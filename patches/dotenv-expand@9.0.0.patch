@@ -1,0 +1,17 @@
+diff --git a/lib/main.js b/lib/main.js
+index c873cc77229d4cd0cf9de98ae0970b25d89f312f..d754b8653b14ee1f66fca8de24daece788ba7db1 100644
+--- a/lib/main.js
++++ b/lib/main.js
+@@ -1,10 +1,10 @@
+ 'use strict'
+ 
+ function _interpolate (envValue, environment, config) {
+-  const matches = envValue.match(/(.?\${*[\w]*(?::-[\w/]*)?}*)/g) || []
++  const matches = envValue.match(/(.?\${+[\w]*(?::-[\w/]*)?}+)/g) || []
+ 
+   return matches.reduce(function (newEnv, match, index) {
+-    const parts = /(.?)\${*([\w]*(?::-[\w/]*)?)?}*/g.exec(match)
++    const parts = /(.?)\${+([\w]*(?::-[\w/]*)?)?}+/g.exec(match)
+     if (!parts || parts.length === 0) {
+       return newEnv
+     }

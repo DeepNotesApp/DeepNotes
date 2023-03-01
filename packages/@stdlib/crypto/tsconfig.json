@@ -1,0 +1,22 @@
+{
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [
+    { "path": "../../../packages/@stdlib/base64/tsconfig.build.json" },
+    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
+  ],
+
+  "include": ["src/**/*.ts"]
+}

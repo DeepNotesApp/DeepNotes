@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "typeRoots": ["node_modules/@types"] // Needed for tests
+  },
+
+  "include": ["*.ts", "src/**/*.ts"]
+}

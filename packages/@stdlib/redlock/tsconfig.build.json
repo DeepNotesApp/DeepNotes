@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  },
+
+  "include": ["src/**/*.ts"]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "tsconfig",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "files": [
+    "base.json",
+    "lib.json"
+  ],
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js"
+}

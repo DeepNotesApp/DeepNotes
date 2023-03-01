@@ -1,0 +1,14 @@
+.git/
+
+**/.env
+
+**/dist/
+
+**/node_modules/
+
+**/Dockerfile
+.dockerignore
+
+**/*.log
+
+**/*.tsbuildinfo

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@deeplib/*": ["../../../packages/@deeplib/*/src"],
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [
+    { "path": "../../../packages/@deeplib/db/tsconfig.build.json" },
+    { "path": "../../../packages/@deeplib/misc/tsconfig.build.json" },
+    { "path": "../../../packages/@stdlib/base64/tsconfig.build.json" },
+    { "path": "../../../packages/@stdlib/crypto/tsconfig.build.json" },
+    { "path": "../../../packages/@stdlib/data/tsconfig.build.json" },
+    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
+  ],
+
+  "include": ["src/**/*.ts"]
+}

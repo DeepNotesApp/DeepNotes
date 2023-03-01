@@ -1,0 +1,19 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "npkill": { "cache": false },
+    "dev": { "cache": false },
+    "lint": { "outputs": [] },
+    "fix": { "cache": false },
+    "test": { "outputs": [] },
+    "test:watch": { "cache": false },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "build:watch": { "cache": false },
+    "repo:build": { "cache": false },
+    "repo:build:watch": { "cache": false },
+    "clean": { "cache": false }
+  }
+}

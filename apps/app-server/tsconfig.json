@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  // Necessary for ts-node-dev to work
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/types/env.d.ts", "src/types/fastify.d.ts"],
+
+  "compilerOptions": {
+    "typeRoots": ["node_modules/@types"], // Needed for tests
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@deeplib/*": ["../../packages/@deeplib/*/src"],
+      "@stdlib/*": ["../../packages/@stdlib/*/src"]
+    },
+
+    "module": "commonjs",
+    "target": "es2017",
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": "./"
+  },
+
+  "references": [
+    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
+    { "path": "../../packages/@deeplib/db/tsconfig.build.json" },
+    { "path": "../../packages/@deeplib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/crypto/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/db/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/redlock/tsconfig.build.json" }
+  ],
+
+  "include": ["src/**/*.ts"]
+}

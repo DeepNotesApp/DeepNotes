@@ -1,0 +1,33 @@
+{
+  "name": "@stdlib/data",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "dependencies": {
+    "@stdlib/base64": "workspace:1.0.0",
+    "@stdlib/misc": "workspace:1.0.0",
+    "msgpackr": "1.8.0",
+    "nanoid": "3.3.4",
+    "node-cache": "5.1.2",
+    "unilogr": "0.0.27",
+    "winston": "3.8.2"
+  },
+  "peerDependencies": {
+    "ioredis": "5.3.1",
+    "objection": "3.0.1"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.build.json --watch\" \"tsc-alias -p tsconfig.build.json --watch\"",
+    "clean": "rimraf ./dist *.tsbuildinfo",
+    "fix": "eslint --fix --ext .js,.ts,.vue ./",
+    "npkill": "rimraf ./node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "repo:build": "tsc-alias -p tsconfig.build.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch"
+  }
+}

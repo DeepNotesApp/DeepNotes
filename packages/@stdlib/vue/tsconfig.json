@@ -1,0 +1,23 @@
+{
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "typeRoots": ["node_modules/@types"], // Needed for tests
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [
+    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
+  ],
+
+  "include": ["*.ts", "src/**/*.ts"]
+}

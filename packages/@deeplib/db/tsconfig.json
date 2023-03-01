@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [
+    { "path": "../../../packages/@stdlib/data/tsconfig.build.json" }
+  ],
+
+  "include": ["src/**/*.ts"]
+}

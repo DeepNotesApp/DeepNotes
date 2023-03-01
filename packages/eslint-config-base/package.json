@@ -1,0 +1,9 @@
+{
+  "name": "eslint-config-base",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js"
+}

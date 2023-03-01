@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts"],
+
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+
+  "references": [
+    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
+  ],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
+}

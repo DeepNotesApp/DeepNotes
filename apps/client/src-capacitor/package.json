@@ -1,0 +1,15 @@
+{
+  "name": "deepnotes-client-capacitor",
+  "description": "DeepNotes",
+  "version": "0.0.1",
+  "author": "Gustavo Takachi Toyota <gustavotakachitoyota@gmail.com>",
+  "dependencies": {
+    "@capacitor/android": "3.9.0",
+    "@capacitor/app": "1.1.1",
+    "@capacitor/cli": "3.9.0",
+    "@capacitor/core": "3.9.0",
+    "@capacitor/ios": "3.9.0",
+    "@capacitor/splash-screen": "1.2.2"
+  },
+  "private": true
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  // Necessary for ts-node-dev to work
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/types/env.d.ts", "src/types/http.d.ts", "src/types/ws.d.ts"],
+
+  "compilerOptions": {
+    "typeRoots": ["node_modules/@types"], // Needed for tests
+
+    "baseUrl": ".",
+
+    "rootDir": ".",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@deeplib/*": ["../../packages/@deeplib/*/src"],
+      "@stdlib/*": ["../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [
+    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
+    { "path": "../../packages/@deeplib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" }
+  ],
+
+  "include": ["src/**/*.ts"]
+}

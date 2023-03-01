@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "@quasar/app-vite/tsconfig-preset",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@deeplib/*": ["../../packages/@deeplib/*/src"],
+      "@stdlib/*": ["../../packages/@stdlib/*/src"]
+    },
+
+    "allowSyntheticDefaultImports": true
+  },
+
+  "references": [
+    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
+    { "path": "../../packages/@deeplib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/color/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/crypto/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/vue/tsconfig.build.json" }
+  ],
+
+  "include": ["*.ts", "*.js", "src*/**/*.ts", "src/**/*.vue"]
+}

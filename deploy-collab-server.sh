@@ -1,0 +1,1 @@
+caprover deploy -c captain-definition-collab-server
