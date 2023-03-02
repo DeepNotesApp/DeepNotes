@@ -179,7 +179,7 @@ export async function bumpRecentItem(
 
   recentItemIds.splice(0, 0, itemId);
 
-  if (recentItemIds.length > 20) {
+  if (recentItemIds.length > 50) {
     recentItemIds.pop();
   }
 
