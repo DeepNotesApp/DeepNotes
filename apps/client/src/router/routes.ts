@@ -180,7 +180,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'group',
-        component: () => import('src/pages/Group.vue'),
+        component: () => import('src/pages/pages/Group.vue'),
       },
     ],
   },
@@ -188,7 +188,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/pages',
     name: 'pages',
-    component: () => import('src/pages/Pages.vue'),
+    component: () => import('src/pages/pages/Pages.vue'),
     meta: { requiresAuth: true },
   },
   {
@@ -198,7 +198,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'page',
-        component: () => import('src/pages/Page.vue'),
+        component: () => import('src/pages/pages/Page.vue'),
       },
     ],
   },
