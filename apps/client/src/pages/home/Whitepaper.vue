@@ -216,7 +216,10 @@ const html = marked(`
     <a href="/whitepaper/key-hierarchy.png" target="_blank">
         <img src="/whitepaper/key-hierarchy.png" alt="Encryption key hierarchy in DeepNotes"/>
     </a>
-    <figcaption>Encryption key hierarchy in DeepNotes</figcaption=>
+    <figcaption>
+      Encryption key hierarchy in DeepNotes
+      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/QsSTbzb7xlA8IAdgvlukJ" target="_blank">Go to page</a>)
+    </figcaption=>
   </figure>
 
   Encryption in DeepNotes starts with the user's master key, which is derived from the user's password, using their email as salt.
@@ -278,7 +281,10 @@ const html = marked(`
     <a href="/whitepaper/registration.png" target="_blank">
       <img src="/whitepaper/registration.png" alt="Registration process in DeepNotes"/>
     </a>
-    <figcaption>Registration process in DeepNotes</figcaption=>
+    <figcaption>
+      Registration process in DeepNotes
+      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/GukHGpstqawsIZEZQj2nj" target="_blank">Go to page</a>)
+    </figcaption=>
   </figure>
 
   In order to register a user, we first derive the master key and login hash from the password, using the email as salt.
@@ -297,7 +303,10 @@ const html = marked(`
     <a href="/whitepaper/authentication.png" target="_blank">
       <img src="/whitepaper/authentication.png" alt="Authentication process in DeepNotes"/>
     </a>
-    <figcaption>Authentication process in DeepNotes</figcaption=>
+    <figcaption>
+      Authentication process in DeepNotes
+      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/nxUu4Tnul0kWXltOPi6Wy" target="_blank">Go to page</a>)
+    </figcaption=>
   </figure>
 
   For user authentication we repeat the same process as in user registration, but instead of storing
@@ -316,7 +325,10 @@ const html = marked(`
     <a href="/whitepaper/session-refresh.png" target="_blank">
       <img src="/whitepaper/session-refresh.png" alt="Session refreshing in DeepNotes"/>
     </a>
-    <figcaption>Session refreshing in DeepNotes</figcaption=>
+    <figcaption>
+      Session refreshing in DeepNotes
+      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/xe2XvhhXHiJrErUeoVDRW" target="_blank">Go to page</a>)
+    </figcaption=>
   </figure>
 
   To refresh a session, we extract the refresh code from the refresh token,
