@@ -110,7 +110,7 @@ import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
-import AcceptInvitationDialog from '../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
+import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 import type { initialSettings } from './UserSettingsDialog.vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;

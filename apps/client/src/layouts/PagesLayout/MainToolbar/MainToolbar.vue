@@ -170,7 +170,6 @@
 import { isIncluded } from '@stdlib/misc';
 import { multiModePath, useResizeObserver } from 'src/code/utils.universal';
 
-import UserSettingsDialog from '../UserSettingsDialog/UserSettingsDialog.vue';
 import AccountPopup from './AccountPopup.vue';
 import AlignmentBtns from './AlignmentBtns.vue';
 import BasicBtns from './BasicBtns.vue';
@@ -178,6 +177,7 @@ import FormattingBtns from './FormattingBtns.vue';
 import NotificationsBtn from './Notifications/NotificationsBtn.vue';
 import ObjectBtns from './ObjectBtns.vue';
 import ToolbarBtnContainer from './ToolbarBtnContainer.vue';
+import UserSettingsDialog from './UserSettingsDialog/UserSettingsDialog.vue';
 
 const quasarMode = process.env.MODE;
 

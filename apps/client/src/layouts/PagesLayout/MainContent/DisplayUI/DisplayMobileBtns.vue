@@ -113,7 +113,7 @@
             <q-item
               clickable
               v-close-popup
-              @click="$q.dialog({ component: UserSettingsDialogVue })"
+              @click="$q.dialog({ component: UserSettingsDialog })"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-cog" />
@@ -217,7 +217,7 @@ import FormattingBtns from '../../MainToolbar/FormattingBtns.vue';
 import NotificationsBadge from '../../MainToolbar/Notifications/NotificationsBadge.vue';
 import NotificationsPopup from '../../MainToolbar/Notifications/NotificationsPopup.vue';
 import ObjectBtns from '../../MainToolbar/ObjectBtns.vue';
-import UserSettingsDialogVue from '../../UserSettingsDialog/UserSettingsDialog.vue';
+import UserSettingsDialog from '../../MainToolbar/UserSettingsDialog/UserSettingsDialog.vue';
 
 const quasarMode = process.env.MODE;
 </script>
