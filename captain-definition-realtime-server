@@ -2,6 +2,6 @@
   "schemaVersion": 2,
   "caproverName": "captain-01",
   "caproverApp": "deepnotes-realtime-server",
-  "branch": "master",
+  "branch": "main",
   "dockerfilePath": "./apps/realtime-server/Dockerfile"
 }
