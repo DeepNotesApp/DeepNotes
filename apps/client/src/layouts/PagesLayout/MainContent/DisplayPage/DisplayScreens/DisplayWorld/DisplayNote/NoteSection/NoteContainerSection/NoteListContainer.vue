@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { getClientRect } from '@stdlib/misc';
+import { getClientRectAsync } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { debounce } from 'lodash';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
@@ -168,7 +168,7 @@ const updateChildPositions = debounce(async () => {
       continue;
     }
 
-    void getClientRect(noteElem).then((clientRect) => {
+    void getClientRectAsync(noteElem).then((clientRect) => {
       const worldRect = page.rects.clientToWorld(
         page.rects.fromDOM(clientRect),
       );

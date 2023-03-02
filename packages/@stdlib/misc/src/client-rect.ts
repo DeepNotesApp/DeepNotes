@@ -21,7 +21,7 @@ const _getIntersectionObserver = once(
     }),
 );
 
-export function getClientRect(target: Element) {
+export function getClientRectAsync(target: Element) {
   let resolvable = _getIntersectionResolvables().get(target);
 
   if (resolvable == null) {
@@ -35,6 +35,6 @@ export function getClientRect(target: Element) {
   return resolvable;
 }
 
-export function getClientRects(targets: Element[]) {
-  return Promise.all(targets.map(getClientRect));
+export function getClientRectsAsync(targets: Element[]) {
+  return Promise.all(targets.map(getClientRectAsync));
 }
