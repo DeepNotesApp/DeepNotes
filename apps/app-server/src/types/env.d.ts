@@ -35,8 +35,6 @@ declare namespace NodeJS {
 
     RECOVERY_CODES_ENCRYPTION_KEY: string;
 
-    ENABLE_REDIS_AUTO_PIPELINING?: 'true' | 'false';
-
     KEYDB_HOSTS: string;
     KEYDB_PASSWORD: string;
 

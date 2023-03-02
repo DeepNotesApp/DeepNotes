@@ -12,7 +12,7 @@ export function createRedisInstance() {
         password: process.env.KEYDB_PASSWORD,
       },
 
-      enableAutoPipelining: !!process.env.ENABLE_REDIS_AUTO_PIPELINING,
+      enableAutoPipelining: true,
       scaleReads: 'master',
 
       showFriendlyErrorStack: !!process.env.DEV,
