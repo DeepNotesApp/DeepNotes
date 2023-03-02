@@ -33,34 +33,41 @@
           max-height: 100%;
         "
       >
-        <q-item
+        <template
           v-for="groupId in memberGroupsIds"
           :key="groupId"
-          class="text-grey-1"
-          style="background-color: #424242"
-          clickable
-          v-ripple
-          active-class="bg-grey-7"
-          :active="baseSelectedGroupIds.has(groupId)"
-          @click="select(groupId, $event as MouseEvent)"
         >
-          <q-item-section>
-            <q-item-label>
-              {{ groupNames()(groupId).get().text }}
-            </q-item-label>
-            <q-item-label caption>
-              {{
-                rolesMap()[
-                  realtimeCtx.hget(
-                    'group-member',
-                    `${groupId}:${authStore().userId}`,
-                    'role',
-                  )!
-                ]?.name
-              }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
+          <q-item
+            v-if="
+              realtimeCtx.hget('group', groupId, 'permanent-deletion-date') ==
+              null
+            "
+            class="text-grey-1"
+            style="background-color: #424242"
+            clickable
+            v-ripple
+            active-class="bg-grey-7"
+            :active="baseSelectedGroupIds.has(groupId)"
+            @click="select(groupId, $event as MouseEvent)"
+          >
+            <q-item-section>
+              <q-item-label>
+                {{ groupNames()(groupId).get().text }}
+              </q-item-label>
+              <q-item-label caption>
+                {{
+                  rolesMap()[
+                    realtimeCtx.hget(
+                      'group-member',
+                      `${groupId}:${authStore().userId}`,
+                      'role',
+                    )!
+                  ]?.name
+                }}
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </template>
       </q-list>
     </div>
 
