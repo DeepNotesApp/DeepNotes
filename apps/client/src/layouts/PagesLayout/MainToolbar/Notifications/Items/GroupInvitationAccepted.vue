@@ -14,6 +14,7 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import { getGroupInvitationAcceptedNotificationInfo } from 'src/code/pages/notifications/group-invitation-accepted.client';
+import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 
 import NotificationItem from '../NotificationItem.vue';
 
@@ -40,5 +41,14 @@ const notificationInfo = createSmartComputed({
 
 async function onClick() {
   await router().push(`/groups/${notificationContent.value.groupId}`);
+
+  $quasar().dialog({
+    component: GroupSettingsDialog,
+
+    componentProps: {
+      groupId: notificationContent.value.groupId,
+      tab: 'Members',
+    },
+  });
 }
 </script>
