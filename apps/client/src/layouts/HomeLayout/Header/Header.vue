@@ -86,6 +86,7 @@
         <q-space />
 
         <RightButtons></RightButtons>
+        <RightMenu></RightMenu>
       </ResponsiveContainer>
     </q-toolbar>
   </q-header>
@@ -98,6 +99,7 @@ import type { ComponentPublicInstance } from 'vue';
 
 import LeftMenu from './LeftMenu.vue';
 import RightButtons from './RightButtons/RightButtons.vue';
+import RightMenu from './RightButtons/RightMenu.vue';
 
 const quasarMode = process.env.MODE;
 
