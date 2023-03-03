@@ -114,8 +114,6 @@
 </template>
 
 <script setup lang="ts">
-import { getClientRectAsync } from '@stdlib/misc';
-import { watchUntilTrue } from '@stdlib/vue';
 import { debounce } from 'lodash';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
@@ -168,13 +166,13 @@ const updateChildPositions = debounce(async () => {
       continue;
     }
 
-    void getClientRectAsync(noteElem).then((clientRect) => {
-      const worldRect = page.rects.clientToWorld(
-        page.rects.fromDOM(clientRect),
-      );
+    const noteClientRect = noteElem.getBoundingClientRect();
 
-      childNote.react.offsetInList = worldRect.topLeft.sub(originPos);
-    });
+    const worldTopLeft = page.pos.clientToWorld(
+      page.rects.fromDOM(noteClientRect).topLeft,
+    );
+
+    childNote.react.offsetInList = worldTopLeft.sub(originPos);
   }
 }, 100);
 
@@ -189,8 +187,6 @@ watch(
 
 const onResize = debounce(async function () {
   // Update overflow
-
-  await watchUntilTrue(() => page.react.allEditorsLoaded);
 
   hideUI.value = true;
 
