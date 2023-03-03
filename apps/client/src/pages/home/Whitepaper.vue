@@ -283,7 +283,7 @@ const html = marked(`
     </a>
     <figcaption>
       Registration process in DeepNotes
-      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/GukHGpstqawsIZEZQj2nj" target="_blank">Go to page</a>)
+      (<a href="/pages/GukHGpstqawsIZEZQj2nj#/pages/GukHGpstqawsIZEZQj2nj" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
@@ -305,7 +305,7 @@ const html = marked(`
     </a>
     <figcaption>
       Authentication process in DeepNotes
-      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/nxUu4Tnul0kWXltOPi6Wy" target="_blank">Go to page</a>)
+      (<a href="/pages/nxUu4Tnul0kWXltOPi6Wy#/pages/nxUu4Tnul0kWXltOPi6Wy" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
@@ -327,7 +327,7 @@ const html = marked(`
     </a>
     <figcaption>
       Session refreshing in DeepNotes
-      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/xe2XvhhXHiJrErUeoVDRW" target="_blank">Go to page</a>)
+      (<a href="/pages/xe2XvhhXHiJrErUeoVDRW#/pages/xe2XvhhXHiJrErUeoVDRW" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
