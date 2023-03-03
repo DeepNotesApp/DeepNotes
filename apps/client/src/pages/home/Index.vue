@@ -48,10 +48,17 @@
         </div>
 
         <div style="grid-area: image">
-          <img
-            style="width: 100%"
-            src="~assets/screenshot.png"
-          />
+          <video
+            style="width: 100%; image-rendering: pixelated"
+            autoplay
+            muted
+            loop
+          >
+            <source
+              src="~assets/main.mp4"
+              type="video/mp4"
+            />
+          </video>
         </div>
       </div>
 
@@ -116,10 +123,17 @@
         </div>
 
         <div style="grid-area: image">
-          <img
-            style="width: 100%"
-            src="~assets/screenshot.png"
-          />
+          <video
+            style="width: 100%; image-rendering: pixelated"
+            autoplay
+            muted
+            loop
+          >
+            <source
+              src="~assets/notes.mp4"
+              type="video/mp4"
+            />
+          </video>
         </div>
       </div>
 
