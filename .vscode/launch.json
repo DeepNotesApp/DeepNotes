@@ -8,14 +8,14 @@
       "type": "firefox",
       "request": "launch",
       "name": "Launch Firefox against localhost",
-      "url": "http://192.168.1.4:60379",
+      "url": "http://192.168.1.4:61033",
       "webRoot": "${workspaceFolder}"
     },
     {
       "type": "chrome",
       "request": "launch",
       "name": "Launch Chrome against localhost",
-      "url": "http://192.168.1.4:60379",
+      "url": "http://192.168.1.4:61033",
       "webRoot": "${workspaceFolder}"
     },
     {
