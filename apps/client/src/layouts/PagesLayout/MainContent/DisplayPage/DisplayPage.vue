@@ -212,10 +212,7 @@ watchEffect(() => {
 
   componentLogger.info('Checking if can finish setup');
 
-  if (
-    (!!groupIsPublic || groupMemberRole != null) &&
-    pageKeyring?.topLayer === DataLayer.Raw
-  ) {
+  if (pageKeyring?.topLayer === DataLayer.Raw) {
     void props.page.finishSetup();
     return;
   }

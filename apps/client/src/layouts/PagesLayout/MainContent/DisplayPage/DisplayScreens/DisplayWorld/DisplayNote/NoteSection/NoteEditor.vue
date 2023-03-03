@@ -45,9 +45,6 @@ const paddingFix = computed(
 // Setup Tiptap editor
 
 note.react.numEditorsLoading++;
-page.react.numEditorsLoading++;
-
-note.react.allEditorsLoaded = false;
 
 let loading = true;
 
@@ -59,11 +56,8 @@ function finishLoading() {
   loading = false;
 
   note.react.numEditorsLoading--;
-  page.react.numEditorsLoading--;
 
   if (note.react.numEditorsLoading === 0) {
-    note.react.allEditorsLoaded = true;
-
     void watchUntilTrue(() => {
       if (!note.react.loaded) {
         return false;
@@ -156,8 +150,6 @@ const overflow = ref(false);
 const hideUI = ref(false);
 
 async function updateOverflow() {
-  await watchUntilTrue(() => page.react.allEditorsLoaded);
-
   hideUI.value = true;
 
   await nextTick();

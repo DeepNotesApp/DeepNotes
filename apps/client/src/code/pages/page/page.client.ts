@@ -71,9 +71,6 @@ export interface IAppPageReact extends IRegionReact {
   groupId: ComputedRef<string>;
   readOnly: ComputedRef<boolean>;
 
-  numEditorsLoading: number;
-  allEditorsLoaded: ComputedRef<boolean>;
-
   loading: boolean;
 }
 
@@ -232,9 +229,6 @@ export class Page implements IPageRegion {
         );
       }),
 
-      numEditorsLoading: 0,
-      allEditorsLoaded: computed(() => this.react.numEditorsLoading === 0),
-
       loading: true,
     });
 
@@ -295,13 +289,21 @@ export class Page implements IPageRegion {
 
       this.react.status = 'success';
 
-      await sleep();
-      await watchUntilTrue(() => this.react.allEditorsLoaded);
-      await sleep();
+      await watchUntilTrue(() => {
+        for (const note of this.react.notes) {
+          if (!note.react.initialized) {
+            return false;
+          }
+        }
 
-      mainLogger().sub('page.finishSetup').info('allEditorsLoaded finished');
+        return true;
+      });
+
+      mainLogger().sub('page.finishSetup').info('All notes initialized');
 
       this.camera.fitToScreen();
+
+      await sleep();
     } catch (error) {
       mainLogger().error(error);
     }

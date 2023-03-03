@@ -90,7 +90,7 @@ export class PagePresence {
     });
   }
 
-  async setup() {
+  setup() {
     this.unwatchUserName = watchEffect(() => {
       const groupIsPublic = internals.realtime.globalCtx.hget(
         'group',

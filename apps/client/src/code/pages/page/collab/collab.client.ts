@@ -43,7 +43,7 @@ export class PageCollab {
   async setup() {
     const logger = mainLogger().sub('page.collab.setup');
 
-    await this.presence.setup();
+    this.presence.setup();
 
     logger.info('Presence setup finished');
 

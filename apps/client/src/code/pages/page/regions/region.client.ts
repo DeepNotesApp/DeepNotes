@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type { PageArrow } from '../arrows/arrow.client';
 import type { PageElem } from '../elems/elem.client';
 import type { PageNote } from '../notes/note.client';
-import { Page } from '../page.client';
+import type { Page } from '../page.client';
 
 export type PageRegion = Page | PageNote;
 
@@ -70,7 +70,7 @@ export interface IPageRegion {
 
 export function getIslandRoot(region: PageRegion): PageRegion {
   if (
-    region instanceof Page ||
+    region.type === 'page' ||
     (!region.react.container.spatial && region.react.container.overflow)
   ) {
     return region;

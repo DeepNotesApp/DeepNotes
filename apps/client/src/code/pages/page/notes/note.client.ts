@@ -114,10 +114,11 @@ export interface INoteReact extends IRegionReact, IElemReact {
 
   editors: ComputedRef<Editor[]>;
 
-  numEditorsLoading: number;
-  allEditorsLoaded: boolean;
-  loaded: ComputedRef<boolean>;
   initialized: boolean;
+
+  numEditorsLoading: number;
+
+  loaded: ComputedRef<boolean>;
 }
 
 function makeSectionHeightCSS(note: PageNote, section: NoteSection) {
@@ -427,7 +428,7 @@ export class PageNote extends PageElem() implements IPageRegion {
         let topLeft: Vec2;
 
         if (
-          this.react.region instanceof PageNote &&
+          this.react.region.type === 'note' &&
           !this.react.region.react.container.spatial
         ) {
           topLeft = this.react.offsetInList;
@@ -443,7 +444,7 @@ export class PageNote extends PageElem() implements IPageRegion {
         let topLeft = this.react.relativeRect.topLeft;
 
         if (
-          this.react.region instanceof PageNote &&
+          this.react.region.type === 'note' &&
           this.react.region !== this.react.islandRoot
         ) {
           topLeft = topLeft
@@ -514,22 +515,23 @@ export class PageNote extends PageElem() implements IPageRegion {
         return result;
       }),
 
+      initialized: false,
+
       numEditorsLoading: 0,
-      allEditorsLoaded: true,
+
       loaded: computed(() => {
         if (this.react.initialized) {
           return true;
         }
 
         for (const childNote of this.react.notes) {
-          if (!childNote.react.allEditorsLoaded) {
+          if (!childNote.react.loaded) {
             return false;
           }
         }
 
-        return this.react.allEditorsLoaded;
+        return this.react.numEditorsLoading === 0;
       }),
-      initialized: false,
     };
 
     Object.assign(this.react, react);
