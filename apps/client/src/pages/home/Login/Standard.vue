@@ -70,6 +70,23 @@
         label="Remember session"
         v-model="rememberSession"
       />
+
+      <q-icon
+        name="mdi-information"
+        size="17px"
+        style="margin-left: 6px; margin-top: 1px"
+      >
+        <q-tooltip
+          anchor="top middle"
+          self="bottom middle"
+          transition-show="jump-up"
+          transition-hide="jump-down"
+          max-width="227px"
+        >
+          This option is convenient, but may reduce the security of your
+          account.
+        </q-tooltip>
+      </q-icon>
     </div>
   </details>
 </template>
