@@ -115,9 +115,7 @@ export interface INoteReact extends IRegionReact, IElemReact {
   editors: ComputedRef<Editor[]>;
 
   initialized: boolean;
-
   numEditorsLoading: number;
-
   loaded: ComputedRef<boolean>;
 }
 
@@ -205,7 +203,7 @@ export class PageNote extends PageElem() implements IPageRegion {
       }),
 
       notes: computed(() =>
-        this.page.notes.fromIds(this.react.collab?.noteIds ?? [], this.id),
+        this.page.notes.fromIds(this.react.collab.noteIds, this.id),
       ),
       arrows: computed(() =>
         this.page.arrows.fromIds(this.react.collab.arrowIds),
@@ -515,18 +513,18 @@ export class PageNote extends PageElem() implements IPageRegion {
         return result;
       }),
 
-      initialized: false,
-
+      initialized: true,
       numEditorsLoading: 0,
-
       loaded: computed(() => {
         if (this.react.initialized) {
           return true;
         }
 
-        for (const childNote of this.react.notes) {
-          if (!childNote.react.loaded) {
-            return false;
+        if (this.react.collab.container.enabled) {
+          for (const childNote of this.react.notes) {
+            if (!childNote.react.loaded) {
+              return false;
+            }
           }
         }
 

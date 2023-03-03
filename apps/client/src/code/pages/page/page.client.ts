@@ -289,9 +289,10 @@ export class Page implements IPageRegion {
 
       this.react.status = 'success';
 
+      await sleep();
       await watchUntilTrue(() => {
         for (const note of this.react.notes) {
-          if (!note.react.initialized) {
+          if (!note.react.loaded) {
             return false;
           }
         }
@@ -299,7 +300,7 @@ export class Page implements IPageRegion {
         return true;
       });
 
-      mainLogger().sub('page.finishSetup').info('All notes initialized');
+      mainLogger().sub('page.finishSetup').info('All notes loaded');
 
       this.camera.fitToScreen();
 

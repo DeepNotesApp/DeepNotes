@@ -44,6 +44,7 @@ const paddingFix = computed(
 
 // Setup Tiptap editor
 
+note.react.initialized = false;
 note.react.numEditorsLoading++;
 
 let loading = true;
