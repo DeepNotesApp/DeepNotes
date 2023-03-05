@@ -146,6 +146,8 @@ h3 {
   color: inherit;
 }
 
+/* Lists */
+
 .q-list {
   user-select: none;
 }
@@ -153,6 +155,10 @@ h3 {
 .q-list--dark,
 .q-item--dark {
   color: rgba(255, 255, 255, 0.9);
+}
+
+.q-item__section--side {
+  min-width: 0px;
 }
 
 /* Scrollbars */

@@ -125,7 +125,7 @@
           <Gap style="width: 2px" />
 
           <ToolbarBtn
-            tooltip="Pages Settings"
+            tooltip="Pages settings"
             icon="mdi-cog"
             icon-size="28px"
             round

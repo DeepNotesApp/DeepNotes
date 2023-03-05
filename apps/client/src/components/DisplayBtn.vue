@@ -13,11 +13,22 @@
     dense
   >
     <slot></slot>
+
+    <q-tooltip
+      v-if="tooltip != null"
+      anchor="top middle"
+      self="bottom middle"
+      transition-show="jump-down"
+      transition-hide="jump-up"
+    >
+      {{ tooltip }}
+    </q-tooltip>
   </DeepBtn>
 </template>
 
 <script setup lang="ts">
 defineProps<{
   icon: string;
+  tooltip?: string;
 }>();
 </script>

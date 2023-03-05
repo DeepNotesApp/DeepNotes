@@ -76,7 +76,7 @@
             <q-item-section avatar>
               <q-icon name="mdi-account" />
             </q-item-section>
-            <q-item-section>Account</q-item-section>
+            <q-item-section>Account settings</q-item-section>
           </q-item>
 
           <template v-if="uiStore().width < BREAKPOINT_LG_MIN">

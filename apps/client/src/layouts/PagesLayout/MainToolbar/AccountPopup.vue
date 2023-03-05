@@ -29,7 +29,7 @@
             <q-item-section avatar>
               <q-icon name="mdi-account" />
             </q-item-section>
-            <q-item-section>Account</q-item-section>
+            <q-item-section>Account settings</q-item-section>
           </q-item>
 
           <q-item

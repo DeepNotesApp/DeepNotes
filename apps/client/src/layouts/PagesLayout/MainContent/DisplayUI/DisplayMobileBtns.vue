@@ -20,7 +20,10 @@
           display: flex;
         "
       >
-        <DisplayBtn icon="mdi-hammer-wrench">
+        <DisplayBtn
+          icon="mdi-hammer-wrench"
+          tooltip="Basic"
+        >
           <q-menu
             style="padding: 1px 5px"
             :offset="[0, 4]"
@@ -32,7 +35,10 @@
 
         <Gap style="width: 4px" />
 
-        <DisplayBtn icon="mdi-format-color-text">
+        <DisplayBtn
+          icon="mdi-format-color-text"
+          tooltip="Formatting"
+        >
           <q-menu
             style="padding: 1px 5px"
             :offset="[0, 4]"
@@ -44,7 +50,10 @@
 
         <Gap style="width: 4px" />
 
-        <DisplayBtn icon="mdi-format-list-bulleted">
+        <DisplayBtn
+          icon="mdi-format-list-bulleted"
+          tooltip="Objects"
+        >
           <q-menu
             style="padding: 1px 5px"
             :offset="[0, 4]"
@@ -56,7 +65,10 @@
 
         <Gap style="width: 4px" />
 
-        <DisplayBtn icon="mdi-align-horizontal-left">
+        <DisplayBtn
+          icon="mdi-align-horizontal-left"
+          tooltip="Alignment"
+        >
           <q-menu
             style="padding: 1px 5px"
             :offset="[0, 4]"
@@ -68,7 +80,8 @@
       </div>
 
       <DisplayBtn
-        icon="mdi-account"
+        icon="mdi-menu"
+        tooltip="Menu"
         style="position: absolute; right: 60px; top: 8px"
       >
         <q-menu
@@ -119,7 +132,7 @@
                 <q-icon name="mdi-cog" />
               </q-item-section>
 
-              <q-item-section>Settings</q-item-section>
+              <q-item-section>Pages settings</q-item-section>
             </q-item>
 
             <q-item
@@ -131,7 +144,7 @@
                 <q-icon name="mdi-account" />
               </q-item-section>
 
-              <q-item-section>Account</q-item-section>
+              <q-item-section>Account settings</q-item-section>
             </q-item>
 
             <q-item
