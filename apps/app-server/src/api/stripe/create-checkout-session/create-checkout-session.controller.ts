@@ -68,8 +68,11 @@ export class CreateCheckoutSessionController {
         });
       }
 
-      if (customer != null && customer.subscriptions?.data.length! > 0) {
-        await dataAbstraction().patch('user', userId, { plan: 'pro' });
+      if (customer?.subscriptions?.data?.[0] != null) {
+        await dataAbstraction().patch('user', userId, {
+          plan: 'pro',
+          subscription_id: customer.subscriptions.data[0].id,
+        });
 
         throw new HttpException(
           'You already have an active subscription.',
