@@ -1,12 +1,4 @@
 <template>
-  <h5 style="margin-block-start: 0; margin-block-end: 0">E-mail</h5>
-
-  <Gap style="height: 8px" />
-
-  <q-separator />
-
-  <Gap style="height: 24px" />
-
   <q-form style="display: flex; flex-direction: column; max-width: 300px">
     <TextField
       label="Current e-mail"
@@ -35,8 +27,6 @@
       @click.prevent="changeEmail()"
     />
   </q-form>
-
-  <LoadingOverlay v-if="loading" />
 </template>
 
 <script setup lang="ts">
@@ -47,23 +37,10 @@ import {
   wrapSymmetricKey,
 } from '@stdlib/crypto';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
-import { watchUntilTrue } from '@stdlib/vue';
 import { deriveUserValues } from 'src/code/crypto.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
-useMeta(() => ({
-  title: 'General - Account - DeepNotes',
-}));
-
 const newEmail = ref('');
-
-const loading = ref(true);
-
-onMounted(async () => {
-  await watchUntilTrue(() => !internals.realtime.globalCtx.loading);
-
-  loading.value = false;
-});
 
 async function changeEmail() {
   if (!newEmail.value.match(w3cEmailRegex)) {

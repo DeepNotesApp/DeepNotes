@@ -155,12 +155,14 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'general',
             name: 'account/general',
-            component: () => import('src/pages/home/Account/General.vue'),
+            component: () =>
+              import('src/pages/home/Account/General/General.vue'),
           },
           {
             path: 'billing',
             name: 'account/billing',
-            component: () => import('src/pages/home/Account/Billing.vue'),
+            component: () =>
+              import('src/pages/home/Account/Billing/Billing.vue'),
           },
           {
             path: 'security',
