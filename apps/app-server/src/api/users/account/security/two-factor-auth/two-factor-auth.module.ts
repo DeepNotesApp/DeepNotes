@@ -1,6 +1,6 @@
 import { Module, UseModuleGuard } from 'src/nest-plus';
 
-import { makePasswordGuard } from '../../password.guard';
+import { makePasswordGuard } from '../../../password.guard';
 import { DisableModule } from './disable/disable.module';
 import { EnableModule } from './enable/enable.module';
 import { GenerateRecoveryCodesModule } from './generate-recovery-codes/generate-recovery-codes.module';

@@ -9,6 +9,18 @@
 
   <ChangeEmail />
 
+  <Gap style="height: 72px" />
+
+  <h5 style="margin-block-start: 0; margin-block-end: 0">Danger zone</h5>
+
+  <Gap style="height: 8px" />
+
+  <q-separator />
+
+  <Gap style="height: 24px" />
+
+  <DeleteAccount />
+
   <LoadingOverlay v-if="loading" />
 </template>
 
@@ -16,6 +28,7 @@
 import { watchUntilTrue } from '@stdlib/vue';
 
 import ChangeEmail from './ChangeEmail.vue';
+import DeleteAccount from './DeleteAccount.vue';
 
 useMeta(() => ({
   title: 'General - Account - DeepNotes',

@@ -33,7 +33,7 @@ export async function derivePasswordValues(
 
       type: (globalThis as any).argon2.ArgonType.Argon2id,
     })
-  ).hash;
+  ).hash as Uint8Array;
 
   moduleLogger.info('Finished key derivation');
 
