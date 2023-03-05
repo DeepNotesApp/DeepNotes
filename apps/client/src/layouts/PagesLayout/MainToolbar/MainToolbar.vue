@@ -125,11 +125,11 @@
           <Gap style="width: 2px" />
 
           <ToolbarBtn
-            tooltip="Settings"
+            tooltip="Pages Settings"
             icon="mdi-cog"
             icon-size="28px"
             round
-            @click="$q.dialog({ component: UserSettingsDialog })"
+            @click="$q.dialog({ component: PagesSettingsDialog })"
             :disable="!uiStore().loggedIn"
           />
 
@@ -176,8 +176,8 @@ import BasicBtns from './BasicBtns.vue';
 import FormattingBtns from './FormattingBtns.vue';
 import NotificationsBtn from './Notifications/NotificationsBtn.vue';
 import ObjectBtns from './ObjectBtns.vue';
+import PagesSettingsDialog from './PagesSettingsDialog/PagesSettingsDialog.vue';
 import ToolbarBtnContainer from './ToolbarBtnContainer.vue';
-import UserSettingsDialog from './UserSettingsDialog/UserSettingsDialog.vue';
 
 const quasarMode = process.env.MODE;
 

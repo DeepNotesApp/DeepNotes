@@ -111,7 +111,7 @@ import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
-import type { initialSettings } from './UserSettingsDialog.vue';
+import type { initialSettings } from './PagesSettingsDialog.vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 

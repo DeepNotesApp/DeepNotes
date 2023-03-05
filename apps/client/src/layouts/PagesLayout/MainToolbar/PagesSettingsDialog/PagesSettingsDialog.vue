@@ -10,7 +10,7 @@
   >
     <template #header>
       <q-card-section style="display: flex">
-        <div class="text-h5">User Settings</div>
+        <div class="text-h5">Pages Settings</div>
 
         <q-space />
 
