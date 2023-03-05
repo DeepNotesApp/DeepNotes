@@ -1,11 +1,12 @@
 <template>
-  <template v-if="!uiStore().loggedIn && uiStore().width < BREAKPOINT_LG_MIN">
-    <div style="width: 16px"></div>
+  <template v-if="uiStore().loggedIn || uiStore().width < BREAKPOINT_LG_MIN">
+    <Gap style="width: 24px" />
 
-    <DeepBtn
-      icon="mdi-menu"
-      flat
-      style="padding: 4px 12px; font-size: 20px"
+    <ToolbarBtn
+      :icon="uiStore().loggedIn ? 'mdi-account-circle' : 'mdi-menu'"
+      :icon-size="uiStore().loggedIn ? '38px' : '32px'"
+      :btn-size="uiStore().loggedIn ? '36px' : '46px'"
+      :round="uiStore().loggedIn"
     >
       <q-menu
         anchor="bottom right"
@@ -13,13 +14,24 @@
         auto-close
       >
         <q-list>
+          <template v-if="uiStore().loggedIn">
+            <q-item>
+              <q-item-section style="font-weight: bold">
+                <q-item-label>
+                  {{ selfUserName().get() }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator />
+          </template>
+
           <template
             v-if="!uiStore().loggedIn && uiStore().width < BREAKPOINT_MD_MIN"
           >
             <q-item
               clickable
               :to="{ name: 'login' }"
-              style="padding: 16px 20px; font-size: 16px"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-login" />
@@ -30,7 +42,6 @@
             <q-item
               clickable
               :to="{ name: 'register' }"
-              style="padding: 16px 20px; font-size: 16px"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-account-plus" />
@@ -44,7 +55,6 @@
               v-if="uiStore().width < BREAKPOINT_MD_MIN"
               clickable
               :href="multiModePath('/pages')"
-              style="padding: 16px 20px; font-size: 16px"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-note-multiple" />
@@ -55,7 +65,6 @@
             <q-item
               clickable
               :to="{ name: 'account/general' }"
-              style="padding: 16px 20px; font-size: 16px"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-account" />
@@ -64,44 +73,42 @@
             </q-item>
           </template>
 
-          <q-item
-            clickable
-            :to="{ name: 'pricing' }"
-            style="padding: 16px 20px; font-size: 16px"
-          >
-            <q-item-section avatar>
-              <q-icon name="mdi-currency-usd" />
-            </q-item-section>
-            <q-item-section>Pricing</q-item-section>
-          </q-item>
+          <template v-if="uiStore().width < BREAKPOINT_LG_MIN">
+            <q-item
+              clickable
+              :to="{ name: 'pricing' }"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-currency-usd" />
+              </q-item-section>
+              <q-item-section>Pricing</q-item-section>
+            </q-item>
 
-          <q-item
-            clickable
-            :to="{ name: 'download' }"
-            style="padding: 16px 20px; font-size: 16px"
-          >
-            <q-item-section avatar>
-              <q-icon name="mdi-download" />
-            </q-item-section>
-            <q-item-section>Download</q-item-section>
-          </q-item>
+            <q-item
+              clickable
+              :to="{ name: 'download' }"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-download" />
+              </q-item-section>
+              <q-item-section>Download</q-item-section>
+            </q-item>
 
-          <q-item
-            clickable
-            :to="{ name: 'whitepaper' }"
-            style="padding: 16px 20px; font-size: 16px"
-          >
-            <q-item-section avatar>
-              <q-icon name="mdi-file-document" />
-            </q-item-section>
-            <q-item-section>Whitepaper</q-item-section>
-          </q-item>
+            <q-item
+              clickable
+              :to="{ name: 'whitepaper' }"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-file-document" />
+              </q-item-section>
+              <q-item-section>Whitepaper</q-item-section>
+            </q-item>
+          </template>
 
           <template v-if="uiStore().loggedIn">
             <q-item
               clickable
               @click="logout()"
-              style="padding: 16px 20px; font-size: 16px"
             >
               <q-item-section avatar>
                 <q-icon name="mdi-logout" />
@@ -111,12 +118,13 @@
           </template>
         </q-list>
       </q-menu>
-    </DeepBtn>
+    </ToolbarBtn>
   </template>
 </template>
 
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import { logout } from 'src/code/auth/logout.client';
+import { selfUserName } from 'src/code/self-user-name.client';
 import { multiModePath } from 'src/code/utils.universal';
 </script>
