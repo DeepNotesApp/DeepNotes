@@ -57,7 +57,7 @@
           <DeepBtn
             label="Untrust all devices"
             color="primary"
-            @click="untrustDevices()"
+            @click="untrustAllDevices()"
           />
         </q-card-section>
 
@@ -141,8 +141,19 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function untrustDevices() {
+async function untrustAllDevices() {
   try {
+    await asyncPrompt({
+      title: 'Untrust all devices',
+      message:
+        'Are you sure you want to untrust all devices in regard to two-factor authentication?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
     await api().post(
       '/api/users/account/security/two-factor-auth/untrust-devices',
       { loginHash: props.loginHash },
