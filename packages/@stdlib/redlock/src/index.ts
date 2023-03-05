@@ -15,7 +15,7 @@ export function usingLocks(
     func = (signals) =>
       redlock.using(
         nodeResources,
-        process.env.DEV ? 2 * 60000 : 5000,
+        process.env.DEV ? 2 * 5000 : 5000,
         (signal) => prevFunc([...signals, signal]),
       );
   }

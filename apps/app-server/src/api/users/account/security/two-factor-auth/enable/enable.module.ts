@@ -1,10 +1,12 @@
 import { Module } from 'src/nest-plus';
 
-import { EnableController } from './enable.controller';
-import { EnableService } from './enable.service';
+import { RequestModule } from './request/request.module';
+import { VerifyModule } from './verify/verify.module';
 
 @Module({
-  controllers: [EnableController],
-  providers: [EnableService],
+  imports: [
+    { prefix: 'request', module: RequestModule },
+    { prefix: 'verify', module: VerifyModule },
+  ],
 })
 export class EnableModule {}

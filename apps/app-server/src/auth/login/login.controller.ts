@@ -12,7 +12,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { getPasswordHashValues, wrapSymmetricKey } from '@stdlib/crypto';
-import { equalUint8Arrays, isNanoID, w3cEmailRegex } from '@stdlib/misc';
+import { equalUint8Arrays, w3cEmailRegex } from '@stdlib/misc';
 import { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
@@ -39,7 +39,10 @@ class BodyDto extends createZodDto(
     authenticatorToken: z.string().optional(),
     rememberDevice: z.boolean().optional(),
 
-    recoveryCode: z.string().refine(isNanoID).optional(),
+    recoveryCode: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional(),
 
     demo: z
       .object({

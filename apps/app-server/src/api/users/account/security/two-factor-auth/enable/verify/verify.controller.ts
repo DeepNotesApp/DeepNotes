@@ -7,20 +7,25 @@ import {
 } from '@nestjs/common';
 import type { DataTransaction } from '@stdlib/data';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
-import { nanoid } from 'nanoid';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'nestjs-zod/z';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
 import { Locals } from 'src/utils';
 
+import { generateRecoveryCodes } from '../../generate-recovery-codes/generate-recovery-codes.controller';
 import { VerifyService } from './verify.service';
 
-export type EndpointValues = {
+class BodyDto extends createZodDto(
+  z.object({
+    authenticatorToken: z.string().regex(/^\d{6}$/),
+  }),
+) {}
+
+export type EndpointValues = BodyDto & {
   userId: string;
 
-  authenticatorToken: string;
   authenticatorSecret?: string;
-
-  recoveryCodes?: string[];
 
   dtrx: DataTransaction;
 };
@@ -33,11 +38,17 @@ export class VerifyController {
   async handle(
     @Locals('userId') userId: string,
 
-    @Body('authenticatorToken') authenticatorToken: string,
+    @Body() body: BodyDto,
   ) {
     return await usingLocks([[`user-lock:${userId}`]], async (signals) => {
       return await dataAbstraction().transaction(async (dtrx) => {
-        const values: EndpointValues = { userId, authenticatorToken, dtrx };
+        const values: EndpointValues = {
+          userId,
+
+          dtrx,
+
+          ...body,
+        };
 
         values.authenticatorSecret =
           (await this.endpointService.getAuthenticatorSecret(values))!;
@@ -60,16 +71,12 @@ export class VerifyController {
 
         checkRedlockSignalAborted(signals);
 
-        values.recoveryCodes = Array(10)
-          .fill(null)
-          .map(() => nanoid());
-
         await this.endpointService.finishVerification(values);
 
         checkRedlockSignalAborted(signals);
 
         return {
-          recoveryCodes: values.recoveryCodes,
+          recoveryCodes: await generateRecoveryCodes(userId, { dtrx }),
         };
       });
     });

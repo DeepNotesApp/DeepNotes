@@ -184,20 +184,20 @@ async function verify() {
       return;
     }
 
-    const response = (
+    const recoveryCodes = (
       await api().post<{
         recoveryCodes: string[];
-      }>('/api/users/account/security/two-factor-auth/verify', {
+      }>('/api/users/account/security/two-factor-auth/enable/verify', {
         loginHash: props.loginHash,
         authenticatorToken: authenticatorToken.value,
       })
-    ).data;
+    ).data.recoveryCodes;
 
     $quasar().dialog({
       component: RecoveryCodeDialog,
 
       componentProps: {
-        recoveryCodes: response.recoveryCodes,
+        recoveryCodes: recoveryCodes,
       },
     });
 

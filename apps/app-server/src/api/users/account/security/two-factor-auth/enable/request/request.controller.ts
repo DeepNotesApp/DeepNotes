@@ -5,7 +5,7 @@ import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
 import { Locals } from 'src/utils';
 
-import { EnableService } from './enable.service';
+import { RequestService } from './request.service';
 
 export type EndpointValues = {
   userId: string;
@@ -15,8 +15,8 @@ export type EndpointValues = {
 };
 
 @Controller()
-export class EnableController {
-  constructor(readonly endpointService: EnableService) {}
+export class RequestController {
+  constructor(readonly endpointService: RequestService) {}
 
   @Post()
   async handle(@Locals('userId') userId: string) {

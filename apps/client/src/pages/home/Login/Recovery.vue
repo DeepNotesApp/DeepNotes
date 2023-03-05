@@ -3,25 +3,22 @@
     Two-factor Authentication
   </div>
 
-  <Gap style="height: 16px" />
+  <Gap style="height: 12px" />
 
-  <div>
-    <div>
-      <span style="color: red">Note: </span>
-      <span style="color: #c0c0c0"
-        >Two-factor authentication will be disabled after using your recovery
-        code.</span
-      >
-    </div>
+  <div style="text-align: center">
+    <span style="color: red">Note: </span>
+    <span style="color: #c0c0c0">
+      The recovery code provided will be disabled after you use it to log in.
+    </span>
   </div>
 
-  <Gap style="height: 8px" />
+  <Gap style="height: 12px" />
 
   <TextField
     label="Recovery code"
     label-color="grey-5"
     v-model="recoveryCode"
-    :maxlength="nanoidLength"
+    :maxlength="32"
   />
 
   <Gap style="height: 16px" />
@@ -49,7 +46,6 @@
 
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
-import { nanoidLength } from '@stdlib/misc';
 import { login } from 'src/code/auth/login.client';
 import { deriveUserValues } from 'src/code/crypto.client';
 import { handleError } from 'src/code/utils.client';

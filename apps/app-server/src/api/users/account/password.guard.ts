@@ -2,8 +2,10 @@ import { UserModel } from '@deeplib/db';
 import type { CanActivate, ExecutionContext, Type } from '@nestjs/common';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { base64ToBytes } from '@stdlib/base64';
+import { getPasswordHashValues } from '@stdlib/crypto';
+import { equalUint8Arrays } from '@stdlib/misc';
 import type { FastifyRequest } from 'fastify';
-import sodium from 'libsodium-wrappers';
+import { derivePasswordValues } from 'src/crypto';
 import { mainLogger } from 'src/logger';
 import { decryptRehashedLoginHash } from 'src/utils';
 
@@ -27,16 +29,25 @@ export function makePasswordGuard(
         throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
       }
 
-      if (
-        !sodium.crypto_pwhash_str_verify(
-          decryptRehashedLoginHash(encryptedRehashedLoginHash),
-          base64ToBytes(
-            (request.body as any)[
-              type === 'password' ? 'loginHash' : 'oldLoginHash'
-            ],
-          ),
-        )
-      ) {
+      const passwordHashValues = getPasswordHashValues(
+        decryptRehashedLoginHash(encryptedRehashedLoginHash),
+      );
+
+      const passwordValues = derivePasswordValues(
+        base64ToBytes(
+          (request.body as any)[
+            type === 'password' ? 'loginHash' : 'oldLoginHash'
+          ],
+        ),
+        passwordHashValues.saltBytes,
+      );
+
+      const passwordIsCorrect = equalUint8Arrays(
+        passwordValues.hash,
+        passwordHashValues.hashBytes,
+      );
+
+      if (!passwordIsCorrect) {
         throw new HttpException(
           `${type === 'password' ? 'Password' : 'Old password'} is incorrect.`,
           HttpStatus.BAD_REQUEST,

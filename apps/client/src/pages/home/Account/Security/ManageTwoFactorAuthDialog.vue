@@ -56,7 +56,7 @@
 
           <DeepBtn
             label="Untrust all devices"
-            color="secondary"
+            color="primary"
             @click="untrustDevices()"
           />
         </q-card-section>
@@ -67,22 +67,17 @@
           style="flex: 1; padding: 20px; display: flex; flex-direction: column"
         >
           <div>
-            If you lose your authenticator app, your recovery code will be the
-            only way to regain access to your account:
+            If you lose access to your authenticator app, your recovery codes
+            will be the only way to regain access to your account:
           </div>
 
-          <Gap style="height: 8px" />
+          <Gap style="height: 12px" />
 
-          <TextField
-            :model-value="recoveryCodes[0]"
-            dense
-            copy-btn
-            readonly
+          <DeepBtn
+            label="Regenerate recovery codes"
+            color="primary"
+            @click="regenerateRecoveryCodes()"
           />
-
-          <Gap style="height: 8px" />
-
-          <div>Make sure to store it in a safe and accessible place.</div>
         </q-card-section>
 
         <q-separator />
@@ -115,10 +110,12 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_MD_MIN, sleep } from '@stdlib/misc';
+import { BREAKPOINT_SM_MIN, sleep } from '@stdlib/misc';
 import QRCode from 'qrcode';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
+
+import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
@@ -126,10 +123,9 @@ const props = defineProps<{
   loginHash: string;
   secret: string;
   keyUri: string;
-  recoveryCodes: string[];
 }>();
 
-const maximized = computed(() => uiStore().width < BREAKPOINT_MD_MIN);
+const maximized = computed(() => uiStore().width < BREAKPOINT_SM_MIN);
 
 const canvasElem = ref<HTMLElement>();
 
@@ -155,6 +151,39 @@ async function untrustDevices() {
     $quasar().notify({
       message: 'All devices have been untrusted.',
       type: 'positive',
+    });
+  } catch (error: any) {
+    handleError(error);
+  }
+}
+
+async function regenerateRecoveryCodes() {
+  try {
+    await asyncPrompt({
+      title: 'Regenerate recovery codes',
+      message: 'Are you sure you want to regenerate the recovery codes?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    const recoveryCodes = (
+      await api().post<{
+        recoveryCodes: string[];
+      }>(
+        '/api/users/account/security/two-factor-auth/generate-recovery-codes',
+        { loginHash: props.loginHash },
+      )
+    ).data.recoveryCodes;
+
+    $quasar().dialog({
+      component: RecoveryCodeDialog,
+
+      componentProps: {
+        recoveryCodes: recoveryCodes,
+      },
     });
   } catch (error: any) {
     handleError(error);

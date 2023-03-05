@@ -1,9 +1,14 @@
 import type { ExecutionContext } from '@nestjs/common';
 import { createParamDecorator } from '@nestjs/common';
 import { base64ToBytes } from '@stdlib/base64';
-import { wrapSymmetricKey } from '@stdlib/crypto';
-import { bytesToText, textToBytes } from '@stdlib/misc';
+import {
+  cryptoJsWordArrayToUint8Array,
+  wrapSymmetricKey,
+} from '@stdlib/crypto';
+import { bytesToText, concatUint8Arrays, textToBytes } from '@stdlib/misc';
+import CryptoJS from 'crypto-js';
 import type { FastifyRequest } from 'fastify';
+import sodium from 'libsodium-wrappers';
 import { pack, unpack } from 'msgpackr';
 
 // Rehashed login hash
@@ -65,11 +70,38 @@ export function decryptAuthenticatorSecret(
 const _recoveryCodesEncryptionKey = wrapSymmetricKey(
   base64ToBytes(process.env.RECOVERY_CODES_ENCRYPTION_KEY),
 );
-export function encryptRecoveryCodes(recoveryCodes: string[]) {
+export function encryptRecoveryCodes(recoveryCodes: Uint8Array[]) {
   return _recoveryCodesEncryptionKey.encrypt(pack(recoveryCodes));
 }
-export function decryptRecoveryCodes(encryptedRecoveryCode: Uint8Array) {
+export function decryptRecoveryCodes(
+  encryptedRecoveryCode: Uint8Array,
+): Uint8Array[] {
   return unpack(_recoveryCodesEncryptionKey.decrypt(encryptedRecoveryCode));
+}
+
+export function hashRecoveryCode(
+  recoveryCode: string,
+  salt?: Uint8Array,
+): Uint8Array {
+  salt ??= sodium.randombytes_buf(16);
+
+  return concatUint8Arrays(
+    salt,
+    cryptoJsWordArrayToUint8Array(
+      CryptoJS.SHA256(sodium.to_hex(salt) + recoveryCode),
+    ),
+  );
+}
+export function verifyRecoveryCode(
+  recoveryCode: string,
+  hashedRecoveryCode: Uint8Array,
+) {
+  const salt = hashedRecoveryCode.slice(0, 16);
+
+  return sodium.memcmp(
+    hashedRecoveryCode.slice(16),
+    hashRecoveryCode(recoveryCode, salt).slice(16),
+  );
 }
 
 export const Locals = createParamDecorator(

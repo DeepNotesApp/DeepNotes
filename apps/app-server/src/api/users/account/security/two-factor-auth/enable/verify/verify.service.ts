@@ -2,7 +2,7 @@ import { UserModel } from '@deeplib/db';
 import { Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { dataAbstraction } from 'src/data/data-abstraction';
-import { decryptAuthenticatorSecret, encryptRecoveryCodes } from 'src/utils';
+import { decryptAuthenticatorSecret } from 'src/utils';
 
 import type { EndpointValues } from './verify.controller';
 
@@ -23,13 +23,12 @@ export class VerifyService {
     return authenticator.check(authenticatorToken, authenticatorSecret!);
   }
 
-  async finishVerification({ userId, recoveryCodes, dtrx }: EndpointValues) {
+  async finishVerification({ userId, dtrx }: EndpointValues) {
     await dataAbstraction().patch(
       'user',
       userId,
       {
         two_factor_auth_enabled: true,
-        encrypted_recovery_codes: encryptRecoveryCodes(recoveryCodes!),
       },
       { dtrx },
     );

@@ -270,7 +270,7 @@ async function enableTwoFactorAuth() {
       await api().post<{
         secret: string;
         keyUri: string;
-      }>('/api/users/account/security/two-factor-auth/enable', {
+      }>('/api/users/account/security/two-factor-auth/enable/request', {
         loginHash,
       })
     ).data;

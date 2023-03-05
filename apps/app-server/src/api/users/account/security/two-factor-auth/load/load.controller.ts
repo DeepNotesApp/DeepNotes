@@ -2,11 +2,7 @@ import { decryptEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { authenticator } from 'otplib';
-import {
-  decryptAuthenticatorSecret,
-  decryptRecoveryCodes,
-  Locals,
-} from 'src/utils';
+import { decryptAuthenticatorSecret, Locals } from 'src/utils';
 
 @Controller()
 export class LoadController {
@@ -15,15 +11,13 @@ export class LoadController {
     const user = (await UserModel.query().findById(userId).select(
       'two_factor_auth_enabled',
       'encrypted_authenticator_secret',
-      'encrypted_recovery_codes',
 
       'encrypted_email',
     ))!;
 
     if (
       !user.two_factor_auth_enabled ||
-      user.encrypted_authenticator_secret == null ||
-      user.encrypted_recovery_codes == null
+      user.encrypted_authenticator_secret == null
     ) {
       throw new HttpException(
         'Two-factor authentication is not enabled.',
@@ -42,7 +36,6 @@ export class LoadController {
         'DeepNotes',
         authenticatorSecret,
       ),
-      recoveryCodes: decryptRecoveryCodes(user.encrypted_recovery_codes),
     };
   }
 }

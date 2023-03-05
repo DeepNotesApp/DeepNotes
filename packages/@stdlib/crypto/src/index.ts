@@ -1,3 +1,4 @@
+export * from './crypto-js';
 export * from './key-pair';
 export * from './password-hashing';
 export * from './private-key';

@@ -3,10 +3,10 @@ import { authenticator } from 'otplib';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { encryptAuthenticatorSecret } from 'src/utils';
 
-import type { EndpointValues } from './enable.controller';
+import type { EndpointValues } from './request.controller';
 
 @Injectable()
-export class EnableService {
+export class RequestService {
   async isTwoFactorAuthEnabled({ userId }: EndpointValues): Promise<boolean> {
     return await dataAbstraction().hget(
       'user',

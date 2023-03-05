@@ -11,7 +11,12 @@ import { setCookies } from 'src/cookies';
 import { getDeviceHash } from 'src/crypto';
 import { getRedis } from 'src/data/redis';
 import { generateTokens } from 'src/tokens';
-import { decryptAuthenticatorSecret, decryptRecoveryCodes } from 'src/utils';
+import {
+  decryptAuthenticatorSecret,
+  decryptRecoveryCodes,
+  encryptRecoveryCodes,
+  verifyRecoveryCode,
+} from 'src/utils';
 
 import type { EndpointValues } from './login.controller';
 
@@ -151,18 +156,27 @@ export class LoginService {
     } else if (recoveryCode != null) {
       // Check recovery code
 
-      if (
-        user.encrypted_recovery_codes != null &&
-        decryptRecoveryCodes(user.encrypted_recovery_codes).includes(
-          recoveryCode,
-        )
-      ) {
-        await this.incrementFailedLoginAttempts(values);
-        throw new HttpException(
-          'Incorrect recovery code.',
-          HttpStatus.FORBIDDEN,
+      if (user.encrypted_recovery_codes != null) {
+        const recoveryCodes = decryptRecoveryCodes(
+          user.encrypted_recovery_codes,
         );
+
+        for (let i = 0; i < recoveryCodes.length; i++) {
+          if (verifyRecoveryCode(recoveryCode, recoveryCodes[i])) {
+            recoveryCodes.splice(i, 1);
+
+            await user.$query(trx).patch({
+              encrypted_recovery_codes: encryptRecoveryCodes(recoveryCodes),
+            });
+
+            return;
+          }
+        }
       }
+
+      await this.incrementFailedLoginAttempts(values);
+
+      throw new HttpException('Invalid recovery code.', HttpStatus.FORBIDDEN);
     } else {
       return { twoFactorAuth: true };
     }
