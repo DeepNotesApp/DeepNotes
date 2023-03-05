@@ -5,11 +5,20 @@ import {
   HttpStatus,
   Post,
 } from '@nestjs/common';
+import { isNanoID } from '@stdlib/misc';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'nestjs-zod/z';
 import { Locals } from 'src/utils';
 
 import { CurrentPathService } from './current-path.service';
 
-export type EndpointValues = {
+class BodyDto extends createZodDto(
+  z.object({
+    initialPageId: z.string().refine(isNanoID),
+  }),
+) {}
+
+export type EndpointValues = BodyDto & {
   userId: string;
   initialPageId: string;
   mainPageId?: string;
@@ -20,13 +29,11 @@ export class CurrentPathController {
   constructor(readonly endpointService: CurrentPathService) {}
 
   @Post()
-  async handle(
-    @Locals('userId') userId: string,
-    @Body('initialPageId') initialPageId: string,
-  ) {
+  async handle(@Locals('userId') userId: string, @Body() body: BodyDto) {
     const values: EndpointValues = {
       userId,
-      initialPageId,
+
+      ...body,
     };
 
     if (!(await this.endpointService.initialPageExists(values))) {

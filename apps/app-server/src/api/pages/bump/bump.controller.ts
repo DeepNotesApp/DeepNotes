@@ -6,11 +6,20 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { isNanoID } from '@stdlib/misc';
+import { createZodDto } from 'nestjs-zod';
+import { z } from 'nestjs-zod/z';
 import { Locals } from 'src/utils';
 
 import { BumpService } from './bump.service';
 
-export type EndpointValues = {
+class BodyDto extends createZodDto(
+  z.object({
+    parentPageId: z.string().refine(isNanoID).optional(),
+  }),
+) {}
+
+export type EndpointValues = BodyDto & {
   userId: string;
   pageId: string;
   parentPageId?: string;
@@ -25,12 +34,13 @@ export class BumpController {
     @Locals('userId') userId: string,
 
     @Param('pageId') pageId: string,
-    @Body('parentPageId') parentPageId?: string,
+    @Body() body: BodyDto,
   ) {
     const values: EndpointValues = {
       userId,
       pageId,
-      parentPageId,
+
+      ...body,
     };
 
     if (!(await this.endpointService.pageExists(pageId))) {
