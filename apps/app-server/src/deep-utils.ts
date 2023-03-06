@@ -3,7 +3,7 @@ import {
   hashEmail,
   userHasPermission as _userHasPermission,
 } from '@deeplib/data';
-import { UserModel } from '@deeplib/db';
+import { SessionModel, UserModel } from '@deeplib/db';
 import { GroupMemberModel } from '@deeplib/db';
 import type { IGroupRole } from '@deeplib/misc';
 import { base64ToBytes, base64ToBytesSafe } from '@stdlib/base64';
@@ -375,4 +375,25 @@ export async function createUser({
   );
 
   return userModel;
+}
+
+export async function invalidateAllSessions(
+  userId: string,
+  params?: { dtrx?: DataTransaction },
+) {
+  const sessions = await SessionModel.query()
+    .where('user_id', userId)
+    .whereNot('invalidated', true)
+    .select('id');
+
+  await Promise.all(
+    sessions.map((session) =>
+      dataAbstraction().patch(
+        'session',
+        session.id,
+        { invalidated: true },
+        { dtrx: params?.dtrx },
+      ),
+    ),
+  );
 }

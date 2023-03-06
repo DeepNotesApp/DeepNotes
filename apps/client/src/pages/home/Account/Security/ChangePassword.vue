@@ -7,7 +7,7 @@
       v-model="oldPassword"
     />
 
-    <Gap style="height: 20px" />
+    <Gap style="height: 16px" />
 
     <EvaluatedPasswordField
       label="New password"
@@ -16,7 +16,7 @@
       v-model="newPassword"
     />
 
-    <Gap style="height: 20px" />
+    <Gap style="height: 16px" />
 
     <PasswordField
       label="Confirm new password"
@@ -25,7 +25,7 @@
       v-model="confirmNewPassword"
     />
 
-    <Gap style="height: 20px" />
+    <Gap style="height: 16px" />
 
     <DeepBtn
       label="Change password"
@@ -102,6 +102,20 @@ async function changePassword() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
   }
+
+  await asyncPrompt({
+    html: true,
+    title: 'Change password',
+    message: `Are you sure you want to change password?<br/>
+      <span style="color: #a0a0a0">
+        <span style="color: red">Note</span>: This action will log you out of all devices.
+      </span>`,
+
+    focus: 'cancel',
+
+    cancel: { label: 'No', flat: true, color: 'primary' },
+    ok: { label: 'Yes', flat: true, color: 'negative' },
+  });
 
   try {
     const email = await internals.realtime.hget(

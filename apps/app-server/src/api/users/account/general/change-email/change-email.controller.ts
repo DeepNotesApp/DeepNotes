@@ -5,12 +5,14 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Res,
 } from '@nestjs/common';
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { getPasswordHashValues } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
 import { equalUint8Arrays, isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
+import { FastifyReply } from 'fastify';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 import { derivePasswordValues } from 'src/crypto';
@@ -44,6 +46,8 @@ export type EndpointValues = BodyDto &
     user?: UserModel;
 
     dtrx: DataTransaction;
+
+    reply: FastifyReply;
   };
 
 @Controller()
@@ -53,14 +57,14 @@ export class ChangeEmailController {
   @Post()
   async handle(
     @Locals() locals: LocalValues,
-
     @Body() body: BodyDto,
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     return await usingLocks(
       [[`user-lock:${locals.userId}`]],
       async (signals) => {
         return await dataAbstraction().transaction(async (dtrx) => {
-          const values: EndpointValues = { ...locals, ...body, dtrx };
+          const values: EndpointValues = { ...locals, ...body, dtrx, reply };
 
           // Verify old password
 

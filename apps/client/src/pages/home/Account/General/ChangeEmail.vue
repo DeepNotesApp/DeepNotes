@@ -43,19 +43,28 @@ import { asyncPrompt, handleError } from 'src/code/utils.client';
 const newEmail = ref('');
 
 async function changeEmail() {
-  if (!newEmail.value.match(w3cEmailRegex)) {
+  try {
+    if (
+      !newEmail.value.match(w3cEmailRegex) ||
+      newEmail.value ===
+        internals.realtime.globalCtx.hget('user', authStore().userId, 'email')
+    ) {
     $quasar().notify({
-      message: 'New e-mail address is invalid.',
+        message: 'New email address is invalid.',
       color: 'negative',
     });
 
     return;
   }
 
-  try {
     const password = await asyncPrompt<string>({
-      title: 'Change e-mail',
-      message: 'Enter your password:',
+      html: true,
+      title: 'Change email',
+      message: `Enter your password:<br/>
+        <span style="color: #a0a0a0">
+          <span style="color: red">Note</span>: This action will log you out of all devices.
+        </span>`,
+
       color: 'primary',
       prompt: {
         type: 'password',

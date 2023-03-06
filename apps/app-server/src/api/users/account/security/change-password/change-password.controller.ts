@@ -5,14 +5,18 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Res,
 } from '@nestjs/common';
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { getPasswordHashValues } from '@stdlib/crypto';
+import type { DataTransaction } from '@stdlib/data';
 import { equalUint8Arrays } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
+import { FastifyReply } from 'fastify';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 import { derivePasswordValues } from 'src/crypto';
+import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
 import { decryptRehashedLoginHash, Locals } from 'src/utils';
 
@@ -35,6 +39,10 @@ export type EndpointValues = BodyDto & {
 
   userId: string;
   sessionId: string;
+
+  dtrx: DataTransaction;
+
+  reply: FastifyReply;
 };
 
 @Controller()
@@ -50,57 +58,65 @@ export class ChangePasswordController {
     },
 
     @Body() body: BodyDto,
+
+    @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     return await usingLocks(
       [[`user-lock:${locals.userId}`]],
       async (signals) => {
-        const values: EndpointValues = {
-          endpointService: this.endpointService,
+        return await dataAbstraction().transaction(async (dtrx) => {
+          const values: EndpointValues = {
+            endpointService: this.endpointService,
 
-          ...locals,
-          ...body,
-        };
+            ...locals,
+            ...body,
 
-        // Verify old password
+            dtrx,
 
-        const user = await UserModel.query()
-          .findById(values.userId)
-          .select('encrypted_rehashed_login_hash');
+            reply,
+          };
 
-        checkRedlockSignalAborted(signals);
+          // Verify old password
 
-        const passwordHashValues = getPasswordHashValues(
-          decryptRehashedLoginHash(user!.encrypted_rehashed_login_hash),
-        );
+          const user = await UserModel.query()
+            .findById(values.userId)
+            .select('encrypted_rehashed_login_hash');
 
-        const oldPasswordValues = derivePasswordValues(
-          base64ToBytes(values.oldLoginHash),
-          passwordHashValues.saltBytes,
-        );
+          checkRedlockSignalAborted(signals);
 
-        if (
-          !equalUint8Arrays(
-            oldPasswordValues.hash,
-            passwordHashValues.hashBytes,
-          )
-        ) {
-          throw new HttpException(
-            'Old password is incorrect.',
-            HttpStatus.BAD_REQUEST,
+          const passwordHashValues = getPasswordHashValues(
+            decryptRehashedLoginHash(user!.encrypted_rehashed_login_hash),
           );
-        }
 
-        if (
-          body.newLoginHash == null ||
-          body.encryptedPrivateKeyring == null ||
-          body.encryptedSymmetricKeyring == null
-        ) {
-          return await this.endpointService.getNecessaryDataForClient(values);
-        }
+          const oldPasswordValues = derivePasswordValues(
+            base64ToBytes(values.oldLoginHash),
+            passwordHashValues.saltBytes,
+          );
 
-        checkRedlockSignalAborted(signals);
+          if (
+            !equalUint8Arrays(
+              oldPasswordValues.hash,
+              passwordHashValues.hashBytes,
+            )
+          ) {
+            throw new HttpException(
+              'Old password is incorrect.',
+              HttpStatus.BAD_REQUEST,
+            );
+          }
 
-        await this.endpointService.updateUserData(values);
+          if (
+            body.newLoginHash == null ||
+            body.encryptedPrivateKeyring == null ||
+            body.encryptedSymmetricKeyring == null
+          ) {
+            return await this.endpointService.getNecessaryDataForClient(values);
+          }
+
+          checkRedlockSignalAborted(signals);
+
+          await this.endpointService.updateUserData(values);
+        });
       },
     );
   }

@@ -9,8 +9,10 @@ import {
 } from '@stdlib/crypto';
 import { randomInt } from 'crypto';
 import type { EndpointValues } from 'src/api/users/account/general/change-email/change-email.controller';
+import { clearCookies } from 'src/cookies';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
+import { invalidateAllSessions } from 'src/deep-utils';
 import { sendMail } from 'src/mail';
 import { stripe } from 'src/stripe/stripe';
 import { encryptRehashedLoginHash, padZeroes } from 'src/utils';
@@ -86,6 +88,8 @@ export class ChangeEmailService {
     encryptedSymmetricKeyring,
 
     dtrx,
+
+    reply,
   }: EndpointValues) {
     const passwordValues = derivePasswordValues(base64ToBytes(newLoginHash!));
 
@@ -113,8 +117,12 @@ export class ChangeEmailService {
       { dtrx },
     );
 
+    await invalidateAllSessions(user!.id, { dtrx });
+
     await stripe().customers.update(user!.customer_id!, {
       email: newEmail,
     });
+
+    clearCookies(reply);
   }
 }

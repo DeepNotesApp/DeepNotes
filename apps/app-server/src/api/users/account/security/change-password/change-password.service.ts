@@ -7,8 +7,10 @@ import {
   createSymmetricKeyring,
   encodePasswordHash,
 } from '@stdlib/crypto';
+import { clearCookies } from 'src/cookies';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
+import { invalidateAllSessions } from 'src/deep-utils';
 import { encryptRehashedLoginHash } from 'src/utils';
 
 import type { EndpointValues } from './change-password.controller';
@@ -36,20 +38,33 @@ export class ChangePasswordService {
 
     encryptedPrivateKeyring,
     encryptedSymmetricKeyring,
+
+    dtrx,
+
+    reply,
   }: EndpointValues) {
     const passwordValues = derivePasswordValues(base64ToBytes(newLoginHash!));
 
-    await dataAbstraction().patch('user', userId, {
-      encrypted_rehashed_login_hash: encryptRehashedLoginHash(
-        encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
-      ),
+    await dataAbstraction().patch(
+      'user',
+      userId,
+      {
+        encrypted_rehashed_login_hash: encryptRehashedLoginHash(
+          encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
+        ),
 
-      encrypted_private_keyring: createPrivateKeyring(
-        base64ToBytes(encryptedPrivateKeyring!),
-      ).wrapSymmetric(passwordValues.key).fullValue,
-      encrypted_symmetric_keyring: createSymmetricKeyring(
-        base64ToBytes(encryptedSymmetricKeyring!),
-      ).wrapSymmetric(passwordValues.key).fullValue,
-    });
+        encrypted_private_keyring: createPrivateKeyring(
+          base64ToBytes(encryptedPrivateKeyring!),
+        ).wrapSymmetric(passwordValues.key).fullValue,
+        encrypted_symmetric_keyring: createSymmetricKeyring(
+          base64ToBytes(encryptedSymmetricKeyring!),
+        ).wrapSymmetric(passwordValues.key).fullValue,
+      },
+      { dtrx },
+    );
+
+    await invalidateAllSessions(userId, { dtrx });
+
+    clearCookies(reply);
   }
 }
