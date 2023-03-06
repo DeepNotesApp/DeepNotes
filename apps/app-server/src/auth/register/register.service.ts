@@ -35,7 +35,7 @@ export class RegisterService {
         to: [email],
         subject: 'Complete your registration',
         html: `
-          Visit the following link to verify your e-mail address:<br/>
+          Visit the following link to verify your email address:<br/>
           <a href="https://deepnotes.app/verify-email/${
             user!.email_verification_code
           }">https://deepnotes.app/verify-email/${
@@ -45,7 +45,7 @@ export class RegisterService {
         `,
       });
     } catch (error) {
-      mainLogger().error('E-mail sending error: %o', error);
+      mainLogger().error('Email sending error: %o', error);
     }
   }
 }

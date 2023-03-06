@@ -75,12 +75,12 @@ export class RegisterController {
       if (user != null) {
         if (user.email_verified) {
           throw new HttpException(
-            'E-mail already registered.',
+            'Email already registered.',
             HttpStatus.CONFLICT,
           );
         } else {
           throw new HttpException(
-            'E-mail awaiting verification.',
+            'Email awaiting verification.',
             HttpStatus.CONFLICT,
           );
         }

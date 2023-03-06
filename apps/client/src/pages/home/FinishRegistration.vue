@@ -8,7 +8,7 @@
             internals.sessionStorage?.getItem('email')
           }}</span
           >.<br />
-          Check your e-mail to proceed.
+          Check your email to proceed.
         </div>
 
         <Gap style="height: 32px" />

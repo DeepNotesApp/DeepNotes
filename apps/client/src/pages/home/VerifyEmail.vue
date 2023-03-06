@@ -5,7 +5,7 @@
       style="padding: 160px 0; text-align: center"
     >
       <template v-if="status">
-        <div style="font-size: 16px">Your e-mail has been verified.</div>
+        <div style="font-size: 16px">Your email has been verified.</div>
 
         <Gap style="height: 16px" />
 
@@ -28,7 +28,7 @@
       </template>
 
       <template v-else>
-        <div style="font-size: 16px">Invalid e-mail verification code.</div>
+        <div style="font-size: 16px">Invalid email verification code.</div>
 
         <Gap style="height: 24px" />
 

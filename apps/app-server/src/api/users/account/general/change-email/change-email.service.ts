@@ -47,9 +47,9 @@ export class ChangeEmailService {
         email: 'account@deepnotes.app',
       },
       to: [newEmail],
-      subject: 'Verify your e-mail address',
+      subject: 'Verify your email address',
       html: `
-        Use the following code to verify your e-mail address: <b>${emailVerificationCode}</b>.<br/>
+        Use the following code to verify your email address: <b>${emailVerificationCode}</b>.<br/>
         If you did not request this action, you can safely ignore this email.
       `,
     });

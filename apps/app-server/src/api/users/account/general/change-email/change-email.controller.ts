@@ -104,7 +104,7 @@ export class ChangeEmailController {
 
           if (await this.endpointService.isEmailInUse(values)) {
             throw new HttpException(
-              'E-mail is already in use.',
+              'Email is already in use.',
               HttpStatus.BAD_REQUEST,
             );
           }
@@ -124,7 +124,7 @@ export class ChangeEmailController {
             !(await this.endpointService.checkEmailVerificationCode(values))
           ) {
             throw new HttpException(
-              'E-mail verification code is incorrect.',
+              'Email verification code is incorrect.',
               HttpStatus.BAD_REQUEST,
             );
           }

@@ -16,7 +16,7 @@ export class VerifyEmailController {
   async handle(@Param('emailVerificationCode') emailVerificationCode: string) {
     if (!(await this.endpointService.tryVerifyEmail(emailVerificationCode))) {
       throw new HttpException(
-        'Invalid e-mail verification code.',
+        'Invalid email verification code.',
         HttpStatus.BAD_REQUEST,
       );
     }

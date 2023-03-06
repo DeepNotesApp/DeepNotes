@@ -15,7 +15,7 @@
   <Gap style="height: 16px" />
 
   <TextField
-    label="E-mail"
+    label="Email"
     label-color="grey-5"
     v-model="email"
     autocomplete="username"
@@ -33,7 +33,7 @@
   <Gap style="height: 16px" />
 
   <Checkbox
-    label="Remember e-mail"
+    label="Remember email"
     v-model="rememberEmail"
   />
 

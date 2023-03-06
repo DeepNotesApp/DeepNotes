@@ -1,7 +1,7 @@
 <template>
   <q-form style="display: flex; flex-direction: column; max-width: 300px">
     <TextField
-      label="Current e-mail"
+      label="Current email"
       dense
       :model-value="
         internals.realtime.globalCtx.hget('user', authStore().userId, 'email')
@@ -12,7 +12,7 @@
     <Gap style="height: 16px" />
 
     <TextField
-      label="New e-mail"
+      label="New email"
       dense
       v-model="newEmail"
       :maxlength="maxEmailLength"
@@ -21,7 +21,7 @@
     <Gap style="height: 16px" />
 
     <DeepBtn
-      label="Change e-mail"
+      label="Change email"
       type="submit"
       color="primary"
       @click.prevent="changeEmail()"
@@ -49,13 +49,13 @@ async function changeEmail() {
       newEmail.value ===
         internals.realtime.globalCtx.hget('user', authStore().userId, 'email')
     ) {
-    $quasar().notify({
+      $quasar().notify({
         message: 'New email address is invalid.',
-      color: 'negative',
-    });
+        color: 'negative',
+      });
 
-    return;
-  }
+      return;
+    }
 
     const password = await asyncPrompt<string>({
       html: true,
@@ -95,15 +95,15 @@ async function changeEmail() {
     });
 
     $quasar().notify({
-      message: 'A verification code has been sent to the new e-mail address.',
+      message: 'A verification code has been sent to the new email address.',
       color: 'positive',
     });
 
     // Verification code promise
 
     const emailVerificationCode = await asyncPrompt<string>({
-      title: 'Verify the new e-mail',
-      message: 'Enter the verification code sent to the new e-mail:',
+      title: 'Verify the new email',
+      message: 'Enter the verification code sent to the new email:',
       color: 'primary',
       prompt: {
         model: '',
@@ -149,7 +149,7 @@ async function changeEmail() {
         .wrapSymmetric(newDerivedValues.masterKey).fullValue,
     );
 
-    // Request e-mail change
+    // Request email change
 
     await api().post('/api/users/account/general/change-email', {
       newEmail: newEmail.value,
@@ -170,7 +170,7 @@ async function changeEmail() {
     newEmail.value = '';
 
     $quasar().notify({
-      message: 'E-mail changed successfully.',
+      message: 'Email changed successfully.',
       type: 'positive',
     });
   } catch (error: any) {

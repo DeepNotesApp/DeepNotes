@@ -28,7 +28,7 @@
           :maxlength="maxEmailLength"
         >
           <template #label>
-            E-mail
+            Email
 
             <q-icon
               name="mdi-information"
@@ -153,11 +153,11 @@ const agree = ref(false);
 
 async function register() {
   try {
-    // Check if e-mail is valid
+    // Check if email is valid
 
     if (!email.value.match(w3cEmailRegex)) {
       $quasar().notify({
-        message: 'E-mail is invalid.',
+        message: 'Email is invalid.',
         type: 'negative',
       });
 
@@ -235,7 +235,7 @@ async function register() {
     internals.sessionStorage.setItem('email', email.value);
 
     $quasar().notify({
-      message: 'Verification e-mail sent.',
+      message: 'Verification email sent.',
       type: 'positive',
     });
 

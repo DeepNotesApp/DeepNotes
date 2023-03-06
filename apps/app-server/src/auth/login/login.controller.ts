@@ -160,7 +160,7 @@ export class LoginController {
           await this.endpointService.incrementFailedLoginAttempts(values);
 
           throw new HttpException(
-            'Incorrect e-mail or password.',
+            'Incorrect email or password.',
             HttpStatus.FORBIDDEN,
           );
         }
@@ -185,16 +185,16 @@ export class LoginController {
           await this.endpointService.incrementFailedLoginAttempts(values);
 
           throw new HttpException(
-            'Incorrect e-mail or password.',
+            'Incorrect email or password.',
             HttpStatus.FORBIDDEN,
           );
         }
 
-        // Check e-mail awaiting verification
+        // Check email awaiting verification
 
         if (!values.user.email_verified) {
           throw new HttpException(
-            'E-mail awaiting verification.',
+            'Email awaiting verification.',
             HttpStatus.FORBIDDEN,
           );
         }

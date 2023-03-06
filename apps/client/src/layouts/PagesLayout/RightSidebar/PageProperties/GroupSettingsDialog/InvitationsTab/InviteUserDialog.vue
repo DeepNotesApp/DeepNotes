@@ -9,7 +9,7 @@
     <template #body>
       <q-card-section style="padding: 20px">
         <TextField
-          label="User ID or E-mail"
+          label="User ID or Email"
           dense
           v-model="identity"
           :maxlength="maxEmailLength"
@@ -108,7 +108,7 @@ async function inviteUser() {
       .safeParse(identity.value).success
   ) {
     $quasar().notify({
-      message: 'Invalid e-mail or user ID.',
+      message: 'Invalid email or user ID.',
       type: 'negative',
     });
 

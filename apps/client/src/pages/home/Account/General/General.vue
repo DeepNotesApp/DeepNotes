@@ -1,5 +1,5 @@
 <template>
-  <h5 style="margin-block-start: 0; margin-block-end: 0">E-mail</h5>
+  <h5 style="margin-block-start: 0; margin-block-end: 0">Email</h5>
 
   <Gap style="height: 8px" />
 
