@@ -9,6 +9,7 @@ import { MainPageIdModule } from './main-page-id/main-page-id.module';
 import { PasswordModule } from './password/password.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { RemoveUserModule } from './remove-user/remove-user.module';
+import { RotateKeysModule } from './rotate-keys/rotate-keys.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RemoveUserModule } from './remove-user/remove-user.module';
     { prefix: ':groupId/deletion', module: DeletionModule },
     { prefix: ':groupId/privacy', module: PrivacyModule },
     { prefix: ':groupId/main-page-id', module: MainPageIdModule },
+    { prefix: ':groupId/rotate-keys', module: RotateKeysModule },
   ],
 })
 export class GroupsModule {}

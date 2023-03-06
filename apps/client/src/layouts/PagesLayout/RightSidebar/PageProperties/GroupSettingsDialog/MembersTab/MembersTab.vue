@@ -200,39 +200,21 @@ async function removeSelectedUsers() {
       groupMemberNames()(`${groupId}:${agentId}`).getAsync(),
     ]);
 
-    let lastUserId: string | undefined;
-
-    for (const userId of finalSelectedUserIds.value) {
-      lastUserId = userId;
-    }
-
     await Promise.all(
       finalSelectedUserIds.value.map(async (patientId) => {
         const targetName = await groupMemberNames()(
           `${groupId}:${patientId}`,
         ).getAsync();
 
-        const response = (
-          await api().post<
-            GroupKeyRotationValues & {
-              notificationRecipients: Record<string, { publicKeyring: string }>;
-            }
-          >(`/api/groups/${groupId}/remove-user/${patientId}`, {
-            rotateGroupKeys: patientId === lastUserId,
-          })
-        ).data;
+        const notificationRecipients = (
+          await api().post<{
+            notificationRecipients: Record<string, { publicKeyring: string }>;
+          }>(`/api/groups/${groupId}/remove-user/${patientId}`, {})
+        ).data.notificationRecipients;
 
         await api().post(`/api/groups/${groupId}/remove-user/${patientId}`, {
-          ...(patientId === lastUserId
-            ? {
-                rotateGroupKeys: true,
-
-                ...(await rotateGroupKeys(groupId, response)),
-              }
-            : {}),
-
           notifications: await createNotifications({
-            recipients: response.notificationRecipients,
+            recipients: notificationRecipients,
 
             patientId,
 
@@ -281,6 +263,18 @@ async function removeSelectedUsers() {
           }),
         });
       }),
+    );
+
+    const groupKeyRotationValues = (
+      await api().post<GroupKeyRotationValues>(
+        `/api/groups/${groupId}/rotate-keys`,
+        {},
+      )
+    ).data;
+
+    await api().post(
+      `/api/groups/${groupId}/rotate-keys`,
+      await rotateGroupKeys(groupId, groupKeyRotationValues),
     );
 
     baseSelectedUserIds.value.clear();

@@ -11,23 +11,14 @@ import type { DataTransaction } from '@stdlib/data';
 import { objEntries, objFromEntries } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { createZodDto } from 'nestjs-zod';
-import { z } from 'nestjs-zod/z';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
-import { groupKeyRotationSchema } from 'src/group-key-rotation';
 import { notificationsRequestSchema, notifyUsers } from 'src/notifications';
 import { Locals } from 'src/utils';
 
 import { RemoveUserService } from './remove-user.service';
 
-class BodyDto extends createZodDto(
-  z
-    .object({
-      rotateGroupKeys: z.boolean().optional(),
-    })
-    .merge(groupKeyRotationSchema.partial())
-    .merge(notificationsRequestSchema.partial()),
-) {}
+class BodyDto extends createZodDto(notificationsRequestSchema.partial()) {}
 
 export type EndpointValues = BodyDto & {
   agentId: string;

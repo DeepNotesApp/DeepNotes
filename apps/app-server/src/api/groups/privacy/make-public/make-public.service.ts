@@ -23,30 +23,26 @@ export class MakePublicService {
   }
 
   async makePublic({ groupId, accessKeyring, dtrx }: EndpointValues) {
-    await dataAbstraction().patch(
-      'group',
-      groupId,
-      { access_keyring: base64ToBytes(accessKeyring) },
-      { dtrx },
-    );
-
-    const promises: PromiseLike<any>[] = [];
-
     const groupMembers = await GroupMemberModel.query()
       .where('group_id', groupId)
       .select('user_id');
 
-    for (const groupMember of groupMembers) {
-      promises.push(
+    await Promise.all([
+      dataAbstraction().patch(
+        'group',
+        groupId,
+        { access_keyring: base64ToBytes(accessKeyring) },
+        { dtrx },
+      ),
+
+      ...groupMembers.map((groupMember) =>
         dataAbstraction().patch(
           'group-member',
           `${groupId}:${groupMember.user_id}`,
           { encrypted_access_keyring: null },
           { dtrx },
         ),
-      );
-    }
-
-    await Promise.all(promises);
+      ),
+    ]);
   }
 }

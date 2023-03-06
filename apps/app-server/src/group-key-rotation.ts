@@ -14,9 +14,15 @@ import { z } from 'nestjs-zod/z';
 import { dataAbstraction } from './data/data-abstraction';
 
 export const groupKeyRotationSchema = z.object({
+  groupAccessKeyring: z.string().refine(isBase64).optional(),
+  groupEncryptedName: z.string().refine(isBase64),
+  groupEncryptedContentKeyring: z.string().refine(isBase64),
+  groupPublicKeyring: z.string().refine(isBase64),
+  groupEncryptedPrivateKeyring: z.string().refine(isBase64),
+
   groupMembers: z.record(
     z.object({
-      encryptedAccessKeyring: z.string().refine(isBase64),
+      encryptedAccessKeyring: z.string().refine(isBase64).optional(),
       encryptedInternalKeyring: z.string().refine(isBase64),
 
       encryptedName: z.string().refine(isBase64),
@@ -24,7 +30,7 @@ export const groupKeyRotationSchema = z.object({
   ),
   groupJoinInvitations: z.record(
     z.object({
-      encryptedAccessKeyring: z.string().refine(isBase64),
+      encryptedAccessKeyring: z.string().refine(isBase64).optional(),
       encryptedInternalKeyring: z.string().refine(isBase64),
 
       encryptedName: z.string().refine(isBase64),
@@ -36,12 +42,6 @@ export const groupKeyRotationSchema = z.object({
     }),
   ),
 
-  groupEncryptedName: z.string().refine(isBase64),
-  groupEncryptedContentKeyring: z.string().refine(isBase64),
-
-  groupPublicKeyring: z.string().refine(isBase64),
-  groupEncryptedPrivateKeyring: z.string().refine(isBase64),
-
   groupPages: z.record(
     z.object({
       encryptedSymmetricKeyring: z.string().refine(isBase64),
@@ -49,15 +49,15 @@ export const groupKeyRotationSchema = z.object({
   ),
 });
 
+export type GroupKeyRotationValues = z.infer<typeof groupKeyRotationSchema>;
+
 export async function getGroupKeyRotationValues(
   groupId: string,
   userId: string,
 ) {
   const [
-    [groupEncryptedAccessKeyring, groupEncryptedInternalKeyring],
-
     [
-      accessKeyring,
+      groupAccessKeyring,
       groupEncryptedName,
       groupEncryptedContentKeyring,
 
@@ -65,17 +65,14 @@ export async function getGroupKeyRotationValues(
       groupEncryptedPrivateKeyring,
     ],
 
+    [groupEncryptedAccessKeyring, groupEncryptedInternalKeyring],
+
     groupMembers,
     groupJoinInvitations,
     groupJoinRequests,
 
     groupPages,
   ] = await Promise.all([
-    dataAbstraction().hmget('group-member', `${groupId}:${userId}`, [
-      'encrypted-access-keyring',
-      'encrypted-internal-keyring',
-    ]),
-
     dataAbstraction().hmget('group', groupId, [
       'access-keyring',
       'encrypted-name',
@@ -83,6 +80,11 @@ export async function getGroupKeyRotationValues(
 
       'public-keyring',
       'encrypted-private-keyring',
+    ]),
+
+    dataAbstraction().hmget('group-member', `${groupId}:${userId}`, [
+      'encrypted-access-keyring',
+      'encrypted-internal-keyring',
     ]),
 
     GroupMemberModel.query()
@@ -117,17 +119,15 @@ export async function getGroupKeyRotationValues(
   ]);
 
   return {
-    rotateGroupKeys: true,
-
-    groupEncryptedAccessKeyring: bytesToBase64Safe(groupEncryptedAccessKeyring),
-    groupEncryptedInternalKeyring: bytesToBase64(groupEncryptedInternalKeyring),
-
-    accessKeyring: bytesToBase64Safe(accessKeyring),
+    groupAccessKeyring: bytesToBase64Safe(groupAccessKeyring),
     groupEncryptedName: bytesToBase64(groupEncryptedName),
     groupEncryptedContentKeyring: bytesToBase64(groupEncryptedContentKeyring),
 
     groupPublicKeyring: bytesToBase64(groupPublicKeyring),
     groupEncryptedPrivateKeyring: bytesToBase64(groupEncryptedPrivateKeyring),
+
+    groupEncryptedAccessKeyring: bytesToBase64Safe(groupEncryptedAccessKeyring),
+    groupEncryptedInternalKeyring: bytesToBase64(groupEncryptedInternalKeyring),
 
     groupMembers: objFromEntries(
       groupMembers.map((groupMember) => [
@@ -174,17 +174,15 @@ export async function getGroupKeyRotationValues(
 export async function rotateGroupKeys({
   groupId,
 
-  groupIsPublic,
+  groupAccessKeyring,
+  groupEncryptedName,
+  groupEncryptedContentKeyring,
+  groupPublicKeyring,
+  groupEncryptedPrivateKeyring,
 
   groupMembers,
   groupJoinInvitations,
   groupJoinRequests,
-
-  groupEncryptedName,
-  groupEncryptedContentKeyring,
-
-  groupPublicKeyring,
-  groupEncryptedPrivateKeyring,
 
   groupPages,
 
@@ -192,55 +190,33 @@ export async function rotateGroupKeys({
 }: {
   groupId: string;
 
-  groupIsPublic: boolean;
-
-  groupMembers: Record<
-    string,
+  dtrx?: DataTransaction;
+} & GroupKeyRotationValues) {
+  await dataAbstraction().patch(
+    'group',
+    groupId,
     {
-      encryptedAccessKeyring: string;
-      encryptedInternalKeyring: string;
+      access_keyring:
+        groupAccessKeyring != null ? base64ToBytes(groupAccessKeyring) : null,
 
-      encryptedName: string;
-    }
-  >;
-  groupJoinInvitations: Record<
-    string,
-    {
-      encryptedAccessKeyring: string;
-      encryptedInternalKeyring: string;
+      encrypted_name: base64ToBytes(groupEncryptedName),
+      encrypted_content_keyring: base64ToBytes(groupEncryptedContentKeyring),
 
-      encryptedName: string;
-    }
-  >;
-  groupJoinRequests: Record<
-    string,
-    {
-      encryptedName: string;
-    }
-  >;
-
-  groupEncryptedName: string;
-  groupEncryptedContentKeyring: string;
-
-  groupPublicKeyring: string;
-  groupEncryptedPrivateKeyring: string;
-
-  groupPages: Record<string, { encryptedSymmetricKeyring: string }>;
-
-  dtrx: DataTransaction;
-}) {
-  if (groupIsPublic) {
-    return { groupIsPublic };
-  }
+      public_keyring: base64ToBytes(groupPublicKeyring),
+      encrypted_private_keyring: base64ToBytes(groupEncryptedPrivateKeyring),
+    },
+    { dtrx },
+  );
 
   for (const [userId, groupMember] of Object.entries(groupMembers)) {
     await dataAbstraction().patch(
       'group-member',
       `${groupId}:${userId}`,
       {
-        encrypted_access_keyring: base64ToBytes(
-          groupMember.encryptedAccessKeyring,
-        ),
+        encrypted_access_keyring:
+          groupMember.encryptedAccessKeyring != null
+            ? base64ToBytes(groupMember.encryptedAccessKeyring)
+            : null,
         encrypted_internal_keyring: base64ToBytes(
           groupMember.encryptedInternalKeyring,
         ),
@@ -258,9 +234,10 @@ export async function rotateGroupKeys({
       'group-join-invitation',
       `${groupId}:${userId}`,
       {
-        encrypted_access_keyring: base64ToBytes(
-          groupJoinInvitation.encryptedAccessKeyring,
-        ),
+        encrypted_access_keyring:
+          groupJoinInvitation.encryptedAccessKeyring != null
+            ? base64ToBytes(groupJoinInvitation.encryptedAccessKeyring)
+            : null,
         encrypted_internal_keyring: base64ToBytes(
           groupJoinInvitation.encryptedInternalKeyring,
         ),
@@ -275,25 +252,10 @@ export async function rotateGroupKeys({
     await dataAbstraction().patch(
       'group-join-request',
       `${groupId}:${userId}`,
-      {
-        encrypted_name: base64ToBytes(groupJoinRequest.encryptedName),
-      },
+      { encrypted_name: base64ToBytes(groupJoinRequest.encryptedName) },
       { dtrx },
     );
   }
-
-  await dataAbstraction().patch(
-    'group',
-    groupId,
-    {
-      encrypted_name: base64ToBytes(groupEncryptedName),
-      encrypted_content_keyring: base64ToBytes(groupEncryptedContentKeyring),
-
-      public_keyring: base64ToBytes(groupPublicKeyring),
-      encrypted_private_keyring: base64ToBytes(groupEncryptedPrivateKeyring),
-    },
-    { dtrx },
-  );
 
   for (const [pageId, groupPage] of Object.entries(groupPages)) {
     await dataAbstraction().patch(

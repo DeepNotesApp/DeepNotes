@@ -6,10 +6,6 @@ import { bytesToBase64 } from '@stdlib/base64';
 import { objFromEntries } from '@stdlib/misc';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { getGroupMembers } from 'src/deep-utils';
-import {
-  getGroupKeyRotationValues,
-  rotateGroupKeys,
-} from 'src/group-key-rotation';
 import type { NotificationsResponse } from 'src/notifications';
 import { notificationsRequestSchema } from 'src/notifications';
 
@@ -62,16 +58,8 @@ export class RemoveUserService {
     return notificationsRequestSchema.safeParse(values).success;
   }
 
-  async getNecessaryDataForClient({
-    groupId,
-    agentId,
-    rotateGroupKeys,
-  }: EndpointValues) {
+  async getNecessaryDataForClient({ groupId }: EndpointValues) {
     return {
-      ...(rotateGroupKeys
-        ? await getGroupKeyRotationValues(groupId, agentId)
-        : {}),
-
       ...({
         notificationRecipients: objFromEntries(
           (await getGroupMembers(groupId)).map(({ userId, publicKeyring }) => [
@@ -88,26 +76,8 @@ export class RemoveUserService {
       groupId,
       patientId,
 
-      rotateGroupKeys: _rotateGroupKeys,
-
       dtrx,
     } = values;
-
-    const groupIsPublic = await dataAbstraction().hget(
-      'group',
-      groupId,
-      'is-public',
-    );
-
-    if (_rotateGroupKeys) {
-      await rotateGroupKeys({
-        ...(values as Required<EndpointValues>),
-
-        groupIsPublic,
-
-        dtrx,
-      });
-    }
 
     await dataAbstraction().delete('group-member', `${groupId}:${patientId}`, {
       dtrx,

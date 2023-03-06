@@ -28,21 +28,6 @@ export class MakePrivateService {
   }
 
   async makePrivate(values: EndpointValues) {
-    const { groupId, dtrx } = values;
-
-    await dataAbstraction().patch(
-      'group',
-      groupId,
-      { access_keyring: null },
-      { dtrx },
-    );
-
-    await rotateGroupKeys({
-      ...(values as Required<EndpointValues>),
-
-      groupIsPublic: false,
-
-      dtrx,
-    });
+    await rotateGroupKeys(values as Required<EndpointValues>);
   }
 }

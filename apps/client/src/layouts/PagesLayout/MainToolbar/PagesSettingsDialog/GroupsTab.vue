@@ -186,23 +186,15 @@ async function leaveSelectedGroups() {
           groupMemberNames()(`${groupId}:${agentId}`).getAsync(),
         ]);
 
-        const response = (
-          await api().post<
-            GroupKeyRotationValues & {
-              notificationRecipients: Record<string, { publicKeyring: string }>;
-            }
-          >(`/api/groups/${groupId}/remove-user/${agentId}`, {
-            rotateGroupKeys: true,
-          })
-        ).data;
+        const notificationRecipients = (
+          await api().post<{
+            notificationRecipients: Record<string, { publicKeyring: string }>;
+          }>(`/api/groups/${groupId}/remove-user/${agentId}`, {})
+        ).data.notificationRecipients;
 
         await api().post(`/api/groups/${groupId}/remove-user/${agentId}`, {
-          rotateGroupKeys: true,
-
-          ...(await rotateGroupKeys(groupId, response)),
-
           notifications: await createNotifications({
-            recipients: response.notificationRecipients,
+            recipients: notificationRecipients,
 
             notifications: {
               agent: {
@@ -229,6 +221,18 @@ async function leaveSelectedGroups() {
             },
           }),
         });
+
+        const groupKeyRotationValues = (
+          await api().post<GroupKeyRotationValues>(
+            `/api/groups/${groupId}/rotate-keys`,
+            {},
+          )
+        ).data;
+
+        await api().post(
+          `/api/groups/${groupId}/rotate-keys`,
+          await rotateGroupKeys(groupId, groupKeyRotationValues),
+        );
       }),
     );
 

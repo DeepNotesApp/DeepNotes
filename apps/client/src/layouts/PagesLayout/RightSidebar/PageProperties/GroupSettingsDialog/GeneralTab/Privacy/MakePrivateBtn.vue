@@ -32,12 +32,10 @@ async function makePrivate() {
       )
     ).data;
 
-    if (response.rotateGroupKeys) {
-      await api().post(
-        `/api/groups/${groupId}/privacy/make-private`,
-        await rotateGroupKeys(groupId, response),
-      );
-    }
+    await api().post(
+      `/api/groups/${groupId}/privacy/make-private`,
+      await rotateGroupKeys(groupId, { ...response, groupIsPublic: false }),
+    );
 
     $quasar().notify({
       message: 'Group is now private.',
