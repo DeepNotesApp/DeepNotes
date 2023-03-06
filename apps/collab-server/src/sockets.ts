@@ -134,6 +134,8 @@ export class SocketAuxObject {
         }
       } else {
         if (!groupIsPublic) {
+          this.destroySocket();
+
           throw new Error(
             'Unauthenticated users can only access public groups.',
           );
@@ -356,13 +358,23 @@ export class SocketAuxObject {
   }
 
   private async _handleMessage(messageBuffer: ArrayBuffer) {
-    // Check if has permission to edit
+    const [groupId, sessionWasInvalidated] = await Promise.all([
+      dataAbstraction().hget('page', this.room.pageId, 'group-id'),
 
-    const groupId = await dataAbstraction().hget(
-      'page',
-      this.room.pageId,
-      'group-id',
-    );
+      ...(this.sessionId != null
+        ? [dataAbstraction().hget('session', this.sessionId, 'invalidated')]
+        : []),
+    ]);
+
+    // Check if session is invalidated
+
+    if (sessionWasInvalidated) {
+      this.destroySocket();
+
+      throw new Error('Session was invalidated.');
+    }
+
+    // Check if has permission to edit
 
     const role =
       groupId != null && this.userId != null
