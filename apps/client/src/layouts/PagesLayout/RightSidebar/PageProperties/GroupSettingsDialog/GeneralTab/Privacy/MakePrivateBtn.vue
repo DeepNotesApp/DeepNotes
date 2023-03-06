@@ -25,7 +25,7 @@ async function makePrivate() {
       cancel: { label: 'No', flat: true, color: 'primary' },
     });
 
-    const response = (
+    const groupKeyRotationValues = (
       await api().post<GroupKeyRotationValues>(
         `/api/groups/${groupId}/privacy/make-private`,
         {},
@@ -34,7 +34,11 @@ async function makePrivate() {
 
     await api().post(
       `/api/groups/${groupId}/privacy/make-private`,
-      await rotateGroupKeys(groupId, { ...response, groupIsPublic: false }),
+      await rotateGroupKeys(groupId, {
+        ...groupKeyRotationValues,
+
+        groupIsPublic: false,
+      }),
     );
 
     $quasar().notify({

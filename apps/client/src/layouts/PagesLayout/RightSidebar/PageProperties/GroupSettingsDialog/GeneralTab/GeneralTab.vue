@@ -102,7 +102,7 @@
 
       <Gap style="height: 20px" />
 
-      <div>Group security and privacy</div>
+      <div>Group security</div>
 
       <Gap style="height: 10px" />
 
@@ -126,9 +126,21 @@
         <template v-else>
           <EnablePasswordProtectionBtn />
         </template>
+
+        <Gap style="height: 16px" />
+
+        <RotateGroupKeys />
       </div>
 
-      <Gap style="height: 16px" />
+      <Gap style="height: 24px" />
+
+      <q-separator />
+
+      <Gap style="height: 20px" />
+
+      <div>Group privacy</div>
+
+      <Gap style="height: 10px" />
 
       <div style="max-width: 300px; display: flex; flex-direction: column">
         <MakePrivateBtn
@@ -171,6 +183,7 @@ import MakePublicBtn from './Privacy/MakePublicBtn.vue';
 import ChangePasswordBtn from './Protection/ChangePasswordBtn.vue';
 import DisablePasswordProtectionBtn from './Protection/DisablePasswordProtectionBtn.vue';
 import EnablePasswordProtectionBtn from './Protection/EnablePasswordProtectionBtn.vue';
+import RotateGroupKeys from './RotateGroupKeys.vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
