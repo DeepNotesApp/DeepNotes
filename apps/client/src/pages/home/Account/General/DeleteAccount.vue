@@ -58,7 +58,7 @@ async function deleteAccount() {
       type: 'positive',
     });
 
-    await sleep(2000);
+    await sleep(1000);
 
     await logout();
   } catch (error: any) {
