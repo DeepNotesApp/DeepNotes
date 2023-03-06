@@ -49,7 +49,7 @@ async function deleteAccount() {
     );
     const derivedValues = await deriveUserValues(email, password);
 
-    await api().post('/api/users/account/delete', {
+    await api().post('/api/users/account/general/delete', {
       loginHash: bytesToBase64(derivedValues.loginHash),
     });
 
