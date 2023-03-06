@@ -91,22 +91,40 @@ export class SocketAuxObject {
         this.sessionId,
         'user-id',
       );
-    }
 
-    if (this.userId != null) {
-      getSub().on('messageBuffer', this._handleUserNotification);
+      if (this.userId != null) {
+        getSub().on('messageBuffer', this._handleUserNotification);
 
-      await getSub().subscribe(`user-notification:${this.userId}`);
+        await getSub().subscribe(`user-notification:${this.userId}`);
+      }
     }
 
     this._setupPromise.resolve();
   }
 
-  private _handleUserNotification = (
+  private async _checkSessionInvalidated() {
+    if (this.sessionId != null) {
+      const sessionWasInvalidated = await dataAbstraction().hget(
+        'session',
+        this.sessionId,
+        'invalidated',
+      );
+
+      if (sessionWasInvalidated) {
+        this.destroySocket();
+
+        throw new Error('Session was invalidated.');
+      }
+    }
+  }
+
+  private _handleUserNotification = async (
     channelBuffer: Buffer,
     messageBuffer: Buffer,
   ) => {
     if (bytesToText(channelBuffer) === `user-notification:${this.userId}`) {
+      await this._checkSessionInvalidated();
+
       const encoder = encoding.createEncoder();
 
       encoding.writeVarUint(
@@ -121,6 +139,8 @@ export class SocketAuxObject {
   };
 
   private async _handleMessage(message: ArrayBuffer) {
+    await this._checkSessionInvalidated();
+
     const decoder = decoding.createDecoder(new Uint8Array(message));
 
     const messageType = decoding.readVarUint(decoder);
@@ -374,6 +394,8 @@ export class SocketAuxObject {
         if (this.socket === origin) {
           return;
         }
+
+        await this._checkSessionInvalidated();
 
         if (
           !(await fieldInfo?.userGettable?.({
