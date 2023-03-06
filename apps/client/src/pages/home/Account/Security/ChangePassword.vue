@@ -44,8 +44,10 @@ import {
   createSymmetricKeyring,
   wrapSymmetricKey,
 } from '@stdlib/crypto';
+import { sleep } from '@stdlib/misc';
 import { zxcvbn } from '@zxcvbn-ts/core';
 import { QForm } from 'quasar';
+import { logout } from 'src/code/auth/logout.client';
 import { deriveUserValues } from 'src/code/crypto.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
@@ -180,11 +182,9 @@ async function changePassword() {
       type: 'positive',
     });
 
-    // Clear form data
+    await sleep(1000);
 
-    oldPassword.value = '';
-    newPassword.value = '';
-    confirmNewPassword.value = '';
+    await logout();
   } catch (error: any) {
     handleError(error);
   }

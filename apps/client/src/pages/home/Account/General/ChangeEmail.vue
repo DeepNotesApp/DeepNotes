@@ -36,7 +36,8 @@ import {
   createSymmetricKeyring,
   wrapSymmetricKey,
 } from '@stdlib/crypto';
-import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
+import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
+import { logout } from 'src/code/auth/logout.client';
 import { deriveUserValues } from 'src/code/crypto.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
@@ -167,12 +168,14 @@ async function changeEmail() {
       internals.localStorage.setItem('email', newEmail.value);
     }
 
-    newEmail.value = '';
-
     $quasar().notify({
       message: 'Email changed successfully.',
       type: 'positive',
     });
+
+    await sleep(1000);
+
+    await logout();
   } catch (error: any) {
     handleError(error);
   }
