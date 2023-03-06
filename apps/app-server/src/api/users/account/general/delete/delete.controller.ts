@@ -50,7 +50,8 @@ export class DeleteController {
 
             SessionModel.query(dtrx.trx)
               .where('user_id', userId)
-              .select('invalidated'),
+              .whereNot('invalidated', true)
+              .select('id'),
 
             UserModel.query(dtrx.trx)
               .findById(userId)
@@ -93,16 +94,14 @@ export class DeleteController {
             }),
           ),
 
-          ...sessions.map(async (session) => {
-            if (!session.invalidated) {
-              await dataAbstraction().hmset(
-                'session',
-                session.id,
-                { invalidated: true },
-                { dtrx, cacheOnly: true },
-              );
-            }
-          }),
+          ...sessions.map((session) =>
+            dataAbstraction().patch(
+              'session',
+              session.id,
+              { invalidated: true },
+              { dtrx, cacheOnly: true },
+            ),
+          ),
 
           dataAbstraction().delete('group', user.personal_group_id, {
             dtrx,
