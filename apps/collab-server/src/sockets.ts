@@ -471,6 +471,20 @@ export class SocketAuxObject {
   private async _handleDocAllUpdatesUnmergedResponseMessage(
     decoder: decoding.Decoder,
   ) {
+    // Check if there's a pending request
+
+    const requestIdBytes = decoding.readVarUint8Array(decoder);
+    const requestIdBase64 = bytesToBase64(requestIdBytes);
+
+    const timeout = _pendingRequests.get(requestIdBase64);
+
+    if (timeout == null) {
+      return;
+    }
+
+    clearTimeout(timeout);
+    _pendingRequests.delete(requestIdBase64);
+
     await usingLocks([[`page-lock:${this.room.pageId}`]], async (signals) => {
       const groupId = await dataAbstraction().hget(
         'page',
@@ -484,20 +498,6 @@ export class SocketAuxObject {
         [[`group-lock:${groupId}`]],
         async (signals) => {
           await dataAbstraction().transaction(async (dtrx) => {
-            // Check if there's a pending request
-
-            const requestIdBytes = decoding.readVarUint8Array(decoder);
-            const requestIdBase64 = bytesToBase64(requestIdBytes);
-
-            const timeout = _pendingRequests.get(requestIdBase64);
-
-            if (timeout == null) {
-              return;
-            }
-
-            clearTimeout(timeout);
-            _pendingRequests.delete(requestIdBase64);
-
             // Rotate page key
 
             const rotatePageKey = decoding.readUint8(decoder) === 1;
