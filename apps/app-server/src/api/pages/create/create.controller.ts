@@ -8,7 +8,6 @@ import {
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
-import { nanoid } from 'nanoid';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 import { dataAbstraction } from 'src/data/data-abstraction';
@@ -20,6 +19,8 @@ class BodyDto extends createZodDto(
   z.object({
     parentPageId: z.string().refine(isNanoID),
     groupId: z.string().refine(isNanoID),
+    pageId: z.string().refine(isNanoID),
+
     pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
     pageEncryptedRelativeTitle: z.string().refine(isBase64),
     pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
@@ -49,6 +50,8 @@ export class CreateController {
     {
       parentPageId,
       groupId,
+      pageId,
+
       pageEncryptedSymmetricKeyring,
       pageEncryptedRelativeTitle,
       pageEncryptedAbsoluteTitle,
@@ -123,8 +126,6 @@ export class CreateController {
 
         // Create page
 
-        const pageId = nanoid();
-
         if (createGroup) {
           if (
             groupEncryptedName == null ||
@@ -147,7 +148,7 @@ export class CreateController {
             encryptedName: groupEncryptedName,
             passwordHash: groupPasswordHash,
             isPublic: !!groupIsPublic,
-            isPersonalGroup: false,
+            isPersonal: false,
 
             userId: agentId,
 

@@ -18,7 +18,7 @@ import { z } from 'nestjs-zod/z';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
-import { decryptRehashedLoginHash, Locals } from 'src/utils';
+import { decryptUserRehashedLoginHash, Locals } from 'src/utils';
 
 import { ChangePasswordService } from './change-password.service';
 
@@ -85,7 +85,7 @@ export class ChangePasswordController {
           checkRedlockSignalAborted(signals);
 
           const passwordHashValues = getPasswordHashValues(
-            decryptRehashedLoginHash(user!.encrypted_rehashed_login_hash),
+            decryptUserRehashedLoginHash(user!.encrypted_rehashed_login_hash),
           );
 
           const oldPasswordValues = derivePasswordValues(

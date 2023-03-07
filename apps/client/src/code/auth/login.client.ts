@@ -62,16 +62,36 @@ export async function login({
     'encryptedPrivateKeyring',
     bytesToBase64(
       createPrivateKeyring(base64ToBytes(encryptedPrivateKeyring))
-        .unwrapSymmetric(masterKey)
-        .wrapSymmetric(wrappedSessionKey).fullValue,
+        .unwrapSymmetric(masterKey, {
+          associatedData: {
+            context: 'UserPrivateKeyring',
+            userId,
+          },
+        })
+        .wrapSymmetric(wrappedSessionKey, {
+          associatedData: {
+            context: 'SessionUserPrivateKeyring',
+            userId,
+          },
+        }).fullValue,
     ),
   );
   internals.storage.setItem(
     'encryptedSymmetricKeyring',
     bytesToBase64(
       createSymmetricKeyring(base64ToBytes(encryptedSymmetricKeyring))
-        .unwrapSymmetric(masterKey)
-        .wrapSymmetric(wrappedSessionKey).fullValue,
+        .unwrapSymmetric(masterKey, {
+          associatedData: {
+            context: 'UserSymmetricKeyring',
+            userId,
+          },
+        })
+        .wrapSymmetric(wrappedSessionKey, {
+          associatedData: {
+            context: 'SessionUserSymmetricKeyring',
+            userId,
+          },
+        }).fullValue,
     ),
   );
 

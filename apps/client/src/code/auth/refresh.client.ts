@@ -86,25 +86,47 @@ export async function tryRefreshTokens(): Promise<void> {
 
     const privateKeyring = createPrivateKeyring(
       base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
-    ).unwrapSymmetric(oldSessionKey);
+    ).unwrapSymmetric(oldSessionKey, {
+      associatedData: {
+        context: 'SessionUserPrivateKeyring',
+        userId: authStore().userId,
+      },
+    });
 
     internals.keyPair = wrapKeyPair(publicKeyring, privateKeyring);
 
     internals.symmetricKeyring = createSymmetricKeyring(
       base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
-    ).unwrapSymmetric(oldSessionKey);
+    ).unwrapSymmetric(oldSessionKey, {
+      associatedData: {
+        context: 'SessionUserSymmetricKeyring',
+        userId: authStore().userId,
+      },
+    });
 
     // Update storage
 
     internals.storage.setItem(
       'encryptedPrivateKeyring',
-      bytesToBase64(privateKeyring.wrapSymmetric(newSessionKey).fullValue),
+      bytesToBase64(
+        privateKeyring.wrapSymmetric(newSessionKey, {
+          associatedData: {
+            context: 'SessionUserPrivateKeyring',
+            userId: authStore().userId,
+          },
+        }).fullValue,
+      ),
     );
 
     internals.storage.setItem(
       'encryptedSymmetricKeyring',
       bytesToBase64(
-        internals.symmetricKeyring.wrapSymmetric(newSessionKey).fullValue,
+        internals.symmetricKeyring.wrapSymmetric(newSessionKey, {
+          associatedData: {
+            context: 'SessionUserSymmetricKeyring',
+            userId: authStore().userId,
+          },
+        }).fullValue,
       ),
     );
 

@@ -12,7 +12,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { getPasswordHashValues, wrapSymmetricKey } from '@stdlib/crypto';
-import { equalUint8Arrays, w3cEmailRegex } from '@stdlib/misc';
+import { equalUint8Arrays, isNanoID, w3cEmailRegex } from '@stdlib/misc';
 import { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
@@ -23,7 +23,7 @@ import type { PasswordValues } from 'src/crypto';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { createUser } from 'src/deep-utils';
-import { decryptRehashedLoginHash } from 'src/utils';
+import { decryptUserRehashedLoginHash } from 'src/utils';
 
 import { LoginService } from './login.service';
 
@@ -46,11 +46,15 @@ class BodyDto extends createZodDto(
 
     demo: z
       .object({
+        userId: z.string().refine(isNanoID),
+        groupId: z.string().refine(isNanoID),
+        pageId: z.string().refine(isNanoID),
+
         userPublicKeyring: z.string().refine(isBase64),
         userEncryptedPrivateKeyring: z.string().refine(isBase64),
-
         userEncryptedSymmetricKeyring: z.string().refine(isBase64),
 
+        userEncryptedName: z.string().refine(isBase64),
         userEncryptedDefaultNote: z.string().refine(isBase64),
         userEncryptedDefaultArrow: z.string().refine(isBase64),
 
@@ -61,11 +65,9 @@ class BodyDto extends createZodDto(
         groupPublicKeyring: z.string().refine(isBase64),
         groupEncryptedPrivateKeyring: z.string().refine(isBase64),
 
-        groupMemberEncryptedName: z.string().refine(isBase64),
-
-        mainPageEncryptedSymmetricKeyring: z.string().refine(isBase64),
-        mainPageEncryptedRelativeTitle: z.string().refine(isBase64),
-        mainPageEncryptedAbsoluteTitle: z.string().refine(isBase64),
+        pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
+        pageEncryptedRelativeTitle: z.string().refine(isBase64),
+        pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
       })
       .optional(),
   }),
@@ -168,7 +170,9 @@ export class LoginController {
         // Check correct password
 
         const passwordHashValues = getPasswordHashValues(
-          decryptRehashedLoginHash(values.user.encrypted_rehashed_login_hash),
+          decryptUserRehashedLoginHash(
+            values.user.encrypted_rehashed_login_hash,
+          ),
         );
 
         values.passwordValues = derivePasswordValues(

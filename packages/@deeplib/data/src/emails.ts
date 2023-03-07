@@ -7,20 +7,26 @@ import { bytesToText, textToBytes } from '@stdlib/misc';
 import CryptoJS from 'crypto-js';
 import { once } from 'lodash';
 
-export const emailEncryptionKey = once(() =>
+const _userEmailEncryptionKey = once(() =>
   wrapSymmetricKey(base64ToBytes(process.env.EMAIL_ENCRYPTION_KEY!)),
 );
 
-export function encryptEmail(email: string) {
-  return emailEncryptionKey().encrypt(textToBytes(email), { padding: true });
+export function encryptUserEmail(email: string) {
+  return _userEmailEncryptionKey().encrypt(textToBytes(email), {
+    padding: true,
+    associatedData: { context: 'UserEmail' },
+  });
 }
-export function decryptEmail(encryptedEmail: Uint8Array) {
+export function decryptUserEmail(encryptedEmail: Uint8Array) {
   return bytesToText(
-    emailEncryptionKey().decrypt(encryptedEmail, { padding: true }),
+    _userEmailEncryptionKey().decrypt(encryptedEmail, {
+      padding: true,
+      associatedData: { context: 'UserEmail' },
+    }),
   );
 }
 
-export function hashEmail(email: string) {
+export function hashUserEmail(email: string) {
   return cryptoJsWordArrayToUint8Array(
     CryptoJS.HmacSHA256(email, process.env.EMAIL_SECRET!),
   );

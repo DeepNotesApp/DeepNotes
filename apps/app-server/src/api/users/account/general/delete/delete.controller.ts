@@ -1,4 +1,4 @@
-import { decryptEmail } from '@deeplib/data';
+import { decryptUserEmail } from '@deeplib/data';
 import {
   GroupJoinInvitationModel,
   GroupJoinRequestModel,
@@ -119,7 +119,7 @@ export class DeleteController {
 
           dataAbstraction().delete(
             'email',
-            decryptEmail(user.encrypted_email),
+            decryptUserEmail(user.encrypted_email),
             {
               dtrx,
               cacheOnly: true,

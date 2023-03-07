@@ -130,7 +130,12 @@ export function createPrivateKeyring(
 
     wrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        includeNonce?: boolean;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       return createPrivateKeyring(
         _wrappedData.wrapSymmetric(symmetricKey, params).value,
@@ -138,7 +143,11 @@ export function createPrivateKeyring(
     }
     unwrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       return createPrivateKeyring(
         _wrappedData.unwrapSymmetric(symmetricKey, params).value,

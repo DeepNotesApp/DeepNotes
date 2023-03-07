@@ -18,7 +18,7 @@ import { z } from 'nestjs-zod/z';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { usingLocks } from 'src/data/redlock';
-import { decryptRehashedLoginHash, Locals } from 'src/utils';
+import { decryptUserRehashedLoginHash, Locals } from 'src/utils';
 
 import { ChangeEmailService } from './change-email.service';
 
@@ -80,7 +80,7 @@ export class ChangeEmailController {
           checkRedlockSignalAborted(signals);
 
           const passwordHashValues = getPasswordHashValues(
-            decryptRehashedLoginHash(
+            decryptUserRehashedLoginHash(
               values.user!.encrypted_rehashed_login_hash,
             ),
           );

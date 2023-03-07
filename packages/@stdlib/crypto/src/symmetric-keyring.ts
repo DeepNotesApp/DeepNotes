@@ -66,8 +66,10 @@ export function createSymmetricKeyring(
     encrypt(
       plaintext: Uint8Array,
       params?: {
-        additionalData?: string | undefined;
-        padding?: boolean | undefined;
+        nonce?: Uint8Array;
+        includeNonce?: boolean;
+        associatedData?: object;
+        padding?: boolean;
       },
     ): Uint8Array {
       if (_wrappedData.topLayer !== DataLayer.Raw) {
@@ -79,8 +81,10 @@ export function createSymmetricKeyring(
     decrypt(
       ciphertext: Uint8Array,
       params?: {
-        additionalData?: string | undefined;
-        padding?: boolean | undefined;
+        nonce?: Uint8Array;
+        includeNonce?: boolean;
+        associatedData?: object;
+        padding?: boolean;
       },
     ): Uint8Array {
       if (_wrappedData.topLayer !== DataLayer.Raw) {
@@ -133,7 +137,12 @@ export function createSymmetricKeyring(
 
     wrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        includeNonce?: boolean;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       return createSymmetricKeyring(
         _wrappedData.wrapSymmetric(symmetricKey, params).value,
@@ -141,7 +150,11 @@ export function createSymmetricKeyring(
     }
     unwrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       return createSymmetricKeyring(
         _wrappedData.unwrapSymmetric(symmetricKey, params).value,

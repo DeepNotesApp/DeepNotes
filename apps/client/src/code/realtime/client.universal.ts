@@ -438,7 +438,10 @@ export const RealtimeClient = once(
         );
 
         const content = unpack(
-          symmetricKey.decrypt(base64ToBytes(notifObj.encryptedContent)),
+          symmetricKey.decrypt(base64ToBytes(notifObj.encryptedContent), {
+            padding: true,
+            associatedData: { context: 'UserNotificationContent' },
+          }),
         );
 
         this._logger

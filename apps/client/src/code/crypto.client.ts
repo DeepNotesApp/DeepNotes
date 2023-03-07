@@ -56,7 +56,10 @@ export async function deriveUserValues(email: string, password: string) {
     loginHash: passwordValues.hash,
   };
 }
-export function generateRandomUserKeys(masterKey: SymmetricKey) {
+export function generateRandomUserKeys(
+  userId: string,
+  masterKey: SymmetricKey,
+) {
   const rawKeyPair = sodium.crypto_box_keypair();
 
   const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
@@ -70,12 +73,22 @@ export function generateRandomUserKeys(masterKey: SymmetricKey) {
     // Asymmetric keys
 
     keyPair,
-    encryptedPrivateKeyring: privateKeyring.wrapSymmetric(masterKey),
+    encryptedPrivateKeyring: privateKeyring.wrapSymmetric(masterKey, {
+      associatedData: {
+        context: 'UserPrivateKeyring',
+        userId,
+      },
+    }),
 
     // Symmetric key
 
     symmetricKeyring,
-    encryptedSymmetricKeyring: symmetricKeyring.wrapSymmetric(masterKey),
+    encryptedSymmetricKeyring: symmetricKeyring.wrapSymmetric(masterKey, {
+      associatedData: {
+        context: 'UserSymmetricKeyring',
+        userId,
+      },
+    }),
   };
 }
 
@@ -130,11 +143,24 @@ export async function generateGroupValues({
 
     encryptedContentKeyring = encryptedContentKeyring.wrapSymmetric(
       passwordValues.passwordKey,
+      {
+        associatedData: {
+          context: 'GroupContentKeyringPasswordProtection',
+          groupId,
+        },
+      },
     );
   }
 
-  encryptedContentKeyring =
-    encryptedContentKeyring.wrapSymmetric(accessKeyring);
+  encryptedContentKeyring = encryptedContentKeyring.wrapSymmetric(
+    accessKeyring,
+    {
+      associatedData: {
+        context: 'GroupContentKeyring',
+        groupId,
+      },
+    },
+  );
 
   return {
     groupId,
@@ -148,7 +174,12 @@ export async function generateGroupValues({
     encryptedContentKeyring,
 
     keyPair,
-    encryptedPrivateKeyring: privateKeyring.wrapSymmetric(internalKeyring),
+    encryptedPrivateKeyring: privateKeyring.wrapSymmetric(internalKeyring, {
+      associatedData: {
+        context: 'GroupPrivateKeyring',
+        groupId,
+      },
+    }),
 
     passwordValues,
   };
@@ -189,6 +220,12 @@ export async function unlockGroupContentKeyring(
     try {
       groupContentKeyring = groupContentKeyring.unwrapSymmetric(
         groupPasswordValues.passwordKey,
+        {
+          associatedData: {
+            context: 'GroupContentKeyringPasswordProtection',
+            groupId,
+          },
+        },
       );
     } catch (error) {
       throw new Error('Password is incorrect.');

@@ -1,4 +1,4 @@
-import { encryptEmail, hashEmail } from '@deeplib/data';
+import { encryptUserEmail, hashUserEmail } from '@deeplib/data';
 import { SessionModel, UserModel } from '@deeplib/db';
 import { Injectable } from '@nestjs/common';
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
@@ -15,14 +15,14 @@ import { dataAbstraction } from 'src/data/data-abstraction';
 import { invalidateAllSessions } from 'src/deep-utils';
 import { sendMail } from 'src/mail';
 import { stripe } from 'src/stripe/stripe';
-import { encryptRehashedLoginHash, padZeroes } from 'src/utils';
+import { encryptUserRehashedLoginHash, padZeroes } from 'src/utils';
 
 @Injectable()
 export class ChangeEmailService {
   async isEmailInUse({ newEmail }: EndpointValues) {
     return (
       (await UserModel.query()
-        .where('email_hash', Buffer.from(hashEmail(newEmail)))
+        .where('email_hash', Buffer.from(hashUserEmail(newEmail)))
         .select(1)
         .first()) != null
     );
@@ -35,7 +35,7 @@ export class ChangeEmailService {
       'user',
       userId,
       {
-        encrypted_new_email: encryptEmail(newEmail),
+        encrypted_new_email: encryptUserEmail(newEmail),
         email_verification_code: emailVerificationCode,
       },
       { dtrx },
@@ -61,7 +61,7 @@ export class ChangeEmailService {
     emailVerificationCode,
   }: EndpointValues) {
     return (
-      user?.encrypted_new_email === encryptEmail(newEmail) &&
+      user?.encrypted_new_email === encryptUserEmail(newEmail) &&
       user?.email_verification_code === emailVerificationCode
     );
   }
@@ -97,22 +97,32 @@ export class ChangeEmailService {
       'user',
       userId,
       {
-        encrypted_email: encryptEmail(newEmail),
-        email_hash: hashEmail(newEmail),
+        encrypted_email: encryptUserEmail(newEmail),
+        email_hash: hashUserEmail(newEmail),
 
         encrypted_new_email: null,
         email_verification_code: null,
 
-        encrypted_rehashed_login_hash: encryptRehashedLoginHash(
+        encrypted_rehashed_login_hash: encryptUserRehashedLoginHash(
           encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
         ),
 
         encrypted_private_keyring: createPrivateKeyring(
           base64ToBytes(encryptedPrivateKeyring!),
-        ).wrapSymmetric(passwordValues.key).fullValue,
+        ).wrapSymmetric(passwordValues.key, {
+          associatedData: {
+            context: 'UserEncryptedPrivateKeyring',
+            userId,
+          },
+        }).fullValue,
         encrypted_symmetric_keyring: createSymmetricKeyring(
           base64ToBytes(encryptedSymmetricKeyring!),
-        ).wrapSymmetric(passwordValues.key).fullValue,
+        ).wrapSymmetric(passwordValues.key, {
+          associatedData: {
+            context: 'UserEncryptedSymmetricKeyring',
+            userId,
+          },
+        }).fullValue,
       },
       { dtrx },
     );

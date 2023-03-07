@@ -1,8 +1,8 @@
-import { decryptEmail } from '@deeplib/data';
+import { decryptUserEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { Controller, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { authenticator } from 'otplib';
-import { decryptAuthenticatorSecret, Locals } from 'src/utils';
+import { decryptUserAuthenticatorSecret, Locals } from 'src/utils';
 
 @Controller()
 export class LoadController {
@@ -25,14 +25,14 @@ export class LoadController {
       );
     }
 
-    const authenticatorSecret = decryptAuthenticatorSecret(
+    const authenticatorSecret = decryptUserAuthenticatorSecret(
       user.encrypted_authenticator_secret,
     );
 
     return {
       secret: authenticatorSecret,
       keyUri: authenticator.keyuri(
-        decryptEmail(user.encrypted_email),
+        decryptUserEmail(user.encrypted_email),
         'DeepNotes',
         authenticatorSecret,
       ),

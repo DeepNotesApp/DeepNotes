@@ -1,7 +1,7 @@
 import type { UserModel } from '@deeplib/db';
 import type { DataField } from '@stdlib/data';
 
-import { decryptEmail, encryptEmail } from '../../emails';
+import { decryptUserEmail, encryptUserEmail } from '../../emails';
 
 export const email: DataField<UserModel> = {
   notifyUpdates: true,
@@ -10,6 +10,6 @@ export const email: DataField<UserModel> = {
 
   columns: ['encrypted_email'],
 
-  get: ({ model }) => decryptEmail(model?.encrypted_email!),
-  set: ({ model, value }) => (model.encrypted_email = encryptEmail(value)),
+  get: ({ model }) => decryptUserEmail(model?.encrypted_email!),
+  set: ({ model, value }) => (model.encrypted_email = encryptUserEmail(value)),
 };

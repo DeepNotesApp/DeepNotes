@@ -130,17 +130,36 @@ async function restoreVersion(snapshotId: string) {
     const encryptedData = bytesToBase64(
       newSnapshotSymmetricKey.encrypt(
         Y.encodeStateAsUpdateV2(page.value.collab.doc),
+        {
+          padding: true,
+          associatedData: {
+            context: 'PageDocUpdate',
+            pageId: page.value.id,
+          },
+        },
       ),
     );
 
     // Restore snapshot
 
     const oldSnapshotSymmetricKey = wrapSymmetricKey(
-      pageKeyring.decrypt(base64ToBytes(response.encryptedSymmetricKey)),
+      pageKeyring.decrypt(base64ToBytes(response.encryptedSymmetricKey), {
+        associatedData: {
+          context: 'PageSnapshotSymmetricKey',
+          pageId: page.value.id,
+        },
+      }),
     );
 
     const snapshotData = oldSnapshotSymmetricKey.decrypt(
       base64ToBytes(response.encryptedData),
+      {
+        padding: true,
+        associatedData: {
+          context: 'PageDocUpdate',
+          pageId: page.value.id,
+        },
+      },
     );
 
     revertToSnapshot(page.value.collab.doc, snapshotData);
@@ -149,7 +168,12 @@ async function restoreVersion(snapshotId: string) {
 
     await api().post(`/api/pages/${page.value.id}/snapshots/save`, {
       encryptedSymmetricKey: bytesToBase64(
-        pageKeyring.encrypt(newSnapshotSymmetricKey.value),
+        pageKeyring.encrypt(newSnapshotSymmetricKey.value, {
+          associatedData: {
+            context: 'PageSnapshotSymmetricKey',
+            pageId: page.value.id,
+          },
+        }),
       ),
       encryptedData,
 
@@ -189,10 +213,21 @@ async function saveVersion() {
 
     await api().post(`/api/pages/${page.value.id}/snapshots/save`, {
       encryptedSymmetricKey: bytesToBase64(
-        pageKeyring.encrypt(symmetricKey.value),
+        pageKeyring.encrypt(symmetricKey.value, {
+          associatedData: {
+            context: 'PageSnapshotSymmetricKey',
+            pageId: page.value.id,
+          },
+        }),
       ),
       encryptedData: bytesToBase64(
-        symmetricKey.encrypt(Y.encodeStateAsUpdateV2(page.value.collab.doc)),
+        symmetricKey.encrypt(Y.encodeStateAsUpdateV2(page.value.collab.doc), {
+          padding: true,
+          associatedData: {
+            context: 'PageDocUpdate',
+            pageId: page.value.id,
+          },
+        }),
       ),
     });
 

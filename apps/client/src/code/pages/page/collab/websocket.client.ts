@@ -220,34 +220,78 @@ export const PageWebsocket = once(
 
           encoding.writeVarUint8Array(
             encoder,
-            pageKeyring.wrapSymmetric(groupContentKeyring).fullValue,
+            pageKeyring.wrapSymmetric(groupContentKeyring, {
+              associatedData: {
+                context: 'PageKeyring',
+                pageId: this.page.id,
+              },
+            }).fullValue,
           );
 
           encoding.writeVarUint8Array(
             encoder,
             pageKeyring.encrypt(
-              pageKeyring.decrypt(encryptedPageRelativeTitle),
+              pageKeyring.decrypt(encryptedPageRelativeTitle, {
+                padding: true,
+                associatedData: {
+                  context: 'PageRelativeTitle',
+                  pageId: this.page.id,
+                },
+              }),
+              {
+                padding: true,
+                associatedData: {
+                  context: 'PageRelativeTitle',
+                  pageId: this.page.id,
+                },
+              },
             ),
           );
 
           encoding.writeVarUint8Array(
             encoder,
             pageKeyring.encrypt(
-              pageKeyring.decrypt(encryptedPageAbsoluteTitle),
+              pageKeyring.decrypt(encryptedPageAbsoluteTitle, {
+                padding: true,
+                associatedData: {
+                  context: 'PageAbsoluteTitle',
+                  pageId: this.page.id,
+                },
+              }),
+              {
+                padding: true,
+                associatedData: {
+                  context: 'PageAbsoluteTitle',
+                  pageId: this.page.id,
+                },
+              },
             ),
           );
 
           encoding.writeVarUint(encoder, encryptedSnapshotSymmetricKeys.size);
 
           for (const [
-            clientId,
+            snapshotId,
             encryptedSymmetricKey,
           ] of encryptedSnapshotSymmetricKeys) {
-            encoding.writeVarString(encoder, clientId);
+            encoding.writeVarString(encoder, snapshotId);
 
             encoding.writeVarUint8Array(
               encoder,
-              pageKeyring.encrypt(pageKeyring.decrypt(encryptedSymmetricKey)),
+              pageKeyring.encrypt(
+                pageKeyring.decrypt(encryptedSymmetricKey, {
+                  associatedData: {
+                    context: 'PageSnapshotSymmetricKey',
+                    pageId: this.page.id,
+                  },
+                }),
+                {
+                  associatedData: {
+                    context: 'PageSnapshotSymmetricKey',
+                    pageId: this.page.id,
+                  },
+                },
+              ),
             );
           }
         }
@@ -258,11 +302,22 @@ export const PageWebsocket = once(
 
         encoding.writeVarUint8Array(
           encoder,
-          pageKeyring.encrypt(pageKeyring.value),
+          pageKeyring.encrypt(pageKeyring.value, {
+            associatedData: {
+              context: 'PageKeyring',
+              pageId: this.page.id,
+            },
+          }),
         ); // Encrypted symmetric key
 
         const rawUpdate = Y.encodeStateAsUpdateV2(this.doc);
-        const encryptedUpdate = pageKeyring.encrypt(rawUpdate);
+        const encryptedUpdate = pageKeyring.encrypt(rawUpdate, {
+          padding: true,
+          associatedData: {
+            context: 'PageDocUpdate',
+            pageId: this.page.id,
+          },
+        });
         encoding.writeVarUint8Array(encoder, encryptedUpdate);
 
         encoding.writeUint8(encoder, createSnapshot ? 1 : 0);
@@ -300,7 +355,13 @@ export const PageWebsocket = once(
           return;
         }
 
-        const encryptedUpdate = pageKeyring.encrypt(mergedUpdate);
+        const encryptedUpdate = pageKeyring.encrypt(mergedUpdate, {
+          padding: true,
+          associatedData: {
+            context: 'PageDocUpdate',
+            pageId: this.page.id,
+          },
+        });
 
         encoding.writeVarUint(encoder, this._updateId);
         encoding.writeVarUint8Array(encoder, encryptedUpdate);
@@ -352,6 +413,13 @@ export const PageWebsocket = once(
           awarenessProtocol.encodeAwarenessUpdate(this.awareness, [
             this.doc.clientID,
           ]),
+          {
+            padding: true,
+            associatedData: {
+              context: 'PageAwarenessUpdate',
+              pageId: this.page.id,
+            },
+          },
         );
 
         const encoder = encoding.createEncoder();
@@ -406,7 +474,13 @@ export const PageWebsocket = once(
           try {
             awarenessProtocol.applyAwarenessUpdate(
               this.awareness,
-              pageKeyring.decrypt(decoding.readVarUint8Array(decoder)),
+              pageKeyring.decrypt(decoding.readVarUint8Array(decoder), {
+                padding: true,
+                associatedData: {
+                  context: 'PageAwarenessUpdate',
+                  pageId: this.page.id,
+                },
+              }),
               this,
             );
           } catch (error) {
@@ -453,7 +527,13 @@ export const PageWebsocket = once(
           for (let i = 0; i < numUpdates; i++) {
             try {
               const encryptedUpdate = decoding.readVarUint8Array(decoder);
-              const rawUpdate = pageKeyring.decrypt(encryptedUpdate);
+              const rawUpdate = pageKeyring.decrypt(encryptedUpdate, {
+                padding: true,
+                associatedData: {
+                  context: 'PageDocUpdate',
+                  pageId: this.page.id,
+                },
+              });
               Y.applyUpdateV2(this.doc, rawUpdate, this);
             } catch (error) {
               // this._logger.error(error);
@@ -527,7 +607,13 @@ export const PageWebsocket = once(
             `Doc single update message received (size: ${encryptedUpdate.length})`,
           );
 
-          const rawUpdate = pageKeyring.decrypt(encryptedUpdate);
+          const rawUpdate = pageKeyring.decrypt(encryptedUpdate, {
+            padding: true,
+            associatedData: {
+              context: 'PageDocUpdate',
+              pageId: this.page.id,
+            },
+          });
           Y.applyUpdateV2(this.doc, rawUpdate, this);
         } catch (error) {
           // this._logger.error(error);

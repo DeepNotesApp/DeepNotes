@@ -141,6 +141,7 @@ import { DataLayer } from '@stdlib/crypto';
 import { BREAKPOINT_MD_MIN, sleep, splitStr } from '@stdlib/misc';
 import { textToBytes } from '@stdlib/misc';
 import { zxcvbn } from '@zxcvbn-ts/core';
+import { nanoid } from 'nanoid';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,
@@ -265,6 +266,8 @@ async function createPage() {
     const request = {} as {
       parentPageId: string;
       groupId: string;
+      pageId: string;
+
       pageEncryptedSymmetricKeyring: string;
       pageEncryptedRelativeTitle: string;
       pageEncryptedAbsoluteTitle: string;
@@ -282,6 +285,9 @@ async function createPage() {
     };
 
     request.parentPageId = page.value.id;
+
+    request.pageId = nanoid();
+
     request.createGroup = destGroupId.value === 'new';
 
     if (request.createGroup) {
@@ -336,6 +342,10 @@ async function createPage() {
       request.groupEncryptedName = bytesToBase64(
         groupValues.accessKeyring.encrypt(textToBytes(groupName.value), {
           padding: true,
+          associatedData: {
+            context: 'GroupName',
+            groupId: groupValues.groupId,
+          },
         }),
       );
 
@@ -406,15 +416,30 @@ async function createPage() {
     const pageKeyring = createSymmetricKeyring();
 
     request.pageEncryptedSymmetricKeyring = bytesToBase64(
-      pageKeyring.wrapSymmetric(groupContentKeyring).fullValue,
+      pageKeyring.wrapSymmetric(groupContentKeyring, {
+        associatedData: {
+          context: 'PageKeyring',
+          pageId: request.pageId,
+        },
+      }).fullValue,
     );
     request.pageEncryptedRelativeTitle = bytesToBase64(
       pageKeyring.encrypt(textToBytes(pageRelativeTitle.value), {
         padding: true,
+        associatedData: {
+          context: 'PageRelativeTitle',
+          pageId: request.pageId,
+        },
       }),
     );
     request.pageEncryptedAbsoluteTitle = bytesToBase64(
-      pageKeyring.encrypt(textToBytes(''), { padding: true }),
+      pageKeyring.encrypt(textToBytes(''), {
+        padding: true,
+        associatedData: {
+          context: 'PageAbsoluteTitle',
+          pageId: request.pageId,
+        },
+      }),
     );
 
     const response = (

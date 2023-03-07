@@ -50,6 +50,12 @@ async function changeGroupPassword() {
     if (groupContentKeyring.topLayer === DataLayer.Symmetric) {
       groupContentKeyring = groupContentKeyring.unwrapSymmetric(
         currentGroupPasswordValues.passwordKey,
+        {
+          associatedData: {
+            context: 'GroupContentKeyringPasswordProtection',
+            groupId,
+          },
+        },
       ) as SymmetricKeyring;
     } else if (groupContentKeyring.topLayer !== DataLayer.Raw) {
       throw new Error('Group is not password protected.');
@@ -79,6 +85,12 @@ async function changeGroupPassword() {
 
     groupContentKeyring = groupContentKeyring.wrapSymmetric(
       newGroupPasswordValues.passwordKey,
+      {
+        associatedData: {
+          context: 'GroupContentKeyringPasswordProtection',
+          groupId,
+        },
+      },
     ) as SymmetricKeyring;
 
     // Wrap content keyring with group keyring
@@ -89,9 +101,12 @@ async function changeGroupPassword() {
       throw new Error('Invalid group keyring.');
     }
 
-    groupContentKeyring = groupContentKeyring.wrapSymmetric(
-      accessKeyring,
-    ) as SymmetricKeyring;
+    groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
+      associatedData: {
+        context: 'GroupContentKeyring',
+        groupId,
+      },
+    }) as SymmetricKeyring;
 
     // Send password change request
 

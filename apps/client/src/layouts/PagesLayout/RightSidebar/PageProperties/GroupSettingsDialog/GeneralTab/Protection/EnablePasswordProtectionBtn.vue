@@ -46,6 +46,12 @@ async function enablePasswordProtection() {
 
     groupContentKeyring = groupContentKeyring.wrapSymmetric(
       groupPasswordValues.passwordKey,
+      {
+        associatedData: {
+          context: 'GroupContentKeyringPasswordProtection',
+          groupId,
+        },
+      },
     ) as SymmetricKeyring;
 
     // Wrap content keyring with group keyring
@@ -56,9 +62,12 @@ async function enablePasswordProtection() {
       throw new Error('Invalid group keyring.');
     }
 
-    groupContentKeyring = groupContentKeyring.wrapSymmetric(
-      accessKeyring,
-    ) as SymmetricKeyring;
+    groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
+      associatedData: {
+        context: 'GroupContentKeyring',
+        groupId,
+      },
+    }) as SymmetricKeyring;
 
     // Send password enable request
 

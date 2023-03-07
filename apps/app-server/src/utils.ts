@@ -11,19 +11,25 @@ import type { FastifyRequest } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { pack, unpack } from 'msgpackr';
 
-// Rehashed login hash
+// User rehashed login hash
 
-const _rehashedLoginHashEncryptionKey = wrapSymmetricKey(
+const _userRehashedLoginHashEncryptionKey = wrapSymmetricKey(
   base64ToBytes(process.env.REHASHED_LOGIN_HASH_ENCRYPTION_KEY),
 );
-export function encryptRehashedLoginHash(rehashedLoginHash: string) {
-  return _rehashedLoginHashEncryptionKey.encrypt(
-    textToBytes(rehashedLoginHash),
+export function encryptUserRehashedLoginHash(userRehashedLoginHash: string) {
+  return _userRehashedLoginHashEncryptionKey.encrypt(
+    textToBytes(userRehashedLoginHash),
+    { associatedData: { context: 'UserRehashedLoginHash' } },
   );
 }
-export function decryptRehashedLoginHash(rehashedLoginHash: Uint8Array) {
+export function decryptUserRehashedLoginHash(
+  userEncryptedRehashedLoginHash: Uint8Array,
+) {
   return bytesToText(
-    _rehashedLoginHashEncryptionKey.decrypt(rehashedLoginHash),
+    _userRehashedLoginHashEncryptionKey.decrypt(
+      userEncryptedRehashedLoginHash,
+      { associatedData: { context: 'UserRehashedLoginHash' } },
+    ),
   );
 }
 
@@ -37,46 +43,62 @@ export function encryptGroupRehashedPasswordHash(
 ) {
   return _groupRehashedPasswordHashEncryptionKey.encrypt(
     textToBytes(groupRehashedPasswordHash),
+    { associatedData: { context: 'GroupRehashedPasswordHash' } },
   );
 }
 export function decryptGroupRehashedPasswordHash(
-  groupRehashedPasswordHash: Uint8Array,
+  groupEncryptedRehashedPasswordHash: Uint8Array,
 ) {
   return bytesToText(
-    _groupRehashedPasswordHashEncryptionKey.decrypt(groupRehashedPasswordHash),
+    _groupRehashedPasswordHashEncryptionKey.decrypt(
+      groupEncryptedRehashedPasswordHash,
+      { associatedData: { context: 'GroupRehashedPasswordHash' } },
+    ),
   );
 }
 
-// Authenticator secret
+// User authenticator secret
 
-const _authenticatorSecretEncryptionKey = wrapSymmetricKey(
+const _userAuthenticatorSecretEncryptionKey = wrapSymmetricKey(
   base64ToBytes(process.env.AUTHENTICATOR_SECRET_ENCRYPTION_KEY),
 );
-export function encryptAuthenticatorSecret(authenticatorSecret: string) {
-  return _authenticatorSecretEncryptionKey.encrypt(
-    textToBytes(authenticatorSecret),
+export function encryptUserAuthenticatorSecret(
+  userAuthenticatorSecret: string,
+) {
+  return _userAuthenticatorSecretEncryptionKey.encrypt(
+    textToBytes(userAuthenticatorSecret),
+    { associatedData: { context: 'UserAuthenticatorSecret' } },
   );
 }
-export function decryptAuthenticatorSecret(
-  encryptedAuthenticatorSecret: Uint8Array,
+export function decryptUserAuthenticatorSecret(
+  userEncryptedAuthenticatorSecret: Uint8Array,
 ) {
   return bytesToText(
-    _authenticatorSecretEncryptionKey.decrypt(encryptedAuthenticatorSecret),
+    _userAuthenticatorSecretEncryptionKey.decrypt(
+      userEncryptedAuthenticatorSecret,
+      { associatedData: { context: 'UserAuthenticatorSecret' } },
+    ),
   );
 }
 
-// Recovery codes
+// User recovery codes
 
-const _recoveryCodesEncryptionKey = wrapSymmetricKey(
+const _userRecoveryCodesEncryptionKey = wrapSymmetricKey(
   base64ToBytes(process.env.RECOVERY_CODES_ENCRYPTION_KEY),
 );
-export function encryptRecoveryCodes(recoveryCodes: Uint8Array[]) {
-  return _recoveryCodesEncryptionKey.encrypt(pack(recoveryCodes));
+export function encryptRecoveryCodes(userRecoveryCodes: Uint8Array[]) {
+  return _userRecoveryCodesEncryptionKey.encrypt(pack(userRecoveryCodes), {
+    associatedData: { context: 'UserRecoveryCodes' },
+  });
 }
 export function decryptRecoveryCodes(
-  encryptedRecoveryCode: Uint8Array,
+  userEncryptedRecoveryCodes: Uint8Array,
 ): Uint8Array[] {
-  return unpack(_recoveryCodesEncryptionKey.decrypt(encryptedRecoveryCode));
+  return unpack(
+    _userRecoveryCodesEncryptionKey.decrypt(userEncryptedRecoveryCodes, {
+      associatedData: { context: 'UserRecoveryCodes' },
+    }),
+  );
 }
 
 export function hashRecoveryCode(

@@ -126,7 +126,7 @@ export class MoveService {
       mainPageId: pageId,
       passwordHash: groupPasswordHash,
       isPublic: !!groupIsPublic,
-      isPersonalGroup: false,
+      isPersonal: false,
 
       userId: agentId,
 

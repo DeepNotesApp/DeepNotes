@@ -63,7 +63,12 @@ export function wrapData(value: Uint8Array, params?: { raw?: boolean }) {
 
     wrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        includeNonce?: boolean;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       return wrapData(
         new Uint8Array([
@@ -76,7 +81,11 @@ export function wrapData(value: Uint8Array, params?: { raw?: boolean }) {
     }
     unwrapSymmetric(
       symmetricKey: SymmetricKey,
-      params?: { additionalData?: string; padding?: boolean },
+      params?: {
+        nonce?: Uint8Array;
+        associatedData?: object;
+        padding?: boolean;
+      },
     ) {
       if (this.topLayer !== DataLayer.Symmetric) {
         throw new Error('Cannot decrypt non-symmetric keyring.');

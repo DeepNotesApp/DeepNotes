@@ -93,11 +93,19 @@ export class Pages {
         this.defaultNote = unpack(
           internals.symmetricKeyring.decrypt(encryptedDefaultNote, {
             padding: true,
+            associatedData: {
+              context: 'UserDefaultNote',
+              userId: authStore().userId,
+            },
           }),
         );
         this.defaultArrow = unpack(
           internals.symmetricKeyring.decrypt(encryptedDefaultArrow, {
             padding: true,
+            associatedData: {
+              context: 'UserDefaultArrow',
+              userId: authStore().userId,
+            },
           }),
         );
 

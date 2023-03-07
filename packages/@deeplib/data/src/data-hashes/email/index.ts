@@ -1,7 +1,7 @@
 import { validateDataHash } from '@stdlib/data/src/universal';
 import { once } from 'lodash';
 
-import { hashEmail } from '../../emails';
+import { hashUserEmail } from '../../emails';
 import { userId } from './user-id';
 
 const UserModel = once(
@@ -17,7 +17,7 @@ export const email = validateDataHash({
       await UserModel()
     )
       .query(trx)
-      .where('email_hash', Buffer.from(hashEmail(email)))
+      .where('email_hash', Buffer.from(hashUserEmail(email)))
       .select(columns)
       .first(),
 

@@ -11,7 +11,7 @@ import { clearCookies } from 'src/cookies';
 import { derivePasswordValues } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { invalidateAllSessions } from 'src/deep-utils';
-import { encryptRehashedLoginHash } from 'src/utils';
+import { encryptUserRehashedLoginHash } from 'src/utils';
 
 import type { EndpointValues } from './change-password.controller';
 
@@ -49,16 +49,26 @@ export class ChangePasswordService {
       'user',
       userId,
       {
-        encrypted_rehashed_login_hash: encryptRehashedLoginHash(
+        encrypted_rehashed_login_hash: encryptUserRehashedLoginHash(
           encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
         ),
 
         encrypted_private_keyring: createPrivateKeyring(
           base64ToBytes(encryptedPrivateKeyring!),
-        ).wrapSymmetric(passwordValues.key).fullValue,
+        ).wrapSymmetric(passwordValues.key, {
+          associatedData: {
+            context: 'UserEncryptedPrivateKeyring',
+            userId,
+          },
+        }).fullValue,
         encrypted_symmetric_keyring: createSymmetricKeyring(
           base64ToBytes(encryptedSymmetricKeyring!),
-        ).wrapSymmetric(passwordValues.key).fullValue,
+        ).wrapSymmetric(passwordValues.key, {
+          associatedData: {
+            context: 'UserEncryptedSymmetricKeyring',
+            userId,
+          },
+        }).fullValue,
       },
       { dtrx },
     );

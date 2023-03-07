@@ -39,7 +39,12 @@ export const pageKeyrings = once(() =>
         pageKeyring?.topLayer === DataLayer.Symmetric
       ) {
         try {
-          pageKeyring = pageKeyring.unwrapSymmetric(groupContentKeyring);
+          pageKeyring = pageKeyring.unwrapSymmetric(groupContentKeyring, {
+            associatedData: {
+              context: 'PageKeyring',
+              pageId,
+            },
+          });
         } catch (error) {
           //
         }

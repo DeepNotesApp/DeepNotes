@@ -99,6 +99,11 @@ async function sendJoinRequest() {
         encryptedUserNameForUser: bytesToBase64(
           internals.symmetricKeyring.encrypt(textToBytes(userName.value), {
             padding: true,
+            associatedData: {
+              context: 'GroupJoinRequestUserNameForUser',
+              groupId: props.groupId,
+              userId: authStore().userId,
+            },
           }),
         ),
       },

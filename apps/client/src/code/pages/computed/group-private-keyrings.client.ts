@@ -42,6 +42,12 @@ export const groupPrivateKeyrings = once(() =>
       try {
         return createPrivateKeyring(encryptedPrivateKeyring).unwrapSymmetric(
           groupInternalKeyring,
+          {
+            associatedData: {
+              context: 'GroupPrivateKeyring',
+              groupId,
+            },
+          },
         );
       } catch (error) {
         //

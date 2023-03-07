@@ -805,6 +805,10 @@ async function setAsDefault() {
       encryptedDefaultNote: bytesToBase64(
         internals.symmetricKeyring.encrypt(pack(serialObject), {
           padding: true,
+          associatedData: {
+            context: 'UserDefaultNote',
+            userId: authStore().userId,
+          },
         }),
       ),
     });

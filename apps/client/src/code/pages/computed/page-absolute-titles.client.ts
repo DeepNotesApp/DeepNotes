@@ -53,13 +53,19 @@ export const pageAbsoluteTitles = once(() =>
       }
 
       try {
-        const result = bytesToText(
-          pageKeyring.decrypt(pageEncryptedAbsoluteTitle, { padding: true }),
+        const pageAbsoluteTitle = bytesToText(
+          pageKeyring.decrypt(pageEncryptedAbsoluteTitle, {
+            padding: true,
+            associatedData: {
+              context: 'PageAbsoluteTitle',
+              pageId,
+            },
+          }),
         );
 
-        _getLogger.info(`${pageId}: ${result}`);
+        _getLogger.info(`${pageId}: ${pageAbsoluteTitle}`);
 
-        return { text: result, status: 'success' };
+        return { text: pageAbsoluteTitle, status: 'success' };
       } catch (error) {
         _getLogger.info(`${pageId}: Failed to decrypt page title`);
 
@@ -97,7 +103,13 @@ export const pageAbsoluteTitles = once(() =>
 
       const pageEncryptedAbsoluteTitle = pageKeyring.encrypt(
         textToBytes(value),
-        { padding: true },
+        {
+          padding: true,
+          associatedData: {
+            context: 'PageAbsoluteTitle',
+            pageId,
+          },
+        },
       );
 
       internals.realtime.hset(

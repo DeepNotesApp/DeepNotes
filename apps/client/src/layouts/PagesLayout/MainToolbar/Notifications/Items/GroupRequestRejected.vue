@@ -29,7 +29,10 @@ const notificationContent = computed(() => {
   );
 
   return unpack(
-    symmetricKey.decrypt(base64ToBytes(props.notification.encryptedContent)),
+    symmetricKey.decrypt(base64ToBytes(props.notification.encryptedContent), {
+      padding: true,
+      associatedData: { context: 'UserNotificationContent' },
+    }),
   );
 });
 

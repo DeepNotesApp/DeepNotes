@@ -54,6 +54,12 @@ async function disablePasswordProtection() {
     if (groupContentKeyring.topLayer === DataLayer.Symmetric) {
       groupContentKeyring = groupContentKeyring.unwrapSymmetric(
         groupPasswordValues.passwordKey,
+        {
+          associatedData: {
+            context: 'GroupContentKeyringPasswordProtection',
+            groupId,
+          },
+        },
       ) as SymmetricKeyring;
     } else if (groupContentKeyring.topLayer !== DataLayer.Raw) {
       throw new Error('Group is not password protected.');
@@ -67,9 +73,12 @@ async function disablePasswordProtection() {
       throw new Error('Invalid group keyring.');
     }
 
-    groupContentKeyring = groupContentKeyring.wrapSymmetric(
-      accessKeyring,
-    ) as SymmetricKeyring;
+    groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
+      associatedData: {
+        context: 'GroupContentKeyring',
+        groupId,
+      },
+    }) as SymmetricKeyring;
 
     // Send password disable request
 

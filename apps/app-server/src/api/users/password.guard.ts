@@ -7,7 +7,7 @@ import { equalUint8Arrays } from '@stdlib/misc';
 import type { FastifyRequest } from 'fastify';
 import { derivePasswordValues } from 'src/crypto';
 import { mainLogger } from 'src/logger';
-import { decryptRehashedLoginHash } from 'src/utils';
+import { decryptUserRehashedLoginHash } from 'src/utils';
 
 export function makePasswordGuard(
   type: 'password' | 'old-password',
@@ -30,7 +30,7 @@ export function makePasswordGuard(
       }
 
       const passwordHashValues = getPasswordHashValues(
-        decryptRehashedLoginHash(encryptedRehashedLoginHash),
+        decryptUserRehashedLoginHash(encryptedRehashedLoginHash),
       );
 
       const passwordValues = derivePasswordValues(

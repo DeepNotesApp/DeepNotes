@@ -1,6 +1,6 @@
 import {
-  encryptEmail,
-  hashEmail,
+  encryptUserEmail,
+  hashUserEmail,
   userHasPermission as _userHasPermission,
 } from '@deeplib/data';
 import { SessionModel, UserModel } from '@deeplib/db';
@@ -23,7 +23,7 @@ import { computePasswordHash, derivePasswordValues } from './crypto';
 import { dataAbstraction } from './data/data-abstraction';
 import {
   encryptGroupRehashedPasswordHash,
-  encryptRehashedLoginHash,
+  encryptUserRehashedLoginHash,
 } from './utils';
 
 export const RoleEnum = once(() =>
@@ -33,7 +33,7 @@ export const RoleEnum = once(() =>
 export async function createGroup({
   groupId,
   userId,
-  isPersonalGroup,
+  isPersonal,
   encryptedName,
   mainPageId,
   passwordHash,
@@ -56,7 +56,7 @@ export async function createGroup({
 
   isPublic: boolean;
 
-  isPersonalGroup: boolean;
+  isPersonal: boolean;
   userId: string;
 
   accessKeyring: string;
@@ -90,7 +90,7 @@ export async function createGroup({
       access_keyring: isPublic ? base64ToBytes(accessKeyring) : undefined,
       encrypted_content_keyring: base64ToBytes(encryptedContentKeyring),
 
-      user_id: isPersonalGroup ? userId : undefined,
+      user_id: isPersonal ? userId : undefined,
 
       public_keyring: base64ToBytes(publicKeyring),
       encrypted_private_keyring: base64ToBytes(encryptedPrivateKeyring),
@@ -209,29 +209,31 @@ export async function userHasPermission(
 export async function createUser({
   demo,
 
+  userId,
+  groupId,
+  pageId,
+
   email,
   loginHash,
 
   userPublicKeyring,
   userEncryptedPrivateKeyring,
-
   userEncryptedSymmetricKeyring,
 
+  userEncryptedName,
   userEncryptedDefaultNote,
   userEncryptedDefaultArrow,
 
-  groupEncryptedInternalKeyring,
   groupEncryptedAccessKeyring,
+  groupEncryptedInternalKeyring,
   groupEncryptedContentKeyring,
 
   groupPublicKeyring,
   groupEncryptedPrivateKeyring,
 
-  groupMemberEncryptedName,
-
-  mainPageEncryptedSymmetricKeyring,
-  mainPageEncryptedRelativeTitle,
-  mainPageEncryptedAbsoluteTitle,
+  pageEncryptedSymmetricKeyring,
+  pageEncryptedRelativeTitle,
+  pageEncryptedAbsoluteTitle,
 
   passwordValues,
 
@@ -242,14 +244,18 @@ export async function createUser({
 
   demo?: boolean;
 
+  userId: string;
+  groupId: string;
+  pageId: string;
+
   email: string;
   loginHash: string;
 
   userPublicKeyring: string;
   userEncryptedPrivateKeyring: string;
-
   userEncryptedSymmetricKeyring: string;
 
+  userEncryptedName: string;
   userEncryptedDefaultNote: string;
   userEncryptedDefaultArrow: string;
 
@@ -260,36 +266,31 @@ export async function createUser({
   groupPublicKeyring: string;
   groupEncryptedPrivateKeyring: string;
 
-  groupMemberEncryptedName: string;
-
-  mainPageEncryptedSymmetricKeyring: string;
-  mainPageEncryptedRelativeTitle: string;
-  mainPageEncryptedAbsoluteTitle: string;
+  pageEncryptedSymmetricKeyring: string;
+  pageEncryptedRelativeTitle: string;
+  pageEncryptedAbsoluteTitle: string;
 
   passwordValues?: PasswordValues;
 
   dtrx?: DataTransaction;
 }) {
-  const userId = nanoid();
-  const personalGroupId = nanoid();
-  const mainPageId = nanoid();
   const emailVerificationCode = nanoid();
 
   passwordValues ??= derivePasswordValues(base64ToBytes(loginHash));
 
   await UserModel.query(dtrx?.trx)
-    .where('email_hash', Buffer.from(hashEmail(email)))
+    .where('email_hash', Buffer.from(hashUserEmail(email)))
     .delete();
 
   const userModel = {
     id: userId,
 
-    encrypted_email: encryptEmail(email),
-    email_hash: hashEmail(email),
+    encrypted_email: encryptUserEmail(email),
+    email_hash: hashUserEmail(email),
 
     encrypted_rehashed_login_hash: demo
       ? new Uint8Array()
-      : encryptRehashedLoginHash(
+      : encryptUserRehashedLoginHash(
           encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
         ),
 
@@ -298,28 +299,37 @@ export async function createUser({
     email_verified: demo,
     ...(!demo
       ? {
-          encrypted_new_email: encryptEmail(email),
+          encrypted_new_email: encryptUserEmail(email),
           email_verification_code: emailVerificationCode,
           email_verification_expiration_date: addHours(new Date(), 1),
         }
       : {}),
 
-    personal_group_id: personalGroupId,
+    personal_group_id: groupId,
 
-    starting_page_id: mainPageId,
-    recent_page_ids: [mainPageId],
-    recent_group_ids: [personalGroupId],
+    starting_page_id: pageId,
+    recent_page_ids: [pageId],
+    recent_group_ids: [groupId],
 
     public_keyring: base64ToBytes(userPublicKeyring),
     encrypted_private_keyring: createPrivateKeyring(
       base64ToBytes(userEncryptedPrivateKeyring),
-    ).wrapSymmetric(passwordValues.key).fullValue,
+    ).wrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedPrivateKeyring',
+        userId,
+      },
+    }).fullValue,
     encrypted_symmetric_keyring: createSymmetricKeyring(
       base64ToBytes(userEncryptedSymmetricKeyring),
-    ).wrapSymmetric(passwordValues.key).fullValue,
+    ).wrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedSymmetricKeyring',
+        userId,
+      },
+    }).fullValue,
 
-    encrypted_name: base64ToBytes(groupMemberEncryptedName),
-
+    encrypted_name: base64ToBytes(userEncryptedName),
     encrypted_default_note: base64ToBytes(userEncryptedDefaultNote),
     encrypted_default_arrow: base64ToBytes(userEncryptedDefaultArrow),
   } as UserModel;
@@ -327,10 +337,10 @@ export async function createUser({
   await dataAbstraction().insert('user', userId, userModel, { dtrx });
 
   await createGroup({
-    groupId: personalGroupId,
-    mainPageId: mainPageId,
+    groupId: groupId,
+    mainPageId: pageId,
     isPublic: false,
-    isPersonalGroup: true,
+    isPersonal: true,
 
     userId: userId,
 
@@ -346,18 +356,16 @@ export async function createUser({
 
   await dataAbstraction().insert(
     'page',
-    mainPageId,
+    pageId,
     {
-      id: mainPageId,
+      id: pageId,
 
-      encrypted_symmetric_keyring: base64ToBytes(
-        mainPageEncryptedSymmetricKeyring,
-      ),
+      encrypted_symmetric_keyring: base64ToBytes(pageEncryptedSymmetricKeyring),
 
-      encrypted_relative_title: base64ToBytes(mainPageEncryptedRelativeTitle),
-      encrypted_absolute_title: base64ToBytes(mainPageEncryptedAbsoluteTitle),
+      encrypted_relative_title: base64ToBytes(pageEncryptedRelativeTitle),
+      encrypted_absolute_title: base64ToBytes(pageEncryptedAbsoluteTitle),
 
-      group_id: personalGroupId,
+      group_id: groupId,
 
       free: true,
     },
@@ -366,10 +374,10 @@ export async function createUser({
 
   await dataAbstraction().insert(
     'user-page',
-    `${userId}:${mainPageId}`,
+    `${userId}:${pageId}`,
     {
       user_id: userId,
-      page_id: mainPageId,
+      page_id: pageId,
     },
     { dtrx },
   );

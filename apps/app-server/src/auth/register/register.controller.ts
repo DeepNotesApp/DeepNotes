@@ -9,7 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { isBase64 } from '@stdlib/base64';
-import { w3cEmailRegex } from '@stdlib/misc';
+import { isNanoID, w3cEmailRegex } from '@stdlib/misc';
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'nestjs-zod/z';
 import type { TransactionOrKnex } from 'objection';
@@ -19,14 +19,18 @@ import { RegisterService } from './register.service';
 
 class BodyDto extends createZodDto(
   z.object({
+    userId: z.string().refine(isNanoID),
+    groupId: z.string().refine(isNanoID),
+    pageId: z.string().refine(isNanoID),
+
     email: z.string().regex(w3cEmailRegex),
     loginHash: z.string().refine(isBase64),
 
     userPublicKeyring: z.string().refine(isBase64),
     userEncryptedPrivateKeyring: z.string().refine(isBase64),
-
     userEncryptedSymmetricKeyring: z.string().refine(isBase64),
 
+    userEncryptedName: z.string().refine(isBase64),
     userEncryptedDefaultNote: z.string().refine(isBase64),
     userEncryptedDefaultArrow: z.string().refine(isBase64),
 
@@ -37,11 +41,9 @@ class BodyDto extends createZodDto(
     groupPublicKeyring: z.string().refine(isBase64),
     groupEncryptedPrivateKeyring: z.string().refine(isBase64),
 
-    groupMemberEncryptedName: z.string().refine(isBase64),
-
-    mainPageEncryptedSymmetricKeyring: z.string().refine(isBase64),
-    mainPageEncryptedRelativeTitle: z.string().refine(isBase64),
-    mainPageEncryptedAbsoluteTitle: z.string().refine(isBase64),
+    pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
+    pageEncryptedRelativeTitle: z.string().refine(isBase64),
+    pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
   }),
 ) {}
 

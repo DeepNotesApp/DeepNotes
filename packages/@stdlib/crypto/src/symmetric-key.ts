@@ -24,7 +24,7 @@ export function wrapSymmetricKey(
       params?: {
         nonce?: Uint8Array;
         includeNonce?: boolean;
-        additionalData?: string;
+        associatedData?: object;
         padding?: boolean;
       },
     ): Uint8Array {
@@ -38,9 +38,15 @@ export function wrapSymmetricKey(
           sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
         );
 
+      const associatedData = JSON.stringify({
+        app: 'DeepNotes',
+        nonce: sodium.to_base64(nonce),
+        extra: params?.associatedData ?? {},
+      });
+
       const ciphertext = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
         plaintext,
-        params?.additionalData ?? null,
+        associatedData,
         null, // Not used by the algorithm
         nonce,
         value,
@@ -56,7 +62,7 @@ export function wrapSymmetricKey(
       nonceAndCiphertext: Uint8Array,
       params?: {
         nonce?: Uint8Array;
-        additionalData?: string;
+        associatedData?: object;
         padding?: boolean;
       },
     ): Uint8Array {
@@ -76,10 +82,16 @@ export function wrapSymmetricKey(
         );
       }
 
+      const associatedData = JSON.stringify({
+        app: 'DeepNotes',
+        nonce: sodium.to_base64(nonce),
+        extra: params?.associatedData ?? {},
+      });
+
       let plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
         null, // Not used by the algorithm
         ciphertext,
-        params?.additionalData ?? null,
+        associatedData,
         nonce,
         value,
       );

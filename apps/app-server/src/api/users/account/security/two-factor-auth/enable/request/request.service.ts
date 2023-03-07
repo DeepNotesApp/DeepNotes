@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { dataAbstraction } from 'src/data/data-abstraction';
-import { encryptAuthenticatorSecret } from 'src/utils';
+import { encryptUserAuthenticatorSecret } from 'src/utils';
 
 import type { EndpointValues } from './request.controller';
 
@@ -28,7 +28,7 @@ export class RequestService {
       'user',
       userId,
       {
-        encrypted_authenticator_secret: encryptAuthenticatorSecret(
+        encrypted_authenticator_secret: encryptUserAuthenticatorSecret(
           authenticatorSecret!,
         ),
       },

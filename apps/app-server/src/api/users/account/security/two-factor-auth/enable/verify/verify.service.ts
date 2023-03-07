@@ -2,7 +2,7 @@ import { UserModel } from '@deeplib/db';
 import { Injectable } from '@nestjs/common';
 import { authenticator } from 'otplib';
 import { dataAbstraction } from 'src/data/data-abstraction';
-import { decryptAuthenticatorSecret } from 'src/utils';
+import { decryptUserAuthenticatorSecret } from 'src/utils';
 
 import type { EndpointValues } from './verify.controller';
 
@@ -13,7 +13,9 @@ export class VerifyService {
       .findById(userId)
       .select('encrypted_authenticator_secret');
 
-    return decryptAuthenticatorSecret(user?.encrypted_authenticator_secret!);
+    return decryptUserAuthenticatorSecret(
+      user?.encrypted_authenticator_secret!,
+    );
   }
 
   async checkAuthenticatorToken({

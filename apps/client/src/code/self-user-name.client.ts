@@ -15,7 +15,15 @@ export const selfUserName = once(() =>
         return '';
       }
 
-      return bytesToText(internals.symmetricKeyring.decrypt(userEncryptedName));
+      return bytesToText(
+        internals.symmetricKeyring.decrypt(userEncryptedName, {
+          padding: true,
+          associatedData: {
+            context: 'UserName',
+            userId: authStore().userId,
+          },
+        }),
+      );
     },
 
     set: (value) => {
@@ -23,7 +31,13 @@ export const selfUserName = once(() =>
         'user',
         authStore().userId,
         'encrypted-name',
-        internals.symmetricKeyring.encrypt(textToBytes(value)),
+        internals.symmetricKeyring.encrypt(textToBytes(value), {
+          padding: true,
+          associatedData: {
+            context: 'UserName',
+            userId: authStore().userId,
+          },
+        }),
       );
     },
   }),

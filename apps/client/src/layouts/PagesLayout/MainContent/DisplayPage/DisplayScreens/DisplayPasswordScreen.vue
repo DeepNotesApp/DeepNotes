@@ -52,6 +52,12 @@ async function onEnterPassword() {
 
       groupContentKeyring = groupContentKeyring.unwrapSymmetric(
         groupPasswordValues.passwordKey,
+        {
+          associatedData: {
+            context: 'GroupContentKeyringPasswordProtection',
+            groupId: page.react.groupId,
+          },
+        },
       );
     }
 

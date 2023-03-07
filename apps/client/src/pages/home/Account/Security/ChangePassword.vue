@@ -153,16 +153,36 @@ async function changePassword() {
       createPrivateKeyring(
         base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
       )
-        .unwrapSymmetric(wrappedSessionKey)
-        .wrapSymmetric(newDerivedValues.masterKey).fullValue,
+        .unwrapSymmetric(wrappedSessionKey, {
+          associatedData: {
+            context: 'SessionUserPrivateKeyring',
+            userId: authStore().userId,
+          },
+        })
+        .wrapSymmetric(newDerivedValues.masterKey, {
+          associatedData: {
+            context: 'UserPrivateKeyring',
+            userId: authStore().userId,
+          },
+        }).fullValue,
     );
 
     const encryptedSymmetricKeyring = bytesToBase64(
       createSymmetricKeyring(
         base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
       )
-        .unwrapSymmetric(wrappedSessionKey)
-        .wrapSymmetric(newDerivedValues.masterKey).fullValue,
+        .unwrapSymmetric(wrappedSessionKey, {
+          associatedData: {
+            context: 'SessionUserSymmetricKeyring',
+            userId: authStore().userId,
+          },
+        })
+        .wrapSymmetric(newDerivedValues.masterKey, {
+          associatedData: {
+            context: 'UserSymmetricKeyring',
+            userId: authStore().userId,
+          },
+        }).fullValue,
     );
 
     // Request password change

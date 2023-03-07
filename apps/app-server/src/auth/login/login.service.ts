@@ -1,4 +1,4 @@
-import { hashEmail } from '@deeplib/data';
+import { hashUserEmail } from '@deeplib/data';
 import { DeviceModel, SessionModel, UserModel } from '@deeplib/db';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { bytesToBase64 } from '@stdlib/base64';
@@ -12,8 +12,8 @@ import { getDeviceHash } from 'src/crypto';
 import { getRedis } from 'src/data/redis';
 import { generateTokens } from 'src/tokens';
 import {
-  decryptAuthenticatorSecret,
   decryptRecoveryCodes,
+  decryptUserAuthenticatorSecret,
   encryptRecoveryCodes,
   verifyRecoveryCode,
 } from 'src/utils';
@@ -71,7 +71,7 @@ export class LoginService {
 
   async getUserData({ email }: EndpointValues) {
     return await UserModel.query()
-      .where('email_hash', Buffer.from(hashEmail(email)))
+      .where('email_hash', Buffer.from(hashUserEmail(email)))
       .where((builder) =>
         builder
           .where('email_verified', true)
@@ -137,7 +137,7 @@ export class LoginService {
       if (
         !authenticator.check(
           authenticatorToken,
-          decryptAuthenticatorSecret(user.encrypted_authenticator_secret),
+          decryptUserAuthenticatorSecret(user.encrypted_authenticator_secret),
         )
       ) {
         await this.incrementFailedLoginAttempts(values);
@@ -231,12 +231,23 @@ export class LoginService {
       encryptedPrivateKeyring: bytesToBase64(
         createPrivateKeyring(user.encrypted_private_keyring).unwrapSymmetric(
           passwordValues!.key,
+          {
+            associatedData: {
+              context: 'UserEncryptedPrivateKeyring',
+              userId: user.id,
+            },
+          },
         ).fullValue,
       ),
       encryptedSymmetricKeyring: bytesToBase64(
         createSymmetricKeyring(
           user.encrypted_symmetric_keyring,
-        ).unwrapSymmetric(passwordValues!.key).fullValue,
+        ).unwrapSymmetric(passwordValues!.key, {
+          associatedData: {
+            context: 'UserEncryptedSymmetricKeyring',
+            userId: user.id,
+          },
+        }).fullValue,
       ),
 
       sessionKey: bytesToBase64(sessionKey),

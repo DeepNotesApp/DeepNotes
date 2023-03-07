@@ -128,6 +128,10 @@ export async function createNotifications({
 
                   recipientType: 'agent',
                 }),
+                {
+                  padding: true,
+                  associatedData: { context: 'UserNotificationContent' },
+                },
               ),
             ),
           }
@@ -161,6 +165,10 @@ export async function createNotifications({
 
                   recipientType: 'target',
                 }),
+                {
+                  padding: true,
+                  associatedData: { context: 'UserNotificationContent' },
+                },
               ),
             ),
           },
@@ -199,6 +207,10 @@ export async function createNotifications({
 
                   recipientType: 'observer',
                 }),
+                {
+                  padding: true,
+                  associatedData: { context: 'UserNotificationContent' },
+                },
               ),
             ),
           },

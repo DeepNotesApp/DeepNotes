@@ -54,8 +54,15 @@ export const groupContentKeyrings = once(() =>
         accessKeyring?.topLayer === DataLayer.Raw
       ) {
         try {
-          groupContentKeyring =
-            groupContentKeyring.unwrapSymmetric(accessKeyring);
+          groupContentKeyring = groupContentKeyring.unwrapSymmetric(
+            accessKeyring,
+            {
+              associatedData: {
+                context: 'GroupContentKeyring',
+                groupId,
+              },
+            },
+          );
         } catch (error) {
           //
         }

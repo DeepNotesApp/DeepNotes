@@ -72,11 +72,21 @@ export async function rotateGroupKeys(
   );
   const oldGroupPrivateKeyring = createPrivateKeyring(
     base64ToBytes(params.groupEncryptedPrivateKeyring),
-  ).unwrapSymmetric(oldGroupInternalKeyring);
+  ).unwrapSymmetric(oldGroupInternalKeyring, {
+    associatedData: {
+      context: 'GroupPrivateKeyring',
+      groupId,
+    },
+  });
 
   let oldGroupContentKeyring: SymmetricKeyring = createSymmetricKeyring(
     base64ToBytes(params.groupEncryptedContentKeyring),
-  ).unwrapSymmetric(oldGroupAccessKeyring);
+  ).unwrapSymmetric(oldGroupAccessKeyring, {
+    associatedData: {
+      context: 'GroupContentKeyring',
+      groupId,
+    },
+  });
 
   let groupPasswordValues: Awaited<
     ReturnType<typeof computeGroupPasswordValues>
@@ -110,6 +120,12 @@ export async function rotateGroupKeys(
     try {
       oldGroupContentKeyring = oldGroupContentKeyring.unwrapSymmetric(
         groupPasswordValues.passwordKey,
+        {
+          associatedData: {
+            context: 'GroupContentKeyringPasswordProtection',
+            groupId,
+          },
+        },
       );
     } catch (error) {
       throw new Error('Incorrect group password.');
@@ -137,18 +153,52 @@ export async function rotateGroupKeys(
       : {}),
     groupEncryptedName: bytesToBase64(
       newGroupAccessKeyring.encrypt(
-        oldGroupAccessKeyring.decrypt(base64ToBytes(params.groupEncryptedName)),
+        oldGroupAccessKeyring.decrypt(
+          base64ToBytes(params.groupEncryptedName),
+          {
+            padding: true,
+            associatedData: {
+              context: 'GroupName',
+              groupId,
+            },
+          },
+        ),
+        {
+          padding: true,
+          associatedData: {
+            context: 'GroupName',
+            groupId,
+          },
+        },
       ),
     ),
     groupEncryptedContentKeyring: bytesToBase64(
       (passwordProtected
-        ? newGroupContentKeyring.wrapSymmetric(groupPasswordValues!.passwordKey)
+        ? newGroupContentKeyring.wrapSymmetric(
+            groupPasswordValues!.passwordKey,
+            {
+              associatedData: {
+                context: 'GroupContentKeyringPasswordProtection',
+                groupId,
+              },
+            },
+          )
         : newGroupContentKeyring
-      ).wrapSymmetric(newGroupAccessKeyring).fullValue,
+      ).wrapSymmetric(newGroupAccessKeyring, {
+        associatedData: {
+          context: 'GroupContentKeyring',
+          groupId,
+        },
+      }).fullValue,
     ),
     groupPublicKeyring: bytesToBase64(newGroupPublicKeyring.fullValue),
     groupEncryptedPrivateKeyring: bytesToBase64(
-      newGroupPrivateKeyring.wrapSymmetric(newGroupInternalKeyring).fullValue,
+      newGroupPrivateKeyring.wrapSymmetric(newGroupInternalKeyring, {
+        associatedData: {
+          context: 'GroupPrivateKeyring',
+          groupId,
+        },
+      }).fullValue,
     ),
 
     groupMembers: objFromEntries(
@@ -178,9 +228,11 @@ export async function rotateGroupKeys(
             newGroupPrivateKeyring.encrypt(
               oldGroupPrivateKeyring.decrypt(
                 base64ToBytes(groupMember.encryptedName),
+                { padding: true },
               ),
               newGroupPublicKeyring,
               newGroupPublicKeyring,
+              { padding: true },
             ),
           ),
         },
@@ -216,9 +268,11 @@ export async function rotateGroupKeys(
               newGroupPrivateKeyring.encrypt(
                 oldGroupPrivateKeyring.decrypt(
                   base64ToBytes(groupJoinInvitation.encryptedName),
+                  { padding: true },
                 ),
                 newGroupPublicKeyring,
                 newGroupPublicKeyring,
+                { padding: true },
               ),
             ),
           },
@@ -233,9 +287,11 @@ export async function rotateGroupKeys(
             newGroupPrivateKeyring.encrypt(
               oldGroupPrivateKeyring.decrypt(
                 base64ToBytes(groupJoinRequest.encryptedName),
+                { padding: true },
               ),
               newGroupPublicKeyring,
               newGroupPublicKeyring,
+              { padding: true },
             ),
           ),
         },
@@ -250,8 +306,18 @@ export async function rotateGroupKeys(
             createSymmetricKeyring(
               base64ToBytes(groupPage.encryptedSymmetricKeyring),
             )
-              .unwrapSymmetric(oldGroupContentKeyring)
-              .wrapSymmetric(newGroupContentKeyring).fullValue,
+              .unwrapSymmetric(oldGroupContentKeyring, {
+                associatedData: {
+                  context: 'PageKeyring',
+                  pageId,
+                },
+              })
+              .wrapSymmetric(newGroupContentKeyring, {
+                associatedData: {
+                  context: 'PageKeyring',
+                  pageId,
+                },
+              }).fullValue,
           ),
         },
       ]),

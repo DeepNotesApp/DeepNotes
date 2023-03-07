@@ -50,7 +50,10 @@ export class PageClipboard {
       : bytesToBase64(
           wrapSymmetricKey(PageClipboard.encryptionKey).encrypt(
             pack(clipboardObj),
-            { padding: true },
+            {
+              padding: true,
+              associatedData: { context: 'Clipboard' },
+            },
           ),
         );
 
@@ -73,7 +76,10 @@ export class PageClipboard {
           : unpack(
               wrapSymmetricKey(PageClipboard.encryptionKey).decrypt(
                 base64ToBytes(encryptedClipboardText),
-                { padding: true },
+                {
+                  padding: true,
+                  associatedData: { context: 'Clipboard' },
+                },
               ),
             );
 

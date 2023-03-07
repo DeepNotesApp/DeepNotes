@@ -305,6 +305,10 @@ async function movePage() {
         request.groupEncryptedName = bytesToBase64(
           groupValues.accessKeyring.encrypt(textToBytes(groupName.value), {
             padding: true,
+            associatedData: {
+              context: 'GroupName',
+              groupId: groupValues.groupId,
+            },
           }),
         );
 
@@ -402,14 +406,33 @@ async function movePage() {
       const newPageKeyring = createSymmetricKeyring();
 
       request.pageEncryptedSymmetricKeyring = bytesToBase64(
-        newPageKeyring.wrapSymmetric(destGroupContentKeyring).fullValue,
+        newPageKeyring.wrapSymmetric(destGroupContentKeyring, {
+          associatedData: {
+            context: 'PageKeyring',
+            pageId: page.value.id,
+          },
+        }).fullValue,
       );
 
       request.pageEncryptedRelativeTitle = bytesToBase64(
         newPageKeyring.encrypt(
           oldPageKeyring.decrypt(
             base64ToBytes(encryptedPageData.pageEncryptedRelativeTitle),
+            {
+              padding: true,
+              associatedData: {
+                context: 'PageRelativeTitle',
+                pageId: page.value.id,
+              },
+            },
           ),
+          {
+            padding: true,
+            associatedData: {
+              context: 'PageRelativeTitle',
+              pageId: page.value.id,
+            },
+          },
         ),
       );
 
@@ -417,7 +440,21 @@ async function movePage() {
         newPageKeyring.encrypt(
           oldPageKeyring.decrypt(
             base64ToBytes(encryptedPageData.pageEncryptedAbsoluteTitle),
+            {
+              padding: true,
+              associatedData: {
+                context: 'PageAbsoluteTitle',
+                pageId: page.value.id,
+              },
+            },
           ),
+          {
+            padding: true,
+            associatedData: {
+              context: 'PageAbsoluteTitle',
+              pageId: page.value.id,
+            },
+          },
         ),
       );
 
@@ -428,7 +465,13 @@ async function movePage() {
           try {
             Y.applyUpdateV2(
               auxDoc,
-              oldPageKeyring.decrypt(base64ToBytes(pageEncryptedUpdate)),
+              oldPageKeyring.decrypt(base64ToBytes(pageEncryptedUpdate), {
+                padding: true,
+                associatedData: {
+                  context: 'PageDocUpdate',
+                  pageId: page.value.id,
+                },
+              }),
             );
           } catch (error) {
             mainLogger().error(error);
@@ -437,26 +480,58 @@ async function movePage() {
       });
 
       request.pageEncryptedUpdate = bytesToBase64(
-        newPageKeyring.encrypt(Y.encodeStateAsUpdateV2(auxDoc)),
+        newPageKeyring.encrypt(Y.encodeStateAsUpdateV2(auxDoc), {
+          padding: true,
+          associatedData: {
+            context: 'PageDocUpdate',
+            pageId: page.value.id,
+          },
+        }),
       );
 
       request.pageEncryptedSnapshots = objFromEntries(
         objEntries(encryptedPageData.pageEncryptedSnapshots).map(
           ([snapshotId, { encryptedSymmetricKey, encryptedData }]) => {
-            const oldSymmetricKey = wrapSymmetricKey(
-              oldPageKeyring.decrypt(base64ToBytes(encryptedSymmetricKey)),
+            const oldSnapshotSymmetricKey = wrapSymmetricKey(
+              oldPageKeyring.decrypt(base64ToBytes(encryptedSymmetricKey), {
+                associatedData: {
+                  context: 'PageSnapshotSymmetricKey',
+                  pageId: page.value.id,
+                },
+              }),
             );
-            const newSymmetricKey = wrapSymmetricKey();
+            const newSnapshotSymmetricKey = wrapSymmetricKey();
 
             return [
               snapshotId,
               {
                 encryptedSymmetricKey: bytesToBase64(
-                  newPageKeyring.encrypt(newSymmetricKey.value),
+                  newPageKeyring.encrypt(newSnapshotSymmetricKey.value, {
+                    associatedData: {
+                      context: 'PageSnapshotSymmetricKey',
+                      pageId: page.value.id,
+                    },
+                  }),
                 ),
                 encryptedData: bytesToBase64(
-                  newSymmetricKey.encrypt(
-                    oldSymmetricKey.decrypt(base64ToBytes(encryptedData)),
+                  newSnapshotSymmetricKey.encrypt(
+                    oldSnapshotSymmetricKey.decrypt(
+                      base64ToBytes(encryptedData),
+                      {
+                        padding: true,
+                        associatedData: {
+                          context: 'PageDocUpdate',
+                          pageId: page.value.id,
+                        },
+                      },
+                    ),
+                    {
+                      padding: true,
+                      associatedData: {
+                        context: 'PageDocUpdate',
+                        pageId: page.value.id,
+                      },
+                    },
                   ),
                 ),
               },

@@ -310,6 +310,10 @@ async function setAsDefault() {
       encryptedDefaultArrow: bytesToBase64(
         internals.symmetricKeyring.encrypt(pack(serialArrow), {
           padding: true,
+          associatedData: {
+            context: 'UserDefaultArrow',
+            userId: authStore().userId,
+          },
         }),
       ),
     });

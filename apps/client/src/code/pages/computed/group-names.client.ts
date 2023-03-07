@@ -49,13 +49,19 @@ export const groupNames = once(() =>
       }
 
       try {
-        const result = bytesToText(
-          accessKeyring.decrypt(groupEncryptedName, { padding: true }),
+        const groupName = bytesToText(
+          accessKeyring.decrypt(groupEncryptedName, {
+            padding: true,
+            associatedData: {
+              context: 'GroupName',
+              groupId,
+            },
+          }),
         );
 
-        _getLogger.info(`${groupId}: ${result}`);
+        _getLogger.info(`${groupId}: ${groupName}`);
 
-        return { status: 'success', text: result };
+        return { status: 'success', text: groupName };
       } catch (error) {
         _getLogger.info(`${groupId}: Failed to decrypt group name`);
 
@@ -77,6 +83,10 @@ export const groupNames = once(() =>
 
       const groupEncryptedName = accessKeyring.encrypt(textToBytes(value), {
         padding: true,
+        associatedData: {
+          context: 'GroupName',
+          groupId,
+        },
       });
 
       internals.realtime.hset(

@@ -54,7 +54,13 @@ export const pageRelativeTitles = once(() =>
 
       try {
         const result = bytesToText(
-          pageKeyring.decrypt(pageEncryptedRelativeTitle, { padding: true }),
+          pageKeyring.decrypt(pageEncryptedRelativeTitle, {
+            padding: true,
+            associatedData: {
+              context: 'PageRelativeTitle',
+              pageId,
+            },
+          }),
         );
 
         _getLogger.info(`${pageId}: ${result}`);
@@ -97,7 +103,13 @@ export const pageRelativeTitles = once(() =>
 
       const pageEncryptedRelativeTitle = pageKeyring.encrypt(
         textToBytes(value),
-        { padding: true },
+        {
+          padding: true,
+          associatedData: {
+            context: 'PageRelativeTitle',
+            pageId,
+          },
+        },
       );
 
       internals.realtime.hset(

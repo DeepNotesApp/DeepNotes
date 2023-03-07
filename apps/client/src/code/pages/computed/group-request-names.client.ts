@@ -49,12 +49,17 @@ export const groupRequestNames = once(() =>
       }
 
       try {
-        let result;
+        let groupRequestUserName;
 
         if (isSelf) {
-          result = bytesToText(
+          groupRequestUserName = bytesToText(
             internals.symmetricKeyring.decrypt(encryptedName, {
               padding: true,
+              associatedData: {
+                context: 'GroupJoinRequestUserNameForUser',
+                groupId,
+                userId,
+              },
             }),
           );
         } else {
@@ -64,14 +69,14 @@ export const groupRequestNames = once(() =>
             return { text: '[Encrypted name]', status: 'encrypted' };
           }
 
-          result = bytesToText(
+          groupRequestUserName = bytesToText(
             privateKeyring.decrypt(encryptedName, { padding: true }),
           );
         }
 
-        _getLogger.info(`${key}: ${result}`);
+        _getLogger.info(`${key}: ${groupRequestUserName}`);
 
-        return { text: result, status: 'success' };
+        return { text: groupRequestUserName, status: 'success' };
       } catch (error) {
         _getLogger.info(`${key}: Failed to decrypt page title`);
 

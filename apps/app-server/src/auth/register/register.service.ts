@@ -1,4 +1,4 @@
-import { hashEmail } from '@deeplib/data';
+import { hashUserEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { Injectable } from '@nestjs/common';
 import { createUser } from 'src/deep-utils';
@@ -11,7 +11,7 @@ import type { EndpointValues } from './register.controller';
 export class RegisterService {
   async getUser({ email }: EndpointValues) {
     return await UserModel.query()
-      .where('email_hash', Buffer.from(hashEmail(email)))
+      .where('email_hash', Buffer.from(hashUserEmail(email)))
       .where((builder) =>
         builder
           .where('email_verified', true)
