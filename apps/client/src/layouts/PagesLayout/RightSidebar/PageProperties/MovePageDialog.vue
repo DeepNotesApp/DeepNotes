@@ -242,8 +242,6 @@ async function movePage() {
       groupEncryptedPrivateKeyring?: string;
 
       groupMemberEncryptedName?: string;
-
-      requestId?: string;
     };
 
     request.destGroupId = destGroupId.value!;
@@ -388,12 +386,8 @@ async function movePage() {
               encryptedData: string;
             }
           >;
-
-          requestId: string;
         }>(`/api/pages/${page.value.id}/move`, request)
       ).data;
-
-      request.requestId = encryptedPageData.requestId;
 
       const oldPageKeyring = await pageKeyrings()(
         `${page.value.react.groupId}:${page.value.id}`,

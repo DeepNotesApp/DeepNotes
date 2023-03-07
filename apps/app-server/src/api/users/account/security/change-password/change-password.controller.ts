@@ -29,8 +29,6 @@ class BodyDto extends createZodDto(
 
     encryptedPrivateKeyring: z.string().refine(isBase64).optional(),
     encryptedSymmetricKeyring: z.string().refine(isBase64).optional(),
-
-    requestId: z.string().refine(isBase64).optional(),
   }),
 ) {}
 

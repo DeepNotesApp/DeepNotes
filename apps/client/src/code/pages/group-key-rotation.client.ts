@@ -47,8 +47,6 @@ export type GroupKeyRotationValues = {
       encryptedSymmetricKeyring: string;
     }
   >;
-
-  requestId: string;
 };
 
 export async function rotateGroupKeys(
@@ -322,7 +320,5 @@ export async function rotateGroupKeys(
         },
       ]),
     ),
-
-    requestId: params.requestId,
   };
 }

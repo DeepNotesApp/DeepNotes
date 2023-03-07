@@ -136,8 +136,6 @@ async function changePassword() {
     const response = (
       await api().post<{
         sessionKey: string;
-
-        requestId: string;
       }>('/api/users/account/security/change-password', {
         oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
       })
@@ -193,8 +191,6 @@ async function changePassword() {
 
       encryptedPrivateKeyring,
       encryptedSymmetricKeyring,
-
-      requestId: response.requestId,
     });
 
     $quasar().notify({

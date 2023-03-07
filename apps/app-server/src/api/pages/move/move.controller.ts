@@ -47,8 +47,6 @@ class BodyDto extends createZodDto(
       groupPublicKeyring: z.string().refine(isBase64).optional(),
       groupEncryptedPrivateKeyring: z.string().refine(isBase64).optional(),
       groupMemberEncryptedName: z.string().refine(isBase64).optional(),
-
-      requestId: z.string().refine(isBase64).optional(),
     })
     .merge(pageKeyRotationSchema.partial()),
 ) {}
