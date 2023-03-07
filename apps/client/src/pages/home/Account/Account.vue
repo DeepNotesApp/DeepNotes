@@ -2,7 +2,6 @@
   <q-page style="display: flex; flex-direction: column">
     <ResponsiveContainer
       style="
-        padding: 0;
         margin-top: 48px;
         margin-bottom: 150px;
         flex: 1;
@@ -71,12 +70,11 @@
   display: flex;
   flex-direction: column;
 
-  padding-left: 36px;
-  padding-right: 36px;
+  padding-left: 0;
   padding-top: 20px;
 
-  @media (min-width: $breakpoint-sm-min) {
-    padding-left: 90px;
+  @media (min-width: $breakpoint-lg-min) {
+    padding-left: 36px;
   }
 }
 </style>

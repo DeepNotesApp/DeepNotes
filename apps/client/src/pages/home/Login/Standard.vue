@@ -81,10 +81,9 @@
           self="bottom middle"
           transition-show="jump-up"
           transition-hide="jump-down"
-          max-width="227px"
+          max-width="233px"
         >
-          This option is convenient, but may reduce the security of your
-          account.
+          This option is convenient, but reduces the security of your account.
         </q-tooltip>
       </q-icon>
     </div>

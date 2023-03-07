@@ -1,6 +1,6 @@
 <template>
   <template v-if="uiStore().loggedIn || uiStore().width < BREAKPOINT_LG_MIN">
-    <Gap style="width: 24px" />
+    <Gap style="width: 20px" />
 
     <ToolbarBtn
       :icon="uiStore().loggedIn ? 'mdi-account-circle' : 'mdi-menu'"
@@ -87,11 +87,21 @@
             <q-item
               clickable
               :to="{ name: 'download' }"
+              disable
             >
               <q-item-section avatar>
                 <q-icon name="mdi-download" />
               </q-item-section>
               <q-item-section>Download</q-item-section>
+
+              <q-tooltip
+                anchor="top middle"
+                self="bottom middle"
+                transition-show="jump-up"
+                transition-hide="jump-down"
+              >
+                Coming soon
+              </q-tooltip>
             </q-item>
 
             <q-item

@@ -36,14 +36,16 @@
               visual note-taking tool with deep page navigation.
             </div>
 
-            <Gap style="height: 30px" />
+            <template v-if="!authStore().loggedIn">
+              <Gap style="height: 30px" />
 
-            <DeepBtn
-              label="Get started - It's free!"
-              color="primary"
-              style="padding: 14px 25px; font-size: 15px"
-              :to="{ name: 'register' }"
-            />
+              <DeepBtn
+                label="Get started - It's free!"
+                color="primary"
+                style="padding: 14px 25px; font-size: 15px"
+                :to="{ name: 'register' }"
+              />
+            </template>
           </div>
         </div>
 

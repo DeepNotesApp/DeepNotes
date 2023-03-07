@@ -160,6 +160,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
+import { multiModePath } from 'src/code/utils.universal';
 
 const html = marked(`
   DeepNotes' [source code](https://github.com/konponsoft/deepnotes) is available on GitHub.
@@ -218,7 +219,9 @@ const html = marked(`
     </a>
     <figcaption>
       Encryption key hierarchy in DeepNotes
-      (<a href="/pages/QsSTbzb7xlA8IAdgvlukJ#/pages/QsSTbzb7xlA8IAdgvlukJ" target="_blank">Go to page</a>)
+      (<a href="${multiModePath(
+        '/pages/8aaeqyoMe_W1AlC3yRPB_',
+      )}" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
@@ -283,7 +286,9 @@ const html = marked(`
     </a>
     <figcaption>
       Registration process in DeepNotes
-      (<a href="/pages/GukHGpstqawsIZEZQj2nj#/pages/GukHGpstqawsIZEZQj2nj" target="_blank">Go to page</a>)
+      (<a href="${multiModePath(
+        '/pages/lZ0M_o6493_D2mqYe9AoY',
+      )}" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
@@ -305,7 +310,9 @@ const html = marked(`
     </a>
     <figcaption>
       Authentication process in DeepNotes
-      (<a href="/pages/nxUu4Tnul0kWXltOPi6Wy#/pages/nxUu4Tnul0kWXltOPi6Wy" target="_blank">Go to page</a>)
+      (<a href="${multiModePath(
+        '/pages/B7v93eQ0eYxHzf5-zpgYO',
+      )}" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 
@@ -327,7 +334,9 @@ const html = marked(`
     </a>
     <figcaption>
       Session refreshing in DeepNotes
-      (<a href="/pages/xe2XvhhXHiJrErUeoVDRW#/pages/xe2XvhhXHiJrErUeoVDRW" target="_blank">Go to page</a>)
+      (<a href="${multiModePath(
+        '/pages/a83KuUKUeFfntd-lB-UiZ',
+      )}" target="_blank">Go to page</a>)
     </figcaption=>
   </figure>
 

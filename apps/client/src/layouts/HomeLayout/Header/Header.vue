@@ -4,7 +4,11 @@
     style="background-color: #181818"
   >
     <q-toolbar
-      style="height: 64px; border-bottom: 1px solid rgba(255, 255, 255, 0.2)"
+      style="
+        height: 64px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 0;
+      "
     >
       <ResponsiveContainer style="display: flex; align-items: center">
         <LeftMenu></LeftMenu>

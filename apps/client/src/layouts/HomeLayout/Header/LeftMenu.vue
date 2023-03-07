@@ -1,10 +1,11 @@
 <template>
-  <DeepBtn
-    v-if="$route.path.startsWith('/account/')"
+  <ToolbarBtn
+    v-if="
+      $route.path.startsWith('/account/') && uiStore().width < BREAKPOINT_LG_MIN
+    "
     icon="mdi-menu"
-    flat
-    class="d-flex d-lg-none"
-    style="font-size: 20px"
+    icon-size="32px"
+    btn-size="46px"
   >
     <q-menu
       anchor="bottom left"
@@ -46,5 +47,11 @@
         </q-item>
       </q-list>
     </q-menu>
-  </DeepBtn>
+  </ToolbarBtn>
+
+  <Gap style="width: 12px" />
 </template>
+
+<script setup lang="ts">
+import { BREAKPOINT_LG_MIN } from '@stdlib/misc';
+</script>

@@ -47,12 +47,7 @@
             Pricing
           </router-link>
 
-          <router-link
-            :to="{ name: 'download' }"
-            class="footer-item"
-          >
-            Download
-          </router-link>
+          <div style="margin-top: 6px; color: #808080">Download</div>
 
           <router-link
             :to="{ name: 'whitepaper' }"
@@ -65,7 +60,19 @@
         <div class="footer-section col-4 col-md-3">
           <div class="footer-header">Socials</div>
 
-          <div class="footer-item">Twitter</div>
+          <a
+            class="footer-item"
+            href="https://discord.gg/UaF2gPTUPh"
+          >
+            Discord
+          </a>
+
+          <a
+            class="footer-item"
+            href="https://twitter.com/DeepNotesApp"
+          >
+            Twitter
+          </a>
 
           <a
             class="footer-item"
@@ -73,8 +80,6 @@
           >
             Reddit
           </a>
-
-          <div class="footer-item">Discord</div>
         </div>
 
         <div class="footer-section col-4 col-md-3">
@@ -120,7 +125,6 @@
 .footer-item {
   display: block;
 
-  font-size: 14px;
   margin-top: 6px;
 
   color: #c8c8c8 !important;
