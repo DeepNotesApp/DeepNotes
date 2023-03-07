@@ -3,6 +3,7 @@ import {
   CollabMessageType,
   CollabServerDocMessageType,
 } from '@deeplib/misc';
+import { wrapSymmetricKey } from '@stdlib/crypto';
 import { ClientSocket } from '@stdlib/misc';
 import { Resolvable } from '@stdlib/misc';
 import { Y } from '@syncedstore/core';
@@ -212,7 +213,9 @@ export const PageWebsocket = once(
         if (rotatePageKey) {
           this._logger.info('Rotating page key');
 
-          pageKeyring = pageKeyring.addKey();
+          const oldPageKeyring = pageKeyring;
+          const newPageKeyring = oldPageKeyring.addKey();
+          pageKeyring = newPageKeyring;
 
           const groupContentKeyring = groupContentKeyrings()(
             this.page.react.groupId,
@@ -220,7 +223,7 @@ export const PageWebsocket = once(
 
           encoding.writeVarUint8Array(
             encoder,
-            pageKeyring.wrapSymmetric(groupContentKeyring, {
+            newPageKeyring.wrapSymmetric(groupContentKeyring, {
               associatedData: {
                 context: 'PageKeyring',
                 pageId: this.page.id,
@@ -230,8 +233,8 @@ export const PageWebsocket = once(
 
           encoding.writeVarUint8Array(
             encoder,
-            pageKeyring.encrypt(
-              pageKeyring.decrypt(encryptedPageRelativeTitle, {
+            newPageKeyring.encrypt(
+              oldPageKeyring.decrypt(encryptedPageRelativeTitle, {
                 padding: true,
                 associatedData: {
                   context: 'PageRelativeTitle',
@@ -250,8 +253,8 @@ export const PageWebsocket = once(
 
           encoding.writeVarUint8Array(
             encoder,
-            pageKeyring.encrypt(
-              pageKeyring.decrypt(encryptedPageAbsoluteTitle, {
+            newPageKeyring.encrypt(
+              oldPageKeyring.decrypt(encryptedPageAbsoluteTitle, {
                 padding: true,
                 associatedData: {
                   context: 'PageAbsoluteTitle',
@@ -278,8 +281,8 @@ export const PageWebsocket = once(
 
             encoding.writeVarUint8Array(
               encoder,
-              pageKeyring.encrypt(
-                pageKeyring.decrypt(encryptedSymmetricKey, {
+              newPageKeyring.encrypt(
+                oldPageKeyring.decrypt(encryptedSymmetricKey, {
                   associatedData: {
                     context: 'PageSnapshotSymmetricKey',
                     pageId: this.page.id,
@@ -300,16 +303,6 @@ export const PageWebsocket = once(
 
         encoding.writeVarUint(encoder, updateIndex);
 
-        encoding.writeVarUint8Array(
-          encoder,
-          pageKeyring.encrypt(pageKeyring.value, {
-            associatedData: {
-              context: 'PageKeyring',
-              pageId: this.page.id,
-            },
-          }),
-        ); // Encrypted symmetric key
-
         const rawUpdate = Y.encodeStateAsUpdateV2(this.doc);
         const encryptedUpdate = pageKeyring.encrypt(rawUpdate, {
           padding: true,
@@ -321,6 +314,35 @@ export const PageWebsocket = once(
         encoding.writeVarUint8Array(encoder, encryptedUpdate);
 
         encoding.writeUint8(encoder, createSnapshot ? 1 : 0);
+
+        if (createSnapshot) {
+          const snapshotSymmetricKey = wrapSymmetricKey();
+
+          const snapshotEncryptedSymmetricKey = pageKeyring.encrypt(
+            snapshotSymmetricKey.value,
+            {
+              associatedData: {
+                context: 'PageSnapshotSymmetricKey',
+                pageId: this.page.id,
+              },
+            },
+          );
+
+          const snapshotEncryptedData = snapshotSymmetricKey.encrypt(
+            rawUpdate,
+            {
+              padding: true,
+              associatedData: {
+                context: 'PageSnapshotData',
+                pageId: this.page.id,
+              },
+            },
+          );
+
+          encoding.writeVarUint8Array(encoder, snapshotEncryptedSymmetricKey);
+
+          encoding.writeVarUint8Array(encoder, snapshotEncryptedData);
+        }
 
         // Send message
 

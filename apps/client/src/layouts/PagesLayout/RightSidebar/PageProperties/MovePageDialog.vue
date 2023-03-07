@@ -520,7 +520,7 @@ async function movePage() {
                       {
                         padding: true,
                         associatedData: {
-                          context: 'PageDocUpdate',
+                          context: 'PageSnapshotData',
                           pageId: page.value.id,
                         },
                       },
@@ -528,7 +528,7 @@ async function movePage() {
                     {
                       padding: true,
                       associatedData: {
-                        context: 'PageDocUpdate',
+                        context: 'PageSnapshotData',
                         pageId: page.value.id,
                       },
                     },

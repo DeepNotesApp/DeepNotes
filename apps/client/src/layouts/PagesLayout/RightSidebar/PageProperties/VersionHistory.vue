@@ -133,7 +133,7 @@ async function restoreVersion(snapshotId: string) {
         {
           padding: true,
           associatedData: {
-            context: 'PageDocUpdate',
+            context: 'PageSnapshotData',
             pageId: page.value.id,
           },
         },
@@ -156,7 +156,7 @@ async function restoreVersion(snapshotId: string) {
       {
         padding: true,
         associatedData: {
-          context: 'PageDocUpdate',
+          context: 'PageSnapshotData',
           pageId: page.value.id,
         },
       },

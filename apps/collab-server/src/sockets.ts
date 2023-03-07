@@ -556,13 +556,32 @@ export class SocketAuxObject {
               checkRedlockSignalAborted(signals);
             }
 
-            // Save merged update in database
+            // Read encrypted update
 
             const updateIndex = decoding.readVarUint(decoder);
-            const encryptedSymmetricKey = decoding.readVarUint8Array(decoder);
-            const encryptedData = decoding.readVarUint8Array(decoder);
+            const encryptedUpdate = decoding.readVarUint8Array(decoder);
+
+            // Create snapshot
 
             const createSnapshot = decoding.readUint8(decoder) === 1;
+
+            if (createSnapshot) {
+              const snapshotEncryptedSymmetricKey =
+                decoding.readVarUint8Array(decoder);
+              const snapshotEncryptedData = decoding.readVarUint8Array(decoder);
+
+              await insertPageSnapshot({
+                dataAbstraction: dataAbstraction(),
+                pageId: this.room.pageId,
+                authorId: this.userId!,
+                encryptedSymmetricKey: snapshotEncryptedSymmetricKey,
+                encryptedData: snapshotEncryptedData,
+                type: 'periodic',
+                dtrx,
+              });
+
+              checkRedlockSignalAborted(signals);
+            }
 
             // Delete old unmerged updates
 
@@ -579,35 +598,19 @@ export class SocketAuxObject {
               .insert({
                 page_id: this.room.pageId,
                 index: updateIndex,
-                encrypted_data: encryptedData,
+                encrypted_data: encryptedUpdate,
               })
               .onConflict(['page_id', 'index'])
               .ignore();
 
             checkRedlockSignalAborted(signals);
 
-            // Insert page snapshot
-
-            if (createSnapshot) {
-              await insertPageSnapshot({
-                dataAbstraction: dataAbstraction(),
-                pageId: this.room.pageId,
-                authorId: this.userId!,
-                encryptedSymmetricKey,
-                encryptedData,
-                type: 'periodic',
-                dtrx,
-              });
-
-              checkRedlockSignalAborted(signals);
-            }
-
             // Update Redis data
 
             await Promise.all([
               flushPageUpdateBuffer(this.room.pageId, updateIndex),
 
-              squashPageUpdates(this.room.pageId, updateIndex, encryptedData),
+              squashPageUpdates(this.room.pageId, updateIndex, encryptedUpdate),
             ]);
 
             moduleLogger.info(
