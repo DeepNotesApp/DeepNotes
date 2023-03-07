@@ -40,7 +40,6 @@ export function wrapSymmetricKey(
 
       const associatedData = JSON.stringify({
         app: 'DeepNotes',
-        nonce: sodium.to_base64(nonce),
         extra: params?.associatedData ?? {},
       });
 
@@ -84,7 +83,6 @@ export function wrapSymmetricKey(
 
       const associatedData = JSON.stringify({
         app: 'DeepNotes',
-        nonce: sodium.to_base64(nonce),
         extra: params?.associatedData ?? {},
       });
 
