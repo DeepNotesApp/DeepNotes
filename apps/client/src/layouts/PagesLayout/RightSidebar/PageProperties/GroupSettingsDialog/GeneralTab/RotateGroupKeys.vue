@@ -1,6 +1,6 @@
 <template>
   <DeepBtn
-    label="Rotate group keys"
+    label="Rotate encryption keys"
     color="primary"
     @click="_rotateGroupKeys()"
   />
@@ -15,8 +15,8 @@ const groupId = inject<string>('groupId')!;
 
 async function _rotateGroupKeys() {
   await asyncPrompt({
-    title: 'Rotate group keys',
-    message: 'Are you sure you want to rotate the group keys?',
+    title: 'Rotate encryption keys',
+    message: 'Are you sure you want to rotate the group encryption keys?',
 
     focus: 'cancel',
 

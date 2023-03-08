@@ -1,6 +1,6 @@
 <template>
   <DeepBtn
-    label="Make private"
+    label="Make group private"
     color="secondary"
     @click="makePrivate"
   />

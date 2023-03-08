@@ -1,6 +1,6 @@
 <template>
   <DeepBtn
-    label="Make public"
+    label="Make group public"
     color="negative"
     @click="makePublic"
   />
