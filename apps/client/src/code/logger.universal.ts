@@ -13,6 +13,8 @@ import {
 export const mainLogger = once(
   () =>
     new Logger([
+      () => !!process.env.DEV,
+
       capitalizeField('level'),
       colorizeField('level'),
       addTimestamp(),
