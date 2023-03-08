@@ -215,9 +215,7 @@ export class CreateController {
 
         return {
           pageId,
-          message: `Page created successfully. (Remaining: ${
-            numFreePages + 1
-          }/10)`,
+          message: `Page created successfully. (${numFreePages + 1}/10)`,
         };
       });
     });
