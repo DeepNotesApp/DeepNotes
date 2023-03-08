@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <ResponsiveContainer style="padding: 120px 0">
+    <ResponsiveContainer style="padding: 120px 32px">
       <q-form style="margin: 0px auto; max-width: 270px">
         <div
           style="display: flex; justify-content: center; align-items: center"
@@ -102,10 +102,10 @@
         <Gap style="height: 20px" />
 
         <div style="display: flex">
-        <Checkbox
-          v-model="agree"
+          <Checkbox
+            v-model="agree"
             style="flex: none"
-        />
+          />
 
           <div style="flex: 1">
             I have read and agree to the<br />

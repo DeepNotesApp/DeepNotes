@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <ResponsiveContainer style="padding: 150px 0">
+    <ResponsiveContainer style="padding: 150px 32px">
       <div style="margin: 0px auto; max-width: 270px">
         <q-form>
           <Standard v-if="authType === 'standard'" />
