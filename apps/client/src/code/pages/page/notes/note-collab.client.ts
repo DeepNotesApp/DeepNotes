@@ -39,7 +39,7 @@ const INoteCollabTextSection = (enabled: boolean) =>
 export const INoteCollab = once(() =>
   IElemCollab().merge(
     IRegionCollab().extend({
-      link: z.string().nullable().default(null),
+      link: z.string().default(''),
 
       anchor: IVec2(0.5, 0.5).default({ x: 0.5, y: 0.5 }),
       pos: IVec2(0, 0).default({ x: 0, y: 0 }),
