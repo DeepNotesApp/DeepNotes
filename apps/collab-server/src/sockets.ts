@@ -79,6 +79,21 @@ export class SocketAuxObject {
     });
   }
 
+  private async _checkSessionInvalidated() {
+    if (this.sessionId != null) {
+      const sessionInvalidated = await dataAbstraction().hget(
+        'session',
+        this.sessionId,
+        'invalidated',
+      );
+
+      if (sessionInvalidated) {
+        this.destroySocket();
+        throw new Error('Invalid session.');
+      }
+    }
+  }
+
   async setup(req: IncomingMessage) {
     if (this._setupPromise != null) {
       return await this._setupPromise;
@@ -99,13 +114,14 @@ export class SocketAuxObject {
       );
 
       if (this.sessionId != null) {
-        this.userId = await dataAbstraction().hget(
-          'session',
-          this.sessionId,
-          'user-id',
-        );
+        [this.userId] = await Promise.all([
+          dataAbstraction().hget('session', this.sessionId, 'user-id'),
+
+          this._checkSessionInvalidated(),
+        ]);
 
         if (this.userId == null) {
+          this.destroySocket();
           throw new Error('Invalid session.');
         }
 
@@ -358,7 +374,7 @@ export class SocketAuxObject {
   }
 
   private async _handleMessage(messageBuffer: ArrayBuffer) {
-    const [groupId, sessionWasInvalidated] = await Promise.all([
+    const [groupId, sessionInvalidated] = await Promise.all([
       dataAbstraction().hget('page', this.room.pageId, 'group-id'),
 
       ...(this.sessionId != null
@@ -368,10 +384,10 @@ export class SocketAuxObject {
 
     // Check if session is invalidated
 
-    if (sessionWasInvalidated) {
+    if (sessionInvalidated) {
       this.destroySocket();
 
-      throw new Error('Session was invalidated.');
+      return;
     }
 
     // Check if has permission to edit

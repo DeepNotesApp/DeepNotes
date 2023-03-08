@@ -78,6 +78,21 @@ export class SocketAuxObject {
     });
   }
 
+  private async _checkSessionInvalidated() {
+    if (this.sessionId != null) {
+      const sessionInvalidated = await dataAbstraction().hget(
+        'session',
+        this.sessionId,
+        'invalidated',
+      );
+
+      if (sessionInvalidated) {
+        this.destroySocket();
+        throw new Error('Invalid session.');
+      }
+    }
+  }
+
   async setup() {
     if (this._setupPromise != null) {
       return await this._setupPromise;
@@ -86,55 +101,46 @@ export class SocketAuxObject {
     this._setupPromise = new Resolvable();
 
     if (this.sessionId != null) {
-      this.userId = await dataAbstraction().hget(
-        'session',
-        this.sessionId,
-        'user-id',
-      );
+      [this.userId] = await Promise.all([
+        dataAbstraction().hget('session', this.sessionId, 'user-id'),
 
-      if (this.userId != null) {
-        getSub().on('messageBuffer', this._handleUserNotification);
+        this._checkSessionInvalidated(),
+      ]);
 
-        await getSub().subscribe(`user-notification:${this.userId}`);
+      if (this.userId == null) {
+        this.destroySocket();
+        throw new Error('Invalid session.');
       }
+
+      getSub().on('messageBuffer', this._handleUserNotification);
+
+      await getSub().subscribe(`user-notification:${this.userId}`);
     }
 
     this._setupPromise.resolve();
-  }
-
-  private async _checkSessionInvalidated() {
-    if (this.sessionId != null) {
-      const sessionWasInvalidated = await dataAbstraction().hget(
-        'session',
-        this.sessionId,
-        'invalidated',
-      );
-
-      if (sessionWasInvalidated) {
-        this.destroySocket();
-
-        throw new Error('Session was invalidated.');
-      }
-    }
   }
 
   private _handleUserNotification = async (
     channelBuffer: Buffer,
     messageBuffer: Buffer,
   ) => {
-    if (bytesToText(channelBuffer) === `user-notification:${this.userId}`) {
-      await this._checkSessionInvalidated();
+    try {
+      if (bytesToText(channelBuffer) === `user-notification:${this.userId}`) {
+        await this._checkSessionInvalidated();
 
-      const encoder = encoding.createEncoder();
+        const encoder = encoding.createEncoder();
 
-      encoding.writeVarUint(
-        encoder,
-        RealtimeServerMessageType.USER_NOTIFICATION,
-      );
+        encoding.writeVarUint(
+          encoder,
+          RealtimeServerMessageType.USER_NOTIFICATION,
+        );
 
-      encoding.writeVarUint8Array(encoder, messageBuffer);
+        encoding.writeVarUint8Array(encoder, messageBuffer);
 
-      this.socket.send(encoding.toUint8Array(encoder));
+        this.socket.send(encoding.toUint8Array(encoder));
+      }
+    } catch (error) {
+      moduleLogger.error('User notification handling error: %o', error);
     }
   };
 
