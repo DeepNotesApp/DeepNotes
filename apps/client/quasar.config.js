@@ -17,9 +17,9 @@ const { hashFNV1a, objFromEntries } = require('@stdlib/misc');
 const env = Object.assign(
   {},
   require('dotenv-expand').expand(
-    require('dotenv').config({
-      path: '../../.env',
-    }),
+    require('dotenv').config({ path: '../../.env' }).parsed?.DEV
+      ? require('dotenv').config({ path: '../../.env.dev' })
+      : require('dotenv').config({ path: '../../.env.prod' }),
   ).parsed,
   objFromEntries(
     Object.entries(process.env ?? {}).filter(([key]) => /^\w+$/.test(key)),

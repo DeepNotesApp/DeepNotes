@@ -2,24 +2,19 @@ declare namespace NodeJS {
   interface ProcessEnv {
     DEV?: string;
 
-    HOST_DEV: string;
-    HOST_PROD: string;
+    HOST: string;
 
     APP_SERVER_PORT: string;
-    APP_SERVER_URL_DEV: string;
-    APP_SERVER_URL_PROD: string;
+    APP_SERVER_URL: string;
 
     CLIENT_PORT: string;
-    CLIENT_URL_DEV: string;
-    CLIENT_URL_PROD: string;
+    CLIENT_URL: string;
 
     REALTIME_SERVER_PORT: string;
-    REALTIME_SERVER_URL_DEV: string;
-    REALTIME_SERVER_URL_PROD: string;
+    REALTIME_SERVER_URL: string;
 
     COLLAB_SERVER_PORT: string;
-    COLLAB_SERVER_URL_DEV: string;
-    COLLAB_SERVER_URL_PROD: string;
+    COLLAB_SERVER_URL: string;
 
     ACCESS_SECRET: string;
     REFRESH_SECRET: string;
@@ -54,13 +49,10 @@ declare namespace NodeJS {
     ZOHO_USER: string;
     ZOHO_PASSWORD: string;
 
-    STRIPE_TEST_PUBLISHABLE_KEY: string;
-    STRIPE_TEST_SECRET_KEY: string;
-    STRIPE_TEST_PRO_PLAN_PRICE_ID: string;
+    STRIPE_PUBLISHABLE_KEY: string;
+    STRIPE_SECRET_KEY: string;
+    STRIPE_PRO_PLAN_PRICE_ID: string;
     STRIPE_TEST_WEBHOOK_SECRET: string;
-    STRIPE_LIVE_PUBLISHABLE_KEY: string;
-    STRIPE_LIVE_SECRET_KEY: string;
-    STRIPE_LIVE_PRO_PLAN_PRICE_ID: string;
     STRIPE_LIVE_WEBHOOK_SECRET: string;
   }
 }

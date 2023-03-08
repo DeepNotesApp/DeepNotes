@@ -49,11 +49,7 @@ export const RealtimeClient = once(
       private _isFirstConnection = true;
 
       constructor() {
-        super(
-          process.env.DEV
-            ? process.env.REALTIME_SERVER_URL_DEV
-            : process.env.REALTIME_SERVER_URL_PROD,
-        );
+        super(process.env.REALTIME_SERVER_URL);
       }
 
       connect() {

@@ -30,7 +30,7 @@ async function bootstrap() {
           if (
             process.env.DEV ||
             requestOrigin === undefined ||
-            requestOrigin === process.env.CLIENT_URL_PROD ||
+            requestOrigin === process.env.CLIENT_URL ||
             requestOrigin === 'http://localhost'
           ) {
             callback(null, true);

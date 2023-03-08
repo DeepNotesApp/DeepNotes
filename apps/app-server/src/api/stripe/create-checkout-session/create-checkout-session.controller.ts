@@ -82,16 +82,12 @@ export class CreateCheckoutSessionController {
 
       checkRedlockSignalAborted(signals);
 
-      const priceId = process.env.DEV
-        ? process.env.STRIPE_TEST_PRO_PLAN_PRICE_ID
-        : process.env.STRIPE_LIVE_PRO_PLAN_PRICE_ID;
-
       const session = await stripe().checkout.sessions.create({
         mode: 'subscription',
 
         line_items: [
           {
-            price: priceId,
+            price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
             quantity: 1,
           },
         ],

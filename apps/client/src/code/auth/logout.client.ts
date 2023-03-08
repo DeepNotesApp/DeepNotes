@@ -25,7 +25,7 @@ export async function logout() {
   // Clear loggedIn cookie
 
   Cookies.remove('loggedIn', {
-    domain: process.env.DEV ? process.env.HOST_DEV : process.env.HOST_PROD,
+    domain: process.env.HOST,
     path: '/',
   });
 

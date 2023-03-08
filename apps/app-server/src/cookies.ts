@@ -13,7 +13,7 @@ export function setCookie(
 ) {
   void reply.setCookie(name, value, {
     secure: !process.env.DEV,
-    domain: process.env.DEV ? process.env.HOST_DEV : process.env.HOST_PROD,
+    domain: process.env.HOST,
     path: '/',
     sameSite: 'strict',
     httpOnly: true,
@@ -28,7 +28,7 @@ export function clearCookie(
 ) {
   void reply.clearCookie(name, {
     secure: !process.env.DEV,
-    domain: process.env.DEV ? process.env.HOST_DEV : process.env.HOST_PROD,
+    domain: process.env.HOST,
     path: '/',
     sameSite: 'strict',
     httpOnly: true,

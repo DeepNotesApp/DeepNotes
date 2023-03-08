@@ -6,9 +6,7 @@ import { once } from 'lodash';
 export const api = once(() =>
   axios.create({
     withCredentials: true,
-    baseURL: process.env.DEV
-      ? process.env.APP_SERVER_URL_DEV
-      : process.env.APP_SERVER_URL_PROD,
+    baseURL: process.env.APP_SERVER_URL,
   }),
 );
 

@@ -43,9 +43,7 @@
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 
-const appServerURL = process.env.DEV
-  ? process.env.APP_SERVER_URL_DEV
-  : process.env.APP_SERVER_URL_PROD;
+const appServerURL = process.env.APP_SERVER_URL;
 
 const loading = ref(true);
 

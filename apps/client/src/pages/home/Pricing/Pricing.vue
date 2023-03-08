@@ -160,9 +160,7 @@ import { watchUntilTrue } from '@stdlib/vue';
 
 import PlanCard from './PlanCard.vue';
 
-const appServerURL = process.env.DEV
-  ? process.env.APP_SERVER_URL_DEV
-  : process.env.APP_SERVER_URL_PROD;
+const appServerURL = process.env.APP_SERVER_URL;
 
 const plan = computed(() =>
   internals.realtime.globalCtx.hget('user', authStore().userId, 'plan'),
