@@ -87,7 +87,7 @@ export class CreateCheckoutSessionController {
 
         line_items: [
           {
-            price: process.env.STRIPE_PRO_PLAN_PRICE_ID,
+            price: process.env.STRIPE_PRICE_ID,
             quantity: 1,
           },
         ],

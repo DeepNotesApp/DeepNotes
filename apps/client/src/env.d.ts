@@ -62,7 +62,7 @@ declare namespace NodeJS {
 
     STRIPE_PUBLISHABLE_KEY: string;
     STRIPE_SECRET_KEY: string;
-    STRIPE_PRO_PLAN_PRICE_ID: string;
+    STRIPE_PRICE_ID: string;
     STRIPE_TEST_WEBHOOK_SECRET: string;
     STRIPE_LIVE_WEBHOOK_SECRET: string;
   }
