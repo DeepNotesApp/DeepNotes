@@ -12,6 +12,8 @@
       display: flex;
       flex-direction: column;
       background-color: rgb(33, 33, 33);
+      min-width: 299px;
+      max-width: 299px;
     "
   >
     <q-toolbar style="padding: 0; flex: none; background-color: #141414">

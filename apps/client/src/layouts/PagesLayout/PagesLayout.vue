@@ -77,7 +77,6 @@ body {
 <style lang="scss" scoped>
 .pages-layout :deep() {
   .q-drawer {
-    transition: width 0.2s ease;
     overflow-x: hidden;
 
     > .q-drawer__content {

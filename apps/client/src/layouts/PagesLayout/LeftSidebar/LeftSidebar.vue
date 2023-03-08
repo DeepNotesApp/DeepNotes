@@ -9,7 +9,13 @@
     no-swipe-backdrop
     behavior="desktop"
     :width="260"
-    style="display: flex; flex-direction: column; background-color: #212121"
+    style="
+      display: flex;
+      flex-direction: column;
+      background-color: #212121;
+      min-width: 259px;
+      max-width: 259px;
+    "
   >
     <CurrentPath />
 
