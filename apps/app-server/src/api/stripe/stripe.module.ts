@@ -1,4 +1,4 @@
-import { Module, UseModuleGuard } from 'src/nest-plus';
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 
 import { DemoGuard } from '../demo.guard';
 import { CreateCheckoutSessionModule } from './create-checkout-session/create-checkout-session.module';

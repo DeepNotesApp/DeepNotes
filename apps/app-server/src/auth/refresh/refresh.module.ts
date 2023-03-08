@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { RefreshController } from './refresh.controller';
 import { RefreshService } from './refresh.service';

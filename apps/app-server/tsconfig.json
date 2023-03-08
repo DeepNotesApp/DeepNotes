@@ -35,6 +35,7 @@
     { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
     { "path": "../../packages/@stdlib/db/tsconfig.build.json" },
     { "path": "../../packages/@stdlib/misc/tsconfig.build.json" },
+    { "path": "../../packages/@stdlib/nestjs/tsconfig.build.json" },
     { "path": "../../packages/@stdlib/redlock/tsconfig.build.json" }
   ],
 

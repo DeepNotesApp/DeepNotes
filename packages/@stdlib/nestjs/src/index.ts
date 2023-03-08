@@ -13,8 +13,6 @@ import { JwtModule } from '@nestjs/jwt';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 
-import { mainLogger } from './logger';
-
 type NestModule =
   | Type<any>
   | DynamicModule
@@ -193,8 +191,6 @@ const oldCreate = NestFactory.create;
 
 NestFactory.create = function (rootModule: NestModule, ...args: any[]) {
   for (const { guard, controller } of _moduleGuards.slice().reverse()) {
-    mainLogger().info(`Use ${guard.name} on ${controller.name}`);
-
     UseGuards(guard)(controller);
   }
 

@@ -21,7 +21,7 @@ COPY --from=builder /build/apps/app-server/bundle/ ./
 COPY --from=builder /build/apps/app-server/package.json ./
 COPY --from=builder /build/.npmrc ./
 RUN pnpm remove @deeplib/data @deeplib/db @deeplib/misc @stdlib/base64 \
-  @stdlib/crypto @stdlib/data @stdlib/db @stdlib/misc @stdlib/redlock \
-  @stdlib/testing
+  @stdlib/crypto @stdlib/data @stdlib/db @stdlib/misc @stdlib/nestjs \
+  @stdlib/redlock @stdlib/testing
 RUN pnpm add knex ws pg msgpackr
 CMD pm2 start /app/main.js -i max && pm2 logs

@@ -1,8 +1,8 @@
 import { APP_GUARD, APP_PIPE, RouterModule } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { Module } from '@stdlib/nestjs';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { Module } from 'src/nest-plus';
 
 import { ApiModule } from './api/api.module';
 import { AppController } from './app.controller';

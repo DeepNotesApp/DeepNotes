@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { CurrentPathController } from './current-path.controller';
 import { CurrentPathService } from './current-path.service';

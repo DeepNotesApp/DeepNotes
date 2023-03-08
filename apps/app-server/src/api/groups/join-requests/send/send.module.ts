@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { SendController } from './send.controller';
 import { SendService } from './send.service';

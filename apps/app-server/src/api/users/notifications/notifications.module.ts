@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { LoadModule } from './load/load.module';
 import { MarkAsReadModule } from './mark-as-read/mark-as-read.module';

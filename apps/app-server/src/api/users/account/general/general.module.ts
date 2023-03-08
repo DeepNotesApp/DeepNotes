@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { ChangeEmailModule } from './change-email/change-email.module';
 import { DeleteModule } from './delete/delete.module';

@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { TestWebhookModule } from './test-webhook/test-webhook.module';
 import { WebhookModule } from './webhook/webhook.module';

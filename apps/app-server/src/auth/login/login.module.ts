@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { LoginController } from './login.controller';
 import { LoginService } from './login.service';

@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { RequestModule } from './request/request.module';
 import { VerifyModule } from './verify/verify.module';

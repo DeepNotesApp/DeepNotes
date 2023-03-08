@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { VerifyEmailController } from './verify-email.controller';
 import { VerifyEmailService } from './verify-email.service';

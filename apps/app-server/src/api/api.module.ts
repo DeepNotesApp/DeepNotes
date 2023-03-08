@@ -1,5 +1,5 @@
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 import { makeAuthGuard } from 'src/auth/auth.guard';
-import { Module, UseModuleGuard } from 'src/nest-plus';
 
 import { GroupsModule } from './groups/groups.module';
 import { PagesModule } from './pages/pages.module';

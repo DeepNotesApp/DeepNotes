@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { LoginModule } from './login/login.module';
 import { LogoutModule } from './logout/logout.module';

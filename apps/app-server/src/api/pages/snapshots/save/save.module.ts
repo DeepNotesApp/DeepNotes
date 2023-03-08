@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { SaveController } from './save.controller';
 import { SaveService } from './save.service';

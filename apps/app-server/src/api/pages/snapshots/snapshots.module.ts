@@ -1,5 +1,5 @@
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 import { ProPlanGuard } from 'src/api/pro-plan.guard';
-import { Module, UseModuleGuard } from 'src/nest-plus';
 
 import { DeleteModule } from './delete/delete.module';
 import { LoadModule } from './load/load.module';

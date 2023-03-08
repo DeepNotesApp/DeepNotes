@@ -1,0 +1,32 @@
+{
+  "name": "@stdlib/nestjs",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "keywords": [],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.build.json --watch\" \"tsc-alias -p tsconfig.build.json --watch\"",
+    "clean": "rimraf ./dist *.tsbuildinfo",
+    "fix": "eslint --fix --ext .js,.ts,.vue ./",
+    "npkill": "rimraf ./node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "repo:build": "tsc-alias -p tsconfig.build.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch"
+  },
+  "devDependencies": {
+    "@nestjs/common": "9.2.0",
+    "@nestjs/core": "9.2.0",
+    "@nestjs/jwt": "9.0.0",
+    "@nestjs/testing": "9.2.0"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "9.2.0",
+    "@nestjs/core": "9.2.0",
+    "@nestjs/jwt": "9.0.0",
+    "@nestjs/testing": "9.2.0"
+  }
+}

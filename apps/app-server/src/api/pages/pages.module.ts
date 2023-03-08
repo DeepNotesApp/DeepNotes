@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { BumpModule } from './bump/bump.module';
 import { CreateModule } from './create/create.module';

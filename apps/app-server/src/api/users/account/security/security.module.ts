@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { ChangePasswordModule } from './change-password/change-password.module';
 import { TwoFactorAuthModule } from './two-factor-auth/two-factor-auth.module';

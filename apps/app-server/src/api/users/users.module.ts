@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { AccountModule } from './account/account.module';
 import { CurrentPathModule } from './current-path/current-path.module';

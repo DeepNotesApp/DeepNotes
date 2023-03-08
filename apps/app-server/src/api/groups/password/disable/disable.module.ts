@@ -1,4 +1,4 @@
-import { Module, UseModuleGuard } from 'src/nest-plus';
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 
 import { makePasswordGuard } from '../password.guard';
 import { DisableController } from './disable.controller';

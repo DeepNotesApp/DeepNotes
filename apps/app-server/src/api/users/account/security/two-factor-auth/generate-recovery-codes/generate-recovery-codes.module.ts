@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { GenerateRecoveryCodesController } from './generate-recovery-codes.controller';
 

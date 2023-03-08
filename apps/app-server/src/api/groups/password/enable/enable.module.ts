@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { EnableController } from './enable.controller';
 import { EnableService } from './enable.service';

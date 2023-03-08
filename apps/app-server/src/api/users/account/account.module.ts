@@ -1,5 +1,5 @@
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 import { DemoGuard } from 'src/api/demo.guard';
-import { Module, UseModuleGuard } from 'src/nest-plus';
 
 import { GeneralModule } from './general/general.module';
 import { SecurityModule } from './security/security.module';

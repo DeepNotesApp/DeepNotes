@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { RemoveUserController } from './remove-user.controller';
 import { RemoveUserService } from './remove-user.service';

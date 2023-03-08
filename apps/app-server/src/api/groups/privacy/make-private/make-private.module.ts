@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { MakePrivateController } from './make-private.controller';
 import { MakePrivateService } from './make-private.service';

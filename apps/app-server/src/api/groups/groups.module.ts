@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { ChangeUserRoleModule } from './change-user-role/change-user-role.module';
 import { DeletionModule } from './deletion/deletion.module';

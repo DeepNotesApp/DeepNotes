@@ -1,5 +1,5 @@
+import { Module, UseModuleGuard } from '@stdlib/nestjs';
 import { ProPlanGuard } from 'src/api/pro-plan.guard';
-import { Module, UseModuleGuard } from 'src/nest-plus';
 
 import { NonPersonalGroupGuard } from '../non-personal-group.guard';
 import { AcceptModule } from './accept/accept.module';

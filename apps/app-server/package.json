@@ -22,6 +22,7 @@
     "@stdlib/data": "workspace:1.0.0",
     "@stdlib/db": "workspace:1.0.0",
     "@stdlib/misc": "workspace:1.0.0",
+    "@stdlib/nestjs": "workspace:1.0.0",
     "@stdlib/redlock": "workspace:1.0.0",
     "@stdlib/testing": "workspace:1.0.0",
     "class-transformer": "0.5.1",

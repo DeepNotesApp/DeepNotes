@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { MakePublicController } from './make-public.controller';
 import { MakePublicService } from './make-public.service';

@@ -1,4 +1,4 @@
-import { Module } from 'src/nest-plus';
+import { Module } from '@stdlib/nestjs';
 
 import { DeleteModule } from './delete/delete.module';
 import { DeletePermanentlyModule } from './delete-permanently/delete-permanently.module';
