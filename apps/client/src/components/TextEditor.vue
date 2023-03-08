@@ -170,7 +170,7 @@ defineProps<Props>();
       }
 
       a {
-        color: #81d4fa !important;
+        color: #47a7ff !important;
       }
 
       blockquote {
