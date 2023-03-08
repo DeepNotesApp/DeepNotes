@@ -141,31 +141,7 @@
       <Combobox
         label="Link URL"
         :disable="page.react.readOnly"
-        :options="
-          internals.pages.react.recentPageIds
-            .map((pageId) => {
-              const groupId = realtimeCtx.hget('page', pageId, 'group-id');
-
-              if (groupId == null) {
-                return;
-              }
-
-              if (
-                realtimeCtx.hget('group', groupId, 'permanent-deletion-date') !=
-                  null ||
-                realtimeCtx.hget('page', pageId, 'permanent-deletion-date') !=
-                  null
-              ) {
-                return;
-              }
-
-              return {
-                label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-                value: pageId,
-              };
-            })
-            .filter((page) => page != null)
-        "
+        :options="linkOptions"
         :model-value="note.react.collab.link"
         @update:model-value="
           changeProp($event, (selectedNote, value) => {
@@ -791,6 +767,30 @@ function changeProp(value: any, func: (note: PageNote, value: any) => void) {
     }
   });
 }
+
+const linkOptions = computed(() =>
+  internals.pages.react.recentPageIds
+    .map((pageId) => {
+      const groupId = realtimeCtx.hget('page', pageId, 'group-id');
+
+      if (groupId == null) {
+        return;
+      }
+
+      if (
+        realtimeCtx.hget('group', groupId, 'permanent-deletion-date') != null ||
+        realtimeCtx.hget('page', pageId, 'permanent-deletion-date') != null
+      ) {
+        return;
+      }
+
+      return {
+        label: getPageTitle(pageId, { prefer: 'absolute' }).text,
+        value: pageId,
+      };
+    })
+    .filter((page) => page != null),
+);
 
 async function setAsDefault() {
   try {
