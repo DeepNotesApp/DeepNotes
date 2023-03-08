@@ -202,7 +202,7 @@ const html = marked(`
   ### Key rotation
   
   We rotate group encryption keys on every group member removal.
-  Page encryption keys are rotated on the first user interaction with the page after 24 hours have passed since the last page key rotation.
+  Page encryption keys are rotated on the first user interaction with the page after 7 days have passed since the last page key rotation.
 
   We use keyrings in order to facilitate realtime key rotation.
   A keyring is a list of keys, where the first key is the current key, and the rest are previous keys.

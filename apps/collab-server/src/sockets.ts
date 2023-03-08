@@ -249,7 +249,7 @@ export class SocketAuxObject {
               }
 
               await dataAbstraction().patch('page', this.room.pageId, {
-                next_key_rotation_date: addDays(new Date(), 1),
+                next_key_rotation_date: addDays(new Date(), 7),
               });
 
               checkRedlockSignalAborted(signals);
