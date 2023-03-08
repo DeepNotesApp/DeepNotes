@@ -12,28 +12,29 @@ export interface MailOptions {
   html: string;
 }
 
+export type MailSendFunc = (opts: MailOptions) => Promise<void>;
+
+const _sendMailFuncs: [string, MailSendFunc][] = [
+  ['SendGrid', sendSendGridMail],
+  ['Sendinblue', sendSendinblueMail],
+  ['Mailjet', sendMailjetMail],
+  ['Zoho', sendZohoMail],
+];
+
 export async function sendMail(opts: MailOptions) {
   const funcLogger = mainLogger().sub('sendMail');
 
-  try {
+  for (const [serviceName, sendFunc] of _sendMailFuncs) {
     try {
-      try {
-        await sendSendGridMail(opts);
+      await sendFunc(opts);
 
-        funcLogger.info('Mail sent via SendGrid');
-      } catch (error) {
-        await sendSendinblueMail(opts);
+      funcLogger.info(`Mail sent via ${serviceName}.`);
 
-        funcLogger.info('Mail sent via Sendinblue');
-      }
+      break;
     } catch (error) {
-      await sendMailjetMail(opts);
-
-      funcLogger.info('Mail sent via Mailjet');
+      //
     }
-  } catch (error) {
-    await sendZohoMail(opts);
-
-    funcLogger.info('Mail sent via Zoho');
   }
+
+  throw new Error('Failed to send mail.');
 }
