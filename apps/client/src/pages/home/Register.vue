@@ -101,10 +101,23 @@
 
         <Gap style="height: 20px" />
 
+        <div style="display: flex">
         <Checkbox
-          label="I have read and agree to the Terms of Service and Privacy Policy."
           v-model="agree"
+            style="flex: none"
         />
+
+          <div style="flex: 1">
+            I have read and agree to the<br />
+            <router-link :to="{ name: 'privacy-policy' }">
+              Privacy Policy
+            </router-link>
+            and
+            <router-link :to="{ name: 'terms-of-service' }">
+              Terms of Service</router-link
+            >.
+          </div>
+        </div>
 
         <Gap style="height: 28px" />
 
