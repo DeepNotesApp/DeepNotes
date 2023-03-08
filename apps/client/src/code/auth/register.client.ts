@@ -60,7 +60,13 @@ export async function getRegistrationValues(
       randomUserKeys.symmetricKeyring.encrypt(
         pack({
           root: { noteIdxs: [0] },
-          notes: [{}],
+          notes: [
+            {
+              anchor: {
+                y: 0,
+              },
+            },
+          ],
         } as ISerialObjectInput),
         {
           padding: true,
