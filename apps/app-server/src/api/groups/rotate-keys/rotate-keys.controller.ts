@@ -25,7 +25,7 @@ export class RotateKeysController {
     @Param('groupId') groupId: string,
     @Body() body: BodyDto,
   ) {
-    if (!(await userHasPermission(agentId, groupId, 'editGroupPages'))) {
+    if (!(await userHasPermission(agentId, groupId, 'manageLowerRanks'))) {
       throw new HttpException(
         'Insufficient permissions.',
         HttpStatus.FORBIDDEN,
