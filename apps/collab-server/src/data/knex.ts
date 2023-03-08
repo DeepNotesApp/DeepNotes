@@ -13,9 +13,9 @@ export const initKnex = once(() => {
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
-      ssl: {
-        ca: base64ToText(process.env.POSTGRES_CA_CERTIFICATE),
-      },
+      ssl: process.env.POSTGRES_CA_CERTIFICATE
+        ? { ca: base64ToText(process.env.POSTGRES_CA_CERTIFICATE) }
+        : undefined,
     },
     pool: {
       min: 0,
