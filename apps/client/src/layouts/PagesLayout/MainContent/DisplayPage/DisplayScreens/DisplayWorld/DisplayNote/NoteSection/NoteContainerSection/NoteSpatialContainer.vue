@@ -93,7 +93,7 @@ async function onLeftDoubleClick(event: MouseEvent) {
   }
 
   await page.notes.create(
-    note.react.region,
+    note,
     page.pos.eventToWorld(event).sub(containerWorldTopLeft),
   );
 }
