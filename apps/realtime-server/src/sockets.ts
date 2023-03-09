@@ -88,9 +88,12 @@ export class SocketAuxObject {
 
       if (sessionInvalidated) {
         this.destroySocket();
-        throw new Error('Invalid session.');
+
+        return true;
       }
     }
+
+    return false;
   }
 
   async setup() {
@@ -101,13 +104,15 @@ export class SocketAuxObject {
     this._setupPromise = new Resolvable();
 
     if (this.sessionId != null) {
-      [this.userId] = await Promise.all([
+      let sessionInvalidated;
+
+      [this.userId, sessionInvalidated] = await Promise.all([
         dataAbstraction().hget('session', this.sessionId, 'user-id'),
 
         this._checkSessionInvalidated(),
       ]);
 
-      if (this.userId == null) {
+      if (this.userId == null || sessionInvalidated) {
         this.destroySocket();
         throw new Error('Invalid session.');
       }
@@ -124,28 +129,28 @@ export class SocketAuxObject {
     channelBuffer: Buffer,
     messageBuffer: Buffer,
   ) => {
-    try {
-      if (bytesToText(channelBuffer) === `user-notification:${this.userId}`) {
-        await this._checkSessionInvalidated();
-
-        const encoder = encoding.createEncoder();
-
-        encoding.writeVarUint(
-          encoder,
-          RealtimeServerMessageType.USER_NOTIFICATION,
-        );
-
-        encoding.writeVarUint8Array(encoder, messageBuffer);
-
-        this.socket.send(encoding.toUint8Array(encoder));
+    if (bytesToText(channelBuffer) === `user-notification:${this.userId}`) {
+      if (await this._checkSessionInvalidated()) {
+        return;
       }
-    } catch (error) {
-      moduleLogger.error('User notification handling error: %o', error);
+
+      const encoder = encoding.createEncoder();
+
+      encoding.writeVarUint(
+        encoder,
+        RealtimeServerMessageType.USER_NOTIFICATION,
+      );
+
+      encoding.writeVarUint8Array(encoder, messageBuffer);
+
+      this.socket.send(encoding.toUint8Array(encoder));
     }
   };
 
   private async _handleMessage(message: ArrayBuffer) {
-    await this._checkSessionInvalidated();
+    if (await this._checkSessionInvalidated()) {
+      return;
+    }
 
     const decoder = decoding.createDecoder(new Uint8Array(message));
 
@@ -397,29 +402,27 @@ export class SocketAuxObject {
 
     if (fieldInfo?.notifyUpdates && !this._listeners.has(fullKey)) {
       const updateListener: DataUpdateListener = async ({ value, origin }) => {
-        try {
-          if (this.socket === origin) {
-            return;
-          }
-
-          await this._checkSessionInvalidated();
-
-          if (
-            !(await fieldInfo?.userGettable?.({
-              dataAbstraction: dataAbstraction(),
-              userId: this.userId,
-              suffix,
-            }))
-          ) {
-            return;
-          }
-
-          this._dataNotificationBuffer.push([prefix, suffix, field, value]);
-
-          this._flushDataNotificationBuffer();
-        } catch (error) {
-          moduleLogger.error('Error in update listener: %o', error);
+        if (this.socket === origin) {
+          return;
         }
+
+        if (await this._checkSessionInvalidated()) {
+          return;
+        }
+
+        if (
+          !(await fieldInfo?.userGettable?.({
+            dataAbstraction: dataAbstraction(),
+            userId: this.userId,
+            suffix,
+          }))
+        ) {
+          return;
+        }
+
+        this._dataNotificationBuffer.push([prefix, suffix, field, value]);
+
+        this._flushDataNotificationBuffer();
       };
 
       await dataAbstraction().addUpdateListener(

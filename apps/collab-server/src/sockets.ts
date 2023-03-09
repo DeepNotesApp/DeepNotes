@@ -89,9 +89,11 @@ export class SocketAuxObject {
 
       if (sessionInvalidated) {
         this.destroySocket();
-        throw new Error('Invalid session.');
+        return true;
       }
     }
+
+    return false;
   }
 
   async setup(req: IncomingMessage) {
@@ -114,13 +116,15 @@ export class SocketAuxObject {
       );
 
       if (this.sessionId != null) {
-        [this.userId] = await Promise.all([
+        let sessionInvalidated;
+
+        [this.userId, sessionInvalidated] = await Promise.all([
           dataAbstraction().hget('session', this.sessionId, 'user-id'),
 
           this._checkSessionInvalidated(),
         ]);
 
-        if (this.userId == null) {
+        if (this.userId == null || sessionInvalidated) {
           this.destroySocket();
           throw new Error('Invalid session.');
         }
