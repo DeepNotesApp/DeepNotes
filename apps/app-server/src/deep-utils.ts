@@ -296,7 +296,7 @@ export async function createUser({
 
     demo: !!demo,
 
-    email_verified: demo,
+    email_verified: false,
     ...(!demo
       ? {
           encrypted_new_email: encryptUserEmail(email),
