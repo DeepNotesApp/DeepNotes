@@ -29,7 +29,7 @@ async function deleteAccount() {
 
     const password = await asyncPrompt<string>({
       title: 'Delete account',
-      message: 'Enter the your password:',
+      message: 'Enter your password:',
       color: 'primary',
       prompt: {
         type: 'password',
