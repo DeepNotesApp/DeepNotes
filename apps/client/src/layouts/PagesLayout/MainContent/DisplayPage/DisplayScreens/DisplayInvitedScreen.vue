@@ -1,7 +1,11 @@
 <template>
   <div style="max-width: 400px">
     You were invited to join the group
-    <b>"{{ groupNames()(page.react.groupId).get().text }}"</b>.
+    <b>
+      {{
+        groupName.status === 'success' ? groupName.text : page.react.groupId
+      }}</b
+    >.
   </div>
 
   <Gap style="height: 20px" />
@@ -35,6 +39,8 @@ import { asyncPrompt, handleError } from 'src/code/utils.client';
 import AcceptInvitationDialog from './AcceptInvitationDialog.vue';
 
 const page = inject<Page>('page')!;
+
+const groupName = computed(() => groupNames()(page.react.groupId).get());
 
 async function acceptInvitation() {
   $quasar()
