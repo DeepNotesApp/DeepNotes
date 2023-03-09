@@ -8,7 +8,7 @@ import {
 } from '@stdlib/misc';
 import type { Cluster, Redis, Result } from 'ioredis';
 import { pack, unpack } from 'msgpackr';
-import type NodeCache from 'node-cache';
+import NodeCache from 'node-cache';
 import type { TransactionOrKnex } from 'objection';
 import { Model } from 'objection';
 
@@ -123,9 +123,10 @@ export class DataAbstraction<
     string
   >();
 
+  private readonly nodeCache = new NodeCache();
+
   constructor(
     readonly dataHashes: DataHashes_,
-    readonly nodeCache: NodeCache,
     readonly redis: Redis | Cluster,
     readonly sub: Redis | Cluster,
   ) {
