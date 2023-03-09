@@ -16,13 +16,7 @@
       tooltip="Swap"
       icon="mdi-cached"
       :disable="page.react.readOnly"
-      @click="
-        changeProp(null, (note) => {
-          const sourceHead = note.react.collab.sourceHead;
-          note.react.collab.sourceHead = note.react.collab.targetHead;
-          note.react.collab.targetHead = sourceHead;
-        })
-      "
+      @click="swapArrowheads"
     />
 
     <MiniSidebarBtn
