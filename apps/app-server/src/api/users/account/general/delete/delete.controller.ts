@@ -30,8 +30,8 @@ export class DeleteController {
 
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
-    await usingLocks([[`user-lock:${userId}`]], async (signals) => {
-      await dataAbstraction().transaction(async (dtrx) => {
+    return await usingLocks([[`user-lock:${userId}`]], async (signals) => {
+      return await dataAbstraction().transaction(async (dtrx) => {
         const [invitations, requests, members, pageIds, sessions, user] =
           await Promise.all([
             GroupJoinInvitationModel.query(dtrx.trx)

@@ -58,68 +58,68 @@ const newPassword = ref('');
 const confirmNewPassword = ref('');
 
 async function changePassword() {
-  if (newPassword.value === oldPassword.value) {
-    $quasar().notify({
-      message: 'New password must be different than old password.',
-      color: 'negative',
-    });
+  try {
+    if (newPassword.value === oldPassword.value) {
+      $quasar().notify({
+        message: 'New password must be different than old password.',
+        color: 'negative',
+      });
 
-    return;
-  }
+      return;
+    }
 
-  if (newPassword.value !== confirmNewPassword.value) {
-    $quasar().notify({
-      message: 'New passwords do not match.',
-      type: 'negative',
-    });
+    if (newPassword.value !== confirmNewPassword.value) {
+      $quasar().notify({
+        message: 'New passwords do not match.',
+        type: 'negative',
+      });
 
-    return;
-  }
+      return;
+    }
 
-  // Check password strength
+    // Check password strength
 
-  const zxcvbnResult = zxcvbn(newPassword.value);
+    const zxcvbnResult = zxcvbn(newPassword.value);
 
-  if (zxcvbnResult.score <= 1) {
-    $quasar().notify({
-      html: true,
-      message: 'Password is too weak.<br/>Please use a stronger password.',
-      type: 'negative',
-    });
+    if (zxcvbnResult.score <= 1) {
+      $quasar().notify({
+        html: true,
+        message: 'Password is too weak.<br/>Please use a stronger password.',
+        type: 'negative',
+      });
 
-    return;
-  }
+      return;
+    }
 
-  if (zxcvbnResult.score <= 2) {
+    if (zxcvbnResult.score <= 2) {
+      await asyncPrompt({
+        title: 'Weak password',
+        html: true,
+        message:
+          'Your password is relatively weak.<br/>Are you sure you want to continue?',
+        style: { width: 'max-content', padding: '4px 8px' },
+
+        focus: 'cancel',
+
+        cancel: { label: 'No', flat: true, color: 'primary' },
+        ok: { label: 'Yes', flat: true, color: 'negative' },
+      });
+    }
+
     await asyncPrompt({
-      title: 'Weak password',
       html: true,
-      message:
-        'Your password is relatively weak.<br/>Are you sure you want to continue?',
-      style: { width: 'max-content', padding: '4px 8px' },
+      title: 'Change password',
+      message: `Are you sure you want to change password?<br/>
+      <span style="color: #a0a0a0">
+        <span style="color: red">Note</span>: This action will log you out of all devices.
+      </span>`,
 
       focus: 'cancel',
 
       cancel: { label: 'No', flat: true, color: 'primary' },
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
-  }
 
-  await asyncPrompt({
-    html: true,
-    title: 'Change password',
-    message: `Are you sure you want to change password?<br/>
-      <span style="color: #a0a0a0">
-        <span style="color: red">Note</span>: This action will log you out of all devices.
-      </span>`,
-
-    focus: 'cancel',
-
-    cancel: { label: 'No', flat: true, color: 'primary' },
-    ok: { label: 'Yes', flat: true, color: 'negative' },
-  });
-
-  try {
     const email = await internals.realtime.hget(
       'user',
       authStore().userId,

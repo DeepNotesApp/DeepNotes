@@ -397,25 +397,29 @@ export class SocketAuxObject {
 
     if (fieldInfo?.notifyUpdates && !this._listeners.has(fullKey)) {
       const updateListener: DataUpdateListener = async ({ value, origin }) => {
-        if (this.socket === origin) {
-          return;
+        try {
+          if (this.socket === origin) {
+            return;
+          }
+
+          await this._checkSessionInvalidated();
+
+          if (
+            !(await fieldInfo?.userGettable?.({
+              dataAbstraction: dataAbstraction(),
+              userId: this.userId,
+              suffix,
+            }))
+          ) {
+            return;
+          }
+
+          this._dataNotificationBuffer.push([prefix, suffix, field, value]);
+
+          this._flushDataNotificationBuffer();
+        } catch (error) {
+          moduleLogger.error('Error in update listener: %o', error);
         }
-
-        await this._checkSessionInvalidated();
-
-        if (
-          !(await fieldInfo?.userGettable?.({
-            dataAbstraction: dataAbstraction(),
-            userId: this.userId,
-            suffix,
-          }))
-        ) {
-          return;
-        }
-
-        this._dataNotificationBuffer.push([prefix, suffix, field, value]);
-
-        this._flushDataNotificationBuffer();
       };
 
       await dataAbstraction().addUpdateListener(
