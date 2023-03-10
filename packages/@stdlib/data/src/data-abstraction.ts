@@ -589,10 +589,10 @@ export class DataAbstraction<
     try {
       // Delete on database
 
-      if (!params?.cacheOnly) {
-        await (
-          await this.dataHashes[prefix].model()
-        )
+      const model = await this.dataHashes[prefix].model();
+
+      if (!params?.cacheOnly && model != null) {
+        await model
           .query(params?.dtrx?.trx ?? params?.trx)
           .findById(splitStr(suffix, ':'))
           .delete();

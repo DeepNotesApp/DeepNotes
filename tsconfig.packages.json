@@ -7,6 +7,7 @@
     { "path": "apps/app-server/tsconfig.build.json" },
     { "path": "apps/realtime-server/tsconfig.build.json" },
     { "path": "apps/collab-server/tsconfig.build.json" },
+    { "path": "apps/scheduler/tsconfig.build.json" },
     { "path": "packages/@deeplib/data/tsconfig.build.json" },
     { "path": "packages/@deeplib/db/tsconfig.build.json" },
     { "path": "packages/@deeplib/misc/tsconfig.build.json" },

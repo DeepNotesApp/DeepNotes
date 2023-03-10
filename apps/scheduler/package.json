@@ -1,0 +1,34 @@
+{
+  "name": "deepnotes-scheduler",
+  "version": "1.0.0",
+  "dependencies": {
+    "@deeplib/data": "workspace:1.0.0",
+    "@stdlib/base64": "workspace:1.0.0",
+    "@stdlib/data": "workspace:1.0.0",
+    "@stdlib/misc": "workspace:1.0.0",
+    "dotenv": "16.0.3",
+    "dotenv-expand": "9.0.0",
+    "ioredis": "npm:@gustavotoyota/ioredis@5.2.7",
+    "knex": "2.3.0",
+    "lodash": "4.17.21",
+    "objection": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.14.189",
+    "tsup": "6.5.0"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.build.json --watch\" \"tsc-alias -p tsconfig.build.json --watch\"",
+    "bundle": "tsup",
+    "clean": "rimraf ./dist *.tsbuildinfo",
+    "dev": "ts-node-dev -r tsconfig-paths/register ./src/index.ts",
+    "fix": "eslint --fix --ext .js,.ts,.vue ./",
+    "npkill": "rimraf ./node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "repo:build": "tsc-alias -p tsconfig.build.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch",
+    "start": "ts-node -r tsconfig-paths/register ./src/index.ts"
+  }
+}
