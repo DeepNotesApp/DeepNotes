@@ -3,6 +3,7 @@ import {
   GroupJoinInvitationModel,
   GroupJoinRequestModel,
   GroupMemberModel,
+  PageModel,
   SessionModel,
   UserModel,
   UserPageModel,
@@ -32,31 +33,43 @@ export class DeleteController {
   ) {
     return await usingLocks([[`user-lock:${userId}`]], async (signals) => {
       return await dataAbstraction().transaction(async (dtrx) => {
-        const [invitations, requests, members, pageIds, sessions, user] =
-          await Promise.all([
-            GroupJoinInvitationModel.query(dtrx.trx)
-              .where('user_id', userId)
-              .select('group_id'),
-            GroupJoinRequestModel.query(dtrx.trx)
-              .where('user_id', userId)
-              .select('group_id'),
-            GroupMemberModel.query(dtrx.trx)
-              .where('user_id', userId)
-              .select('group_id'),
+        const [
+          groupPageIds,
+          invitations,
+          requests,
+          members,
+          visitedPageIds,
+          sessions,
+          user,
+        ] = await Promise.all([
+          PageModel.query(dtrx.trx)
+            .join('users', 'users.personal_group_id', 'pages.group_id')
+            .where('users.id', userId)
+            .select('pages.id'),
 
-            UserPageModel.query(dtrx.trx)
-              .where('user_id', userId)
-              .select('page_id'),
+          GroupJoinInvitationModel.query(dtrx.trx)
+            .where('user_id', userId)
+            .select('group_id'),
+          GroupJoinRequestModel.query(dtrx.trx)
+            .where('user_id', userId)
+            .select('group_id'),
+          GroupMemberModel.query(dtrx.trx)
+            .where('user_id', userId)
+            .select('group_id'),
 
-            SessionModel.query(dtrx.trx)
-              .where('user_id', userId)
-              .whereNot('invalidated', true)
-              .select('id'),
+          UserPageModel.query(dtrx.trx)
+            .where('user_id', userId)
+            .select('page_id'),
 
-            UserModel.query(dtrx.trx)
-              .findById(userId)
-              .select('encrypted_email', 'personal_group_id', 'customer_id'),
-          ]);
+          SessionModel.query(dtrx.trx)
+            .where('user_id', userId)
+            .whereNot('invalidated', true)
+            .select('id'),
+
+          UserModel.query(dtrx.trx)
+            .findById(userId)
+            .select('encrypted_email', 'personal_group_id', 'customer_id'),
+        ]);
 
         checkRedlockSignalAborted(signals);
 
@@ -65,6 +78,13 @@ export class DeleteController {
         }
 
         await Promise.all([
+          ...groupPageIds.map((page) =>
+            dataAbstraction().delete('page', page.id, {
+              dtrx,
+              cacheOnly: true,
+            }),
+          ),
+
           ...invitations.map((invitation) =>
             dataAbstraction().delete(
               'group-join-invitation',
@@ -87,7 +107,7 @@ export class DeleteController {
             ),
           ),
 
-          ...pageIds.map((page) =>
+          ...visitedPageIds.map((page) =>
             dataAbstraction().delete('user-page', `${userId}:${page.page_id}`, {
               dtrx,
               cacheOnly: true,
