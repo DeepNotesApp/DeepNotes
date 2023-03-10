@@ -7,6 +7,7 @@ import {
   splitStr,
 } from '@stdlib/misc';
 import type { Cluster, Redis, Result } from 'ioredis';
+import { some } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 import NodeCache from 'node-cache';
 import type { TransactionOrKnex } from 'objection';
@@ -303,7 +304,11 @@ export class DataAbstraction<
     const missedFields: FieldInfo[] = [];
 
     for (const field of remainingFields) {
-      if (field.infos?.cacheLocally && this.nodeCache.has(field.fullKey)) {
+      if (
+        !field.infos?.dontCache &&
+        field.infos?.cacheLocally &&
+        this.nodeCache.has(field.fullKey)
+      ) {
         field.value = this.nodeCache.data[field.fullKey].v;
 
         classLogger
@@ -325,7 +330,7 @@ export class DataAbstraction<
 
       this.addToTransaction(dtrx, () => {
         for (const field of missedFields) {
-          if (field.infos?.cacheLocally) {
+          if (!field.infos?.dontCache && field.infos?.cacheLocally) {
             classLogger
               .sub('hmget')
               .info(
@@ -344,26 +349,36 @@ export class DataAbstraction<
 
     // Check remote cache
 
-    const valueBuffers = await this.redis.hmgetBuffer(
-      key,
-      ...remainingFields.map((field) => field.name),
+    const someFieldsCacheable = some(
+      remainingFields,
+      (field) => !field.infos?.dontCache,
     );
 
-    const missedFields: FieldInfo[] = [];
+    let missedFields: FieldInfo[];
 
-    for (let i = 0; i < remainingFields.length; i++) {
-      if (valueBuffers[i] != null) {
-        remainingFields[i].value = unpack(valueBuffers[i]!);
+    if (someFieldsCacheable) {
+      missedFields = [];
 
-        classLogger
-          .sub('hmget')
-          .info(
-            `${remainingFields[i].fullKey}: Found on remote cache (%o)`,
-            remainingFields[i].value,
-          );
-      } else {
-        missedFields.push(remainingFields[i]);
+      const valueBuffers = await this.redis.hmgetBuffer(
+        key,
+        ...remainingFields.map((field) => field.name),
+      );
+
+      for (let i = 0; i < remainingFields.length; i++) {
+        const field = remainingFields[i];
+
+        if (!field.infos?.dontCache && valueBuffers[i] != null) {
+          field.value = unpack(valueBuffers[i]!);
+
+          classLogger
+            .sub('hmget')
+            .info(`${field.fullKey}: Found on remote cache (%o)`, field.value);
+        } else {
+          missedFields.push(field);
+        }
       }
+    } else {
+      missedFields = remainingFields;
     }
 
     if (missedFields.length > 0) {
@@ -375,20 +390,21 @@ export class DataAbstraction<
 
       // Save missed values on remote cache
 
-      this.addToTransaction(dtrx, async () => {
-        const missedValues = objFromEntries(
-          missedFields.map((field) => [
-            field.name,
-            Buffer.from(pack(field.value)),
-          ]),
-        );
+      if (someFieldsCacheable) {
+        this.addToTransaction(dtrx, async () => {
+          const missedValues = objFromEntries(
+            missedFields
+              .filter((field) => !field.infos?.dontCache)
+              .map((field) => [field.name, Buffer.from(pack(field.value))]),
+          );
 
-        classLogger
-          .sub('hmget')
-          .info(`${key}: Saving on remote cache (%o)`, missedValues);
+          classLogger
+            .sub('hmget')
+            .info(`${key}: Saving on remote cache (%o)`, missedValues);
 
-        await this.redis.hset(key, missedValues);
-      });
+          await this.redis.hset(key, missedValues);
+        });
+      }
     }
   }
   private async _hmgetDatabase(params: HMGetInternalParams) {

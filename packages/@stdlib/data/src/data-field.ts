@@ -7,6 +7,7 @@ export interface DataAuthParams {
 }
 
 export interface DataField<T = any> {
+  dontCache?: boolean;
   cacheLocally?: boolean;
   notifyUpdates?: boolean;
 
