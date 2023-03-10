@@ -93,41 +93,43 @@ export class ChangeEmailService {
   }: EndpointValues) {
     const passwordValues = derivePasswordValues(base64ToBytes(newLoginHash!));
 
-    await dataAbstraction().patch(
-      'user',
-      userId,
-      {
-        encrypted_email: encryptUserEmail(newEmail),
-        email_hash: hashUserEmail(newEmail),
+    await Promise.all([
+      dataAbstraction().patch(
+        'user',
+        userId,
+        {
+          encrypted_email: encryptUserEmail(newEmail),
+          email_hash: hashUserEmail(newEmail),
 
-        encrypted_new_email: null,
-        email_verification_code: null,
+          encrypted_new_email: null,
+          email_verification_code: null,
 
-        encrypted_rehashed_login_hash: encryptUserRehashedLoginHash(
-          encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
-        ),
+          encrypted_rehashed_login_hash: encryptUserRehashedLoginHash(
+            encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
+          ),
 
-        encrypted_private_keyring: createPrivateKeyring(
-          base64ToBytes(encryptedPrivateKeyring!),
-        ).wrapSymmetric(passwordValues.key, {
-          associatedData: {
-            context: 'UserEncryptedPrivateKeyring',
-            userId,
-          },
-        }).fullValue,
-        encrypted_symmetric_keyring: createSymmetricKeyring(
-          base64ToBytes(encryptedSymmetricKeyring!),
-        ).wrapSymmetric(passwordValues.key, {
-          associatedData: {
-            context: 'UserEncryptedSymmetricKeyring',
-            userId,
-          },
-        }).fullValue,
-      },
-      { dtrx },
-    );
+          encrypted_private_keyring: createPrivateKeyring(
+            base64ToBytes(encryptedPrivateKeyring!),
+          ).wrapSymmetric(passwordValues.key, {
+            associatedData: {
+              context: 'UserEncryptedPrivateKeyring',
+              userId,
+            },
+          }).fullValue,
+          encrypted_symmetric_keyring: createSymmetricKeyring(
+            base64ToBytes(encryptedSymmetricKeyring!),
+          ).wrapSymmetric(passwordValues.key, {
+            associatedData: {
+              context: 'UserEncryptedSymmetricKeyring',
+              userId,
+            },
+          }).fullValue,
+        },
+        { dtrx },
+      ),
 
-    await invalidateAllSessions(user!.id, { dtrx });
+      invalidateAllSessions(user!.id, { dtrx }),
+    ]);
 
     await stripe().customers.update(user!.customer_id!, {
       email: newEmail,
