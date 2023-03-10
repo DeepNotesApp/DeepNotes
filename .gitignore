@@ -13,3 +13,5 @@ dist
 *.keystore
 
 .DS_Store
+
+deploy-*.sh

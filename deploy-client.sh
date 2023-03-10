@@ -1,1 +1,0 @@
-caprover deploy -c captain-definition-client
