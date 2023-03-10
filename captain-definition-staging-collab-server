@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 2,
+  "caproverName": "captain-01",
+  "caproverApp": "deepnotes-staging-collab-server",
+  "branch": "main",
+  "dockerfilePath": "./apps/collab-server/Dockerfile"
+}
