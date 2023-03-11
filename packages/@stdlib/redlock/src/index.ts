@@ -13,10 +13,8 @@ export function usingLocks(
     const prevFunc = func;
 
     func = (signals) =>
-      redlock.using(
-        nodeResources,
-        process.env.DEV ? 2 * 5000 : 5000,
-        (signal) => prevFunc([...signals, signal]),
+      redlock.using(nodeResources, process.env.DEV ? 30000 : 5000, (signal) =>
+        prevFunc([...signals, signal]),
       );
   }
 
