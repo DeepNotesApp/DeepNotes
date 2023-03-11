@@ -102,7 +102,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'whitepaper',
-        component: () => import('src/pages/home/Whitepaper.vue'),
+        component: () => import('src/pages/home/Whitepaper/Whitepaper.vue'),
       },
     ],
   },
@@ -114,7 +114,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'privacy-policy',
-        component: () => import('src/pages/home/PrivacyPolicy.vue'),
+        component: () =>
+          import('src/pages/home/PrivacyPolicy/PrivacyPolicy.vue'),
       },
     ],
   },
@@ -125,7 +126,8 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'terms-of-service',
-        component: () => import('src/pages/home/TermsOfService.vue'),
+        component: () =>
+          import('src/pages/home/TermsOfService/TermsOfService.vue'),
       },
     ],
   },

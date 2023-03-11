@@ -11,7 +11,42 @@
       "
     >
       <ResponsiveContainer style="display: flex; align-items: center">
-        <LeftHeaderMenu></LeftHeaderMenu>
+        <!-- Left menu-->
+
+        <template
+          v-if="
+            uiStore().width < BREAKPOINT_LG_MIN &&
+            ($route.name === 'privacy-policy' ||
+              $route.name === 'terms-of-service' ||
+              $route.name === 'whitepaper' ||
+              $route.path.startsWith('/account/'))
+          "
+        >
+          <ToolbarBtn
+            icon="mdi-menu"
+            icon-size="32px"
+            btn-size="46px"
+          >
+            <q-menu
+              anchor="bottom left"
+              self="top left"
+              auto-close
+            >
+              <q-list>
+                <PrivacyPolicyItems v-if="$route.name === 'privacy-policy'" />
+                <TermsOfServiceItems
+                  v-if="$route.name === 'terms-of-service'"
+                />
+                <WhitepaperItems v-if="$route.name === 'whitepaper'" />
+                <AccountItems v-if="$route.path.startsWith('/account/')" />
+              </q-list>
+            </q-menu>
+          </ToolbarBtn>
+
+          <Gap style="width: 10px" />
+        </template>
+
+        <!-- App name and Logo -->
 
         <q-toolbar-title style="overflow: visible; padding: 0px; flex: none">
           <router-link
@@ -47,6 +82,8 @@
             </div>
           </router-link>
         </q-toolbar-title>
+
+        <!-- Center buttons -->
 
         <template v-if="uiStore().width >= BREAKPOINT_LG_MIN">
           <Gap style="width: 32px" />
@@ -99,7 +136,10 @@
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, isIncluded } from '@stdlib/misc';
 import { useResizeObserver } from 'src/code/utils.universal';
-import LeftHeaderMenu from 'src/pages/home/Account/AccountMenu.vue';
+import AccountItems from 'src/pages/home/Account/AccountItems.vue';
+import PrivacyPolicyItems from 'src/pages/home/PrivacyPolicy/PrivacyPolicyItems.vue';
+import TermsOfServiceItems from 'src/pages/home/TermsOfService/TermsOfServiceItems.vue';
+import WhitepaperItems from 'src/pages/home/Whitepaper/WhitepaperItems.vue';
 import type { ComponentPublicInstance } from 'vue';
 
 import RightButtons from './RightButtons/RightButtons.vue';
