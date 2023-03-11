@@ -278,6 +278,7 @@ importers:
       objection: 3.0.1
       pinia: 2.0.24
       process: 0.11.10
+      prom-client: ^14.2.0
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
       prosemirror-view: 1.29.1
@@ -356,6 +357,7 @@ importers:
       objection: 3.0.1_knex@2.3.0
       pinia: 2.0.24_vue@3.2.47
       process: 0.11.10
+      prom-client: 14.2.0
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
       prosemirror-view: 1.29.1
@@ -3481,7 +3483,7 @@ packages:
   /@types/express-serve-static-core/4.17.31:
     resolution: {integrity: sha512-DxMhY+NAsTwMMFHBTtJFNp5qiHKJ7TeqOo23zVEM9alT1Ml27Q3xcTH0xwxn7Q0BbMcVEJOs/7aQtUWupUQN3Q==}
     dependencies:
-      '@types/node': 18.11.18
+      '@types/node': 18.13.0
       '@types/qs': 6.9.7
       '@types/range-parser': 1.2.4
     dev: true

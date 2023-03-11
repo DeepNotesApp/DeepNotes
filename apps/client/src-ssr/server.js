@@ -9,8 +9,12 @@
  * Make sure to yarn add / npm install (in your project root)
  * anything you import here (except for express and compression).
  */
-import express from 'express'
-import compression from 'compression'
+import express from 'express';
+import compression from 'compression';
+import { Registry, collectDefaultMetrics } from 'prom-client';
+
+const prometheusRegistry = new Registry();
+collectDefaultMetrics({ register: prometheusRegistry });
 
 /**
  * Create your webserver and return its instance.
@@ -19,16 +23,23 @@ import compression from 'compression'
  *
  * Should NOT be async!
  */
-export function create (/* { ... } */) {
-  const app = express()
+export function create(/* { ... } */) {
+  const app = express();
 
   // place here any middlewares that
   // absolutely need to run before anything else
   if (process.env.PROD) {
-    app.use(compression())
+    app.use(compression());
   }
 
-  return app
+  // Prometheus metrics
+
+  app.get('/metrics', (req, res) => {
+    res.set('Content-Type', prometheusRegistry.contentType);
+    res.end(prometheusRegistry.metrics());
+  });
+
+  return app;
 }
 
 /**
@@ -42,13 +53,13 @@ export function create (/* { ... } */) {
  * For production, you can instead export your
  * handler for serverless use or whatever else fits your needs.
  */
-export async function listen ({ app, port, isReady }) {
-  await isReady()
+export async function listen({ app, port, isReady }) {
+  await isReady();
   return await app.listen(port, () => {
     if (process.env.PROD) {
-      console.log('Server listening at port ' + port)
+      console.log('Server listening at port ' + port);
     }
-  })
+  });
 }
 
 /**
@@ -61,65 +72,63 @@ export async function listen ({ app, port, isReady }) {
  *
  * Can be async.
  */
-export function close ({ listenResult }) {
-  return listenResult.close()
+export function close({ listenResult }) {
+  return listenResult.close();
 }
 
-const maxAge = process.env.DEV
-  ? 0
-  : 1000 * 60 * 60 * 24 * 30
+const maxAge = process.env.DEV ? 0 : 1000 * 60 * 60 * 24 * 30;
 
 /**
  * Should return middleware that serves the indicated path
  * with static content.
  */
-export function serveStaticContent (path, opts) {
+export function serveStaticContent(path, opts) {
   return express.static(path, {
     maxAge,
-    ...opts
-  })
+    ...opts,
+  });
 }
 
-const jsRE = /\.js$/
-const cssRE = /\.css$/
-const woffRE = /\.woff$/
-const woff2RE = /\.woff2$/
-const gifRE = /\.gif$/
-const jpgRE = /\.jpe?g$/
-const pngRE = /\.png$/
+const jsRE = /\.js$/;
+const cssRE = /\.css$/;
+const woffRE = /\.woff$/;
+const woff2RE = /\.woff2$/;
+const gifRE = /\.gif$/;
+const jpgRE = /\.jpe?g$/;
+const pngRE = /\.png$/;
 
 /**
  * Should return a String with HTML output
  * (if any) for preloading indicated file
  */
-export function renderPreloadTag (file) {
+export function renderPreloadTag(file) {
   if (jsRE.test(file) === true) {
-    return `<link rel="modulepreload" href="${file}" crossorigin>`
+    return `<link rel="modulepreload" href="${file}" crossorigin>`;
   }
 
   if (cssRE.test(file) === true) {
-    return `<link rel="stylesheet" href="${file}">`
+    return `<link rel="stylesheet" href="${file}">`;
   }
 
   if (woffRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="font" type="font/woff" crossorigin>`
+    return `<link rel="preload" href="${file}" as="font" type="font/woff" crossorigin>`;
   }
 
   if (woff2RE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="font" type="font/woff2" crossorigin>`
+    return `<link rel="preload" href="${file}" as="font" type="font/woff2" crossorigin>`;
   }
 
   if (gifRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/gif">`
+    return `<link rel="preload" href="${file}" as="image" type="image/gif">`;
   }
 
   if (jpgRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/jpeg">`
+    return `<link rel="preload" href="${file}" as="image" type="image/jpeg">`;
   }
 
   if (pngRE.test(file) === true) {
-    return `<link rel="preload" href="${file}" as="image" type="image/png">`
+    return `<link rel="preload" href="${file}" as="image" type="image/png">`;
   }
 
-  return ''
+  return '';
 }
