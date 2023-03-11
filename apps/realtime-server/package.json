@@ -18,6 +18,7 @@
     "msgpackr": "1.8.0",
     "node-cache": "5.1.2",
     "objection": "3.0.1",
+    "prom-client": "^14.2.0",
     "unilogr": "0.0.27",
     "ws": "8.11.0"
   },
