@@ -99,6 +99,7 @@ importers:
       '@types/nodemailer-html-to-text': 3.1.0
       '@types/passport-jwt': 3.0.7
       '@types/supertest': 2.0.11
+      '@willsoto/nestjs-prometheus': ^5.1.0
       class-transformer: 0.5.1
       class-validator: 0.13.2
       cookie-parser: 1.4.6
@@ -121,6 +122,7 @@ importers:
       objection: 3.0.1
       otplib: 12.0.1
       passport-jwt: 4.0.0
+      prom-client: ^14.2.0
       redlock: 5.0.0-beta.2
       reflect-metadata: 0.1.13
       rxjs: 7.5.7
@@ -153,6 +155,7 @@ importers:
       '@stdlib/nestjs': link:../../packages/@stdlib/nestjs
       '@stdlib/redlock': link:../../packages/@stdlib/redlock
       '@stdlib/testing': link:../../packages/@stdlib/testing
+      '@willsoto/nestjs-prometheus': 5.1.0_rleqobfci3h24yuweqko2ihkoa
       class-transformer: 0.5.1
       class-validator: 0.13.2
       cookie-parser: 1.4.6
@@ -174,6 +177,7 @@ importers:
       objection: 3.0.1_knex@2.3.0
       otplib: 12.0.1
       passport-jwt: 4.0.0
+      prom-client: 14.2.0
       redlock: 5.0.0-beta.2
       reflect-metadata: 0.1.13
       rxjs: 7.5.7
@@ -4144,6 +4148,16 @@ packages:
       '@xtuc/long': 4.2.2
     dev: true
 
+  /@willsoto/nestjs-prometheus/5.1.0_rleqobfci3h24yuweqko2ihkoa:
+    resolution: {integrity: sha512-Ko9xElrdiXHJXL4ChhmLSs7J9IHl2coLEHfZrKssDucpXO33nV6EHaCZP7LkMniDnWnUaJnwqbzlzEtTQ8Wsiw==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0 || ^9.0.0
+      prom-client: ^13.0.0 || ^14.0.0
+    dependencies:
+      '@nestjs/common': 9.2.0_x6yqyveuahcdef4z4mxykmuv6a
+      prom-client: 14.2.0
+    dev: false
+
   /@xtuc/ieee754/1.2.0:
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
     dev: true
@@ -4827,6 +4841,10 @@ packages:
     resolution: {integrity: sha512-jDctJ/IVQbZoJykoeHbhXpOlNBqGNcwXJKJog42E5HDPUwQTSdjCHdihjj0DlnheQ7blbT6dHOafNAiS8ooQKA==}
     engines: {node: '>=8'}
     dev: true
+
+  /bintrees/1.0.2:
+    resolution: {integrity: sha512-VOMgTMwjAaUG580SXn3LacVgjurrbMme7ZZNYGSSV7mmtY6QQRh0Eg3pwIcntQ77DErK1L0NxkbetjcoXzVwKw==}
+    dev: false
 
   /bl/4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
@@ -11009,6 +11027,13 @@ packages:
     engines: {node: '>=0.4.0'}
     dev: true
 
+  /prom-client/14.2.0:
+    resolution: {integrity: sha512-sF308EhTenb/pDRPakm+WgiN+VdM/T1RaHj1x+MvAuT8UiQP8JmOEbxVqtkbfR4LrvOg5n7ic01kRBDGXjYikA==}
+    engines: {node: '>=10'}
+    dependencies:
+      tdigest: 0.1.2
+    dev: false
+
   /prompts/2.4.2:
     resolution: {integrity: sha512-NxNv/kLguCA7p3jE8oL2aEBsrJWgAakBpgmgK6lpPWV+WuOmY6r2/zbAVnP+T8bQlA0nzHXSJSJW0Hq7ylaD2Q==}
     engines: {node: '>= 6'}
@@ -12405,6 +12430,12 @@ packages:
   /tarn/3.0.2:
     resolution: {integrity: sha512-51LAVKUSZSVfI05vjPESNc5vwqqZpbXCsU+/+wxlOrUjk2SnFTt97v9ZgQrD4YmxYW1Px6w2KjaDitCfkvgxMQ==}
     engines: {node: '>=8.0.0'}
+    dev: false
+
+  /tdigest/0.1.2:
+    resolution: {integrity: sha512-+G0LLgjjo9BZX2MfdvPfH+MKLCrxlXSYec5DaPYP1fe6Iyhf0/fSmJ0bFiZ1F8BT6cGXl2LpltQptzjXKWEkKA==}
+    dependencies:
+      bintrees: 1.0.2
     dev: false
 
   /temp-file/3.4.0:

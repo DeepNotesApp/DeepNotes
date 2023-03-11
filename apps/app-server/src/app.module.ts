@@ -2,6 +2,7 @@ import { APP_GUARD, APP_PIPE, RouterModule } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { Module } from '@stdlib/nestjs';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { ZodValidationPipe } from 'nestjs-zod';
 
 import { ApiModule } from './api/api.module';
@@ -15,14 +16,12 @@ import { StripeModule } from './stripe/stripe.module';
       ttl: 60,
       limit: 15,
     }),
+    PrometheusModule.register(),
+    RouterModule,
+    JwtModule,
 
     { prefix: 'auth', module: AuthModule },
     { prefix: 'api', module: ApiModule },
-
-    RouterModule,
-
-    JwtModule,
-
     { prefix: 'stripe', module: StripeModule },
   ],
 
