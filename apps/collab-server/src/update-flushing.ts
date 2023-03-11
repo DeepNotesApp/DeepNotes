@@ -75,6 +75,6 @@ export const flushPageUpdatesThrottled = throttle(
       moduleLogger.error('Page update flushing error: %o', error);
     }
   },
-  30000,
+  5000,
   { leading: false },
 );
