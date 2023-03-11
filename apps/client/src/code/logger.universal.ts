@@ -13,7 +13,7 @@ import {
 export const mainLogger = once(
   () =>
     new Logger([
-      () => !!process.env.DEV,
+      () => !!process.env.DEV || !!process.env.STAGING,
 
       capitalizeField('level'),
       colorizeField('level'),

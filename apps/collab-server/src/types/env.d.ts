@@ -1,6 +1,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
     DEV?: string;
+    STAGING?: string;
 
     HOST: string;
 

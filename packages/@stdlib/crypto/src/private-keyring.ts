@@ -24,7 +24,7 @@ export function createPrivateKeyring(
       i <
       Math.min(
         _wrappedData.content.length / 32,
-        params?.maxKeys ?? (process.env.DEV ? 1 : 3),
+        params?.maxKeys ?? (process.env.DEV || process.env.STAGING ? 1 : 3),
       );
       ++i
     ) {

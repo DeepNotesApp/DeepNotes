@@ -13,6 +13,8 @@ declare namespace NodeJS {
     SERVER: string;
     MODE: 'spa' | 'ssr' | 'pwa' | 'bex' | 'cordova' | 'capacitor' | 'electron';
 
+    STAGING?: string;
+
     HOST: string;
 
     APP_SERVER_PORT: string;
