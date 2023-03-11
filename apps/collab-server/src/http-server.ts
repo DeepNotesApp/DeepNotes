@@ -5,14 +5,23 @@ import { createServer } from 'http';
 import jwt from 'jsonwebtoken';
 import { once } from 'lodash';
 import type { Socket } from 'net';
+import { collectDefaultMetrics, Registry } from 'prom-client';
 
 import { mainLogger } from './logger';
 import { wsServer } from './ws-server';
 
+const prometheusRegistry = new Registry();
+collectDefaultMetrics({ register: prometheusRegistry });
+
 export const httpServer = once(() =>
   createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Okay');
+    if (req.url === '/metrics') {
+      res.writeHead(200, { 'Content-Type': prometheusRegistry.contentType });
+      res.end(prometheusRegistry.metrics());
+    } else {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('Okay');
+    }
   }),
 );
 
