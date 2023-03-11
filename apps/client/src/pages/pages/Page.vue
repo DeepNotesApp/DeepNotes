@@ -16,7 +16,7 @@ useMeta(() => {
   const groupName = groupNames()(page.react.groupId).get().text;
   const pageTitle = getPageTitle(page.id, { prefer: 'absolute' }).text;
 
-  return { title: `${pageTitle} - ${groupName} - DeepNotes` };
+  return { title: `${pageTitle} - ${groupName}` };
 });
 
 onMounted(async () => {
