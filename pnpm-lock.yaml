@@ -641,6 +641,7 @@ importers:
       '@stdlib/misc': workspace:1.0.0
       '@types/crypto-js': ^4.1.1
       '@types/libsodium-wrappers': 0.7.10
+      '@types/node': ^18.11.18
       crypto-js: ^4.1.1
       libsodium-wrappers: 0.7.10
     dependencies:
@@ -651,6 +652,7 @@ importers:
     devDependencies:
       '@types/crypto-js': 4.1.1
       '@types/libsodium-wrappers': 0.7.10
+      '@types/node': 18.13.0
 
   packages/@stdlib/data:
     specifiers:
@@ -2011,14 +2013,14 @@ packages:
       '@jest/test-result': 29.3.1
       '@jest/transform': 29.3.1
       '@jest/types': 29.3.1
-      '@types/node': 18.11.18
+      '@types/node': 18.13.0
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.6.1
       exit: 0.1.2
       graceful-fs: 4.2.10
       jest-changed-files: 29.2.0
-      jest-config: 29.3.1_zfha7dvnw4nti6zkbsmhmn6xo4
+      jest-config: 29.3.1_ucpl6toqp57nqodtp3vxxi6g5a
       jest-haste-map: 29.3.1
       jest-message-util: 29.3.1
       jest-regex-util: 29.2.0
@@ -2193,7 +2195,7 @@ packages:
       '@jest/schemas': 29.0.0
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 18.11.18
+      '@types/node': 18.13.0
       '@types/yargs': 17.0.13
       chalk: 4.1.2
     dev: true
@@ -8869,46 +8871,6 @@ packages:
       '@jest/test-sequencer': 29.3.1
       '@jest/types': 29.3.1
       '@types/node': 18.13.0
-      babel-jest: 29.3.1_@babel+core@7.20.2
-      chalk: 4.1.2
-      ci-info: 3.8.0
-      deepmerge: 4.2.2
-      glob: 7.2.3
-      graceful-fs: 4.2.10
-      jest-circus: 29.3.1
-      jest-environment-node: 29.3.1
-      jest-get-type: 29.2.0
-      jest-regex-util: 29.2.0
-      jest-resolve: 29.3.1
-      jest-runner: 29.3.1
-      jest-util: 29.3.1
-      jest-validate: 29.3.1
-      micromatch: 4.0.5
-      parse-json: 5.2.0
-      pretty-format: 29.3.1
-      slash: 3.0.0
-      strip-json-comments: 3.1.1
-      ts-node: 10.9.1_nzmgu45mhmik4zm4geprvt2coi
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /jest-config/29.3.1_zfha7dvnw4nti6zkbsmhmn6xo4:
-    resolution: {integrity: sha512-y0tFHdj2WnTEhxmGUK1T7fgLen7YK4RtfvpLFBXfQkh2eMJAQq24Vx9472lvn5wg0MAO6B+iPfJfzdR9hJYalg==}
-    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-    peerDependencies:
-      '@types/node': '*'
-      ts-node: '>=9.0.0'
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      ts-node:
-        optional: true
-    dependencies:
-      '@babel/core': 7.20.2
-      '@jest/test-sequencer': 29.3.1
-      '@jest/types': 29.3.1
-      '@types/node': 18.11.18
       babel-jest: 29.3.1_@babel+core@7.20.2
       chalk: 4.1.2
       ci-info: 3.8.0

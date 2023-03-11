@@ -207,7 +207,7 @@ const html = marked(`
   We use keyrings in order to facilitate realtime key rotation.
   A keyring is a list of keys, where the first key is the current key, and the rest are previous keys.
   On a key rotation, we generate a new key that is added to the beginning of the keyring.
-  At this moment, the maximum number of keys in a keyring is set to 2.
+  At this moment, the maximum number of keys in a keyring is set to 3.
 
   <br/>
 

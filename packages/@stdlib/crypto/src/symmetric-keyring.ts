@@ -22,7 +22,11 @@ export function createSymmetricKeyring(
   if (_wrappedData.topLayer === DataLayer.Raw) {
     for (
       let i = 0;
-      i < Math.min(_wrappedData.content.length / 32, params?.maxKeys ?? 2);
+      i <
+      Math.min(
+        _wrappedData.content.length / 32,
+        params?.maxKeys ?? (process.env.DEV ? 1 : 3),
+      );
       ++i
     ) {
       _keys.push(
