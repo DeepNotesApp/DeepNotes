@@ -11,7 +11,7 @@
       "
     >
       <ResponsiveContainer style="display: flex; align-items: center">
-        <LeftMenu></LeftMenu>
+        <LeftHeaderMenu></LeftHeaderMenu>
 
         <q-toolbar-title style="overflow: visible; padding: 0px; flex: none">
           <router-link
@@ -99,9 +99,9 @@
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, isIncluded } from '@stdlib/misc';
 import { useResizeObserver } from 'src/code/utils.universal';
+import LeftHeaderMenu from 'src/pages/home/Account/AccountMenu.vue';
 import type { ComponentPublicInstance } from 'vue';
 
-import LeftMenu from './LeftMenu.vue';
 import RightButtons from './RightButtons/RightButtons.vue';
 import RightMenu from './RightButtons/RightMenu.vue';
 
