@@ -47,7 +47,7 @@ import { multiModePath } from 'src/code/utils.universal';
 import WhitepaperItems from './WhitepaperItems.vue';
 
 const html = marked(`
-  DeepNotes' [source code](https://github.com/konponsoft/deepnotes) is available on GitHub.
+  DeepNotes' [source code](https://github.com/DeepNotesApp/DeepNotes) is available on GitHub.
 
   <br/>
 
