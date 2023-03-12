@@ -5,6 +5,7 @@
     "
     :style="{ cursor: note.react.cursor }"
     tabindex="-1"
+    target="_blank"
   >
     <div
       class="note-content"
