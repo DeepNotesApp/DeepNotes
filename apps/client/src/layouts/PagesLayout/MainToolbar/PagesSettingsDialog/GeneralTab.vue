@@ -6,7 +6,7 @@
       <q-icon
         name="mdi-information"
         size="15px"
-        style="margin-top: -1px"
+        style="margin-top: -1px; opacity: 0.9"
       >
         <q-tooltip
           anchor="top middle"

@@ -6,7 +6,25 @@
         !realtimeCtx.hget('group', groupId, 'is-personal')
       "
     >
-      <div>Group name</div>
+      <div>
+        Group name
+
+        <q-icon
+          name="mdi-information"
+          size="15px"
+          style="margin-top: -1px; opacity: 0.9"
+        >
+          <q-tooltip
+            anchor="top middle"
+            self="bottom middle"
+            transition-show="jump-up"
+            transition-hide="jump-down"
+            max-width="164px"
+          >
+            This value is encrypted, unreadable to the server.
+          </q-tooltip>
+        </q-icon>
+      </div>
 
       <Gap style="height: 8px" />
 
@@ -20,7 +38,25 @@
 
       <Gap style="height: 20px" />
 
-      <div>Your in-group name</div>
+      <div>
+        Your in-group name
+
+        <q-icon
+          name="mdi-information"
+          size="15px"
+          style="margin-top: -1px; opacity: 0.9"
+        >
+          <q-tooltip
+            anchor="top middle"
+            self="bottom middle"
+            transition-show="jump-up"
+            transition-hide="jump-down"
+            max-width="164px"
+          >
+            This value is encrypted, unreadable to the server.
+          </q-tooltip>
+        </q-icon>
+      </div>
 
       <Gap style="height: 8px" />
 
