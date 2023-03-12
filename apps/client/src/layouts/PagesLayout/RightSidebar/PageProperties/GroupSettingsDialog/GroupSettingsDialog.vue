@@ -73,6 +73,13 @@
               :disable="loading"
             />
 
+            <TabBtn
+              name="Pages"
+              icon="mdi-page"
+              :settings="settings"
+              :disable="loading"
+            />
+
             <template
               v-if="authStore().loggedIn && !groupIsPersonal && !loading"
             >
@@ -110,6 +117,7 @@
           "
         >
           <GeneralTab v-if="settings.tab === 'General'" />
+          <PagesTab v-if="settings.tab === 'Pages'" />
           <MembersTab v-if="settings.tab === 'Members'" />
           <InvitationsTab v-if="settings.tab === 'Join invitations'" />
           <RequestsTab v-if="settings.tab === 'Join requests'" />
@@ -140,6 +148,9 @@ export function initialSettings(groupId: string) {
     tab: 'General',
 
     general: {},
+    pages: {
+      selectedPageIds: new Set<string>(),
+    },
     members: {
       selectedUserIds: new Set<string>(),
     },
@@ -163,6 +174,7 @@ import type { Ref } from 'vue';
 import GeneralTab from './GeneralTab/GeneralTab.vue';
 import InvitationsTab from './InvitationsTab/InvitationsTab.vue';
 import MembersTab from './MembersTab/MembersTab.vue';
+import PagesTab from './PagesTab/PagesTab.vue';
 import RequestsTab from './RequestsTab/RequestsTab.vue';
 
 const props = defineProps<{

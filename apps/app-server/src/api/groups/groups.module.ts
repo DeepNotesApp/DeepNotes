@@ -10,6 +10,7 @@ import { PasswordModule } from './password/password.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { RemoveUserModule } from './remove-user/remove-user.module';
 import { RotateKeysModule } from './rotate-keys/rotate-keys.module';
+import { LoadPagesModule } from './load-pages/load-pages.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RotateKeysModule } from './rotate-keys/rotate-keys.module';
     { prefix: ':groupId/privacy', module: PrivacyModule },
     { prefix: ':groupId/main-page-id', module: MainPageIdModule },
     { prefix: ':groupId/rotate-keys', module: RotateKeysModule },
+    LoadPagesModule,
   ],
 })
 export class GroupsModule {}
