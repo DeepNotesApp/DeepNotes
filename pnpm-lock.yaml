@@ -242,6 +242,7 @@ importers:
       '@types/argon2-browser': ^1.18.1
       '@types/color': 3.0.3
       '@types/cookie': 0.5.1
+      '@types/katex': ^0.16.0
       '@types/libsodium-wrappers': 0.7.10
       '@types/lodash': 4.14.189
       '@types/marked': 4.0.8
@@ -268,6 +269,7 @@ importers:
       highlight.js: 11.6.0
       ioredis: npm:@gustavotoyota/ioredis@5.2.7
       js-base64: 3.7.3
+      katex: ^0.16.4
       lib0: 0.2.53
       libsodium-wrappers: 0.7.10
       lodash: 4.17.21
@@ -347,6 +349,7 @@ importers:
       highlight.js: 11.6.0
       ioredis: /@gustavotoyota/ioredis/5.2.7
       js-base64: 3.7.3
+      katex: 0.16.4
       lib0: 0.2.53
       libsodium-wrappers: 0.7.10
       lodash: 4.17.21
@@ -379,6 +382,7 @@ importers:
       '@types/argon2-browser': 1.18.1
       '@types/color': 3.0.3
       '@types/cookie': 0.5.1
+      '@types/katex': 0.16.0
       '@types/libsodium-wrappers': 0.7.10
       '@types/lodash': 4.14.189
       '@types/qrcode': 1.5.0
@@ -3582,6 +3586,10 @@ packages:
       '@types/node': 18.13.0
     dev: true
 
+  /@types/katex/0.16.0:
+    resolution: {integrity: sha512-hz+S3nV6Mym5xPbT9fnO8dDhBFQguMYpY0Ipxv06JMi1ORgnEM4M1ymWDUhUNer3ElLmT583opRo4RzxKmh9jw==}
+    dev: true
+
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
@@ -5410,6 +5418,11 @@ packages:
   /commander/6.2.1:
     resolution: {integrity: sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==}
     engines: {node: '>= 6'}
+    dev: false
+
+  /commander/8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
     dev: false
 
   /commander/9.4.1:
@@ -9443,6 +9456,13 @@ packages:
     dependencies:
       jwa: 1.4.1
       safe-buffer: 5.2.1
+
+  /katex/0.16.4:
+    resolution: {integrity: sha512-WudRKUj8yyBeVDI4aYMNxhx5Vhh2PjpzQw1GRu/LVGqL4m1AxwD1GcUp0IMbdJaf5zsjtj8ghP0DOQRYhroNkw==}
+    hasBin: true
+    dependencies:
+      commander: 8.3.0
+    dev: false
 
   /keyv/3.1.0:
     resolution: {integrity: sha512-9ykJ/46SN/9KPM/sichzQ7OvXyGDYKGTaDlKMGCAlg2UK8KRy4jb0d8sFc+0Tt0YYnThq8X2RZgCg74RPxgcVA==}
