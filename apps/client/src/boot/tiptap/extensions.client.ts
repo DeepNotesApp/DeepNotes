@@ -21,6 +21,7 @@ import type { Fragment, Slice } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import { TaskItem } from 'src/boot/tiptap/task-item.client';
+import { MathBlockExtension } from 'src/code/tiptap/math-block/math-block-extension';
 
 import { ImageResizeExtension } from './image-resize-extension.client';
 
@@ -150,4 +151,6 @@ export const extensions = once(() => [
       ];
     },
   }),
+
+  MathBlockExtension,
 ]);

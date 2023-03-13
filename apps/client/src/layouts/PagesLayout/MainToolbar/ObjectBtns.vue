@@ -22,11 +22,11 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Math expression\n(Coming soon)'"
+    :tooltip="'Math block'"
     icon="mdi-sigma"
     icon-size="24px"
-    disable
-    @click="page.selection.format((chain) => chain.toggleTaskList())"
+    :disable="page.react.readOnly || !page.activeElem.react.exists"
+    @click="page.selection.format((chain) => (chain as any).addMathBlock())"
   />
 
   <q-separator
