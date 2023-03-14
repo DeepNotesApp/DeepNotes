@@ -1,8 +1,10 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
-  <NodeViewWrapper style="display: inline">
+  <NodeViewWrapper
+    as="span"
+    class="inline-math"
+  >
     <span
-      class="math-block"
       contentEditable="false"
       draggable="true"
       data-drag-handle
@@ -64,28 +66,3 @@ const renderedFormula = computed(() => {
   });
 });
 </script>
-
-<style scoped>
-.math-block {
-  border-radius: 4px;
-
-  text-align: center;
-  font-style: italic;
-  font-size: 18px;
-
-  transition: background-color 0.1s ease-in-out;
-}
-
-.math-block,
-.math-block :deep(*) {
-  user-select: none !important;
-}
-</style>
-
-<style>
-.text-editor.editing .math-block:hover {
-  cursor: pointer;
-
-  background-color: rgba(255, 255, 255, 0.1);
-}
-</style>

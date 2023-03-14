@@ -151,6 +151,6 @@ export const extensions = once(() => [
       ];
     },
   }),
-  InlineMathExtension,
 
+  InlineMathExtension,
 ]);

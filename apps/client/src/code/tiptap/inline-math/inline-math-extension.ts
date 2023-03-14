@@ -1,40 +1,45 @@
-import { mergeAttributes, Node } from '@tiptap/core';
-import { VueNodeViewRenderer } from '@tiptap/vue-3';
+import '@benrbray/prosemirror-math/style/math.css';
+import 'katex/dist/katex.min.css';
 
-import InlineMath from './InlineMath.vue';
+import {
+  makeInlineMathInputRule,
+  mathPlugin,
+  REGEX_INLINE_MATH_DOLLARS,
+} from '@benrbray/prosemirror-math';
+import { mergeAttributes, Node } from '@tiptap/vue-3';
+import { inputRules } from 'prosemirror-inputrules';
+
+export const regex = /(?:^|\s)((?:\$)((?:[^*]+))(?:\$))$/;
 
 export const InlineMathExtension = Node.create({
-  name: 'InlineMath',
-
-  group: 'inline',
-  content: 'text*',
+  name: 'math_inline',
+  group: 'inline math',
+  content: 'text*', // important!
 
   marks: '',
 
-  atom: true,
-  inline: true,
-  defining: true,
-  isolating: true,
+  inline: true, // important!
+  atom: true, // important!
   code: true,
 
-  addAttributes() {
-    return {
-      content: {
-        default: '',
-      },
-    };
-  },
-
   parseHTML() {
-    return [{ tag: 'span.inline-math' }];
+    return [{ tag: 'math-inline' }]; // important!
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['span', mergeAttributes(HTMLAttributes, { class: 'inline-math' })];
+    return [
+      'math-inline',
+      mergeAttributes({ class: 'math-node' }, HTMLAttributes),
+      0,
+    ];
   },
 
-  addNodeView() {
-    return VueNodeViewRenderer(InlineMath);
+  addProseMirrorPlugins() {
+    const inputRulePlugin = inputRules({
+      rules: [makeInlineMathInputRule(REGEX_INLINE_MATH_DOLLARS, this.type)],
+    });
+
+    return [mathPlugin, inputRulePlugin];
   },
 
   addCommands(): any {
