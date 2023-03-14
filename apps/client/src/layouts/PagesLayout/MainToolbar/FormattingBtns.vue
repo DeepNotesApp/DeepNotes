@@ -70,6 +70,13 @@
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('justify'))"
   />
+  <ToolbarBtn
+    :tooltip="'Inline math'"
+    icon="mdi-sigma"
+    icon-size="24px"
+    :disable="page.react.readOnly || !page.activeElem.react.exists"
+    @click="page.selection.format((chain) => (chain as any).addInlineMath())"
+  />
 
   <q-separator
     vertical
