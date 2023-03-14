@@ -222,6 +222,10 @@ defineProps<Props>();
       .ProseMirror-separator {
         display: none !important;
       }
+
+      .ProseMirror-gapcursor:after {
+        border-top: 1px solid white;
+      }
     }
   }
 }
