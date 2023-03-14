@@ -10,6 +10,8 @@ export async function logout() {
 
   // Clear local storage
 
+  internals.sessionStorage.removeItem('demo');
+
   internals.storage.removeItem('userId');
   internals.storage.removeItem('sessionId');
   internals.storage.removeItem('personalGroupId');

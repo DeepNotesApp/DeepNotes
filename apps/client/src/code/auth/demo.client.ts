@@ -38,7 +38,7 @@ export async function enterDemo() {
   await login({
     ...response,
 
-    email: 'demo',
+    demo: true,
     rememberSession: false,
 
     masterKey: derivedKeys.masterKey,

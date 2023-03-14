@@ -45,13 +45,24 @@ const newEmail = ref('');
 
 async function changeEmail() {
   try {
-    if (
-      !newEmail.value.match(w3cEmailRegex) ||
-      newEmail.value ===
-        internals.realtime.globalCtx.hget('user', authStore().userId, 'email')
-    ) {
+    const currentEmail = await internals.realtime.hget(
+      'user',
+      authStore().userId,
+      'email',
+    );
+
+    if (!w3cEmailRegex.test(newEmail.value)) {
       $quasar().notify({
         message: 'New email address is invalid.',
+        color: 'negative',
+      });
+
+      return;
+    }
+
+    if (newEmail.value.toLowerCase() === currentEmail.toLowerCase()) {
+      $quasar().notify({
+        message: 'New email address is the same as the current one.',
         color: 'negative',
       });
 
@@ -79,12 +90,6 @@ async function changeEmail() {
     });
 
     // Compute derived keys
-
-    const currentEmail = await internals.realtime.hget(
-      'user',
-      authStore().userId,
-      'email',
-    );
 
     const oldDerivedValues = await deriveUserValues(currentEmail!, password);
     const newDerivedValues = await deriveUserValues(newEmail.value, password);

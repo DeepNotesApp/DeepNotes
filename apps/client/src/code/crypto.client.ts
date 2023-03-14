@@ -46,7 +46,7 @@ export async function derivePasswordValues(
 export async function deriveUserValues(email: string, password: string) {
   const emailHash = sodium.crypto_generichash(
     sodium.crypto_pwhash_SALTBYTES,
-    email,
+    email.toLowerCase(),
   );
 
   const passwordValues = await derivePasswordValues(password, emailHash);
