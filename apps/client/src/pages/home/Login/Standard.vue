@@ -173,7 +173,6 @@ async function onSubmit() {
     await login({
       ...response,
 
-      email: email.value,
       rememberSession: rememberSession.value,
 
       masterKey: derivedKeys.masterKey,

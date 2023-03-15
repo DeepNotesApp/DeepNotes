@@ -18,6 +18,7 @@ import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import { z } from 'nestjs-zod/z';
 
+import type { RegistrationValues } from './auth/register/register.controller';
 import type { PasswordValues } from './crypto';
 import { computePasswordHash, derivePasswordValues } from './crypto';
 import { dataAbstraction } from './data/data-abstraction';
@@ -209,12 +210,12 @@ export async function userHasPermission(
 export async function createUser({
   demo,
 
+  email,
+  loginHash,
+
   userId,
   groupId,
   pageId,
-
-  email,
-  loginHash,
 
   userPublicKeyring,
   userEncryptedPrivateKeyring,
@@ -244,36 +245,13 @@ export async function createUser({
 
   demo?: boolean;
 
-  userId: string;
-  groupId: string;
-  pageId: string;
-
   email: string;
   loginHash: string;
-
-  userPublicKeyring: string;
-  userEncryptedPrivateKeyring: string;
-  userEncryptedSymmetricKeyring: string;
-
-  userEncryptedName: string;
-  userEncryptedDefaultNote: string;
-  userEncryptedDefaultArrow: string;
-
-  groupEncryptedAccessKeyring: string;
-  groupEncryptedInternalKeyring: string;
-  groupEncryptedContentKeyring: string;
-
-  groupPublicKeyring: string;
-  groupEncryptedPrivateKeyring: string;
-
-  pageEncryptedSymmetricKeyring: string;
-  pageEncryptedRelativeTitle: string;
-  pageEncryptedAbsoluteTitle: string;
 
   passwordValues?: PasswordValues;
 
   dtrx?: DataTransaction;
-}) {
+} & RegistrationValues) {
   const emailVerificationCode = nanoid();
 
   passwordValues ??= derivePasswordValues(base64ToBytes(loginHash));

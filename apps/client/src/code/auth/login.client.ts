@@ -7,7 +7,8 @@ import { multiModePath } from '../utils.universal';
 import { storeClientTokenExpirations } from './tokens.client';
 
 export async function login({
-  email,
+  demo,
+
   rememberSession,
 
   masterKey,
@@ -23,7 +24,8 @@ export async function login({
 
   personalGroupId,
 }: {
-  email: string;
+  demo?: boolean;
+
   rememberSession: boolean;
 
   masterKey: SymmetricKey;
@@ -39,16 +41,16 @@ export async function login({
 
   personalGroupId: string;
 }) {
+  if (demo) {
+    internals.localStorage.setItem('demo', 'true');
+  } else {
+    internals.localStorage.removeItem('demo');
+  }
+
   if (rememberSession) {
     internals.storage = internals.localStorage;
   } else {
     internals.storage = internals.sessionStorage;
-  }
-
-  if (email === 'demo') {
-    internals.localStorage.setItem('demo', 'true');
-  } else {
-    internals.localStorage.removeItem('demo');
   }
 
   internals.storage.setItem('userId', userId);

@@ -17,34 +17,42 @@ import { dataAbstraction } from 'src/data/data-abstraction';
 
 import { RegisterService } from './register.service';
 
+export const RegistrationSchema = z.object({
+  userId: z.string().refine(isNanoID),
+  groupId: z.string().refine(isNanoID),
+  pageId: z.string().refine(isNanoID),
+
+  userPublicKeyring: z.string().refine(isBase64),
+  userEncryptedPrivateKeyring: z.string().refine(isBase64),
+  userEncryptedSymmetricKeyring: z.string().refine(isBase64),
+
+  userEncryptedName: z.string().refine(isBase64),
+  userEncryptedDefaultNote: z.string().refine(isBase64),
+  userEncryptedDefaultArrow: z.string().refine(isBase64),
+
+  groupEncryptedAccessKeyring: z.string().refine(isBase64),
+  groupEncryptedInternalKeyring: z.string().refine(isBase64),
+  groupEncryptedContentKeyring: z.string().refine(isBase64),
+
+  groupPublicKeyring: z.string().refine(isBase64),
+  groupEncryptedPrivateKeyring: z.string().refine(isBase64),
+
+  pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
+  pageEncryptedRelativeTitle: z.string().refine(isBase64),
+  pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
+});
+export type RegistrationValues = z.infer<typeof RegistrationSchema>;
+
 class BodyDto extends createZodDto(
-  z.object({
-    userId: z.string().refine(isNanoID),
-    groupId: z.string().refine(isNanoID),
-    pageId: z.string().refine(isNanoID),
-
-    email: z.string().regex(w3cEmailRegex),
-    loginHash: z.string().refine(isBase64),
-
-    userPublicKeyring: z.string().refine(isBase64),
-    userEncryptedPrivateKeyring: z.string().refine(isBase64),
-    userEncryptedSymmetricKeyring: z.string().refine(isBase64),
-
-    userEncryptedName: z.string().refine(isBase64),
-    userEncryptedDefaultNote: z.string().refine(isBase64),
-    userEncryptedDefaultArrow: z.string().refine(isBase64),
-
-    groupEncryptedAccessKeyring: z.string().refine(isBase64),
-    groupEncryptedInternalKeyring: z.string().refine(isBase64),
-    groupEncryptedContentKeyring: z.string().refine(isBase64),
-
-    groupPublicKeyring: z.string().refine(isBase64),
-    groupEncryptedPrivateKeyring: z.string().refine(isBase64),
-
-    pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
-    pageEncryptedRelativeTitle: z.string().refine(isBase64),
-    pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
-  }),
+  z
+    .object({
+      email: z
+        .string()
+        .regex(w3cEmailRegex)
+        .transform((email) => email.toLowerCase()),
+      loginHash: z.string().refine(isBase64),
+    })
+    .merge(RegistrationSchema),
 ) {}
 
 export type EndpointValues = BodyDto & {
