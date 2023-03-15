@@ -7,9 +7,8 @@
       draggable="true"
       data-drag-handle
       v-html="renderedFormula"
-      :style="{
-        'background-color':
-          editor.isEditable && selected ? 'rgba(0, 109, 210, 0.2)' : undefined,
+      :class="{
+        selected: editor.isEditable && selected,
       }"
     ></div>
 
@@ -93,5 +92,8 @@ const renderedFormula = computed(() => {
   cursor: pointer;
 
   background-color: rgba(255, 255, 255, 0.1);
+}
+.text-editor.editing .math-block.selected {
+  background-color: rgba(0, 109, 210, 0.2);
 }
 </style>
