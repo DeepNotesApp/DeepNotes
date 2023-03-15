@@ -168,7 +168,7 @@ async function register() {
   try {
     // Check if email is valid
 
-    if (!email.value.match(w3cEmailRegex)) {
+    if (!w3cEmailRegex.test(email.value)) {
       $quasar().notify({
         message: 'Email is invalid.',
         type: 'negative',

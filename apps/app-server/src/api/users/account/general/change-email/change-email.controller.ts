@@ -24,7 +24,10 @@ import { ChangeEmailService } from './change-email.service';
 
 class BodyDto extends createZodDto(
   z.object({
-    newEmail: z.string().email(),
+    newEmail: z
+      .string()
+      .email()
+      .transform((email) => email.toLowerCase()),
 
     oldLoginHash: z.string().refine(isBase64),
     newLoginHash: z.string().refine(isBase64).optional(),

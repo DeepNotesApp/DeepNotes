@@ -12,7 +12,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { base64ToBytes, isBase64 } from '@stdlib/base64';
 import { getPasswordHashValues, wrapSymmetricKey } from '@stdlib/crypto';
-import { equalUint8Arrays, isNanoID, w3cEmailRegex } from '@stdlib/misc';
+import { equalUint8Arrays, w3cEmailRegex } from '@stdlib/misc';
 import { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
@@ -25,6 +25,7 @@ import { dataAbstraction } from 'src/data/data-abstraction';
 import { createUser } from 'src/deep-utils';
 import { decryptUserRehashedLoginHash } from 'src/utils';
 
+import { RegistrationSchema } from '../register/register.controller';
 import { LoginService } from './login.service';
 
 class BodyDto extends createZodDto(
@@ -32,7 +33,8 @@ class BodyDto extends createZodDto(
     email: z
       .string()
       .regex(w3cEmailRegex)
-      .or(z.string().refine((email) => email === 'demo')),
+      .or(z.string().refine((email) => email === 'demo'))
+      .transform((email) => email.toLowerCase()),
     loginHash: z.string().refine(isBase64),
     rememberSession: z.boolean(),
 
@@ -44,32 +46,7 @@ class BodyDto extends createZodDto(
       .regex(/^[a-f0-9]{32}$/)
       .optional(),
 
-    demo: z
-      .object({
-        userId: z.string().refine(isNanoID),
-        groupId: z.string().refine(isNanoID),
-        pageId: z.string().refine(isNanoID),
-
-        userPublicKeyring: z.string().refine(isBase64),
-        userEncryptedPrivateKeyring: z.string().refine(isBase64),
-        userEncryptedSymmetricKeyring: z.string().refine(isBase64),
-
-        userEncryptedName: z.string().refine(isBase64),
-        userEncryptedDefaultNote: z.string().refine(isBase64),
-        userEncryptedDefaultArrow: z.string().refine(isBase64),
-
-        groupEncryptedAccessKeyring: z.string().refine(isBase64),
-        groupEncryptedInternalKeyring: z.string().refine(isBase64),
-        groupEncryptedContentKeyring: z.string().refine(isBase64),
-
-        groupPublicKeyring: z.string().refine(isBase64),
-        groupEncryptedPrivateKeyring: z.string().refine(isBase64),
-
-        pageEncryptedSymmetricKeyring: z.string().refine(isBase64),
-        pageEncryptedRelativeTitle: z.string().refine(isBase64),
-        pageEncryptedAbsoluteTitle: z.string().refine(isBase64),
-      })
-      .optional(),
+    demo: RegistrationSchema.optional(),
   }),
 ) {}
 
@@ -135,24 +112,33 @@ export class LoginController {
         );
       }
 
-      if (values.email === 'demo' && values.demo != null) {
-        values.email = `demo-${nanoid()}`;
+      if (values.demo != null) {
+        if (RegistrationSchema.safeParse(values.demo).success) {
+          // Create demo account
 
-        values.passwordValues = {
-          hash: sodium.randombytes_buf(64),
-          key: wrapSymmetricKey(sodium.randombytes_buf(32)),
-          salt: new Uint8Array(sodium.randombytes_buf(16)),
-        };
+          values.email = `demo-${nanoid()}`;
 
-        values.user = await createUser({
-          ...values,
+          values.passwordValues = {
+            hash: sodium.randombytes_buf(64),
+            key: wrapSymmetricKey(sodium.randombytes_buf(32)),
+            salt: new Uint8Array(sodium.randombytes_buf(16)),
+          };
 
-          ...values.demo,
+          values.user = await createUser({
+            ...values,
 
-          passwordValues: values.passwordValues,
+            ...values.demo,
 
-          demo: true,
-        });
+            demo: true,
+
+            passwordValues: values.passwordValues,
+          });
+        } else {
+          throw new HttpException(
+            'Incorrect email or password.',
+            HttpStatus.FORBIDDEN,
+          );
+        }
       } else {
         // Get user
 

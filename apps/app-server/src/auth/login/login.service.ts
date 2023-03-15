@@ -202,19 +202,19 @@ export class LoginService {
 
   async setAuthCookies({
     jwtService,
-    email,
     user,
     sessionId,
     refreshCode,
     reply,
     rememberSession,
+    demo,
   }: EndpointValues) {
     const tokens = await generateTokens(
       jwtService,
       user.id,
       sessionId,
       refreshCode,
-      rememberSession && email !== 'demo',
+      rememberSession && demo == null,
     );
 
     setCookies(reply, tokens.accessToken, tokens.refreshToken, rememberSession);
