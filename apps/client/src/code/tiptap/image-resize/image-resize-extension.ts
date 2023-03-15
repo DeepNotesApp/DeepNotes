@@ -2,7 +2,7 @@ import Image from '@tiptap/extension-image';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 import { once } from 'lodash';
 
-import ImageResize from './ImageResize.client.vue';
+import ImageResize from './ImageResize.vue';
 
 export const ImageResizeExtension = once(() =>
   Image.extend({
