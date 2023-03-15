@@ -37,8 +37,19 @@ defineProps<Props>();
       p {
         margin-bottom: 0;
       }
+
       > * + * {
-        margin-top: 12px;
+        margin-top: 10px;
+      }
+
+      > * + hr,
+      > hr + * {
+        margin-top: 14px;
+      }
+
+      > * + .tableWrapper,
+      > .tableWrapper + * {
+        margin-top: 14px;
       }
 
       table {
@@ -163,8 +174,6 @@ defineProps<Props>();
       }
 
       hr {
-        margin: 12px 0;
-
         border: none;
         height: 1px;
         background-color: rgba(255, 255, 255, 0.35);
