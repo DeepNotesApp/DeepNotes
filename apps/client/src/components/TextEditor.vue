@@ -27,20 +27,21 @@ defineProps<Props>();
 
       touch-action: pan-x pan-y !important;
 
-      &[contenteditable='false'] img {
-        -webkit-user-drag: none;
-      }
-      &[contenteditable='false'] hr {
-        -webkit-user-drag: none;
+      &[contenteditable='false'] {
+        img,
+        hr {
+          -webkit-user-drag: none;
+        }
       }
 
       p {
         margin-bottom: 0;
       }
+      > * + * {
+        margin-top: 12px;
+      }
 
       table {
-        margin: 7px 0;
-
         border-collapse: collapse;
 
         td,
@@ -162,7 +163,7 @@ defineProps<Props>();
       }
 
       hr {
-        margin: 9px 0;
+        margin: 12px 0;
 
         border: none;
         height: 1px;
@@ -174,7 +175,8 @@ defineProps<Props>();
       }
 
       blockquote {
-        margin: 4px 0;
+        margin-left: 4px;
+        margin-right: 0px;
 
         border-left: 5px solid rgba(#fff, 0.5);
 
