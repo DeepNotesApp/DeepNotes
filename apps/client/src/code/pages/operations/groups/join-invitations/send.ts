@@ -1,3 +1,4 @@
+import type { GroupRoleID } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { bytesToBase64Safe } from '@stdlib/base64';
 import { createPublicKeyring } from '@stdlib/crypto';
@@ -16,7 +17,7 @@ export async function sendJoinInvitation(
     inviteeUserName,
   }: {
     inviteeUserId: string;
-    inviteeRole: string;
+    inviteeRole: GroupRoleID;
     inviteeUserName: string;
   },
 ) {

@@ -46,6 +46,7 @@ export async function sendJoinRequest(
       observers: {
         groupId: groupId,
 
+        agentId: authStore().userId,
         agentName: userName,
 
         // ${agentName} has sent a join request.

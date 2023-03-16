@@ -56,20 +56,20 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupRoleID } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { acceptJoinRequest } from 'src/code/pages/operations/groups/join-requests/accept';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
-import type { initialSettings } from '../GroupSettingsDialog.vue';
-
 const props = defineProps<{
-  settings: ReturnType<typeof initialSettings>;
+  groupId: string;
+  userId: string;
 }>();
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
-const targetRole = ref<string | null>(null);
+const targetRole = ref<GroupRoleID | null>(null);
 
 async function _acceptJoinRequest() {
   try {
@@ -82,12 +82,10 @@ async function _acceptJoinRequest() {
       return;
     }
 
-    await acceptJoinRequest(props.settings.groupId, {
-      patientId: [...props.settings.requests.selectedUserIds][0],
+    await acceptJoinRequest(props.groupId, {
+      patientId: props.userId,
       targetRole: targetRole.value,
     });
-
-    props.settings.requests.selectedUserIds.clear();
 
     dialogRef.value.onDialogOK();
   } catch (error: any) {

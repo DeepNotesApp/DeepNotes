@@ -68,6 +68,7 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupRoleID } from '@deeplib/misc';
 import { maxNameLength, roles, rolesMap } from '@deeplib/misc';
 import { isNanoID, maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { sendJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/send';
@@ -85,7 +86,7 @@ const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const identity = ref<string>('');
 const userName = ref<string>('');
-const role = ref<string | null>(null);
+const role = ref<GroupRoleID | null>(null);
 
 async function inviteUser() {
   try {

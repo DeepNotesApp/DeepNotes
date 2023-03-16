@@ -1,4 +1,5 @@
 import type { DeepNotesNotification } from '@deeplib/misc';
+import type { QNotifyCreateOptions } from 'quasar';
 
 import { getGroupInvitationAcceptedNotificationInfo } from './group-invitation-accepted.client';
 import { getGroupInvitationCanceledNotificationInfo } from './group-invitation-canceled.client';
@@ -10,6 +11,8 @@ import { getGroupRequestAcceptedNotificationInfo } from './group-request-accepte
 import { getGroupRequestCanceledNotificationInfo } from './group-request-canceled.client';
 import { getGroupRequestRejectedNotificationInfo } from './group-request-rejected.client';
 import { getGroupRequestSentNotificationInfo } from './group-request-sent.client';
+
+export type NotificationInfo = QNotifyCreateOptions;
 
 export async function getNotificationInfo(
   notifObj: DeepNotesNotification,

@@ -1,3 +1,5 @@
+import type { NotificationInfo } from './notifications.client';
+
 export async function getGroupMemberRoleChangedNotificationInfo({
   recipientType,
 
@@ -5,7 +7,7 @@ export async function getGroupMemberRoleChangedNotificationInfo({
   agentName,
   targetName,
   roleName,
-}: any): Promise<{ type: string; message: string }> {
+}: any): Promise<NotificationInfo> {
   if (recipientType === 'agent') {
     return {
       message: `You changed the role of ${targetName} to ${roleName} in the group ${groupName}.`,
@@ -14,12 +16,10 @@ export async function getGroupMemberRoleChangedNotificationInfo({
   } else if (recipientType === 'target') {
     return {
       message: `Your role was changed to ${roleName} in the group ${groupName}.`,
-      type: 'positive',
     };
   } else if (recipientType === 'observer') {
     return {
       message: `${agentName} changed the role of ${targetName} to ${roleName} in the group ${groupName}.`,
-      type: 'positive',
     };
   } else {
     throw new Error(`Unknown recipient type: ${recipientType}`);

@@ -1,10 +1,12 @@
+import type { NotificationInfo } from './notifications.client';
+
 export async function getGroupRequestAcceptedNotificationInfo({
   recipientType,
 
   groupName,
   agentName,
   targetName,
-}: any): Promise<{ type: string; message: string }> {
+}: any): Promise<NotificationInfo> {
   if (recipientType === 'agent') {
     return {
       message: `You have accepted the request of ${targetName} to join the group ${groupName}.`,

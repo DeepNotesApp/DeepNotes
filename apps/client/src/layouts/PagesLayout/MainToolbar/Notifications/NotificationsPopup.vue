@@ -75,6 +75,24 @@
             />
           </template>
         </q-infinite-scroll>
+
+        <template
+          v-if="
+            minNotificationId !== 0 &&
+            minNotificationId !== pagesStore().notifications.items.at(-1)?.id
+          "
+        >
+          <q-item>
+            <q-item-section style="padding: 8px 0">
+              <DeepBtn
+                label="Show older notifications"
+                color="primary"
+                style="text-transform: none"
+                @click="minNotificationId = 0"
+              />
+            </q-item-section>
+          </q-item>
+        </template>
       </template>
     </q-list>
   </q-menu>
