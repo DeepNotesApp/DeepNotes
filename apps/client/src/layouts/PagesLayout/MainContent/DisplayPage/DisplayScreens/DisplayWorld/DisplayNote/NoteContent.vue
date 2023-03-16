@@ -31,6 +31,7 @@ import {
 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
+import { isCtrlDown } from 'src/code/utils.client';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;
@@ -73,7 +74,7 @@ function onLeftPointerDown(event: PointerEvent) {
 }
 
 function onLeftPointerUp(event: PointerEvent) {
-  if (page.arrowCreation.react.active && !event.ctrlKey) {
+  if (page.arrowCreation.react.active && !isCtrlDown(event)) {
     const arrow = page.arrowCreation.linkNote(note);
 
     if (arrow != null) {

@@ -107,7 +107,7 @@ import {
   rejectJoinInvitation,
 } from 'src/code/pages/groups.client';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
@@ -159,7 +159,7 @@ function deselectAll() {
 }
 
 function select(groupId: string, event: MouseEvent) {
-  if (!event.ctrlKey) {
+  if (!isCtrlDown(event)) {
     baseSelectedGroupIds.value.clear();
   }
 
@@ -213,7 +213,7 @@ async function rejectSelectedInvitations() {
 
 async function goToMainPage(event: MouseEvent) {
   await internals.pages.goToGroup(activeGroupId.value!, {
-    openInNewTab: event.ctrlKey,
+    openInNewTab: isCtrlDown(event),
   });
 
   dialog.value.onDialogOK();

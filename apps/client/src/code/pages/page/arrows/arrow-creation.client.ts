@@ -2,6 +2,7 @@ import { listenPointerEvents } from '@stdlib/misc';
 import { cloneDeep, merge } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories.client';
+import { isCtrlDown } from 'src/code/utils.client';
 import { prosemirrorJSONToYXmlFragment } from 'y-prosemirror';
 
 import { ISerialArrow } from '../../serialization.client';
@@ -70,7 +71,7 @@ export class PageArrowCreation {
 
         this.react.active = false;
 
-        if (event.ctrlKey || internals.mobileAltKey) {
+        if (isCtrlDown(event) || internals.mobileAltKey) {
           const clientPos = this.page.pos.eventToClient(event);
           const worldPos = this.page.pos.clientToWorld(clientPos);
 

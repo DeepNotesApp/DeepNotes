@@ -103,7 +103,7 @@ import type { GroupKeyRotationValues } from 'src/code/pages/group-key-rotation.c
 import { rotateGroupKeys } from 'src/code/pages/group-key-rotation.client';
 import { createNotifications } from 'src/code/pages/utils.client';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 import type { initialSettings } from './PagesSettingsDialog.vue';
@@ -153,7 +153,7 @@ function deselectAll() {
 }
 
 function select(groupId: string, event: MouseEvent) {
-  if (!event.ctrlKey) {
+  if (!isCtrlDown(event)) {
     baseSelectedGroupIds.value.clear();
   }
 
@@ -244,7 +244,7 @@ async function leaveSelectedGroups() {
 
 async function goToMainPage(event: MouseEvent) {
   await internals.pages.goToGroup(activeGroupId.value!, {
-    openInNewTab: event.ctrlKey,
+    openInNewTab: isCtrlDown(event),
   });
 
   dialog.value.onDialogOK();

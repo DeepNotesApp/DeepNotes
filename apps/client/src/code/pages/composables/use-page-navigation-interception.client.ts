@@ -1,5 +1,5 @@
 import { isNanoID, splitStr } from '@stdlib/misc';
-import { handleError } from 'src/code/utils.client';
+import { handleError, isCtrlDown } from 'src/code/utils.client';
 
 export function usePageNavigationInterception() {
   onMounted(() => {
@@ -60,12 +60,12 @@ export function usePageNavigationInterception() {
       if (href.includes('/groups/')) {
         await internals.pages.goToGroup(id, {
           fromParent: true,
-          openInNewTab: event.ctrlKey,
+          openInNewTab: isCtrlDown(event),
         });
       } else {
         await internals.pages.goToPage(id, {
           fromParent: true,
-          openInNewTab: event.ctrlKey,
+          openInNewTab: isCtrlDown(event),
         });
       }
     } catch (error) {

@@ -1,20 +1,20 @@
 <template>
   <ToolbarBtn
-    :tooltip="'Ordered list\n(Ctrl + Shift + 7)'"
+    :tooltip="`Ordered list\n(${getCtrlKeyName()} + Shift + 7)`"
     icon="mdi-format-list-numbered"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.toggleOrderedList())"
   />
   <ToolbarBtn
-    :tooltip="'Bullet list\n(Ctrl + Shift + 8)'"
+    :tooltip="`Bullet list\n(${getCtrlKeyName()} + Shift + 8)`"
     icon="mdi-format-list-bulleted"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.toggleBulletList())"
   />
   <ToolbarBtn
-    :tooltip="'Checklist\n(Ctrl + Shift + 9)'"
+    :tooltip="`Checklist\n(${getCtrlKeyName()} + Shift + 9)`"
     icon="mdi-checkbox-marked-outline"
     icon-size="22px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -22,7 +22,7 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Math block'"
+    :tooltip="`Math block`"
     icon="mdi-sigma"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -35,14 +35,14 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Blockquote\n(Ctrl + Shift + B)'"
+    :tooltip="`Blockquote\n(${getCtrlKeyName()} + Shift + B)`"
     icon="mdi-format-quote-close"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.toggleBlockquote())"
   />
   <ToolbarBtn
-    :tooltip="'Codeblock\n(Ctrl + Alt + C)'"
+    :tooltip="`Codeblock\n(${getCtrlKeyName()} + Alt + C)`"
     icon="mdi-code-braces"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -65,7 +65,7 @@
   />
 
   <ToolbarBtn
-    :tooltip="'YouTube video\n(Coming soon)'"
+    :tooltip="`YouTube video\n(Coming soon)`"
     icon="mdi-youtube"
     icon-size="24px"
     disable
@@ -164,6 +164,8 @@
 </template>
 
 <script setup lang="ts">
+import { getCtrlKeyName } from 'src/code/utils.client';
+
 import InsertImageDialog from './InsertImageDialog.vue';
 
 defineProps<{

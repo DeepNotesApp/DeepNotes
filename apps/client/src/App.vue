@@ -7,6 +7,8 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
 
+import { isCtrlDown } from './code/utils.client';
+
 useMeta(() => ({
   title: 'DeepNotes - The next level of note-taking',
 }));
@@ -35,7 +37,7 @@ useEventListener(
       return;
     }
 
-    if (event.ctrlKey) {
+    if (isCtrlDown(event)) {
       event.preventDefault();
     }
   },
