@@ -76,7 +76,7 @@ const renderedFormula = computed(() => {
 
   text-align: center;
   font-style: italic;
-  font-size: 18px;
+  font-size: 17px;
 
   transition: background-color 0.1s ease-in-out;
 }
