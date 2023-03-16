@@ -46,13 +46,13 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      { path: 'internals.universal' },
       { path: 'helpers.universal' },
       { path: 'sodium.universal' },
       { path: 'i18n.universal' },
       { path: 'axios.universal' },
       { path: 'vue.universal' },
       { path: 'disable-cache.universal' },
-      { path: 'internals.universal' },
 
       { path: 'array-at-polyfill.client', server: false },
       { path: 'cross-tab-session-storage.client', server: false },
@@ -137,7 +137,7 @@ module.exports = configure(function (ctx) {
             {
               'src/boot/axios.universal': ['api'],
 
-              'src/boot/internals.universal': ['internals'],
+              'src/code/internals.universal': ['internals'],
 
               'src/code/stores.universal': [
                 'appStore',
