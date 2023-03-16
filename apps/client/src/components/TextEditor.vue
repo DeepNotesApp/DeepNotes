@@ -27,6 +27,8 @@ defineProps<Props>();
 
       touch-action: pan-x pan-y !important;
 
+      white-space: normal;
+
       &[contenteditable='false'] {
         img,
         hr {
@@ -37,8 +39,19 @@ defineProps<Props>();
       p {
         margin-bottom: 0;
       }
+
       > * + * {
-        margin-top: 12px;
+        margin-top: 10px;
+      }
+
+      > * + hr,
+      > hr + * {
+        margin-top: 14px;
+      }
+
+      > * + .tableWrapper,
+      > .tableWrapper + * {
+        margin-top: 14px;
       }
 
       table {
@@ -139,6 +152,9 @@ defineProps<Props>();
       }
 
       pre {
+        width: fit-content;
+        min-width: 100%;
+
         margin: 5px 0;
         border-radius: 0.4rem;
         padding: 0.4rem 0.5rem;
@@ -163,8 +179,6 @@ defineProps<Props>();
       }
 
       hr {
-        margin: 12px 0;
-
         border: none;
         height: 1px;
         background-color: rgba(255, 255, 255, 0.35);

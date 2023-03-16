@@ -17,38 +17,30 @@
     "
   >
     <q-toolbar style="padding: 0; flex: none; background-color: #141414">
-      <DeepBtn
-        flat
-        style="width: 100%; height: 50px; border-radius: 0"
-        no-caps
-      >
-        <div style="width: 100%; display: flex; align-items: center">
-          <q-avatar style="margin-left: -8px">
-            <q-icon
-              name="mdi-chart-box"
-              size="28px"
-            />
-          </q-avatar>
+      <q-avatar style="margin-left: 9px">
+        <q-icon
+          name="mdi-chart-box"
+          size="28px"
+        />
+      </q-avatar>
 
-          <q-toolbar-title
-            v-if="uiStore().rightSidebarExpanded"
-            style="
-              margin-left: 12px;
-              text-align: left;
-              color: rgba(255, 255, 255, 0.85);
-              font-size: 18px;
-            "
-          >
-            <template v-if="page.activeElem.react.value?.type === 'note'">
-              Note properties
-            </template>
-            <template v-else-if="page.activeElem.react.value?.type === 'arrow'">
-              Arrow properties
-            </template>
-            <template v-else> Page properties </template>
-          </q-toolbar-title>
-        </div>
-      </DeepBtn>
+      <q-toolbar-title
+        v-if="uiStore().rightSidebarExpanded"
+        style="
+          margin-left: 12px;
+          text-align: left;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 18px;
+        "
+      >
+        <template v-if="page.activeElem.react.value?.type === 'note'">
+          Note properties
+        </template>
+        <template v-else-if="page.activeElem.react.value?.type === 'arrow'">
+          Arrow properties
+        </template>
+        <template v-else> Page properties </template>
+      </q-toolbar-title>
     </q-toolbar>
 
     <div style="overflow-y: auto; height: 0; flex: 1">

@@ -205,6 +205,10 @@ $note-padding: 9px;
   &.no-wrap :deep() {
     .ProseMirror {
       white-space: nowrap;
+
+      pre {
+        white-space: pre;
+      }
     }
   }
 

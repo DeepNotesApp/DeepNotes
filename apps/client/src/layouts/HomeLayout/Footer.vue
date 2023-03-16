@@ -107,7 +107,10 @@
 
       <Gap style="height: 20px" />
 
-      <div style="font-size: 13px; text-align: center">@ 2023 DeepNotes</div>
+      <div style="font-size: 13px; text-align: center">
+        @ 2023 DeepNotes |
+        <a href="mailto:contact@deepnotes.app">contact@deepnotes.app</a>
+      </div>
 
       <Gap style="height: 20px" />
     </ResponsiveContainer>

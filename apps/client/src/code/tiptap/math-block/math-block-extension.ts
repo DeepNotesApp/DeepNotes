@@ -43,17 +43,12 @@ export const MathBlockExtension = Node.create({
   addCommands(): any {
     return {
       addMathBlock:
-        (attrs: any) =>
-        ({ state, dispatch }: any) => {
-          const { selection } = state;
-          const position = selection.$cursor
-            ? selection.$cursor.pos
-            : selection.$to.pos;
-          const node = this.type.create(attrs);
-          const transaction = state.tr.insert(position, node);
-
-          dispatch(transaction);
-        },
+        (options: any) =>
+        ({ commands }: any) =>
+          commands.insertContent({
+            type: this.name,
+            attrs: options,
+          }),
     };
   },
 });
