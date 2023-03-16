@@ -27,6 +27,8 @@ defineProps<Props>();
 
       touch-action: pan-x pan-y !important;
 
+      white-space: normal;
+
       &[contenteditable='false'] {
         img,
         hr {
@@ -150,6 +152,9 @@ defineProps<Props>();
       }
 
       pre {
+        width: fit-content;
+        min-width: 100%;
+
         margin: 5px 0;
         border-radius: 0.4rem;
         padding: 0.4rem 0.5rem;
