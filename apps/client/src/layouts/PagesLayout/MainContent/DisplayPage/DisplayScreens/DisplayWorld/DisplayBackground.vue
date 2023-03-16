@@ -8,13 +8,14 @@
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page.client';
+import { isCtrlDown } from 'src/code/utils.client';
 
 const page = inject<Page>('page')!;
 
 function onLeftPointerDown(event: PointerEvent) {
   page.editing.stop();
 
-  if (!event.ctrlKey && !event.shiftKey && !internals.mobileAltKey) {
+  if (!isCtrlDown(event) && !event.shiftKey && !internals.mobileAltKey) {
     page.selection.clear(page);
   }
 

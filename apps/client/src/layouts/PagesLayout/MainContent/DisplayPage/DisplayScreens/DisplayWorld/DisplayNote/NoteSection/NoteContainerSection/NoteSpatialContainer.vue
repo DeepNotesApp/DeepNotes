@@ -49,6 +49,7 @@
 <script setup lang="ts">
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
+import { isCtrlDown } from 'src/code/utils.client';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import DisplayBoxSelection from '../../../DisplayBoxSelection.vue';
@@ -71,7 +72,7 @@ function onPointerOut() {
 function onLeftPointerDown(event: PointerEvent) {
   page.editing.stop();
 
-  if (!event.ctrlKey && !event.shiftKey && !internals.mobileAltKey) {
+  if (!isCtrlDown(event) && !event.shiftKey && !internals.mobileAltKey) {
     page.selection.clear(note);
   }
 

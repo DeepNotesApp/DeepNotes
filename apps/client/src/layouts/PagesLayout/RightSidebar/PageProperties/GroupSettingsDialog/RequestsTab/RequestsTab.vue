@@ -113,7 +113,7 @@ import { groupNames } from 'src/code/pages/computed/group-names.client';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
 import { requestWithNotifications } from 'src/code/pages/utils.client';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
@@ -158,7 +158,7 @@ function deselectAll() {
 }
 
 function select(id: string, event: MouseEvent) {
-  if (!event.ctrlKey) {
+  if (!isCtrlDown(event)) {
     baseSelectedUserIds.value.clear();
   }
 

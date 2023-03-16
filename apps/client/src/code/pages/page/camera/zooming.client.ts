@@ -1,5 +1,6 @@
 import { hasVertScrollbar } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
+import { isCtrlDown } from 'src/code/utils.client';
 
 import type { Page } from '../page.client';
 
@@ -13,7 +14,7 @@ export class PageZooming {
   perform(event: WheelEvent) {
     // Skip if already handled by a scrollbar
 
-    if (event.ctrlKey) {
+    if (isCtrlDown(event)) {
       event.preventDefault();
 
       const worldPos = this.page.pos.eventToWorld(event);

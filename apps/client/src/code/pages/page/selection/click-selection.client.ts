@@ -1,3 +1,5 @@
+import { isCtrlDown } from 'src/code/utils.client';
+
 import type { PageElem } from '../elems/elem.client';
 import type { Page } from '../page.client';
 
@@ -34,7 +36,7 @@ export class PageClickSelection {
       // And the clicked element is not selected
 
       if (
-        !event.ctrlKey &&
+        !isCtrlDown(event) &&
         !event.shiftKey &&
         !internals.mobileAltKey &&
         !elem.react.selected
@@ -45,7 +47,10 @@ export class PageClickSelection {
       // Remove element if selected and holding Ctrl
       // Else, just change the active element
 
-      if ((event.ctrlKey || internals.mobileAltKey) && elem.react.selected) {
+      if (
+        (isCtrlDown(event) || internals.mobileAltKey) &&
+        elem.react.selected
+      ) {
         this.page.selection.remove(elem);
       } else {
         this.page.activeElem.set(elem);

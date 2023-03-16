@@ -11,7 +11,6 @@
 const AutoImport = require('unplugin-auto-import/vite');
 const VueComponents = require('unplugin-vue-components/vite');
 
-const { default: topLevelAwait } = require('vite-plugin-top-level-await');
 const { hashFNV1a, objFromEntries } = require('@stdlib/misc');
 
 const env = Object.assign(
@@ -47,13 +46,13 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      { path: 'internals.universal' },
       { path: 'helpers.universal' },
       { path: 'sodium.universal' },
       { path: 'i18n.universal' },
       { path: 'axios.universal' },
       { path: 'vue.universal' },
       { path: 'disable-cache.universal' },
-      { path: 'internals.universal' },
 
       { path: 'array-at-polyfill.client', server: false },
       { path: 'cross-tab-session-storage.client', server: false },
@@ -110,13 +109,6 @@ module.exports = configure(function (ctx) {
       // viteVuePluginOptions: {},
 
       vitePlugins: [
-        topLevelAwait({
-          // The export name of top-level await promise for each chunk module
-          promiseExportName: '__tla',
-          // The function to generate import names of top-level await promise in each chunk module
-          promiseImportName: (i) => `__tla_${i}`,
-        }),
-
         [
           '@intlify/vite-plugin-vue-i18n',
           {
@@ -145,7 +137,7 @@ module.exports = configure(function (ctx) {
             {
               'src/boot/axios.universal': ['api'],
 
-              'src/boot/internals.universal': ['internals'],
+              'src/code/internals.universal': ['internals'],
 
               'src/code/stores.universal': [
                 'appStore',

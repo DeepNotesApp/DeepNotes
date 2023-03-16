@@ -1,6 +1,7 @@
 import { listenPointerEvents } from '@stdlib/misc';
 import { Rect } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
+import { isCtrlDown } from 'src/code/utils.client';
 
 import type { Page } from '../page.client';
 import type { NoteSection, NoteSide } from './note.client';
@@ -94,7 +95,7 @@ export class NoteResizing {
       activeNote.react.resizing.newResizeRect.bottomRight.y = worldPos.y;
     }
 
-    if (event.ctrlKey || internals.mobileAltKey) {
+    if (isCtrlDown(event) || internals.mobileAltKey) {
       if (this.side.includes('w')) {
         activeNote.react.resizing.newResizeRect.bottomRight.x =
           activeNote.react.resizing.oldResizeRect.center.x +

@@ -66,3 +66,10 @@ export function wrapStorage(storage: Storage) {
     },
   });
 }
+
+export function isCtrlDown(event: KeyboardEvent | MouseEvent) {
+  return event.ctrlKey || event.metaKey;
+}
+export function getCtrlKeyName() {
+  return $quasar().platform.is.mac ? '⌘' : 'Ctrl';
+}

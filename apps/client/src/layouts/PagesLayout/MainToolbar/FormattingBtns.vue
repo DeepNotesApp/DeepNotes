@@ -1,27 +1,27 @@
 <template>
   <ToolbarBtn
-    :tooltip="'Bold\n(Ctrl + B)'"
+    :tooltip="`Bold\n(${getCtrlKeyName()} + B)`"
     icon="mdi-format-bold"
     icon-size="25px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleMark('bold')"
   />
   <ToolbarBtn
-    :tooltip="'Italic\n(Ctrl + I)'"
+    :tooltip="`Italic\n(${getCtrlKeyName()} + I)`"
     icon="mdi-format-italic"
     icon-size="25px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleMark('italic')"
   />
   <ToolbarBtn
-    :tooltip="'Strikethrough\n(Ctrl + Shift + X)'"
+    :tooltip="`Strikethrough\n(${getCtrlKeyName()} + Shift + X)`"
     icon="mdi-format-strikethrough"
     icon-size="25px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleMark('strike')"
   />
   <ToolbarBtn
-    :tooltip="'Underline\n(Ctrl + U)'"
+    :tooltip="`Underline\n(${getCtrlKeyName()} + U)`"
     icon="mdi-format-underline"
     icon-size="25px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -43,28 +43,28 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Align left\n(Ctrl + Shift + L)'"
+    :tooltip="`Align left\n(${getCtrlKeyName()} + Shift + L)`"
     icon="mdi-format-align-left"
     icon-size="21px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('left'))"
   />
   <ToolbarBtn
-    :tooltip="'Align center\n(Ctrl + Shift + E)'"
+    :tooltip="`Align center\n(${getCtrlKeyName()} + Shift + E)`"
     icon="mdi-format-align-center"
     icon-size="21px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('center'))"
   />
   <ToolbarBtn
-    :tooltip="'Align right\n(Ctrl + Shift + R)'"
+    :tooltip="`Align right\n(${getCtrlKeyName()} + Shift + R)`"
     icon="mdi-format-align-right"
     icon-size="21px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('right'))"
   />
   <ToolbarBtn
-    :tooltip="'Justify\n(Ctrl + Shift + J)'"
+    :tooltip="`Justify\n(${getCtrlKeyName()} + Shift + J)`"
     icon="mdi-format-align-justify"
     icon-size="21px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -77,14 +77,14 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Subscript\n(Ctrl + ,)'"
+    :tooltip="`Subscript\n(${getCtrlKeyName()} + ,)`"
     icon="mdi-format-subscript"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleMark('subscript')"
   />
   <ToolbarBtn
-    :tooltip="'Superscript\n(Ctrl + .)'"
+    :tooltip="`Superscript\n(${getCtrlKeyName()} + .)`"
     icon="mdi-format-superscript"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -105,7 +105,7 @@
     @click="page.selection.unsetMark('link')"
   />
   <ToolbarBtn
-    :tooltip="'Code\n(Ctrl + E)'"
+    :tooltip="`Code\n(${getCtrlKeyName()} + E)`"
     icon="mdi-code-tags"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -118,21 +118,21 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Header 1\n(Ctrl + Alt + 1)'"
+    :tooltip="`Header 1\n(${getCtrlKeyName()} + Alt + 1)`"
     icon="mdi-format-header-1"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setHeading({ level: 1 }))"
   />
   <ToolbarBtn
-    :tooltip="'Header 2\n(Ctrl + Alt + 2)'"
+    :tooltip="`Header 2\n(${getCtrlKeyName()} + Alt + 2)`"
     icon="mdi-format-header-2"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setHeading({ level: 2 }))"
   />
   <ToolbarBtn
-    :tooltip="'Header 3\n(Ctrl + Alt + 3)'"
+    :tooltip="`Header 3\n(${getCtrlKeyName()} + Alt + 3)`"
     icon="mdi-format-header-3"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -148,6 +148,8 @@
 </template>
 
 <script setup lang="ts">
+import { getCtrlKeyName } from 'src/code/utils.client';
+
 import InsertLinkDialog from './InsertLinkDialog.vue';
 
 defineProps<{

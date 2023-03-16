@@ -1,4 +1,5 @@
 import { Vec2 } from '@stdlib/misc';
+import { isCtrlDown } from 'src/code/utils.client';
 
 export function useKeyboardShortcuts() {
   const page = computed(() => internals.pages?.react?.page);
@@ -48,27 +49,27 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      if (event.ctrlKey && event.code === 'KeyB') {
+      if (isCtrlDown(event) && event.code === 'KeyB') {
         event.preventDefault();
         page.value.selection.toggleMark('bold');
         return;
       }
-      if (event.ctrlKey && event.code === 'KeyI') {
+      if (isCtrlDown(event) && event.code === 'KeyI') {
         event.preventDefault();
         page.value.selection.toggleMark('italic');
         return;
       }
-      if (event.ctrlKey && event.code === 'KeyU') {
+      if (isCtrlDown(event) && event.code === 'KeyU') {
         event.preventDefault();
         page.value.selection.toggleMark('underline');
         return;
       }
-      if (event.ctrlKey && event.code === 'KeyE') {
+      if (isCtrlDown(event) && event.code === 'KeyE') {
         event.preventDefault();
         page.value.selection.toggleMark('code');
         return;
       }
-      if (event.ctrlKey && event.shiftKey && event.code === 'KeyX') {
+      if (isCtrlDown(event) && event.shiftKey && event.code === 'KeyX') {
         event.preventDefault();
         page.value.selection.toggleMark('strike');
         return;
@@ -81,40 +82,40 @@ export function useKeyboardShortcuts() {
       return;
     }
 
-    if (event.ctrlKey && event.code === 'KeyA') {
+    if (isCtrlDown(event) && event.code === 'KeyA') {
       event.preventDefault();
       page.value.selection.selectAll();
       return;
     }
 
-    if (event.ctrlKey && event.code === 'KeyD') {
+    if (isCtrlDown(event) && event.code === 'KeyD') {
       event.preventDefault();
       await page.value.cloning.perform();
       return;
     }
 
-    if (event.ctrlKey && event.code === 'KeyC') {
+    if (isCtrlDown(event) && event.code === 'KeyC') {
       event.preventDefault();
       page.value.clipboard.copy();
       return;
     }
-    if (event.ctrlKey && event.code === 'KeyV' && window.clipboardData) {
+    if (isCtrlDown(event) && event.code === 'KeyV' && window.clipboardData) {
       event.preventDefault();
       await page.value.clipboard.paste();
       return;
     }
-    if (event.ctrlKey && event.code === 'KeyX') {
+    if (isCtrlDown(event) && event.code === 'KeyX') {
       event.preventDefault();
       page.value.clipboard.cut();
       return;
     }
 
-    if (event.ctrlKey && event.code === 'KeyZ') {
+    if (isCtrlDown(event) && event.code === 'KeyZ') {
       event.preventDefault();
       page.value.undoRedo.undo();
       return;
     }
-    if (event.ctrlKey && event.code === 'KeyY') {
+    if (isCtrlDown(event) && event.code === 'KeyY') {
       event.preventDefault();
       page.value.undoRedo.redo();
       return;

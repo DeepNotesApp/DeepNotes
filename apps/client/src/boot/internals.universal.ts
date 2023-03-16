@@ -38,8 +38,6 @@ export interface DeepNotesInternals {
 
 moduleLogger.info('Initializing internals');
 
-export const internals = {} as DeepNotesInternals;
-
 internals.dict = {};
 
 internals.realtime = new (RealtimeClient())();

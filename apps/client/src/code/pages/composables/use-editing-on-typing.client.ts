@@ -1,3 +1,5 @@
+import { isCtrlDown } from 'src/code/utils.client';
+
 export function useEditingOnTyping() {
   const page = computed(() => internals.pages.react.page);
 
@@ -6,7 +8,7 @@ export function useEditingOnTyping() {
   });
 
   async function onKeyPress(event: KeyboardEvent) {
-    if (event.ctrlKey) {
+    if (isCtrlDown(event)) {
       return;
     }
 

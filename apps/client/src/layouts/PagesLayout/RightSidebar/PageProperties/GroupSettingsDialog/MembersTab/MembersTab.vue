@@ -124,7 +124,7 @@ import type { GroupKeyRotationValues } from 'src/code/pages/group-key-rotation.c
 import { rotateGroupKeys } from 'src/code/pages/group-key-rotation.client';
 import { createNotifications } from 'src/code/pages/utils.client';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
@@ -165,7 +165,7 @@ function deselectAll() {
 }
 
 function select(id: string, event: MouseEvent) {
-  if (!event.ctrlKey) {
+  if (!isCtrlDown(event)) {
     baseSelectedUserIds.value.clear();
   }
 
