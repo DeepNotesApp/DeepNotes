@@ -11,7 +11,6 @@
 const AutoImport = require('unplugin-auto-import/vite');
 const VueComponents = require('unplugin-vue-components/vite');
 
-const { default: topLevelAwait } = require('vite-plugin-top-level-await');
 const { hashFNV1a, objFromEntries } = require('@stdlib/misc');
 
 const env = Object.assign(
@@ -110,13 +109,6 @@ module.exports = configure(function (ctx) {
       // viteVuePluginOptions: {},
 
       vitePlugins: [
-        topLevelAwait({
-          // The export name of top-level await promise for each chunk module
-          promiseExportName: '__tla',
-          // The function to generate import names of top-level await promise in each chunk module
-          promiseImportName: (i) => `__tla_${i}`,
-        }),
-
         [
           '@intlify/vite-plugin-vue-i18n',
           {
