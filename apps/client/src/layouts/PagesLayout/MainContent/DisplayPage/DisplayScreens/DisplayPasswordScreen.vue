@@ -3,7 +3,7 @@
     {{ groupNames()(page.react.groupId).get().text }}
   </div>
 
-  <Gap style="height: 16px" />
+  <Gap style="height: 8px" />
 
   <div>This group is password protected.</div>
 
