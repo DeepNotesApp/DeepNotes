@@ -55,9 +55,9 @@
           <Gap style="height: 16px" />
 
           <DeepBtn
-            label="Untrust all devices"
+            label="Forget trusted devices"
             color="primary"
-            @click="untrustAllDevices()"
+            @click="forgetTrustedDevices()"
           />
         </q-card-section>
 
@@ -141,12 +141,12 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function untrustAllDevices() {
+async function forgetTrustedDevices() {
   try {
     await asyncPrompt({
-      title: 'Untrust all devices',
+      title: 'Forget trusted devices',
       message:
-        'Are you sure you want to untrust all devices in regard to two-factor authentication?',
+        'Are you sure you want to forget trusted devices in regard to two-factor authentication?',
 
       focus: 'cancel',
 
