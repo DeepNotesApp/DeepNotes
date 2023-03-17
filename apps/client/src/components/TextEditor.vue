@@ -3,6 +3,8 @@
 </template>
 
 <script setup lang="ts">
+import 'katex/dist/katex.min.css';
+
 const EditorContent = internals.tiptap().EditorContent;
 
 type _EditorContent = typeof EditorContent;
@@ -36,12 +38,19 @@ defineProps<Props>();
         }
       }
 
+      // Spacing between root elements
+
       p {
         margin-bottom: 0;
       }
 
       > * + * {
         margin-top: 10px;
+      }
+
+      > * + pre,
+      > pre + * {
+        margin-top: 10px !important;
       }
 
       > * + hr,
@@ -53,6 +62,36 @@ defineProps<Props>();
       > .tableWrapper + * {
         margin-top: 14px;
       }
+
+      td {
+        > * + * {
+          margin-top: 10px;
+        }
+
+        > * + pre,
+        > pre + * {
+          margin-top: 10px !important;
+        }
+
+        > * + hr,
+        > hr + * {
+          margin-top: 14px;
+        }
+
+        > * + .tableWrapper,
+        > .tableWrapper + * {
+          margin-top: 14px;
+        }
+      }
+
+      // Math
+
+      math,
+      math * {
+        font-family: KaTeX_Main, 'Times New Roman', Times, serif;
+      }
+
+      // Tables
 
       table {
         border-collapse: collapse;
@@ -96,9 +135,10 @@ defineProps<Props>();
       }
 
       &.resize-cursor {
-        cursor: ew-resize;
         cursor: col-resize;
       }
+
+      // Lists
 
       ul,
       ol {
@@ -139,6 +179,8 @@ defineProps<Props>();
         }
       }
 
+      // Inline code
+
       code:not(pre > code) {
         border-radius: 0.3em;
 
@@ -151,16 +193,20 @@ defineProps<Props>();
         background: #202020;
       }
 
+      // Code blocks
+
       pre {
         width: fit-content;
         min-width: 100%;
 
-        margin: 5px 0;
+        margin: unset;
         border-radius: 0.4rem;
         padding: 0.4rem 0.5rem;
 
         background: #202020;
       }
+
+      // Headings
 
       h1,
       h2,
@@ -184,9 +230,13 @@ defineProps<Props>();
         background-color: rgba(255, 255, 255, 0.35);
       }
 
+      // Links
+
       a {
         color: #47a7ff !important;
       }
+
+      // Blockquotes
 
       blockquote {
         margin-left: 4px;
@@ -196,6 +246,8 @@ defineProps<Props>();
 
         padding-left: 1.3rem;
       }
+
+      // Cursors
 
       .collaboration-cursor__base {
         position: relative;
