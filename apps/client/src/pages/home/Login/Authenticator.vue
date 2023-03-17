@@ -45,7 +45,7 @@
 
   <div style="text-align: center">
     Lost your phone?
-    <a @click="authType = 'recovery'">Use your recovery code</a>
+    <a @click="authType = 'recovery'">Use a recovery code</a>
   </div>
 </template>
 

@@ -1,7 +1,13 @@
 <template>
+  <div style="font-weight: bold; font-size: 19px; max-width: 240px">
+    {{ groupNames()(page.react.groupId).get().text }}
+  </div>
+
+  <Gap style="height: 8px" />
+
   <div>This group is password protected.</div>
 
-  <Gap style="height: 16px" />
+  <Gap style="height: 12px" />
 
   <q-form style="display: flex; flex-direction: column; width: 240px">
     <PasswordField
@@ -27,6 +33,7 @@
 import { DataLayer } from '@stdlib/crypto';
 import { computeGroupPasswordValues } from 'src/code/crypto.client';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
+import { groupNames } from 'src/code/pages/computed/group-names.client';
 import type { Page } from 'src/code/pages/page/page.client';
 import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 

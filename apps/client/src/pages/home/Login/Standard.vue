@@ -60,7 +60,11 @@
 
   <Gap style="height: 24px" />
 
-  <details style="text-align: center; cursor: default; user-select: none">
+  <details
+    style="text-align: center; cursor: default; user-select: none"
+    :open="additionalOptionsOpen"
+    @toggle="additionalOptionsOpen = $event.target.open"
+  >
     <summary style="display: list-item">Additional options</summary>
 
     <Gap style="height: 12px" />
@@ -99,11 +103,9 @@ import { deriveUserValues } from 'src/code/crypto.client';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
-const authType = inject('authType') as Ref<string>;
-const email = inject('email') as Ref<string>;
-const password = inject('password') as Ref<string>;
-const rememberSession = inject('rememberSession') as Ref<boolean>;
+// Email
 
+const email = inject('email') as Ref<string>;
 const rememberEmail = ref(false);
 
 watch([email, rememberEmail], () => {
@@ -118,18 +120,40 @@ watch([email, rememberEmail], () => {
   }
 });
 
-watch([rememberSession], () => {
-  internals.localStorage?.setItem(
+onMounted(() => {
+  rememberEmail.value = internals.localStorage.getItem('email') != null;
+});
+
+// Additional options
+
+const additionalOptionsOpen = ref(false);
+const rememberSession = inject('rememberSession') as Ref<boolean>;
+
+onMounted(() => {
+  rememberSession.value =
+    internals.localStorage.getItem('rememberSession') === 'true';
+  additionalOptionsOpen.value =
+    internals.localStorage.getItem('additionalOptionsOpen') === 'true';
+});
+
+watch(additionalOptionsOpen, () => {
+  internals.localStorage.setItem(
+    'additionalOptionsOpen',
+    String(additionalOptionsOpen.value),
+  );
+});
+
+watch(rememberSession, () => {
+  internals.localStorage.setItem(
     'rememberSession',
     String(rememberSession.value),
   );
 });
 
-onMounted(() => {
-  rememberEmail.value = internals.localStorage.getItem('email') != null;
-  rememberSession.value =
-    internals.localStorage.getItem('rememberSession') === 'true';
-});
+// Login
+
+const authType = inject('authType') as Ref<string>;
+const password = inject('password') as Ref<string>;
 
 async function onSubmit() {
   try {

@@ -52,7 +52,7 @@ export class EnableController {
           !(await this.endpointService.agentHasSufficientPermissions(values))
         ) {
           throw new HttpException(
-            'You do not have permission to enable password protection.',
+            'Insufficient permissions.',
             HttpStatus.FORBIDDEN,
           );
         }
