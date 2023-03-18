@@ -34,7 +34,13 @@ class BodyDto extends createZodDto(
       .string()
       .regex(w3cEmailRegex)
       .or(z.string().refine((email) => email === 'demo'))
-      .transform((email) => email.toLowerCase()),
+      .transform((email) =>
+        (process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
+          .split(';')
+          .includes(email)
+          ? email
+          : email.toLowerCase(),
+      ),
     loginHash: z.string().refine(isBase64),
     rememberSession: z.boolean(),
 

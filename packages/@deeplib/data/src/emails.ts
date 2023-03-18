@@ -12,10 +12,19 @@ const _userEmailEncryptionKey = once(() =>
 );
 
 export function encryptUserEmail(email: string) {
-  return _userEmailEncryptionKey().encrypt(textToBytes(email), {
-    padding: true,
-    associatedData: { context: 'UserEmail' },
-  });
+  return _userEmailEncryptionKey().encrypt(
+    textToBytes(
+      (process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
+        .split(';')
+        .includes(email)
+        ? email
+        : email.toLowerCase(),
+    ),
+    {
+      padding: true,
+      associatedData: { context: 'UserEmail' },
+    },
+  );
 }
 export function decryptUserEmail(encryptedEmail: Uint8Array) {
   return bytesToText(
@@ -28,6 +37,13 @@ export function decryptUserEmail(encryptedEmail: Uint8Array) {
 
 export function hashUserEmail(email: string) {
   return cryptoJsWordArrayToUint8Array(
-    CryptoJS.HmacSHA256(email, process.env.USER_EMAIL_SECRET!),
+    CryptoJS.HmacSHA256(
+      (process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
+        .split(';')
+        .includes(email)
+        ? email
+        : email.toLowerCase(),
+      process.env.USER_EMAIL_SECRET!,
+    ),
   );
 }

@@ -20,6 +20,8 @@ declare namespace NodeJS {
     ACCESS_SECRET: string;
     REFRESH_SECRET: string;
 
+    EMAIL_CASE_SENSITIVITY_EXCEPTIONS: string;
+
     USER_EMAIL_ENCRYPTION_KEY: string;
     USER_EMAIL_SECRET: string;
     USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY: string;

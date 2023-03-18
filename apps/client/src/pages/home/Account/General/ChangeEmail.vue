@@ -60,7 +60,12 @@ async function changeEmail() {
       return;
     }
 
-    if (newEmail.value.toLowerCase() === currentEmail.toLowerCase()) {
+    if (
+      newEmail.value.toLowerCase() === currentEmail.toLowerCase() &&
+      !(process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
+        .split(';')
+        .includes(currentEmail)
+    ) {
       $quasar().notify({
         message: 'New email address is the same as the current one.',
         color: 'negative',
