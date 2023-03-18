@@ -58,7 +58,7 @@ export class Vec2 implements IVec2 {
   length(): number {
     return Math.sqrt(this.dot(this));
   }
-  normalized(): Vec2 {
+  normal(): Vec2 {
     return this.divScalar(this.length());
   }
   distSqr(vec: Vec2): number {
@@ -73,6 +73,11 @@ export class Vec2 implements IVec2 {
   }
   angleTo(vec: Vec2): number {
     return Math.atan2(this.cross(vec), this.dot(vec));
+  }
+  cosineTo(vec: Vec2) {
+    const dotProduct = this.dot(vec);
+    const magnitudeProduct = this.length() * vec.length();
+    return dotProduct / magnitudeProduct;
   }
   rotate(angle: number): Vec2 {
     const cos = Math.cos(angle);

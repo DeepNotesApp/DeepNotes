@@ -50,15 +50,46 @@ watchEffect(async () => {
 });
 
 function getPathDefinition() {
-  const controlOffset =
-    (Math.abs((arrow.react.targetHeadPos.x - arrow.react.sourceHeadPos.x) / 2) +
-      Math.abs(
-        (arrow.react.targetHeadPos.y - arrow.react.sourceHeadPos.y) / 2,
-      )) *
-    0.75;
+  const absDiff = arrow.react.targetHeadPos
+    .sub(arrow.react.sourceHeadPos)
+    .abs();
 
-  const sourceControl = arrow.react.normals.source.mulScalar(controlOffset);
-  const targetControl = arrow.react.normals.target.mulScalar(controlOffset);
+  const minAbsDiff = Math.min(absDiff.x, absDiff.y);
+  const totalAbsDiff = absDiff.x + absDiff.y;
+
+  const normalDiff = arrow.react.normals.target.sub(
+    arrow.react.normals.source.mulScalar(-1),
+  );
+  const facingNormals = normalDiff.x === 0 && normalDiff.y === 0;
+
+  let sourceControlOffset;
+  let targetControlOffset;
+
+  if (facingNormals) {
+    const arrowNormal = arrow.react.targetHeadPos
+      .sub(arrow.react.sourceHeadPos)
+      .normal();
+
+    const sourceCosine = arrow.react.normals.source.cosineTo(arrowNormal);
+    const targetCosine = arrow.react.normals.target.cosineTo(
+      arrowNormal.mulScalar(-1),
+    );
+
+    sourceControlOffset =
+      sourceCosine > 0.785 ? minAbsDiff : Math.max(100, minAbsDiff);
+    targetControlOffset =
+      targetCosine > 0.785 ? minAbsDiff : Math.max(100, minAbsDiff);
+  } else {
+    const controlOffset = totalAbsDiff * 0.3;
+
+    sourceControlOffset = controlOffset;
+    targetControlOffset = controlOffset;
+  }
+
+  const sourceControl =
+    arrow.react.normals.source.mulScalar(sourceControlOffset);
+  const targetControl =
+    arrow.react.normals.target.mulScalar(targetControlOffset);
 
   return `M ${arrow.react.sourceHeadPos.x}, ${arrow.react.sourceHeadPos.y}
         C ${arrow.react.sourceHeadPos.x + sourceControl.x}, ${
