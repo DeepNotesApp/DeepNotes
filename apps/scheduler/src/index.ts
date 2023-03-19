@@ -12,6 +12,9 @@ import {
 import { addDays } from '@stdlib/misc';
 
 import { dataAbstraction } from './data/data-abstraction';
+import { initKnex } from './data/knex';
+
+initKnex();
 
 setInterval(async () => {
   const [
