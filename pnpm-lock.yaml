@@ -478,6 +478,37 @@ importers:
       '@types/ws': 8.5.3
       tsup: 6.5.0
 
+  apps/manager:
+    specifiers:
+      '@deeplib/data': workspace:1.0.0
+      '@deeplib/db': workspace:1.0.0
+      '@stdlib/base64': workspace:1.0.0
+      '@stdlib/data': workspace:1.0.0
+      '@stdlib/misc': workspace:1.0.0
+      '@types/lodash': 4.14.189
+      dotenv: 16.0.3
+      dotenv-expand: 9.0.0
+      ioredis: npm:@gustavotoyota/ioredis@5.2.7
+      knex: 2.3.0
+      lodash: 4.17.21
+      objection: 3.0.1
+      tsup: 6.5.0
+    dependencies:
+      '@deeplib/data': link:../../packages/@deeplib/data
+      '@deeplib/db': link:../../packages/@deeplib/db
+      '@stdlib/base64': link:../../packages/@stdlib/base64
+      '@stdlib/data': link:../../packages/@stdlib/data
+      '@stdlib/misc': link:../../packages/@stdlib/misc
+      dotenv: 16.0.3
+      dotenv-expand: 9.0.0_adqtadvolhkco6cfvcsvmd42ua
+      ioredis: /@gustavotoyota/ioredis/5.2.7
+      knex: 2.3.0
+      lodash: 4.17.21
+      objection: 3.0.1_knex@2.3.0
+    devDependencies:
+      '@types/lodash': 4.14.189
+      tsup: 6.5.0
+
   apps/realtime-server:
     specifiers:
       '@deeplib/data': workspace:1.0.0
