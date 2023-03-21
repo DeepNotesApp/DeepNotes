@@ -7,9 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
-import { DataLayer } from '@stdlib/crypto';
-import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
+import { makeGroupPublic } from 'src/code/pages/operations/groups/privacy/make-public';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
 const groupId = inject<string>('groupId')!;
@@ -26,15 +24,7 @@ async function makePublic() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();
-
-    if (accessKeyring?.topLayer !== DataLayer.Raw) {
-      throw new Error('Invalid group keyring.');
-    }
-
-    await api().post(`/api/groups/${groupId}/privacy/make-public`, {
-      accessKeyring: bytesToBase64(accessKeyring.fullValue),
-    });
+    await makeGroupPublic(groupId);
 
     $quasar().notify({
       message: 'Group is now public.',

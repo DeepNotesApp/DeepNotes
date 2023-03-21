@@ -5,8 +5,8 @@ import { createSymmetricKeyring, DataLayer } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
 
-import { computeGroupPasswordValues } from '../crypto.client';
-import { asyncPrompt } from '../utils.client';
+import { computeGroupPasswordValues } from '../../../crypto.client';
+import { asyncPrompt } from '../../../utils.client';
 
 export type GroupKeyRotationValues = {
   groupAccessKeyring?: string;
@@ -49,7 +49,7 @@ export type GroupKeyRotationValues = {
   >;
 };
 
-export async function rotateGroupKeys(
+export async function processGroupKeyRotationValues(
   groupId: string,
   params: GroupKeyRotationValues & { groupIsPublic?: boolean },
 ) {
@@ -321,4 +321,18 @@ export async function rotateGroupKeys(
       ]),
     ),
   };
+}
+
+export async function rotateGroupKeys(groupId: string) {
+  const groupKeyRotationValues = (
+    await api().post<GroupKeyRotationValues>(
+      `/api/groups/${groupId}/rotate-keys`,
+      {},
+    )
+  ).data;
+
+  await api().post(
+    `/api/groups/${groupId}/rotate-keys`,
+    await processGroupKeyRotationValues(groupId, groupKeyRotationValues),
+  );
 }

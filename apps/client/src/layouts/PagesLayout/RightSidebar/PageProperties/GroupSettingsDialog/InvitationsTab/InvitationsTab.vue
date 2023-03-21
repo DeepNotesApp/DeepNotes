@@ -119,9 +119,7 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names.client';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { cancelJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/cancel';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -181,9 +179,21 @@ function select(id: string, event: MouseEvent) {
 
 async function cancelSelectedInvitations() {
   try {
+    await asyncPrompt({
+      title: 'Cancel invitation',
+      message: 'Are you sure you want to cancel this invitation?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
     await Promise.all(
       finalSelectedUserIds.value.map((userId) =>
-        cancelJoinInvitation(groupId, userId),
+        cancelJoinInvitation(groupId, {
+          patientId: userId,
+        }),
       ),
     );
 
@@ -191,61 +201,5 @@ async function cancelSelectedInvitations() {
   } catch (error: any) {
     handleError(error);
   }
-}
-
-async function cancelJoinInvitation(groupId: string, patientId: string) {
-  await asyncPrompt({
-    title: 'Cancel invitation',
-    message: 'Are you sure you want to cancel this invitation?',
-
-    focus: 'cancel',
-
-    cancel: { label: 'No', flat: true, color: 'primary' },
-    ok: { label: 'Yes', flat: true, color: 'negative' },
-  });
-
-  const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(groupId).getAsync(),
-
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    groupInvitationNames()(`${groupId}:${patientId}`).getAsync(),
-  ]);
-
-  await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/cancel`,
-
-    body: {
-      patientId,
-    },
-
-    patientId,
-
-    notifications: {
-      agent: {
-        groupId,
-
-        groupName: groupName.text,
-        targetName: targetName.text,
-
-        // You have canceled the invitation of ${targetName} to join the group.
-      },
-
-      target: {
-        groupId,
-
-        // Your invitation to join the group has been canceled.
-      },
-
-      observers: {
-        groupId,
-
-        groupName: groupName.text,
-        agentName: agentName.text,
-        targetName: targetName.text,
-
-        // ${agentName} has canceled the invitation of ${targetName} to join the group.
-      },
-    },
-  });
 }
 </script>

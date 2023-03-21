@@ -7,8 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { GroupKeyRotationValues } from 'src/code/pages/group-key-rotation.client';
-import { rotateGroupKeys } from 'src/code/pages/group-key-rotation.client';
+import { makeGroupPrivate } from 'src/code/pages/operations/groups/privacy/make-private';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
 const groupId = inject<string>('groupId')!;
@@ -25,21 +24,7 @@ async function makePrivate() {
       cancel: { label: 'No', flat: true, color: 'primary' },
     });
 
-    const groupKeyRotationValues = (
-      await api().post<GroupKeyRotationValues>(
-        `/api/groups/${groupId}/privacy/make-private`,
-        {},
-      )
-    ).data;
-
-    await api().post(
-      `/api/groups/${groupId}/privacy/make-private`,
-      await rotateGroupKeys(groupId, {
-        ...groupKeyRotationValues,
-
-        groupIsPublic: false,
-      }),
-    );
+    await makeGroupPrivate(groupId);
 
     $quasar().notify({
       message: 'Group is now private.',

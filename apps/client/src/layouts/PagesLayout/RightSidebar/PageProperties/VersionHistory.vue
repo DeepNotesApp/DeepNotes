@@ -78,14 +78,12 @@
 
 <script setup lang="ts">
 import type { PageSnapshotInfo } from '@deeplib/misc';
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
-import { wrapSymmetricKey } from '@stdlib/crypto';
-import { Y } from '@syncedstore/core';
 import { capitalize } from 'lodash';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { pageKeyrings } from 'src/code/pages/computed/page-keyrings.client';
+import { deletePageSnapshot } from 'src/code/pages/operations/pages/snapshots/delete';
+import { restorePageSnapshot } from 'src/code/pages/operations/pages/snapshots/restore';
+import { savePageSnapshot } from 'src/code/pages/operations/pages/snapshots/save';
 import type { Page } from 'src/code/pages/page/page.client';
-import { revertToSnapshot } from 'src/code/pages/utils.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
@@ -108,76 +106,9 @@ async function restoreVersion(snapshotId: string) {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const pageKeyring = await pageKeyrings()(
-      `${page.value.react.groupId}:${page.value.id}`,
-    ).getAsync();
-
-    if (pageKeyring == null) {
-      throw new Error('Page keyring not found.');
-    }
-
-    const response = (
-      await api().post<{
-        encryptedSymmetricKey: string;
-        encryptedData: string;
-      }>(`/api/pages/${page.value.id}/snapshots/load/${snapshotId}`)
-    ).data;
-
-    // Encrypt pre-restore data
-
-    const newSnapshotSymmetricKey = wrapSymmetricKey();
-
-    const encryptedData = bytesToBase64(
-      newSnapshotSymmetricKey.encrypt(
-        Y.encodeStateAsUpdateV2(page.value.collab.doc),
-        {
-          padding: true,
-          associatedData: {
-            context: 'PageSnapshotData',
-            pageId: page.value.id,
-          },
-        },
-      ),
-    );
-
-    // Restore snapshot
-
-    const oldSnapshotSymmetricKey = wrapSymmetricKey(
-      pageKeyring.decrypt(base64ToBytes(response.encryptedSymmetricKey), {
-        associatedData: {
-          context: 'PageSnapshotSymmetricKey',
-          pageId: page.value.id,
-        },
-      }),
-    );
-
-    const snapshotData = oldSnapshotSymmetricKey.decrypt(
-      base64ToBytes(response.encryptedData),
-      {
-        padding: true,
-        associatedData: {
-          context: 'PageSnapshotData',
-          pageId: page.value.id,
-        },
-      },
-    );
-
-    revertToSnapshot(page.value.collab.doc, snapshotData);
-
-    // Save pre-restore data
-
-    await api().post(`/api/pages/${page.value.id}/snapshots/save`, {
-      encryptedSymmetricKey: bytesToBase64(
-        pageKeyring.encrypt(newSnapshotSymmetricKey.value, {
-          associatedData: {
-            context: 'PageSnapshotSymmetricKey',
-            pageId: page.value.id,
-          },
-        }),
-      ),
-      encryptedData,
-
-      preRestore: true,
+    await restorePageSnapshot(page.value.id, snapshotId, {
+      groupId: page.value.react.groupId,
+      doc: page.value.collab.doc,
     });
 
     $quasar().notify({
@@ -201,34 +132,9 @@ async function saveVersion() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const pageKeyring = pageKeyrings()(
-      `${page.value.react.groupId}:${page.value.id}`,
-    ).get();
-
-    if (pageKeyring == null) {
-      throw new Error('Page keyring not found.');
-    }
-
-    const symmetricKey = wrapSymmetricKey();
-
-    await api().post(`/api/pages/${page.value.id}/snapshots/save`, {
-      encryptedSymmetricKey: bytesToBase64(
-        pageKeyring.encrypt(symmetricKey.value, {
-          associatedData: {
-            context: 'PageSnapshotSymmetricKey',
-            pageId: page.value.id,
-          },
-        }),
-      ),
-      encryptedData: bytesToBase64(
-        symmetricKey.encrypt(Y.encodeStateAsUpdateV2(page.value.collab.doc), {
-          padding: true,
-          associatedData: {
-            context: 'PageDocUpdate',
-            pageId: page.value.id,
-          },
-        }),
-      ),
+    await savePageSnapshot(page.value.id, {
+      groupId: page.value.react.groupId,
+      doc: page.value.collab.doc,
     });
 
     $quasar().notify({
@@ -252,9 +158,7 @@ async function deleteSnapshot(snapshotId: string) {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(
-      `/api/pages/${page.value.id}/snapshots/delete/${snapshotId}`,
-    );
+    await deletePageSnapshot(page.value.id, snapshotId);
 
     $quasar().notify({
       message: 'Version deleted successfully.',

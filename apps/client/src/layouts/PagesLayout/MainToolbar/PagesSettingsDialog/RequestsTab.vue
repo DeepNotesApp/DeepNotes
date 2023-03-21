@@ -79,8 +79,7 @@
 
 <script setup lang="ts">
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -157,31 +156,7 @@ async function cancelSelectedRequests() {
     });
 
     await Promise.all(
-      finalSelectedGroupIds.value.map(async (groupId) => {
-        const agentName = await groupRequestNames()(
-          `${groupId}:${authStore().userId}`,
-        ).getAsync();
-
-        await requestWithNotifications({
-          url: `/api/groups/${groupId}/join-requests/cancel`,
-
-          notifications: {
-            agent: {
-              groupId,
-
-              // You canceled your join request.
-            },
-
-            observers: {
-              groupId,
-
-              agentName: agentName.text,
-
-              // ${agentName} canceled their join request.
-            },
-          },
-        });
-      }),
+      finalSelectedGroupIds.value.map((groupId) => cancelJoinRequest(groupId)),
     );
 
     baseSelectedGroupIds.value.clear();
