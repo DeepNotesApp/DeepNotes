@@ -1,3 +1,4 @@
+import type { GroupRoleID } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { createPublicKeyring } from '@stdlib/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
@@ -14,7 +15,7 @@ export async function acceptJoinRequest(
     targetRole,
   }: {
     patientId: string;
-    targetRole: string;
+    targetRole: GroupRoleID;
   },
 ) {
   if (targetRole == null) {

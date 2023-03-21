@@ -82,7 +82,7 @@
           color="positive"
           :disable="finalSelectedUserIds.length !== 1"
           @click="
-            async () => {
+            () => {
               $q.dialog({
                 component: AcceptRequestDialog,
 

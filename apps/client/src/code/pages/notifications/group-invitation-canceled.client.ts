@@ -1,4 +1,5 @@
 import { groupNames } from '../computed/group-names.client';
+import type { NotificationInfo } from './notifications.client';
 
 export async function getGroupInvitationCanceledNotificationInfo({
   recipientType,
@@ -8,7 +9,7 @@ export async function getGroupInvitationCanceledNotificationInfo({
   groupName,
   agentName,
   targetName,
-}: any): Promise<{ type: string; message: string }> {
+}: any): Promise<NotificationInfo> {
   const targetGroupName = await groupNames()(groupId).getAsync();
 
   if (recipientType === 'agent') {

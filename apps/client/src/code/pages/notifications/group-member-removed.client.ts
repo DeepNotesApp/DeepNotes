@@ -1,3 +1,5 @@
+import type { NotificationInfo } from './notifications.client';
+
 export async function getGroupMemberRemovedNotificationInfo({
   recipientType,
 
@@ -6,13 +8,13 @@ export async function getGroupMemberRemovedNotificationInfo({
   groupName,
   agentName,
   targetName,
-}: any): Promise<{ type: string; message: string }> {
+}: any): Promise<NotificationInfo> {
   if (recipientType === 'agent') {
     return {
       message: removed
         ? `You removed ${targetName} from the group ${groupName}.`
         : `You left the group ${groupName}.`,
-      type: 'negative',
+      type: 'positive',
     };
   } else if (recipientType === 'target') {
     return {
