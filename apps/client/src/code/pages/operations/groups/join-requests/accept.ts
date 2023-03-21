@@ -19,12 +19,7 @@ export async function acceptJoinRequest(
   },
 ) {
   if (targetRole == null) {
-    $quasar().notify({
-      message: 'Please select a role.',
-      color: 'negative',
-    });
-
-    return;
+    throw new Error('Please select a role.');
   }
 
   const [

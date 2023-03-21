@@ -27,7 +27,7 @@ export async function getGroupRequestSentNotificationInfo({
 
       actions: [
         {
-          label: 'Go to group',
+          label: 'Go to settings',
 
           color: 'primary',
 

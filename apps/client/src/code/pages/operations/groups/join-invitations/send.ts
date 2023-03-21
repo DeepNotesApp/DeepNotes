@@ -22,12 +22,7 @@ export async function sendJoinInvitation(
   },
 ) {
   if (inviteeUserId == null) {
-    $quasar().notify({
-      message: 'User not found.',
-      type: 'negative',
-    });
-
-    return;
+    throw new Error('User not found.');
   }
 
   const [
