@@ -367,6 +367,7 @@ export const RealtimeClient = once(
 
             this._resubscribe('group-join-request', suffix, 'encrypted-name');
             this._resubscribe('group-join-request', suffix, 'rejected');
+            this._resubscribe('group-join-request', suffix, 'exists');
 
             this._resubscribe('group-member', suffix, 'encrypted-name');
             this._resubscribe('group-member', suffix, 'exists');

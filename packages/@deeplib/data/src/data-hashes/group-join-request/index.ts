@@ -4,6 +4,7 @@ import { once } from 'lodash';
 
 import { encryptedName } from './encrypted-name';
 import { encryptedNameForUser } from './encrypted-name-for-user';
+import { exists } from './exists';
 import { rejected } from './rejected';
 
 const GroupJoinRequestModel = once(
@@ -30,6 +31,7 @@ export const groupJoinRequest = validateDataHash({
   fields: {
     'encrypted-name-for-user': encryptedNameForUser,
     'encrypted-name': encryptedName,
+    exists: exists,
     rejected: rejected,
   },
 });

@@ -13,8 +13,10 @@ import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
+import type { QMenu } from 'quasar';
 import { getGroupRequestAcceptedNotificationInfo } from 'src/code/pages/notifications/group-request-accepted.client';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
+import type { Ref } from 'vue';
 
 import NotificationItem from '../NotificationItem.vue';
 
@@ -41,6 +43,8 @@ const notificationInfo = createSmartComputed({
   get: () => getGroupRequestAcceptedNotificationInfo(notificationContent.value),
 });
 
+const notificationsMenu = inject('notificationsMenu') as Ref<QMenu>;
+
 async function onClick() {
   await router().push(`/groups/${notificationContent.value.groupId}`);
 
@@ -52,5 +56,7 @@ async function onClick() {
       tab: 'Members',
     },
   });
+
+  notificationsMenu.value.hide();
 }
 </script>

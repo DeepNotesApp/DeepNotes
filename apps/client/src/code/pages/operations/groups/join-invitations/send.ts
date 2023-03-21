@@ -77,9 +77,7 @@ export async function sendJoinInvitation(
         internals.keyPair.encrypt(
           textToBytes(inviteeUserName),
           groupPublicKeyring,
-          {
-            padding: true,
-          },
+          { padding: true },
         ),
       ),
     },
@@ -90,6 +88,7 @@ export async function sendJoinInvitation(
       agent: {
         groupId: groupId,
 
+        patientId: inviteeUserId,
         groupName: groupName.text,
         targetName: inviteeUserName,
 

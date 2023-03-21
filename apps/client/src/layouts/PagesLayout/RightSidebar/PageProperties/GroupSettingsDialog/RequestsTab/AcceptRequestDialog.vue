@@ -5,7 +5,7 @@
   >
     <template #header>
       <q-card-section style="padding: 12px 20px">
-        <div class="text-h6">Accept request</div>
+        <div class="text-h6">Accept join request</div>
       </q-card-section>
     </template>
 

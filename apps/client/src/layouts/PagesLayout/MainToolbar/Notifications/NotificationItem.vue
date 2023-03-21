@@ -1,8 +1,5 @@
 <template>
-  <q-item
-    clickable
-    v-close-popup
-  >
+  <q-item clickable>
     <q-item-section>
       <slot></slot>
 
