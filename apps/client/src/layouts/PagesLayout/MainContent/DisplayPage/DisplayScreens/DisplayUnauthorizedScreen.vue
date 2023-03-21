@@ -25,7 +25,7 @@
       v-if="groupJoinRequestRejected === false"
       label="Cancel request"
       color="negative"
-      @click="cancelRequest()"
+      @click="_cancelJoinRequest()"
     />
   </template>
 
@@ -59,13 +59,10 @@
 </template>
 
 <script setup lang="ts">
-/* eslint-disable vue/no-mutating-props */
-
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
+import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
 import type { Page } from 'src/code/pages/page/page.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
 import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError } from 'src/code/utils.client';
 import { multiModePath } from 'src/code/utils.universal';
 
 import RequestAccessDialog from './RequestAccessDialog.vue';
@@ -86,31 +83,19 @@ const groupJoinRequestRejected = computed(() =>
   ),
 );
 
-async function cancelRequest() {
+async function _cancelJoinRequest() {
   try {
-    const agentName = await groupRequestNames()(
-      `${page.react.groupId}:${authStore().userId}`,
-    ).getAsync();
+    await asyncPrompt({
+      title: 'Cancel join request',
+      message: 'Are you sure you want to cancel your join request?',
 
-    await requestWithNotifications({
-      url: `/api/groups/${page.react.groupId}/join-requests/cancel`,
+      focus: 'cancel',
 
-      notifications: {
-        agent: {
-          groupId: page.react.groupId,
-
-          // You canceled your join request.
-        },
-
-        observers: {
-          groupId: page.react.groupId,
-
-          agentName: agentName.text,
-
-          // ${agentName} canceled their join request.
-        },
-      },
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
     });
+
+    await cancelJoinRequest(page.react.groupId);
   } catch (error: any) {
     handleError(error);
   }

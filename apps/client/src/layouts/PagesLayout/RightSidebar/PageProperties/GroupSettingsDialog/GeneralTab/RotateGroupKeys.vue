@@ -7,8 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { GroupKeyRotationValues } from 'src/code/pages/group-key-rotation.client';
-import { rotateGroupKeys } from 'src/code/pages/group-key-rotation.client';
+import { rotateGroupKeys } from 'src/code/pages/operations/groups/key-rotation';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
 const groupId = inject<string>('groupId')!;
@@ -25,17 +24,7 @@ async function _rotateGroupKeys() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const groupKeyRotationValues = (
-      await api().post<GroupKeyRotationValues>(
-        `/api/groups/${groupId}/rotate-keys`,
-        {},
-      )
-    ).data;
-
-    await api().post(
-      `/api/groups/${groupId}/rotate-keys`,
-      await rotateGroupKeys(groupId, groupKeyRotationValues),
-    );
+    await rotateGroupKeys(groupId);
   } catch (error: any) {
     handleError(error);
   }

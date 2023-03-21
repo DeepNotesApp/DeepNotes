@@ -108,10 +108,8 @@
 </template>
 
 <script setup lang="ts">
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { rejectJoinRequest } from 'src/code/pages/operations/groups/join-requests/reject';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -181,57 +179,12 @@ async function rejectSelectedRequests() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const [groupName, agentName] = await Promise.all([
-      groupNames()(groupId).getAsync(),
-
-      groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    ]);
-
     await Promise.all(
-      finalSelectedUserIds.value.map(async (patientId) => {
-        const targetName = await groupRequestNames()(
-          `${groupId}:${patientId}`,
-        ).getAsync();
-
-        await requestWithNotifications({
-          url: `/api/groups/${groupId}/join-requests/reject`,
-
-          body: {
-            patientId,
-          },
-
+      finalSelectedUserIds.value.map((patientId) =>
+        rejectJoinRequest(groupId, {
           patientId,
-
-          notifications: {
-            agent: {
-              groupId,
-
-              groupName: groupName.text,
-
-              targetName: targetName.text,
-
-              // You rejected the join request of ${targetName}.
-            },
-
-            target: {
-              groupId,
-
-              // Your join request was rejected.
-            },
-
-            observers: {
-              groupId,
-
-              groupName: groupName.text,
-
-              agentName: agentName.text,
-              targetName: targetName.text,
-
-              // ${agentName} rejected the join request of ${targetName}.
-            },
-          },
-        });
-      }),
+        }),
+      ),
     );
 
     baseSelectedUserIds.value.clear();

@@ -105,7 +105,7 @@
           type="submit"
           flat
           color="primary"
-          @click.prevent="movePage()"
+          @click.prevent="_movePage()"
         />
       </q-card-actions>
     </template>
@@ -114,34 +114,12 @@
 
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
-import {
-  base64ToBytes,
-  bytesToBase64,
-  bytesToBase64Safe,
-} from '@stdlib/base64';
-import type { PublicKeyring, SymmetricKeyring } from '@stdlib/crypto';
-import { createSymmetricKeyring } from '@stdlib/crypto';
-import { wrapSymmetricKey } from '@stdlib/crypto';
-import { DataLayer } from '@stdlib/crypto';
-import {
-  BREAKPOINT_MD_MIN,
-  objEntries,
-  objFromEntries,
-  textToBytes,
-} from '@stdlib/misc';
-import { Y } from '@syncedstore/core';
-import { zxcvbn } from '@zxcvbn-ts/core';
-import {
-  generateGroupValues,
-  unlockGroupContentKeyring,
-} from 'src/code/crypto.client';
-import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
+import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { pageKeyrings } from 'src/code/pages/computed/page-keyrings.client';
-import { createPageDoc } from 'src/code/pages/utils.client';
+import { movePage } from 'src/code/pages/operations/pages/move';
 import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { handleError } from 'src/code/utils.client';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -211,331 +189,20 @@ onMounted(async () => {
   ]);
 });
 
-async function movePage() {
+async function _movePage() {
   try {
-    const request = {} as {
-      destGroupId: string;
-      setAsMainPage: boolean;
+    await movePage(page.value.id, {
+      currentGroupId: page.value.react.groupId,
+      setAsMainPage: setAsMainPage.value,
 
-      pageEncryptedSymmetricKeyring?: string;
-      pageEncryptedRelativeTitle?: string;
-      pageEncryptedAbsoluteTitle?: string;
-      pageEncryptedUpdate?: string;
-      pageEncryptedSnapshots?: Record<
-        string,
-        {
-          encryptedSymmetricKey: string;
-          encryptedData: string;
-        }
-      >;
-
-      createGroup: boolean;
-      groupEncryptedName?: string;
-      groupPasswordHash?: string;
-      groupIsPublic?: boolean;
-
-      accessKeyring?: string;
-      groupEncryptedInternalKeyring?: string;
-      groupEncryptedContentKeyring?: string;
-
-      groupPublicKeyring?: string;
-      groupEncryptedPrivateKeyring?: string;
-
-      groupMemberEncryptedName?: string;
-    };
-
-    request.destGroupId = destGroupId.value!;
-    request.setAsMainPage = setAsMainPage.value;
-    request.createGroup = destGroupId.value === 'new';
-
-    if (destGroupId.value !== page.value.react.groupId) {
-      let destGroupContentKeyring: SymmetricKeyring | undefined;
-
-      if (request.createGroup) {
-        if (groupName.value === '') {
-          $quasar().notify({
-            message: 'Please enter a group name.',
-            type: 'negative',
-          });
-
-          return;
-        }
-
-        if (groupMemberName.value === '') {
-          $quasar().notify({
-            message: 'Please enter an user alias.',
-            type: 'negative',
-          });
-
-          return;
-        }
-
-        if (
-          groupIsPasswordProtected.value &&
-          zxcvbn(groupPassword.value).score <= 2
-        ) {
-          await asyncPrompt({
-            title: 'Weak password',
-            html: true,
-            message:
-              'Your password is relatively weak.<br/>Are you sure you want to continue?',
-            style: { width: 'max-content', padding: '4px 8px' },
-
-            focus: 'cancel',
-
-            cancel: { label: 'No', flat: true, color: 'primary' },
-            ok: { label: 'Yes', flat: true, color: 'negative' },
-          });
-        }
-
-        const groupValues = await generateGroupValues({
-          userKeyPair: internals.keyPair,
-          isPublic: groupIsPublic.value,
-          password: groupIsPasswordProtected.value
-            ? groupPassword.value
-            : undefined,
-        });
-
-        request.destGroupId = groupValues.groupId;
-
-        destGroupContentKeyring = groupValues.contentKeyring;
-
-        request.groupEncryptedName = bytesToBase64(
-          groupValues.accessKeyring.encrypt(textToBytes(groupName.value), {
-            padding: true,
-            associatedData: {
-              context: 'GroupName',
-              groupId: groupValues.groupId,
-            },
-          }),
-        );
-
-        request.groupPasswordHash = bytesToBase64Safe(
-          groupValues.passwordValues?.passwordHash,
-        );
-
-        request.groupIsPublic = groupIsPublic.value;
-
-        request.groupEncryptedInternalKeyring = bytesToBase64(
-          groupValues.encryptedInternalKeyring.fullValue,
-        );
-        request.accessKeyring = bytesToBase64(
-          groupValues.finalAccessKeyring.fullValue,
-        );
-        request.groupEncryptedContentKeyring = bytesToBase64(
-          groupValues.encryptedContentKeyring.fullValue,
-        );
-
-        request.groupPublicKeyring = bytesToBase64(
-          (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
-        );
-        request.groupEncryptedPrivateKeyring = bytesToBase64(
-          groupValues.encryptedPrivateKeyring.fullValue,
-        );
-
-        request.groupMemberEncryptedName = bytesToBase64(
-          internals.keyPair.encrypt(
-            textToBytes(groupMemberName.value),
-            groupValues.keyPair.publicKey,
-            { padding: true },
-          ),
-        );
-      } else {
-        destGroupContentKeyring = await groupContentKeyrings()(
-          destGroupId.value!,
-        ).getAsync();
-
-        if (destGroupContentKeyring?.topLayer === DataLayer.Symmetric) {
-          const destGroupPassword = await asyncPrompt<string>({
-            title: 'Destination group password',
-            message: 'Enter the destination group password:',
-            color: 'primary',
-            prompt: {
-              type: 'password',
-              model: '',
-              filled: true,
-            },
-            style: {
-              maxWidth: '350px',
-            },
-            cancel: true,
-          });
-
-          destGroupContentKeyring = await unlockGroupContentKeyring(
-            destGroupId.value!,
-            destGroupPassword,
-          );
-        }
-      }
-
-      if (destGroupContentKeyring?.topLayer !== DataLayer.Raw) {
-        throw new Error('Invalid group content keyring.');
-      }
-
-      // Reencrypt page data
-
-      const encryptedPageData = (
-        await api().post<{
-          pageEncryptedRelativeTitle: string;
-          pageEncryptedAbsoluteTitle: string;
-          pageEncryptedUpdates: string[];
-          pageEncryptedSnapshots: Record<
-            string,
-            {
-              encryptedSymmetricKey: string;
-              encryptedData: string;
-            }
-          >;
-        }>(`/api/pages/${page.value.id}/move`, request)
-      ).data;
-
-      const oldPageKeyring = await pageKeyrings()(
-        `${page.value.react.groupId}:${page.value.id}`,
-      ).getAsync();
-
-      if (oldPageKeyring?.topLayer !== DataLayer.Raw) {
-        throw new Error('Invalid page keyring');
-      }
-
-      const newPageKeyring = createSymmetricKeyring();
-
-      request.pageEncryptedSymmetricKeyring = bytesToBase64(
-        newPageKeyring.wrapSymmetric(destGroupContentKeyring, {
-          associatedData: {
-            context: 'PageKeyring',
-            pageId: page.value.id,
-          },
-        }).fullValue,
-      );
-
-      request.pageEncryptedRelativeTitle = bytesToBase64(
-        newPageKeyring.encrypt(
-          oldPageKeyring.decrypt(
-            base64ToBytes(encryptedPageData.pageEncryptedRelativeTitle),
-            {
-              padding: true,
-              associatedData: {
-                context: 'PageRelativeTitle',
-                pageId: page.value.id,
-              },
-            },
-          ),
-          {
-            padding: true,
-            associatedData: {
-              context: 'PageRelativeTitle',
-              pageId: page.value.id,
-            },
-          },
-        ),
-      );
-
-      request.pageEncryptedAbsoluteTitle = bytesToBase64(
-        newPageKeyring.encrypt(
-          oldPageKeyring.decrypt(
-            base64ToBytes(encryptedPageData.pageEncryptedAbsoluteTitle),
-            {
-              padding: true,
-              associatedData: {
-                context: 'PageAbsoluteTitle',
-                pageId: page.value.id,
-              },
-            },
-          ),
-          {
-            padding: true,
-            associatedData: {
-              context: 'PageAbsoluteTitle',
-              pageId: page.value.id,
-            },
-          },
-        ),
-      );
-
-      const auxDoc = createPageDoc();
-
-      auxDoc.transact(() => {
-        for (const pageEncryptedUpdate of encryptedPageData.pageEncryptedUpdates) {
-          try {
-            Y.applyUpdateV2(
-              auxDoc,
-              oldPageKeyring.decrypt(base64ToBytes(pageEncryptedUpdate), {
-                padding: true,
-                associatedData: {
-                  context: 'PageDocUpdate',
-                  pageId: page.value.id,
-                },
-              }),
-            );
-          } catch (error) {
-            mainLogger().error(error);
-          }
-        }
-      });
-
-      request.pageEncryptedUpdate = bytesToBase64(
-        newPageKeyring.encrypt(Y.encodeStateAsUpdateV2(auxDoc), {
-          padding: true,
-          associatedData: {
-            context: 'PageDocUpdate',
-            pageId: page.value.id,
-          },
-        }),
-      );
-
-      request.pageEncryptedSnapshots = objFromEntries(
-        objEntries(encryptedPageData.pageEncryptedSnapshots).map(
-          ([snapshotId, { encryptedSymmetricKey, encryptedData }]) => {
-            const oldSnapshotSymmetricKey = wrapSymmetricKey(
-              oldPageKeyring.decrypt(base64ToBytes(encryptedSymmetricKey), {
-                associatedData: {
-                  context: 'PageSnapshotSymmetricKey',
-                  pageId: page.value.id,
-                },
-              }),
-            );
-            const newSnapshotSymmetricKey = wrapSymmetricKey();
-
-            return [
-              snapshotId,
-              {
-                encryptedSymmetricKey: bytesToBase64(
-                  newPageKeyring.encrypt(newSnapshotSymmetricKey.value, {
-                    associatedData: {
-                      context: 'PageSnapshotSymmetricKey',
-                      pageId: page.value.id,
-                    },
-                  }),
-                ),
-                encryptedData: bytesToBase64(
-                  newSnapshotSymmetricKey.encrypt(
-                    oldSnapshotSymmetricKey.decrypt(
-                      base64ToBytes(encryptedData),
-                      {
-                        padding: true,
-                        associatedData: {
-                          context: 'PageSnapshotData',
-                          pageId: page.value.id,
-                        },
-                      },
-                    ),
-                    {
-                      padding: true,
-                      associatedData: {
-                        context: 'PageSnapshotData',
-                        pageId: page.value.id,
-                      },
-                    },
-                  ),
-                ),
-              },
-            ];
-          },
-        ),
-      );
-    }
-
-    await api().post(`/api/pages/${page.value.id}/move`, request);
+      createGroup: destGroupId.value === 'new',
+      groupName: groupName.value,
+      groupMemberName: groupMemberName.value,
+      groupIsPublic: groupIsPublic.value,
+      groupPassword: groupIsPasswordProtected.value
+        ? groupPassword.value
+        : undefined,
+    });
 
     $quasar().notify({
       message: 'Page moved successfully.',

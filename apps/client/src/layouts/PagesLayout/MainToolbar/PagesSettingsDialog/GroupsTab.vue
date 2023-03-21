@@ -97,11 +97,8 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import type { GroupKeyRotationValues } from 'src/code/pages/group-key-rotation.client';
-import { rotateGroupKeys } from 'src/code/pages/group-key-rotation.client';
-import { createNotifications } from 'src/code/pages/utils.client';
+import { removeGroupUser } from 'src/code/pages/operations/groups/remove-user';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -176,64 +173,12 @@ async function leaveSelectedGroups() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const agentId = authStore().userId;
-
     await Promise.all(
-      finalSelectedGroupIds.value.map(async (groupId) => {
-        const [groupName, agentName] = await Promise.all([
-          groupNames()(groupId).getAsync(),
-
-          groupMemberNames()(`${groupId}:${agentId}`).getAsync(),
-        ]);
-
-        const notificationRecipients = (
-          await api().post<{
-            notificationRecipients: Record<string, { publicKeyring: string }>;
-          }>(`/api/groups/${groupId}/remove-user/${agentId}`, {})
-        ).data.notificationRecipients;
-
-        await api().post(`/api/groups/${groupId}/remove-user/${agentId}`, {
-          notifications: await createNotifications({
-            recipients: notificationRecipients,
-
-            notifications: {
-              agent: {
-                groupId,
-
-                removed: false,
-
-                groupName: groupName.text,
-                agentName: agentName.text,
-
-                // You left the group.
-              },
-
-              observers: {
-                groupId,
-
-                removed: false,
-
-                groupName: groupName.text,
-                agentName: agentName.text,
-
-                // ${agentName} left the group.
-              },
-            },
-          }),
-        });
-
-        const groupKeyRotationValues = (
-          await api().post<GroupKeyRotationValues>(
-            `/api/groups/${groupId}/rotate-keys`,
-            {},
-          )
-        ).data;
-
-        await api().post(
-          `/api/groups/${groupId}/rotate-keys`,
-          await rotateGroupKeys(groupId, groupKeyRotationValues),
-        );
-      }),
+      finalSelectedGroupIds.value.map((groupId) =>
+        removeGroupUser(groupId, {
+          patientId: authStore().userId,
+        }),
+      ),
     );
 
     baseSelectedGroupIds.value.clear();

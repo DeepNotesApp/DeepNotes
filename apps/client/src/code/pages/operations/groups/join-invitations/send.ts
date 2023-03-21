@@ -1,0 +1,122 @@
+import { bytesToBase64 } from '@stdlib/base64';
+import { bytesToBase64Safe } from '@stdlib/base64';
+import { createPublicKeyring } from '@stdlib/crypto';
+import { textToBytes } from '@stdlib/misc';
+import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
+import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
+import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { requestWithNotifications } from 'src/code/pages/utils.client';
+
+export async function sendJoinInvitation(
+  groupId: string,
+  {
+    inviteeUserId,
+    inviteeRole,
+    inviteeUserName,
+  }: {
+    inviteeUserId: string;
+    inviteeRole: string;
+    inviteeUserName: string;
+  },
+) {
+  if (inviteeUserId == null) {
+    $quasar().notify({
+      message: 'User not found.',
+      type: 'negative',
+    });
+
+    return;
+  }
+
+  const [
+    inviteePublicKeyring,
+    groupPublicKeyring,
+
+    accessKeyring,
+    groupInternalKeyring,
+
+    groupName,
+    agentName,
+  ] = await Promise.all([
+    (async () =>
+      createPublicKeyring(
+        await internals.realtime.hget('user', inviteeUserId, 'public-keyring'),
+      ))(),
+    (async () =>
+      createPublicKeyring(
+        await internals.realtime.hget('group', groupId, 'public-keyring'),
+      ))(),
+
+    groupAccessKeyrings()(groupId).getAsync(),
+    groupInternalKeyrings()(groupId).getAsync(),
+
+    groupNames()(groupId).getAsync(),
+    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
+  ]);
+
+  if (accessKeyring == null || groupInternalKeyring == null) {
+    throw new Error('Group keyrings not found.');
+  }
+
+  await requestWithNotifications({
+    url: `/api/groups/${groupId}/join-invitations/send`,
+
+    body: {
+      patientId: inviteeUserId,
+      invitationRole: inviteeRole,
+
+      encryptedAccessKeyring: bytesToBase64(
+        accessKeyring.wrapAsymmetric(internals.keyPair, inviteePublicKeyring)
+          .fullValue,
+      ),
+      encryptedInternalKeyring: bytesToBase64(
+        groupInternalKeyring.wrapAsymmetric(
+          internals.keyPair,
+          inviteePublicKeyring,
+        ).fullValue,
+      ),
+
+      userEncryptedName: bytesToBase64Safe(
+        internals.keyPair.encrypt(
+          textToBytes(inviteeUserName),
+          groupPublicKeyring,
+          {
+            padding: true,
+          },
+        ),
+      ),
+    },
+
+    patientId: inviteeUserId,
+
+    notifications: {
+      agent: {
+        groupId: groupId,
+
+        groupName: groupName.text,
+        targetName: inviteeUserName,
+
+        // You invited ${targetName} to join the group.
+      },
+
+      target: {
+        groupId: groupId,
+
+        groupName: groupName.text,
+
+        // Your were invited to join the group.
+      },
+
+      observers: {
+        groupId: groupId,
+
+        groupName: groupName.text,
+        agentName: agentName.text,
+        targetName: inviteeUserName,
+
+        // ${agentName} invited ${targetName} to join the group.
+      },
+    },
+  });
+}
