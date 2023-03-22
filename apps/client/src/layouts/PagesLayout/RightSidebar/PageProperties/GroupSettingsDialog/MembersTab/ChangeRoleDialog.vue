@@ -90,15 +90,11 @@ const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 const role = ref<GroupRoleID | null>(null);
 
 async function changeRole() {
-  if (role.value == null) {
-    $quasar().notify({
-      message: 'Please select a role.',
-      type: 'negative',
-    });
-    return;
-  }
-
   try {
+    if (role.value == null) {
+      throw new Error('Please select a role.');
+    }
+
     await Promise.all(
       props.userIds.map((patientId) =>
         changeUserRole(props.groupId, {

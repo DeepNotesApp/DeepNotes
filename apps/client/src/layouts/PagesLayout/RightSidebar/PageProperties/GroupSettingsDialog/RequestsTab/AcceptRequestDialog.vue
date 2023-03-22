@@ -96,12 +96,7 @@ const targetRole = ref<GroupRoleID | null>(null);
 async function _acceptJoinRequest() {
   try {
     if (targetRole.value == null) {
-      $quasar().notify({
-        message: 'Please select a role.',
-        color: 'negative',
-      });
-
-      return;
+      throw new Error('Please select a role.');
     }
 
     await Promise.all(

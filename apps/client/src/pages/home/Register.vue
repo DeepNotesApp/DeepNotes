@@ -169,34 +169,19 @@ async function register() {
     // Check if email is valid
 
     if (!w3cEmailRegex.test(email.value)) {
-      $quasar().notify({
-        message: 'Email is invalid.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Email is invalid.');
     }
 
     // Check if display name is empty
 
     if (userName.value === '') {
-      $quasar().notify({
-        message: 'Display name cannot be empty.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Display name cannot be empty.');
     }
 
     // Password validation
 
     if (password.value !== repeatPassword.value) {
-      $quasar().notify({
-        message: 'Passwords do not match.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Passwords do not match.');
     }
 
     // Check password strength
@@ -229,12 +214,9 @@ async function register() {
     }
 
     if (!agree.value) {
-      $quasar().notify({
-        message: 'You must agree to the Terms of Service and Privacy Policy.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error(
+        'You must agree to the Terms of Service and Privacy Policy.',
+      );
     }
 
     const derivedKeys = await deriveUserValues(email.value, password.value);

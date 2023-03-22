@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { asyncPrompt } from 'src/code/utils.client';
+import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -62,30 +62,29 @@ const password = ref('');
 const repeatPassword = ref('');
 
 async function enablePasswordProtection() {
-  if (password.value !== repeatPassword.value) {
-    $quasar().notify({
-      type: 'negative',
-      message: 'Passwords do not match.',
-    });
+  try {
+    if (password.value !== repeatPassword.value) {
+      throw new Error('Passwords do not match.');
+    }
 
-    return;
+    if (zxcvbn(password.value).score <= 2) {
+      await asyncPrompt({
+        title: 'Weak password',
+        html: true,
+        message:
+          'Your password is relatively weak.<br/>Are you sure you want to continue?',
+        style: { width: 'max-content', padding: '4px 8px' },
+
+        focus: 'cancel',
+
+        cancel: { label: 'No', flat: true, color: 'primary' },
+        ok: { label: 'Yes', flat: true, color: 'negative' },
+      });
+    }
+
+    dialogRef.value.onDialogOK(password.value);
+  } catch (error) {
+    handleError(error);
   }
-
-  if (zxcvbn(password.value).score <= 2) {
-    await asyncPrompt({
-      title: 'Weak password',
-      html: true,
-      message:
-        'Your password is relatively weak.<br/>Are you sure you want to continue?',
-      style: { width: 'max-content', padding: '4px 8px' },
-
-      focus: 'cancel',
-
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
-    });
-  }
-
-  dialogRef.value.onDialogOK(password.value);
 }
 </script>

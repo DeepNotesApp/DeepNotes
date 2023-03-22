@@ -52,12 +52,7 @@ async function changeEmail() {
     );
 
     if (!w3cEmailRegex.test(newEmail.value)) {
-      $quasar().notify({
-        message: 'New email address is invalid.',
-        color: 'negative',
-      });
-
-      return;
+      throw new Error('New email address is invalid.');
     }
 
     if (
@@ -66,12 +61,7 @@ async function changeEmail() {
         .split(';')
         .includes(currentEmail)
     ) {
-      $quasar().notify({
-        message: 'New email address is the same as the current one.',
-        color: 'negative',
-      });
-
-      return;
+      throw new Error('New email address is the same as the current one.');
     }
 
     const password = await asyncPrompt<string>({

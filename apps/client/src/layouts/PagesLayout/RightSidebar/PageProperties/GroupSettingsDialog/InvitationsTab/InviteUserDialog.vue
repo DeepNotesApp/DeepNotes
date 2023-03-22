@@ -119,30 +119,15 @@ async function inviteUser() {
         .or(z.string().regex(w3cEmailRegex))
         .safeParse(identity.value).success
     ) {
-      $quasar().notify({
-        message: 'Invalid email or user ID.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Invalid email or user ID.');
     }
 
     if (userName.value === '') {
-      $quasar().notify({
-        message: 'Please enter a display name.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Please enter a display name.');
     }
 
     if (role.value == null) {
-      $quasar().notify({
-        message: 'Please select a role.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Please select a role.');
     }
 
     let inviteeUserId;
