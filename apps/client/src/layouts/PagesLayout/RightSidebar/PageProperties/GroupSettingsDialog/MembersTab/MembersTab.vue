@@ -138,12 +138,33 @@ const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
-const membersUserIds = computed(() =>
-  Array.from(pagesStore().groups[groupId]?.userIds ?? []).filter(
-    (groupMemberId) =>
-      realtimeCtx.hget('group-member', `${groupId}:${groupMemberId}`, 'exists'),
-  ),
-);
+const membersUserIds = computed(() => {
+  const userIds = Array.from(pagesStore().groups[groupId]?.userIds ?? []);
+
+  const membersUserIds = userIds.filter((groupMemberId) =>
+    realtimeCtx.hget('group-member', `${groupId}:${groupMemberId}`, 'exists'),
+  );
+
+  membersUserIds.sort((memberAUserId, memberBUserId) => {
+    const memberAGroupRole = realtimeCtx.hget(
+      'group-member',
+      `${groupId}:${memberAUserId}`,
+      'role',
+    );
+    const memberBGroupRole = realtimeCtx.hget(
+      'group-member',
+      `${groupId}:${memberBUserId}`,
+      'role',
+    );
+
+    const memberAGroupRoleRank = rolesMap()[memberAGroupRole]?.rank ?? 0;
+    const memberBGroupRoleRank = rolesMap()[memberBGroupRole]?.rank ?? 0;
+
+    return memberBGroupRoleRank - memberAGroupRoleRank;
+  });
+
+  return membersUserIds;
+});
 
 const baseSelectedUserIds = computed(
   () => settings.value.members.selectedUserIds,
