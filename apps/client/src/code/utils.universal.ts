@@ -116,3 +116,21 @@ export async function usePost<T>(url: string, data?: any): Promise<T> {
     async () => (await api().post(url, data)).data,
   );
 }
+
+export function debounceTick(func: () => any) {
+  let scheduled = false;
+
+  return () => {
+    if (scheduled) {
+      return;
+    }
+
+    scheduled = true;
+
+    void nextTick(() => {
+      scheduled = false;
+
+      func();
+    });
+  };
+}
