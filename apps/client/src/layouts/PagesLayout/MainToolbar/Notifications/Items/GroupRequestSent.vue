@@ -90,9 +90,7 @@ const canAcceptRequest = computed(() => {
   );
 
   return (
-    rejected === false &&
-    (rolesMap()[selfGroupRole].permissions.manageOwnRank ||
-      rolesMap()[selfGroupRole].permissions.manageLowerRanks)
+    rejected === false && rolesMap()[selfGroupRole].permissions.manageLowerRanks
   );
 });
 

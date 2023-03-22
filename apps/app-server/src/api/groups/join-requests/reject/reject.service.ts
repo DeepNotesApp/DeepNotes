@@ -7,10 +7,7 @@ import type { EndpointValues } from './reject.controller';
 @Injectable()
 export class RejectService {
   async agentHasSufficientPermissions({ agentId, groupId }: EndpointValues) {
-    return (
-      (await userHasPermission(agentId, groupId, 'manageLowerRanks')) ||
-      (await userHasPermission(agentId, groupId, 'manageOwnRank'))
-    );
+    return await userHasPermission(agentId, groupId, 'manageLowerRanks');
   }
 
   async agentHasPendingRequest({ groupId, patientId }: EndpointValues) {
