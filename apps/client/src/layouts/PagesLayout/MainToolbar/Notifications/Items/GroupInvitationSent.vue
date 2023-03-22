@@ -4,23 +4,95 @@
     @click="onClick"
   >
     <q-item-label>{{ notificationInfo.get()?.message }}</q-item-label>
+
+    <q-item-label
+      v-if="
+        notificationContent.recipientType === 'agent' && canCancelInvitation
+      "
+      style="text-align: center"
+    >
+      <DeepBtn
+        label="Cancel invitation"
+        color="negative"
+        style="margin: 8px"
+        @click.stop="_cancelJoinInvitation"
+      />
+    </q-item-label>
+
+    <q-item-label
+      v-if="
+        notificationContent.recipientType === 'target' && canAcceptInvitation
+      "
+      style="text-align: center"
+    >
+      <DeepBtn
+        label="Reject"
+        color="negative"
+        style="margin: 8px"
+        @click.stop="_rejectJoinInvitation"
+      />
+
+      <DeepBtn
+        label="Accept"
+        color="positive"
+        style="margin: 8px"
+        @click.stop="_acceptJoinInvitation"
+      />
+    </q-item-label>
   </NotificationItem>
 </template>
 
 <script setup lang="ts">
 import type { DeepNotesNotification } from '@deeplib/misc';
+import { canManageRole } from '@deeplib/misc';
 import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
+import type { QMenu } from 'quasar';
 import { getGroupInvitationSentNotificationInfo } from 'src/code/pages/notifications/group-invitation-sent.client';
+import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
+import { cancelJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/cancel';
+import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
+import type { RealtimeContext } from 'src/code/realtime/context.universal';
+import { asyncPrompt, handleError } from 'src/code/utils.client';
+import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
+import type { Ref } from 'vue';
 
 import NotificationItem from '../NotificationItem.vue';
 
 const props = defineProps<{
   notification: DeepNotesNotification;
 }>();
+
+const notificationsMenu = inject('notificationsMenu') as Ref<QMenu>;
+
+const realtimeCtx = inject('realtimeCtx') as RealtimeContext;
+
+const canCancelInvitation = computed(() => {
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${notificationContent.value.groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  const inviteeGroupRole = realtimeCtx.hget(
+    'group-join-invitation',
+    `${notificationContent.value.groupId}:${notificationContent.value.patientId}`,
+    'role',
+  );
+
+  return canManageRole(selfGroupRole, inviteeGroupRole);
+});
+
+const canAcceptInvitation = computed(() =>
+  realtimeCtx.hget(
+    'group-join-invitation',
+    `${notificationContent.value.groupId}:${authStore().userId}`,
+    'exists',
+  ),
+);
 
 const notificationContent = computed(() => {
   const symmetricKey = wrapSymmetricKey(
@@ -44,13 +116,78 @@ const notificationInfo = createSmartComputed({
 async function onClick() {
   await router().push(`/groups/${notificationContent.value.groupId}`);
 
-  $quasar().dialog({
-    component: GroupSettingsDialog,
+  if (notificationContent.value.recipientType !== 'target') {
+    $quasar().dialog({
+      component: GroupSettingsDialog,
 
-    componentProps: {
-      groupId: notificationContent.value.groupId,
-      tab: 'Join invitations',
-    },
-  });
+      componentProps: {
+        groupId: notificationContent.value.groupId,
+        tab: 'Join invitations',
+      },
+    });
+  }
+
+  notificationsMenu.value.hide();
+}
+
+async function _cancelJoinInvitation() {
+  try {
+    await asyncPrompt({
+      title: 'Cancel join invitation',
+      message: 'Are you sure you want to cancel the join invitation?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    await cancelJoinInvitation(notificationContent.value.groupId, {
+      patientId: notificationContent.value.patientId,
+    });
+
+    notificationsMenu.value.hide();
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function _rejectJoinInvitation() {
+  try {
+    await asyncPrompt({
+      title: 'Reject join invitation',
+      message: 'Are you sure you want to reject the join invitation?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    await rejectJoinInvitation(notificationContent.value.groupId);
+
+    notificationsMenu.value.hide();
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function _acceptJoinInvitation() {
+  $quasar()
+    .dialog({ component: AcceptInvitationDialog })
+    .onOk(async (userName) => {
+      try {
+        await acceptJoinInvitation(notificationContent.value.groupId, {
+          userName,
+        });
+
+        notificationsMenu.value.hide();
+      } catch (error: any) {
+        handleError(error);
+      }
+    })
+    .onCancel(() => {
+      notificationsMenu.value.hide();
+    });
 }
 </script>

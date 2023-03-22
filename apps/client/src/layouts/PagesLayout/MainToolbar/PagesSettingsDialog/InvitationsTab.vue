@@ -102,10 +102,8 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import {
-  acceptJoinInvitation,
-  rejectJoinInvitation,
-} from 'src/code/pages/groups.client';
+import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
+import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -177,7 +175,7 @@ async function acceptSelectedInvitations() {
       try {
         await Promise.all(
           finalSelectedGroupIds.value.map((groupId) =>
-            acceptJoinInvitation(groupId, userName),
+            acceptJoinInvitation(groupId, { userName }),
           ),
         );
 

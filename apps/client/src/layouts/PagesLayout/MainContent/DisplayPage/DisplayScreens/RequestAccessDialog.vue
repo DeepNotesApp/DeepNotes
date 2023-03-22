@@ -46,7 +46,7 @@
           flat
           color="primary"
           :disable="loading"
-          @click="sendJoinRequest()"
+          @click="_sendJoinRequest()"
         />
       </q-card-actions>
     </template>
@@ -55,10 +55,7 @@
 
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
-import { bytesToBase64 } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
-import { textToBytes } from '@stdlib/misc';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { sendJoinRequest } from 'src/code/pages/operations/groups/join-requests/send';
 import { selfUserName } from 'src/code/self-user-name.client';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -79,50 +76,10 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function sendJoinRequest() {
+async function _sendJoinRequest() {
   try {
-    const groupPublicKeyring = createPublicKeyring(
-      await internals.realtime.hget('group', props.groupId, 'public-keyring'),
-    );
-
-    await requestWithNotifications({
-      url: `/api/groups/${props.groupId}/join-requests/send`,
-
-      body: {
-        encryptedUserName: bytesToBase64(
-          internals.keyPair.encrypt(
-            textToBytes(userName.value),
-            groupPublicKeyring,
-            { padding: true },
-          ),
-        ),
-        encryptedUserNameForUser: bytesToBase64(
-          internals.symmetricKeyring.encrypt(textToBytes(userName.value), {
-            padding: true,
-            associatedData: {
-              context: 'GroupJoinRequestUserNameForUser',
-              groupId: props.groupId,
-              userId: authStore().userId,
-            },
-          }),
-        ),
-      },
-
-      notifications: {
-        agent: {
-          groupId: props.groupId,
-
-          // You have sent a join request.
-        },
-
-        observers: {
-          groupId: props.groupId,
-
-          agentName: userName.value,
-
-          // ${agentName} has sent a join request.
-        },
-      },
+    await sendJoinRequest(props.groupId, {
+      userName: userName.value,
     });
 
     dialogRef.value.onDialogOK();

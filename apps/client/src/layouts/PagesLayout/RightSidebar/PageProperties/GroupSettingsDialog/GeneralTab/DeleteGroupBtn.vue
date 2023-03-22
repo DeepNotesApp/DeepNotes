@@ -2,11 +2,12 @@
   <DeepBtn
     label="Delete group"
     color="negative"
-    @click="deleteGroup()"
+    @click="_deleteGroup()"
   />
 </template>
 
 <script setup lang="ts">
+import { deleteGroup } from 'src/code/pages/operations/groups/deletion/delete';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
@@ -14,7 +15,7 @@ const groupId = inject<string>('groupId')!;
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
-async function deleteGroup() {
+async function _deleteGroup() {
   try {
     await asyncPrompt({
       title: 'Delete group',
@@ -26,7 +27,7 @@ async function deleteGroup() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(`/api/groups/${groupId}/deletion/delete`);
+    await deleteGroup(groupId);
 
     $quasar().notify({
       message: 'Group deleted successfully.',

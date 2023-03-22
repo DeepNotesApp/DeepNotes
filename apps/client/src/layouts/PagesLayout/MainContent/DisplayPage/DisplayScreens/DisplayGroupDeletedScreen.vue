@@ -15,7 +15,7 @@
     <DeepBtn
       label="Restore group"
       color="secondary"
-      @click="restoreGroup"
+      @click="_restoreGroup"
     />
 
     <Gap style="height: 16px" />
@@ -31,6 +31,8 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { relativeTimeStr } from '@stdlib/misc';
+import { deleteGroupPermanently } from 'src/code/pages/operations/groups/deletion/delete-permanently';
+import { restoreGroup } from 'src/code/pages/operations/groups/deletion/restore';
 import type { Page } from 'src/code/pages/page/page.client';
 import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
@@ -67,9 +69,9 @@ const canRestore = computed(() => {
   return rolesMap()[role]?.permissions.editGroupSettings;
 });
 
-async function restoreGroup() {
+async function _restoreGroup() {
   try {
-    await api().post(`/api/groups/${page.react.groupId}/deletion/restore`);
+    await restoreGroup(page.react.groupId);
 
     $quasar().notify({
       message: 'Group restored successfully.',
@@ -92,9 +94,7 @@ async function deletePermanently() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(
-      `/api/groups/${page.react.groupId}/deletion/delete-permanently`,
-    );
+    await deleteGroupPermanently(page.react.groupId);
 
     $quasar().notify({
       message: 'Group deleted permanently.',

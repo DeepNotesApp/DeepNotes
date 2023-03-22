@@ -53,9 +53,7 @@
 
 <script setup lang="ts">
 import { roles, rolesMap } from '@deeplib/misc';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { changeUserRole } from 'src/code/pages/operations/groups/change-user-role';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
@@ -81,64 +79,13 @@ async function changeRole() {
   }
 
   try {
-    const agentId = authStore().userId;
-    const roleName = rolesMap()[role.value!].name;
-
-    const [groupName, agentName] = await Promise.all([
-      groupNames()(props.settings.groupId).getAsync(),
-
-      groupMemberNames()(`${props.settings.groupId}:${agentId}`).getAsync(),
-    ]);
-
     await Promise.all(
-      Array.from(selectedIds.value).map(async (patientId) => {
-        const targetName = await groupMemberNames()(
-          `${props.settings.groupId}:${patientId}`,
-        ).getAsync();
-
-        await requestWithNotifications({
-          url: `/api/groups/${props.settings.groupId}/change-user-role`,
-
-          body: {
-            patientId,
-            requestedRole: role.value,
-          },
-
+      Array.from(selectedIds.value).map((patientId) =>
+        changeUserRole(props.settings.groupId, {
           patientId,
-
-          notifications: {
-            agent: {
-              groupId: props.settings.groupId,
-
-              groupName: groupName.text,
-              targetName: targetName.text,
-              roleName,
-
-              // You changed the role of ${targetName} to ${roleName}.
-            },
-
-            target: {
-              groupId: props.settings.groupId,
-
-              groupName: groupName.text,
-              roleName,
-
-              // Your role was changed to ${roleName}.
-            },
-
-            observers: {
-              groupId: props.settings.groupId,
-
-              groupName: groupName.text,
-              agentName: agentName.text,
-              targetName: targetName.text,
-              roleName,
-
-              // ${agentName} changed the role of ${targetName} to ${roleName}.
-            },
-          },
-        });
-      }),
+          role: role.value!,
+        }),
+      ),
     );
 
     dialogRef.value.onDialogOK();

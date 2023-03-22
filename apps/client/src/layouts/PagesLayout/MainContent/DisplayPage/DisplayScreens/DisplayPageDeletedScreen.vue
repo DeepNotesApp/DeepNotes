@@ -15,7 +15,7 @@
     <DeepBtn
       label="Restore page"
       color="secondary"
-      @click="restorePage"
+      @click="_restorePage"
     />
 
     <Gap style="height: 16px" />
@@ -31,6 +31,8 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { relativeTimeStr } from '@stdlib/misc';
+import { deletePagePermanently } from 'src/code/pages/operations/pages/deletion/delete-permanently';
+import { restorePageDeletion } from 'src/code/pages/operations/pages/deletion/restore';
 import type { Page } from 'src/code/pages/page/page.client';
 import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
@@ -67,9 +69,9 @@ const canRestore = computed(() => {
   return rolesMap()[role]?.permissions.editGroupPages;
 });
 
-async function restorePage() {
+async function _restorePage() {
   try {
-    await api().post(`/api/pages/${page.id}/deletion/restore`);
+    await restorePageDeletion(page.id);
 
     $quasar().notify({
       message: 'Page restored successfully.',
@@ -92,7 +94,7 @@ async function deletePermanently() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(`/api/pages/${page.id}/deletion/delete-permanently`);
+    await deletePagePermanently(page.id);
 
     $quasar().notify({
       message: 'Page deleted permanently.',

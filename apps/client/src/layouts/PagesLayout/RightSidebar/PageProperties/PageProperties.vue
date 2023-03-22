@@ -94,7 +94,7 @@
         label="Delete page"
         color="negative"
         :disable="page.react.readOnly"
-        @click="deletePage"
+        @click="_deletePage"
       />
     </div>
 
@@ -108,6 +108,7 @@
 import { maxPageTitleLength } from '@deeplib/misc';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles.client';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles.client';
+import { deletePage } from 'src/code/pages/operations/pages/deletion/delete';
 import type { Page } from 'src/code/pages/page/page.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
@@ -118,7 +119,7 @@ import VersionHistory from './VersionHistory.vue';
 
 const page = inject<Ref<Page>>('page')!;
 
-async function deletePage() {
+async function _deletePage() {
   try {
     await asyncPrompt({
       title: 'Delete page',
@@ -129,7 +130,7 @@ async function deletePage() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(`/api/pages/${page.value.id}/deletion/delete`);
+    await deletePage(page.value.id);
 
     $quasar().notify({
       message: 'Page deleted successfully.',

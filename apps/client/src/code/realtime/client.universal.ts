@@ -367,6 +367,7 @@ export const RealtimeClient = once(
 
             this._resubscribe('group-join-request', suffix, 'encrypted-name');
             this._resubscribe('group-join-request', suffix, 'rejected');
+            this._resubscribe('group-join-request', suffix, 'exists');
 
             this._resubscribe('group-member', suffix, 'encrypted-name');
             this._resubscribe('group-member', suffix, 'exists');
@@ -433,7 +434,7 @@ export const RealtimeClient = once(
           ),
         );
 
-        const content = unpack(
+        const notifContent = unpack(
           symmetricKey.decrypt(base64ToBytes(notifObj.encryptedContent), {
             padding: true,
             associatedData: { context: 'UserNotificationContent' },
@@ -445,17 +446,27 @@ export const RealtimeClient = once(
           .info('notifObj: %o', notifObj);
         this._logger
           .sub('_handleUserNotification')
-          .info('content: %o', content);
+          .info('content: %o', notifContent);
 
-        if (content.agentId != null) {
-          pagesStore().groups[content.groupId]?.userIds.add(content.agentId);
+        if (notifContent.agentId != null) {
+          pagesStore().groups[notifContent.groupId]?.userIds.add(
+            notifContent.agentId,
+          );
         }
 
-        if (content.patientId != null) {
-          pagesStore().groups[content.groupId]?.userIds.add(content.patientId);
+        if (notifContent.patientId != null) {
+          pagesStore().groups[notifContent.groupId]?.userIds.add(
+            notifContent.patientId,
+          );
         }
 
-        $quasar().notify(await getNotificationInfo(notifObj, content));
+        const notifInfo = await getNotificationInfo(notifObj, notifContent);
+
+        $quasar().notify({
+          ...notifInfo,
+
+          actions: notifInfo.actions,
+        });
       }
 
       isSynced<

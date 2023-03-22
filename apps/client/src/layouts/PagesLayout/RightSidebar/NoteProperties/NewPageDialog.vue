@@ -121,7 +121,7 @@
           type="submit"
           flat
           color="primary"
-          @click.prevent="createPage()"
+          @click.prevent="_createPage()"
         />
       </q-card-actions>
     </template>
@@ -134,23 +134,12 @@ import {
   maxNameLength,
   maxPageTitleLength,
 } from '@deeplib/misc';
-import { bytesToBase64, bytesToBase64Safe } from '@stdlib/base64';
-import type { PublicKeyring, SymmetricKeyring } from '@stdlib/crypto';
-import { createSymmetricKeyring } from '@stdlib/crypto';
-import { DataLayer } from '@stdlib/crypto';
 import { BREAKPOINT_MD_MIN, sleep, splitStr } from '@stdlib/misc';
-import { textToBytes } from '@stdlib/misc';
-import { zxcvbn } from '@zxcvbn-ts/core';
-import { nanoid } from 'nanoid';
-import {
-  generateGroupValues,
-  unlockGroupContentKeyring,
-} from 'src/code/crypto.client';
-import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
 import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { createPage } from 'src/code/pages/operations/pages/create';
 import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { handleError } from 'src/code/utils.client';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -248,7 +237,7 @@ onMounted(async () => {
   ]);
 });
 
-async function createPage() {
+async function _createPage() {
   try {
     if (pageRelativeTitle.value === '') {
       $quasar().notify({
@@ -261,198 +250,23 @@ async function createPage() {
       return;
     }
 
-    let groupContentKeyring: SymmetricKeyring | undefined;
+    const response = await createPage(page.value.id, {
+      currentGroupId: page.value.react.groupId,
+      pageRelativeTitle: pageRelativeTitle.value,
 
-    const request = {} as {
-      parentPageId: string;
-      groupId: string;
-      pageId: string;
-
-      pageEncryptedSymmetricKeyring: string;
-      pageEncryptedRelativeTitle: string;
-      pageEncryptedAbsoluteTitle: string;
-
-      createGroup: boolean;
-      groupEncryptedName: string;
-      groupPasswordHash?: string;
-      groupIsPublic: boolean;
-      accessKeyring: string;
-      groupEncryptedInternalKeyring: string;
-      groupEncryptedContentKeyring: string;
-      groupPublicKeyring: string;
-      groupEncryptedPrivateKeyring: string;
-      groupMemberEncryptedName: string;
-    };
-
-    request.parentPageId = page.value.id;
-
-    request.pageId = nanoid();
-
-    request.createGroup = destGroupId.value === 'new';
-
-    if (request.createGroup) {
-      if (groupName.value === '') {
-        $quasar().notify({
-          message: 'Please enter a group name.',
-          type: 'negative',
-        });
-
-        return;
-      }
-
-      if (groupMemberName.value === '') {
-        $quasar().notify({
-          message: 'Please enter an user alias.',
-          type: 'negative',
-        });
-
-        return;
-      }
-
-      if (
-        groupIsPasswordProtected.value &&
-        zxcvbn(groupPassword.value).score <= 2
-      ) {
-        await asyncPrompt({
-          title: 'Weak password',
-          html: true,
-          message:
-            'Your password is relatively weak.<br/>Are you sure you want to continue?',
-          style: { width: 'max-content', padding: '4px 8px' },
-
-          focus: 'cancel',
-
-          cancel: { label: 'No', flat: true, color: 'primary' },
-          ok: { label: 'Yes', flat: true, color: 'negative' },
-        });
-      }
-
-      const groupValues = await generateGroupValues({
-        userKeyPair: internals.keyPair,
-        isPublic: groupIsPublic.value,
-        password: groupIsPasswordProtected.value
-          ? groupPassword.value
-          : undefined,
-      });
-
-      request.groupId = groupValues.groupId;
-
-      groupContentKeyring = groupValues.contentKeyring;
-
-      request.groupEncryptedName = bytesToBase64(
-        groupValues.accessKeyring.encrypt(textToBytes(groupName.value), {
-          padding: true,
-          associatedData: {
-            context: 'GroupName',
-            groupId: groupValues.groupId,
-          },
-        }),
-      );
-
-      request.groupPasswordHash = bytesToBase64Safe(
-        groupValues.passwordValues?.passwordHash,
-      );
-
-      request.groupIsPublic = groupIsPublic.value;
-
-      request.accessKeyring = bytesToBase64(
-        groupValues.finalAccessKeyring.fullValue,
-      );
-      request.groupEncryptedInternalKeyring = bytesToBase64(
-        groupValues.encryptedInternalKeyring.fullValue,
-      );
-      request.groupEncryptedContentKeyring = bytesToBase64(
-        groupValues.encryptedContentKeyring.fullValue,
-      );
-
-      request.groupPublicKeyring = bytesToBase64(
-        (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
-      );
-      request.groupEncryptedPrivateKeyring = bytesToBase64(
-        groupValues.encryptedPrivateKeyring.fullValue,
-      );
-
-      request.groupMemberEncryptedName = bytesToBase64(
-        internals.keyPair.encrypt(
-          textToBytes(groupMemberName.value),
-          groupValues.keyPair.publicKey,
-          { padding: true },
-        ),
-      );
-    } else {
-      request.groupId = destGroupId.value!;
-
-      groupContentKeyring = await groupContentKeyrings()(
-        destGroupId.value!,
-      ).getAsync();
-
-      if (groupContentKeyring?.topLayer === DataLayer.Symmetric) {
-        const destGroupPassword = await asyncPrompt<string>({
-          title: 'Destination group password',
-          message: 'Enter the destination group password:',
-          color: 'primary',
-          prompt: {
-            type: 'password',
-            model: '',
-            filled: true,
-          },
-          style: {
-            maxWidth: '350px',
-          },
-          cancel: true,
-        });
-
-        groupContentKeyring = await unlockGroupContentKeyring(
-          request.groupId!,
-          destGroupPassword,
-        );
-      }
-    }
-
-    if (groupContentKeyring?.topLayer !== DataLayer.Raw) {
-      throw new Error('Invalid group content keyring.');
-    }
-
-    const pageKeyring = createSymmetricKeyring();
-
-    request.pageEncryptedSymmetricKeyring = bytesToBase64(
-      pageKeyring.wrapSymmetric(groupContentKeyring, {
-        associatedData: {
-          context: 'PageKeyring',
-          pageId: request.pageId,
-        },
-      }).fullValue,
-    );
-    request.pageEncryptedRelativeTitle = bytesToBase64(
-      pageKeyring.encrypt(textToBytes(pageRelativeTitle.value), {
-        padding: true,
-        associatedData: {
-          context: 'PageRelativeTitle',
-          pageId: request.pageId,
-        },
-      }),
-    );
-    request.pageEncryptedAbsoluteTitle = bytesToBase64(
-      pageKeyring.encrypt(textToBytes(''), {
-        padding: true,
-        associatedData: {
-          context: 'PageAbsoluteTitle',
-          pageId: request.pageId,
-        },
-      }),
-    );
-
-    const response = (
-      await api().post<{
-        pageId: string;
-        message?: string;
-      }>('/api/pages/create', request)
-    ).data;
+      createGroup: destGroupId.value === 'new',
+      groupName: groupName.value,
+      groupMemberName: groupMemberName.value,
+      groupIsPublic: groupIsPublic.value,
+      groupPassword: groupIsPasswordProtected.value
+        ? groupPassword.value
+        : undefined,
+    });
 
     props.callback?.(
       /* destGroupId.value === 'new' // Buggy, implement later
-        ? `/groups/${request.groupId}`
-        : */ `/pages/${response.pageId}`,
+      ? `/groups/${request.groupId}`
+      : */ `/pages/${response.pageId}`,
     );
 
     await internals.pages.goToPage(response.pageId, { fromParent: true });

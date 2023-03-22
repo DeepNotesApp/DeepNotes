@@ -1,5 +1,6 @@
 <template>
   <q-menu
+    ref="notificationsMenu"
     anchor="bottom middle"
     self="top middle"
     style="width: 250px"
@@ -75,6 +76,24 @@
             />
           </template>
         </q-infinite-scroll>
+
+        <template
+          v-if="
+            minNotificationId !== 0 &&
+            minNotificationId !== pagesStore().notifications.items.at(-1)?.id
+          "
+        >
+          <q-item>
+            <q-item-section style="padding: 8px 0">
+              <DeepBtn
+                label="Show older notifications"
+                color="primary"
+                style="text-transform: none"
+                @click="minNotificationId = 0"
+              />
+            </q-item-section>
+          </q-item>
+        </template>
       </template>
     </q-list>
   </q-menu>
@@ -82,6 +101,7 @@
 
 <script setup lang="ts">
 import type { DeepNotesNotification } from '@deeplib/misc';
+import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 
 import GroupInvitationAccepted from './Items/GroupInvitationAccepted.vue';
@@ -94,6 +114,12 @@ import GroupRequestAccepted from './Items/GroupRequestAccepted.vue';
 import GroupRequestCanceled from './Items/GroupRequestCanceled.vue';
 import GroupRequestRejected from './Items/GroupRequestRejected.vue';
 import GroupRequestSent from './Items/GroupRequestSent.vue';
+
+const notificationsMenu = ref();
+provide('notificationsMenu', notificationsMenu);
+
+const realtimeCtx = useRealtimeContext();
+provide('realtimeCtx', realtimeCtx);
 
 const minNotificationId = ref<number>(0);
 

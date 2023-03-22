@@ -9,6 +9,7 @@ import type { ComputedRef, UnwrapNestedRefs } from 'vue';
 import type { z } from 'zod';
 
 import { pageGroupIds } from '../computed/page-group-id.client';
+import { bumpPage } from '../operations/pages/bump';
 import type { PageArrowCreation } from './arrows/arrow-creation.client';
 import type { PageArrows } from './arrows/arrows.client';
 import type { PageCamera } from './camera/camera.client';
@@ -334,9 +335,7 @@ export class Page implements IPageRegion {
     // Bump on server
 
     if (authStore().loggedIn) {
-      await api().post(`/api/pages/${this.id}/bump`, {
-        parentPageId,
-      });
+      await bumpPage(this.id, { parentPageId });
     }
   }
 

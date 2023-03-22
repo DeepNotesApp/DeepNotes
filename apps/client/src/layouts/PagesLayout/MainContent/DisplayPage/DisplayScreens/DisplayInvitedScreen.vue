@@ -13,7 +13,7 @@
   <DeepBtn
     label="Accept invitation"
     color="positive"
-    @click="acceptInvitation()"
+    @click="_acceptJoinInvitation()"
   />
 
   <Gap style="height: 16px" />
@@ -21,7 +21,7 @@
   <DeepBtn
     label="Reject invitation"
     color="negative"
-    @click="rejectInvitation()"
+    @click="_rejectJoinInvitation()"
   />
 </template>
 
@@ -29,10 +29,8 @@
 /* eslint-disable vue/no-mutating-props */
 
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import {
-  acceptJoinInvitation,
-  rejectJoinInvitation,
-} from 'src/code/pages/groups.client';
+import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
+import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { Page } from 'src/code/pages/page/page.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 
@@ -42,19 +40,21 @@ const page = inject<Page>('page')!;
 
 const groupName = computed(() => groupNames()(page.react.groupId).get());
 
-async function acceptInvitation() {
+async function _acceptJoinInvitation() {
   $quasar()
     .dialog({ component: AcceptInvitationDialog })
     .onOk(async (userName) => {
       try {
-        await acceptJoinInvitation(page.react.groupId, userName);
+        await acceptJoinInvitation(page.react.groupId, {
+          userName,
+        });
       } catch (error: any) {
         handleError(error);
       }
     });
 }
 
-async function rejectInvitation() {
+async function _rejectJoinInvitation() {
   try {
     await asyncPrompt({
       title: 'Reject invitation',

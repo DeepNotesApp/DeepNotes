@@ -13,7 +13,9 @@ import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
+import type { QMenu } from 'quasar';
 import { getGroupInvitationRejectedNotificationInfo } from 'src/code/pages/notifications/group-invitation-rejected.client';
+import type { Ref } from 'vue';
 
 import NotificationItem from '../NotificationItem.vue';
 
@@ -41,7 +43,11 @@ const notificationInfo = createSmartComputed({
     getGroupInvitationRejectedNotificationInfo(notificationContent.value),
 });
 
+const notificationsMenu = inject('notificationsMenu') as Ref<QMenu>;
+
 async function onClick() {
   await router().push(`/groups/${notificationContent.value.groupId}`);
+
+  notificationsMenu.value.hide();
 }
 </script>

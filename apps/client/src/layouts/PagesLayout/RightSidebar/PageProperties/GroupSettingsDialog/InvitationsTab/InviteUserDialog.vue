@@ -68,21 +68,10 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupRoleID } from '@deeplib/misc';
 import { maxNameLength, roles, rolesMap } from '@deeplib/misc';
-import { bytesToBase64 } from '@stdlib/base64';
-import { bytesToBase64Safe } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
-import {
-  isNanoID,
-  maxEmailLength,
-  textToBytes,
-  w3cEmailRegex,
-} from '@stdlib/misc';
-import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
-import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings.client';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { isNanoID, maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
+import { sendJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/send';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 import { z } from 'zod';
@@ -97,43 +86,43 @@ const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const identity = ref<string>('');
 const userName = ref<string>('');
-const role = ref<string | null>(null);
+const role = ref<GroupRoleID | null>(null);
 
 async function inviteUser() {
-  if (
-    !z
-      .string()
-      .refine(isNanoID)
-      .or(z.string().regex(w3cEmailRegex))
-      .safeParse(identity.value).success
-  ) {
-    $quasar().notify({
-      message: 'Invalid email or user ID.',
-      type: 'negative',
-    });
-
-    return;
-  }
-
-  if (userName.value === '') {
-    $quasar().notify({
-      message: 'Please enter a display name.',
-      type: 'negative',
-    });
-
-    return;
-  }
-
-  if (role.value == null) {
-    $quasar().notify({
-      message: 'Please select a role.',
-      type: 'negative',
-    });
-
-    return;
-  }
-
   try {
+    if (
+      !z
+        .string()
+        .refine(isNanoID)
+        .or(z.string().regex(w3cEmailRegex))
+        .safeParse(identity.value).success
+    ) {
+      $quasar().notify({
+        message: 'Invalid email or user ID.',
+        type: 'negative',
+      });
+
+      return;
+    }
+
+    if (userName.value === '') {
+      $quasar().notify({
+        message: 'Please enter a display name.',
+        type: 'negative',
+      });
+
+      return;
+    }
+
+    if (role.value == null) {
+      $quasar().notify({
+        message: 'Please select a role.',
+        type: 'negative',
+      });
+
+      return;
+    }
+
     let inviteeUserId;
 
     if (isNanoID(identity.value)) {
@@ -146,109 +135,10 @@ async function inviteUser() {
       );
     }
 
-    if (inviteeUserId == null) {
-      $quasar().notify({
-        message: 'User not found.',
-        type: 'negative',
-      });
-
-      return;
-    }
-
-    const [inviteePublicKeyring, groupPublicKeyring] = await Promise.all([
-      (async () =>
-        createPublicKeyring(
-          await internals.realtime.hget(
-            'user',
-            inviteeUserId,
-            'public-keyring',
-          ),
-        ))(),
-
-      (async () =>
-        createPublicKeyring(
-          await internals.realtime.hget(
-            'group',
-            props.settings.groupId,
-            'public-keyring',
-          ),
-        ))(),
-    ]);
-
-    const [accessKeyring, groupInternalKeyring] = await Promise.all([
-      groupAccessKeyrings()(props.settings.groupId).getAsync(),
-      groupInternalKeyrings()(props.settings.groupId).getAsync(),
-    ]);
-
-    if (accessKeyring == null || groupInternalKeyring == null) {
-      throw new Error('Group keyrings not found.');
-    }
-
-    const [groupName, agentName] = await Promise.all([
-      groupNames()(props.settings.groupId).getAsync(),
-
-      groupMemberNames()(
-        `${props.settings.groupId}:${authStore().userId}`,
-      ).getAsync(),
-    ]);
-
-    await requestWithNotifications({
-      url: `/api/groups/${props.settings.groupId}/join-invitations/send`,
-
-      body: {
-        patientId: inviteeUserId,
-        invitationRole: role.value,
-
-        encryptedAccessKeyring: bytesToBase64(
-          accessKeyring.wrapAsymmetric(internals.keyPair, inviteePublicKeyring)
-            .fullValue,
-        ),
-        encryptedInternalKeyring: bytesToBase64(
-          groupInternalKeyring.wrapAsymmetric(
-            internals.keyPair,
-            inviteePublicKeyring,
-          ).fullValue,
-        ),
-
-        userEncryptedName: bytesToBase64Safe(
-          internals.keyPair.encrypt(
-            textToBytes(userName.value),
-            groupPublicKeyring,
-            { padding: true },
-          ),
-        ),
-      },
-
-      patientId: inviteeUserId,
-
-      notifications: {
-        agent: {
-          groupId: props.settings.groupId,
-
-          groupName: groupName.text,
-          targetName: userName.value,
-
-          // You invited ${targetName} to join the group.
-        },
-
-        target: {
-          groupId: props.settings.groupId,
-
-          groupName: groupName.text,
-
-          // Your were invited to join the group.
-        },
-
-        observers: {
-          groupId: props.settings.groupId,
-
-          groupName: groupName.text,
-          agentName: agentName.text,
-          targetName: userName.value,
-
-          // ${agentName} invited ${targetName} to join the group.
-        },
-      },
+    await sendJoinInvitation(props.settings.groupId, {
+      inviteeUserId,
+      inviteeUserName: userName.value,
+      inviteeRole: role.value,
     });
 
     dialogRef.value.onDialogOK();

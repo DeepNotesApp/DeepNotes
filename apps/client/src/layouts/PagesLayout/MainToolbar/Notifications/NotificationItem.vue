@@ -1,10 +1,9 @@
 <template>
-  <q-item
-    clickable
-    v-close-popup
-  >
+  <q-item clickable>
     <q-item-section>
       <slot></slot>
+
+      <Gap style="height: 6px" />
 
       <q-item-label caption>
         {{
@@ -25,3 +24,15 @@ defineProps<{
   notification: DeepNotesNotification;
 }>();
 </script>
+
+<style scoped>
+.q-item {
+  margin: 8px;
+
+  border-radius: 4px;
+
+  padding: 12px 14px;
+
+  background-color: #2a2a2a;
+}
+</style>
