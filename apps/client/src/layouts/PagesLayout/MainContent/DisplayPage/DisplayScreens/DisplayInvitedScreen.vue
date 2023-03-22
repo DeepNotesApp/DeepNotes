@@ -29,7 +29,6 @@
 /* eslint-disable vue/no-mutating-props */
 
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
 import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { Page } from 'src/code/pages/page/page.client';
 import { asyncPrompt, handleError } from 'src/code/utils.client';
@@ -41,17 +40,13 @@ const page = inject<Page>('page')!;
 const groupName = computed(() => groupNames()(page.react.groupId).get());
 
 async function _acceptJoinInvitation() {
-  $quasar()
-    .dialog({ component: AcceptInvitationDialog })
-    .onOk(async (userName) => {
-      try {
-        await acceptJoinInvitation(page.react.groupId, {
-          userName,
-        });
-      } catch (error: any) {
-        handleError(error);
-      }
-    });
+  $quasar().dialog({
+    component: AcceptInvitationDialog,
+
+    componentProps: {
+      groupIds: [page.react.groupId],
+    },
+  });
 }
 
 async function _rejectJoinInvitation() {

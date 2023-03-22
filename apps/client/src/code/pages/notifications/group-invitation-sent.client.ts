@@ -1,7 +1,6 @@
 import { asyncPrompt, handleError } from 'src/code/utils.client';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 
-import { acceptJoinInvitation } from '../operations/groups/join-invitations/accept';
 import { rejectJoinInvitation } from '../operations/groups/join-invitations/reject';
 import type { NotificationInfo } from './notifications.client';
 
@@ -62,17 +61,13 @@ export async function getGroupInvitationSentNotificationInfo({
           color: 'green',
 
           handler: () =>
-            $quasar()
-              .dialog({ component: AcceptInvitationDialog })
-              .onOk(async (userName) => {
-                try {
-                  await acceptJoinInvitation(groupId, {
-                    userName,
-                  });
-                } catch (error: any) {
-                  handleError(error);
-                }
-              }),
+            $quasar().dialog({
+              component: AcceptInvitationDialog,
+
+              componentProps: {
+                groupIds: [groupId],
+              },
+            }),
         },
       ],
     };

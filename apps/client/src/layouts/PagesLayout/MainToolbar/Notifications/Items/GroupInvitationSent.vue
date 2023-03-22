@@ -51,7 +51,6 @@ import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import type { QMenu } from 'quasar';
 import { getGroupInvitationSentNotificationInfo } from 'src/code/pages/notifications/group-invitation-sent.client';
-import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
 import { cancelJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/cancel';
 import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
@@ -174,19 +173,14 @@ async function _rejectJoinInvitation() {
 
 async function _acceptJoinInvitation() {
   $quasar()
-    .dialog({ component: AcceptInvitationDialog })
-    .onOk(async (userName) => {
-      try {
-        await acceptJoinInvitation(notificationContent.value.groupId, {
-          userName,
-        });
+    .dialog({
+      component: AcceptInvitationDialog,
 
-        notificationsMenu.value.hide();
-      } catch (error: any) {
-        handleError(error);
-      }
+      componentProps: {
+        groupIds: [notificationContent.value.groupId],
+      },
     })
-    .onCancel(() => {
+    .onDismiss(() => {
       notificationsMenu.value.hide();
     });
 }
