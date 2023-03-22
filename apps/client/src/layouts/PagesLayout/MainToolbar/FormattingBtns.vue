@@ -118,21 +118,21 @@
   />
 
   <ToolbarBtn
-    :tooltip="`Header 1\n(${getCtrlKeyName()} + Alt + 1)`"
+    :tooltip="`Heading 1\n(${getCtrlKeyName()} + Alt + 1)`"
     icon="mdi-format-header-1"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setHeading({ level: 1 }))"
   />
   <ToolbarBtn
-    :tooltip="`Header 2\n(${getCtrlKeyName()} + Alt + 2)`"
+    :tooltip="`Heading 2\n(${getCtrlKeyName()} + Alt + 2)`"
     icon="mdi-format-header-2"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setHeading({ level: 2 }))"
   />
   <ToolbarBtn
-    :tooltip="`Header 3\n(${getCtrlKeyName()} + Alt + 3)`"
+    :tooltip="`Heading 3\n(${getCtrlKeyName()} + Alt + 3)`"
     icon="mdi-format-header-3"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
