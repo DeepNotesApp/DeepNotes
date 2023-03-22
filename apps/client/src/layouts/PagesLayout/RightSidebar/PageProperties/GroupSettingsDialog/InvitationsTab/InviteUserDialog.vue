@@ -27,7 +27,7 @@
         <Gap style="height: 16px" />
 
         <q-select
-          :options="roles()"
+          :options="manageableRoles"
           option-label="name"
           option-value="id"
           filled
@@ -69,9 +69,11 @@
 
 <script setup lang="ts">
 import type { GroupRoleID } from '@deeplib/misc';
+import { canManageRole } from '@deeplib/misc';
 import { maxNameLength, roles, rolesMap } from '@deeplib/misc';
 import { isNanoID, maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { sendJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/send';
+import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 import { z } from 'zod';
@@ -81,6 +83,26 @@ import type { initialSettings } from '../GroupSettingsDialog.vue';
 const props = defineProps<{
   settings: ReturnType<typeof initialSettings>;
 }>();
+
+const realtimeCtx = useRealtimeContext();
+
+const manageableRoles = computed(() => {
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${props.settings.groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  const result = [];
+
+  for (const role of roles()) {
+    if (canManageRole(selfGroupRole, role.id)) {
+      result.push(role);
+    }
+  }
+
+  return result;
+});
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
@@ -97,30 +119,15 @@ async function inviteUser() {
         .or(z.string().regex(w3cEmailRegex))
         .safeParse(identity.value).success
     ) {
-      $quasar().notify({
-        message: 'Invalid email or user ID.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Invalid email or user ID.');
     }
 
     if (userName.value === '') {
-      $quasar().notify({
-        message: 'Please enter a display name.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Please enter a display name.');
     }
 
     if (role.value == null) {
-      $quasar().notify({
-        message: 'Please select a role.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Please select a role.');
     }
 
     let inviteeUserId;

@@ -12,7 +12,7 @@
     <template #body>
       <q-card-section style="padding: 20px">
         <q-select
-          :options="roles()"
+          :options="manageableRoles"
           option-label="name"
           option-value="id"
           filled
@@ -52,36 +52,52 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupRoleID } from '@deeplib/misc';
+import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { changeUserRole } from 'src/code/pages/operations/groups/change-user-role';
+import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
-import type { initialSettings } from '../GroupSettingsDialog.vue';
-
 const props = defineProps<{
-  settings: ReturnType<typeof initialSettings>;
+  groupId: string;
+  userIds: string[];
 }>();
+
+const realtimeCtx = useRealtimeContext();
+
+const manageableRoles = computed(() => {
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${props.groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  const result = [];
+
+  for (const role of roles()) {
+    if (canManageRole(selfGroupRole, role.id)) {
+      result.push(role);
+    }
+  }
+
+  return result;
+});
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
-const role = ref<string | null>(null);
-
-const selectedIds = computed(() => props.settings.members.selectedUserIds);
+const role = ref<GroupRoleID | null>(null);
 
 async function changeRole() {
-  if (role.value == null) {
-    $quasar().notify({
-      message: 'Please select a role.',
-      type: 'negative',
-    });
-    return;
-  }
-
   try {
+    if (role.value == null) {
+      throw new Error('Please select a role.');
+    }
+
     await Promise.all(
-      Array.from(selectedIds.value).map((patientId) =>
-        changeUserRole(props.settings.groupId, {
+      props.userIds.map((patientId) =>
+        changeUserRole(props.groupId, {
           patientId,
           role: role.value!,
         }),

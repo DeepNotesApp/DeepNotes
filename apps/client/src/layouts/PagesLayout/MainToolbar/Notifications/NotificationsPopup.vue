@@ -6,27 +6,32 @@
     style="width: 250px"
     @before-show="onBeforeShow()"
   >
-    <q-list>
-      <template v-if="filteredNotifications.length === 0">
-        <q-item>
-          <q-item-section style="padding: 8px 0">
-            You have no new notifications.
+    <template v-if="filteredNotifications.length === 0">
+      <div
+        style="
+          margin: 12px;
+          display: flex;
+          flex-direction: column;
+          text-align: center;
+        "
+      >
+        You have no new notifications.
 
-            <template v-if="pagesStore().notifications.items.length > 0">
-              <Gap style="height: 8px" />
+        <template v-if="pagesStore().notifications.items.length > 0">
+          <Gap style="height: 10px" />
 
-              <DeepBtn
-                label="Show older notifications"
-                color="primary"
-                style="text-transform: none"
-                @click="minNotificationId = 0"
-              />
-            </template>
-          </q-item-section>
-        </q-item>
-      </template>
+          <DeepBtn
+            label="Show older notifications"
+            color="primary"
+            style="text-transform: none"
+            @click="minNotificationId = 0"
+          />
+        </template>
+      </div>
+    </template>
 
-      <template v-else>
+    <template v-else>
+      <q-list>
         <q-infinite-scroll @load="onLoad">
           <template
             v-for="notification in filteredNotifications"
@@ -83,19 +88,17 @@
             minNotificationId !== pagesStore().notifications.items.at(-1)?.id
           "
         >
-          <q-item>
-            <q-item-section style="padding: 8px 0">
-              <DeepBtn
-                label="Show older notifications"
-                color="primary"
-                style="text-transform: none"
-                @click="minNotificationId = 0"
-              />
-            </q-item-section>
-          </q-item>
+          <div style="margin: 12px; display: flex; flex-direction: column">
+            <DeepBtn
+              label="Show older notifications"
+              color="primary"
+              style="text-transform: none"
+              @click="minNotificationId = 0"
+            />
+          </div>
         </template>
-      </template>
-    </q-list>
+      </q-list>
+    </template>
   </q-menu>
 </template>
 

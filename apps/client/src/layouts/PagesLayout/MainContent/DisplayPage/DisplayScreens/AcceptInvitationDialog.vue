@@ -55,9 +55,14 @@
 
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
+import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
 import { selfUserName } from 'src/code/self-user-name.client';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
+
+const props = defineProps<{
+  groupIds: string[];
+}>();
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
@@ -72,8 +77,16 @@ onMounted(async () => {
 
 async function accept() {
   try {
+    await Promise.all(
+      props.groupIds.map((groupId) =>
+        acceptJoinInvitation(groupId, {
+          userName: userName.value,
+        }),
+      ),
+    );
+
     dialogRef.value.onDialogOK(userName.value);
-  } catch (error: any) {
+  } catch (error) {
     handleError(error);
   }
 }

@@ -91,8 +91,7 @@ const canAcceptRequest = computed(() => {
 
   return (
     rejected === false &&
-    (rolesMap()[selfGroupRole].permissions.manageOwnRank ||
-      rolesMap()[selfGroupRole].permissions.manageLowerRanks)
+    rolesMap()[selfGroupRole]?.permissions.manageLowerRanks
   );
 });
 
@@ -179,7 +178,7 @@ async function _acceptJoinRequest() {
 
       componentProps: {
         groupId: notificationContent.value.groupId,
-        userId: notificationContent.value.agentId,
+        userIds: [notificationContent.value.agentId],
       },
     })
     .onDismiss(() => {

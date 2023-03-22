@@ -67,10 +67,7 @@ const rememberDevice = ref(false);
 async function onSubmit() {
   try {
     if (!/^\d{6}$/.test(authenticatorToken.value)) {
-      $quasar().notify({
-        message: 'Please enter a valid 6-digit code.',
-        type: 'negative',
-      });
+      throw new Error('Please enter a valid 6-digit code.');
     }
 
     const derivedKeys = await deriveUserValues(email.value, password.value);

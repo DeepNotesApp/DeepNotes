@@ -176,12 +176,7 @@ const authenticatorToken = ref('');
 async function verify() {
   try {
     if (!/^\d{6}$/.test(authenticatorToken.value)) {
-      $quasar().notify({
-        message: 'Please enter a valid 6-digit code.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('Please enter a valid 6-digit code.');
     }
 
     const recoveryCodes = (

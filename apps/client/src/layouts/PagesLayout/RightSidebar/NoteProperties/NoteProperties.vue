@@ -7,6 +7,7 @@
       @click="
         $q.dialog({
           component: NewPageDialog,
+
           componentProps: {
             callback: (url: string) => {
               changeProp(url, (selectedNote, url) => {
@@ -174,6 +175,7 @@
         @click="
           $q.dialog({
             component: NewPageDialog,
+
             componentProps: {
               callback: (pageId: string) => {
                 changeProp(pageId, (selectedNote, value) => {

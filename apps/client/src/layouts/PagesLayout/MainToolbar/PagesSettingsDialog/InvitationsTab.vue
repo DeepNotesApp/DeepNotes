@@ -102,7 +102,6 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { acceptJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/accept';
 import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
@@ -169,21 +168,13 @@ function select(groupId: string, event: MouseEvent) {
 }
 
 async function acceptSelectedInvitations() {
-  $quasar()
-    .dialog({ component: AcceptInvitationDialog })
-    .onOk(async (userName) => {
-      try {
-        await Promise.all(
-          finalSelectedGroupIds.value.map((groupId) =>
-            acceptJoinInvitation(groupId, { userName }),
-          ),
-        );
+  $quasar().dialog({
+    component: AcceptInvitationDialog,
 
-        baseSelectedGroupIds.value.clear();
-      } catch (error: any) {
-        handleError(error);
-      }
-    });
+    componentProps: {
+      groupIds: settings.value.groupIds,
+    },
+  });
 }
 async function rejectSelectedInvitations() {
   try {

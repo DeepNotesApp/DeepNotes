@@ -240,14 +240,9 @@ onMounted(async () => {
 async function _createPage() {
   try {
     if (pageRelativeTitle.value === '') {
-      $quasar().notify({
-        message: 'Please enter a page title.',
-        type: 'negative',
-      });
-
       pageRelativeTitleElem.value?.$el.focus();
 
-      return;
+      throw new Error('Please enter a page title.');
     }
 
     const response = await createPage(page.value.id, {

@@ -12,7 +12,7 @@ module.exports = {
         'improve', // General code improvement
         'revert', // Reverts a previous commit
         'logging', // Logging-related changes
-        'ui', // UI changes
+        'visual', // Visual changes
 
         'docs', // Documentation only changes
         'style', // Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)

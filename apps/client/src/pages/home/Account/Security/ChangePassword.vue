@@ -60,21 +60,11 @@ const confirmNewPassword = ref('');
 async function changePassword() {
   try {
     if (newPassword.value === oldPassword.value) {
-      $quasar().notify({
-        message: 'New password must be different than old password.',
-        color: 'negative',
-      });
-
-      return;
+      throw new Error('New password must be different than old password.');
     }
 
     if (newPassword.value !== confirmNewPassword.value) {
-      $quasar().notify({
-        message: 'New passwords do not match.',
-        type: 'negative',
-      });
-
-      return;
+      throw new Error('New passwords do not match.');
     }
 
     // Check password strength
