@@ -72,6 +72,8 @@
             :index="index"
             @resize="
               () => {
+                logger.info('DisplayNote resize %o', note.id);
+
                 void onResize();
 
                 void updateChildPositions();
@@ -115,6 +117,7 @@
 
 <script setup lang="ts">
 import { debounce } from 'lodash';
+import { mainLogger } from 'src/code/logger.universal';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
 import { useResizeObserver } from 'src/code/utils.universal';
@@ -126,6 +129,8 @@ import NoteDropZone from '../../NoteDropZones/NoteDropZone.vue';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;
+
+const logger = mainLogger().sub('NoteListContainer');
 
 async function onLeftDoubleClick(event: MouseEvent, destIndex?: number) {
   const clientTopLeft = note.getContainerClientRect()?.topLeft;
@@ -149,9 +154,7 @@ const frameElem = ref<Element>();
 const hideUI = ref(false);
 
 const updateChildPositions = debounce(async () => {
-  mainLogger().info('updateChildPositions %o', note.id);
-
-  await nextTick();
+  logger.info('updateChildPositions %o', note.id);
 
   const originPos = note.getOriginWorldPos();
 
@@ -179,6 +182,8 @@ const updateChildPositions = debounce(async () => {
 watch(
   () => note.react.notes,
   () => {
+    logger.info('childNotes change %o', note.id);
+
     void onResize();
 
     void updateChildPositions();
@@ -186,6 +191,8 @@ watch(
 );
 
 const onResize = debounce(async function () {
+  logger.info('onResize %o', note.id);
+
   // Update overflow
 
   hideUI.value = true;
@@ -205,12 +212,18 @@ const onResize = debounce(async function () {
 
 useResizeObserver(
   () => containerElem.value!,
-  () => onResize(),
+  () => {
+    logger.info('containerElem resize %o', note.id);
+
+    void onResize();
+  },
 );
 
 useResizeObserver(
   () => frameElem.value!,
   () => {
+    logger.info('frameElem resize %o', note.id);
+
     void onResize();
 
     void updateChildPositions();
