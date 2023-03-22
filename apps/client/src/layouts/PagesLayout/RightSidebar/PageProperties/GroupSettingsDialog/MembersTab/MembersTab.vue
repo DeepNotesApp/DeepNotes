@@ -98,7 +98,8 @@
             component: ChangeRoleDialog,
 
             componentProps: {
-              settings,
+              groupId,
+              userIds: finalSelectedUserIds,
             },
           })
         "

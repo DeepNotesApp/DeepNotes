@@ -80,14 +80,15 @@
         <DeepBtn
           label="Accept"
           color="positive"
-          :disable="finalSelectedUserIds.length !== 1"
+          :disable="!canManageSelected"
           @click="
             () => {
               $q.dialog({
                 component: AcceptRequestDialog,
 
                 componentProps: {
-                  settings,
+                  groupId,
+                  userIds: finalSelectedUserIds,
                 },
               });
             }
@@ -99,7 +100,7 @@
         <DeepBtn
           label="Reject"
           color="negative"
-          :disable="finalSelectedUserIds.length === 0"
+          :disable="!canManageSelected"
           @click="rejectSelectedRequests()"
         />
       </div>
@@ -108,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+import { rolesMap } from '@deeplib/misc';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
 import { rejectJoinRequest } from 'src/code/pages/operations/groups/join-requests/reject';
 import type { RealtimeContext } from 'src/code/realtime/context.universal';
@@ -123,6 +125,20 @@ const groupId = inject<string>('groupId')!;
 const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
+
+const canManageSelected = computed(() => {
+  if (finalSelectedUserIds.value.length === 0) {
+    return false;
+  }
+
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  return rolesMap()[selfGroupRole]?.permissions.manageLowerRanks;
+});
 
 const requestsUserIds = computed(() =>
   Array.from(pagesStore().groups[groupId]?.userIds ?? []).filter(

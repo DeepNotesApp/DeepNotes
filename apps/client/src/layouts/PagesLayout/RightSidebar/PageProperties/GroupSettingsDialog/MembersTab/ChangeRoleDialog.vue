@@ -60,10 +60,9 @@ import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
-import type { initialSettings } from '../GroupSettingsDialog.vue';
-
 const props = defineProps<{
-  settings: ReturnType<typeof initialSettings>;
+  groupId: string;
+  userIds: string[];
 }>();
 
 const realtimeCtx = useRealtimeContext();
@@ -71,7 +70,7 @@ const realtimeCtx = useRealtimeContext();
 const manageableRoles = computed(() => {
   const selfGroupRole = realtimeCtx.hget(
     'group-member',
-    `${props.settings.groupId}:${authStore().userId}`,
+    `${props.groupId}:${authStore().userId}`,
     'role',
   );
 
@@ -90,8 +89,6 @@ const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const role = ref<GroupRoleID | null>(null);
 
-const selectedIds = computed(() => props.settings.members.selectedUserIds);
-
 async function changeRole() {
   if (role.value == null) {
     $quasar().notify({
@@ -103,8 +100,8 @@ async function changeRole() {
 
   try {
     await Promise.all(
-      Array.from(selectedIds.value).map((patientId) =>
-        changeUserRole(props.settings.groupId, {
+      props.userIds.map((patientId) =>
+        changeUserRole(props.groupId, {
           patientId,
           role: role.value!,
         }),

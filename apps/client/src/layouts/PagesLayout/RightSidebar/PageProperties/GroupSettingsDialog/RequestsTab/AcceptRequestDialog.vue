@@ -16,7 +16,7 @@
         <Gap style="height: 8px" />
 
         <q-select
-          :options="roles()"
+          :options="manageableRoles"
           option-label="name"
           option-value="id"
           filled
@@ -57,15 +57,37 @@
 
 <script setup lang="ts">
 import type { GroupRoleID } from '@deeplib/misc';
+import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { acceptJoinRequest } from 'src/code/pages/operations/groups/join-requests/accept';
+import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
 const props = defineProps<{
   groupId: string;
-  userId: string;
+  userIds: string[];
 }>();
+
+const realtimeCtx = useRealtimeContext();
+
+const manageableRoles = computed(() => {
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${props.groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  const result = [];
+
+  for (const role of roles()) {
+    if (canManageRole(selfGroupRole, role.id)) {
+      result.push(role);
+    }
+  }
+
+  return result;
+});
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
@@ -82,10 +104,14 @@ async function _acceptJoinRequest() {
       return;
     }
 
-    await acceptJoinRequest(props.groupId, {
-      patientId: props.userId,
-      targetRole: targetRole.value,
-    });
+    await Promise.all(
+      props.userIds.map((userId) =>
+        acceptJoinRequest(props.groupId, {
+          patientId: userId,
+          targetRole: targetRole.value!,
+        }),
+      ),
+    );
 
     dialogRef.value.onDialogOK();
   } catch (error: any) {

@@ -80,7 +80,7 @@ export async function getGroupRequestSentNotificationInfo({
 
               componentProps: {
                 groupId,
-                userId: agentId,
+                userIds: [agentId],
               },
             }),
         },

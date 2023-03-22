@@ -104,6 +104,15 @@
     label="Invite new member"
     color="primary"
     style="width: 180px"
+    :disable="
+      !rolesMap()[
+        realtimeCtx.hget(
+          'group-member',
+          `${groupId}:${authStore().userId}`,
+          'role',
+        )
+      ]?.permissions.manageLowerRanks
+    "
     @click="
       $q.dialog({
         component: InviteUserDialog,
