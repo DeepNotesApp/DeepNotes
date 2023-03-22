@@ -92,7 +92,7 @@
       <DeepBtn
         label="Change role"
         color="secondary"
-        :disable="finalSelectedUserIds.length === 0"
+        :disable="!canManageSelected"
         @click="
           $q.dialog({
             component: ChangeRoleDialog,
@@ -109,7 +109,9 @@
       <DeepBtn
         label="Remove"
         color="negative"
-        :disable="finalSelectedUserIds.length === 0"
+        :disable="
+          finalSelectedUserIds[0] !== authStore().userId && !canManageSelected
+        "
         @click="removeSelectedUsers()"
       />
     </div>
@@ -117,7 +119,7 @@
 </template>
 
 <script setup lang="ts">
-import { rolesMap } from '@deeplib/misc';
+import { canManageRole, rolesMap } from '@deeplib/misc';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
 import { rotateGroupKeys } from 'src/code/pages/operations/groups/key-rotation';
 import { removeGroupUser } from 'src/code/pages/operations/groups/remove-user';
@@ -150,6 +152,32 @@ const finalSelectedUserIds = computed(() =>
     baseSelectedUserIds.value.has(userId),
   ),
 );
+
+const canManageSelected = computed(() => {
+  if (finalSelectedUserIds.value.length === 0) {
+    return false;
+  }
+
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  for (const selectedUserId of finalSelectedUserIds.value) {
+    const selectedUserGroupRole = realtimeCtx.hget(
+      'group-member',
+      `${groupId}:${selectedUserId}`,
+      'role',
+    );
+
+    if (!canManageRole(selfGroupRole, selectedUserGroupRole)) {
+      return false;
+    }
+  }
+
+  return true;
+});
 
 function selectAll() {
   for (const userId of membersUserIds.value) {

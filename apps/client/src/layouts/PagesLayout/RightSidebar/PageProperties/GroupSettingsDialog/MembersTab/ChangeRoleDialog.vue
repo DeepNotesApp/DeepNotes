@@ -12,7 +12,7 @@
     <template #body>
       <q-card-section style="padding: 20px">
         <q-select
-          :options="roles()"
+          :options="manageableRoles"
           option-label="name"
           option-value="id"
           filled
@@ -53,8 +53,10 @@
 
 <script setup lang="ts">
 import type { GroupRoleID } from '@deeplib/misc';
+import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { changeUserRole } from 'src/code/pages/operations/groups/change-user-role';
+import { useRealtimeContext } from 'src/code/realtime/context.universal';
 import { handleError } from 'src/code/utils.client';
 import type { Ref } from 'vue';
 
@@ -63,6 +65,26 @@ import type { initialSettings } from '../GroupSettingsDialog.vue';
 const props = defineProps<{
   settings: ReturnType<typeof initialSettings>;
 }>();
+
+const realtimeCtx = useRealtimeContext();
+
+const manageableRoles = computed(() => {
+  const selfGroupRole = realtimeCtx.hget(
+    'group-member',
+    `${props.settings.groupId}:${authStore().userId}`,
+    'role',
+  );
+
+  const result = [];
+
+  for (const role of roles()) {
+    if (canManageRole(selfGroupRole, role.id)) {
+      result.push(role);
+    }
+  }
+
+  return result;
+});
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
