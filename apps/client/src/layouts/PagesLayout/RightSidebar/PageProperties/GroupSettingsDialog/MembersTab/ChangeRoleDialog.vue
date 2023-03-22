@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import type { GroupRoleID } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { changeUserRole } from 'src/code/pages/operations/groups/change-user-role';
 import { handleError } from 'src/code/utils.client';
@@ -65,7 +66,7 @@ const props = defineProps<{
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
-const role = ref<string | null>(null);
+const role = ref<GroupRoleID | null>(null);
 
 const selectedIds = computed(() => props.settings.members.selectedUserIds);
 
