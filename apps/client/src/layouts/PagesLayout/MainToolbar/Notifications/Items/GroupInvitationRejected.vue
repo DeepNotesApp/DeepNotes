@@ -14,7 +14,7 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import type { QMenu } from 'quasar';
-import { getGroupInvitationRejectedNotificationInfo } from 'src/code/pages/notifications/group-invitation-rejected.client';
+import { getGroupInvitationRejectedNotificationInfo } from 'src/code/pages/notifications/group-invitation-rejected';
 import type { Ref } from 'vue';
 
 import NotificationItem from '../NotificationItem.vue';

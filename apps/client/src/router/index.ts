@@ -1,6 +1,6 @@
 import { route } from 'quasar/wrappers';
-import { clearCookie } from 'src/code/cookies.universal';
-import { getRedirectDest } from 'src/code/routing.universal';
+import { clearCookie } from 'src/code/cookies';
+import { getRedirectDest } from 'src/code/routing';
 import type { RouteLocationRaw } from 'vue-router';
 import {
   createMemoryHistory,

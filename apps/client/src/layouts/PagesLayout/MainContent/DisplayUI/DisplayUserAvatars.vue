@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { getNameInitials } from 'src/code/utils.universal';
+import { getNameInitials } from 'src/code/utils';
 
 const $q = useQuasar();
 

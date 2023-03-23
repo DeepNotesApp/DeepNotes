@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Page } from 'src/code/pages/page/page.client';
+import type { Page } from 'src/code/pages/page/page';
 
 import SVGDisplay from './SVGDisplay.vue';
 

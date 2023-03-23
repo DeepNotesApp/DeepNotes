@@ -148,10 +148,10 @@
 import { maxNameLength } from '@deeplib/misc';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { enterDemo } from 'src/code/auth/demo.client';
-import { getRegistrationValues } from 'src/code/auth/register.client';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { enterDemo } from 'src/code/auth/demo';
+import { getRegistrationValues } from 'src/code/auth/register';
+import { deriveUserValues } from 'src/code/crypto';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 useMeta(() => ({
   title: 'Register - DeepNotes',

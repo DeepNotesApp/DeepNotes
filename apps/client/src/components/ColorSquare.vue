@@ -15,8 +15,8 @@
 </template>
 
 <script setup lang="ts">
-import type { ColorName } from 'src/code/pages/colors.client';
-import { colorMap } from 'src/code/pages/colors.client';
+import type { ColorName } from 'src/code/pages/colors';
+import { colorMap } from 'src/code/pages/colors';
 
 defineEmits(['select']);
 

@@ -110,10 +110,10 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
+import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { rejectJoinRequest } from 'src/code/pages/operations/groups/join-requests/reject';
-import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
+import type { RealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';

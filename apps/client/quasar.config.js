@@ -137,16 +137,16 @@ module.exports = configure(function (ctx) {
             {
               'src/boot/axios.universal': ['api'],
 
-              'src/code/internals.universal': ['internals'],
+              'src/code/internals': ['internals'],
 
-              'src/code/stores.universal': [
+              'src/code/stores': [
                 'appStore',
                 'authStore',
                 'uiStore',
                 'pagesStore',
               ],
-              'src/code/helpers.universal': ['router', 'route', '$quasar'],
-              'src/code/logger.universal': ['mainLogger'],
+              'src/code/helpers': ['router', 'route', '$quasar'],
+              'src/code/logger': ['mainLogger'],
 
               'src/components/CustomDialog.vue': [['default', 'CustomDialog']],
 

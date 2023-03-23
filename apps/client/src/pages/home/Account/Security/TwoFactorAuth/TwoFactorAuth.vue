@@ -24,8 +24,8 @@
 
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { deriveUserValues } from 'src/code/crypto';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';
 import ManageTwoFactorAuthDialog from './ManageTwoFactorAuthDialog.vue';

@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { colorNames } from 'src/code/pages/colors.client';
+import { colorNames } from 'src/code/pages/colors';
 
 import ColorSquare from './ColorSquare.vue';
 

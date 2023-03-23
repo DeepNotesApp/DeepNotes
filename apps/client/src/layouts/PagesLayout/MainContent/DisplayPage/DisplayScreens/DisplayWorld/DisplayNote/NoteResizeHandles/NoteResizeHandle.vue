@@ -33,8 +33,8 @@ import type {
   NoteSection,
   NoteSide,
   PageNote,
-} from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
+} from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
 
 const props = defineProps<{
   side: NoteSide;

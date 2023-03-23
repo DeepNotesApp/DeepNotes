@@ -1,7 +1,7 @@
 import { bytesToBase64 } from '@stdlib/base64';
 import { createPublicKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function acceptJoinInvitation(
   groupId: string,

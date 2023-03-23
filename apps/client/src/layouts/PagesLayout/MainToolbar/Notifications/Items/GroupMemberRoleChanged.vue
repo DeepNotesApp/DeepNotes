@@ -14,7 +14,7 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import type { QMenu } from 'quasar';
-import { getGroupMemberRoleChangedNotificationInfo } from 'src/code/pages/notifications/group-member-role-changed.client';
+import { getGroupMemberRoleChangedNotificationInfo } from 'src/code/pages/notifications/group-member-role-changed';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import type { Ref } from 'vue';
 

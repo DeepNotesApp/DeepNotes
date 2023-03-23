@@ -19,12 +19,9 @@
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 import { Y } from '@syncedstore/core';
-import type {
-  NoteTextSection,
-  PageNote,
-} from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import { useResizeObserver } from 'src/code/utils.universal';
+import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
+import { useResizeObserver } from 'src/code/utils';
 import type { ComponentPublicInstance } from 'vue';
 
 const props = defineProps<{

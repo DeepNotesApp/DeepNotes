@@ -30,7 +30,7 @@ export default {
 
 <script setup lang="ts">
 import { Vec2 } from '@stdlib/misc';
-import type { PageArrow } from 'src/code/pages/page/arrows/arrow.client';
+import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 
 const arrow = inject<PageArrow>('arrow')!;
 

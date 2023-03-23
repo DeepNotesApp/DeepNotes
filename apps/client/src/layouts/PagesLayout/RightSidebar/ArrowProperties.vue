@@ -266,12 +266,12 @@ import {
   colorHexToColorName,
   colorMap,
   colorNameToColorHex,
-} from 'src/code/pages/colors.client';
-import type { PageArrow } from 'src/code/pages/page/arrows/arrow.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import type { ISerialArrowInput } from 'src/code/pages/serialization.client';
-import { ISerialArrow } from 'src/code/pages/serialization.client';
-import { handleError } from 'src/code/utils.client';
+} from 'src/code/pages/colors';
+import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
+import type { Page } from 'src/code/pages/page/page';
+import type { ISerialArrowInput } from 'src/code/pages/serialization';
+import { ISerialArrow } from 'src/code/pages/serialization';
+import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 import { yXmlFragmentToProsemirrorJSON } from 'y-prosemirror';
 

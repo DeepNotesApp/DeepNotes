@@ -29,9 +29,9 @@ import {
   isMouseOverScrollbar,
   isTouchOverScrollbar,
 } from '@stdlib/misc';
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import { isCtrlDown } from 'src/code/utils.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
+import { isCtrlDown } from 'src/code/utils';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;

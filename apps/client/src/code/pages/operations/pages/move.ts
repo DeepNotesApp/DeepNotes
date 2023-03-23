@@ -13,11 +13,11 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,
-} from 'src/code/crypto.client';
-import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
-import { pageKeyrings } from 'src/code/pages/computed/page-keyrings.client';
-import { createPageDoc } from 'src/code/pages/utils.client';
-import { asyncPrompt } from 'src/code/utils.client';
+} from 'src/code/crypto';
+import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
+import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
+import { createPageDoc } from 'src/code/pages/utils';
+import { asyncPrompt } from 'src/code/utils';
 
 export async function movePage(
   pageId: string,

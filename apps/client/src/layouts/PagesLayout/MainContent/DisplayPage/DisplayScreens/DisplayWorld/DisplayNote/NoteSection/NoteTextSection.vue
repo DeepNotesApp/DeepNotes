@@ -11,11 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  NoteTextSection,
-  PageNote,
-} from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
+import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
 
 import NoteEditor from './NoteEditor.vue';
 import NoteSection from './NoteSection.vue';

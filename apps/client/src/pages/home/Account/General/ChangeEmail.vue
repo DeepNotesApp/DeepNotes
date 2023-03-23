@@ -37,9 +37,9 @@ import {
   wrapSymmetricKey,
 } from '@stdlib/crypto';
 import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
-import { logout } from 'src/code/auth/logout.client';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { logout } from 'src/code/auth/logout';
+import { deriveUserValues } from 'src/code/crypto';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 const newEmail = ref('');
 

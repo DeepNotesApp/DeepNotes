@@ -31,10 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  NoteSection,
-  PageNote,
-} from 'src/code/pages/page/notes/note.client';
+import type { NoteSection, PageNote } from 'src/code/pages/page/notes/note';
 
 import NoteResizeBar from './NoteResizeHandles/NoteResizeBar.vue';
 import NoteResizeHandle from './NoteResizeHandles/NoteResizeHandle.vue';

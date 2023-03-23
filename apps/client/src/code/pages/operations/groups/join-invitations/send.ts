@@ -3,11 +3,11 @@ import { bytesToBase64 } from '@stdlib/base64';
 import { bytesToBase64Safe } from '@stdlib/base64';
 import { createPublicKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
-import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings.client';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
+import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function sendJoinInvitation(
   groupId: string,

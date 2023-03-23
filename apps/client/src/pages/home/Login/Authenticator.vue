@@ -51,9 +51,9 @@
 
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
-import { login } from 'src/code/auth/login.client';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { handleError } from 'src/code/utils.client';
+import { login } from 'src/code/auth/login';
+import { deriveUserValues } from 'src/code/crypto';
+import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 const authType = inject('authType') as Ref<string>;

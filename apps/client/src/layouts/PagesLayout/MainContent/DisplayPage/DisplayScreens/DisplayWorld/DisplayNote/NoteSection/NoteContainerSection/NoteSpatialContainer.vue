@@ -47,9 +47,9 @@
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import { isCtrlDown } from 'src/code/utils.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
+import { isCtrlDown } from 'src/code/utils';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import DisplayBoxSelection from '../../../DisplayBoxSelection.vue';

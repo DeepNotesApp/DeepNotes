@@ -14,5 +14,5 @@
 </template>
 
 <script setup lang="ts">
-import { multiModePath } from 'src/code/utils.universal';
+import { multiModePath } from 'src/code/utils';
 </script>

@@ -101,10 +101,10 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { groupNames } from 'src/code/pages/computed/group-names';
 import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
-import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
+import type { RealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';

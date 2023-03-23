@@ -31,10 +31,10 @@
 
 <script setup lang="ts">
 import { DataLayer } from '@stdlib/crypto';
-import { computeGroupPasswordValues } from 'src/code/crypto.client';
-import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import type { Page } from 'src/code/pages/page/page.client';
+import { computeGroupPasswordValues } from 'src/code/crypto';
+import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import type { Page } from 'src/code/pages/page/page';
 import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 
 const page = inject<Page>('page')!;

@@ -60,10 +60,10 @@
 
 <script setup lang="ts">
 import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
-import type { Page } from 'src/code/pages/page/page.client';
-import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
-import { multiModePath } from 'src/code/utils.universal';
+import type { Page } from 'src/code/pages/page/page';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError } from 'src/code/utils';
+import { multiModePath } from 'src/code/utils';
 
 import RequestAccessDialog from './RequestAccessDialog.vue';
 

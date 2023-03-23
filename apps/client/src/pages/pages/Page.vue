@@ -3,8 +3,8 @@
 </template>
 
 <script setup lang="ts">
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { getPageTitle } from 'src/code/pages/utils.client';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { getPageTitle } from 'src/code/pages/utils';
 
 useMeta(() => {
   const page = internals.pages?.react.page;

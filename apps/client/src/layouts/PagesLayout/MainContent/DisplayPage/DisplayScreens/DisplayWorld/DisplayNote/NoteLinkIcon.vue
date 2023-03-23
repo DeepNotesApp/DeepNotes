@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
 
 const note = inject<PageNote>('note')!;
 </script>

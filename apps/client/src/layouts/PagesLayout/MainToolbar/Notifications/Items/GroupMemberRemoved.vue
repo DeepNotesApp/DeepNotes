@@ -14,7 +14,7 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import type { QMenu } from 'quasar';
-import { getGroupMemberRemovedNotificationInfo } from 'src/code/pages/notifications/group-member-removed.client';
+import { getGroupMemberRemovedNotificationInfo } from 'src/code/pages/notifications/group-member-removed';
 import type { Ref } from 'vue';
 
 import NotificationItem from '../NotificationItem.vue';

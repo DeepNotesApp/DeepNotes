@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils.client';
+import { getCtrlKeyName } from 'src/code/utils';
 
 defineProps<{
   popup?: boolean;

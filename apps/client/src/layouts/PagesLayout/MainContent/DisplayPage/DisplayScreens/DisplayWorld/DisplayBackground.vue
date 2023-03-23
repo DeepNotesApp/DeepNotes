@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Page } from 'src/code/pages/page/page.client';
-import { isCtrlDown } from 'src/code/utils.client';
+import type { Page } from 'src/code/pages/page/page';
+import { isCtrlDown } from 'src/code/utils';
 
 const page = inject<Page>('page')!;
 

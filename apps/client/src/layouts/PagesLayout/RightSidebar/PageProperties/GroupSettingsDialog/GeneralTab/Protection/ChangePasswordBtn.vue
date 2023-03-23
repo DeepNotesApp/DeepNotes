@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { changeGroupPasswordProtection } from 'src/code/pages/operations/groups/password/change';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 const groupId = inject<string>('groupId')!;
 

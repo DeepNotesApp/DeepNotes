@@ -28,10 +28,10 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
 
-import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { groupNames } from 'src/code/pages/computed/group-names';
 import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
-import type { Page } from 'src/code/pages/page/page.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import type { Page } from 'src/code/pages/page/page';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 import AcceptInvitationDialog from './AcceptInvitationDialog.vue';
 

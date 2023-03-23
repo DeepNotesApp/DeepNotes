@@ -23,8 +23,8 @@
 
 <script setup lang="ts">
 import { Y } from '@syncedstore/core';
-import type { PageArrow } from 'src/code/pages/page/arrows/arrow.client';
-import type { Page } from 'src/code/pages/page/page.client';
+import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
+import type { Page } from 'src/code/pages/page/page';
 
 const props = defineProps<{
   arrow: PageArrow;

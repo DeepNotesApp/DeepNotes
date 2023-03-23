@@ -20,9 +20,9 @@ import {
 } from '@stdlib/crypto';
 import { sleep } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
-import { logout } from 'src/code/auth/logout.client';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { logout } from 'src/code/auth/logout';
+import { deriveUserValues } from 'src/code/crypto';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 async function rotateEncryptionKeys() {
   try {

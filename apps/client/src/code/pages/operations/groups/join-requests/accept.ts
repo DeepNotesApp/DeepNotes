@@ -1,12 +1,12 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { createPublicKeyring } from '@stdlib/crypto';
-import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings.client';
-import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings.client';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
+import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function acceptJoinRequest(
   groupId: string,

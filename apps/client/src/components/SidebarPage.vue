@@ -59,10 +59,10 @@
 </template>
 
 <script setup lang="ts">
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { pageGroupIds } from 'src/code/pages/computed/page-group-id.client';
-import { getPageTitle } from 'src/code/pages/utils.client';
-import { useRealtimeContext } from 'src/code/realtime/context.universal';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { pageGroupIds } from 'src/code/pages/computed/page-group-id';
+import { getPageTitle } from 'src/code/pages/utils';
+import { useRealtimeContext } from 'src/code/realtime/context';
 
 const props = defineProps<{
   group: string;

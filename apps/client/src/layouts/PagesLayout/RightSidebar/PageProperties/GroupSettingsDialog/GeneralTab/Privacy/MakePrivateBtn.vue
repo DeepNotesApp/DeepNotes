@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { makeGroupPrivate } from 'src/code/pages/operations/groups/privacy/make-private';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 const groupId = inject<string>('groupId')!;
 

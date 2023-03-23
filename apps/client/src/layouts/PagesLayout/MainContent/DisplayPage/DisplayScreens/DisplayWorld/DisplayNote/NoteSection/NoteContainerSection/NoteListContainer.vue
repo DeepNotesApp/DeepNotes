@@ -114,10 +114,10 @@
 </template>
 
 <script setup lang="ts">
-import { mainLogger } from 'src/code/logger.universal';
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import { debounceTick, useResizeObserver } from 'src/code/utils.universal';
+import { mainLogger } from 'src/code/logger';
+import type { PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
+import { debounceTick, useResizeObserver } from 'src/code/utils';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';

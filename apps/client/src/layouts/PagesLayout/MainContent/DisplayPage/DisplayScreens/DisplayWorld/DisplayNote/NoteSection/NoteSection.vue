@@ -33,10 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  NoteSection,
-  PageNote,
-} from 'src/code/pages/page/notes/note.client';
+import type { NoteSection, PageNote } from 'src/code/pages/page/notes/note';
 
 import NoteCollapseBtn from './NoteCollapseBtn.vue';
 

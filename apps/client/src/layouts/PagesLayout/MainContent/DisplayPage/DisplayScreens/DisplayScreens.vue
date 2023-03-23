@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Page } from 'src/code/pages/page/page.client';
+import type { Page } from 'src/code/pages/page/page';
 
 import DisplayContentScreen from './DisplayContentScreen.vue';
 import DisplayErrorScreen from './DisplayErrorScreen.vue';

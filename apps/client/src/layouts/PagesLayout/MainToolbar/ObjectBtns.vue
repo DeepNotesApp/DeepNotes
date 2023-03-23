@@ -164,7 +164,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils.client';
+import { getCtrlKeyName } from 'src/code/utils';
 
 import InsertImageDialog from './InsertImageDialog.vue';
 

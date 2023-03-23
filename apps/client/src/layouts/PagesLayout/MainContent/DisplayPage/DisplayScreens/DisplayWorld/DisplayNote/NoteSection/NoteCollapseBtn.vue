@@ -30,10 +30,7 @@
 
 <script setup lang="ts">
 import { negateProp } from '@stdlib/misc';
-import type {
-  NoteSection,
-  PageNote,
-} from 'src/code/pages/page/notes/note.client';
+import type { NoteSection, PageNote } from 'src/code/pages/page/notes/note';
 
 defineProps<{
   section: NoteSection;

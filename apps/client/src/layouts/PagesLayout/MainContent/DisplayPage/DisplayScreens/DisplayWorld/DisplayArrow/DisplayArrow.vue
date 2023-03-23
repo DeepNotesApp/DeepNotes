@@ -35,8 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PageArrow } from 'src/code/pages/page/arrows/arrow.client';
-import type { Page } from 'src/code/pages/page/page.client';
+import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
+import type { Page } from 'src/code/pages/page/page';
 
 import CurveArrow from './Bodies/CurveArrow.vue';
 import LineArrow from './Bodies/LineArrow.vue';
