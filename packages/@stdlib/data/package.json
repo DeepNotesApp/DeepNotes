@@ -14,7 +14,7 @@
     "winston": "3.8.2"
   },
   "peerDependencies": {
-    "ioredis": "npm:@gustavotoyota/ioredis@5.2.7",
+    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
     "objection": "3.0.1"
   },
   "keywords": [],
