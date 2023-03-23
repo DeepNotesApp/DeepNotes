@@ -1,7 +1,7 @@
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function rejectJoinRequest(
   groupId: string,

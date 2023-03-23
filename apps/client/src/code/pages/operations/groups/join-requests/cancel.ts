@@ -1,5 +1,5 @@
-import { groupRequestNames } from 'src/code/pages/computed/group-request-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function cancelJoinRequest(groupId: string) {
   const agentName = await groupRequestNames()(

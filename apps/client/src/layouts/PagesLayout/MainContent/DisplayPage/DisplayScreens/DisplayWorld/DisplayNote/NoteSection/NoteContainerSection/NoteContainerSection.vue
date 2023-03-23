@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
 
 import NoteSection from '../NoteSection.vue';
 import NoteListContainer from './NoteListContainer.vue';

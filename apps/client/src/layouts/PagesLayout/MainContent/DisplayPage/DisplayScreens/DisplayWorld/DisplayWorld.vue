@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { isMouseOverScrollbar } from '@stdlib/misc';
-import type { Page } from 'src/code/pages/page/page.client';
+import type { Page } from 'src/code/pages/page/page';
 
 import ArrowCreation from './ArrowCreation.vue';
 import DisplayArrows from './DisplayArrows.vue';

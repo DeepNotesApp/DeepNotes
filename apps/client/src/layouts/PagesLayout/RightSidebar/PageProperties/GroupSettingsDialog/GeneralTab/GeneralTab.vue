@@ -208,9 +208,9 @@
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { createSymmetricKeyring } from '@stdlib/crypto';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import type { RealtimeContext } from 'src/code/realtime/context.universal';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import type { RealtimeContext } from 'src/code/realtime/context';
 import type { Ref } from 'vue';
 
 import DeleteGroupBtn from './DeleteGroupBtn.vue';

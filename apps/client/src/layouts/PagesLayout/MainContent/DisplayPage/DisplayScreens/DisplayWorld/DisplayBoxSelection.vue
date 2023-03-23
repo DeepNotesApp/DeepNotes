@@ -32,8 +32,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Page } from 'src/code/pages/page/page.client';
-import type { PageRegion } from 'src/code/pages/page/regions/region.client';
+import type { Page } from 'src/code/pages/page/page';
+import type { PageRegion } from 'src/code/pages/page/regions/region';
 
 defineProps<{
   region: PageRegion;

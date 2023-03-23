@@ -78,10 +78,10 @@
 </template>
 
 <script setup lang="ts">
-import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { groupNames } from 'src/code/pages/computed/group-names';
 import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
-import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
+import type { RealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import type { initialSettings } from './PagesSettingsDialog.vue';

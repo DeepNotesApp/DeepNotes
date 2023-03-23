@@ -1,5 +1,5 @@
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function rejectJoinInvitation(groupId: string) {
   const agentName = await groupMemberNames()(

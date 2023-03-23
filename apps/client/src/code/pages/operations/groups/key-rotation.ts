@@ -5,8 +5,8 @@ import { createSymmetricKeyring, DataLayer } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
 
-import { computeGroupPasswordValues } from '../../../crypto.client';
-import { asyncPrompt } from '../../../utils.client';
+import { computeGroupPasswordValues } from '../../../crypto';
+import { asyncPrompt } from '../../../utils';
 
 export type GroupKeyRotationValues = {
   groupAccessKeyring?: string;

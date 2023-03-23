@@ -46,7 +46,7 @@ export default {
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
 
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
 
 import NoteAnchor from './NoteAnchor.vue';
 import NoteArrowHandles from './NoteArrowHandles/NoteArrowHandles.vue';

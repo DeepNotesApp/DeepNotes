@@ -745,13 +745,13 @@ import {
   colorHexToColorName,
   colorMap,
   colorNameToColorHex,
-} from 'src/code/pages/colors.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
-import { getPageTitle } from 'src/code/pages/utils.client';
-import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { handleError } from 'src/code/utils.client';
+} from 'src/code/pages/colors';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import type { PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
+import { getPageTitle } from 'src/code/pages/utils';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import NewPageDialog from './NewPageDialog.vue';

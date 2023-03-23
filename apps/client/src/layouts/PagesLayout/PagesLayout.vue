@@ -22,14 +22,14 @@
 
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
-import { useEditingOnTyping } from 'src/code/pages/composables/use-editing-on-typing.client';
-import { useElementPasting } from 'src/code/pages/composables/use-element-pasting.client';
-import { useKeyboardShortcuts } from 'src/code/pages/composables/use-keyboard-shortcuts.client';
-import { useMiddleClickPastePrevention } from 'src/code/pages/composables/use-middle-click-paste-prevention.client';
-import { usePageNavigationInterception } from 'src/code/pages/composables/use-page-navigation-interception.client';
-import { useTableContextMenu } from 'src/code/pages/composables/use-table-context-menu.client';
-import { useTouchscreenPointerCaptureRelease } from 'src/code/pages/composables/use-touchscreen-pointer-capture-release.client';
-import { useWindowResizeListener } from 'src/code/pages/composables/use-window-resize-listener.client';
+import { useEditingOnTyping } from 'src/code/pages/composables/use-editing-on-typing';
+import { useElementPasting } from 'src/code/pages/composables/use-element-pasting';
+import { useKeyboardShortcuts } from 'src/code/pages/composables/use-keyboard-shortcuts';
+import { useMiddleClickPastePrevention } from 'src/code/pages/composables/use-middle-click-paste-prevention';
+import { usePageNavigationInterception } from 'src/code/pages/composables/use-page-navigation-interception';
+import { useTableContextMenu } from 'src/code/pages/composables/use-table-context-menu';
+import { useTouchscreenPointerCaptureRelease } from 'src/code/pages/composables/use-touchscreen-pointer-capture-release';
+import { useWindowResizeListener } from 'src/code/pages/composables/use-window-resize-listener';
 import LeftSidebar from 'src/layouts/PagesLayout/LeftSidebar/LeftSidebar.vue';
 import MainContent from 'src/layouts/PagesLayout/MainContent/MainContent.vue';
 import MainToolbar from 'src/layouts/PagesLayout/MainToolbar/MainToolbar.vue';

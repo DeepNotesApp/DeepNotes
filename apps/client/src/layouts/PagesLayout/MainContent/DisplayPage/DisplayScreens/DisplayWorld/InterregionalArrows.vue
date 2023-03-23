@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PageRegion } from 'src/code/pages/page/regions/region.client';
+import type { PageRegion } from 'src/code/pages/page/regions/region';
 
 import ArrowLabel from './DisplayArrow/ArrowLabel.vue';
 import DisplayArrow from './DisplayArrow/DisplayArrow.vue';

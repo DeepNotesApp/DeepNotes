@@ -127,10 +127,10 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
-import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names.client';
+import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import { cancelJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/cancel';
-import type { RealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils.client';
+import type { RealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';

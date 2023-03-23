@@ -1,8 +1,8 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { Y } from '@syncedstore/core';
-import { pageKeyrings } from 'src/code/pages/computed/page-keyrings.client';
-import { revertToSnapshot } from 'src/code/pages/utils.client';
+import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
+import { revertToSnapshot } from 'src/code/pages/utils';
 
 export async function restorePageSnapshot(
   pageId: string,

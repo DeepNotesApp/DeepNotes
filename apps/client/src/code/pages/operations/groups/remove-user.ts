@@ -1,7 +1,7 @@
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { createNotifications } from 'src/code/pages/utils.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { createNotifications } from 'src/code/pages/utils';
 
-import { groupNames } from '../../computed/group-names.client';
+import { groupNames } from '../../computed/group-names';
 
 export async function removeGroupUser(
   groupId: string,

@@ -31,8 +31,8 @@
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
-import type { Page } from 'src/code/pages/page/page.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
+import type { Page } from 'src/code/pages/page/page';
 
 import NoteDropZone from './NoteDropZone.vue';
 

@@ -97,10 +97,10 @@
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
-import { enterDemo } from 'src/code/auth/demo.client';
-import { login } from 'src/code/auth/login.client';
-import { deriveUserValues } from 'src/code/crypto.client';
-import { handleError } from 'src/code/utils.client';
+import { enterDemo } from 'src/code/auth/demo';
+import { login } from 'src/code/auth/login';
+import { deriveUserValues } from 'src/code/crypto';
+import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 // Email

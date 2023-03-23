@@ -79,12 +79,12 @@
 <script setup lang="ts">
 import type { PageSnapshotInfo } from '@deeplib/misc';
 import { capitalize } from 'lodash';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { deletePageSnapshot } from 'src/code/pages/operations/pages/snapshots/delete';
 import { restorePageSnapshot } from 'src/code/pages/operations/pages/snapshots/restore';
 import { savePageSnapshot } from 'src/code/pages/operations/pages/snapshots/save';
-import type { Page } from 'src/code/pages/page/page.client';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import type { Page } from 'src/code/pages/page/page';
+import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;

@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import type { Vec2 } from '@stdlib/misc';
-import type { PageArrow } from 'src/code/pages/page/arrows/arrow.client';
+import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 
 defineProps<{
   pos: Vec2;

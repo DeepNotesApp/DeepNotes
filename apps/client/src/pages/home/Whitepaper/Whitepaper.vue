@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
-import { multiModePath } from 'src/code/utils.universal';
+import { multiModePath } from 'src/code/utils';
 
 import WhitepaperItems from './WhitepaperItems.vue';
 
@@ -79,12 +79,12 @@ const html = marked(`
   We add an extra layer of security on the server-side by encrypting user data with keys stored only in environment variables.
   This is done so that an attacker who gains access to the database doesn't have direct access to valuable data.
   We do this to the following user data: email, password hash, two factor authentication secret, and recovery codes.
-  
+
   In order to keep emails searchable in the database, we create a blind index of the emails using HMAC-SHA256,
   again keeping the secret stored only in an environment variable.
 
   ### Key rotation
-  
+
   We rotate group encryption keys on every group member removal.
   Page encryption keys are rotated on the first user interaction with the page after 7 days have passed since the last page key rotation.
 

@@ -148,7 +148,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils.client';
+import { getCtrlKeyName } from 'src/code/utils';
 
 import InsertLinkDialog from './InsertLinkDialog.vue';
 

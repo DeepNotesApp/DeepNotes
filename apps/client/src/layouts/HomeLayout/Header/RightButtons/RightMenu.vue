@@ -134,7 +134,7 @@
 
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import { logout } from 'src/code/auth/logout.client';
-import { selfUserName } from 'src/code/self-user-name.client';
-import { multiModePath } from 'src/code/utils.universal';
+import { logout } from 'src/code/auth/logout';
+import { selfUserName } from 'src/code/self-user-name';
+import { multiModePath } from 'src/code/utils';
 </script>

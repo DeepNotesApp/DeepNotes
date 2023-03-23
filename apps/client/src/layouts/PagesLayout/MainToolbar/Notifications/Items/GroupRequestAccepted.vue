@@ -14,7 +14,7 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
 import type { QMenu } from 'quasar';
-import { getGroupRequestAcceptedNotificationInfo } from 'src/code/pages/notifications/group-request-accepted.client';
+import { getGroupRequestAcceptedNotificationInfo } from 'src/code/pages/notifications/group-request-accepted';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import type { Ref } from 'vue';
 

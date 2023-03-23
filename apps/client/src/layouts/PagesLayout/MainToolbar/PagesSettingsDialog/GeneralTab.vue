@@ -67,5 +67,5 @@
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
-import { selfUserName } from 'src/code/self-user-name.client';
+import { selfUserName } from 'src/code/self-user-name';
 </script>

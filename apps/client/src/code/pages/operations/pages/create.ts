@@ -8,9 +8,9 @@ import { nanoid } from 'nanoid';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,
-} from 'src/code/crypto.client';
-import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings.client';
-import { asyncPrompt } from 'src/code/utils.client';
+} from 'src/code/crypto';
+import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
+import { asyncPrompt } from 'src/code/utils';
 
 export async function createPage(
   pageId: string,

@@ -33,9 +33,9 @@ import { rolesMap } from '@deeplib/misc';
 import { relativeTimeStr } from '@stdlib/misc';
 import { deletePagePermanently } from 'src/code/pages/operations/pages/deletion/delete-permanently';
 import { restorePageDeletion } from 'src/code/pages/operations/pages/deletion/restore';
-import type { Page } from 'src/code/pages/page/page.client';
-import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { asyncPrompt, handleError } from 'src/code/utils.client';
+import type { Page } from 'src/code/pages/page/page';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { asyncPrompt, handleError } from 'src/code/utils';
 
 const page = inject<Page>('page')!;
 

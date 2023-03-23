@@ -61,7 +61,7 @@
 
 <script setup lang="ts">
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { useResizeObserver } from 'src/code/utils.universal';
+import { useResizeObserver } from 'src/code/utils';
 import type { ComponentPublicInstance } from 'vue';
 
 const props = defineProps<{

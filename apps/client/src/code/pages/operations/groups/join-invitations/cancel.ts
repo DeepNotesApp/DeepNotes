@@ -1,7 +1,7 @@
-import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names.client';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
-import { requestWithNotifications } from 'src/code/pages/utils.client';
+import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
+import { requestWithNotifications } from 'src/code/pages/utils';
 
 export async function cancelJoinInvitation(
   groupId: string,

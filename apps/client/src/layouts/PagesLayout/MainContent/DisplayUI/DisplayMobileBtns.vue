@@ -220,9 +220,9 @@
 
 <script setup lang="ts">
 import { isIncluded } from '@stdlib/misc';
-import { logout } from 'src/code/auth/logout.client';
-import { selfUserName } from 'src/code/self-user-name.client';
-import { multiModePath } from 'src/code/utils.universal';
+import { logout } from 'src/code/auth/logout';
+import { selfUserName } from 'src/code/self-user-name';
+import { multiModePath } from 'src/code/utils';
 
 import AlignmentBtns from '../../MainToolbar/AlignmentBtns.vue';
 import BasicBtns from '../../MainToolbar/BasicBtns.vue';

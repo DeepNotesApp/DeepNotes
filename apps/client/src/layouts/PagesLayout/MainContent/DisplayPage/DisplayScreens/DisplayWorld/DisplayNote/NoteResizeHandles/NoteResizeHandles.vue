@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note.client';
+import type { PageNote } from 'src/code/pages/page/notes/note';
 
 import NoteResizeBar from './NoteResizeBar.vue';
 import NoteResizeHandle from './NoteResizeHandle.vue';

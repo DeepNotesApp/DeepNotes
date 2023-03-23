@@ -115,11 +115,11 @@
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names.client';
-import { groupNames } from 'src/code/pages/computed/group-names.client';
+import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
 import { movePage } from 'src/code/pages/operations/pages/move';
-import { useRealtimeContext } from 'src/code/realtime/context.universal';
-import { handleError } from 'src/code/utils.client';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { handleError } from 'src/code/utils';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
