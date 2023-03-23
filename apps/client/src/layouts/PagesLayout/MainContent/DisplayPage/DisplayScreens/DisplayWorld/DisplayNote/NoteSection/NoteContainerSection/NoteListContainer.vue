@@ -50,49 +50,47 @@
     >
       <!-- Children -->
 
-      <template
+      <div
         v-for="(childNote, index) in note.react.notes"
         :key="childNote?.id ?? index"
+        class="note-container-child"
+        :style="{
+          'flex-direction': note.react.collab.container.horizontal
+            ? 'row'
+            : 'column',
+          width:
+            !note.react.collab.container.horizontal &&
+            note.react.collab.container.stretchChildren
+              ? 'calc(100% - 6px)'
+              : undefined,
+          display: !childNote.react.loaded ? 'none' : undefined,
+        }"
       >
-        <div
-          class="note-container-child"
-          :style="{
-            'flex-direction': note.react.collab.container.horizontal
-              ? 'row'
-              : 'column',
-            width:
-              !note.react.collab.container.horizontal &&
-              note.react.collab.container.stretchChildren
-                ? 'calc(100% - 6px)'
-                : undefined,
-          }"
-        >
-          <DisplayNote
-            :note="childNote"
-            :index="index"
-            @resize="
-              () => {
-                logger.info('DisplayNote resize %o', note.id);
+        <DisplayNote
+          :note="childNote"
+          :index="index"
+          @resize="
+            () => {
+              logger.info('DisplayNote resize %o', note.id);
 
-                void onResize();
+              void onResize();
 
-                void updateChildPositions();
-              }
-            "
+              void updateChildPositions();
+            }
+          "
+        />
+
+        <div style="position: relative">
+          <NoteDropZone
+            v-if="index < note.react.notes.length - 1"
+            :parent-note="note"
+            always-visible
+            :index="index + 1"
+            style="position: absolute; min-width: 6px; min-height: 6px"
+            @dblclick.left="onLeftDoubleClick($event, index + 1)"
           />
-
-          <div style="position: relative">
-            <NoteDropZone
-              v-if="index < note.react.notes.length - 1"
-              :parent-note="note"
-              always-visible
-              :index="index + 1"
-              style="position: absolute; min-width: 6px; min-height: 6px"
-              @dblclick.left="onLeftDoubleClick($event, index + 1)"
-            />
-          </div>
         </div>
-      </template>
+      </div>
 
       <!-- Last drop zone -->
 
@@ -116,11 +114,10 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from 'lodash';
 import { mainLogger } from 'src/code/logger.universal';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
-import { useResizeObserver } from 'src/code/utils.universal';
+import { debounceTick, useResizeObserver } from 'src/code/utils.universal';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';
@@ -153,7 +150,7 @@ const frameElem = ref<Element>();
 
 const hideUI = ref(false);
 
-const updateChildPositions = debounce(async () => {
+const updateChildPositions = debounceTick(async () => {
   logger.info('updateChildPositions %o', note.id);
 
   const originPos = note.getOriginWorldPos();
@@ -177,20 +174,9 @@ const updateChildPositions = debounce(async () => {
 
     childNote.react.offsetInList = worldTopLeft.sub(originPos);
   }
-}, 100);
+});
 
-watch(
-  () => note.react.notes,
-  () => {
-    logger.info('childNotes change %o', note.id);
-
-    void onResize();
-
-    void updateChildPositions();
-  },
-);
-
-const onResize = debounce(async function () {
+const onResize = debounceTick(async function () {
   logger.info('onResize %o', note.id);
 
   // Update overflow
