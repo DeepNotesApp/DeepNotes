@@ -29,7 +29,7 @@ defineProps<Props>();
 
       touch-action: pan-x pan-y !important;
 
-      white-space: normal;
+      white-space: pre-wrap;
 
       &[contenteditable='false'] {
         img,
