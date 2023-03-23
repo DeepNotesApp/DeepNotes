@@ -30,7 +30,7 @@
       opacity:
         note.react.dragging || note.react.resizing?.active ? '0.7' : undefined,
 
-      visibility: !note.react.loaded ? 'hidden' : undefined,
+      display: !note.react.loaded ? 'none' : undefined,
 
       'z-index': note.react.floating ? note.react.collab?.zIndex : undefined,
     }"

@@ -45,17 +45,15 @@ export class PageClipboard {
 
     // Copy to clipboard
 
-    const encryptedClipboardText = process.env.DEV
-      ? JSON.stringify(clipboardObj, null, 2)
-      : bytesToBase64(
-          wrapSymmetricKey(PageClipboard.encryptionKey).encrypt(
-            pack(clipboardObj),
-            {
-              padding: true,
-              associatedData: { context: 'Clipboard' },
-            },
-          ),
-        );
+    const encryptedClipboardText = bytesToBase64(
+      wrapSymmetricKey(PageClipboard.encryptionKey).encrypt(
+        pack(clipboardObj),
+        {
+          padding: true,
+          associatedData: { context: 'Clipboard' },
+        },
+      ),
+    );
 
     setClipboardText(encryptedClipboardText);
   }

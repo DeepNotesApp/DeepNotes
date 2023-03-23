@@ -24,7 +24,7 @@ export const roles = once((): IGroupRole[] => [
 
     name: 'Owner',
 
-    rank: 500,
+    rank: 5,
     permissions: {
       manageOwnRank: true,
       manageLowerRanks: true,
@@ -42,7 +42,7 @@ export const roles = once((): IGroupRole[] => [
 
     name: 'Admin',
 
-    rank: 400,
+    rank: 4,
     permissions: {
       manageOwnRank: true,
       manageLowerRanks: true,
@@ -60,7 +60,7 @@ export const roles = once((): IGroupRole[] => [
 
     name: 'Moderator',
 
-    rank: 300,
+    rank: 3,
     permissions: {
       manageOwnRank: false,
       manageLowerRanks: true,
@@ -78,7 +78,7 @@ export const roles = once((): IGroupRole[] => [
 
     name: 'Member',
 
-    rank: 200,
+    rank: 2,
     permissions: {
       manageOwnRank: false,
       manageLowerRanks: false,
@@ -96,7 +96,7 @@ export const roles = once((): IGroupRole[] => [
 
     name: 'Viewer',
 
-    rank: 100,
+    rank: 1,
     permissions: {
       manageOwnRank: false,
       manageLowerRanks: false,

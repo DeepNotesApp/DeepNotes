@@ -50,47 +50,47 @@
     >
       <!-- Children -->
 
-      <template
+      <div
         v-for="(childNote, index) in note.react.notes"
         :key="childNote?.id ?? index"
+        class="note-container-child"
+        :style="{
+          'flex-direction': note.react.collab.container.horizontal
+            ? 'row'
+            : 'column',
+          width:
+            !note.react.collab.container.horizontal &&
+            note.react.collab.container.stretchChildren
+              ? 'calc(100% - 6px)'
+              : undefined,
+          display: !childNote.react.loaded ? 'none' : undefined,
+        }"
       >
-        <div
-          class="note-container-child"
-          :style="{
-            'flex-direction': note.react.collab.container.horizontal
-              ? 'row'
-              : 'column',
-            width:
-              !note.react.collab.container.horizontal &&
-              note.react.collab.container.stretchChildren
-                ? 'calc(100% - 6px)'
-                : undefined,
-          }"
-        >
-          <DisplayNote
-            :note="childNote"
-            :index="index"
-            @resize="
-              () => {
-                void onResize();
+        <DisplayNote
+          :note="childNote"
+          :index="index"
+          @resize="
+            () => {
+              logger.info('DisplayNote resize %o', note.id);
 
-                void updateChildPositions();
-              }
-            "
+              void onResize();
+
+              void updateChildPositions();
+            }
+          "
+        />
+
+        <div style="position: relative">
+          <NoteDropZone
+            v-if="index < note.react.notes.length - 1"
+            :parent-note="note"
+            always-visible
+            :index="index + 1"
+            style="position: absolute; min-width: 6px; min-height: 6px"
+            @dblclick.left="onLeftDoubleClick($event, index + 1)"
           />
-
-          <div style="position: relative">
-            <NoteDropZone
-              v-if="index < note.react.notes.length - 1"
-              :parent-note="note"
-              always-visible
-              :index="index + 1"
-              style="position: absolute; min-width: 6px; min-height: 6px"
-              @dblclick.left="onLeftDoubleClick($event, index + 1)"
-            />
-          </div>
         </div>
-      </template>
+      </div>
 
       <!-- Last drop zone -->
 
@@ -114,10 +114,10 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from 'lodash';
+import { mainLogger } from 'src/code/logger.universal';
 import type { PageNote } from 'src/code/pages/page/notes/note.client';
 import type { Page } from 'src/code/pages/page/page.client';
-import { useResizeObserver } from 'src/code/utils.universal';
+import { debounceTick, useResizeObserver } from 'src/code/utils.universal';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';
@@ -126,6 +126,8 @@ import NoteDropZone from '../../NoteDropZones/NoteDropZone.vue';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;
+
+const logger = mainLogger().sub('NoteListContainer');
 
 async function onLeftDoubleClick(event: MouseEvent, destIndex?: number) {
   const clientTopLeft = note.getContainerClientRect()?.topLeft;
@@ -148,10 +150,8 @@ const frameElem = ref<Element>();
 
 const hideUI = ref(false);
 
-const updateChildPositions = debounce(async () => {
-  mainLogger().info('updateChildPositions %o', note.id);
-
-  await nextTick();
+const updateChildPositions = debounceTick(async () => {
+  logger.info('updateChildPositions %o', note.id);
 
   const originPos = note.getOriginWorldPos();
 
@@ -174,18 +174,11 @@ const updateChildPositions = debounce(async () => {
 
     childNote.react.offsetInList = worldTopLeft.sub(originPos);
   }
-}, 100);
+});
 
-watch(
-  () => note.react.notes,
-  () => {
-    void onResize();
+const onResize = debounceTick(async function () {
+  logger.info('onResize %o', note.id);
 
-    void updateChildPositions();
-  },
-);
-
-const onResize = debounce(async function () {
   // Update overflow
 
   hideUI.value = true;
@@ -205,12 +198,18 @@ const onResize = debounce(async function () {
 
 useResizeObserver(
   () => containerElem.value!,
-  () => onResize(),
+  () => {
+    logger.info('containerElem resize %o', note.id);
+
+    void onResize();
+  },
 );
 
 useResizeObserver(
   () => frameElem.value!,
   () => {
+    logger.info('frameElem resize %o', note.id);
+
     void onResize();
 
     void updateChildPositions();
