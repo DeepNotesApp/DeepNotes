@@ -28,7 +28,7 @@
         <q-separator />
 
         <q-tabs
-          v-model="settings.tab"
+          v-model="tab"
           inline-label
           outside-arrows
           mobile-arrows
@@ -64,22 +64,26 @@
             <TabBtn
               name="General"
               icon="mdi-account"
-              :settings="settings"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
             />
             <TabBtn
               name="Groups"
               icon="mdi-account-group"
-              :settings="settings"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
             />
             <TabBtn
               name="Join invitations"
               icon="mdi-calendar"
-              :settings="settings"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
             />
             <TabBtn
               name="Join requests"
               icon="mdi-account-multiple-plus"
-              :settings="settings"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
             />
           </q-list>
 
@@ -95,10 +99,10 @@
             position: relative;
           "
         >
-          <GeneralTab v-if="settings.tab === 'General'" />
-          <GroupsTab v-if="settings.tab === 'Groups'" />
-          <InvitationsTab v-if="settings.tab === 'Join invitations'" />
-          <RequestsTab v-if="settings.tab === 'Join requests'" />
+          <GeneralTab v-if="tab === 'General'" />
+          <GroupsTab v-if="tab === 'Groups'" />
+          <InvitationsTab v-if="tab === 'Join invitations'" />
+          <RequestsTab v-if="tab === 'Join requests'" />
 
           <LoadingOverlay v-if="loading" />
         </div>
@@ -118,27 +122,6 @@
   </CustomDialog>
 </template>
 
-<script lang="ts">
-export function initialSettings() {
-  return {
-    tab: 'General',
-
-    general: {},
-    groups: {
-      selectedGroupIds: new Set<string>(),
-    },
-    invitations: {
-      selectedGroupIds: new Set<string>(),
-    },
-    requests: {
-      selectedGroupIds: new Set<string>(),
-    },
-
-    groupIds: [] as string[],
-  };
-}
-</script>
-
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
@@ -157,8 +140,10 @@ const maximized = computed(
   () => uiStore().width < 800 || uiStore().height < 600,
 );
 
-const settings = ref(initialSettings());
-provide('settings', settings);
+const tab = ref('General');
+
+const groupIds = ref<string[]>([]);
+provide('groupIds', groupIds);
 
 const realtimeCtx = useRealtimeContext();
 provide('realtimeCtx', realtimeCtx);
@@ -174,7 +159,7 @@ onMounted(async () => {
       }>('/api/users/load-settings')
     ).data;
 
-    settings.value.groupIds = request.groupIds;
+    groupIds.value = request.groupIds;
 
     await watchUntilTrue(() => !internals.realtime.loading);
 

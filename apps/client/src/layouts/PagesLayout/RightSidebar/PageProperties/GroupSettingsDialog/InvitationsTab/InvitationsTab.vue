@@ -118,7 +118,7 @@
         component: InviteUserDialog,
 
         componentProps: {
-          settings,
+          groupId,
         },
       })
     "
@@ -131,15 +131,11 @@ import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-n
 import { cancelJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/cancel';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
-import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
-import type { initialSettings } from '../GroupSettingsDialog.vue';
 import InviteUserDialog from './InviteUserDialog.vue';
 
 const groupId = inject<string>('groupId')!;
-
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
@@ -154,9 +150,8 @@ const invitationsUserIds = computed(() =>
   ),
 );
 
-const baseSelectedUserIds = computed(
-  () => settings.value.invitations.selectedUserIds,
-);
+const baseSelectedUserIds = ref(new Set<string>());
+
 const finalSelectedUserIds = computed(() =>
   invitationsUserIds.value.filter((userId) =>
     baseSelectedUserIds.value.has(userId),

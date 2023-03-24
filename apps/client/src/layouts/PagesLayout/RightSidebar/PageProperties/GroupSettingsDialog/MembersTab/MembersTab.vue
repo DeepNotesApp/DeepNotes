@@ -126,15 +126,11 @@ import { rotateGroupKeys } from 'src/code/pages/operations/groups/key-rotation';
 import { removeGroupUser } from 'src/code/pages/operations/groups/remove-user';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
-import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
-import type { initialSettings } from '../GroupSettingsDialog.vue';
 import ChangeRoleDialog from './ChangeRoleDialog.vue';
 
 const groupId = inject<string>('groupId')!;
-
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
@@ -166,9 +162,8 @@ const membersUserIds = computed(() => {
   return membersUserIds;
 });
 
-const baseSelectedUserIds = computed(
-  () => settings.value.members.selectedUserIds,
-);
+const baseSelectedUserIds = ref(new Set<string>());
+
 const finalSelectedUserIds = computed(() =>
   membersUserIds.value.filter((userId) =>
     baseSelectedUserIds.value.has(userId),

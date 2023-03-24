@@ -84,16 +84,14 @@ import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
-import type { initialSettings } from './PagesSettingsDialog.vue';
-
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
+const groupIds = inject<Ref<string[]>>('groupIds')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
 const requestGroupsIds = computed(() =>
-  settings.value.groupIds.filter(
+  groupIds.value.filter(
     (groupId) =>
       realtimeCtx.hget(
         'group-join-request',
@@ -103,9 +101,8 @@ const requestGroupsIds = computed(() =>
   ),
 );
 
-const baseSelectedGroupIds = computed(
-  () => settings.value.requests.selectedGroupIds,
-);
+const baseSelectedGroupIds = ref(new Set<string>());
+
 const finalSelectedGroupIds = computed(() =>
   requestGroupsIds.value.filter((groupId) =>
     baseSelectedGroupIds.value.has(groupId),

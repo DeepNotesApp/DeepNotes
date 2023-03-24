@@ -78,10 +78,8 @@ import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 import { z } from 'zod';
 
-import type { initialSettings } from '../GroupSettingsDialog.vue';
-
 const props = defineProps<{
-  settings: ReturnType<typeof initialSettings>;
+  groupId: string;
 }>();
 
 const realtimeCtx = useRealtimeContext();
@@ -89,7 +87,7 @@ const realtimeCtx = useRealtimeContext();
 const manageableRoles = computed(() => {
   const selfGroupRole = realtimeCtx.hget(
     'group-member',
-    `${props.settings.groupId}:${authStore().userId}`,
+    `${props.groupId}:${authStore().userId}`,
     'role',
   );
 
@@ -142,7 +140,7 @@ async function inviteUser() {
       );
     }
 
-    await sendJoinInvitation(props.settings.groupId, {
+    await sendJoinInvitation(props.groupId, {
       inviteeUserId,
       inviteeUserName: userName.value,
       inviteeRole: role.value,

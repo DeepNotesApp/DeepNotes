@@ -103,16 +103,14 @@ import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
-import type { initialSettings } from './PagesSettingsDialog.vue';
-
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
+const groupIds = inject<Ref<string[]>>('groupIds')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
 const memberGroupsIds = computed(() =>
-  settings.value.groupIds.filter((groupId) =>
+  groupIds.value.filter((groupId) =>
     realtimeCtx.hget(
       'group-member',
       `${groupId}:${authStore().userId}`,
@@ -121,9 +119,8 @@ const memberGroupsIds = computed(() =>
   ),
 );
 
-const baseSelectedGroupIds = computed(
-  () => settings.value.groups.selectedGroupIds,
-);
+const baseSelectedGroupIds = ref(new Set<string>());
+
 const finalSelectedGroupIds = computed(() =>
   memberGroupsIds.value.filter((groupId) =>
     baseSelectedGroupIds.value.has(groupId),

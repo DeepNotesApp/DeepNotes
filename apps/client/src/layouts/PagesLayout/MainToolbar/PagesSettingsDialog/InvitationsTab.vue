@@ -108,16 +108,15 @@ import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
-import type { initialSettings } from './PagesSettingsDialog.vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
+const groupIds = inject<Ref<string[]>>('groupIds')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
 const invitationGroupsIds = computed(() =>
-  settings.value.groupIds.filter(
+  groupIds.value.filter(
     (groupId) =>
       !!realtimeCtx.hget(
         'group-join-invitation',
@@ -127,9 +126,8 @@ const invitationGroupsIds = computed(() =>
   ),
 );
 
-const baseSelectedGroupIds = computed(
-  () => settings.value.invitations.selectedGroupIds,
-);
+const baseSelectedGroupIds = ref(new Set<string>());
+
 const finalSelectedGroupIds = computed(() =>
   invitationGroupsIds.value.filter((groupId) =>
     baseSelectedGroupIds.value.has(groupId),
@@ -172,7 +170,7 @@ async function acceptSelectedInvitations() {
     component: AcceptInvitationDialog,
 
     componentProps: {
-      groupIds: settings.value.groupIds,
+      groupIds: groupIds.value,
     },
   });
 }
