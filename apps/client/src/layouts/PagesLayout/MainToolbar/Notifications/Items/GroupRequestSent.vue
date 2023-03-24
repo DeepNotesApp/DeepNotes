@@ -122,7 +122,7 @@ async function onClick() {
 
     componentProps: {
       groupId: notificationContent.value.groupId,
-      tab: 'Join requests',
+      initialTab: 'Join requests',
     },
   });
 

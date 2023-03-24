@@ -39,7 +39,7 @@ export async function getGroupRequestSentNotificationInfo({
 
               componentProps: {
                 groupId,
-                tab: 'Join requests',
+                initialTab: 'Join requests',
               },
             });
           },

@@ -53,7 +53,7 @@ async function onClick() {
 
     componentProps: {
       groupId: notificationContent.value.groupId,
-      tab: 'Members',
+      initialTab: 'Members',
     },
   });
 

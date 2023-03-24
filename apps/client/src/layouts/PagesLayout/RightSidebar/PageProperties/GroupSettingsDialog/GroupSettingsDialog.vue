@@ -39,7 +39,20 @@
             label="General"
           />
 
-          <template v-if="authStore().loggedIn && !groupIsPersonal && !loading">
+          <template
+            v-if="
+              authStore().loggedIn &&
+              !realtimeCtx.hget('group', groupId, 'is-personal') &&
+              rolesMap()[
+                realtimeCtx.hget(
+                  'group-member',
+                  `${groupId}:${authStore().userId}`,
+                  'role',
+                )
+              ]?.permissions.manageLowerRanks &&
+              !loading
+            "
+          >
             <q-tab
               name="Members"
               icon="mdi-wallet-membership"
@@ -74,7 +87,18 @@
             />
 
             <template
-              v-if="authStore().loggedIn && !groupIsPersonal && !loading"
+              v-if="
+                authStore().loggedIn &&
+                !realtimeCtx.hget('group', groupId, 'is-personal') &&
+                rolesMap()[
+                  realtimeCtx.hget(
+                    'group-member',
+                    `${groupId}:${authStore().userId}`,
+                    'role',
+                  )
+                ]?.permissions.manageLowerRanks &&
+                !loading
+              "
             >
               <TabBtn
                 name="Members"
@@ -154,6 +178,7 @@ export function initialSettings(groupId: string) {
 </script>
 
 <script setup lang="ts">
+import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
@@ -167,7 +192,7 @@ import RequestsTab from './RequestsTab/RequestsTab.vue';
 
 const props = defineProps<{
   groupId: string;
-  tab?: string;
+  initialTab?: string;
 }>();
 
 provide('groupId', props.groupId);
@@ -180,15 +205,11 @@ const maximized = computed(
 );
 
 const settings = ref(initialSettings(props.groupId));
-settings.value.tab = props.tab ?? settings.value.tab;
+settings.value.tab = props.initialTab ?? settings.value.tab;
 provide('settings', settings);
 
 const realtimeCtx = useRealtimeContext();
 provide('realtimeCtx', realtimeCtx);
-
-const groupIsPersonal = computed(() =>
-  realtimeCtx.hget('group', props.groupId, 'is-personal'),
-);
 
 const loading = ref(true);
 
