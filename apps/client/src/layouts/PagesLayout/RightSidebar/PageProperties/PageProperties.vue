@@ -106,9 +106,9 @@
 
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
+import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
-import { deletePage } from 'src/code/pages/operations/pages/deletion/delete';
 import type { Page } from 'src/code/pages/page/page';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';

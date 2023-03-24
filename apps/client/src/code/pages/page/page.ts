@@ -2,6 +2,7 @@ import { rolesMap } from '@deeplib/misc';
 import { sleep, Vec2 } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { once, pull } from 'lodash';
+import { bumpPage } from 'src/code/api-interface/pages/bump';
 import type { Factories } from 'src/code/factories';
 import type { Pages } from 'src/code/pages/pages';
 import { RealtimeContext } from 'src/code/realtime/context';
@@ -9,7 +10,6 @@ import type { ComputedRef, UnwrapNestedRefs } from 'vue';
 import type { z } from 'zod';
 
 import { pageGroupIds } from '../computed/page-group-id';
-import { bumpPage } from '../operations/pages/bump';
 import type { PageArrowCreation } from './arrows/arrow-creation';
 import type { PageArrows } from './arrows/arrows';
 import type { PageCamera } from './camera/camera';

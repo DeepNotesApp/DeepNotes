@@ -59,7 +59,7 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
-import { acceptJoinRequest } from 'src/code/pages/operations/groups/join-requests/accept';
+import { acceptJoinRequest } from 'src/code/api-interface/groups/join-requests/accept';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';

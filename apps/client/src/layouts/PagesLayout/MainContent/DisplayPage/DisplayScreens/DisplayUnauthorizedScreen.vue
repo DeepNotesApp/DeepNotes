@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
+import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError } from 'src/code/utils';

@@ -121,9 +121,9 @@
 
 <script setup lang="ts">
 import { canManageRole, rolesMap } from '@deeplib/misc';
+import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
+import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
-import { rotateGroupKeys } from 'src/code/pages/operations/groups/key-rotation';
-import { removeGroupUser } from 'src/code/pages/operations/groups/remove-user';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 

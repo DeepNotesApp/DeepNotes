@@ -1,9 +1,9 @@
+import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';
 
 import { groupNames } from '../computed/group-names';
-import { rejectJoinRequest } from '../operations/groups/join-requests/reject';
 import type { NotificationInfo } from './notifications';
 
 export async function getGroupRequestSentNotificationInfo({

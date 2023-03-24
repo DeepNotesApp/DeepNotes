@@ -78,8 +78,8 @@
 </template>
 
 <script setup lang="ts">
+import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { cancelJoinRequest } from 'src/code/pages/operations/groups/join-requests/cancel';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';

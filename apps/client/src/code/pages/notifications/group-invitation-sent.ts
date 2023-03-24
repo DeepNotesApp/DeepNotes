@@ -1,7 +1,7 @@
+import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 
-import { rejectJoinInvitation } from '../operations/groups/join-invitations/reject';
 import type { NotificationInfo } from './notifications';
 
 export async function getGroupInvitationSentNotificationInfo({

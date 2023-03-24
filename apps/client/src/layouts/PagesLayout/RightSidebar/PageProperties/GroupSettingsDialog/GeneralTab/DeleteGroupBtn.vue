@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { deleteGroup } from 'src/code/pages/operations/groups/deletion/delete';
+import { deleteGroup } from 'src/code/api-interface/groups/deletion/delete';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 

@@ -97,8 +97,8 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { removeGroupUser } from 'src/code/pages/operations/groups/remove-user';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
