@@ -192,7 +192,7 @@ onMounted(async () => {
 async function _movePage() {
   try {
     await movePage(page.value.id, {
-      currentGroupId: page.value.react.groupId,
+      destGroupId: destGroupId.value!,
       setAsMainPage: setAsMainPage.value,
 
       createGroup: destGroupId.value === 'new',
