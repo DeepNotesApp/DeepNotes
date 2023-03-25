@@ -31,8 +31,8 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { relativeTimeStr } from '@stdlib/misc';
-import { deletePagePermanently } from 'src/code/pages/operations/pages/deletion/delete-permanently';
-import { restorePageDeletion } from 'src/code/pages/operations/pages/deletion/restore';
+import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
+import { restorePageDeletion } from 'src/code/api-interface/pages/deletion/restore';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError } from 'src/code/utils';

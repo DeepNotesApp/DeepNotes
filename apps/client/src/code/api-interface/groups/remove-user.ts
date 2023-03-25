@@ -1,7 +1,6 @@
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
-
-import { groupNames } from '../../computed/group-names';
 
 export async function removeGroupUser(
   groupId: string,

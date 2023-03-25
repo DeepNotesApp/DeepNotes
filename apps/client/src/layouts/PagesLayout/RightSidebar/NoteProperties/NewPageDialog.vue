@@ -135,9 +135,9 @@ import {
   maxPageTitleLength,
 } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN, sleep, splitStr } from '@stdlib/misc';
+import { createPage } from 'src/code/api-interface/pages/create';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { createPage } from 'src/code/pages/operations/pages/create';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils';
 import type { ComponentPublicInstance, Ref } from 'vue';

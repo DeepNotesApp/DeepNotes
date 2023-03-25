@@ -24,26 +24,24 @@
       label="Change email"
       type="submit"
       color="primary"
-      @click.prevent="changeEmail()"
+      @click.prevent="_changeEmail()"
     />
   </q-form>
 </template>
 
 <script setup lang="ts">
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
-import {
-  createPrivateKeyring,
-  createSymmetricKeyring,
-  wrapSymmetricKey,
-} from '@stdlib/crypto';
 import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
+import {
+  changeEmail,
+  requestEmailChange,
+} from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
 import { asyncPrompt, handleError } from 'src/code/utils';
 
 const newEmail = ref('');
 
-async function changeEmail() {
+async function _changeEmail() {
   try {
     const currentEmail = await internals.realtime.hget(
       'user',
@@ -87,12 +85,10 @@ async function changeEmail() {
     // Compute derived keys
 
     const oldDerivedValues = await deriveUserValues(currentEmail!, password);
-    const newDerivedValues = await deriveUserValues(newEmail.value, password);
 
-    await api().post('/api/users/account/general/change-email', {
+    await requestEmailChange({
       newEmail: newEmail.value,
-
-      oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
+      oldDerivedUserValues: oldDerivedValues,
     });
 
     $quasar().notify({
@@ -116,71 +112,10 @@ async function changeEmail() {
       cancel: true,
     });
 
-    const response = (
-      await api().post<{
-        sessionKey: string;
-      }>('/api/users/account/general/change-email', {
-        newEmail: newEmail.value,
-
-        oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
-
-        emailVerificationCode,
-      })
-    ).data;
-
-    const wrappedSessionKey = wrapSymmetricKey(
-      base64ToBytes(response.sessionKey),
-    );
-
-    // Reencrypt values
-
-    const encryptedPrivateKeyring = bytesToBase64(
-      createPrivateKeyring(
-        base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
-      )
-        .unwrapSymmetric(wrappedSessionKey, {
-          associatedData: {
-            context: 'SessionUserPrivateKeyring',
-            userId: authStore().userId,
-          },
-        })
-        .wrapSymmetric(newDerivedValues.masterKey, {
-          associatedData: {
-            context: 'UserPrivateKeyring',
-            userId: authStore().userId,
-          },
-        }).fullValue,
-    );
-
-    const encryptedSymmetricKeyring = bytesToBase64(
-      createSymmetricKeyring(
-        base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
-      )
-        .unwrapSymmetric(wrappedSessionKey, {
-          associatedData: {
-            context: 'SessionUserSymmetricKeyring',
-            userId: authStore().userId,
-          },
-        })
-        .wrapSymmetric(newDerivedValues.masterKey, {
-          associatedData: {
-            context: 'UserSymmetricKeyring',
-            userId: authStore().userId,
-          },
-        }).fullValue,
-    );
-
-    // Request email change
-
-    await api().post('/api/users/account/general/change-email', {
+    await changeEmail({
       newEmail: newEmail.value,
-
-      oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
-      newLoginHash: bytesToBase64(newDerivedValues.loginHash),
-
-      encryptedPrivateKeyring,
-      encryptedSymmetricKeyring,
-
+      password,
+      oldDerivedUserValues: oldDerivedValues,
       emailVerificationCode,
     });
 

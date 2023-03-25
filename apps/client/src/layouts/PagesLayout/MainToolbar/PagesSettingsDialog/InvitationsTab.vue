@@ -101,23 +101,22 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
-import type { initialSettings } from './PagesSettingsDialog.vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
+const groupIds = inject<Ref<string[]>>('groupIds')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
 const invitationGroupsIds = computed(() =>
-  settings.value.groupIds.filter(
+  groupIds.value.filter(
     (groupId) =>
       !!realtimeCtx.hget(
         'group-join-invitation',
@@ -127,9 +126,8 @@ const invitationGroupsIds = computed(() =>
   ),
 );
 
-const baseSelectedGroupIds = computed(
-  () => settings.value.invitations.selectedGroupIds,
-);
+const baseSelectedGroupIds = ref(new Set<string>());
+
 const finalSelectedGroupIds = computed(() =>
   invitationGroupsIds.value.filter((groupId) =>
     baseSelectedGroupIds.value.has(groupId),
@@ -172,7 +170,7 @@ async function acceptSelectedInvitations() {
     component: AcceptInvitationDialog,
 
     componentProps: {
-      groupIds: settings.value.groupIds,
+      groupIds: groupIds.value,
     },
   });
 }

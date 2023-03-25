@@ -34,45 +34,71 @@
         style="max-width: 300px"
         dense
         :maxlength="maxGroupNameLength"
+        :readonly="
+          !rolesMap()[
+            realtimeCtx.hget(
+              'group-member',
+              `${groupId}:${authStore().userId}`,
+              'role',
+            )
+          ]?.permissions.editGroupSettings
+        "
       />
 
-      <Gap style="height: 20px" />
-
-      <div>
-        Your in-group name
-
-        <q-icon
-          name="mdi-information"
-          size="15px"
-          style="margin-top: -1px; opacity: 0.9"
-        >
-          <q-tooltip
-            anchor="top middle"
-            self="bottom middle"
-            transition-show="jump-up"
-            transition-hide="jump-down"
-            max-width="164px"
-          >
-            This value is encrypted, unreadable to the server.
-          </q-tooltip>
-        </q-icon>
-      </div>
-
-      <Gap style="height: 8px" />
-
-      <TextField
-        :model-value="
-          groupMemberNames()(`${groupId}:${authStore().userId}`).get().text
-        "
-        @update:model-value="
-          groupMemberNames()(`${groupId}:${authStore().userId}`).set(
-            $event as any,
+      <template
+        v-if="
+          realtimeCtx.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'exists',
           )
         "
-        style="max-width: 300px"
-        dense
-        :maxlength="maxNameLength"
-      />
+      >
+        <Gap style="height: 20px" />
+
+        <div>
+          Your in-group name
+
+          <q-icon
+            name="mdi-information"
+            size="15px"
+            style="margin-top: -1px; opacity: 0.9"
+          >
+            <q-tooltip
+              anchor="top middle"
+              self="bottom middle"
+              transition-show="jump-up"
+              transition-hide="jump-down"
+              max-width="164px"
+            >
+              This value is encrypted, unreadable to the server.
+            </q-tooltip>
+          </q-icon>
+        </div>
+
+        <Gap style="height: 8px" />
+
+        <TextField
+          :model-value="
+            groupMemberNames()(`${groupId}:${authStore().userId}`).get().text
+          "
+          @update:model-value="
+            groupMemberNames()(`${groupId}:${authStore().userId}`).set(
+              $event as any,
+            )
+          "
+          style="max-width: 300px"
+          dense
+          :maxlength="maxNameLength"
+          :disable="
+            !realtimeCtx.hget(
+              'group-member',
+              `${groupId}:${authStore().userId}`,
+              'exists',
+            )
+          "
+        />
+      </template>
 
       <Gap style="height: 24px" />
     </template>
@@ -95,7 +121,13 @@
     />
 
     <template
-      v-if="!internals.realtime.globalCtx.hget('group', groupId, 'is-public')"
+      v-if="
+        realtimeCtx.hget(
+          'group-member',
+          `${groupId}:${authStore().userId}`,
+          'exists',
+        )
+      "
     >
       <Gap style="height: 16px" />
 
@@ -129,7 +161,14 @@
     <template
       v-if="
         authStore().loggedIn &&
-        !realtimeCtx.hget('group', groupId, 'is-personal')
+        !realtimeCtx.hget('group', groupId, 'is-personal') &&
+        rolesMap()[
+          realtimeCtx.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'role',
+          )
+        ]?.permissions.editGroupSettings
       "
     >
       <Gap style="height: 24px" />
@@ -205,7 +244,7 @@
 </template>
 
 <script setup lang="ts">
-import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
+import { maxGroupNameLength, maxNameLength, rolesMap } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';

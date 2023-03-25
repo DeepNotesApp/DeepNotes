@@ -28,7 +28,7 @@
         <q-separator />
 
         <q-tabs
-          v-model="settings.tab"
+          v-model="tab"
           inline-label
           outside-arrows
           mobile-arrows
@@ -39,7 +39,20 @@
             label="General"
           />
 
-          <template v-if="authStore().loggedIn && !groupIsPersonal && !loading">
+          <template
+            v-if="
+              authStore().loggedIn &&
+              !realtimeCtx.hget('group', groupId, 'is-personal') &&
+              rolesMap()[
+                realtimeCtx.hget(
+                  'group-member',
+                  `${groupId}:${authStore().userId}`,
+                  'role',
+                )
+              ]?.permissions.manageLowerRanks &&
+              !loading
+            "
+          >
             <q-tab
               name="Members"
               icon="mdi-wallet-membership"
@@ -69,29 +82,43 @@
             <TabBtn
               name="General"
               icon="mdi-account-group"
-              :settings="settings"
-              :disable="loading"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
             />
 
             <template
-              v-if="authStore().loggedIn && !groupIsPersonal && !loading"
+              v-if="
+                authStore().loggedIn &&
+                !realtimeCtx.hget('group', groupId, 'is-personal') &&
+                rolesMap()[
+                  realtimeCtx.hget(
+                    'group-member',
+                    `${groupId}:${authStore().userId}`,
+                    'role',
+                  )
+                ]?.permissions.manageLowerRanks &&
+                !loading
+              "
             >
               <TabBtn
                 name="Members"
                 icon="mdi-wallet-membership"
-                :settings="settings"
+                :current-tab="tab"
+                @set-tab="(targetTab: string) => tab = targetTab"
               />
 
               <TabBtn
                 name="Join invitations"
                 icon="mdi-calendar"
-                :settings="settings"
+                :current-tab="tab"
+                @set-tab="(targetTab: string) => tab = targetTab"
               />
 
               <TabBtn
                 name="Join requests"
                 icon="mdi-account-multiple-plus"
-                :settings="settings"
+                :current-tab="tab"
+                @set-tab="(targetTab: string) => tab = targetTab"
               />
             </template>
           </q-list>
@@ -109,10 +136,10 @@
             overflow: auto;
           "
         >
-          <GeneralTab v-if="settings.tab === 'General'" />
-          <MembersTab v-if="settings.tab === 'Members'" />
-          <InvitationsTab v-if="settings.tab === 'Join invitations'" />
-          <RequestsTab v-if="settings.tab === 'Join requests'" />
+          <GeneralTab v-if="tab === 'General'" />
+          <MembersTab v-if="tab === 'Members'" />
+          <InvitationsTab v-if="tab === 'Join invitations'" />
+          <RequestsTab v-if="tab === 'Join requests'" />
 
           <LoadingOverlay v-if="loading || internals.realtime.loading" />
         </div>
@@ -132,28 +159,8 @@
   </CustomDialog>
 </template>
 
-<script lang="ts">
-export function initialSettings(groupId: string) {
-  return {
-    groupId,
-
-    tab: 'General',
-
-    general: {},
-    members: {
-      selectedUserIds: new Set<string>(),
-    },
-    invitations: {
-      selectedUserIds: new Set<string>(),
-    },
-    requests: {
-      selectedUserIds: new Set<string>(),
-    },
-  };
-}
-</script>
-
 <script setup lang="ts">
+import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
@@ -167,7 +174,7 @@ import RequestsTab from './RequestsTab/RequestsTab.vue';
 
 const props = defineProps<{
   groupId: string;
-  tab?: string;
+  initialTab?: string;
 }>();
 
 provide('groupId', props.groupId);
@@ -179,16 +186,10 @@ const maximized = computed(
   () => uiStore().width < 800 || uiStore().height < 600,
 );
 
-const settings = ref(initialSettings(props.groupId));
-settings.value.tab = props.tab ?? settings.value.tab;
-provide('settings', settings);
+const tab = ref(props.initialTab ?? 'General');
 
 const realtimeCtx = useRealtimeContext();
 provide('realtimeCtx', realtimeCtx);
-
-const groupIsPersonal = computed(() =>
-  realtimeCtx.hget('group', props.groupId, 'is-personal'),
-);
 
 const loading = ref(true);
 

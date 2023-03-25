@@ -115,9 +115,9 @@
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
+import { movePage } from 'src/code/api-interface/pages/move';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { movePage } from 'src/code/pages/operations/pages/move';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils';
 import type { ComponentPublicInstance, Ref } from 'vue';
@@ -192,7 +192,7 @@ onMounted(async () => {
 async function _movePage() {
   try {
     await movePage(page.value.id, {
-      currentGroupId: page.value.react.groupId,
+      destGroupId: destGroupId.value!,
       setAsMainPage: setAsMainPage.value,
 
       createGroup: destGroupId.value === 'new',

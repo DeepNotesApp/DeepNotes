@@ -110,19 +110,15 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
-import { rejectJoinRequest } from 'src/code/pages/operations/groups/join-requests/reject';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
-import type { Ref } from 'vue';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
-import type { initialSettings } from '../GroupSettingsDialog.vue';
 import AcceptRequestDialog from './AcceptRequestDialog.vue';
 
 const groupId = inject<string>('groupId')!;
-
-const settings = inject<Ref<ReturnType<typeof initialSettings>>>('settings')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
@@ -151,9 +147,8 @@ const requestsUserIds = computed(() =>
   ),
 );
 
-const baseSelectedUserIds = computed(
-  () => settings.value.requests.selectedUserIds,
-);
+const baseSelectedUserIds = ref(new Set<string>());
+
 const finalSelectedUserIds = computed(() =>
   requestsUserIds.value.filter((userId) =>
     baseSelectedUserIds.value.has(userId),

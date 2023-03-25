@@ -79,10 +79,10 @@
 <script setup lang="ts">
 import type { PageSnapshotInfo } from '@deeplib/misc';
 import { capitalize } from 'lodash';
+import { deletePageSnapshot } from 'src/code/api-interface/pages/snapshots/delete';
+import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/restore';
+import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
-import { deletePageSnapshot } from 'src/code/pages/operations/pages/snapshots/delete';
-import { restorePageSnapshot } from 'src/code/pages/operations/pages/snapshots/restore';
-import { savePageSnapshot } from 'src/code/pages/operations/pages/snapshots/save';
 import type { Page } from 'src/code/pages/page/page';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';

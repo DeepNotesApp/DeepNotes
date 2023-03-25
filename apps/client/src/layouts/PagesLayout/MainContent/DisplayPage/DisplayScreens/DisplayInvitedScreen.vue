@@ -28,8 +28,8 @@
 <script setup lang="ts">
 /* eslint-disable vue/no-mutating-props */
 
+import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { rejectJoinInvitation } from 'src/code/pages/operations/groups/join-invitations/reject';
 import type { Page } from 'src/code/pages/page/page';
 import { asyncPrompt, handleError } from 'src/code/utils';
 

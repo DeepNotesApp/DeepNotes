@@ -1,13 +1,10 @@
 <template>
   <q-item
     clickable
-    :active="settings.tab === name"
+    :active="currentTab === name"
     active-class="bg-grey-9 text-grey-1"
     v-ripple
-    @click="
-      // eslint-disable-next-line vue/no-mutating-props
-      settings.tab = name
-    "
+    @click="$emit('set-tab', name)"
   >
     <q-item-section avatar>
       <q-icon :name="icon" />
@@ -20,6 +17,6 @@
 defineProps<{
   name: string;
   icon: string;
-  settings: { tab: string };
+  currentTab: string;
 }>();
 </script>
