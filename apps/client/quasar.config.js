@@ -13,12 +13,16 @@ const VueComponents = require('unplugin-vue-components/vite');
 
 const { hashFNV1a, objFromEntries } = require('@stdlib/misc');
 
+const dotenv = require('dotenv');
+
 const env = Object.assign(
   {},
   require('dotenv-expand').expand(
-    require('dotenv').config({ path: '../../.env' }).parsed?.DEV
-      ? require('dotenv').config({ path: '../../.env.dev' })
-      : require('dotenv').config({ path: '../../.env.prod' }),
+    dotenv.config({ path: '../../.env' }).parsed?.DEV
+      ? dotenv.config({ path: '../../.env' }).parsed?.PRODEV
+        ? dotenv.config({ path: '../../.env.prodev' })
+        : dotenv.config({ path: '../../.env.dev' })
+      : dotenv.config({ path: '../../.env.prod' }),
   ).parsed,
   objFromEntries(
     Object.entries(process.env ?? {}).filter(([key]) => /^\w+$/.test(key)),
