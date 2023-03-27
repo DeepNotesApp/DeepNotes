@@ -206,15 +206,15 @@ onMounted(async () => {
     return;
   }
 
-  if (activeElem.react.topSection !== 'container') {
-    const text = activeElem.react.collab[activeElem.react.topSection].value;
+  const editorElem = activeElem.getElem('ProseMirror');
 
-    pageRelativeTitle.value = splitStr(text.toDOM().textContent!, '\n')[0];
-
-    await sleep();
-
-    pageRelativeTitleElem.value?.$el.focus();
+  if (editorElem != null) {
+    pageRelativeTitle.value = splitStr(editorElem.innerText, '\n')[0];
   }
+
+  await sleep();
+
+  pageRelativeTitleElem.value?.$el.focus();
 
   // Load recent group IDs
 
