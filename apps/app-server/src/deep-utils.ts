@@ -14,7 +14,7 @@ import {
 } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
 import { addHours } from '@stdlib/misc';
-import { once } from 'lodash';
+import { once, pull } from 'lodash';
 import { nanoid } from 'nanoid';
 import { z } from 'nestjs-zod/z';
 
@@ -170,17 +170,12 @@ export async function bumpRecentItem(
     `recent-${itemType}-ids`,
   );
 
-  // Append item to recent item IDs
+  // Prepend item ID to recent item IDs
 
-  const index = recentItemIds.findIndex((item) => item === itemId);
-
-  if (index >= 0) {
-    recentItemIds.splice(index, 1);
-  }
-
+  pull(recentItemIds, itemId);
   recentItemIds.splice(0, 0, itemId);
 
-  if (recentItemIds.length > 50) {
+  while (recentItemIds.length > 50) {
     recentItemIds.pop();
   }
 
