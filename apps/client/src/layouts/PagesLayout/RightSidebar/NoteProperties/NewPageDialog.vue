@@ -134,7 +134,7 @@ import {
   maxNameLength,
   maxPageTitleLength,
 } from '@deeplib/misc';
-import { BREAKPOINT_MD_MIN, sleep, splitStr } from '@stdlib/misc';
+import { BREAKPOINT_MD_MIN, sleep } from '@stdlib/misc';
 import { createPage } from 'src/code/api-interface/pages/create';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
@@ -145,14 +145,14 @@ import type { ComponentPublicInstance, Ref } from 'vue';
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const props = defineProps<{
-  callback: (url: string) => void;
+  initialPageTitle: string;
 }>();
 
 const page = computed(() => internals.pages.react.page);
 
 const horizontal = computed(() => uiStore().width >= BREAKPOINT_MD_MIN);
 
-const pageRelativeTitle = ref('');
+const pageRelativeTitle = ref(props.initialPageTitle);
 const pageRelativeTitleElem = ref<ComponentPublicInstance>();
 
 const realtimeCtx = useRealtimeContext();
@@ -198,19 +198,7 @@ onMounted(async () => {
   groupIds.value = [page.value.react.groupId];
   destGroupId.value = page.value.react.groupId;
 
-  // Initialize page title
-
-  const activeElem = internals.pages.react.page.activeElem.react.value;
-
-  if (activeElem?.type !== 'note') {
-    return;
-  }
-
-  const editorElem = activeElem.getElem('ProseMirror');
-
-  if (editorElem != null) {
-    pageRelativeTitle.value = splitStr(editorElem.innerText, '\n')[0];
-  }
+  // Focus page title
 
   await sleep();
 
@@ -258,7 +246,7 @@ async function _createPage() {
         : undefined,
     });
 
-    props.callback?.(
+    dialogRef.value.onDialogOK(
       /* destGroupId.value === 'new' // Buggy, implement later
       ? `/groups/${request.groupId}`
       : */ `/pages/${response.pageId}`,
