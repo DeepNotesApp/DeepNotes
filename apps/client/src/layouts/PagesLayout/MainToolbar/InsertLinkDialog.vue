@@ -35,21 +35,21 @@
 
         <DeepBtn
           flat
-          label="Link new page"
-          color="secondary"
-          @click="() => {
-              dialogRef.onDialogHide()
+          label="New page"
+          color="primary"
+          @click="
+            () => {
+              dialogRef.onDialogHide();
 
               $q.dialog({
                 component: NewPageDialog,
-                
+
                 componentProps: {
-                  callback: (url: string) => {
-                    page.selection.setMark('link', { href: url });
-                  },
+                  initialPageTitle,
                 },
-              })
-            }"
+              });
+            }
+          "
         />
 
         <DeepBtn
@@ -65,7 +65,7 @@
 </template>
 
 <script setup lang="ts">
-import { maxUrlLength, sleep } from '@stdlib/misc';
+import { maxUrlLength, sleep, splitStr } from '@stdlib/misc';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 import NewPageDialog from '../RightSidebar/NoteProperties/NewPageDialog.vue';
@@ -77,7 +77,11 @@ const page = computed(() => internals.pages.react.page);
 const url = ref('');
 const urlElem = ref<ComponentPublicInstance>();
 
+let initialPageTitle = '';
+
 onMounted(async () => {
+  initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];
+
   await sleep();
 
   urlElem.value?.$el.focus();

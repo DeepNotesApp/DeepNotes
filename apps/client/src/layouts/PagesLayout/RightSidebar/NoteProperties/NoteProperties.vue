@@ -4,19 +4,7 @@
       tooltip="Create new page"
       icon="mdi-note-plus"
       :disable="page.react.readOnly"
-      @click="
-        $q.dialog({
-          component: NewPageDialog,
-
-          componentProps: {
-            callback: (url: string) => {
-              changeProp(url, (selectedNote, url) => {
-                selectedNote.react.collab.link = url;
-              });
-            },
-          },
-        })
-      "
+      @click="createNewPage"
     />
 
     <q-separator />
@@ -172,19 +160,7 @@
         label="Create new page"
         color="primary"
         :disable="page.react.readOnly"
-        @click="
-          $q.dialog({
-            component: NewPageDialog,
-
-            componentProps: {
-              callback: (pageId: string) => {
-                changeProp(pageId, (selectedNote, value) => {
-                  selectedNote.react.collab.link = value;
-                });
-              },
-            },
-          })
-        "
+        @click="createNewPage"
       />
     </div>
 
@@ -740,6 +716,7 @@
 
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
+import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
 import {
   colorHexToColorName,
@@ -788,11 +765,43 @@ const linkOptions = computed(() =>
 
       return {
         label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-        value: pageId,
+        value: `/pages/${pageId}`,
       };
     })
     .filter((page) => page != null),
 );
+
+function createNewPage() {
+  let initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];
+
+  if (initialPageTitle === '') {
+    const activeElem = internals.pages.react.page.activeElem.react.value;
+
+    if (activeElem?.type !== 'note') {
+      return;
+    }
+
+    const editorElem = activeElem.getElem('ProseMirror');
+
+    if (editorElem != null) {
+      initialPageTitle = splitStr(editorElem.innerText, '\n')[0];
+    }
+  }
+
+  $quasar()
+    .dialog({
+      component: NewPageDialog,
+
+      componentProps: {
+        initialPageTitle,
+      },
+    })
+    .onOk((url) => {
+      changeProp(url, (selectedNote, url) => {
+        selectedNote.react.collab.link = url;
+      });
+    });
+}
 
 async function setAsDefault() {
   try {
