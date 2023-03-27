@@ -772,18 +772,20 @@ const linkOptions = computed(() =>
 );
 
 function createNewPage() {
-  const activeElem = internals.pages.react.page.activeElem.react.value;
+  let initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];
 
-  if (activeElem?.type !== 'note') {
-    return;
-  }
+  if (initialPageTitle === '') {
+    const activeElem = internals.pages.react.page.activeElem.react.value;
 
-  const editorElem = activeElem.getElem('ProseMirror');
+    if (activeElem?.type !== 'note') {
+      return;
+    }
 
-  let initialPageTitle = '';
+    const editorElem = activeElem.getElem('ProseMirror');
 
-  if (editorElem != null) {
-    initialPageTitle = splitStr(editorElem.innerText, '\n')[0];
+    if (editorElem != null) {
+      initialPageTitle = splitStr(editorElem.innerText, '\n')[0];
+    }
   }
 
   $quasar()
