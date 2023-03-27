@@ -788,7 +788,7 @@ const linkOptions = computed(() =>
 
       return {
         label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-        value: pageId,
+        value: `/pages/${pageId}`,
       };
     })
     .filter((page) => page != null),
