@@ -74,7 +74,7 @@ export class BumpService {
       last_parent_id: parentPageId ?? null,
     });
   }
-  async updatePageLink({ userId, parentPageId, pageId }: EndpointValues) {
+  async updatePageLink({ parentPageId, pageId }: EndpointValues) {
     if (parentPageId == null) {
       return;
     }
@@ -84,11 +84,10 @@ export class BumpService {
         .insert({
           target_page_id: pageId,
           source_page_id: parentPageId,
-          user_id: userId,
 
           last_activity_date: new Date(),
         })
-        .onConflict(['user_id', 'source_page_id', 'target_page_id'])
+        .onConflict(['source_page_id', 'target_page_id'])
         .merge();
     } catch (error) {
       // Ignore error: Page doesn't need to exist
