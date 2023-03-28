@@ -1,11 +1,11 @@
 import 'vue';
 
-import type { internals } from 'src/boot/internals.universal';
+import type { DeepNotesInternals } from './boot/internals.universal';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
     global: typeof globalThis;
-    internals: typeof internals;
+    internals: DeepNotesInternals;
 
     api: typeof api;
 

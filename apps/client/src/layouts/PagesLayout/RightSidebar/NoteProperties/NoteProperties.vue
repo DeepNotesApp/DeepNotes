@@ -140,15 +140,20 @@
       >
         <template #item="scope">
           <q-item-section>
-            <q-item-label>
-              {{ scope.opt.label }}
-            </q-item-label>
             <q-item-label caption>
               {{
                 groupNames()(
-                  realtimeCtx.hget('page', scope.opt.value, 'group-id')!,
+                  realtimeCtx.hget(
+                    'page',
+                    splitStr(scope.opt.value, '/').at(-1)!,
+                    'group-id',
+                  ),
                 ).get().text
               }}
+            </q-item-label>
+
+            <q-item-label>
+              {{ scope.opt.label }}
             </q-item-label>
           </q-item-section>
         </template>

@@ -7,6 +7,7 @@ import { groupJoinInvitation } from './group-join-invitation';
 import { groupJoinRequest } from './group-join-request';
 import { groupMember } from './group-member';
 import { page } from './page';
+import { pageBacklinks } from './page-backlinks';
 import { pageSnapshots } from './page-snapshots';
 import { session } from './session';
 import { user } from './user';
@@ -20,6 +21,7 @@ export const dataHashes = validateDataHashes({
   'group-join-request': groupJoinRequest,
   'group-member': groupMember,
   page: page,
+  'page-backlinks': pageBacklinks,
   'page-snaphots': pageSnapshots,
   session: session,
   user: user,

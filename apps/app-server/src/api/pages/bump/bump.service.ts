@@ -1,5 +1,6 @@
 import { GroupMemberModel, PageLinkModel, PageModel } from '@deeplib/db';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { pull } from 'lodash';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { bumpRecentItem } from 'src/deep-utils';
 import { mainLogger } from 'src/logger';
@@ -8,10 +9,6 @@ import type { EndpointValues } from './bump.controller';
 
 @Injectable()
 export class BumpService {
-  async pageExists(pageId: string) {
-    return (await dataAbstraction().hget('page', pageId, 'group-id')) != null;
-  }
-
   async updateStartingPageId({ userId, pageId }: EndpointValues) {
     await dataAbstraction().patch('user', userId, { starting_page_id: pageId });
   }
@@ -74,6 +71,7 @@ export class BumpService {
       last_parent_id: parentPageId ?? null,
     });
   }
+
   async updatePageLink({ parentPageId, pageId }: EndpointValues) {
     if (parentPageId == null) {
       return;
@@ -93,13 +91,37 @@ export class BumpService {
       // Ignore error: Page doesn't need to exist
     }
   }
+  async updatePageBacklinks({ pageId, parentPageId }: EndpointValues) {
+    if (parentPageId == null) {
+      return;
+    }
+
+    const pageBacklinks: string[] = await dataAbstraction().hget(
+      'page-backlinks',
+      pageId,
+      'list',
+    );
+
+    // Prepend page ID to backlinks
+
+    pull(pageBacklinks, parentPageId);
+    pageBacklinks.splice(0, 0, parentPageId);
+
+    while (pageBacklinks.length > 100) {
+      pageBacklinks.pop();
+    }
+
+    // Update backlinks
+
+    await dataAbstraction().hmset('page-backlinks', pageId, {
+      list: pageBacklinks,
+    });
+  }
 
   async updateRecentPageIds({ userId, pageId }: EndpointValues) {
     await bumpRecentItem(userId, 'page', pageId);
   }
-  async updateRecentGroupIds({ userId, pageId }: EndpointValues) {
-    const groupId = await dataAbstraction().hget('page', pageId, 'group-id');
-
+  async updateRecentGroupIds({ userId, groupId }: EndpointValues) {
     if (groupId == null) {
       return;
     }
@@ -116,9 +138,7 @@ export class BumpService {
       // Ignore error: Page doesn't need to exist
     }
   }
-  async updateGroupLastActivityDate({ userId, pageId }: EndpointValues) {
-    const groupId = await dataAbstraction().hget('page', pageId, 'group-id');
-
+  async updateGroupLastActivityDate({ userId, groupId }: EndpointValues) {
     if (groupId == null) {
       return;
     }
