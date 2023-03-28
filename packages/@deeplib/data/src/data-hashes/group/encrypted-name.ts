@@ -7,9 +7,7 @@ export const encryptedName: DataField<GroupModel> = {
   notifyUpdates: true,
 
   userGettable: async ({ userId, suffix: groupId, dataAbstraction }) =>
-    await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup', {
-      publicGroups: true,
-    }),
+    await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup'),
   userSettable: async ({ userId, suffix: groupId, dataAbstraction }) =>
     await userHasPermission(
       dataAbstraction,
