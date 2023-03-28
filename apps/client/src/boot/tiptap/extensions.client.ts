@@ -22,6 +22,7 @@ import { Plugin } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import { TaskItem } from 'src/boot/tiptap/task-item.client';
 import { ImageResizeExtension } from 'src/code/tiptap/image-resize/image-resize-extension';
+import { InlineMathExtension } from 'src/code/tiptap/inline-math/inline-math-extension';
 import { MathBlockExtension } from 'src/code/tiptap/math-block/math-block-extension';
 
 export const extensions = once(() => [
@@ -151,5 +152,6 @@ export const extensions = once(() => [
     },
   }),
 
+  InlineMathExtension,
   MathBlockExtension,
 ]);
