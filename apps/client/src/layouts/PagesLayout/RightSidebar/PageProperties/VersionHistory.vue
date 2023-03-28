@@ -12,7 +12,10 @@
         overflow: auto;
       "
     >
-      <q-item v-if="snapshotInfos.length === 0">
+      <q-item
+        v-if="snapshotInfos.length === 0"
+        style="color: #b0b0b0"
+      >
         <q-item-section>
           <q-item-label>No versions available</q-item-label>
         </q-item-section>

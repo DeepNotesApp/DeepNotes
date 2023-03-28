@@ -39,6 +39,6 @@ export async function userHasPermission(
 
   return (
     (rolesMap()[groupMemberRole!]?.permissions[permission] ?? false) ||
-    (!!params?.publicGroups && !!groupIsPublic)
+    (!!params?.publicGroups && !!groupIsPublic && permission === 'viewGroup')
   );
 }
