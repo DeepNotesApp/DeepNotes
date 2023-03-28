@@ -1,6 +1,5 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
-  <NodeViewWrapper ref="nodeViewWrapperElem">
+  <NodeViewWrapper>
     <div
       class="math-block"
       contentEditable="false"
@@ -63,7 +62,7 @@ const renderedFormula = computed(() => {
     throwOnError: false,
     strict: false,
     displayMode: true,
-    output: 'mathml',
+    output: 'html',
   });
 });
 </script>
@@ -72,11 +71,11 @@ const renderedFormula = computed(() => {
 .math-block {
   border-radius: 4px;
 
-  padding: 20px;
+  padding: 1px 12px;
 
   text-align: center;
   font-style: italic;
-  font-size: 17px;
+  font-size: 16px;
 
   transition: background-color 0.1s ease-in-out;
 }
