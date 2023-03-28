@@ -1,7 +1,7 @@
 <template>
-  <NodeViewWrapper>
-    <div
-      class="math-block"
+  <NodeViewWrapper as="span">
+    <span
+      class="inline-math"
       contentEditable="false"
       draggable="true"
       data-drag-handle
@@ -9,7 +9,7 @@
       :class="{
         selected: editor.isEditable && selected,
       }"
-    ></div>
+    ></span>
 
     <q-menu
       v-model="showFormulaEditor"
@@ -61,38 +61,36 @@ const renderedFormula = computed(() => {
   return katex.renderToString(props.node.attrs.input, {
     throwOnError: false,
     strict: false,
-    displayMode: true,
+    displayMode: false,
     output: 'html',
   });
 });
 </script>
 
 <style scoped>
-.math-block {
+.inline-math {
   border-radius: 4px;
-
-  padding: 1px 12px;
 
   text-align: center;
   font-style: italic;
-  font-size: 16px;
+  font-size: 15px;
 
   transition: background-color 0.1s ease-in-out;
 }
 
-.math-block,
-.math-block :deep(*) {
+.inline-math,
+.inline-math :deep(*) {
   user-select: none !important;
 }
 </style>
 
 <style>
-.text-editor.editing .math-block:hover {
+.text-editor.editing .inline-math:hover {
   cursor: pointer;
 
   background-color: rgba(255, 255, 255, 0.1);
 }
-.text-editor.editing .math-block.selected {
+.text-editor.editing .inline-math.selected {
   background-color: rgba(0, 109, 210, 0.2);
 }
 </style>

@@ -22,6 +22,13 @@
   />
 
   <ToolbarBtn
+    :tooltip="'Inline math'"
+    icon="mdi-sigma-lower"
+    icon-size="24px"
+    :disable="page.react.readOnly || !page.activeElem.react.exists"
+    @click="page.selection.format((chain) => (chain as any).addInlineMath())"
+  />
+  <ToolbarBtn
     :tooltip="`Math block`"
     icon="mdi-sigma"
     icon-size="24px"

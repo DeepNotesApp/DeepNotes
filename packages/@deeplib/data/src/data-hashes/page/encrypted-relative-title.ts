@@ -13,7 +13,6 @@ export const encryptedRelativeTitle: DataField<PageModel> = {
       userId,
       await dataAbstraction.hget('page', pageId, 'group-id'),
       'viewGroup',
-      { publicGroups: true },
     ),
   userSettable: async ({ userId, suffix: pageId, dataAbstraction }) => {
     const groupId = await dataAbstraction.hget<DataPrefix>(
