@@ -190,13 +190,11 @@ async function rejectSelectedRequests() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await Promise.all(
-      finalSelectedUserIds.value.map((patientId) =>
-        rejectJoinRequest(groupId, {
-          patientId,
-        }),
-      ),
-    );
+    for (const userId of finalSelectedUserIds.value) {
+      await rejectJoinRequest(groupId, {
+        patientId: userId,
+      });
+    }
 
     baseSelectedUserIds.value.clear();
   } catch (error: any) {

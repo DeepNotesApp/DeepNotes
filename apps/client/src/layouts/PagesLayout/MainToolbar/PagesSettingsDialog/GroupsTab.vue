@@ -170,13 +170,11 @@ async function leaveSelectedGroups() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await Promise.all(
-      finalSelectedGroupIds.value.map((groupId) =>
-        removeGroupUser(groupId, {
-          patientId: authStore().userId,
-        }),
-      ),
-    );
+    for (const groupId of finalSelectedGroupIds.value) {
+      await removeGroupUser(groupId, {
+        patientId: authStore().userId,
+      });
+    }
 
     baseSelectedGroupIds.value.clear();
   } catch (error: any) {

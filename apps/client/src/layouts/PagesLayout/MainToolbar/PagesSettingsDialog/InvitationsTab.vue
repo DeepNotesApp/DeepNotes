@@ -186,11 +186,9 @@ async function rejectSelectedInvitations() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await Promise.all(
-      finalSelectedGroupIds.value.map((groupId) =>
-        rejectJoinInvitation(groupId),
-      ),
-    );
+    for (const groupId of finalSelectedGroupIds.value) {
+      await rejectJoinInvitation(groupId);
+    }
 
     baseSelectedGroupIds.value.clear();
   } catch (error: any) {

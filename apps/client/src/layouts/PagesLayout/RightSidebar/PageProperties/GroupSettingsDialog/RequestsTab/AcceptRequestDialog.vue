@@ -99,14 +99,12 @@ async function _acceptJoinRequest() {
       throw new Error('Please select a role.');
     }
 
-    await Promise.all(
-      props.userIds.map((userId) =>
-        acceptJoinRequest(props.groupId, {
-          patientId: userId,
-          targetRole: targetRole.value!,
-        }),
-      ),
-    );
+    for (const userId of props.userIds) {
+      await acceptJoinRequest(props.groupId, {
+        patientId: userId,
+        targetRole: targetRole.value!,
+      });
+    }
 
     dialogRef.value.onDialogOK();
   } catch (error: any) {

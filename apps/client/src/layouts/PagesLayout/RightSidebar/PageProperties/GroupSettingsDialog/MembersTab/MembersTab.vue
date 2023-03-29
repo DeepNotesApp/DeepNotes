@@ -235,13 +235,11 @@ async function removeSelectedUsers() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await Promise.all(
-      finalSelectedUserIds.value.map((patientId) =>
-        removeGroupUser(groupId, {
-          patientId,
-        }),
-      ),
-    );
+    for (const userId of finalSelectedUserIds.value) {
+      await removeGroupUser(groupId, {
+        patientId: userId,
+      });
+    }
 
     await rotateGroupKeys(groupId);
 
