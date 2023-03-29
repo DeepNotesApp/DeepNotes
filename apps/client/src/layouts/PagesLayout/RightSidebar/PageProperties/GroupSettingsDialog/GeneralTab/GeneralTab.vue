@@ -1,10 +1,7 @@
 <template>
   <div style="display: flex; flex-direction: column">
     <template
-      v-if="
-        authStore().loggedIn &&
-        !realtimeCtx.hget('group', groupId, 'is-personal')
-      "
+      v-if="authStore().loggedIn && groupId !== internals.personalGroupId"
     >
       <div>
         Group name
@@ -160,8 +157,7 @@
 
     <template
       v-if="
-        authStore().loggedIn &&
-        !realtimeCtx.hget('group', groupId, 'is-personal') &&
+        groupId !== internals.personalGroupId &&
         rolesMap()[
           realtimeCtx.hget(
             'group-member',

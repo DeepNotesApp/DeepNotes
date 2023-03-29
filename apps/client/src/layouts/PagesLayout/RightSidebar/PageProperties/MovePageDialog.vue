@@ -115,16 +115,17 @@
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import { movePage } from 'src/code/api-interface/pages/move';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { selfUserName } from 'src/code/self-user-name';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
-const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
+const props = defineProps<{
+  groupId: string;
+}>();
 
-const page = computed(() => internals.pages.react.page);
+const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const horizontal = computed(() => uiStore().width >= BREAKPOINT_MD_MIN);
 
@@ -167,8 +168,8 @@ const groupOptions = computed(() => [
 ]);
 
 onMounted(async () => {
-  groupIds.value = [page.value.react.groupId];
-  destGroupId.value = page.value.react.groupId;
+  groupIds.value = [props.groupId];
+  destGroupId.value = props.groupId;
 
   await Promise.all([
     (async () => {
@@ -176,47 +177,27 @@ onMounted(async () => {
         'user',
         authStore().userId,
         'recent-group-ids',
-      )) ?? [page.value.react.groupId];
+      )) ?? [props.groupId];
     })(),
 
     (async () => {
-      groupMemberName.value = (
-        await groupMemberNames()(
-          `${page.value.react.groupId}:${authStore().userId}`,
-        ).getAsync()
-      ).text;
+      groupMemberName.value = await selfUserName().getAsync();
     })(),
   ]);
 });
 
 async function _movePage() {
-  try {
-    await movePage(page.value.id, {
-      destGroupId: destGroupId.value!,
-      setAsMainPage: setAsMainPage.value,
+  dialogRef.value.onDialogOK({
+    destGroupId: destGroupId.value!,
+    setAsMainPage: setAsMainPage.value,
 
-      createGroup: destGroupId.value === 'new',
-      groupName: groupName.value,
-      groupMemberName: groupMemberName.value,
-      groupIsPublic: groupIsPublic.value,
-      groupPassword: groupIsPasswordProtected.value
-        ? groupPassword.value
-        : undefined,
-    });
-
-    $quasar().notify({
-      message: 'Page moved successfully.',
-      color: 'positive',
-    });
-
-    dialogRef.value.onDialogOK();
-
-    if (setAsMainPage.value) {
-      internals.pages.react.pathPageIds.length = 0;
-      await internals.pages.updateCurrentPath(page.value.id);
-    }
-  } catch (error: any) {
-    handleError(error);
-  }
+    createGroup: destGroupId.value === 'new',
+    groupName: groupName.value,
+    groupMemberName: groupMemberName.value,
+    groupIsPublic: groupIsPublic.value,
+    groupPassword: groupIsPasswordProtected.value
+      ? groupPassword.value
+      : undefined,
+  } as MovePageParams);
 }
 </script>

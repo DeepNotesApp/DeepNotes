@@ -19,6 +19,17 @@ import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import { createPageDoc } from 'src/code/pages/utils';
 import { asyncPrompt } from 'src/code/utils';
 
+export interface MovePageParams {
+  destGroupId: string;
+  setAsMainPage: boolean;
+
+  createGroup: boolean;
+  groupName: string;
+  groupMemberName: string;
+  groupIsPublic: boolean;
+  groupPassword?: string;
+}
+
 export async function movePage(
   pageId: string,
   {
@@ -30,16 +41,7 @@ export async function movePage(
     groupMemberName,
     groupIsPublic,
     groupPassword,
-  }: {
-    destGroupId: string;
-    setAsMainPage: boolean;
-
-    createGroup: boolean;
-    groupName: string;
-    groupMemberName: string;
-    groupIsPublic: boolean;
-    groupPassword?: string;
-  },
+  }: MovePageParams,
 ) {
   const request = {} as {
     destGroupId: string;
@@ -351,4 +353,9 @@ export async function movePage(
   );
 
   await api().post(`/api/pages/${pageId}/move`, request);
+
+  if (internals.pages.react.pageId === pageId && setAsMainPage) {
+    internals.pages.react.pathPageIds.length = 0;
+    await internals.pages.updateCurrentPath(pageId);
+  }
 }
