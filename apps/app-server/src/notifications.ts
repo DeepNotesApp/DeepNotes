@@ -125,12 +125,12 @@ export async function loadNotifications(
       'notifications.datetime',
     )
     .orderBy('users_notifications.notification_id', 'DESC')
-    .limit(11);
+    .limit(21);
 
   const notifications = (await notificationsQuery) as (UserNotificationModel &
     NotificationModel)[];
 
-  const hasMore = notifications.length > 10;
+  const hasMore = notifications.length > 20;
 
   if (hasMore) {
     notifications.pop();
