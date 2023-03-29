@@ -2,7 +2,11 @@
   <div>You do not have permission to access this page.</div>
 
   <template
-    v-if="uiStore().loggedIn && !realtimeCtx.loading && !groupIsPersonal"
+    v-if="
+      uiStore().loggedIn &&
+      !realtimeCtx.loading &&
+      !realtimeCtx.hget('group', page.react.groupId, 'is-personal')
+    "
   >
     <Gap style="height: 12px" />
 
@@ -70,10 +74,6 @@ import RequestAccessDialog from './RequestAccessDialog.vue';
 const page = inject<Page>('page')!;
 
 const realtimeCtx = useRealtimeContext();
-
-const groupIsPersonal = computed(() =>
-  realtimeCtx.hget('group', page.react.groupId, 'is-personal'),
-);
 
 const groupJoinRequestRejected = computed(() =>
   realtimeCtx.hget(

@@ -41,8 +41,7 @@
 
           <template
             v-if="
-              authStore().loggedIn &&
-              !realtimeCtx.hget('group', groupId, 'is-personal') &&
+              groupId !== internals.personalGroupId &&
               rolesMap()[
                 realtimeCtx.hget(
                   'group-member',
@@ -86,10 +85,16 @@
               @set-tab="(targetTab: string) => tab = targetTab"
             />
 
+            <TabBtn
+              name="Pages"
+              icon="mdi-note"
+              :current-tab="tab"
+              @set-tab="(targetTab: string) => tab = targetTab"
+            />
+
             <template
               v-if="
-                authStore().loggedIn &&
-                !realtimeCtx.hget('group', groupId, 'is-personal') &&
+                groupId !== internals.personalGroupId &&
                 rolesMap()[
                   realtimeCtx.hget(
                     'group-member',
@@ -137,11 +142,12 @@
           "
         >
           <GeneralTab v-if="tab === 'General'" />
+          <PagesTab v-if="tab === 'Pages'" />
           <MembersTab v-if="tab === 'Members'" />
           <InvitationsTab v-if="tab === 'Join invitations'" />
           <RequestsTab v-if="tab === 'Join requests'" />
 
-          <LoadingOverlay v-if="loading || internals.realtime.loading" />
+          <LoadingOverlay v-if="loading || realtimeCtx.loading" />
         </div>
       </q-card-section>
     </template>
@@ -170,6 +176,7 @@ import type { Ref } from 'vue';
 import GeneralTab from './GeneralTab/GeneralTab.vue';
 import InvitationsTab from './InvitationsTab/InvitationsTab.vue';
 import MembersTab from './MembersTab/MembersTab.vue';
+import PagesTab from './PagesTab/PagesTab.vue';
 import RequestsTab from './RequestsTab/RequestsTab.vue';
 
 const props = defineProps<{
@@ -181,6 +188,11 @@ provide('groupId', props.groupId);
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 provide('dialog', dialogRef);
+
+const pageIds = ref<string[]>([]);
+const hasMorePages = ref(true);
+provide('pageIds', pageIds);
+provide('hasMorePages', hasMorePages);
 
 const maximized = computed(
   () => uiStore().width < 800 || uiStore().height < 600,

@@ -4,6 +4,7 @@ import { ChangeUserRoleModule } from './change-user-role/change-user-role.module
 import { DeletionModule } from './deletion/deletion.module';
 import { JoinInvitationsModule } from './join-invitations/join-invitations.module';
 import { JoinRequestsModule } from './join-requests/join-requests.module';
+import { LoadPagesModule } from './load-pages/load-pages.module';
 import { LoadSettingsModule } from './load-settings/load-settings.module';
 import { MainPageIdModule } from './main-page-id/main-page-id.module';
 import { PasswordModule } from './password/password.module';
@@ -23,6 +24,7 @@ import { RotateKeysModule } from './rotate-keys/rotate-keys.module';
     { prefix: ':groupId/privacy', module: PrivacyModule },
     { prefix: ':groupId/main-page-id', module: MainPageIdModule },
     { prefix: ':groupId/rotate-keys', module: RotateKeysModule },
+    { prefix: ':groupId/load-pages', module: LoadPagesModule },
   ],
 })
 export class GroupsModule {}
