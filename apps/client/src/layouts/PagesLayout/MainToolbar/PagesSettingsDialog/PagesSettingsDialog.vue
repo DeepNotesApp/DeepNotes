@@ -104,7 +104,7 @@
           <InvitationsTab v-if="tab === 'Join invitations'" />
           <RequestsTab v-if="tab === 'Join requests'" />
 
-          <LoadingOverlay v-if="loading" />
+          <LoadingOverlay v-if="!mounted || realtimeCtx.loading" />
         </div>
       </q-card-section>
     </template>
@@ -149,7 +149,6 @@ const realtimeCtx = useRealtimeContext();
 provide('realtimeCtx', realtimeCtx);
 
 const mounted = ref(false);
-const loading = computed(() => !mounted.value || internals.realtime.loading);
 
 onMounted(async () => {
   try {
