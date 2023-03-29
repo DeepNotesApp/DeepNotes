@@ -6,7 +6,9 @@ Object.defineProperty(process, 'env', {
   get: once(() => {
     dotenvExpand.expand(
       dotenv.config({ path: '../../.env' }).parsed?.DEV
-        ? dotenv.config({ path: '../../.env.dev' })
+        ? dotenv.config({ path: '../../.env' }).parsed?.PRODEV
+          ? dotenv.config({ path: '../../.env.prodev' })
+          : dotenv.config({ path: '../../.env.dev' })
         : dotenv.config({ path: '../../.env.prod' }),
     );
 
