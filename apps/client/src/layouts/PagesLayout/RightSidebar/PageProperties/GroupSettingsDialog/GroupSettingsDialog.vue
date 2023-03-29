@@ -39,6 +39,22 @@
             label="General"
           />
 
+          <q-tab
+            v-if="
+              groupId !== internals.personalGroupId &&
+              (realtimeCtx.hget(
+                'group-member',
+                `${groupId}:${authStore().userId}`,
+                'exists',
+              ) ||
+                realtimeCtx.hget('group', groupId, 'is-public')) &&
+              !loading
+            "
+            name="Pages"
+            icon="mdi-account-group"
+            label="Pages"
+          />
+
           <template
             v-if="
               groupId !== internals.personalGroupId &&
@@ -86,6 +102,16 @@
             />
 
             <TabBtn
+              v-if="
+                groupId !== internals.personalGroupId &&
+                (realtimeCtx.hget(
+                  'group-member',
+                  `${groupId}:${authStore().userId}`,
+                  'exists',
+                ) ||
+                  realtimeCtx.hget('group', groupId, 'is-public')) &&
+                !loading
+              "
               name="Pages"
               icon="mdi-note"
               :current-tab="tab"
