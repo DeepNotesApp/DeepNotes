@@ -77,13 +77,11 @@ onMounted(async () => {
 
 async function accept() {
   try {
-    await Promise.all(
-      props.groupIds.map((groupId) =>
-        acceptJoinInvitation(groupId, {
-          userName: userName.value,
-        }),
-      ),
-    );
+    for (const groupId of props.groupIds) {
+      await acceptJoinInvitation(groupId, {
+        userName: userName.value,
+      });
+    }
 
     dialogRef.value.onDialogOK(userName.value);
   } catch (error) {

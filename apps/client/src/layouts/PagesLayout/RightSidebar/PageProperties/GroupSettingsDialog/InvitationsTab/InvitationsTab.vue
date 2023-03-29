@@ -193,13 +193,11 @@ async function cancelSelectedInvitations() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await Promise.all(
-      finalSelectedUserIds.value.map((userId) =>
-        cancelJoinInvitation(groupId, {
-          patientId: userId,
-        }),
-      ),
-    );
+    for (const userId of finalSelectedUserIds.value) {
+      await cancelJoinInvitation(groupId, {
+        patientId: userId,
+      });
+    }
 
     baseSelectedUserIds.value.clear();
   } catch (error: any) {

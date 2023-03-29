@@ -85,7 +85,7 @@
         label="Move page"
         color="primary"
         :disable="page.react.readOnly"
-        @click="$q.dialog({ component: MovePageDialog })"
+        @click="_movePage"
       />
 
       <Gap style="height: 16px" />
@@ -111,6 +111,8 @@
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
+import type { MovePageParams } from 'src/code/api-interface/pages/move';
+import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
@@ -123,6 +125,27 @@ import PageBacklinks from './PageBacklinks.vue';
 import VersionHistory from './VersionHistory.vue';
 
 const page = inject<Ref<Page>>('page')!;
+
+async function _movePage() {
+  try {
+    const movePageParams: MovePageParams = await asyncPrompt({
+      component: MovePageDialog,
+
+      componentProps: {
+        groupId: page.value.react.groupId,
+      },
+    });
+
+    await movePage(page.value.id, movePageParams);
+
+    $quasar().notify({
+      message: 'Page moved successfully.',
+      color: 'positive',
+    });
+  } catch (error) {
+    handleError(error);
+  }
+}
 
 async function _deletePage() {
   try {

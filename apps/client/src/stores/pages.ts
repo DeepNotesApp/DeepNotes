@@ -11,7 +11,7 @@ export const usePagesStore = defineStore('pages', () => {
 
     notifications: {
       items: [] as DeepNotesNotification[],
-      hasMore: false,
+      hasMore: true,
       lastNotificationRead: -1 as number | undefined,
     },
 

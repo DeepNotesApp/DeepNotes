@@ -95,14 +95,12 @@ async function changeRole() {
       throw new Error('Please select a role.');
     }
 
-    await Promise.all(
-      props.userIds.map((patientId) =>
-        changeUserRole(props.groupId, {
-          patientId,
-          role: role.value!,
-        }),
-      ),
-    );
+    for (const userId of props.userIds) {
+      await changeUserRole(props.groupId, {
+        patientId: userId,
+        role: role.value,
+      });
+    }
 
     dialogRef.value.onDialogOK();
   } catch (error: any) {

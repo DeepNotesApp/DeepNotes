@@ -3,10 +3,10 @@
     ref="notificationsMenu"
     anchor="bottom middle"
     self="top middle"
-    style="width: 250px"
+    style="width: 250px; display: flex; flex-direction: column"
     @before-show="onBeforeShow()"
   >
-    <template v-if="filteredNotifications.length === 0">
+    <template v-if="pagesStore().notifications.items.length === 0">
       <div
         style="
           margin: 12px;
@@ -15,26 +15,22 @@
           text-align: center;
         "
       >
-        You have no new notifications.
-
-        <template v-if="pagesStore().notifications.items.length > 0">
-          <Gap style="height: 10px" />
-
-          <DeepBtn
-            label="Show older notifications"
-            color="primary"
-            style="text-transform: none"
-            @click="minNotificationId = 0"
-          />
-        </template>
+        You have no notifications.
       </div>
     </template>
 
     <template v-else>
-      <q-list>
-        <q-infinite-scroll @load="onLoad">
+      <q-list
+        class="overflow-auto"
+        style="flex: 1"
+      >
+        <q-infinite-scroll
+          @load="onLoad"
+          :disable="!pagesStore().notifications.hasMore"
+          :offset="250"
+        >
           <template
-            v-for="notification in filteredNotifications"
+            v-for="notification in pagesStore().notifications.items"
             :key="notification.id"
           >
             <GroupRequestSent
@@ -80,23 +76,16 @@
               :notification="notification"
             />
           </template>
-        </q-infinite-scroll>
 
-        <template
-          v-if="
-            minNotificationId !== 0 &&
-            minNotificationId !== pagesStore().notifications.items.at(-1)?.id
-          "
-        >
-          <div style="margin: 12px; display: flex; flex-direction: column">
-            <DeepBtn
-              label="Show older notifications"
-              color="primary"
-              style="text-transform: none"
-              @click="minNotificationId = 0"
-            />
-          </div>
-        </template>
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md">
+              <q-circular-progress
+                indeterminate
+                size="md"
+              />
+            </div>
+          </template>
+        </q-infinite-scroll>
       </q-list>
     </template>
   </q-menu>
@@ -124,18 +113,8 @@ provide('notificationsMenu', notificationsMenu);
 const realtimeCtx = useRealtimeContext();
 provide('realtimeCtx', realtimeCtx);
 
-const minNotificationId = ref<number>(0);
-
-const filteredNotifications = computed(() =>
-  pagesStore().notifications.items.filter(
-    (notification) => !(notification.id <= minNotificationId.value),
-  ),
-);
-
 async function onBeforeShow() {
   try {
-    minNotificationId.value = pagesStore().notifications.lastNotificationRead!;
-
     if (pagesStore().notifications.items[0]?.id == null) {
       return;
     }
@@ -172,12 +151,12 @@ async function onLoad(index: number, done: (stop?: boolean) => void) {
 
     pagesStore().notifications.items.push(...notifications.items);
     pagesStore().notifications.hasMore = notifications.hasMore;
-
-    done(!notifications.hasMore);
   } catch (error: any) {
     handleError(error);
 
-    done(true);
+    pagesStore().notifications.hasMore = false;
   }
+
+  done(!pagesStore().notifications.hasMore);
 }
 </script>
