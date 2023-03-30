@@ -1,4 +1,4 @@
-import { getAllPageUpdates, hget, insertPageSnapshot } from '@deeplib/data';
+import { getAllPageUpdates, insertPageSnapshot } from '@deeplib/data';
 import { PageSnapshotModel, PageUpdateModel } from '@deeplib/db';
 import {
   CollabClientDocMessageType,
@@ -169,22 +169,31 @@ export class SocketAuxObject {
 
       await this.room.setup();
 
-      await this._sendDocAllUpdatesUnmergedMessage(false);
+      await this._sendDocAllUpdatesUnmergedMessage();
       await this._sendAwarenessSyncMessage();
     })();
 
     return await this._setupPromise;
   }
 
-  private async _sendDocAllUpdatesUnmergedMessage(createSnapshot: boolean) {
-    const [pageUpdates, nextKeyRotationDate] = await Promise.all([
+  private async _sendDocAllUpdatesUnmergedMessage() {
+    const [
+      pageUpdates,
+
+      userPlan,
+
+      [nextSnapshotDate, nextSnapshotUpdateIndex, nextKeyRotationDate],
+    ] = await Promise.all([
       getAllPageUpdates(this.room.pageId, getRedis()),
 
-      dataAbstraction().hget(
-        'page',
-        this.room.pageId,
+      dataAbstraction().hget('user', this.userId!, 'plan'),
+
+      dataAbstraction().hmget('page', this.room.pageId, [
+        'next-snapshot-date',
+        'next-snapshot-update-index',
+
         'next-key-rotation-date',
-      ),
+      ]),
     ]);
 
     const encoder = encoding.createEncoder();
@@ -200,6 +209,11 @@ export class SocketAuxObject {
     // Write page updates
 
     const pageUpdateIndex = pageUpdates.at(-1)?.[0] ?? 0;
+
+    const createSnapshot =
+      userPlan === 'pro' &&
+      new Date() >= nextSnapshotDate &&
+      pageUpdateIndex >= nextSnapshotUpdateIndex;
 
     if (createSnapshot) {
       void dataAbstraction().patch('page', this.room.pageId, {
@@ -688,20 +702,8 @@ export class SocketAuxObject {
 
     // Send merge updates message periodically
 
-    const [userPlan, nextSnapshotDate, nextSnapshotUpdateIndex] =
-      await dataAbstraction().mhget([
-        hget('user', this.userId!, 'plan'),
-        hget('page', this.room.pageId, 'next-snapshot-date'),
-        hget('page', this.room.pageId, 'next-snapshot-update-index'),
-      ]);
-
-    if (
-      userPlan === 'pro' &&
-      updateIndex % 100 === 0 &&
-      new Date() >= nextSnapshotDate &&
-      updateIndex >= nextSnapshotUpdateIndex
-    ) {
-      await this._sendDocAllUpdatesUnmergedMessage(true);
+    if (updateIndex % 100 === 0) {
+      await this._sendDocAllUpdatesUnmergedMessage();
     }
   }
 
