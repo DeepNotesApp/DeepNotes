@@ -115,7 +115,6 @@ importers:
       msgpackr: 1.8.0
       nanoid: 3.3.4
       nestjs-zod: 1.2.1
-      node-cache: 5.1.2
       node-mailjet: 5.1.1
       nodemailer: 6.8.0
       nodemailer-html-to-text: 3.2.0
@@ -170,7 +169,6 @@ importers:
       msgpackr: 1.8.0
       nanoid: 3.3.4
       nestjs-zod: 1.2.1_pf2fb646rsvo5szivgkaevcpvi
-      node-cache: 5.1.2
       node-mailjet: 5.1.1
       nodemailer: 6.8.0
       nodemailer-html-to-text: 3.2.0
@@ -436,7 +434,6 @@ importers:
       lib0: 0.2.53
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1
       prom-client: ^14.2.0
       redlock: 5.0.0-beta.2
@@ -463,7 +460,6 @@ importers:
       lib0: 0.2.53
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1_knex@2.3.0
       prom-client: 14.2.0
       redlock: 5.0.0-beta.2
@@ -529,7 +525,6 @@ importers:
       lib0: 0.2.53
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1
       prom-client: ^14.2.0
       tsup: 6.5.0
@@ -550,7 +545,6 @@ importers:
       lib0: 0.2.53
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1_knex@2.3.0
       prom-client: 14.2.0
       unilogr: 0.0.27
@@ -605,7 +599,6 @@ importers:
       ioredis: npm:@deepnotes/ioredis@5.3.1
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1
       unilogr: 0.0.27
     dependencies:
@@ -619,7 +612,6 @@ importers:
       ioredis: /@deepnotes/ioredis/5.3.1
       lodash: 4.17.21
       msgpackr: 1.8.0
-      node-cache: 5.1.2
       objection: 3.0.1_knex@2.3.0
       unilogr: 0.0.27
     devDependencies:
@@ -699,6 +691,7 @@ importers:
 
   packages/@stdlib/data:
     specifiers:
+      '@deepnotes/simple-lru-cache': ^0.0.2
       '@stdlib/base64': workspace:1.0.0
       '@stdlib/misc': workspace:1.0.0
       '@types/lodash': 4.14.189
@@ -706,18 +699,17 @@ importers:
       lodash: 4.17.21
       msgpackr: 1.8.0
       nanoid: 3.3.4
-      node-cache: 5.1.2
       objection: 3.0.1
       unilogr: 0.0.27
       winston: 3.8.2
     dependencies:
+      '@deepnotes/simple-lru-cache': 0.0.2
       '@stdlib/base64': link:../base64
       '@stdlib/misc': link:../misc
       ioredis: /@deepnotes/ioredis/5.3.1
       lodash: 4.17.21
       msgpackr: 1.8.0
       nanoid: 3.3.4
-      node-cache: 5.1.2
       objection: 3.0.1_knex@2.3.0
       unilogr: 0.0.27
       winston: 3.8.2
@@ -1615,6 +1607,10 @@ packages:
     resolution: {integrity: sha512-kRjaNHYO0KHWHFS57VmJk0Lq/nqWdbs/0uVzRFOB+U/eqQnrSLanUgsZo7fuk3bPmtYPQBT0n6vISeof9c+stQ==}
     engines: {node: '>= 10.18.1', npm: '>= 6.13.4', yarn: '>= 1.21.1'}
 
+  /@deepnotes/simple-lru-cache/0.0.2:
+    resolution: {integrity: sha512-jD3J8lvxoq2xKgsTXD7GwWU02fBqrdpIXtIAqdb/yxbmGxByt7BrDGnaUTRF6STVq9lTri7bQmlWq+qqF+zHog==}
+    dev: false
+
   /@deepnotes/tiptap-extension-collaboration-cursor/2.0.0-beta.202_6d62mjc2dpxrmqogqxac6gqjza:
     resolution: {integrity: sha512-PUor3vgCHaQd3SpVN4v7bShryUx+xVJUaSvyoZd2CndiT5+Gnn1cvoma7Q9AQEiQgAUBK8kgy3ZWLL5bt/JMwg==}
     peerDependencies:
@@ -2056,14 +2052,14 @@ packages:
       '@jest/test-result': 29.3.1
       '@jest/transform': 29.3.1
       '@jest/types': 29.3.1
-      '@types/node': 18.13.0
+      '@types/node': 18.11.9
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.6.1
       exit: 0.1.2
       graceful-fs: 4.2.10
       jest-changed-files: 29.2.0
-      jest-config: 29.3.1_ucpl6toqp57nqodtp3vxxi6g5a
+      jest-config: 29.3.1_odkjkoia5xunhxkdrka32ib6vi
       jest-haste-map: 29.3.1
       jest-message-util: 29.3.1
       jest-regex-util: 29.2.0
@@ -5192,11 +5188,6 @@ packages:
     resolution: {integrity: sha512-JQHZ2QMW6l3aH/j6xCqQThY/9OH4D/9ls34cgkUBiEeocRTU04tHfKPBsUK1PqZCUQM7GiA0IIXJSuXHI64Kbg==}
     engines: {node: '>=0.8'}
     dev: true
-
-  /clone/2.1.2:
-    resolution: {integrity: sha512-3Pe/CF1Nn94hyhIYpjtiLhdCoEoz0DqQ+988E9gmeEdQZlojxnOb74wctFyuwWQHzqyf9X7C7MG8juUpqBJT8w==}
-    engines: {node: '>=0.8'}
-    dev: false
 
   /cluster-key-slot/1.1.2:
     resolution: {integrity: sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==}
@@ -8759,6 +8750,46 @@ packages:
       - supports-color
     dev: true
 
+  /jest-config/29.3.1_odkjkoia5xunhxkdrka32ib6vi:
+    resolution: {integrity: sha512-y0tFHdj2WnTEhxmGUK1T7fgLen7YK4RtfvpLFBXfQkh2eMJAQq24Vx9472lvn5wg0MAO6B+iPfJfzdR9hJYalg==}
+    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+    peerDependencies:
+      '@types/node': '*'
+      ts-node: '>=9.0.0'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      ts-node:
+        optional: true
+    dependencies:
+      '@babel/core': 7.20.2
+      '@jest/test-sequencer': 29.3.1
+      '@jest/types': 29.3.1
+      '@types/node': 18.11.9
+      babel-jest: 29.3.1_@babel+core@7.20.2
+      chalk: 4.1.2
+      ci-info: 3.8.0
+      deepmerge: 4.2.2
+      glob: 7.2.3
+      graceful-fs: 4.2.10
+      jest-circus: 29.3.1
+      jest-environment-node: 29.3.1
+      jest-get-type: 29.2.0
+      jest-regex-util: 29.2.0
+      jest-resolve: 29.3.1
+      jest-runner: 29.3.1
+      jest-util: 29.3.1
+      jest-validate: 29.3.1
+      micromatch: 4.0.5
+      parse-json: 5.2.0
+      pretty-format: 29.3.1
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+      ts-node: 10.9.1_nzmgu45mhmik4zm4geprvt2coi
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /jest-config/29.3.1_ucpl6toqp57nqodtp3vxxi6g5a:
     resolution: {integrity: sha512-y0tFHdj2WnTEhxmGUK1T7fgLen7YK4RtfvpLFBXfQkh2eMJAQq24Vx9472lvn5wg0MAO6B+iPfJfzdR9hJYalg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -10134,13 +10165,6 @@ packages:
 
   /node-abort-controller/3.0.1:
     resolution: {integrity: sha512-/ujIVxthRs+7q6hsdjHMaj8hRG9NuWmwrz+JdRwZ14jdFoKSkm+vDsCbF9PLpnSqjaWQJuTmVtcWHNLr+vrOFw==}
-
-  /node-cache/5.1.2:
-    resolution: {integrity: sha512-t1QzWwnk4sjLWaQAS8CHgOJ+RAfmHpxFWmc36IWTiWHQfs0w5JDMBS1b1ZxQteo0vVVuWJvIUKHDkkeK7vIGCg==}
-    engines: {node: '>= 8.0.0'}
-    dependencies:
-      clone: 2.1.2
-    dev: false
 
   /node-emoji/1.11.0:
     resolution: {integrity: sha512-wo2DpQkQp7Sjm2A0cq+sN7EHKO6Sl0ctXeBdFZrL9T9+UywORbufTcTZxom8YqpLQt/FqNMUkOpkZrJVYSKD3A==}
