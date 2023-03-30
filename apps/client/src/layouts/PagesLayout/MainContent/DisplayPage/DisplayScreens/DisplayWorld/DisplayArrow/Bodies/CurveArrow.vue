@@ -62,14 +62,17 @@ function getPathDefinition() {
   const sourceCosine = arrow.react.normals.source.cosineTo(targetDirection);
   const targetCosine = arrow.react.normals.target.cosineTo(sourceDirection);
 
+  const sourceAbsDot = Math.abs(arrow.react.normals.source.dot(absDiff));
+  const targetAbsDot = Math.abs(arrow.react.normals.target.dot(absDiff));
+
   const sourceControlOffset = lerp(
-    Math.max(50, Math.abs(arrow.react.normals.source.dot(absDiff)) * 0.75),
-    Math.abs(arrow.react.normals.source.dot(absDiff)) * 0.5,
+    Math.max(50, sourceAbsDot * 0.75),
+    sourceAbsDot * 0.5,
     (Math.max(0.785, sourceCosine) - 0.785) / (1 - 0.785),
   );
   const targetControlOffset = lerp(
-    Math.max(50, Math.abs(arrow.react.normals.target.dot(absDiff)) * 0.75),
-    Math.abs(arrow.react.normals.target.dot(absDiff)) * 0.5,
+    Math.max(50, targetAbsDot * 0.75),
+    targetAbsDot * 0.5,
     (Math.max(0.785, targetCosine) - 0.785) / (1 - 0.785),
   );
 
