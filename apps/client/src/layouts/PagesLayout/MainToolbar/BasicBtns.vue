@@ -101,6 +101,11 @@ async function takeScreenshot() {
 
   const margin = 100;
 
+  const selectedElems = page.value.selection.react.elems;
+  page.value.selection.clear();
+
+  await nextTick();
+
   const canvas = await html2canvas(
     document.querySelector(
       `.display-world[data-page-id="${page.value.id}"]`,
@@ -122,6 +127,8 @@ async function takeScreenshot() {
       allowTaint: true,
     },
   );
+
+  page.value.selection.set(...selectedElems);
 
   const dataUrl = canvas.toDataURL('image/png');
 
