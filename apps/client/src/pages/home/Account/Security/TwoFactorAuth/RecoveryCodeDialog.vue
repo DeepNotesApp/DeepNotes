@@ -38,12 +38,90 @@
 
           <Gap style="width: 16px" />
 
-          <div style="flex: none">
+          <div style="flex: none; display: flex; flex-direction: column">
             <q-btn
               color="primary"
               style="width: 38px"
+              @click="
+                () => {
+                  setClipboardText(recoveryCodes.join('\n'));
+
+                  $q.notify({
+                    message: 'Copied to clipboard.',
+                    type: 'positive',
+                  });
+                }
+              "
             >
-              <CopyBtn :text="recoveryCodes.join('\n')" />
+              <q-icon
+                name="mdi-content-copy"
+                size="23px"
+                class="cursor-pointer"
+                style="margin-right: -3px"
+              >
+                <q-tooltip
+                  anchor="top middle"
+                  self="bottom middle"
+                  transition-show="jump-up"
+                  transition-hide="jump-down"
+                >
+                  Copy
+                </q-tooltip>
+              </q-icon>
+            </q-btn>
+
+            <Gap style="height: 16px" />
+
+            <q-btn
+              color="primary"
+              style="width: 38px"
+              @click="
+                download(
+                  recoveryCodes.join('\n'),
+                  'DeepNotes recovery codes.txt',
+                  'text/plain',
+                )
+              "
+            >
+              <q-icon
+                name="mdi-download"
+                size="23px"
+                class="cursor-pointer"
+                style="margin-right: -3px"
+              >
+                <q-tooltip
+                  anchor="top middle"
+                  self="bottom middle"
+                  transition-show="jump-up"
+                  transition-hide="jump-down"
+                >
+                  Download
+                </q-tooltip>
+              </q-icon>
+            </q-btn>
+
+            <Gap style="height: 16px" />
+
+            <q-btn
+              color="primary"
+              style="width: 38px"
+              @click="printRecoveryCodes"
+            >
+              <q-icon
+                name="mdi-printer"
+                size="23px"
+                class="cursor-pointer"
+                style="margin-right: -3px"
+              >
+                <q-tooltip
+                  anchor="top middle"
+                  self="bottom middle"
+                  transition-show="jump-up"
+                  transition-hide="jump-down"
+                >
+                  Print
+                </q-tooltip>
+              </q-icon>
             </q-btn>
           </div>
         </div>
@@ -69,7 +147,8 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_SM_MIN } from '@stdlib/misc';
+import { BREAKPOINT_SM_MIN, setClipboardText } from '@stdlib/misc';
+import download from 'downloadjs';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -81,6 +160,24 @@ const props = defineProps<{
 const maximized = computed(() => uiStore().width < BREAKPOINT_SM_MIN);
 
 const recoveryCodes = ref(props.recoveryCodes);
+
+function printRecoveryCodes() {
+  // Create a new window with the recovery codes
+  const newWindow = window.open('', 'Print');
+
+  if (newWindow == null) {
+    return;
+  }
+
+  // Write the recovery codes to the new window
+  newWindow.document.write(`<pre>${recoveryCodes.value.join('\n')}</pre>`);
+
+  // Call the print function on the new window
+  newWindow.print();
+
+  // Close the new window
+  newWindow.close();
+}
 </script>
 
 <style scoped>
