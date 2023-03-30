@@ -8,9 +8,9 @@
     @pointerdown.middle.prevent="onMiddlePointerDown"
     @auxclick.capture.middle="onMiddleAuxClick"
   >
-    <DisplayGrid />
-
     <DisplayBackground />
+
+    <DisplayGrid />
 
     <DisplayArrows :region="page" />
 

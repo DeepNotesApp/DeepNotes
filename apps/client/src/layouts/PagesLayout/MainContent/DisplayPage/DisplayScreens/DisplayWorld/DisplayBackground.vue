@@ -37,5 +37,7 @@ async function onLeftDoubleClick(event: MouseEvent) {
   position: absolute;
 
   inset: -999999px;
+
+  background-color: rgb(24, 24, 24);
 }
 </style>
