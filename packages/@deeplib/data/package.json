@@ -13,7 +13,6 @@
     "crypto-js": "^4.1.1",
     "lodash": "4.17.21",
     "msgpackr": "1.8.0",
-    "node-cache": "5.1.2",
     "unilogr": "0.0.27"
   },
   "devDependencies": {

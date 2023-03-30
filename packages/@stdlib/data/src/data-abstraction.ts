@@ -9,14 +9,25 @@ import {
 import type { Cluster, Redis, Result } from 'ioredis';
 import { some } from 'lodash';
 import { pack, unpack } from 'msgpackr';
-import NodeCache from 'node-cache';
 import type { TransactionOrKnex } from 'objection';
 import { Model } from 'objection';
+import simpleLRUCache from '@deepnotes/simple-lru-cache';
 
 import type { DataField } from './data-field';
 import type { DataHash, DataHashes } from './data-hash';
 import { getSelfPublisherIdBytes } from './data-publishing';
 import { mainLogger } from './logger';
+
+export interface SimpleLRUCache {
+  cache: Record<string, any>;
+
+  reset(): void;
+
+  get(key: string, hit?: boolean): any;
+  set(key: string, value: any, hit?: boolean): void;
+
+  del(key: string): void;
+}
 
 export const classLogger = mainLogger().sub('DataAbstraction');
 
@@ -124,7 +135,9 @@ export class DataAbstraction<
     string
   >();
 
-  private readonly nodeCache = new NodeCache();
+  private readonly localCache: SimpleLRUCache = new simpleLRUCache({
+    maxSize: 500000,
+  });
 
   constructor(
     readonly dataHashes: DataHashes_,
@@ -181,12 +194,12 @@ export class DataAbstraction<
           for (const [fullKey, value] of Object.entries(values)) {
             classLogger.sub('Local cache update').info(`${fullKey}: %o`, value);
 
-            this.nodeCache.set(fullKey, value);
+            this.localCache.set(fullKey, value);
           }
         } else if (prefix === 'local-cache-clear') {
           classLogger.sub('Local cache clear').info('Clearing local cache');
 
-          this.nodeCache.data = {};
+          this.localCache.reset();
         } else if (prefix === 'data-update') {
           const fullKey = channelStr.substring('data-update|'.length);
           const [key, field] = splitStr(fullKey, '>', 2);
@@ -307,9 +320,9 @@ export class DataAbstraction<
       if (
         !field.infos?.dontCache &&
         field.infos?.cacheLocally &&
-        this.nodeCache.has(field.fullKey)
+        this.localCache.cache[field.fullKey] != null
       ) {
-        field.value = this.nodeCache.data[field.fullKey].v;
+        field.value = this.localCache.get(field.fullKey);
 
         classLogger
           .sub('hmget')
@@ -338,7 +351,7 @@ export class DataAbstraction<
                 field.value,
               );
 
-            this.nodeCache.set(field.fullKey, field.value, DEFAULT_LOCAL_TTL);
+            this.localCache.set(field.fullKey, field.value);
           }
         }
       });
@@ -728,12 +741,11 @@ export class DataAbstraction<
 
     this.addToTransaction(dtrx, () => {
       for (const field of fields) {
-        if (field.infos?.cacheLocally && this.nodeCache.has(field.fullKey)) {
-          this.nodeCache.set(
-            field.fullKey,
-            field.value,
-            this.nodeCache.getTtl(field.fullKey)!,
-          );
+        if (
+          field.infos?.cacheLocally &&
+          this.localCache.cache[field.fullKey] != null
+        ) {
+          this.localCache.set(field.fullKey, field.value);
         }
       }
     });
