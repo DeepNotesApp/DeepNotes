@@ -1,3 +1,4 @@
+import simpleLRUCache from '@deepnotes/simple-lru-cache';
 import { objFromEntries } from '@stdlib/misc';
 import { allSettledResults } from '@stdlib/misc';
 import {
@@ -11,7 +12,6 @@ import { some } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 import type { TransactionOrKnex } from 'objection';
 import { Model } from 'objection';
-import simpleLRUCache from '@deepnotes/simple-lru-cache';
 
 import type { DataField } from './data-field';
 import type { DataHash, DataHashes } from './data-hash';
