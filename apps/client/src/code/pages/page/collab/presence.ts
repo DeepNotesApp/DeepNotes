@@ -113,13 +113,16 @@ export class PagePresence {
           },
         });
       } else {
+        const groupMemberName = groupMemberNames()(
+          `${this.page.react.groupId}:${authStore().userId}`,
+        ).get();
+
         this.mergeLocalState({
           user: {
             id: authStore().userId,
 
-            name: groupMemberNames()(
-              `${this.page.react.groupId}:${authStore().userId}`,
-            ).get().text,
+            name:
+              groupMemberName.status === 'success' ? groupMemberName.text : '?',
 
             color: Color(
               `hsl(${hashFNV1a(authStore().userId) % 360}, 100%, 45%)`,
