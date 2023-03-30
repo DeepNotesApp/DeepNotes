@@ -139,7 +139,7 @@
     @click="page.selection.format((chain) => chain.setHeading({ level: 3 }))"
   />
   <ToolbarBtn
-    tooltip="No header"
+    tooltip="Remove heading"
     icon="mdi-format-header-pound"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"

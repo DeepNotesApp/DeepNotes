@@ -43,6 +43,10 @@
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 
+useMeta(() => ({
+  title: 'Billing - Account - DeepNotes',
+}));
+
 const appServerURL = process.env.APP_SERVER_URL;
 
 const loading = ref(true);
