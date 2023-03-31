@@ -83,7 +83,7 @@ export class PageEditing {
       editor.setEditable(true);
     }
 
-    this.react.editor?.commands.focus('all');
+    this.react.editor?.commands.focus('all', { scrollIntoView: false });
   }
 
   stop() {
