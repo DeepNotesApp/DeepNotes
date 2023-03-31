@@ -2,6 +2,7 @@ import 'highlight.js/styles/atom-one-dark.css';
 
 import { columnResizing } from '@_ueberdosis/prosemirror-tables';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import Highlight from '@tiptap/extension-highlight';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import Link from '@tiptap/extension-link';
 import Subscript from '@tiptap/extension-subscript';
@@ -154,4 +155,6 @@ export const extensions = once(() => [
 
   InlineMathExtension,
   MathBlockExtension,
+
+  Highlight,
 ]);

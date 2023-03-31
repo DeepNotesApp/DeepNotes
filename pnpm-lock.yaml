@@ -222,6 +222,7 @@ importers:
       '@tiptap/extension-code-block-lowlight': 2.0.0-beta.202
       '@tiptap/extension-collaboration': 2.0.0-beta.202
       '@tiptap/extension-collaboration-cursor': npm:@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202
+      '@tiptap/extension-highlight': ^2.0.1
       '@tiptap/extension-horizontal-rule': 2.0.0-beta.202
       '@tiptap/extension-image': 2.0.0-beta.202
       '@tiptap/extension-link': 2.0.0-beta.202
@@ -318,6 +319,7 @@ importers:
       '@tiptap/extension-code-block-lowlight': 2.0.0-beta.202_f2k53t7qnda3fp6gklka5iw344
       '@tiptap/extension-collaboration': 2.0.0-beta.202_rb6njybqraxl4nlwvrz3gs4pb4
       '@tiptap/extension-collaboration-cursor': /@deepnotes/tiptap-extension-collaboration-cursor/2.0.0-beta.202_6d62mjc2dpxrmqogqxac6gqjza
+      '@tiptap/extension-highlight': 2.0.1_pv7cmqvutaztpd4mucego55zca
       '@tiptap/extension-horizontal-rule': 2.0.0-beta.202_pv7cmqvutaztpd4mucego55zca
       '@tiptap/extension-image': 2.0.0-beta.202_pv7cmqvutaztpd4mucego55zca
       '@tiptap/extension-link': 2.0.0-beta.202_pv7cmqvutaztpd4mucego55zca
@@ -2961,6 +2963,14 @@ packages:
     resolution: {integrity: sha512-sF271jSWHgtoJLDNFLS7eyUcUStl7mBDQNJIENWVI+lFu2Ax8GmO7AoB74Q6L5Zaw4h73L6TAvaafHIXurz7tA==}
     peerDependencies:
       '@tiptap/core': ^2.0.0-beta.193
+    dependencies:
+      '@tiptap/core': 2.0.0-beta.217_@tiptap+pm@2.0.0-beta.217
+    dev: false
+
+  /@tiptap/extension-highlight/2.0.1_pv7cmqvutaztpd4mucego55zca:
+    resolution: {integrity: sha512-k9rJnAGzjXWQSN3RqSVPQfsbtFAgZu2AnwSFH2VQ2Ea7oiAUOaD7Qcqrs0PLo/CxLEuWPAbULNngXUXZVseMBA==}
+    peerDependencies:
+      '@tiptap/core': ^2.0.0
     dependencies:
       '@tiptap/core': 2.0.0-beta.217_@tiptap+pm@2.0.0-beta.217
     dev: false

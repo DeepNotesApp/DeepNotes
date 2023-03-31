@@ -247,6 +247,14 @@ defineProps<Props>();
         padding-left: 1.3rem;
       }
 
+      // Highlight
+
+      mark {
+        color: rgba(255, 255, 255, 0.95);
+
+        background-color: #585800;
+      }
+
       // Cursors
 
       .collaboration-cursor__base {

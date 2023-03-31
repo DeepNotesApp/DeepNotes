@@ -70,6 +70,14 @@
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('justify'))"
   />
+  <ToolbarBtn
+    :tooltip="`Highlight\n(${getCtrlKeyName()} + Shift + H)`"
+    icon="mdi-marker"
+    icon-size="20px"
+    style="padding-top: 1px"
+    :disable="page.react.readOnly || !page.activeElem.react.exists"
+    @click="page.selection.format((chain) => chain.toggleHighlight())"
+  />
 
   <q-separator
     vertical
