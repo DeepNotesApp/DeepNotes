@@ -1,5 +1,5 @@
 import { listenPointerEvents } from '@stdlib/misc';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories';
 import { isCtrlDown } from 'src/code/utils';
@@ -9,7 +9,7 @@ import { ISerialArrow } from '../../serialization';
 import { makeSlim } from '../../slim';
 import type { PageNote } from '../notes/note';
 import type { Page } from '../page';
-import type { PageArrow } from './arrow';
+import type { IArrowCollabInput, PageArrow } from './arrow';
 import { IArrowCollabDefault } from './arrow';
 import { IArrowCollab } from './arrow';
 
@@ -46,20 +46,18 @@ export class PageArrowCreation {
 
     const serialArrow = ISerialArrow().parse(internals.pages.defaultArrow);
 
-    const arrowCollab = internals.pages.serialization.parseArrowCollab(
-      serialArrow,
-      sourceNote.react.region.id,
-    );
+    const arrowCollab = IArrowCollab().parse({
+      ...serialArrow,
 
-    merge(this.fakeArrow.react.collab, arrowCollab);
+      regionId: sourceNote.react.region.id,
+
+      source: sourceNote.id,
+      target: '',
+    } as IArrowCollabInput);
+
+    Object.assign(this.fakeArrow.react.collab, arrowCollab);
 
     this.fakeArrow.react.modifying = 'target';
-
-    this.fakeArrow.react.collab.label = serialArrow.label;
-
-    this.fakeArrow.react.collab.source = sourceNote.id;
-    this.fakeArrow.react.collab.target = '';
-
     this.fakeArrow.react.fakeTargetPos = this.page.pos.eventToWorld(event);
 
     listenPointerEvents(event, {
