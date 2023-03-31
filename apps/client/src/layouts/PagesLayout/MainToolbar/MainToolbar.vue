@@ -36,19 +36,12 @@
       <div style="flex: 1; width: 0; display: flex">
         <div
           ref="toolbarRef"
-          style="
-            flex: 1;
-            width: 0;
-            display: flex;
-            overflow: hidden;
-            align-items: center;
-          "
+          style="flex: 1; width: 0; display: flex; align-items: center"
         >
           <Gap style="width: 8px" />
 
           <ToolbarBtnContainer
-            :toolbar-width="toolbarWidth"
-            :breakpoint="393"
+            :expanded="basicExpanded"
             tooltip="Basic"
             icon="mdi-hammer-wrench"
           >
@@ -61,8 +54,7 @@
           />
 
           <ToolbarBtnContainer
-            :toolbar-width="toolbarWidth"
-            :breakpoint="917"
+            :expanded="formattingExpanded"
             tooltip="Formatting"
             icon="mdi-format-color-text"
           >
@@ -75,8 +67,7 @@
           />
 
           <ToolbarBtnContainer
-            :toolbar-width="toolbarWidth"
-            :breakpoint="1465"
+            :expanded="objectsExpanded"
             tooltip="Objects"
             icon="mdi-format-list-numbered"
           >
@@ -89,8 +80,7 @@
           />
 
           <ToolbarBtnContainer
-            :toolbar-width="toolbarWidth"
-            :breakpoint="1620"
+            :expanded="alignmentExpanded"
             tooltip="Alignment"
             icon="mdi-align-horizontal-left"
           >
@@ -182,12 +172,59 @@ import ToolbarBtnContainer from './ToolbarBtnContainer.vue';
 const quasarMode = process.env.MODE;
 
 const toolbarRef = ref<HTMLElement>();
-const toolbarWidth = ref(0);
+
+let toolbarWidth = 0;
+
+const basicExpanded = ref(false);
+const formattingExpanded = ref(false);
+const objectsExpanded = ref(false);
+const alignmentExpanded = ref(false);
 
 useResizeObserver(
   () => toolbarRef.value!,
-  (entry) => {
-    toolbarWidth.value = entry.contentRect.width;
+  async (entry) => {
+    if (toolbarWidth === entry.contentRect.width) {
+      return;
+    }
+
+    toolbarWidth = entry.contentRect.width;
+
+    basicExpanded.value = true;
+    formattingExpanded.value = true;
+    objectsExpanded.value = true;
+    alignmentExpanded.value = true;
+
+    await nextTick();
+
+    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
+      return;
+    }
+
+    alignmentExpanded.value = false;
+
+    await nextTick();
+
+    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
+      return;
+    }
+
+    objectsExpanded.value = false;
+
+    await nextTick();
+
+    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
+      return;
+    }
+
+    formattingExpanded.value = false;
+
+    await nextTick();
+
+    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
+      return;
+    }
+
+    basicExpanded.value = false;
   },
 );
 </script>
