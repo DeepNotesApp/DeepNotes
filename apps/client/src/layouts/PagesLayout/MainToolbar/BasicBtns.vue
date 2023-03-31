@@ -25,7 +25,7 @@
   />
   <ToolbarBtn
     :tooltip="`Take screenshot`"
-    icon="mdi-camera"
+    icon="mdi-camera-outline"
     @click="takeScreenshot()"
   />
 
