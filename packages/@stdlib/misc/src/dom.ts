@@ -45,11 +45,18 @@ export function isTouchOverScrollbar(event: TouchEvent, zoom?: number) {
 export function isMouseOverScrollbar(event: PointerEvent) {
   const elem = event.target as HTMLElement;
 
-  if (hasVertScrollbar(elem) && event.offsetX > elem.clientWidth) {
+  if (
+    hasVertScrollbar(elem) &&
+    (event.offsetX > elem.clientWidth || event.offsetX > elem.offsetWidth - 12)
+  ) {
     return true;
   }
 
-  if (hasHorizScrollbar(elem) && event.offsetY > elem.clientHeight) {
+  if (
+    hasHorizScrollbar(elem) &&
+    (event.offsetY > elem.clientHeight ||
+      event.offsetY > elem.offsetHeight - 12)
+  ) {
     return true;
   }
 
