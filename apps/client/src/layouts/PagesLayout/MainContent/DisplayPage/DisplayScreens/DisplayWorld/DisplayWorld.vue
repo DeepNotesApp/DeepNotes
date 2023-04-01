@@ -10,8 +10,6 @@
   >
     <DisplayBackground />
 
-    <DisplayGrid />
-
     <DisplayArrows :region="page" />
 
     <DOMDisplay :region="page">
@@ -38,7 +36,6 @@ import ArrowCreation from './ArrowCreation.vue';
 import DisplayArrows from './DisplayArrows.vue';
 import DisplayBackground from './DisplayBackground.vue';
 import DisplayBoxSelection from './DisplayBoxSelection.vue';
-import DisplayGrid from './DisplayGrid.vue';
 import DisplayNote from './DisplayNote/DisplayNote.vue';
 import DOMDisplay from './DOMDisplay.vue';
 import InterregionalArrows from './InterregionalArrows.vue';

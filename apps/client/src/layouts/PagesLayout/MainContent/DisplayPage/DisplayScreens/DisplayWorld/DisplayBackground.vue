@@ -1,14 +1,36 @@
 <template>
   <div
-    class="display-background"
+    style="position: absolute; inset: 0"
     @pointerdown.left="onLeftPointerDown"
     @dblclick.left="onLeftDoubleClick"
-  ></div>
+  >
+    <div class="display-background"></div>
+
+    <DisplayGrid />
+
+    <div
+      v-if="uiStore().loggedIn && page.react.notes.length === 0"
+      style="
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: grid;
+        place-items: center;
+      "
+    >
+      <div>
+        <div>Double-click anywhere</div>
+        <div>to create a note.</div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
 import { isCtrlDown } from 'src/code/utils';
+
+import DisplayGrid from './DisplayGrid.vue';
 
 const page = inject<Page>('page')!;
 
