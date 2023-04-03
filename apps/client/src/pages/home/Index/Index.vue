@@ -146,7 +146,11 @@
         </div>
       </div>
 
-      <Gap style="height: 277px" />
+      <Gap style="height: 180px" />
+
+      <PricingSection />
+
+      <Gap style="height: 180px" />
     </ResponsiveContainer>
 
     <ViewportLoadingOverlay v-if="loading" />
@@ -154,6 +158,8 @@
 </template>
 
 <script setup lang="ts">
+import PricingSection from './PricingSection.vue';
+
 const loading = ref(true);
 
 onMounted(async () => {
