@@ -95,6 +95,7 @@
             :to="{ name: 'pricing' }"
           />
 
+          <!--
           <Gap style="width: 12px" />
 
           <DeepBtn
@@ -113,6 +114,7 @@
               Coming soon
             </q-tooltip>
           </DeepBtn>
+          -->
 
           <Gap style="width: 12px" />
 
