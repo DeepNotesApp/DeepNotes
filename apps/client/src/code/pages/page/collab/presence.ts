@@ -125,7 +125,7 @@ export class PagePresence {
               groupMemberName.status === 'success' ? groupMemberName.text : '?',
 
             color: Color(
-              `hsl(${hashFNV1a(authStore().userId) % 360}, 100%, 45%)`,
+              `hsl(${hashFNV1a(authStore().userId) % 360}, 100%, 35%)`,
             ).hex(),
           },
         });
