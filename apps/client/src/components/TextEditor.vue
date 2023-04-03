@@ -239,8 +239,7 @@ defineProps<Props>();
       // Blockquotes
 
       blockquote {
-        margin-left: 4px;
-        margin-right: 0px;
+        margin: 4px 0px 4px 4px;
 
         border-left: 5px solid rgba(#fff, 0.5);
 
