@@ -1,8 +1,8 @@
 import { negateProp } from '@stdlib/misc';
 import { defineStore } from 'pinia';
 
-export const useUIStore = defineStore('ui', {
-  state: () => ({
+export const useUIStore = defineStore('ui', () => {
+  const state = reactive({
     loggedIn: false,
 
     leftSidebarExpanded: false,
@@ -15,26 +15,26 @@ export const useUIStore = defineStore('ui', {
 
     width: 0,
     height: 0,
-  }),
+  });
 
-  getters: {},
+  return {
+    ...toRefs(state),
 
-  actions: {
     toggleLeftSidebar() {
-      negateProp(this, 'leftSidebarExpanded');
+      negateProp(state, 'leftSidebarExpanded');
 
-      if (this.leftSidebarExpanded && window.innerWidth < 1065) {
-        this.rightSidebarExpanded = false;
+      if (state.leftSidebarExpanded && window.innerWidth < 1065) {
+        state.rightSidebarExpanded = false;
       }
     },
     toggleRightSidebar() {
-      negateProp(this, 'rightSidebarExpanded');
+      negateProp(state, 'rightSidebarExpanded');
 
-      if (this.rightSidebarExpanded && window.innerWidth < 1065) {
-        this.leftSidebarExpanded = false;
+      if (state.rightSidebarExpanded && window.innerWidth < 1065) {
+        state.leftSidebarExpanded = false;
       }
     },
-  },
+  };
 });
 
 export type UIStore = ReturnType<typeof useUIStore>;
