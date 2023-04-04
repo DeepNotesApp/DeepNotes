@@ -1,6 +1,9 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
+import type { Vec2 } from '@stdlib/misc';
 import { getClipboardText, setClipboardText } from '@stdlib/misc';
+import { watchUntilTrue } from '@stdlib/vue';
+import { every } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 
 import { ISerialObject } from '../../serialization';
@@ -28,19 +31,23 @@ export class PageClipboard {
 
     // Subtract center
 
-    const worldRect = this.page.regions.getWorldRect(this.page.selection.react);
+    if (this.page.activeRegion.react.value.type === 'page') {
+      const worldRect = this.page.regions.getWorldRect(
+        this.page.selection.react,
+      );
 
-    if (worldRect == null) {
-      return;
-    }
+      if (worldRect == null) {
+        return;
+      }
 
-    const worldCenter = worldRect.center;
+      const worldCenter = worldRect.center;
 
-    for (const noteIndex of clipboardObj.root.noteIdxs) {
-      const clipboardNote = clipboardObj.notes[noteIndex];
+      for (const noteIndex of clipboardObj.root.noteIdxs) {
+        const clipboardNote = clipboardObj.notes[noteIndex];
 
-      clipboardNote.pos.x -= worldCenter.x;
-      clipboardNote.pos.y -= worldCenter.y;
+        clipboardNote.pos.x -= worldCenter.x;
+        clipboardNote.pos.y -= worldCenter.y;
+      }
     }
 
     // Copy to clipboard
@@ -83,19 +90,19 @@ export class PageClipboard {
 
       const clipboardObj = ISerialObject().parse(clipboardData);
 
-      // Center notes around destination
+      // Get destination center
 
-      const worldRect = this.page.regions.getWorldRect(
+      const selectionWorldRect = this.page.regions.getWorldRect(
         this.page.selection.react,
       );
 
-      let destCenter;
+      let destCenter: Vec2;
 
-      if (worldRect != null) {
+      if (selectionWorldRect != null) {
         if (this.page.activeRegion.react.value.type === 'page') {
-          destCenter = worldRect.center.addScalar(8);
+          destCenter = selectionWorldRect.center.addScalar(8);
         } else {
-          destCenter = worldRect.center.addScalar(8);
+          destCenter = selectionWorldRect.center.addScalar(8);
         }
       } else {
         if (this.page.activeRegion.react.value.type === 'page') {
@@ -106,6 +113,8 @@ export class PageClipboard {
               .halfSize;
         }
       }
+
+      // Center notes around destination center
 
       for (const noteIndex of clipboardObj.root.noteIdxs) {
         const clipboardNote = clipboardObj.notes[noteIndex];
@@ -128,6 +137,27 @@ export class PageClipboard {
         destRegion,
         destIndex,
       );
+
+      // Recenter notes around destination center
+
+      await nextTick();
+      await watchUntilTrue(() => every(notes, (note) => note.react.loaded));
+
+      const notesCenter = this.page.regions.getWorldRect({
+        notes,
+        arrows: [],
+      })?.center;
+
+      if (notesCenter != null) {
+        const centerOffset = destCenter.sub(notesCenter);
+
+        this.page.collab.doc.transact(() => {
+          for (const note of notes) {
+            note.react.collab.pos.x += centerOffset.x;
+            note.react.collab.pos.y += centerOffset.y;
+          }
+        });
+      }
 
       // Select notes
 
