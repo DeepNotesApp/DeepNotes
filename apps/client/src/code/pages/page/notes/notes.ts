@@ -118,7 +118,7 @@ export class PageNotes {
   async create(
     region: PageRegion,
     worldPos: Vec2,
-    centralize = true,
+    center = true,
     destIndex?: number,
   ) {
     if (this.page.react.readOnly) {
@@ -136,7 +136,7 @@ export class PageNotes {
     note.react.collab.pos.x = worldPos.x;
     note.react.collab.pos.y = worldPos.y;
 
-    if (centralize) {
+    if (center) {
       const worldSize = note.getWorldRect('note-frame')?.size;
 
       if (worldSize != null) {
