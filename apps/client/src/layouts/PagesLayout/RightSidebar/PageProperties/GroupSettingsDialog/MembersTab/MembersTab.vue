@@ -235,13 +235,21 @@ async function removeSelectedUsers() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const userId of finalSelectedUserIds.value) {
+    for (const userId of finalSelectedUserIds.value.filter(
+      (userId) => userId !== authStore().userId,
+    )) {
       await removeGroupUser(groupId, {
         patientId: userId,
       });
     }
 
     await rotateGroupKeys(groupId);
+
+    if (finalSelectedUserIds.value.includes(authStore().userId)) {
+      await removeGroupUser(groupId, {
+        patientId: authStore().userId,
+      });
+    }
 
     baseSelectedUserIds.value.clear();
   } catch (error: any) {
