@@ -1,4 +1,5 @@
-import type { Editor } from '@tiptap/vue-3';
+import type { NodeName } from '@stdlib/misc';
+import type { ChainedCommands, Editor } from '@tiptap/vue-3';
 
 export function isTiptapEditorEmpty(editor: Editor) {
   const html = editor.getHTML();
@@ -13,4 +14,17 @@ export function isTiptapEditorEmpty(editor: Editor) {
     html === '<h2></h2>' ||
     html === '<h3></h3>'
   );
+}
+
+export function unsetNode(
+  editor: Editor,
+  chain: ChainedCommands,
+  name: NodeName,
+  attrs?: Record<string, unknown>,
+) {
+  if (internals.tiptap().isNodeActive(editor.state, name, attrs)) {
+    return chain.setNode('paragraph');
+  }
+
+  return chain;
 }

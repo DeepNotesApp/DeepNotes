@@ -88,7 +88,9 @@ onMounted(async () => {
 });
 
 function insertLink() {
-  page.value.selection.setMark('link', { href: url.value });
+  page.value.selection.format((chain) =>
+    chain.setMark('link', { href: url.value }),
+  );
 
   dialogRef.value.onDialogOK();
 }
