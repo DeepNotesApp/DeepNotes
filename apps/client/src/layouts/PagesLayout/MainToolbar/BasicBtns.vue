@@ -59,7 +59,7 @@
     @click="page.selection.selectAll()"
   />
   <ToolbarBtn
-    :tooltip="`Delete\n(Delete)`"
+    :tooltip="`Delete\n(Del)`"
     icon="mdi-delete-outline"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
