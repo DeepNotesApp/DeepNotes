@@ -12,13 +12,19 @@
 
     <div
       class="resize-handle"
-      @pointerdown.left.stop="onResizeHandleLeftPointerDown"
+      @pointerdown.left.stop.prevent="onResizeHandleLeftPointerDown"
       :style="{
         transform: `scale(${1 / internals.pages.react.page.camera.react.zoom})`,
       }"
     ></div>
   </NodeViewWrapper>
 </template>
+
+<script lang="ts">
+export const imageResizing = {
+  active: false,
+};
+</script>
 
 <script setup lang="ts">
 import { listenPointerEvents } from '@stdlib/misc';
@@ -47,15 +53,22 @@ function onResizeHandleLeftPointerDown(event: PointerEvent) {
   startWidth = imageElem.value!.clientWidth;
   startPos = event.clientX;
 
+  imageResizing.active = true;
+
   listenPointerEvents(event, {
-    move: onPointerMove,
-  });
-}
-function onPointerMove(event: PointerEvent) {
-  props.updateAttributes({
-    width:
-      startWidth +
-      (event.clientX - startPos) / internals.pages.react.page.camera.react.zoom,
+    move: (event) => {
+      props.updateAttributes({
+        width:
+          startWidth +
+          (event.clientX - startPos) /
+            internals.pages.react.page.camera.react.zoom,
+      });
+    },
+    up: () => {
+      setTimeout(() => {
+        imageResizing.active = false;
+      });
+    },
   });
 }
 </script>

@@ -1,4 +1,5 @@
 import { isNanoID, splitStr } from '@stdlib/misc';
+import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
 import { handleError, isCtrlDown } from 'src/code/utils';
 
 export function usePageNavigationInterception() {
@@ -18,7 +19,12 @@ export function usePageNavigationInterception() {
         return;
       }
 
-      if (event.altKey || internals.mobileAltKey || target.isContentEditable) {
+      if (
+        event.altKey ||
+        internals.mobileAltKey ||
+        target.isContentEditable ||
+        imageResizing.active
+      ) {
         mainLogger()
           .sub('usePageNavigationInterception')
           .info('Prevent default action');
