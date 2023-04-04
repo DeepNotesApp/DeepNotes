@@ -7,7 +7,7 @@
     }"
   >
     <div
-      v-if="!editor?.isEmpty"
+      v-if="editor != null && !isTiptapEditorEmpty(editor)"
       class="arrow-label-background"
     ></div>
 
@@ -25,6 +25,7 @@
 import { Y } from '@syncedstore/core';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
+import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
 
 const props = defineProps<{
   arrow: PageArrow;
