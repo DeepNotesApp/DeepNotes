@@ -33,8 +33,6 @@ const props = defineProps<{
 
 const page = inject<Page>('page')!;
 
-props.arrow!.react.loaded = false;
-
 const editor = internals.tiptap().useEditor({
   content:
     props.arrow.react.collab.label instanceof Y.XmlFragment
@@ -58,15 +56,14 @@ const editor = internals.tiptap().useEditor({
       : []),
   ],
 
-  onCreate({ editor }: any) {
+  onBeforeCreate({ editor }: any) {
     props.arrow!.react.editor = editor;
-
-    props.arrow!.react.loaded = true;
+  },
+  onCreate() {
+    mainLogger().info(`Arrow Editor loaded (${props.arrow.id})`);
   },
   onDestroy() {
     props.arrow!.react.editor = null;
-
-    props.arrow!.react.loaded = true;
   },
 });
 

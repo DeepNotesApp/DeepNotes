@@ -401,10 +401,18 @@ export const PageArrow = once(
             this.react.editor ? [this.react.editor] : [],
           ),
 
-          loaded: true,
+          loaded: false,
         };
 
         Object.assign(this.react, react);
+
+        setTimeout(() => {
+          setTimeout(() => {
+            this.react.loaded = true;
+
+            mainLogger().info(`Arrow loaded (${this.id})`);
+          });
+        });
       }
 
       removeFromRegion() {

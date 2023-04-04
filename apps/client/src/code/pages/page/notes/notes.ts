@@ -77,8 +77,6 @@ export class PageNotes {
       this.page.selection.remove(note);
 
       note.react.index = index;
-
-      note.react.initialized = false;
     }
   }
   createAndObserveIds(noteIds: string[]) {
