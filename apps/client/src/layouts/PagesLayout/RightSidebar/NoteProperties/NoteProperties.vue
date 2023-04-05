@@ -107,9 +107,11 @@
 
     <q-separator />
 
-    <VerticalColorPalette
+    <ColorPalette
       type="notes"
-      style="margin: 6px; border-radius: 4px; width: 44px; overflow: hidden"
+      orientation="vertical"
+      :split="2"
+      style="margin: 6px; width: 44px"
       :disable="page.react.readOnly"
       @select="
         changeProp($event, (selectedNote, value) => {
@@ -450,27 +452,24 @@
 
       <Gap style="height: 16px" />
 
-      <q-color
-        :disable="page.react.readOnly"
-        :model-value="colorNameToColorHex('ui', note.react.collab.color.value)"
-        @update:model-value="
-          changeProp(
-            colorHexToColorName('ui', $event),
-            (selectedNote, value) => {
+      <div style="display: flex; justify-content: center">
+        <ColorPalette
+          type="notes"
+          orientation="horizontal"
+          :split="2"
+          :disable="page.react.readOnly"
+          style="width: 160px"
+          @select="
+            changeProp($event, (selectedNote, value) => {
               if (selectedNote.react.region.type === 'note') {
                 selectedNote.react.collab.color.inherit = false;
               }
 
               selectedNote.react.collab.color.value = value;
-            },
-          )
-        "
-        default-view="palette"
-        no-header
-        no-header-tabs
-        no-footer
-        :palette="Object.values(colorMap().ui)"
-      />
+            })
+          "
+        />
+      </div>
     </div>
 
     <q-separator />
@@ -723,11 +722,6 @@
 import { bytesToBase64 } from '@stdlib/base64';
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
-import {
-  colorHexToColorName,
-  colorMap,
-  colorNameToColorHex,
-} from 'src/code/pages/colors';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';

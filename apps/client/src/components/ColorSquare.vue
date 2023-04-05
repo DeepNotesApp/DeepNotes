@@ -1,6 +1,6 @@
 <template>
   <div
-    style="flex: 1; aspect-ratio: 1 / 1"
+    class="color-square"
     :style="{
       'background-color': colorMap()['ui'][color],
     }"
@@ -26,3 +26,14 @@ defineProps<{
   disable?: boolean;
 }>();
 </script>
+
+<style scoped>
+.color-square {
+  flex: 1;
+
+  aspect-ratio: 1 / 1;
+
+  width: 100%;
+  height: 100%;
+}
+</style>
