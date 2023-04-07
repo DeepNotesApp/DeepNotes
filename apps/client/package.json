@@ -83,7 +83,7 @@
     "zod": "3.19.1"
   },
   "devDependencies": {
-    "@intlify/vite-plugin-vue-i18n": "3.4.0",
+    "@intlify/unplugin-vue-i18n": "^0.10.0",
     "@quasar/app-vite": "npm:@deepnotes/quasar-app-vite@1.2.0",
     "@types/argon2-browser": "^1.18.1",
     "@types/color": "3.0.3",
