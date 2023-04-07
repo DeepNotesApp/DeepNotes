@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 
 import { createSmartComputed } from './smart-computed';

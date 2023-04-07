@@ -10,8 +10,6 @@
   "files": ["src/types/env.d.ts", "src/types/http.d.ts", "src/types/ws.d.ts"],
 
   "compilerOptions": {
-    "typeRoots": ["node_modules/@types"], // Needed for tests
-
     "baseUrl": ".",
 
     "rootDir": ".",

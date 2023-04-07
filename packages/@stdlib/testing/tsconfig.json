@@ -4,10 +4,10 @@
   "include": ["*.ts", "src/**/*.ts"],
 
   "compilerOptions": {
+    "types": ["vitest/globals"],
+
     "baseUrl": ".",
 
-    "rootDir": ".",
-
-    "typeRoots": ["node_modules/@types"] // Needed for tests
+    "rootDir": "."
   }
 }

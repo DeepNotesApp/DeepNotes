@@ -15,5 +15,6 @@ module.exports = {
     'commitlint.config.js',
     'list-duplicates.js',
     'vitest.config.ts',
+    'vite.config.ts',
   ],
 };

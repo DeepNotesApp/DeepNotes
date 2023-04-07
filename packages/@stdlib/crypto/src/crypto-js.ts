@@ -1,3 +1,5 @@
+import type CryptoJS from 'crypto-js';
+
 export function cryptoJsWordArrayToUint8Array(
   wordArray: CryptoJS.lib.WordArray,
 ) {

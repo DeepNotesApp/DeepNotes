@@ -4,8 +4,6 @@
   "extends": "tsconfig/base.json",
 
   "compilerOptions": {
-    "typeRoots": ["node_modules/@types"], // Needed for tests
-
     "baseUrl": ".",
 
     "rootDir": ".",

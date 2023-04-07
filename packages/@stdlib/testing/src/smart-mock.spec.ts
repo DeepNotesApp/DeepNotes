@@ -1,5 +1,3 @@
-import { describe, expect, it, vi } from 'vitest';
-
 import { createSmartMock } from './smart-mock';
 
 describe('Smart Mock', () => {

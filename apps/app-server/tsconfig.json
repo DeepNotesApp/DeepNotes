@@ -10,8 +10,6 @@
   "files": ["src/types/env.d.ts", "src/types/fastify.d.ts"],
 
   "compilerOptions": {
-    "typeRoots": ["node_modules/@types"], // Needed for tests
-
     "paths": {
       "src/*": ["src/*"],
 

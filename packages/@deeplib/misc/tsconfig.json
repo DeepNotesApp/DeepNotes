@@ -4,11 +4,11 @@
   "extends": "tsconfig/base.json",
 
   "compilerOptions": {
+    "types": ["vitest/globals"],
+
     "baseUrl": ".",
 
-    "rootDir": ".",
-
-    "typeRoots": ["node_modules/@types"] // Needed for tests
+    "rootDir": "."
   },
 
   "include": ["*.ts", "src/**/*.ts"]
