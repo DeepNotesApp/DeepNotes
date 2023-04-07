@@ -19,7 +19,6 @@ module.exports = {
 
   env: {
     node: true,
-    jest: true,
   },
 
   ignorePatterns: ['dist', 'node_modules', '.eslintrc.js', 'tsup.config.ts'],

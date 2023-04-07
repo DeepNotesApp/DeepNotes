@@ -6,7 +6,6 @@
     "lint": { "outputs": [] },
     "fix": { "cache": false },
     "test": { "outputs": [] },
-    "test:watch": { "cache": false },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]

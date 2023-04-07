@@ -1,3 +1,5 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import { createSmartMock } from './smart-mock';
 
 describe('Smart Mock', () => {
@@ -21,14 +23,14 @@ describe('Smart Mock', () => {
     expect(smartMock()).toBe(1);
   });
 
-  it('should be callable with Jest Mock', () => {
-    const jestFn = jest.fn(() => 1);
+  it('should be callable with Mock', () => {
+    const fn = vi.fn(() => 1);
 
-    const smartMock = createSmartMock(jestFn);
+    const smartMock = createSmartMock(fn);
 
-    expect(jestFn.mock.calls.length).toBe(0);
+    expect(fn.mock.calls.length).toBe(0);
     expect(smartMock()).toBe(1);
-    expect(jestFn.mock.calls.length).toBe(1);
+    expect(fn.mock.calls.length).toBe(1);
   });
 
   it('should allow deep access through function', () => {
