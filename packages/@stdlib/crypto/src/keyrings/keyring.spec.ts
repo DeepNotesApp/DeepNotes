@@ -1,5 +1,6 @@
 import { addHours } from '@stdlib/misc';
 import { pack } from 'msgpackr';
+import { describe } from 'vitest';
 
 import { DataLayer, wrapSymmetricKey } from '..';
 import { createKeyring } from './keyring';

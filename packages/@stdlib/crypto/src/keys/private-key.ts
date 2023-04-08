@@ -3,22 +3,10 @@ import sodium from 'libsodium-wrappers';
 
 import type { PublicKey } from './public-key';
 
-export function wrapPrivateKey(
-  value: Uint8Array,
-  params?: { locked?: boolean },
-) {
+export function wrapPrivateKey(value: Uint8Array) {
   return new (class PrivateKey {
     get value() {
-      if (params?.locked) {
-        throw new Error('Private key is locked.');
-      }
-
       return value;
-    }
-
-    lock() {
-      params ??= {};
-      params.locked = true;
     }
 
     encrypt(

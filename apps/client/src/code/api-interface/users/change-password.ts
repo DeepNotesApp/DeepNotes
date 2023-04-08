@@ -55,7 +55,7 @@ export async function changePassword({
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
   );
 
   const encryptedSymmetricKeyring = bytesToBase64(
@@ -73,7 +73,7 @@ export async function changePassword({
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
   );
 
   // Request password change

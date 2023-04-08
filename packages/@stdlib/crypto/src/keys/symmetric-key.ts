@@ -3,20 +3,10 @@ import sodium from 'libsodium-wrappers';
 
 export function wrapSymmetricKey(
   value = sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
-  params?: { locked?: boolean },
 ) {
   return new (class SymmetricKey {
     get value() {
-      if (params?.locked) {
-        throw new Error('Symmetric key is locked.');
-      }
-
       return value;
-    }
-
-    lock() {
-      params ??= {};
-      params.locked = true;
     }
 
     encrypt(

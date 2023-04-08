@@ -1,5 +1,5 @@
 import type { KeyPair, SymmetricKey } from '@stdlib/crypto';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
@@ -66,7 +66,7 @@ export function generateRandomUserKeys(
 ) {
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
@@ -113,7 +113,7 @@ export async function generateGroupValues({
 
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);

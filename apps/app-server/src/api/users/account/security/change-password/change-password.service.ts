@@ -60,7 +60,7 @@ export class ChangePasswordService {
             context: 'UserEncryptedPrivateKeyring',
             userId,
           },
-        }).fullValue,
+        }).wrappedValue,
         encrypted_symmetric_keyring: createSymmetricKeyring(
           base64ToBytes(encryptedSymmetricKeyring!),
         ).wrapSymmetric(passwordValues.key, {
@@ -68,7 +68,7 @@ export class ChangePasswordService {
             context: 'UserEncryptedSymmetricKeyring',
             userId,
           },
-        }).fullValue,
+        }).wrappedValue,
       },
       { dtrx },
     );

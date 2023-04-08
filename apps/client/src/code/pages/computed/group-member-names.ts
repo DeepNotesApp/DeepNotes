@@ -1,5 +1,5 @@
 import { hget } from '@deeplib/data/src/universal';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { bytesToText, splitStr, textToBytes } from '@stdlib/misc';
 import { createSmartComputedDict } from '@stdlib/vue';
 import { once } from 'lodash';
@@ -84,7 +84,7 @@ export const groupMemberNames = once(() =>
 
       const groupId = splitStr(key, ':', 2)[0];
 
-      const publicKeyring = createPublicKeyring(
+      const publicKeyring = createKeyring(
         await internals.realtime.globalCtx.hgetAsync(
           'group',
           groupId,

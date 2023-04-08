@@ -151,7 +151,7 @@ export class RotateKeysController {
                 context: 'UserEncryptedSymmetricKeyring',
                 userId,
               },
-            }).fullValue,
+            }).wrappedValue,
           ),
           userEncryptedPrivateKeyring: bytesToBase64(
             createPrivateKeyring(
@@ -161,7 +161,7 @@ export class RotateKeysController {
                 context: 'UserEncryptedPrivateKeyring',
                 userId,
               },
-            }).fullValue,
+            }).wrappedValue,
           ),
           userPublicKeyring: bytesToBase64Safe(user.public_keyring),
 
@@ -222,7 +222,7 @@ export class RotateKeysController {
                 context: 'UserEncryptedSymmetricKeyring',
                 userId,
               },
-            }).fullValue,
+            }).wrappedValue,
             encrypted_private_keyring: createSymmetricKeyring(
               base64ToBytes(body.userEncryptedPrivateKeyring!),
             ).wrapSymmetric(passwordValues.key, {
@@ -230,7 +230,7 @@ export class RotateKeysController {
                 context: 'UserEncryptedPrivateKeyring',
                 userId,
               },
-            }).fullValue,
+            }).wrappedValue,
             public_keyring: base64ToBytes(body.userPublicKeyring!),
 
             encrypted_default_note: base64ToBytes(

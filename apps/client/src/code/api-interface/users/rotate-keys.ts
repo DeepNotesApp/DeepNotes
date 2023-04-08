@@ -1,7 +1,7 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import {
+  createKeyring,
   createPrivateKeyring,
-  createPublicKeyring,
   createSymmetricKeyring,
   wrapKeyPair,
 } from '@stdlib/crypto';
@@ -62,7 +62,7 @@ export async function rotateUserKeys({ password }: { password: string }) {
       userId: authStore().userId,
     },
   });
-  const oldPublicKeyring = createPublicKeyring(
+  const oldPublicKeyring = createKeyring(
     base64ToBytes(keyRotationValues.userPublicKeyring),
   );
 
@@ -82,7 +82,7 @@ export async function rotateUserKeys({ password }: { password: string }) {
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
     ),
     userEncryptedPrivateKeyring: bytesToBase64(
       newPrivateKeyring.wrapSymmetric(derivedValues.masterKey, {
@@ -90,9 +90,9 @@ export async function rotateUserKeys({ password }: { password: string }) {
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
     ),
-    userPublicKeyring: bytesToBase64(newPublicKeyring.fullValue),
+    userPublicKeyring: bytesToBase64(newPublicKeyring.wrappedValue),
 
     userEncryptedDefaultNote: bytesToBase64(
       newSymmetricKeyring.encrypt(
@@ -192,12 +192,12 @@ export async function rotateUserKeys({ password }: { password: string }) {
             encryptedAccessKeyring: bytesToBase64(
               createSymmetricKeyring(base64ToBytes(encryptedAccessKeyring))
                 .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).fullValue,
+                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
             ),
             encryptedInternalKeyring: bytesToBase64(
               createSymmetricKeyring(base64ToBytes(encryptedInternalKeyring))
                 .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).fullValue,
+                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
             ),
           },
         ],
@@ -211,12 +211,12 @@ export async function rotateUserKeys({ password }: { password: string }) {
             encryptedAccessKeyring: bytesToBase64(
               createSymmetricKeyring(base64ToBytes(encryptedAccessKeyring))
                 .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).fullValue,
+                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
             ),
             encryptedInternalKeyring: bytesToBase64(
               createSymmetricKeyring(base64ToBytes(encryptedInternalKeyring))
                 .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).fullValue,
+                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
             ),
           },
         ],
