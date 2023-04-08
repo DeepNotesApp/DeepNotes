@@ -6,7 +6,8 @@
 
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
@@ -15,9 +16,15 @@
     }
   },
 
-  "references": [
-    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
-  ],
+  "references": [{ "path": "../../../packages/@stdlib/misc/tsconfig.json" }],
 
-  "include": ["*.ts", "src/**/*.ts"]
+  "include": ["*.ts", "src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

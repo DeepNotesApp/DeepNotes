@@ -8,7 +8,8 @@
 
     "baseUrl": ".",
 
-    "rootDir": "."
+    "rootDir": "src",
+    "outDir": "dist"
   },
 
   "include": ["*.ts", "src/**/*.ts"]
