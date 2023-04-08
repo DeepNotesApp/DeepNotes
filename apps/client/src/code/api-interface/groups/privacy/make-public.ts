@@ -10,6 +10,6 @@ export async function makeGroupPublic(groupId: string) {
   }
 
   await api().post(`/api/groups/${groupId}/privacy/make-public`, {
-    accessKeyring: bytesToBase64(accessKeyring.fullValue),
+    accessKeyring: bytesToBase64(accessKeyring.wrappedValue),
   });
 }

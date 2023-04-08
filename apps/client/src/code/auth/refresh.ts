@@ -4,8 +4,8 @@ import {
   bytesToBase64,
 } from '@stdlib/base64';
 import {
+  createKeyring,
   createPrivateKeyring,
-  createPublicKeyring,
   createSymmetricKeyring,
   wrapKeyPair,
   wrapSymmetricKey,
@@ -80,7 +80,7 @@ export async function tryRefreshTokens(): Promise<void> {
       base64ToBytes(authStore().newSessionKey || response?.newSessionKey!),
     );
 
-    const publicKeyring = createPublicKeyring(
+    const publicKeyring = createKeyring(
       base64ToBytesSafe(internals.storage.getItem('publicKeyring'))!,
     );
 
@@ -114,7 +114,7 @@ export async function tryRefreshTokens(): Promise<void> {
             context: 'SessionUserPrivateKeyring',
             userId: authStore().userId,
           },
-        }).fullValue,
+        }).wrappedValue,
       ),
     );
 
@@ -126,7 +126,7 @@ export async function tryRefreshTokens(): Promise<void> {
             context: 'SessionUserSymmetricKeyring',
             userId: authStore().userId,
           },
-        }).fullValue,
+        }).wrappedValue,
       ),
     );
 

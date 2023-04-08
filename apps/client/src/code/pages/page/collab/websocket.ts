@@ -222,7 +222,7 @@ export const PageWebsocket = once(
                 context: 'PageKeyring',
                 pageId: this.page.id,
               },
-            }).fullValue,
+            }).wrappedValue,
           );
 
           encoding.writeVarUint8Array(

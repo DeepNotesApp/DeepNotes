@@ -292,7 +292,7 @@ export async function createUser({
         context: 'UserEncryptedPrivateKeyring',
         userId,
       },
-    }).fullValue,
+    }).wrappedValue,
     encrypted_symmetric_keyring: createSymmetricKeyring(
       base64ToBytes(userEncryptedSymmetricKeyring),
     ).wrapSymmetric(passwordValues.key, {
@@ -300,7 +300,7 @@ export async function createUser({
         context: 'UserEncryptedSymmetricKeyring',
         userId,
       },
-    }).fullValue,
+    }).wrappedValue,
 
     encrypted_name: base64ToBytes(userEncryptedName),
     encrypted_default_note: base64ToBytes(userEncryptedDefaultNote),

@@ -75,7 +75,7 @@ export async function login({
             context: 'SessionUserPrivateKeyring',
             userId,
           },
-        }).fullValue,
+        }).wrappedValue,
     ),
   );
   internals.storage.setItem(
@@ -93,7 +93,7 @@ export async function login({
             context: 'SessionUserSymmetricKeyring',
             userId,
           },
-        }).fullValue,
+        }).wrappedValue,
     ),
   );
 

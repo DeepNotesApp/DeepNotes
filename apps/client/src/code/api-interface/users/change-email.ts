@@ -66,7 +66,7 @@ export async function changeEmail({
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
   );
 
   const encryptedSymmetricKeyring = bytesToBase64(
@@ -84,7 +84,7 @@ export async function changeEmail({
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
+      }).wrappedValue,
   );
 
   // Request email change

@@ -1,5 +1,5 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
 import syncedStore, { getYjsDoc, Y } from '@syncedstore/core';
@@ -150,7 +150,7 @@ export async function createNotifications({
                 encryptedSymmetricKey: bytesToBase64(
                   internals.keyPair.encrypt(
                     targetSymmetricKey.value,
-                    createPublicKeyring(
+                    createKeyring(
                       base64ToBytes(recipients[patientId].publicKeyring),
                     ),
                   ),
@@ -193,7 +193,7 @@ export async function createNotifications({
                     encryptedSymmetricKey: bytesToBase64(
                       internals.keyPair.encrypt(
                         observersSymmetricKey.value,
-                        createPublicKeyring(base64ToBytes(publicKeyring)),
+                        createKeyring(base64ToBytes(publicKeyring)),
                       ),
                     ),
                   },

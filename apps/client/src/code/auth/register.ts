@@ -1,5 +1,5 @@
 import { bytesToBase64 } from '@stdlib/base64';
-import type { PublicKeyring } from '@stdlib/crypto';
+import type { Keyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
 import { pack } from 'msgpackr';
@@ -33,14 +33,14 @@ export async function getRegistrationValues(
     loginHash: bytesToBase64(derivedUserKeys.loginHash),
 
     userPublicKeyring: bytesToBase64(
-      (randomUserKeys.keyPair.publicKey as PublicKeyring).fullValue,
+      (randomUserKeys.keyPair.publicKey as Keyring).wrappedValue,
     ),
     userEncryptedPrivateKeyring: bytesToBase64(
-      randomUserKeys.encryptedPrivateKeyring.fullValue,
+      randomUserKeys.encryptedPrivateKeyring.wrappedValue,
     ),
 
     userEncryptedSymmetricKeyring: bytesToBase64(
-      randomUserKeys.encryptedSymmetricKeyring.fullValue,
+      randomUserKeys.encryptedSymmetricKeyring.wrappedValue,
     ),
 
     userEncryptedName: bytesToBase64(
@@ -85,23 +85,23 @@ export async function getRegistrationValues(
     ),
 
     groupEncryptedAccessKeyring: bytesToBase64(
-      groupValues.finalAccessKeyring.fullValue,
+      groupValues.finalAccessKeyring.wrappedValue,
     ),
     groupEncryptedInternalKeyring: bytesToBase64(
-      groupValues.encryptedInternalKeyring.fullValue,
+      groupValues.encryptedInternalKeyring.wrappedValue,
     ),
     groupEncryptedContentKeyring: bytesToBase64(
-      groupValues.encryptedContentKeyring.fullValue,
+      groupValues.encryptedContentKeyring.wrappedValue,
     ),
 
     groupPublicKeyring: bytesToBase64(
-      (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
+      (groupValues.keyPair.publicKey as Keyring).wrappedValue,
     ),
     groupEncryptedPrivateKeyring: bytesToBase64(
-      groupValues.encryptedPrivateKeyring.fullValue,
+      groupValues.encryptedPrivateKeyring.wrappedValue,
     ),
 
-    pageEncryptedSymmetricKeyring: bytesToBase64(pageKeyring.fullValue),
+    pageEncryptedSymmetricKeyring: bytesToBase64(pageKeyring.wrappedValue),
     pageEncryptedRelativeTitle: bytesToBase64(
       pageKeyring.encrypt(textToBytes('Main page'), {
         padding: true,

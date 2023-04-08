@@ -1,5 +1,5 @@
 import { bytesToBase64, bytesToBase64Safe } from '@stdlib/base64';
-import type { PublicKeyring, SymmetricKeyring } from '@stdlib/crypto';
+import type { Keyring, SymmetricKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
@@ -114,20 +114,20 @@ export async function createPage(
     request.groupIsPublic = groupIsPublic;
 
     request.accessKeyring = bytesToBase64(
-      groupValues.finalAccessKeyring.fullValue,
+      groupValues.finalAccessKeyring.wrappedValue,
     );
     request.groupEncryptedInternalKeyring = bytesToBase64(
-      groupValues.encryptedInternalKeyring.fullValue,
+      groupValues.encryptedInternalKeyring.wrappedValue,
     );
     request.groupEncryptedContentKeyring = bytesToBase64(
-      groupValues.encryptedContentKeyring.fullValue,
+      groupValues.encryptedContentKeyring.wrappedValue,
     );
 
     request.groupPublicKeyring = bytesToBase64(
-      (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
+      (groupValues.keyPair.publicKey as Keyring).wrappedValue,
     );
     request.groupEncryptedPrivateKeyring = bytesToBase64(
-      groupValues.encryptedPrivateKeyring.fullValue,
+      groupValues.encryptedPrivateKeyring.wrappedValue,
     );
 
     request.groupMemberEncryptedName = bytesToBase64(
@@ -179,7 +179,7 @@ export async function createPage(
         context: 'PageKeyring',
         pageId: request.pageId,
       },
-    }).fullValue,
+    }).wrappedValue,
   );
   request.pageEncryptedRelativeTitle = bytesToBase64(
     pageKeyring.encrypt(textToBytes(pageRelativeTitle), {

@@ -1,7 +1,7 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { bytesToBase64Safe } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
@@ -36,11 +36,11 @@ export async function sendJoinInvitation(
     agentName,
   ] = await Promise.all([
     (async () =>
-      createPublicKeyring(
+      createKeyring(
         await internals.realtime.hget('user', inviteeUserId, 'public-keyring'),
       ))(),
     (async () =>
-      createPublicKeyring(
+      createKeyring(
         await internals.realtime.hget('group', groupId, 'public-keyring'),
       ))(),
 
@@ -64,13 +64,13 @@ export async function sendJoinInvitation(
 
       encryptedAccessKeyring: bytesToBase64(
         accessKeyring.wrapAsymmetric(internals.keyPair, inviteePublicKeyring)
-          .fullValue,
+          .wrappedValue,
       ),
       encryptedInternalKeyring: bytesToBase64(
         groupInternalKeyring.wrapAsymmetric(
           internals.keyPair,
           inviteePublicKeyring,
-        ).fullValue,
+        ).wrappedValue,
       ),
 
       userEncryptedName: bytesToBase64Safe(
