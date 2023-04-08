@@ -4,21 +4,21 @@
   "files": [],
 
   "references": [
-    { "path": "apps/app-server/tsconfig.build.json" },
-    { "path": "apps/realtime-server/tsconfig.build.json" },
-    { "path": "apps/collab-server/tsconfig.build.json" },
-    { "path": "apps/scheduler/tsconfig.build.json" },
-    { "path": "packages/@deeplib/data/tsconfig.build.json" },
-    { "path": "packages/@deeplib/db/tsconfig.build.json" },
-    { "path": "packages/@deeplib/misc/tsconfig.build.json" },
-    { "path": "packages/@stdlib/base64/tsconfig.build.json" },
-    { "path": "packages/@stdlib/color/tsconfig.build.json" },
-    { "path": "packages/@stdlib/crypto/tsconfig.build.json" },
-    { "path": "packages/@stdlib/data/tsconfig.build.json" },
-    { "path": "packages/@stdlib/db/tsconfig.build.json" },
-    { "path": "packages/@stdlib/misc/tsconfig.build.json" },
-    { "path": "packages/@stdlib/nestjs/tsconfig.build.json" },
-    { "path": "packages/@stdlib/testing/tsconfig.build.json" },
-    { "path": "packages/@stdlib/vue/tsconfig.build.json" }
+    { "path": "apps/app-server/tsconfig.json" },
+    { "path": "apps/realtime-server/tsconfig.json" },
+    { "path": "apps/collab-server/tsconfig.json" },
+    { "path": "apps/scheduler/tsconfig.json" },
+    { "path": "packages/@deeplib/data/tsconfig.json" },
+    { "path": "packages/@deeplib/db/tsconfig.json" },
+    { "path": "packages/@deeplib/misc/tsconfig.json" },
+    { "path": "packages/@stdlib/base64/tsconfig.json" },
+    { "path": "packages/@stdlib/color/tsconfig.json" },
+    { "path": "packages/@stdlib/crypto/tsconfig.json" },
+    { "path": "packages/@stdlib/data/tsconfig.json" },
+    { "path": "packages/@stdlib/db/tsconfig.json" },
+    { "path": "packages/@stdlib/misc/tsconfig.json" },
+    { "path": "packages/@stdlib/nestjs/tsconfig.json" },
+    { "path": "packages/@stdlib/testing/tsconfig.json" },
+    { "path": "packages/@stdlib/vue/tsconfig.json" }
   ]
 }

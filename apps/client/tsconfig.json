@@ -17,15 +17,23 @@
   },
 
   "references": [
-    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
-    { "path": "../../packages/@deeplib/misc/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/color/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/crypto/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/vue/tsconfig.build.json" }
+    { "path": "../../packages/@deeplib/data/tsconfig.json" },
+    { "path": "../../packages/@deeplib/misc/tsconfig.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.json" },
+    { "path": "../../packages/@stdlib/color/tsconfig.json" },
+    { "path": "../../packages/@stdlib/crypto/tsconfig.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.json" },
+    { "path": "../../packages/@stdlib/vue/tsconfig.json" }
   ],
 
-  "include": ["*.ts", "*.js", "src*/**/*.ts", "src/**/*.vue"]
+  "include": ["*.ts", "*.js", "src*/**/*.ts", "src/**/*.vue"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

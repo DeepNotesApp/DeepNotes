@@ -4,7 +4,8 @@
   "compilerOptions": {
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
@@ -14,9 +15,17 @@
   },
 
   "references": [
-    { "path": "../../../packages/@stdlib/base64/tsconfig.build.json" },
-    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
+    { "path": "../../../packages/@stdlib/base64/tsconfig.json" },
+    { "path": "../../../packages/@stdlib/misc/tsconfig.json" }
   ],
 
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

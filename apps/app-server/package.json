@@ -75,7 +75,7 @@
   "license": "UNLICENSED",
   "private": true,
   "scripts": {
-    "build": "nest build && tsc-alias -p tsconfig.build.json",
+    "build": "nest build && tsc-alias -p tsconfig.json",
     "bundle": "tsup",
     "clean": "rimraf ./dist *.tsbuildinfo",
     "dev": "ts-node-dev -r tsconfig-paths/register ./src/main.ts",
@@ -84,8 +84,8 @@
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "npkill": "rimraf ./node_modules",
     "preinstall": "npx only-allow pnpm",
-    "repo:build": "tsc-alias -p tsconfig.build.json",
-    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch",
+    "repo:build": "tsc-alias -p tsconfig.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
     "start": "nest start",
     "test": "vitest"
   }
