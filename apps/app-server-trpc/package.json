@@ -1,0 +1,41 @@
+{
+  "name": "deepnotes-app-server-trpc",
+  "version": "1.0.0",
+  "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
+  "dependencies": {
+    "@deeplib/data": "workspace:1.0.0",
+    "@deeplib/db": "workspace:1.0.0",
+    "@fastify/cors": "8.2.0",
+    "@fastify/helmet": "10.0.2",
+    "@stdlib/base64": "workspace:1.0.0",
+    "@stdlib/data": "workspace:1.0.0",
+    "@stdlib/misc": "workspace:1.0.0",
+    "@trpc/server": "^10.19.1",
+    "dotenv": "16.0.3",
+    "dotenv-expand": "9.0.0",
+    "fastify": "4.10.0",
+    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
+    "knex": "2.3.0",
+    "lodash": "4.17.21",
+    "objection": "3.0.1",
+    "zod": "3.19.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "4.14.189",
+    "tsup": "6.5.0"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
+    "bundle": "tsup",
+    "clean": "rimraf ./dist *.tsbuildinfo",
+    "dev": "ts-node-dev -r tsconfig-paths/register ./src/index.ts",
+    "fix": "eslint --fix --ext .js,.ts,.vue ./",
+    "npkill": "rimraf ./node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "repo:build": "tsc-alias -p tsconfig.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
+    "start": "ts-node -r tsconfig-paths/register ./src/index.ts"
+  }
+}

@@ -9,8 +9,16 @@
     "baseUrl": ".",
 
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
   },
+
+  "references": [{ "path": "../../../packages/@stdlib/misc/tsconfig.json" }],
 
   "include": ["*.ts", "src/**/*.ts"]
 }

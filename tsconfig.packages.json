@@ -5,8 +5,10 @@
 
   "references": [
     { "path": "apps/app-server/tsconfig.json" },
-    { "path": "apps/realtime-server/tsconfig.json" },
+    { "path": "apps/app-server-trpc/tsconfig.json" },
     { "path": "apps/collab-server/tsconfig.json" },
+    { "path": "apps/manager/tsconfig.json" },
+    { "path": "apps/realtime-server/tsconfig.json" },
     { "path": "apps/scheduler/tsconfig.json" },
     { "path": "packages/@deeplib/data/tsconfig.json" },
     { "path": "packages/@deeplib/db/tsconfig.json" },

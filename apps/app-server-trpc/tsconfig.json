@@ -1,35 +1,40 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
 
-  "extends": "@quasar/app-vite/tsconfig-preset",
+  "extends": "tsconfig/base.json",
+
+  // Necessary for ts-node-dev to work
+  "ts-node": {
+    "files": true
+  },
+  "files": ["src/env.d.ts"],
 
   "compilerOptions": {
     "baseUrl": ".",
 
+    "rootDir": "src",
+    "outDir": "dist",
+
     "paths": {
       "src/*": ["src/*"],
 
-      "deepnotes-app-server-trpc": ["../app-server-trpc/src"],
       "@deeplib/*": ["../../packages/@deeplib/*/src"],
       "@stdlib/*": ["../../packages/@stdlib/*/src"]
-    },
-
-    "allowSyntheticDefaultImports": true
+    }
   },
 
   "references": [
-    { "path": "../app-server-trpc/tsconfig.json" },
     { "path": "../../packages/@deeplib/data/tsconfig.json" },
+    { "path": "../../packages/@deeplib/db/tsconfig.json" },
     { "path": "../../packages/@deeplib/misc/tsconfig.json" },
     { "path": "../../packages/@stdlib/base64/tsconfig.json" },
-    { "path": "../../packages/@stdlib/color/tsconfig.json" },
-    { "path": "../../packages/@stdlib/crypto/tsconfig.json" },
     { "path": "../../packages/@stdlib/data/tsconfig.json" },
+    { "path": "../../packages/@stdlib/db/tsconfig.json" },
     { "path": "../../packages/@stdlib/misc/tsconfig.json" },
-    { "path": "../../packages/@stdlib/vue/tsconfig.json" }
+    { "path": "../../packages/@stdlib/redlock/tsconfig.json" }
   ],
 
-  "include": ["*.ts", "*.js", "src*/**/*.ts", "src/**/*.vue"],
+  "include": ["src/**/*.ts"],
 
   "tsc-alias": {
     "replacers": {
