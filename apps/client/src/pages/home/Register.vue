@@ -151,6 +151,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { enterDemo } from 'src/code/auth/demo';
 import { getRegistrationValues } from 'src/code/auth/register';
 import { deriveUserValues } from 'src/code/crypto';
+import { trpcClient } from 'src/code/trpc';
 import { asyncPrompt, handleError } from 'src/code/utils';
 
 useMeta(() => ({
@@ -221,10 +222,16 @@ async function register() {
 
     const derivedKeys = await deriveUserValues(email.value, password.value);
 
-    await api().post('/auth/register', {
-      email: email.value,
+    const registrationValues = await getRegistrationValues(
+      derivedKeys,
+      userName.value,
+    );
 
-      ...(await getRegistrationValues(derivedKeys, userName.value)),
+    await trpcClient.users.register.mutate({
+      email: email.value,
+      loginHash: derivedKeys.loginHash,
+
+      ...registrationValues,
     });
 
     internals.sessionStorage.setItem('email', email.value);

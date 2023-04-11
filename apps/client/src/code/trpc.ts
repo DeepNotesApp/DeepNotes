@@ -1,7 +1,10 @@
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import type { AppRouter } from 'deepnotes-app-server-trpc';
+import superjson from 'superjson';
 
 export const trpcClient = createTRPCProxyClient<AppRouter>({
+  transformer: superjson,
+
   links: [
     httpBatchLink({
       url: process.env.APP_SERVER_TRPC_URL,

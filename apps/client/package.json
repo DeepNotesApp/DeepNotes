@@ -74,6 +74,7 @@
     "qrcode": "1.5.1",
     "quasar": "npm:@deepnotes/quasar@2.11.6",
     "serialize-javascript": "6.0.0",
+    "superjson": "^1.12.2",
     "unilogr": "0.0.27",
     "unique-names-generator": "4.7.1",
     "vue": "3.2.47",

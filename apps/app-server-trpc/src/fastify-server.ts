@@ -1,10 +1,11 @@
+import FastifyCookie from '@fastify/cookie';
 import FastifyCors from '@fastify/cors';
 import FastifyHelmet from '@fastify/helmet';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 
-import { createContext } from './trpc-context';
-import { appRouter } from './trpc-router';
+import { createContext } from './trpc/context';
+import { appRouter } from './trpc/router';
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -16,6 +17,8 @@ export async function buildServer() {
   });
 
   await fastify.register(FastifyHelmet);
+
+  await fastify.register(FastifyCookie);
 
   // CORS
 
@@ -43,7 +46,7 @@ export async function buildServer() {
     prefix: '/trpc',
 
     trpcOptions: {
-      router: appRouter,
+      router: appRouter(),
 
       createContext,
     },

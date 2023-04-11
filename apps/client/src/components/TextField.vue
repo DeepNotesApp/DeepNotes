@@ -19,6 +19,8 @@
 import type { QInputProps } from 'quasar';
 
 interface Props extends QInputProps {
+  accept?: string;
+
   modelValue: any;
   copyBtn?: boolean;
   readonly?: boolean;

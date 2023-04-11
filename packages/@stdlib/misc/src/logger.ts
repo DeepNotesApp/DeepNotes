@@ -13,6 +13,8 @@ import {
 export const mainLogger = once(
   () =>
     new Logger([
+      markSlot('filters'),
+
       capitalizeField('level'),
       colorizeField('level'),
       addTimestamp(),
