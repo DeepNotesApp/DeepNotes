@@ -3,7 +3,7 @@ import { UserModel } from '@deeplib/db';
 import { isNanoID, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
-import type { Context } from 'src/trpc/context';
+import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { createUser } from 'src/utils';
 import { z } from 'zod';
@@ -39,29 +39,26 @@ export type RegistrationSchema = z.output<
   ReturnType<typeof registrationSchema>
 >;
 
-const procedureSchema = z
-  .object({
-    email: z
-      .string()
-      .regex(w3cEmailRegex)
-      .transform((email) => email.toLowerCase()),
-    loginHash: z.instanceof(Uint8Array),
-  })
-  .merge(registrationSchema());
+const baseProcedure = publicProcedure.input(
+  z
+    .object({
+      email: z
+        .string()
+        .regex(w3cEmailRegex)
+        .transform((email) => email.toLowerCase()),
+      loginHash: z.instanceof(Uint8Array),
+    })
+    .merge(registrationSchema()),
+);
 
 export const registerProcedure = once(() =>
-  publicProcedure
-    .input(procedureSchema)
-    .mutation(async (opts) => register(opts)),
+  baseProcedure.mutation(async (opts) => register(opts)),
 );
 
 export async function register({
   ctx,
   input,
-}: {
-  ctx: Context;
-  input: z.output<typeof procedureSchema>;
-}) {
+}: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
     // Get user
 

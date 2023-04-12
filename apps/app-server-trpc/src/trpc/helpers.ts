@@ -1,7 +1,13 @@
+import type { ProcedureBuilder } from '@trpc/server';
 import { TRPCError } from '@trpc/server';
 import { verifyAccessJWT } from 'src/jwt';
 
 import { trpc } from './server';
+
+export type InferProcedureResolver<TBuilder extends ProcedureBuilder<any>> =
+  Parameters<TBuilder['query']>[0];
+export type InferProcedureOpts<TBuilder extends ProcedureBuilder<any>> =
+  Parameters<InferProcedureResolver<TBuilder>>[0];
 
 function createAuthMiddleware({ optional }: { optional: boolean }) {
   return trpc.middleware(async ({ ctx, next }) => {

@@ -365,12 +365,15 @@ importers:
       objection:
         specifier: 3.0.1
         version: 3.0.1(knex@2.3.0)
+      otplib:
+        specifier: 12.0.1
+        version: 12.0.1
       sib-api-v3-typescript:
         specifier: 2.2.2
         version: 2.2.2
       superjson:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: npm:@deepnotes/superjson@1.12.4
+        version: /@deepnotes/superjson@1.12.4
       unilogr:
         specifier: 0.0.27
         version: 0.0.27
@@ -601,8 +604,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       superjson:
-        specifier: ^1.12.2
-        version: 1.12.2
+        specifier: npm:@deepnotes/superjson@1.12.4
+        version: /@deepnotes/superjson@1.12.4
       unilogr:
         specifier: 0.0.27
         version: 0.0.27
@@ -1680,6 +1683,13 @@ packages:
 
   /@deepnotes/simple-lru-cache@0.0.2:
     resolution: {integrity: sha512-jD3J8lvxoq2xKgsTXD7GwWU02fBqrdpIXtIAqdb/yxbmGxByt7BrDGnaUTRF6STVq9lTri7bQmlWq+qqF+zHog==}
+    dev: false
+
+  /@deepnotes/superjson@1.12.4:
+    resolution: {integrity: sha512-5qT4by0h8kzPy59adyvlp6y9MQri9jAm5rCNuB9boMpauibceeetbUoMU59fPJZhdArKEndhiMvGss5sp/+6SA==}
+    engines: {node: '>=10'}
+    dependencies:
+      copy-anything: 3.0.3
     dev: false
 
   /@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(prosemirror-model@1.18.2)(prosemirror-state@1.4.2)(prosemirror-view@1.29.1)(y-protocols@1.0.5)(yjs@13.5.42):
@@ -11139,13 +11149,6 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
-
-  /superjson@1.12.2:
-    resolution: {integrity: sha512-ugvUo9/WmvWOjstornQhsN/sR9mnGtWGYeTxFuqLb4AiT4QdUavjGFRALCPKWWnAiUJ4HTpytj5e0t5HoMRkXg==}
-    engines: {node: '>=10'}
-    dependencies:
-      copy-anything: 3.0.3
-    dev: false
 
   /supertest@6.3.1:
     resolution: {integrity: sha512-hRohNeIfk/cA48Cxpa/w48hktP6ZaRqXb0QV5rLvW0C7paRsBU3Q5zydzYrslOJtj/gd48qx540jKtcs6vG1fQ==}
