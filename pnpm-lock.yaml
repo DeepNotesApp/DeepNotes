@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-overrides:
-  vite: ^3.0.0
-  '@vitejs/plugin-vue': ^3.0.0
-
 patchedDependencies:
   dotenv-expand@9.0.0:
     hash: adqtadvolhkco6cfvcsvmd42ua
@@ -634,9 +630,9 @@ importers:
         specifier: 3.19.1
         version: 3.19.1
     devDependencies:
-      '@intlify/unplugin-vue-i18n':
-        specifier: ^0.10.0
-        version: 0.10.0(vue-i18n@9.2.2)
+      '@intlify/vite-plugin-vue-i18n':
+        specifier: 3.4.0
+        version: 3.4.0(vite@2.9.15)(vue-i18n@9.2.2)
       '@quasar/app-vite':
         specifier: npm:@deepnotes/quasar-app-vite@1.2.0
         version: /@deepnotes/quasar-app-vite@1.2.0(@deepnotes/quasar@2.11.6)(electron-builder@22.4.0)(electron-packager@15.2.0)(eslint@8.27.0)(pinia@2.0.24)(vue-router@4.1.6)(vue@3.2.47)
@@ -695,8 +691,251 @@ importers:
         specifier: 0.22.9
         version: 0.22.9(vue@3.2.47)
       vite:
-        specifier: ^3.0.0
-        version: 3.0.0(sass@1.32.12)
+        specifier: 2.9.15
+        version: 2.9.15(sass@1.32.12)
+
+  apps/client/dist/ssr:
+    dependencies:
+      '@_ueberdosis/prosemirror-tables':
+        specifier: 1.1.3
+        version: 1.1.3
+      '@deeplib/data':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@deeplib/data
+      '@deeplib/misc':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@deeplib/misc
+      '@quasar/extras':
+        specifier: 1.15.11
+        version: 1.15.11
+      '@stdlib/base64':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/base64
+      '@stdlib/color':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/color
+      '@stdlib/crypto':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/crypto
+      '@stdlib/data':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/data
+      '@stdlib/misc':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/misc
+      '@stdlib/vue':
+        specifier: workspace:1.0.0
+        version: link:../../../../packages/@stdlib/vue
+      '@stripe/stripe-js':
+        specifier: 1.46.0
+        version: 1.46.0
+      '@syncedstore/core':
+        specifier: 0.4.2
+        version: 0.4.2(yjs@13.5.42)
+      '@tiptap/core':
+        specifier: 2.0.0-beta.217
+        version: 2.0.0-beta.217(@tiptap/pm@2.0.2)
+      '@tiptap/extension-code-block-lowlight':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(@tiptap/extension-code-block@2.0.2)
+      '@tiptap/extension-collaboration':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(prosemirror-model@1.18.2)(prosemirror-view@1.29.1)(y-protocols@1.0.5)(yjs@13.5.42)
+      '@tiptap/extension-collaboration-cursor':
+        specifier: npm:@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202
+        version: /@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(prosemirror-model@1.18.2)(prosemirror-state@1.4.2)(prosemirror-view@1.29.1)(y-protocols@1.0.5)(yjs@13.5.42)
+      '@tiptap/extension-highlight':
+        specifier: ^2.0.1
+        version: 2.0.1(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-horizontal-rule':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-image':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-link':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-subscript':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-superscript':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-table':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-table-cell':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-table-header':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-table-row':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-task-item':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(prosemirror-model@1.18.2)
+      '@tiptap/extension-task-list':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-text-align':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-underline':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/starter-kit':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/pm@2.0.2)
+      '@tiptap/vue-3':
+        specifier: 2.0.0-beta.202
+        version: 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)(vue@3.2.47)
+      '@trpc/client':
+        specifier: 10.19.1
+        version: 10.19.1(@trpc/server@10.19.1)
+      '@types/marked':
+        specifier: 4.0.8
+        version: 4.0.8
+      '@vueuse/core':
+        specifier: 9.5.0
+        version: 9.5.0(vue@3.2.47)
+      '@zxcvbn-ts/core':
+        specifier: 2.1.0
+        version: 2.1.0
+      '@zxcvbn-ts/language-common':
+        specifier: 2.0.1
+        version: 2.0.1
+      '@zxcvbn-ts/language-en':
+        specifier: 2.1.0
+        version: 2.1.0
+      argon2-browser:
+        specifier: 1.18.0
+        version: 1.18.0
+      axios:
+        specifier: 0.27.2
+        version: 0.27.2
+      color:
+        specifier: 4.2.3
+        version: 4.2.3
+      compression:
+        specifier: ^1.7.4
+        version: 1.7.4
+      cookie:
+        specifier: 0.5.0
+        version: 0.5.0
+      crypto-js:
+        specifier: 4.1.1
+        version: 4.1.1
+      deepnotes-app-server-trpc:
+        specifier: workspace:1.0.0
+        version: link:../../../app-server-trpc
+      dotenv-expand:
+        specifier: 9.0.0
+        version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
+      downloadjs:
+        specifier: 1.4.7
+        version: 1.4.7
+      express:
+        specifier: ^4.17.3
+        version: 4.18.2
+      highlight.js:
+        specifier: 11.6.0
+        version: 11.6.0
+      html2canvas:
+        specifier: 1.4.1
+        version: 1.4.1
+      ioredis:
+        specifier: npm:@deepnotes/ioredis@5.3.1
+        version: /@deepnotes/ioredis@5.3.1
+      js-base64:
+        specifier: 3.7.3
+        version: 3.7.3
+      katex:
+        specifier: 0.16.4
+        version: 0.16.4
+      lib0:
+        specifier: 0.2.53
+        version: 0.2.53
+      libsodium-wrappers:
+        specifier: 0.7.10
+        version: 0.7.10
+      lodash:
+        specifier: 4.17.21
+        version: 4.17.21
+      lowlight:
+        specifier: 2.7.0
+        version: 2.7.0
+      marked:
+        specifier: 4.2.5
+        version: 4.2.5
+      msgpackr:
+        specifier: 1.8.0
+        version: 1.8.0
+      nanoid:
+        specifier: 3.3.4
+        version: 3.3.4
+      objection:
+        specifier: 3.0.1
+        version: 3.0.1(knex@2.3.0)
+      pinia:
+        specifier: 2.0.24
+        version: 2.0.24(typescript@4.8.3)(vue@3.2.47)
+      process:
+        specifier: 0.11.10
+        version: 0.11.10
+      prom-client:
+        specifier: 14.2.0
+        version: 14.2.0
+      prosemirror-model:
+        specifier: 1.18.2
+        version: 1.18.2
+      prosemirror-state:
+        specifier: 1.4.2
+        version: 1.4.2
+      prosemirror-view:
+        specifier: 1.29.1
+        version: 1.29.1
+      qrcode:
+        specifier: 1.5.1
+        version: 1.5.1
+      quasar:
+        specifier: npm:@deepnotes/quasar@2.11.6
+        version: /@deepnotes/quasar@2.11.6
+      serialize-javascript:
+        specifier: ^6.0.0
+        version: 6.0.0
+      superjson:
+        specifier: npm:@deepnotes/superjson@1.12.4
+        version: /@deepnotes/superjson@1.12.4
+      unilogr:
+        specifier: 0.0.27
+        version: 0.0.27
+      unique-names-generator:
+        specifier: 4.7.1
+        version: 4.7.1
+      vue:
+        specifier: 3.2.47
+        version: 3.2.47
+      vue-i18n:
+        specifier: 9.2.2
+        version: 9.2.2(vue@3.2.47)
+      vue-router:
+        specifier: 4.1.6
+        version: 4.1.6(vue@3.2.47)
+      y-prosemirror:
+        specifier: 1.0.20
+        version: 1.0.20(prosemirror-model@1.18.2)(prosemirror-state@1.4.2)(prosemirror-view@1.29.1)(y-protocols@1.0.5)(yjs@13.5.42)
+      y-protocols:
+        specifier: 1.0.5
+        version: 1.0.5
+      yjs:
+        specifier: 13.5.42
+        version: 13.5.42
+      zod:
+        specifier: 3.19.1
+        version: 3.19.1
 
   apps/client/src-capacitor:
     dependencies:
@@ -1205,10 +1444,10 @@ packages:
   /@_ueberdosis/prosemirror-tables@1.1.3:
     resolution: {integrity: sha512-su3pbFi1DT89g6Cuh72TE0MWWKHmWgHcQJ3ODRkm6XfIppWaGpU49t02ur3sgJc7hUhfQXjB93aSkDgOmIii2w==}
     dependencies:
-      prosemirror-keymap: 1.2.0
+      prosemirror-keymap: 1.2.1
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
-      prosemirror-transform: 1.7.0
+      prosemirror-transform: 1.7.1
       prosemirror-view: 1.29.1
     dev: false
 
@@ -1628,13 +1867,13 @@ packages:
         optional: true
     dependencies:
       '@quasar/fastclick': 1.1.5
-      '@quasar/vite-plugin': 1.3.0(@deepnotes/quasar@2.11.6)(@vitejs/plugin-vue@3.2.0)(vite@3.0.0)(vue@3.2.47)
+      '@quasar/vite-plugin': 1.3.0(@deepnotes/quasar@2.11.6)(@vitejs/plugin-vue@2.3.4)(vite@2.9.15)(vue@3.2.47)
       '@rollup/pluginutils': 4.2.1
       '@types/chrome': 0.0.208
       '@types/compression': 1.7.2
       '@types/cordova': 0.0.34
       '@types/express': 4.17.14
-      '@vitejs/plugin-vue': 3.2.0(vite@3.0.0)(vue@3.2.47)
+      '@vitejs/plugin-vue': 2.3.4(vite@2.9.15)(vue@3.2.47)
       archiver: 5.3.1
       chokidar: 3.5.3
       ci-info: 3.8.0
@@ -1665,7 +1904,7 @@ packages:
       semver: 7.3.8
       serialize-javascript: 6.0.0
       table: 6.8.1
-      vite: 3.0.0(sass@1.32.12)
+      vite: 2.9.15(sass@1.32.12)
       vue: 3.2.47
       vue-router: 4.1.6(vue@3.2.47)
       webpack-merge: 5.8.0
@@ -1674,7 +1913,6 @@ packages:
       - rollup
       - stylus
       - supports-color
-      - terser
     dev: true
 
   /@deepnotes/quasar@2.11.6:
@@ -1858,8 +2096,8 @@ packages:
     engines: {node: '>=6.9.0'}
     dev: true
 
-  /@intlify/bundle-utils@5.5.0(vue-i18n@9.2.2):
-    resolution: {integrity: sha512-k5xe8oAoPXiH6unXvyyyCRbq+LtLn1tSi/6r5f6mF+MsX7mcOMtgYbyAQINsjFrf7EDu5Pg4BY00VWSt8bI9XQ==}
+  /@intlify/bundle-utils@2.2.2(vue-i18n@9.2.2):
+    resolution: {integrity: sha512-vngkvlIVV8ZJoyC5VqMvqJd2nvsx+qMN7pQjPiPjOrVndeiR7Dlue0k86Q8FsFUzyksW3HJZZi833ldxwbFzTA==}
     engines: {node: '>= 12'}
     peerDependencies:
       petite-vue-i18n: '*'
@@ -1870,13 +2108,9 @@ packages:
       vue-i18n:
         optional: true
     dependencies:
-      '@intlify/message-compiler': 9.3.0-beta.17
-      '@intlify/shared': 9.3.0-beta.17
-      acorn: 8.8.2
-      escodegen: 2.0.0
-      estree-walker: 2.0.2
+      '@intlify/message-compiler': 9.2.2
+      '@intlify/shared': 9.2.2
       jsonc-eslint-parser: 1.4.1
-      magic-string: 0.30.0
       source-map: 0.6.1
       vue-i18n: 9.2.2(vue@3.2.47)
       yaml-eslint-parser: 0.3.2
@@ -1904,53 +2138,32 @@ packages:
       '@intlify/shared': 9.2.2
       source-map: 0.6.1
 
-  /@intlify/message-compiler@9.3.0-beta.17:
-    resolution: {integrity: sha512-i7hvVIRk1Ax2uKa9xLRJCT57to08OhFMhFXXjWN07rmx5pWQYQ23MfX1xgggv9drnWTNhqEiD+u4EJeHoS5+Ww==}
-    engines: {node: '>= 14'}
-    dependencies:
-      '@intlify/shared': 9.3.0-beta.17
-      source-map: 0.6.1
-    dev: true
-
   /@intlify/shared@9.2.2:
     resolution: {integrity: sha512-wRwTpsslgZS5HNyM7uDQYZtxnbI12aGiBZURX3BTR9RFIKKRWpllTsgzHWvj3HKm3Y2Sh5LPC1r0PDCKEhVn9Q==}
     engines: {node: '>= 14'}
 
-  /@intlify/shared@9.3.0-beta.17:
-    resolution: {integrity: sha512-mscf7RQsUTOil35jTij4KGW1RC9SWQjYScwLxP53Ns6g24iEd5HN7ksbt9O6FvTmlQuX77u+MXpBdfJsGqizLQ==}
-    engines: {node: '>= 14'}
-    dev: true
-
-  /@intlify/unplugin-vue-i18n@0.10.0(vue-i18n@9.2.2):
-    resolution: {integrity: sha512-Sf8fe26/d8rBNcg+zBSb7RA1uyhrG9zhIM+CRX6lqcznMDjLRr/1tuVaJ9E6xqJkzjfPgRzNcCqwMt6rpNkL7Q==}
-    engines: {node: '>= 14.16'}
+  /@intlify/vite-plugin-vue-i18n@3.4.0(vite@2.9.15)(vue-i18n@9.2.2):
+    resolution: {integrity: sha512-XXcZBgwJ+3FRu11c4ARoY9N00kElPii0/jNZ49qR045Ka7/YGCwb1Ku14BBlMSEHiHDSjLQknLwrJKSQGVZLyA==}
+    engines: {node: '>= 12'}
     peerDependencies:
-      petite-vue-i18n: '*'
-      vue-i18n: '*'
-      vue-i18n-bridge: '*'
+      petite-vue-i18n: ^9.1.0
+      vite: ^2.0.0
+      vue-i18n: ^9.1.0
     peerDependenciesMeta:
       petite-vue-i18n:
         optional: true
       vue-i18n:
         optional: true
-      vue-i18n-bridge:
-        optional: true
     dependencies:
-      '@intlify/bundle-utils': 5.5.0(vue-i18n@9.2.2)
-      '@intlify/shared': 9.3.0-beta.17
-      '@rollup/pluginutils': 5.0.2
-      '@vue/compiler-sfc': 3.2.47
+      '@intlify/bundle-utils': 2.2.2(vue-i18n@9.2.2)
+      '@intlify/shared': 9.2.2
+      '@rollup/pluginutils': 4.2.1
       debug: 4.3.4
       fast-glob: 3.2.12
-      js-yaml: 4.1.0
-      json5: 2.2.3
-      pathe: 1.1.0
-      picocolors: 1.0.0
       source-map: 0.6.1
-      unplugin: 1.3.1
+      vite: 2.9.15(sass@1.32.12)
       vue-i18n: 9.2.2(vue@3.2.47)
     transitivePeerDependencies:
-      - rollup
       - supports-color
     dev: true
 
@@ -2432,7 +2645,7 @@ packages:
     resolution: {integrity: sha512-p3JKgTjRlJ1YQXbqTw3Bsa4j0mQdt5dq+WfYvyb7MgKGdephHCKdR/kxA5PCTAmJanGJuDKqRdyGYX/hYN4KGw==}
     dev: true
 
-  /@quasar/vite-plugin@1.3.0(@deepnotes/quasar@2.11.6)(@vitejs/plugin-vue@3.2.0)(vite@3.0.0)(vue@3.2.47):
+  /@quasar/vite-plugin@1.3.0(@deepnotes/quasar@2.11.6)(@vitejs/plugin-vue@2.3.4)(vite@2.9.15)(vue@3.2.47):
     resolution: {integrity: sha512-wd7b/QrKu/WB53l+vxo6GLbkoEwh5FFKLtLl3fM8TXrDDRB1qsKKkRa/vwTU4dpuyBaOZDjycmYuAsOlTdNp8w==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -2441,9 +2654,9 @@ packages:
       vite: ^2.0.0 || ^3.0.0 || ^4.0.0
       vue: ^3.0.0
     dependencies:
-      '@vitejs/plugin-vue': 3.2.0(vite@3.0.0)(vue@3.2.47)
+      '@vitejs/plugin-vue': 2.3.4(vite@2.9.15)(vue@3.2.47)
       quasar: /@deepnotes/quasar@2.11.6
-      vite: 3.0.0(sass@1.32.12)
+      vite: 2.9.15(sass@1.32.12)
       vue: 3.2.47
     dev: true
 
@@ -2626,15 +2839,6 @@ packages:
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
       prosemirror-view: 1.29.1
-    dev: false
-
-  /@tiptap/extension-code-block@2.0.0-beta.202(@tiptap/core@2.0.0-beta.217):
-    resolution: {integrity: sha512-tfK9khIroGjsXQvk2K/9z1/UyQrB4+zghkjyK1xikzRmhgfOeqQzA0TDrFrz7ywFXmSFQ7GnnYAp+RW6r6wyUg==}
-    peerDependencies:
-      '@tiptap/core': ^2.0.0-beta.193
-    dependencies:
-      '@tiptap/core': 2.0.0-beta.217(@tiptap/pm@2.0.2)
-      prosemirror-state: 1.4.2
     dev: false
 
   /@tiptap/extension-code-block@2.0.2(@tiptap/core@2.0.0-beta.217)(@tiptap/pm@2.0.2):
@@ -2936,7 +3140,7 @@ packages:
       '@tiptap/extension-bold': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
       '@tiptap/extension-bullet-list': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
       '@tiptap/extension-code': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
-      '@tiptap/extension-code-block': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
+      '@tiptap/extension-code-block': 2.0.2(@tiptap/core@2.0.0-beta.217)(@tiptap/pm@2.0.2)
       '@tiptap/extension-document': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
       '@tiptap/extension-dropcursor': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
       '@tiptap/extension-gapcursor': 2.0.0-beta.202(@tiptap/core@2.0.0-beta.217)
@@ -3049,7 +3253,7 @@ packages:
   /@types/connect@3.4.35:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
-      '@types/node': 18.15.11
+      '@types/node': 18.13.0
     dev: true
 
   /@types/cookie-parser@1.4.3:
@@ -3520,14 +3724,14 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@vitejs/plugin-vue@3.2.0(vite@3.0.0)(vue@3.2.47):
-    resolution: {integrity: sha512-E0tnaL4fr+qkdCNxJ+Xd0yM31UwMkQje76fsDVBBUCoGOUPexu2VDUYHL8P4CwV+zMvWw6nlRw19OnRKmYAJpw==}
-    engines: {node: ^14.18.0 || >=16.0.0}
+  /@vitejs/plugin-vue@2.3.4(vite@2.9.15)(vue@3.2.47):
+    resolution: {integrity: sha512-IfFNbtkbIm36O9KB8QodlwwYvTEsJb4Lll4c2IwB3VHc2gie2mSPtSzL0eYay7X2jd/2WX02FjSGTWR6OPr/zg==}
+    engines: {node: '>=12.0.0'}
     peerDependencies:
-      vite: ^3.0.0
+      vite: ^2.5.10
       vue: ^3.2.25
     dependencies:
-      vite: 3.0.0(sass@1.32.12)
+      vite: 2.9.15(sass@1.32.12)
       vue: 3.2.47
     dev: true
 
@@ -4455,7 +4659,7 @@ packages:
     dependencies:
       buffer: 5.7.1
       inherits: 2.0.4
-      readable-stream: 3.6.2
+      readable-stream: 3.6.0
     dev: true
 
   /bluebird-lst@1.0.9:
@@ -6423,19 +6627,6 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /escodegen@2.0.0:
-    resolution: {integrity: sha512-mmHKys/C8BFUGI+MAWNcSYoORYLMdPzjrknd2Vc+bUsjN5bXcr8EhrNB+UTqfL1y3I9c4fw2ihgtMPQLBRiQxw==}
-    engines: {node: '>=6.0'}
-    hasBin: true
-    dependencies:
-      esprima: 4.0.1
-      estraverse: 5.3.0
-      esutils: 2.0.3
-      optionator: 0.8.3
-    optionalDependencies:
-      source-map: 0.6.1
-    dev: true
-
   /eslint-config-prettier@8.5.0(eslint@8.27.0):
     resolution: {integrity: sha512-obmWKLUNCnhtQRKc+tmnYuQl0pFU1ibYJQ5BGhTVB08bHe9wC8qUeG7c08dj9XX+AuPj1YSGSQIHl1pnDHZR0Q==}
     hasBin: true
@@ -7190,7 +7381,7 @@ packages:
     resolution: {integrity: sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==}
     engines: {node: '>=6 <7 || >=8'}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: 4.2.10
       jsonfile: 4.0.0
       universalify: 0.1.2
     dev: true
@@ -7887,12 +8078,12 @@ packages:
     resolution: {integrity: sha512-Erxj2n/LDAZ7H8WNJXd9tw38GYM3dv8rk8Zcs+jJuxYTW7sozH+SS8NtrSjVL1/vpLvWi1hxy96IzjJ3EHTJJg==}
     dependencies:
       has: 1.0.3
-    dev: true
 
   /is-core-module@2.11.0:
     resolution: {integrity: sha512-RRjxlvLDkD1YJwDbroBHMb+cukurkDWNyHx7D3oNB5x9rb5ogcksMC5wHCadcXoo67gVr/+3GFySh3134zi6rw==}
     dependencies:
       has: 1.0.3
+    dev: true
 
   /is-docker@2.2.1:
     resolution: {integrity: sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==}
@@ -8166,12 +8357,6 @@ packages:
     hasBin: true
     dev: true
 
-  /json5@2.2.3:
-    resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
-    engines: {node: '>=6'}
-    hasBin: true
-    dev: true
-
   /jsonc-eslint-parser@1.4.1:
     resolution: {integrity: sha512-hXBrvsR1rdjmB2kQmUjf1rEIa+TqHBGMge8pwi++C+Si1ad7EjZrJcpgwym+QGK/pqTx+K7keFAtLlVNdLRJOg==}
     engines: {node: '>=8.10.0'}
@@ -8377,14 +8562,6 @@ packages:
       readable-stream: 2.3.8
     dev: true
 
-  /levn@0.3.0:
-    resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==}
-    engines: {node: '>= 0.8.0'}
-    dependencies:
-      prelude-ls: 1.1.2
-      type-check: 0.3.2
-    dev: true
-
   /levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
@@ -8444,7 +8621,7 @@ packages:
     resolution: {integrity: sha512-3p6ZOGNbiX4CdvEd1VcE6yi78UrGNpjHO33noGwHCnT/o2fyllJDepsm8+mFFv/DvtwFHht5HIHSyOy5a+ChVQ==}
     engines: {node: '>=4'}
     dependencies:
-      graceful-fs: 4.2.11
+      graceful-fs: 4.2.10
       parse-json: 2.2.0
       pify: 2.3.0
       strip-bom: 3.0.0
@@ -8648,13 +8825,6 @@ packages:
     engines: {node: '>=12'}
     dependencies:
       sourcemap-codec: 1.4.8
-    dev: true
-
-  /magic-string@0.30.0:
-    resolution: {integrity: sha512-LA+31JYDJLs82r2ScLrlz1GjSgu66ZV518eyWT+S8VhyQn/JL0u9MeBOvQMGYiPk1DBiSN9DDMOcXvigJZaViQ==}
-    engines: {node: '>=12'}
-    dependencies:
-      '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
   /make-dir@3.1.0:
@@ -9107,7 +9277,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       hosted-git-info: 4.1.0
-      is-core-module: 2.10.0
+      is-core-module: 2.11.0
       semver: 7.3.8
       validate-npm-package-license: 3.0.4
     dev: true
@@ -9248,18 +9418,6 @@ packages:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
-    dev: true
-
-  /optionator@0.8.3:
-    resolution: {integrity: sha512-+IW9pACdk3XWmmTXG8m3upGUJst5XRGzxMRjXzAuJ1XnIFNvfhjjIuYkDvysnPQ7qzqVzLt78BCruntqRhWQbA==}
-    engines: {node: '>= 0.8.0'}
-    dependencies:
-      deep-is: 0.1.4
-      fast-levenshtein: 2.0.6
-      levn: 0.3.0
-      prelude-ls: 1.1.2
-      type-check: 0.3.2
-      word-wrap: 1.2.3
     dev: true
 
   /optionator@0.9.1:
@@ -9762,11 +9920,6 @@ packages:
       xtend: 4.0.2
     dev: false
 
-  /prelude-ls@1.1.2:
-    resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
-    engines: {node: '>= 0.8.0'}
-    dev: true
-
   /prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -9861,7 +10014,7 @@ packages:
     resolution: {integrity: sha512-vy7i77ddKyXlu8kKBB3nlxLBnsWyKUmQIPB5x8RkYNh01QNp/qqGmdd5yZefJs0s3rtv5r7Izfu2qbtr+tYAMQ==}
     dependencies:
       prosemirror-state: 1.4.2
-      prosemirror-transform: 1.7.0
+      prosemirror-transform: 1.7.1
       prosemirror-view: 1.29.1
     dev: false
 
@@ -9957,7 +10110,7 @@ packages:
     resolution: {integrity: sha512-puuzLD2mz/oTdfgd8msFbe0A42j5eNudKAAPDB0+QJRw8cO1ygjLmhLrg9RvDpf87Dkd6D4t93qdef00KKNacQ==}
     dependencies:
       prosemirror-model: 1.18.2
-      prosemirror-transform: 1.7.0
+      prosemirror-transform: 1.7.1
       prosemirror-view: 1.29.1
     dev: false
 
@@ -10004,7 +10157,7 @@ packages:
     dependencies:
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
-      prosemirror-transform: 1.7.0
+      prosemirror-transform: 1.7.1
     dev: false
 
   /proto-list@1.2.4:
@@ -10219,7 +10372,6 @@ packages:
       inherits: 2.0.4
       string_decoder: 1.3.0
       util-deprecate: 1.0.2
-    dev: false
 
   /readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
@@ -10268,7 +10420,7 @@ packages:
     resolution: {integrity: sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      resolve: 1.22.2
+      resolve: 1.22.1
     dev: false
 
   /redent@3.0.0:
@@ -10405,7 +10557,6 @@ packages:
       is-core-module: 2.10.0
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
-    dev: true
 
   /resolve@1.22.2:
     resolution: {integrity: sha512-Sb+mjNHOULsBv818T40qSPeRiuWLyaGMa5ewydRLFimneixmVy2zdivRl+AF6jaYPC8ERxGDmFSiqui6SfPd+g==}
@@ -10414,6 +10565,7 @@ packages:
       is-core-module: 2.11.0
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
+    dev: true
 
   /responselike@1.0.2:
     resolution: {integrity: sha512-/Fpe5guzJk1gPqdJLJR5u7eG/gNY4nImjbRDaVWVMRhne55TCmj2i9Q+54PBRfatRC8v/rIiv9BN0pMd9OV5EQ==}
@@ -10492,6 +10644,14 @@ packages:
       picomatch: 2.3.1
       source-map: 0.7.4
       yargs: 17.7.1
+    dev: true
+
+  /rollup@2.77.3:
+    resolution: {integrity: sha512-/qxNTG7FbmefJWoeeYJFbHehJ2HNWnjkAFRKzWN/45eNBBF/r8lo992CwcJXEzyVxs5FmfId+vTSTQDb+bxA+g==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: true
 
   /rollup@2.79.1:
@@ -11792,13 +11952,6 @@ packages:
     resolution: {integrity: sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA==}
     dev: false
 
-  /type-check@0.3.2:
-    resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
-    engines: {node: '>= 0.8.0'}
-    dependencies:
-      prelude-ls: 1.1.2
-    dev: true
-
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
     engines: {node: '>= 0.8.0'}
@@ -12002,15 +12155,6 @@ packages:
       webpack-virtual-modules: 0.4.5
     dev: true
 
-  /unplugin@1.3.1:
-    resolution: {integrity: sha512-h4uUTIvFBQRxUKS2Wjys6ivoeofGhxzTe2sRWlooyjHXVttcVfV/JiavNd3d4+jty0SVV0dxGw9AkY9MwiaCEw==}
-    dependencies:
-      acorn: 8.8.2
-      chokidar: 3.5.3
-      webpack-sources: 3.2.3
-      webpack-virtual-modules: 0.5.0
-    dev: true
-
   /untildify@4.0.0:
     resolution: {integrity: sha512-KK8xQ1mkzZeg9inewmFVDNkg3l5LUhoq9kN6iWYB/CC9YMG8HA+c1Q8HwDe6dEX7kErrEVNVBO3fWsVq5iDgtw==}
     engines: {node: '>=8'}
@@ -12139,7 +12283,7 @@ packages:
       mlly: 1.2.0
       pathe: 1.1.0
       picocolors: 1.0.0
-      vite: 3.0.0(sass@1.32.12)
+      vite: 3.0.0
     transitivePeerDependencies:
       - less
       - sass
@@ -12148,7 +12292,32 @@ packages:
       - terser
     dev: true
 
-  /vite@3.0.0(sass@1.32.12):
+  /vite@2.9.15(sass@1.32.12):
+    resolution: {integrity: sha512-fzMt2jK4vQ3yK56te3Kqpkaeq9DkcZfBbzHwYpobasvgYmP2SoAr6Aic05CsB4CzCZbsDv4sujX3pkEGhLabVQ==}
+    engines: {node: '>=12.2.0'}
+    hasBin: true
+    peerDependencies:
+      less: '*'
+      sass: '*'
+      stylus: '*'
+    peerDependenciesMeta:
+      less:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+    dependencies:
+      esbuild: 0.14.51
+      postcss: 8.4.21
+      resolve: 1.22.2
+      rollup: 2.77.3
+      sass: 1.32.12
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
+  /vite@3.0.0:
     resolution: {integrity: sha512-M7phQhY3+fRZa0H+1WzI6N+/onruwPTBTMvaj7TzgZ0v2TE+N2sdLKxJOfOv9CckDWt5C4HmyQP81xB4dwRKzA==}
     engines: {node: '>=14.18.0'}
     hasBin: true
@@ -12171,7 +12340,6 @@ packages:
       postcss: 8.4.21
       resolve: 1.22.2
       rollup: 2.79.1
-      sass: 1.32.12
     optionalDependencies:
       fsevents: 2.3.2
     dev: true
@@ -12228,7 +12396,7 @@ packages:
       tinybench: 2.4.0
       tinypool: 0.4.0
       tinyspy: 1.1.1
-      vite: 3.0.0(sass@1.32.12)
+      vite: 3.0.0
       vite-node: 0.29.8
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
@@ -12345,10 +12513,6 @@ packages:
 
   /webpack-virtual-modules@0.4.5:
     resolution: {integrity: sha512-8bWq0Iluiv9lVf9YaqWQ9+liNgXSHICm+rg544yRgGYaR8yXZTVBaHZkINZSB2yZSWo4b0F6MIxqJezVfOEAlg==}
-    dev: true
-
-  /webpack-virtual-modules@0.5.0:
-    resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
     dev: true
 
   /webpack@5.74.0(esbuild@0.15.14):

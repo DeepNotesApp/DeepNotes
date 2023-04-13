@@ -114,7 +114,7 @@ module.exports = configure(function (ctx) {
 
       vitePlugins: [
         [
-          require('@intlify/unplugin-vue-i18n').default,
+          '@intlify/vite-plugin-vue-i18n',
           {
             // if you want to use Vue I18n Legacy API, you need to set `compositionOnly: false`
             // compositionOnly: false,
