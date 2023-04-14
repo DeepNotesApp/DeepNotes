@@ -79,11 +79,12 @@
 
 <script setup lang="ts">
 import { pull } from 'lodash';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 
 async function removeRecentPage(pageId: string) {
   try {
-    await api().post(`/api/users/remove-recent-page/${pageId}`);
+    await trpcClient.users.removeRecentPage.mutate({ pageId });
 
     pull(internals.pages.react.recentPageIds, pageId);
   } catch (error) {

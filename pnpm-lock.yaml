@@ -373,6 +373,9 @@ importers:
       otplib:
         specifier: 12.0.1
         version: 12.0.1
+      redlock:
+        specifier: 5.0.0-beta.2
+        version: 5.0.0-beta.2
       sib-api-v3-typescript:
         specifier: 2.2.2
         version: 2.2.2
