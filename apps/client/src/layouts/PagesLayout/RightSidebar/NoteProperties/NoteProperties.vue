@@ -719,7 +719,6 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
 import { groupNames } from 'src/code/pages/computed/group-names';
@@ -727,6 +726,7 @@ import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { getPageTitle } from 'src/code/pages/utils';
 import { useRealtimeContext } from 'src/code/realtime/context';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
@@ -811,17 +811,15 @@ async function setAsDefault() {
 
     internals.pages.defaultNote = serialObject;
 
-    await api().post('/api/users/set-encrypted-default-note', {
-      encryptedDefaultNote: bytesToBase64(
-        internals.symmetricKeyring.encrypt(pack(serialObject), {
-          padding: true,
-          associatedData: {
-            context: 'UserDefaultNote',
-            userId: authStore().userId,
-          },
-        }),
-      ),
-    });
+    await trpcClient.users.setEncryptedDefaultNote.mutate(
+      internals.symmetricKeyring.encrypt(pack(serialObject), {
+        padding: true,
+        associatedData: {
+          context: 'UserDefaultNote',
+          userId: authStore().userId,
+        },
+      }),
+    );
 
     $quasar().notify({
       message: 'Default note updated.',

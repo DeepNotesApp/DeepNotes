@@ -262,12 +262,12 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { pack } from 'msgpackr';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import type { ISerialArrowInput } from 'src/code/pages/serialization';
 import { ISerialArrow } from 'src/code/pages/serialization';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 import { yXmlFragmentToProsemirrorJSON } from 'y-prosemirror';
@@ -297,17 +297,15 @@ async function setAsDefault() {
 
     internals.pages.defaultArrow = serialArrow;
 
-    await api().post('/api/users/set-encrypted-default-arrow', {
-      encryptedDefaultArrow: bytesToBase64(
-        internals.symmetricKeyring.encrypt(pack(serialArrow), {
-          padding: true,
-          associatedData: {
-            context: 'UserDefaultArrow',
-            userId: authStore().userId,
-          },
-        }),
-      ),
-    });
+    await trpcClient.users.setEncryptedDefaultArrow.mutate(
+      internals.symmetricKeyring.encrypt(pack(serialArrow), {
+        padding: true,
+        associatedData: {
+          context: 'UserDefaultArrow',
+          userId: authStore().userId,
+        },
+      }),
+    );
 
     $quasar().notify({
       message: 'Default arrow updated.',
