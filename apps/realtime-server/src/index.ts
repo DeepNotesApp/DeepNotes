@@ -11,6 +11,6 @@ initKnex();
 
 httpServer().listen(parseInt(process.env.REALTIME_SERVER_PORT), () => {
   moduleLogger.info(
-    `Server started on port ${process.env.REALTIME_SERVER_PORT}`,
+    `realtime-server started on port ${process.env.REALTIME_SERVER_PORT}`,
   );
 });

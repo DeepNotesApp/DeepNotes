@@ -20,16 +20,16 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build ./tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "build:watch": "concurrently \"tsc --build ./tsconfig.build.json --watch\" \"tsc-alias -p tsconfig.build.json --watch\"",
+    "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
     "bundle": "tsup",
     "clean": "rimraf ./dist *.tsbuildinfo",
     "dev": "ts-node-dev -r tsconfig-paths/register ./src/index.ts",
     "fix": "eslint --fix --ext .js,.ts,.vue ./",
     "npkill": "rimraf ./node_modules",
     "preinstall": "npx only-allow pnpm",
-    "repo:build": "tsc-alias -p tsconfig.build.json",
-    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch",
+    "repo:build": "tsc-alias -p tsconfig.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
     "start": "ts-node -r tsconfig-paths/register ./src/index.ts"
   }
 }

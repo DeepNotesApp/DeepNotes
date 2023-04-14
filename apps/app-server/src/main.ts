@@ -54,5 +54,10 @@ async function bootstrap() {
   );
 
   await app.listen(parseInt(process.env.APP_SERVER_PORT), '0.0.0.0');
+
+  mainLogger().info(
+    `app-server started on port ${process.env.APP_SERVER_PORT}`,
+  );
 }
+
 void bootstrap();

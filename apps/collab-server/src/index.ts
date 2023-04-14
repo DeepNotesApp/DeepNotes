@@ -9,5 +9,5 @@ initKnex();
 httpServer().listen(parseInt(process.env.COLLAB_SERVER_PORT), () => {
   mainLogger()
     .sub('index.ts')
-    .info(`Server started on port ${process.env.COLLAB_SERVER_PORT}`);
+    .info(`collab-server started on port ${process.env.COLLAB_SERVER_PORT}`);
 });

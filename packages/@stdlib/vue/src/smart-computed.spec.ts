@@ -1,5 +1,6 @@
-import { createSmartComputed } from 'src/smart-computed';
 import { ref } from 'vue';
+
+import { createSmartComputed } from './smart-computed';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,7 +10,7 @@ describe('SmartComputed', () => {
   it('should execute only when dependencies change', async () => {
     const dependency = ref('test1');
 
-    const smartComputedGetter = jest.fn(async () => {
+    const smartComputedGetter = vi.fn(async () => {
       const result = dependency.value;
 
       await sleep(100);

@@ -1,6 +1,5 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
-import type { SymmetricKeyring } from '@stdlib/crypto';
-import { createPrivateKeyring, createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring, createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring, DataLayer } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
@@ -54,17 +53,17 @@ export async function processGroupKeyRotationValues(
 ) {
   params.groupIsPublic ??= params.groupAccessKeyring != null;
 
-  const oldGroupAccessKeyring: SymmetricKeyring =
+  const oldGroupAccessKeyring =
     params.groupAccessKeyring != null
       ? createSymmetricKeyring(base64ToBytes(params.groupAccessKeyring))
       : createSymmetricKeyring(
           base64ToBytes(params.groupEncryptedAccessKeyring!),
         ).unwrapAsymmetric(internals.keyPair.privateKey);
-  const oldGroupInternalKeyring: SymmetricKeyring = createSymmetricKeyring(
+  const oldGroupInternalKeyring = createSymmetricKeyring(
     base64ToBytes(params.groupEncryptedInternalKeyring),
   ).unwrapAsymmetric(internals.keyPair.privateKey);
 
-  const oldGroupPublicKeyring = createPublicKeyring(
+  const oldGroupPublicKeyring = createKeyring(
     base64ToBytes(params.groupPublicKeyring),
   );
   const oldGroupPrivateKeyring = createPrivateKeyring(
@@ -76,7 +75,7 @@ export async function processGroupKeyRotationValues(
     },
   });
 
-  let oldGroupContentKeyring: SymmetricKeyring = createSymmetricKeyring(
+  let oldGroupContentKeyring = createSymmetricKeyring(
     base64ToBytes(params.groupEncryptedContentKeyring),
   ).unwrapSymmetric(oldGroupAccessKeyring, {
     associatedData: {
@@ -129,12 +128,9 @@ export async function processGroupKeyRotationValues(
     }
   }
 
-  const newGroupAccessKeyring: SymmetricKeyring =
-    oldGroupAccessKeyring.addKey();
-  const newGroupInternalKeyring: SymmetricKeyring =
-    oldGroupInternalKeyring.addKey();
-  const newGroupContentKeyring: SymmetricKeyring =
-    oldGroupContentKeyring.addKey();
+  const newGroupAccessKeyring = oldGroupAccessKeyring.addKey();
+  const newGroupInternalKeyring = oldGroupInternalKeyring.addKey();
+  const newGroupContentKeyring = oldGroupContentKeyring.addKey();
 
   const newGroupRawKeypair = sodium.crypto_box_keypair();
   const newGroupPublicKeyring = oldGroupPublicKeyring.addKey(
@@ -146,7 +142,9 @@ export async function processGroupKeyRotationValues(
 
   return {
     ...(params.groupIsPublic
-      ? { groupAccessKeyring: bytesToBase64(newGroupAccessKeyring.fullValue) }
+      ? {
+          groupAccessKeyring: bytesToBase64(newGroupAccessKeyring.wrappedValue),
+        }
       : {}),
     groupEncryptedName: bytesToBase64(
       newGroupAccessKeyring.encrypt(
@@ -186,16 +184,16 @@ export async function processGroupKeyRotationValues(
           context: 'GroupContentKeyring',
           groupId,
         },
-      }).fullValue,
+      }).wrappedValue,
     ),
-    groupPublicKeyring: bytesToBase64(newGroupPublicKeyring.fullValue),
+    groupPublicKeyring: bytesToBase64(newGroupPublicKeyring.wrappedValue),
     groupEncryptedPrivateKeyring: bytesToBase64(
       newGroupPrivateKeyring.wrapSymmetric(newGroupInternalKeyring, {
         associatedData: {
           context: 'GroupPrivateKeyring',
           groupId,
         },
-      }).fullValue,
+      }).wrappedValue,
     ),
 
     groupMembers: objFromEntries(
@@ -207,18 +205,16 @@ export async function processGroupKeyRotationValues(
                 encryptedAccessKeyring: bytesToBase64(
                   newGroupAccessKeyring.wrapAsymmetric(
                     internals.keyPair,
-                    createPublicKeyring(
-                      base64ToBytes(groupMember.publicKeyring),
-                    ),
-                  ).fullValue,
+                    createKeyring(base64ToBytes(groupMember.publicKeyring)),
+                  ).wrappedValue,
                 ),
               }
             : {}),
           encryptedInternalKeyring: bytesToBase64(
             newGroupInternalKeyring.wrapAsymmetric(
               internals.keyPair,
-              createPublicKeyring(base64ToBytes(groupMember.publicKeyring)),
-            ).fullValue,
+              createKeyring(base64ToBytes(groupMember.publicKeyring)),
+            ).wrappedValue,
           ),
 
           encryptedName: bytesToBase64(
@@ -245,20 +241,18 @@ export async function processGroupKeyRotationValues(
                   encryptedAccessKeyring: bytesToBase64(
                     newGroupAccessKeyring.wrapAsymmetric(
                       internals.keyPair,
-                      createPublicKeyring(
+                      createKeyring(
                         base64ToBytes(groupJoinInvitation.publicKeyring),
                       ),
-                    ).fullValue,
+                    ).wrappedValue,
                   ),
                 }
               : {}),
             encryptedInternalKeyring: bytesToBase64(
               newGroupInternalKeyring.wrapAsymmetric(
                 internals.keyPair,
-                createPublicKeyring(
-                  base64ToBytes(groupJoinInvitation.publicKeyring),
-                ),
-              ).fullValue,
+                createKeyring(base64ToBytes(groupJoinInvitation.publicKeyring)),
+              ).wrappedValue,
             ),
 
             encryptedName: bytesToBase64(
@@ -314,7 +308,7 @@ export async function processGroupKeyRotationValues(
                   context: 'PageKeyring',
                   pageId,
                 },
-              }).fullValue,
+              }).wrappedValue,
           ),
         },
       ]),

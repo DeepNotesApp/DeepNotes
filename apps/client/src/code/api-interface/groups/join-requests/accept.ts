@@ -1,6 +1,6 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
@@ -46,7 +46,7 @@ export async function acceptJoinRequest(
     throw new Error('Group keyrings not found.');
   }
 
-  const userPublicKeyring = createPublicKeyring(userPublicKeyringBytes);
+  const userPublicKeyring = createKeyring(userPublicKeyringBytes);
 
   await requestWithNotifications({
     url: `/api/groups/${groupId}/join-requests/accept`,
@@ -57,13 +57,13 @@ export async function acceptJoinRequest(
 
       encryptedAccessKeyring: bytesToBase64(
         accessKeyring.wrapAsymmetric(internals.keyPair, userPublicKeyring)
-          .fullValue,
+          .wrappedValue,
       ),
       encryptedInternalKeyring: bytesToBase64(
         groupInternalKeyring.wrapAsymmetric(
           internals.keyPair,
           userPublicKeyring,
-        ).fullValue,
+        ).wrappedValue,
       ),
     },
 

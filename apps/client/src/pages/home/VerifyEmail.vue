@@ -46,6 +46,8 @@
 </template>
 
 <script setup lang="ts">
+import { trpcClient } from 'src/code/trpc';
+
 useMeta(() => ({
   title: 'Email verification - DeepNotes',
 }));
@@ -54,7 +56,9 @@ const status = ref<boolean | undefined>(undefined);
 
 onMounted(async () => {
   try {
-    await api().post(`/auth/verify-email/${route().value.params.code}`, {});
+    await trpcClient.users.verifyEmail.mutate({
+      emailVerificationCode: route().value.params.code as string,
+    });
 
     status.value = true;
   } catch (error) {

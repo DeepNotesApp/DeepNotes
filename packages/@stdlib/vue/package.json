@@ -9,24 +9,21 @@
     "vue": "3.2.47"
   },
   "devDependencies": {
-    "@types/jest": "29.2.3",
-    "@types/lodash": "4.14.189",
-    "jest": "29.3.1"
+    "@types/lodash": "4.14.189"
   },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "scripts": {
-    "build": "tsc --build ./tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "build:watch": "concurrently \"tsc --build ./tsconfig.build.json --watch\" \"tsc-alias -p tsconfig.build.json --watch\"",
+    "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
     "clean": "rimraf ./dist *.tsbuildinfo",
     "fix": "eslint --fix --ext .js,.ts,.vue ./",
     "npkill": "rimraf ./node_modules",
     "preinstall": "npx only-allow pnpm",
-    "repo:build": "tsc-alias -p tsconfig.build.json",
-    "repo:build:watch": "tsc-alias -p tsconfig.build.json --watch",
-    "test": "jest --runInBand",
-    "test:watch": "jest --watch --runInBand"
+    "repo:build": "tsc-alias -p tsconfig.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
+    "test": "vitest"
   }
 }

@@ -237,7 +237,7 @@ export class LoginService {
               userId: user.id,
             },
           },
-        ).fullValue,
+        ).wrappedValue,
       ),
       encryptedSymmetricKeyring: bytesToBase64(
         createSymmetricKeyring(
@@ -247,7 +247,7 @@ export class LoginService {
             context: 'UserEncryptedSymmetricKeyring',
             userId: user.id,
           },
-        }).fullValue,
+        }).wrappedValue,
       ),
 
       sessionKey: bytesToBase64(sessionKey),

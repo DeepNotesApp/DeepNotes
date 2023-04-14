@@ -45,9 +45,9 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { login } from 'src/code/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
@@ -62,26 +62,13 @@ async function onSubmit() {
   try {
     const derivedKeys = await deriveUserValues(email.value, password.value);
 
-    const response = (
-      await api().post<{
-        publicKeyring: string;
-        encryptedPrivateKeyring: string;
-        encryptedSymmetricKeyring: string;
+    const response = await trpcClient.sessions.login.mutate({
+      email: email.value,
+      loginHash: derivedKeys.loginHash,
+      rememberSession: rememberSession.value,
 
-        sessionKey: string;
-
-        personalGroupId: string;
-
-        userId: string;
-        sessionId: string;
-      }>('/auth/login', {
-        email: email.value,
-        loginHash: bytesToBase64(derivedKeys.loginHash),
-        rememberSession: rememberSession.value,
-
-        recoveryCode: recoveryCode.value,
-      })
-    ).data;
+      recoveryCode: recoveryCode.value,
+    });
 
     await login({
       ...response,

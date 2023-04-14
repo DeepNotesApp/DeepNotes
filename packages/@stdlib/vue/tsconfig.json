@@ -2,11 +2,12 @@
   "extends": "tsconfig/base.json",
 
   "compilerOptions": {
+    "types": ["vitest/globals"],
+
     "baseUrl": ".",
 
-    "rootDir": ".",
-
-    "typeRoots": ["node_modules/@types"], // Needed for tests
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
@@ -15,9 +16,15 @@
     }
   },
 
-  "references": [
-    { "path": "../../../packages/@stdlib/misc/tsconfig.build.json" }
-  ],
+  "references": [{ "path": "../../../packages/@stdlib/misc/tsconfig.json" }],
 
-  "include": ["*.ts", "src/**/*.ts"]
+  "include": ["*.ts", "src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

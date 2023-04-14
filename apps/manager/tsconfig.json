@@ -4,11 +4,10 @@
   "extends": "tsconfig/base.json",
 
   "compilerOptions": {
-    "typeRoots": ["node_modules/@types"], // Needed for tests
-
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
@@ -19,11 +18,19 @@
   },
 
   "references": [
-    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" }
+    { "path": "../../packages/@deeplib/data/tsconfig.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.json" }
   ],
 
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }
