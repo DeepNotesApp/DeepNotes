@@ -142,7 +142,11 @@ export async function tryRefreshTokens(): Promise<void> {
 
     moduleLogger.info('Tokens refreshed successfully');
 
-    await redirectIfNecessary(router(), route().value, authStore());
+    await redirectIfNecessary({
+      router: router(),
+      route: route().value,
+      auth: authStore(),
+    });
   } catch (error) {
     if (authStore().oldSessionKey && authStore().newSessionKey) {
       moduleLogger.info('Failed refreshing tokens server session keys.');

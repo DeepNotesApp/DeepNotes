@@ -37,9 +37,9 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
           });
         }
 
-        if (process.env.SERVER) {
-          // Pass SSR cookies to browser
+        // Pass SSR cookies to browser
 
+        if (process.env.SERVER && response.headers.has('set-cookie')) {
           (ops[0].context as any).ssrContext.res.setHeader(
             'set-cookie',
             response.headers.get('set-cookie')!.split(/, (?=\w+=)/g),

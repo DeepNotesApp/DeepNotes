@@ -105,7 +105,11 @@ export default route(async function ({ store, ssrContext }) {
 
       auth.redirect = '';
     } else {
-      redirectDest = await getRedirectDest(to, auth, cookies);
+      redirectDest = await getRedirectDest({
+        route: to,
+        auth,
+        cookies,
+      });
     }
 
     if (redirectDest != null) {

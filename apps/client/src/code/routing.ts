@@ -7,13 +7,18 @@ import { getRequestConfig } from './utils';
 
 const moduleLogger = mainLogger().sub('routing.universal.ts');
 
-export async function redirectIfNecessary(
-  router: Router,
-  route: RouteLocationNormalized,
-  auth: AuthStore,
-  cookies?: typeof Cookies,
-) {
-  const redirectDest = await getRedirectDest(route, auth, cookies);
+export async function redirectIfNecessary({
+  router,
+  route,
+  auth,
+  cookies,
+}: {
+  router: Router;
+  route: RouteLocationNormalized;
+  auth: AuthStore;
+  cookies?: typeof Cookies;
+}) {
+  const redirectDest = await getRedirectDest({ route, auth, cookies });
 
   if (redirectDest != null) {
     moduleLogger.info(
@@ -25,11 +30,15 @@ export async function redirectIfNecessary(
   }
 }
 
-export async function getRedirectDest(
-  route: RouteLocationNormalized,
-  auth: AuthStore,
-  cookies?: typeof Cookies,
-) {
+export async function getRedirectDest({
+  route,
+  auth,
+  cookies,
+}: {
+  route: RouteLocationNormalized;
+  auth: AuthStore;
+  cookies?: typeof Cookies;
+}) {
   // Page requires auth
 
   if (
@@ -54,7 +63,10 @@ export async function getRedirectDest(
 
   if (auth.loggedIn && route.name === 'pages') {
     try {
-      const startingPageId = await trpcClient.users.getStartingPageId.query();
+      const startingPageId = await trpcClient.users.getStartingPageId.query(
+        undefined,
+        { context: getRequestConfig(cookies) },
+      );
 
       return { name: 'page', params: { pageId: startingPageId } };
     } catch (error) {
