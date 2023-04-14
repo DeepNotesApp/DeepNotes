@@ -1,19 +1,18 @@
 import { hashUserEmail } from '@deeplib/data';
-import { DeviceModel, SessionModel, UserModel } from '@deeplib/db';
+import { DeviceModel, UserModel } from '@deeplib/db';
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
   getPasswordHashValues,
 } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
-import { addDays, allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
+import { allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type { Cluster } from 'ioredis';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import { authenticator } from 'otplib';
-import { setCookies } from 'src/cookies';
 import {
   decryptRecoveryCodes,
   decryptUserAuthenticatorSecret,
@@ -23,9 +22,9 @@ import {
   getDeviceHash,
   verifyRecoveryCode,
 } from 'src/crypto';
-import { generateTokens } from 'src/tokens';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { generateSessionValues } from 'src/utils';
 import { z } from 'zod';
 
 const baseProcedure = publicProcedure.input(
@@ -150,7 +149,7 @@ export async function login({
 
     // Get user device
 
-    const device = await _getUserDevice({
+    const device = await getUserDevice({
       ip: ctx.req.ip,
       userAgent: ctx.req.headers['user-agent'] ?? '',
       userId: user.id,
@@ -179,47 +178,27 @@ export async function login({
       });
     }
 
-    // Generate session values
-
-    const sessionKey = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
-
     const sessionId = nanoid();
-    const refreshCode = nanoid();
 
-    // Generate tokens
-
-    const tokens = generateTokens({
+    const { sessionKey } = await generateSessionValues(sessionId, {
       userId: user.id,
-      sessionId: sessionId,
-      refreshCode: refreshCode,
+      deviceId: device.id,
       rememberSession: input.rememberSession,
-    });
-
-    // Insert session in database
-
-    await SessionModel.query(dtrx.trx).insert({
-      id: sessionId,
-      user_id: user.id,
-      device_id: device.id,
-      encryption_key: sessionKey,
-      refresh_code: refreshCode,
-      expiration_date: addDays(new Date(), 7),
-    });
-
-    // Set cookies for client
-
-    setCookies({
       reply: ctx.res,
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
-      rememberSession: input.rememberSession,
     });
 
-    const result = {
+    return {
+      userId: user.id,
+      sessionId,
+
+      sessionKey,
+
+      personalGroupId: user.personal_group_id,
+
       publicKeyring: user.public_keyring,
       encryptedPrivateKeyring: createPrivateKeyring(
         user.encrypted_private_keyring,
-      ).unwrapSymmetric(passwordValues!.key, {
+      ).unwrapSymmetric(passwordValues.key, {
         associatedData: {
           context: 'UserEncryptedPrivateKeyring',
           userId: user.id,
@@ -227,22 +206,13 @@ export async function login({
       }).wrappedValue,
       encryptedSymmetricKeyring: createSymmetricKeyring(
         user.encrypted_symmetric_keyring,
-      ).unwrapSymmetric(passwordValues!.key, {
+      ).unwrapSymmetric(passwordValues.key, {
         associatedData: {
           context: 'UserEncryptedSymmetricKeyring',
           userId: user.id,
         },
       }).wrappedValue,
-
-      sessionKey,
-
-      personalGroupId: user.personal_group_id,
-
-      userId: user.id,
-      sessionId: sessionId,
     };
-
-    return result;
   });
 }
 
@@ -314,7 +284,7 @@ async function _incrementFailedLoginAttempts({
   ]);
 }
 
-async function _getUserDevice({
+export async function getUserDevice({
   ip,
   userAgent,
   userId,
@@ -324,7 +294,7 @@ async function _getUserDevice({
   userAgent: string;
   userId: string;
 
-  dtrx: DataTransaction;
+  dtrx?: DataTransaction;
 }) {
   const deviceHash = getDeviceHash({ ip, userAgent, userId });
 
@@ -334,7 +304,7 @@ async function _getUserDevice({
     .first();
 
   if (device == null) {
-    device = await DeviceModel.query(dtrx.trx).insert({
+    device = await DeviceModel.query(dtrx?.trx).insert({
       user_id: userId,
       hash: deviceHash,
     });

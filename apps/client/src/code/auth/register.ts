@@ -8,16 +8,19 @@ import type { deriveUserValues } from 'src/code/crypto';
 import { generateGroupValues, generateRandomUserKeys } from 'src/code/crypto';
 import type { ISerialObjectInput } from 'src/code/pages/serialization';
 
-export async function getRegistrationValues(
-  derivedUserKeys: Awaited<ReturnType<typeof deriveUserValues>>,
-  userName: string,
-): Promise<RegistrationSchema> {
+export async function getRegistrationValues({
+  derivedUserValues,
+  userName,
+}: {
+  derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
+  userName: string;
+}): Promise<RegistrationSchema> {
   const userId = nanoid();
   const pageId = nanoid();
 
   const randomUserKeys = generateRandomUserKeys(
     userId,
-    derivedUserKeys.masterKey,
+    derivedUserValues.masterKey,
   );
   const groupValues = await generateGroupValues({
     userKeyPair: randomUserKeys.keyPair,

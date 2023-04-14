@@ -220,16 +220,19 @@ async function register() {
       );
     }
 
-    const derivedKeys = await deriveUserValues(email.value, password.value);
-
-    const registrationValues = await getRegistrationValues(
-      derivedKeys,
-      userName.value,
+    const derivedUserValues = await deriveUserValues(
+      email.value,
+      password.value,
     );
+
+    const registrationValues = await getRegistrationValues({
+      derivedUserValues,
+      userName: userName.value,
+    });
 
     await trpcClient.users.register.mutate({
       email: email.value,
-      loginHash: derivedKeys.loginHash,
+      loginHash: derivedUserValues.loginHash,
 
       ...registrationValues,
     });

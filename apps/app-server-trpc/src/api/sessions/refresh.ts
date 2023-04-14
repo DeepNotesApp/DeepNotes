@@ -1,15 +1,11 @@
 import { SessionModel } from '@deeplib/db';
 import type { RefreshTokenPayload } from '@deeplib/misc';
-import { addDays } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
-import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
-import { nanoid } from 'nanoid';
-import { setCookies } from 'src/cookies';
 import { decodeRefreshJWT, verifyRefreshJWT } from 'src/jwt';
-import { generateTokens } from 'src/tokens';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { generateSessionValues } from 'src/utils';
 
 export const refreshProcedure = once(() => publicProcedure.mutation(refresh));
 
@@ -76,42 +72,17 @@ export async function refresh({
     });
   }
 
-  // Generate new session values
-
-  const oldSessionKey = session.encryption_key;
-  const newSessionKey = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
-
-  const newRefreshCode = nanoid();
-
-  // Update session in database
-
-  await session.$query().patch({
-    encryption_key: newSessionKey,
-    refresh_code: newRefreshCode,
-    last_refresh_date: new Date(),
-    expiration_date: addDays(new Date(), 7),
-  });
-
-  // Generate tokens
-
-  const tokens = generateTokens({
-    userId: session.user_id,
-    sessionId: session.id,
-    refreshCode: newRefreshCode,
-    rememberSession: jwtPayload.rms,
-  });
-
-  // Set cookies for client
-
-  setCookies({
-    reply: ctx.res,
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    rememberSession: jwtPayload.rms,
-  });
+  const { sessionKey: newSessionKey } = await generateSessionValues(
+    session.id,
+    {
+      userId: session.user_id,
+      rememberSession: jwtPayload.rms,
+      reply: ctx.res,
+    },
+  );
 
   return {
-    oldSessionKey,
+    oldSessionKey: session.encryption_key,
     newSessionKey,
   };
 }
