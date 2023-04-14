@@ -9,13 +9,13 @@ export type InferProcedureResolver<TBuilder extends ProcedureBuilder<any>> =
 export type InferProcedureOpts<TBuilder extends ProcedureBuilder<any>> =
   Parameters<InferProcedureResolver<TBuilder>>[0];
 
-function createAuthMiddleware({ optional }: { optional: boolean }) {
-  return trpc.middleware(async ({ ctx, next }) => {
-    const { req, dataAbstraction } = ctx;
-
-    if (req.cookies['loggedIn'] !== 'true') {
+function createAuthHelper({ optional }: { optional: boolean }) {
+  return async ({
+    ctx,
+  }: Parameters<Parameters<typeof trpc.middleware>[0]>[0]) => {
+    if (ctx.req.cookies['loggedIn'] !== 'true') {
       if (optional) {
-        return next({ ctx });
+        return false;
       }
 
       throw new TRPCError({
@@ -26,11 +26,11 @@ function createAuthMiddleware({ optional }: { optional: boolean }) {
 
     // Check if access token exists
 
-    const accessToken = req.cookies['accessToken'];
+    const accessToken = ctx.req.cookies['accessToken'];
 
     if (accessToken == null) {
       if (optional) {
-        return next({ ctx });
+        return false;
       }
 
       throw new TRPCError({
@@ -39,57 +39,16 @@ function createAuthMiddleware({ optional }: { optional: boolean }) {
       });
     }
 
-    try {
-      // Verify JWT
+    // Verify JWT
 
-      const jwtPayload = verifyAccessJWT(accessToken) as
-        | {
-            uid: string;
-            sid: string;
-          }
-        | undefined;
+    const jwtPayload = verifyAccessJWT<{
+      uid: string;
+      sid: string;
+    }>(accessToken);
 
-      if (jwtPayload == null) {
-        if (optional) {
-          return next({ ctx });
-        }
-
-        throw new TRPCError({
-          message: 'Invalid access token.',
-          code: 'UNAUTHORIZED',
-        });
-      }
-
-      // Check if session is invalidated
-
-      const invalidated = await dataAbstraction.hget(
-        'session',
-        jwtPayload.sid,
-        'invalidated',
-      );
-
-      if (invalidated) {
-        if (optional) {
-          return next({ ctx });
-        }
-
-        throw new TRPCError({
-          message: 'Session was invalidated.',
-          code: 'UNAUTHORIZED',
-        });
-      }
-
-      return next({
-        ctx: {
-          ...ctx,
-
-          userId: jwtPayload.uid,
-          sessionId: jwtPayload.sid,
-        },
-      });
-    } catch (error) {
+    if (jwtPayload == null) {
       if (optional) {
-        return next({ ctx });
+        return false;
       }
 
       throw new TRPCError({
@@ -97,12 +56,68 @@ function createAuthMiddleware({ optional }: { optional: boolean }) {
         code: 'UNAUTHORIZED',
       });
     }
-  });
+
+    // Check if session is invalidated
+
+    const invalidated = await ctx.dataAbstraction.hget(
+      'session',
+      jwtPayload.sid,
+      'invalidated',
+    );
+
+    if (invalidated) {
+      if (optional) {
+        return false;
+      }
+
+      throw new TRPCError({
+        message: 'Session was invalidated.',
+        code: 'UNAUTHORIZED',
+      });
+    }
+
+    return {
+      ...ctx,
+
+      userId: jwtPayload.uid,
+      sessionId: jwtPayload.sid,
+    };
+  };
 }
 
-const authMiddleware = createAuthMiddleware({ optional: false });
-const optionalAuthMiddleware = createAuthMiddleware({ optional: true });
+const authHelper = createAuthHelper({ optional: false });
+const optionalAuthHelper = createAuthHelper({ optional: true });
 
 export const publicProcedure = trpc.procedure;
-export const authProcedure = trpc.procedure.use(authMiddleware);
-export const optionalAuthProcedure = trpc.procedure.use(optionalAuthMiddleware);
+export const authProcedure = trpc.procedure.use(
+  trpc.middleware(async (opts) => {
+    const modifiedCtx = await authHelper(opts);
+
+    if (!modifiedCtx) {
+      throw new TRPCError({
+        message: 'Invalid access token.',
+        code: 'UNAUTHORIZED',
+      });
+    }
+
+    return opts.next({ ctx: modifiedCtx });
+  }),
+);
+export const optionalAuthProcedure = trpc.procedure.use(
+  trpc.middleware(async (opts) => {
+    const modifiedCtx = await optionalAuthHelper(opts);
+
+    if (modifiedCtx) {
+      return opts.next({
+        ctx: {
+          ...modifiedCtx,
+
+          userId: modifiedCtx.userId as string | undefined,
+          sessionId: modifiedCtx.sessionId as string | undefined,
+        },
+      });
+    } else {
+      return opts.next(opts);
+    }
+  }),
+);

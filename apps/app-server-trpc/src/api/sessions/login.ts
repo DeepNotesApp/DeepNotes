@@ -1,12 +1,12 @@
 import { hashUserEmail } from '@deeplib/data';
-import { DeviceModel, UserModel } from '@deeplib/db';
+import { DeviceModel, SessionModel, UserModel } from '@deeplib/db';
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
   getPasswordHashValues,
 } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
-import { allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
+import { addDays, allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type { Cluster } from 'ioredis';
 import sodium from 'libsodium-wrappers';
@@ -193,6 +193,17 @@ export async function login({
       sessionId: sessionId,
       refreshCode: refreshCode,
       rememberSession: input.rememberSession,
+    });
+
+    // Insert session in database
+
+    await SessionModel.query(dtrx.trx).insert({
+      id: sessionId,
+      user_id: user.id,
+      device_id: device.id,
+      encryption_key: sessionKey,
+      refresh_code: refreshCode,
+      expiration_date: addDays(new Date(), 7),
     });
 
     // Set cookies for client

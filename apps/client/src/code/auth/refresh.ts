@@ -3,6 +3,7 @@ import {
   base64ToBytesSafe,
   bytesToBase64,
 } from '@stdlib/base64';
+import type { SymmetricKey } from '@stdlib/crypto';
 import {
   createKeyring,
   createPrivateKeyring,
@@ -12,6 +13,7 @@ import {
 } from '@stdlib/crypto';
 
 import { redirectIfNecessary } from '../routing';
+import { trpcClient } from '../trpc';
 import { logout } from './logout';
 import {
   areClientTokensExpiring,
@@ -50,21 +52,27 @@ export async function tryRefreshTokens(): Promise<void> {
   // Try to refresh tokens
 
   try {
-    let response;
+    let oldSessionKey: SymmetricKey;
+    let newSessionKey: SymmetricKey;
 
     if (authStore().oldSessionKey && authStore().newSessionKey) {
       moduleLogger.info(
         'Tokens already refreshed on server, skipping refresh request.',
       );
+
+      oldSessionKey = wrapSymmetricKey(
+        base64ToBytes(authStore().oldSessionKey),
+      );
+      newSessionKey = wrapSymmetricKey(
+        base64ToBytes(authStore().newSessionKey),
+      );
     } else {
       moduleLogger.info('Sending refresh request');
 
-      response = (
-        await api().post<{
-          oldSessionKey: string;
-          newSessionKey: string;
-        }>('/auth/refresh')
-      ).data;
+      const response = await trpcClient.sessions.refresh.mutate(undefined);
+
+      oldSessionKey = wrapSymmetricKey(response.oldSessionKey);
+      newSessionKey = wrapSymmetricKey(response.newSessionKey);
     }
 
     // Reencrypt keys
@@ -72,13 +80,6 @@ export async function tryRefreshTokens(): Promise<void> {
     moduleLogger.info('Reencrypting keys');
 
     internals.personalGroupId = internals.storage.getItem('personalGroupId')!;
-
-    const oldSessionKey = wrapSymmetricKey(
-      base64ToBytes(authStore().oldSessionKey || response?.oldSessionKey!),
-    );
-    const newSessionKey = wrapSymmetricKey(
-      base64ToBytes(authStore().newSessionKey || response?.newSessionKey!),
-    );
 
     const publicKeyring = createKeyring(
       base64ToBytesSafe(internals.storage.getItem('publicKeyring'))!,

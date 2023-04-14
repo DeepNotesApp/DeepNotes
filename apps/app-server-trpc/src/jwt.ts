@@ -3,6 +3,7 @@ import {
   REFRESH_TOKEN_LONG_DURATION,
   REFRESH_TOKEN_SHORT_DURATION,
 } from '@deeplib/misc';
+import { createDecoder } from 'fast-jwt';
 import { createSigner, createVerifier } from 'fast-jwt';
 
 export const signAccessJWT = createSigner({
@@ -18,9 +19,48 @@ export const signLongRefreshJWT = createSigner({
   expiresIn: REFRESH_TOKEN_LONG_DURATION,
 });
 
-export const verifyAccessJWT = createVerifier({
+const _verifyAccessJWT = createVerifier({
   key: process.env.ACCESS_SECRET,
 });
-export const verifyRefreshJWT = createVerifier({
+export function verifyAccessJWT<TokenType>(
+  token: string | Buffer,
+): TokenType | null {
+  try {
+    return _verifyAccessJWT(token);
+  } catch (error) {
+    return null;
+  }
+}
+const _verifyRefreshJWT = createVerifier({
   key: process.env.REFRESH_SECRET,
 });
+export function verifyRefreshJWT<TokenType>(
+  token: string | Buffer,
+): TokenType | null {
+  try {
+    return _verifyRefreshJWT(token);
+  } catch (error) {
+    return null;
+  }
+}
+
+const _decodeAccessJWT = createDecoder();
+export function decodeAccessJWT<TokenType>(
+  token: string | Buffer,
+): TokenType | null {
+  try {
+    return _decodeAccessJWT(token);
+  } catch (error) {
+    return null;
+  }
+}
+const _decodeRefreshJWT = createDecoder();
+export function decodeRefreshJWT<TokenType>(
+  token: string | Buffer,
+): TokenType | null {
+  try {
+    return _decodeRefreshJWT(token);
+  } catch (error) {
+    return null;
+  }
+}
