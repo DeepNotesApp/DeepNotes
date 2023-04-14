@@ -2,6 +2,7 @@ import { isIncluded } from '@stdlib/misc';
 import type { AuthStore } from 'src/stores/auth';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
+import { trpcClient } from './trpc';
 import { getRequestConfig } from './utils';
 
 const moduleLogger = mainLogger().sub('routing.universal.ts');
@@ -53,13 +54,7 @@ export async function getRedirectDest(
 
   if (auth.loggedIn && route.name === 'pages') {
     try {
-      const startingPageId = (
-        await api().post<{ startingPageId: string }>(
-          '/api/users/starting-page-id',
-          undefined,
-          getRequestConfig(cookies),
-        )
-      ).data.startingPageId;
+      const startingPageId = await trpcClient.users.getStartingPageId.query();
 
       return { name: 'page', params: { pageId: startingPageId } };
     } catch (error) {

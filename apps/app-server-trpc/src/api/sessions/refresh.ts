@@ -7,11 +7,13 @@ import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { generateSessionValues } from 'src/utils';
 
-export const refreshProcedure = once(() => publicProcedure.mutation(refresh));
+const baseProcedure = publicProcedure;
+
+export const refreshProcedure = once(() => baseProcedure.mutation(refresh));
 
 export async function refresh({
   ctx,
-}: InferProcedureOpts<typeof publicProcedure>) {
+}: InferProcedureOpts<typeof baseProcedure>) {
   // Check if loggedIn cookie exists
 
   if (ctx.req.cookies.loggedIn == null) {
