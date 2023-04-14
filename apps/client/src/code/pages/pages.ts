@@ -5,6 +5,7 @@ import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
 
 import type { Factories } from '../factories';
 import { authStore } from '../stores';
+import { trpcClient } from '../trpc';
 import { multiModePath } from '../utils';
 import type { Page } from './page/page';
 import type { PageCache } from './page-cache';
@@ -175,13 +176,9 @@ export class Pages {
 
     if (authStore().loggedIn) {
       try {
-        this.react.pathPageIds = (
-          await api().post<{
-            pathPageIds: string[];
-          }>('/api/users/current-path', {
-            initialPageId: pageId,
-          })
-        ).data.pathPageIds;
+        this.react.pathPageIds = await trpcClient.users.getCurrentPath.query({
+          initialPageId: pageId,
+        });
 
         return;
       } catch (error) {

@@ -1,6 +1,7 @@
 import { once } from 'lodash';
 import { trpc } from 'src/trpc/server';
 
+import { getCurrentPathProcedure } from './get-current-path';
 import { getStartingPageIdProcedure } from './get-starting-page-id';
 import { registerProcedure } from './register';
 import { removeRecentPageProcedure } from './remove-recent-page';
@@ -15,6 +16,7 @@ export const usersRouter = once(() =>
     verifyEmail: verifyEmailProcedure(),
 
     getStartingPageId: getStartingPageIdProcedure(),
+    getCurrentPath: getCurrentPathProcedure(),
     removeRecentPage: removeRecentPageProcedure(),
 
     setEncryptedDefaultNote: setEncryptedDefaultNoteProcedure(),
