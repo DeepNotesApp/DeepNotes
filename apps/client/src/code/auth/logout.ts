@@ -1,10 +1,11 @@
+import { trpcClient } from '../trpc';
 import { multiModePath } from '../utils';
 import { clearClientTokenExpirations } from './tokens';
 
 export async function logout() {
   mainLogger().sub('logout').info('Logging out');
 
-  const logoutPromise = api().post('/auth/logout');
+  const logoutPromise = trpcClient.sessions.logout.mutate();
 
   authStore().loggedIn = false;
 

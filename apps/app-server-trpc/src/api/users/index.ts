@@ -1,10 +1,10 @@
 import { isNanoID } from '@stdlib/misc';
 import { once } from 'lodash';
+import { authProcedure, publicProcedure } from 'src/trpc/helpers';
+import { trpc } from 'src/trpc/server';
 import { z } from 'zod';
 
-import { authProcedure, publicProcedure } from '../trpc/helpers';
-import { trpc } from '../trpc/server';
-import { registerProcedure } from './users/register';
+import { registerProcedure } from './register';
 
 export const usersRouter = once(() =>
   trpc.router({
