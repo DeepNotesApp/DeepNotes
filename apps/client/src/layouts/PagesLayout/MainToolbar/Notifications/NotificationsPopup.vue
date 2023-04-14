@@ -92,8 +92,8 @@
 </template>
 
 <script setup lang="ts">
-import type { DeepNotesNotification } from '@deeplib/misc';
 import { useRealtimeContext } from 'src/code/realtime/context';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 
 import GroupInvitationAccepted from './Items/GroupInvitationAccepted.vue';
@@ -137,17 +137,9 @@ async function onBeforeShow() {
 
 async function onLoad(index: number, done: (stop?: boolean) => void) {
   try {
-    const notifications = (
-      await api().post<{
-        notifications: {
-          items: DeepNotesNotification[];
-
-          hasMore: boolean;
-        };
-      }>('/api/users/notifications/load', {
-        lastNotificationId: pagesStore().notifications.items.at(-1)?.id,
-      })
-    ).data.notifications;
+    const notifications = await trpcClient.users.getNotifications.query({
+      lastNotificationId: pagesStore().notifications.items.at(-1)?.id,
+    });
 
     pagesStore().notifications.items.push(...notifications.items);
     pagesStore().notifications.hasMore = notifications.hasMore;

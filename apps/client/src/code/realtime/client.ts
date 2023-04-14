@@ -5,7 +5,6 @@ import {
   RealtimeCommandType,
   RealtimeServerMessageType,
 } from '@deeplib/misc';
-import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { getFullKey } from '@stdlib/misc';
 import { ClientSocket, Resolvable, splitStr } from '@stdlib/misc';
@@ -429,13 +428,11 @@ export const RealtimeClient = once(
         pagesStore().notifications.items.unshift(notifObj);
 
         const symmetricKey = wrapSymmetricKey(
-          internals.keyPair.decrypt(
-            base64ToBytes(notifObj.encryptedSymmetricKey),
-          ),
+          internals.keyPair.decrypt(notifObj.encryptedSymmetricKey),
         );
 
         const notifContent = unpack(
-          symmetricKey.decrypt(base64ToBytes(notifObj.encryptedContent), {
+          symmetricKey.decrypt(notifObj.encryptedContent, {
             padding: true,
             associatedData: { context: 'UserNotificationContent' },
           }),

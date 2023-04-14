@@ -43,7 +43,6 @@
 <script setup lang="ts">
 import type { DeepNotesNotification } from '@deeplib/misc';
 import { rolesMap } from '@deeplib/misc';
-import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
@@ -97,13 +96,11 @@ const canAcceptRequest = computed(() => {
 
 const notificationContent = computed(() => {
   const symmetricKey = wrapSymmetricKey(
-    internals.keyPair.decrypt(
-      base64ToBytes(props.notification.encryptedSymmetricKey),
-    ),
+    internals.keyPair.decrypt(props.notification.encryptedSymmetricKey),
   );
 
   return unpack(
-    symmetricKey.decrypt(base64ToBytes(props.notification.encryptedContent), {
+    symmetricKey.decrypt(props.notification.encryptedContent, {
       padding: true,
       associatedData: { context: 'UserNotificationContent' },
     }),

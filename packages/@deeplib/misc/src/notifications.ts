@@ -18,8 +18,8 @@ export interface DeepNotesNotification {
 
   type: DeepNotesNotificationType;
 
-  encryptedSymmetricKey: string;
-  encryptedContent: string;
+  encryptedSymmetricKey: Uint8Array;
+  encryptedContent: Uint8Array;
 
   dateTime: Date;
 }

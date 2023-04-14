@@ -1,4 +1,3 @@
-import type { DeepNotesNotification } from '@deeplib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { unpack } from 'msgpackr';
 import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
@@ -65,17 +64,8 @@ export class Pages {
 
     promises.push(
       (async () => {
-        const userData = (
-          await api().post<{
-            notifications: {
-              items: DeepNotesNotification[];
-              hasMore: boolean;
-              lastNotificationRead: number | undefined;
-            };
-          }>('/api/users/data')
-        ).data;
-
-        pagesStore().notifications = userData.notifications;
+        pagesStore().notifications =
+          await trpcClient.users.getNotifications.query();
       })(),
     );
 
