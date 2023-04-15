@@ -75,27 +75,19 @@ export async function finish({
           });
         }
 
-        // Enable two-factor authentication
-
-        await ctx.dataAbstraction.patch(
-          'user',
-          ctx.userId,
-          { two_factor_auth_enabled: true },
-          { dtrx },
-        );
-
-        checkRedlockSignalAborted(signals);
-
         // Generate recovery codes
 
         const recoveryCodes = Array(6)
           .fill(null)
           .map(() => sodium.to_hex(sodium.randombytes_buf(16)));
 
+        // Enable two-factor authentication
+
         await ctx.dataAbstraction.patch(
           'user',
           ctx.userId,
           {
+            two_factor_auth_enabled: true,
             encrypted_recovery_codes: encryptRecoveryCodes(
               recoveryCodes.map((recoveryCode) =>
                 hashRecoveryCode(recoveryCode),
@@ -104,6 +96,8 @@ export async function finish({
           },
           { dtrx },
         );
+
+        checkRedlockSignalAborted(signals);
 
         return { recoveryCodes };
       });

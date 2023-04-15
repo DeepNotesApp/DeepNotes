@@ -181,20 +181,16 @@ async function regenerateRecoveryCodes() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const recoveryCodes = (
-      await api().post<{
-        recoveryCodes: string[];
-      }>(
-        '/api/users/account/security/two-factor-auth/generate-recovery-codes',
+    const recoveryCodes =
+      await trpcClient.users.account.twoFactorAuth.generateRecoveryCodes.mutate(
         { loginHash: props.loginHash },
-      )
-    ).data.recoveryCodes;
+      );
 
     $quasar().dialog({
       component: RecoveryCodeDialog,
 
       componentProps: {
-        recoveryCodes: recoveryCodes,
+        recoveryCodes,
       },
     });
   } catch (error: any) {
