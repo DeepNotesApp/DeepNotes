@@ -155,10 +155,9 @@ async function forgetTrustedDevices() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(
-      '/api/users/account/security/two-factor-auth/untrust-devices',
-      { loginHash: props.loginHash },
-    );
+    await trpcClient.users.account.twoFactorAuth.forgetDevices.mutate({
+      loginHash: props.loginHash,
+    });
 
     $quasar().notify({
       message: 'All devices have been untrusted.',
