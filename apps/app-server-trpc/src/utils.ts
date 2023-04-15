@@ -1,10 +1,12 @@
+import type { dataHashes } from '@deeplib/data';
 import { GroupModel, SessionModel, UserModel } from '@deeplib/db';
 import { getPasswordHashValues } from '@stdlib/crypto';
-import type { DataTransaction } from '@stdlib/data';
+import type { DataAbstraction, DataTransaction } from '@stdlib/data';
 import { addDays } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
+import { pull } from 'lodash';
 import { nanoid } from 'nanoid';
 
 import { setCookies } from './cookies';
@@ -226,4 +228,36 @@ export async function checkCorrectGroupPassword(input: {
       code: 'BAD_REQUEST',
     });
   }
+}
+
+export async function bumpRecentItem(input: {
+  userId: string;
+  itemType: 'group' | 'page';
+  itemId: string;
+  dataAbstraction: DataAbstraction<typeof dataHashes>;
+  dtrx?: DataTransaction;
+}) {
+  const recentItemIds: string[] = await input.dataAbstraction.hget(
+    'user',
+    input.userId,
+    `recent-${input.itemType}-ids`,
+  );
+
+  // Prepend item ID to recent item IDs
+
+  pull(recentItemIds, input.itemId);
+  recentItemIds.splice(0, 0, input.itemId);
+
+  while (recentItemIds.length > 50) {
+    recentItemIds.pop();
+  }
+
+  // Update recent item IDs
+
+  await input.dataAbstraction.patch(
+    'user',
+    input.userId,
+    { [`recent_${input.itemType}_ids`]: recentItemIds },
+    { dtrx: input.dtrx },
+  );
 }
