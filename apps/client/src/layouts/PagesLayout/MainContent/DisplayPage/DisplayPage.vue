@@ -29,7 +29,7 @@ import { useRealtimeContext } from 'src/code/realtime/context';
 import DisplayScreens from './DisplayScreens/DisplayScreens.vue';
 import DOMDisplay from './DisplayScreens/DisplayWorld/DOMDisplay.vue';
 
-const componentLogger = mainLogger().sub('DisplayPage');
+const componentLogger = mainLogger.sub('DisplayPage');
 
 const props = defineProps<{
   page: Page;

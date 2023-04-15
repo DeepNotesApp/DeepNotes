@@ -173,7 +173,7 @@ export class Pages {
 
         return;
       } catch (error) {
-        mainLogger().error(error);
+        mainLogger.error(error);
       }
     }
 
@@ -198,7 +198,7 @@ export class Pages {
     pageId: string,
     params?: { fromParent?: boolean; openInNewTab?: boolean },
   ) {
-    mainLogger().sub('Pages.goToPage').info('pageId: %s', pageId);
+    mainLogger.sub('Pages.goToPage').info('pageId: %s', pageId);
 
     if (params?.openInNewTab) {
       window.open(multiModePath(`/pages/${pageId}`), '_blank');
@@ -214,7 +214,7 @@ export class Pages {
     groupId: string,
     params?: { fromParent?: boolean; openInNewTab?: boolean },
   ) {
-    mainLogger().sub('Pages.goToGroup').info('groupId: %s', groupId);
+    mainLogger.sub('Pages.goToGroup').info('groupId: %s', groupId);
 
     if (params?.openInNewTab) {
       window.open(multiModePath(`/groups/${groupId}`), '_blank');

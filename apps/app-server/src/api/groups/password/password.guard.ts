@@ -2,9 +2,9 @@ import { GroupModel } from '@deeplib/db';
 import type { CanActivate, ExecutionContext, Type } from '@nestjs/common';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { base64ToBytes } from '@stdlib/base64';
+import { mainLogger } from '@stdlib/misc';
 import type { FastifyRequest } from 'fastify';
 import sodium from 'libsodium-wrappers';
-import { mainLogger } from 'src/logger';
 import { decryptGroupRehashedPasswordHash } from 'src/utils';
 
 export function makePasswordGuard(
@@ -13,7 +13,7 @@ export function makePasswordGuard(
   @Injectable()
   class PasswordGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      mainLogger()
+      mainLogger
         .sub('groups/password/PasswordGuard.canActivate')
         .info('Checking');
 

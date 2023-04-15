@@ -5,7 +5,7 @@ import type { RouteLocationNormalized, Router } from 'vue-router';
 import { trpcClient } from './trpc';
 import { getRequestConfig } from './utils';
 
-const moduleLogger = mainLogger().sub('routing.universal.ts');
+const moduleLogger = mainLogger.sub('routing.universal.ts');
 
 export async function redirectIfNecessary(input: {
   router: Router;

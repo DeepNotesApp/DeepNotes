@@ -7,7 +7,7 @@ import { once } from 'lodash';
 export const RealtimeContext = once(
   () =>
     class {
-      private readonly _logger = mainLogger().sub('RealtimeContext');
+      private readonly _logger = mainLogger.sub('RealtimeContext');
 
       readonly subscriptions = new Set<string>();
       readonly pending = reactive(new Set<string>());

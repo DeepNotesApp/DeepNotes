@@ -9,10 +9,9 @@ import {
   nanoidToBytes,
   textToBytes,
 } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
 import { pack, unpack } from 'msgpackr';
-
-import { mainLogger } from './logger';
 
 export function derivePasswordValues(password: Uint8Array, salt?: Uint8Array) {
   mainLogger.info('Started hashing password');

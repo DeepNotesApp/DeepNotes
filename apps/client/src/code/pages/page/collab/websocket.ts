@@ -48,7 +48,7 @@ export const PageWebsocket = once(
         this.doc = input.collab.doc;
         this.awareness = input.collab.presence.awareness;
 
-        this._logger = mainLogger().sub('Websocket').sub(this.page.id);
+        this._logger = mainLogger.sub('Websocket').sub(this.page.id);
       }
 
       connect() {

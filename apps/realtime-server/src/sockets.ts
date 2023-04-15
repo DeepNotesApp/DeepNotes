@@ -13,6 +13,7 @@ import {
   Resolvable,
   splitStr,
 } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import type { IncomingMessage } from 'http';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
@@ -22,9 +23,8 @@ import type { WebSocket } from 'ws';
 
 import { dataAbstraction } from './data/data-abstraction';
 import { getSub } from './data/redis';
-import { mainLogger } from './logger';
 
-const moduleLogger = mainLogger().sub('sockets.ts');
+const moduleLogger = mainLogger.sub('sockets.ts');
 
 interface RealtimeCommand {
   id: number;

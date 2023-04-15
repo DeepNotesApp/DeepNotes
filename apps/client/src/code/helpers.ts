@@ -2,7 +2,7 @@ import { once } from 'lodash';
 import type { Ref } from 'vue';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
-const moduleLogger = once(() => mainLogger().sub('helpers.ts'));
+const moduleLogger = once(() => mainLogger.sub('helpers.ts'));
 
 function makeHelper<T>(
   name: string,

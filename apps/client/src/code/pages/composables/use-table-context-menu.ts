@@ -14,7 +14,7 @@ export function useTableContextMenu() {
 
     while (elem != null) {
       if (elem.nodeName === 'TD' || elem.nodeName === 'TH') {
-        mainLogger().sub('useTableContextMenu').info('Show table context menu');
+        mainLogger.sub('useTableContextMenu').info('Show table context menu');
 
         event.preventDefault();
 

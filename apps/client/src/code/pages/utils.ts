@@ -31,7 +31,7 @@ export function applyDocUpdate(doc: Y.Doc, update: Uint8Array, origin?: any) {
   try {
     Y.applyUpdateV2(doc, update, origin);
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
   }
 }
 

@@ -2,9 +2,9 @@ import type { AccessTokenPayload } from '@deeplib/misc';
 import type { CanActivate, ExecutionContext, Type } from '@nestjs/common';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { mainLogger } from '@stdlib/misc';
 import type { FastifyRequest } from 'fastify';
 import { dataAbstraction } from 'src/data/data-abstraction';
-import { mainLogger } from 'src/logger';
 
 export function makeAuthGuard(params?: {
   optional?: boolean;
@@ -17,7 +17,7 @@ export function makeAuthGuard(params?: {
     constructor(readonly jwtService: JwtService) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      mainLogger().sub('AuthGuard.canActivate').info('Checking');
+      mainLogger.sub('AuthGuard.canActivate').info('Checking');
 
       const request = context.switchToHttp().getRequest<FastifyRequest>();
 

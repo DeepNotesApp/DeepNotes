@@ -3,7 +3,7 @@ import { multiModePath } from '../utils';
 import { clearClientTokenExpirations } from './tokens';
 
 export async function logout() {
-  mainLogger().sub('logout').info('Logging out');
+  mainLogger.sub('logout').info('Logging out');
 
   const logoutPromise = trpcClient.sessions.logout.mutate();
 
@@ -37,7 +37,7 @@ export async function logout() {
   try {
     await logoutPromise;
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
   }
 
   location.href = multiModePath('/');

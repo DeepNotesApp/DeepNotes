@@ -1,9 +1,8 @@
 import type { SymmetricKey } from '@stdlib/crypto';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { nanoidToBytes } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
-
-import { mainLogger } from './logger';
 
 export interface PasswordValues {
   key: SymmetricKey;
@@ -15,7 +14,7 @@ export function derivePasswordValues(
   password: Uint8Array,
   salt?: Uint8Array,
 ): PasswordValues {
-  mainLogger().info('Started hashing password');
+  mainLogger.info('Started hashing password');
 
   salt ??= sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
 
@@ -28,7 +27,7 @@ export function derivePasswordValues(
     sodium.crypto_pwhash_ALG_ARGON2ID13,
   );
 
-  mainLogger().info('Finished hashing password');
+  mainLogger.info('Finished hashing password');
 
   return {
     key: wrapSymmetricKey(derivedKey.slice(0, 32)),
@@ -38,11 +37,11 @@ export function derivePasswordValues(
 }
 
 export function computePasswordHash(password: Uint8Array) {
-  mainLogger().info('Started hashing password');
+  mainLogger.info('Started hashing password');
 
   const result = sodium.crypto_pwhash_str(password, 2, 32 * 1048576);
 
-  mainLogger().info('Finished hashing password');
+  mainLogger.info('Finished hashing password');
 
   return result;
 }

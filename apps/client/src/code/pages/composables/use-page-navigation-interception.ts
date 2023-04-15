@@ -25,7 +25,7 @@ export function usePageNavigationInterception() {
         target.isContentEditable ||
         imageResizing.active
       ) {
-        mainLogger()
+        mainLogger
           .sub('usePageNavigationInterception')
           .info('Prevent default action');
 
@@ -47,7 +47,7 @@ export function usePageNavigationInterception() {
           href.startsWith(`${window.location.origin}/groups/`)
         )
       ) {
-        mainLogger()
+        mainLogger
           .sub('usePageNavigationInterception')
           .info(
             "[usePageNavigationInterception] Link doesn' point to a DeepNotes page: allow default action.",
@@ -55,7 +55,7 @@ export function usePageNavigationInterception() {
         return;
       }
 
-      mainLogger().info(
+      mainLogger.info(
         'Link points to a DeepNotes page: prevent default action.',
       );
 

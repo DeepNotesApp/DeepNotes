@@ -9,7 +9,7 @@ import type { RouteLocationNormalized, Router } from 'vue-router';
 
 import type { tiptap } from './tiptap/index.client';
 
-const moduleLogger = mainLogger().sub('boot/internals.client.ts');
+const moduleLogger = mainLogger.sub('boot/internals.client.ts');
 
 export interface DeepNotesInternals {
   dict: Record<string, any>;

@@ -293,13 +293,13 @@ export class Page implements IPageRegion {
         return true;
       });
 
-      mainLogger().sub('page.finishSetup').info('All notes loaded');
+      mainLogger.sub('page.finishSetup').info('All notes loaded');
 
       this.camera.fitToScreen();
 
       await sleep();
     } catch (error) {
-      mainLogger().error(error);
+      mainLogger.error(error);
     }
 
     this.react.loading = false;

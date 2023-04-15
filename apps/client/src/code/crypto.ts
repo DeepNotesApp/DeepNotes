@@ -12,7 +12,7 @@ import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 
 import { groupContentKeyrings } from './pages/computed/group-content-keyrings';
 
-const moduleLogger = mainLogger().sub('crypto.client.ts');
+const moduleLogger = mainLogger.sub('crypto.client.ts');
 
 export async function derivePasswordValues(
   password: string | Uint8Array,

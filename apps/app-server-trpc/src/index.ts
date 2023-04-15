@@ -1,10 +1,10 @@
 import './env';
 import './data/knex';
 
-import { buildServer } from './fastify-server';
-import { mainLogger } from './logger';
+import { mainLogger } from '@stdlib/misc';
 
-export type { RegistrationSchema } from './api/users/register';
+import { buildServer } from './fastify-server';
+
 export type { AppRouter } from './trpc/router';
 
 void buildServer().then(async (fastify) => {

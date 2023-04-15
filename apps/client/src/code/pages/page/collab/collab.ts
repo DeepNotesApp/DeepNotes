@@ -41,7 +41,7 @@ export class PageCollab {
   }
 
   async setup() {
-    const logger = mainLogger().sub('page.collab.setup');
+    const logger = mainLogger.sub('page.collab.setup');
 
     this.presence.setup();
 

@@ -1,4 +1,4 @@
-import { mainLogger } from 'src/logger';
+import { mainLogger } from '@stdlib/misc';
 
 import { sendMailjetMail } from './mailjet';
 import { sendSendGridMail } from './send-grid';

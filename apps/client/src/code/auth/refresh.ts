@@ -21,7 +21,7 @@ import {
   storeClientTokenExpirations,
 } from './tokens';
 
-const moduleLogger = mainLogger().sub('auth/refresh.client.ts');
+const moduleLogger = mainLogger.sub('auth/refresh.client.ts');
 
 export async function tryRefreshTokens(): Promise<void> {
   if (!authStore().loggedIn) {

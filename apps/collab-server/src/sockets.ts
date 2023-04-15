@@ -10,6 +10,7 @@ import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import { getSelfPublisherIdBytes } from '@stdlib/data';
 import { patchMultiple } from '@stdlib/db';
 import { addDays, addMinutes, splitStr } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { randomBytes } from 'crypto';
 import type { IncomingMessage } from 'http';
@@ -22,11 +23,10 @@ import { bufferizePageUpdate } from './data/redis/bufferize-page-update';
 import { flushPageUpdateBuffer } from './data/redis/flush-page-update-buffer';
 import { squashPageUpdates } from './data/redis/squash-page-updates';
 import { usingLocks } from './data/redlock';
-import { mainLogger } from './logger';
 import type { Room } from './rooms';
 import { getRoom } from './rooms';
 
-const moduleLogger = mainLogger().sub('sockets.ts');
+const moduleLogger = mainLogger.sub('sockets.ts');
 
 const _pendingRequests = new Map<string, NodeJS.Timeout>();
 

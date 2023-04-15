@@ -23,7 +23,7 @@ export async function asyncPrompt<T = any>(opts: QDialogOptions): Promise<T> {
   });
 }
 
-export function handleError(error: any, logger = mainLogger()) {
+export function handleError(error: any, logger = mainLogger) {
   if (error == null) {
     return;
   }

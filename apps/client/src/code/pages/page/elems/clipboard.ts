@@ -168,7 +168,7 @@ export class PageClipboard {
         type: 'negative',
       });
 
-      mainLogger().error(error);
+      mainLogger.error(error);
     }
   }
 

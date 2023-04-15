@@ -6,7 +6,7 @@ export function useTouchscreenPointerCaptureRelease() {
   });
 
   function onPointerDownCapture(event: PointerEvent) {
-    mainLogger()
+    mainLogger
       .sub('useTouchscreenPointerCaptureRelease')
       .info('Release pointer capture');
 

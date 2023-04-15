@@ -7,8 +7,8 @@ import { selfUserName } from 'src/code/self-user-name';
 
 import { groupPrivateKeyrings } from './group-private-keyrings';
 
-const _getLogger = mainLogger().sub('groupMemberNames.get');
-const _setLogger = mainLogger().sub('groupMemberNames.set');
+const _getLogger = mainLogger.sub('groupMemberNames.get');
+const _setLogger = mainLogger.sub('groupMemberNames.set');
 
 export const groupMemberNames = once(() =>
   createSmartComputedDict<
@@ -50,7 +50,7 @@ export const groupMemberNames = once(() =>
       }
 
       if (groupId == null) {
-        mainLogger().info(`${key}: No group ID found`);
+        mainLogger.info(`${key}: No group ID found`);
 
         return { text: '[Encrypted name]', status: 'encrypted' };
       }

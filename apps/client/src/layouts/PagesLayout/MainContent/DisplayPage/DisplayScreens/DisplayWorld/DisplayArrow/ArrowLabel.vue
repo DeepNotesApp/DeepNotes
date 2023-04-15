@@ -60,7 +60,7 @@ const editor = internals.tiptap().useEditor({
     props.arrow!.react.editor = editor;
   },
   onCreate() {
-    mainLogger().info(`Arrow Editor loaded (${props.arrow.id})`);
+    mainLogger.info(`Arrow Editor loaded (${props.arrow.id})`);
   },
   onDestroy() {
     props.arrow!.react.editor = null;

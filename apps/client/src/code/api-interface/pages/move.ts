@@ -289,7 +289,7 @@ export async function movePage(
           }),
         );
       } catch (error) {
-        mainLogger().error(error);
+        mainLogger.error(error);
       }
     }
   });

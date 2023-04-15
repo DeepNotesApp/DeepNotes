@@ -1,4 +1,3 @@
-import { once } from 'lodash';
 import {
   addInterval,
   addTimestamp,
@@ -10,23 +9,20 @@ import {
   writeTo,
 } from 'unilogr';
 
-export const mainLogger = once(
-  () =>
-    new Logger([
-      markSlot('filters'),
+export const mainLogger = new Logger([
+  markSlot('filters'),
 
-      capitalizeField('level'),
-      colorizeField('level'),
-      addTimestamp(),
-      addInterval(),
+  capitalizeField('level'),
+  colorizeField('level'),
+  addTimestamp(),
+  addInterval(),
 
-      markSlot(),
+  markSlot(),
 
-      ({ timestamp, level, message, ctx, interval }) =>
-        `${timestamp} [${level}]${
-          ctx ? ` (${ctx})` : ''
-        }: ${message} (${interval})`,
+  ({ timestamp, level, message, ctx, interval }) =>
+    `${timestamp} [${level}]${
+      ctx ? ` (${ctx})` : ''
+    }: ${message} (${interval})`,
 
-      writeTo(new ConsoleOutput()),
-    ]),
-);
+  writeTo(new ConsoleOutput()),
+]);

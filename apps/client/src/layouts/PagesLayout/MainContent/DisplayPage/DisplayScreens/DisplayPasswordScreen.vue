@@ -76,7 +76,7 @@ async function onEnterPassword() {
       type: 'negative',
     });
 
-    mainLogger().error(error);
+    mainLogger.error(error);
   }
 }
 </script>

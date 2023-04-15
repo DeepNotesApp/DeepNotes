@@ -520,7 +520,7 @@ export class PageNote extends PageElem() implements IPageRegion {
       setTimeout(() => {
         this.react.loaded = true;
 
-        mainLogger().info(`Note loaded (${this.id})`);
+        mainLogger.info(`Note loaded (${this.id})`);
       });
     });
   }

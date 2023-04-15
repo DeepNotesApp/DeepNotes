@@ -26,7 +26,7 @@ export const RealtimeClient = once(
     class extends ClientSocket() {
       private _nextCommandId = 0;
 
-      private readonly _logger = mainLogger().sub('RealtimeClient');
+      private readonly _logger = mainLogger.sub('RealtimeClient');
 
       private readonly _hsetBuffer = new Map<string, any>();
 

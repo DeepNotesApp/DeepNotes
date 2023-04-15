@@ -60,7 +60,7 @@ onMounted(async () => {
 
     status.value = true;
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
 
     status.value = false;
   }

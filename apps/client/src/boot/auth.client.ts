@@ -3,7 +3,7 @@ import { boot } from 'quasar/wrappers';
 import { tryRefreshTokens } from 'src/code/auth/refresh';
 
 export default boot(async ({ store }) => {
-  mainLogger().sub('boot/auth.client.ts').info('Booting');
+  mainLogger.sub('boot/auth.client.ts').info('Booting');
 
   authStore(store).loggedIn ||= !!(await (
     globalThis as any

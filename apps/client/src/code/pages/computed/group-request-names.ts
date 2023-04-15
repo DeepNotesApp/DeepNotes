@@ -4,8 +4,8 @@ import { once } from 'lodash';
 
 import { groupPrivateKeyrings } from './group-private-keyrings';
 
-const _getLogger = mainLogger().sub('groupMemberNames.get');
-const _setLogger = mainLogger().sub('groupMemberNames.set');
+const _getLogger = mainLogger.sub('groupMemberNames.get');
+const _setLogger = mainLogger.sub('groupMemberNames.set');
 
 export const groupRequestNames = once(() =>
   createSmartComputedDict<
@@ -43,7 +43,7 @@ export const groupRequestNames = once(() =>
       }
 
       if (groupId == null) {
-        mainLogger().info(`${key}: No group ID found`);
+        mainLogger.info(`${key}: No group ID found`);
 
         return { text: '[Encrypted name]', status: 'encrypted' };
       }

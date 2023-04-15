@@ -91,7 +91,7 @@ const editor = internals.tiptap().useEditor({
     note.react[props.section].editor = editor;
   },
   onCreate({ editor }) {
-    mainLogger().info(`Note Editor loaded (${note.id})`);
+    mainLogger.info(`Note Editor loaded (${note.id})`);
 
     editor.setEditable(note.react.editing);
   },

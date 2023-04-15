@@ -13,7 +13,7 @@ export function useKeyboardShortcuts() {
   });
 
   async function onKeyDown(event: KeyboardEvent): Promise<any> {
-    mainLogger().info(`Keydown: ${event.code}`);
+    mainLogger.info(`Keydown: ${event.code}`);
 
     if (page.value == null) {
       return;

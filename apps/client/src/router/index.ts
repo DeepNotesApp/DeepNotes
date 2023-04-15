@@ -12,7 +12,7 @@ import {
 
 import routes from './routes';
 
-const moduleLogger = mainLogger().sub('router/index.ts');
+const moduleLogger = mainLogger.sub('router/index.ts');
 
 moduleLogger.info('Running module');
 

@@ -101,7 +101,7 @@ async function _updateLastParentId(input: {
 
   while (loopCheckPageId != null) {
     if (visitedPageIds.has(loopCheckPageId)) {
-      mainLogger().sub('api/pages/bump').info('Loop detected in parent chain');
+      mainLogger.sub('api/pages/bump').info('Loop detected in parent chain');
       return;
     }
 
@@ -117,7 +117,7 @@ async function _updateLastParentId(input: {
       )) ?? undefined;
   }
 
-  mainLogger().sub('api/pages/bump').info('No loop detected in parent chain');
+  mainLogger.sub('api/pages/bump').info('No loop detected in parent chain');
 
   // Check that root page is personal group's main page
 

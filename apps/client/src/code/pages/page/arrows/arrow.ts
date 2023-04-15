@@ -410,7 +410,7 @@ export const PageArrow = once(
           setTimeout(() => {
             this.react.loaded = true;
 
-            mainLogger().info(`Arrow loaded (${this.id})`);
+            mainLogger.info(`Arrow loaded (${this.id})`);
           });
         });
       }
