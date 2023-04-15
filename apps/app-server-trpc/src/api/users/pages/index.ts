@@ -2,6 +2,7 @@ import { once } from 'lodash';
 import { trpc } from 'src/trpc/server';
 
 import { getCurrentPathProcedure } from './get-current-path';
+import { getGroupIdsProcedure } from './get-group-ids';
 import { getNotificationsProcedure } from './get-notifications';
 import { getStartingPageIdProcedure } from './get-starting-page-id';
 import { removeRecentPageProcedure } from './remove-recent-page';
@@ -18,5 +19,7 @@ export const pagesRouter = once(() =>
 
     setEncryptedDefaultNote: setEncryptedDefaultNoteProcedure(),
     setEncryptedDefaultArrow: setEncryptedDefaultArrowProcedure(),
+
+    getGroupIds: getGroupIdsProcedure(),
   }),
 );
