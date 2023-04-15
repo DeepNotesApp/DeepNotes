@@ -196,6 +196,7 @@ import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
+import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
@@ -238,14 +239,12 @@ onMounted(async () => {
       props.groupId !== internals.personalGroupId &&
       authStore().loggedIn
     ) {
-      const response = (
-        await api().post<{
-          groupMemberIds: string[];
-        }>(`/api/groups/${props.groupId}/load-settings`)
-      ).data;
+      const groupUserIds = await trpcClient.groups.getGroupUserIds.query({
+        groupId: props.groupId,
+      });
 
       pagesStore().groups[props.groupId] = {
-        userIds: new Set(response.groupMemberIds),
+        userIds: new Set(groupUserIds),
       };
     }
 
