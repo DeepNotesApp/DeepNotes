@@ -1,4 +1,3 @@
-import { bytesToBase64, bytesToBase64Safe } from '@stdlib/base64';
 import type { Keyring, SymmetricKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
@@ -25,32 +24,11 @@ export async function createPage(input: {
 }) {
   let groupContentKeyring: SymmetricKeyring | undefined;
 
-  const request = {} as {
-    parentPageId: string;
-    groupId: string;
-    pageId: string;
-
-    pageEncryptedSymmetricKeyring: string;
-    pageEncryptedRelativeTitle: string;
-    pageEncryptedAbsoluteTitle: string;
-
-    createGroup: boolean;
-    groupEncryptedName: string;
-    groupPasswordHash?: string;
-    groupIsPublic: boolean;
-    accessKeyring: string;
-    groupEncryptedInternalKeyring: string;
-    groupEncryptedContentKeyring: string;
-    groupPublicKeyring: string;
-    groupEncryptedPrivateKeyring: string;
-    groupMemberEncryptedName: string;
-  };
+  const request = {} as Parameters<typeof trpcClient.pages.create.mutate>[0];
 
   request.parentPageId = input.pageId;
 
   request.pageId = nanoid();
-
-  request.createGroup = input.createGroup;
 
   if (input.createGroup) {
     if (input.groupName === '') {
@@ -86,46 +64,39 @@ export async function createPage(input: {
 
     groupContentKeyring = groupValues.contentKeyring;
 
-    request.groupEncryptedName = bytesToBase64(
-      groupValues.accessKeyring.encrypt(textToBytes(input.groupName), {
-        padding: true,
-        associatedData: {
-          context: 'GroupName',
-          groupId: groupValues.groupId,
+    request.groupCreation = {
+      groupEncryptedName: groupValues.accessKeyring.encrypt(
+        textToBytes(input.groupName),
+        {
+          padding: true,
+          associatedData: {
+            context: 'GroupName',
+            groupId: groupValues.groupId,
+          },
         },
-      }),
-    );
+      ),
 
-    request.groupPasswordHash = bytesToBase64Safe(
-      groupValues.passwordValues?.passwordHash,
-    );
+      groupPasswordHash: groupValues.passwordValues?.passwordHash,
 
-    request.groupIsPublic = input.groupIsPublic;
+      groupIsPublic: input.groupIsPublic,
 
-    request.accessKeyring = bytesToBase64(
-      groupValues.finalAccessKeyring.wrappedValue,
-    );
-    request.groupEncryptedInternalKeyring = bytesToBase64(
-      groupValues.encryptedInternalKeyring.wrappedValue,
-    );
-    request.groupEncryptedContentKeyring = bytesToBase64(
-      groupValues.encryptedContentKeyring.wrappedValue,
-    );
+      accessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+      groupEncryptedInternalKeyring:
+        groupValues.encryptedInternalKeyring.wrappedValue,
+      groupEncryptedContentKeyring:
+        groupValues.encryptedContentKeyring.wrappedValue,
 
-    request.groupPublicKeyring = bytesToBase64(
-      (groupValues.keyPair.publicKey as Keyring).wrappedValue,
-    );
-    request.groupEncryptedPrivateKeyring = bytesToBase64(
-      groupValues.encryptedPrivateKeyring.wrappedValue,
-    );
+      groupPublicKeyring: (groupValues.keyPair.publicKey as Keyring)
+        .wrappedValue,
+      groupEncryptedPrivateKeyring:
+        groupValues.encryptedPrivateKeyring.wrappedValue,
 
-    request.groupMemberEncryptedName = bytesToBase64(
-      internals.keyPair.encrypt(
+      groupMemberEncryptedName: internals.keyPair.encrypt(
         textToBytes(input.groupMemberName),
         groupValues.keyPair.publicKey,
         { padding: true },
       ),
-    );
+    };
   } else {
     request.groupId = input.currentGroupId;
 
@@ -162,37 +133,32 @@ export async function createPage(input: {
 
   const pageKeyring = createSymmetricKeyring();
 
-  request.pageEncryptedSymmetricKeyring = bytesToBase64(
-    pageKeyring.wrapSymmetric(groupContentKeyring, {
+  request.pageEncryptedSymmetricKeyring = pageKeyring.wrapSymmetric(
+    groupContentKeyring,
+    {
       associatedData: {
         context: 'PageKeyring',
         pageId: request.pageId,
       },
-    }).wrappedValue,
-  );
-  request.pageEncryptedRelativeTitle = bytesToBase64(
-    pageKeyring.encrypt(textToBytes(input.pageRelativeTitle), {
+    },
+  ).wrappedValue;
+  request.pageEncryptedRelativeTitle = pageKeyring.encrypt(
+    textToBytes(input.pageRelativeTitle),
+    {
       padding: true,
       associatedData: {
         context: 'PageRelativeTitle',
         pageId: request.pageId,
       },
-    }),
+    },
   );
-  request.pageEncryptedAbsoluteTitle = bytesToBase64(
-    pageKeyring.encrypt(textToBytes(''), {
-      padding: true,
-      associatedData: {
-        context: 'PageAbsoluteTitle',
-        pageId: request.pageId,
-      },
-    }),
-  );
+  request.pageEncryptedAbsoluteTitle = pageKeyring.encrypt(textToBytes(''), {
+    padding: true,
+    associatedData: {
+      context: 'PageAbsoluteTitle',
+      pageId: request.pageId,
+    },
+  });
 
-  return (
-    await api().post<{
-      pageId: string;
-      message?: string;
-    }>('/api/pages/create', request)
-  ).data;
+  return await trpcClient.pages.create.mutate(request);
 }
