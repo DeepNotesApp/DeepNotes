@@ -2,12 +2,9 @@ import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
-import {
-  computePasswordHash,
-  encryptGroupRehashedPasswordHash,
-} from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { checkCorrectGroupPassword } from 'src/utils';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -20,9 +17,9 @@ const baseProcedure = authProcedure.input(
   }),
 );
 
-export const enableProcedure = once(() => baseProcedure.mutation(enable));
+export const disableProcedure = once(() => baseProcedure.mutation(disable));
 
-export async function enable({
+export async function disable({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
@@ -30,6 +27,15 @@ export async function enable({
     [[`group-lock:${input.groupId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check if given group password is correct
+
+        await checkCorrectGroupPassword({
+          groupId: input.groupId,
+          groupPasswordHash: input.groupPasswordHash,
+        });
+
+        checkRedlockSignalAborted(signals);
+
         // Check if user can edit group settings
 
         if (
@@ -64,15 +70,13 @@ export async function enable({
 
         checkRedlockSignalAborted(signals);
 
-        // Enable password protection
+        // Disable password protection
 
         await ctx.dataAbstraction.patch(
           'group',
           input.groupId,
           {
-            encrypted_rehashed_password_hash: encryptGroupRehashedPasswordHash(
-              computePasswordHash(input.groupPasswordHash),
-            ),
+            encrypted_rehashed_password_hash: null,
 
             encrypted_content_keyring: input.groupEncryptedContentKeyring,
           },
