@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
 import { deriveUserValues } from 'src/code/crypto';
+import { trpcClient } from 'src/code/trpc';
 import { asyncPrompt, handleError } from 'src/code/utils';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';
@@ -53,24 +54,18 @@ async function enableTwoFactorAuth() {
       'email',
     );
 
-    const loginHash = bytesToBase64(
-      (await deriveUserValues(email, password)).loginHash,
-    );
+    const derivedUserValues = await deriveUserValues(email, password);
 
-    const response = (
-      await api().post<{
-        secret: string;
-        keyUri: string;
-      }>('/api/users/account/security/two-factor-auth/enable/request', {
-        loginHash,
-      })
-    ).data;
+    const response =
+      await trpcClient.users.account.twoFactorAuth.enable.request.mutate({
+        loginHash: derivedUserValues.loginHash,
+      });
 
     $quasar().dialog({
       component: EnableTwoFactorAuthDialog,
 
       componentProps: {
-        loginHash,
+        loginHash: derivedUserValues.loginHash,
 
         ...response,
       },

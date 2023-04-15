@@ -30,9 +30,9 @@ export const getRedlock = once(
     }),
 );
 
-export function usingLocks(
+export function usingLocks<TResult>(
   resources: string[][],
-  routine: (signals: RedlockAbortSignal[]) => Promise<any>,
+  routine: (signals: RedlockAbortSignal[]) => Promise<TResult>,
   signals: RedlockAbortSignal[] = [],
 ) {
   return _usingLocks(getRedlock(), resources, routine, signals);

@@ -1,10 +1,10 @@
 import type { RedlockAbortSignal } from 'redlock';
 import type Redlock from 'redlock';
 
-export function usingLocks(
+export function usingLocks<TResult>(
   redlock: Redlock,
   resources: string[][],
-  routine: (signals: RedlockAbortSignal[]) => Promise<any>,
+  routine: (signals: RedlockAbortSignal[]) => Promise<TResult>,
   signals: RedlockAbortSignal[] = [],
 ) {
   let func = routine;

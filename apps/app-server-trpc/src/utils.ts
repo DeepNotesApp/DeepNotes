@@ -1,6 +1,8 @@
-import { SessionModel } from '@deeplib/db';
+import { SessionModel, UserModel } from '@deeplib/db';
+import { getPasswordHashValues } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
 import { addDays } from '@stdlib/misc';
+import { TRPCError } from '@trpc/server';
 import type { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
@@ -8,6 +10,8 @@ import { nanoid } from 'nanoid';
 import { setCookies } from './cookies';
 import {
   computePasswordHash,
+  decryptUserRehashedLoginHash,
+  derivePasswordValues,
   encryptGroupRehashedPasswordHash,
 } from './crypto';
 import { dataAbstraction } from './data/data-abstraction';
@@ -168,4 +172,44 @@ export async function generateSessionValues(
     sessionKey,
     refreshCode,
   };
+}
+
+export async function checkCorrectUserPassword({
+  userId,
+  loginHash,
+}: {
+  userId: string;
+  loginHash: Uint8Array;
+}) {
+  const user = await UserModel.query()
+    .findById(userId)
+    .select('encrypted_rehashed_login_hash');
+
+  if (user?.encrypted_rehashed_login_hash == null) {
+    throw new TRPCError({
+      message: 'User not found.',
+      code: 'NOT_FOUND',
+    });
+  }
+
+  const passwordHashValues = getPasswordHashValues(
+    decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
+  );
+
+  const passwordValues = derivePasswordValues(
+    loginHash,
+    passwordHashValues.saltBytes,
+  );
+
+  const passwordIsCorrect = sodium.memcmp(
+    passwordValues.hash,
+    passwordHashValues.hashBytes,
+  );
+
+  if (!passwordIsCorrect) {
+    throw new TRPCError({
+      message: 'Password is incorrect.',
+      code: 'BAD_REQUEST',
+    });
+  }
 }
