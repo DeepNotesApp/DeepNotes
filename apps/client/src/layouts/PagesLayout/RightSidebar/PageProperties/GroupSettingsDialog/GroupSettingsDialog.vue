@@ -196,7 +196,6 @@ import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 

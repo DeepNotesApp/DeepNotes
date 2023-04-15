@@ -24,7 +24,6 @@
 
 <script setup lang="ts">
 import { deriveUserValues } from 'src/code/crypto';
-import { trpcClient } from 'src/code/trpc';
 import { asyncPrompt, handleError } from 'src/code/utils';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';

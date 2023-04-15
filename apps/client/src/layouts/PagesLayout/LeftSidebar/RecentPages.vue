@@ -79,7 +79,6 @@
 
 <script setup lang="ts">
 import { pull } from 'lodash';
-import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 
 async function removeRecentPage(pageId: string) {

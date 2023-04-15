@@ -140,7 +140,6 @@
 import { sleep } from '@stdlib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import QRCode from 'qrcode';
-import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 

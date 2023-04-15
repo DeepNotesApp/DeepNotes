@@ -2,7 +2,6 @@ import { DataLayer } from '@stdlib/crypto';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
-import { trpcClient } from 'src/code/trpc';
 
 export async function disableGroupPasswordProtection(input: {
   groupId: string;

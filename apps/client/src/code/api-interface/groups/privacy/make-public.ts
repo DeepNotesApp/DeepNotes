@@ -1,6 +1,5 @@
 import { DataLayer } from '@stdlib/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
-import { trpcClient } from 'src/code/trpc';
 
 export async function makeGroupPublic(groupId: string) {
   const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();

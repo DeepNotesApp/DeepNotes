@@ -140,6 +140,7 @@ module.exports = configure(function (ctx) {
             'vue-router',
             {
               'src/boot/axios.universal': ['api'],
+              'src/code/trpc': ['trpcClient'],
 
               'src/code/internals': ['internals'],
 

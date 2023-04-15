@@ -112,7 +112,6 @@
 <script setup lang="ts">
 import { BREAKPOINT_SM_MIN, sleep } from '@stdlib/misc';
 import QRCode from 'qrcode';
-import { trpcClient } from 'src/code/trpc';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 

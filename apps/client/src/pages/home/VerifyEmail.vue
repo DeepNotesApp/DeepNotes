@@ -46,8 +46,6 @@
 </template>
 
 <script setup lang="ts">
-import { trpcClient } from 'src/code/trpc';
-
 useMeta(() => ({
   title: 'Email verification - DeepNotes',
 }));

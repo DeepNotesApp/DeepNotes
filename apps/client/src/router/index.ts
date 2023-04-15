@@ -2,7 +2,6 @@ import { bytesToBase64 } from '@stdlib/base64';
 import { route } from 'quasar/wrappers';
 import { clearCookie } from 'src/code/cookies';
 import { getRedirectDest } from 'src/code/routing';
-import { trpcClient } from 'src/code/trpc';
 import type { RouteLocationRaw } from 'vue-router';
 import {
   createMemoryHistory,

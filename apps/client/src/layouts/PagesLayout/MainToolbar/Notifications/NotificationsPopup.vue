@@ -93,7 +93,6 @@
 
 <script setup lang="ts">
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { trpcClient } from 'src/code/trpc';
 import { handleError } from 'src/code/utils';
 
 import GroupInvitationAccepted from './Items/GroupInvitationAccepted.vue';
