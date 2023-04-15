@@ -63,10 +63,10 @@ export async function getRedirectDest({
 
   if (auth.loggedIn && route.name === 'pages') {
     try {
-      const startingPageId = await trpcClient.users.getStartingPageId.query(
-        undefined,
-        { context: getRequestConfig(cookies) },
-      );
+      const startingPageId =
+        await trpcClient.users.pages.getStartingPageId.query(undefined, {
+          context: getRequestConfig(cookies),
+        });
 
       return { name: 'page', params: { pageId: startingPageId } };
     } catch (error) {

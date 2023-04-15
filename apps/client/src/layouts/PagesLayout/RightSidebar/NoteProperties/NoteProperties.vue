@@ -811,7 +811,7 @@ async function setAsDefault() {
 
     internals.pages.defaultNote = serialObject;
 
-    await trpcClient.users.setEncryptedDefaultNote.mutate(
+    await trpcClient.users.pages.setEncryptedDefaultNote.mutate(
       internals.symmetricKeyring.encrypt(pack(serialObject), {
         padding: true,
         associatedData: {

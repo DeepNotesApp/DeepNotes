@@ -65,7 +65,7 @@ export class Pages {
     promises.push(
       (async () => {
         pagesStore().notifications =
-          await trpcClient.users.getNotifications.query();
+          await trpcClient.users.pages.getNotifications.query();
       })(),
     );
 
@@ -166,9 +166,10 @@ export class Pages {
 
     if (authStore().loggedIn) {
       try {
-        this.react.pathPageIds = await trpcClient.users.getCurrentPath.query({
-          initialPageId: pageId,
-        });
+        this.react.pathPageIds =
+          await trpcClient.users.pages.getCurrentPath.query({
+            initialPageId: pageId,
+          });
 
         return;
       } catch (error) {

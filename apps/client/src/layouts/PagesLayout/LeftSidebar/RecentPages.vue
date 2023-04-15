@@ -84,7 +84,7 @@ import { handleError } from 'src/code/utils';
 
 async function removeRecentPage(pageId: string) {
   try {
-    await trpcClient.users.removeRecentPage.mutate({ pageId });
+    await trpcClient.users.pages.removeRecentPage.mutate({ pageId });
 
     pull(internals.pages.react.recentPageIds, pageId);
   } catch (error) {

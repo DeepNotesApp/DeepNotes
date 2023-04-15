@@ -297,7 +297,7 @@ async function setAsDefault() {
 
     internals.pages.defaultArrow = serialArrow;
 
-    await trpcClient.users.setEncryptedDefaultArrow.mutate(
+    await trpcClient.users.pages.setEncryptedDefaultArrow.mutate(
       internals.symmetricKeyring.encrypt(pack(serialArrow), {
         padding: true,
         associatedData: {

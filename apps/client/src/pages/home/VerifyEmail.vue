@@ -56,7 +56,7 @@ const status = ref<boolean | undefined>(undefined);
 
 onMounted(async () => {
   try {
-    await trpcClient.users.verifyEmail.mutate({
+    await trpcClient.users.account.verifyEmail.mutate({
       emailVerificationCode: route().value.params.code as string,
     });
 

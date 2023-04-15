@@ -230,7 +230,7 @@ async function register() {
       userName: userName.value,
     });
 
-    await trpcClient.users.register.mutate({
+    await trpcClient.users.account.register.mutate({
       email: email.value,
       loginHash: derivedUserValues.loginHash,
 
