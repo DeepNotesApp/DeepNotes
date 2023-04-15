@@ -194,7 +194,8 @@ async function cancelSelectedInvitations() {
     });
 
     for (const userId of finalSelectedUserIds.value) {
-      await cancelJoinInvitation(groupId, {
+      await cancelJoinInvitation({
+        groupId,
         patientId: userId,
       });
     }

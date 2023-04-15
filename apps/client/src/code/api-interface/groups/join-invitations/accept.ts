@@ -3,26 +3,22 @@ import { createKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function acceptJoinInvitation(
-  groupId: string,
-  {
-    userName,
-  }: {
-    userName: string;
-  },
-) {
+export async function acceptJoinInvitation(input: {
+  groupId: string;
+  userName: string;
+}) {
   const groupPublicKeyring = createKeyring(
-    await internals.realtime.hget('group', groupId, 'public-keyring'),
+    await internals.realtime.hget('group', input.groupId, 'public-keyring'),
   );
 
   const userEncryptedName = bytesToBase64(
-    internals.keyPair.encrypt(textToBytes(userName), groupPublicKeyring, {
+    internals.keyPair.encrypt(textToBytes(input.userName), groupPublicKeyring, {
       padding: true,
     }),
   );
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/accept`,
+    url: `/api/groups/${input.groupId}/join-invitations/accept`,
 
     body: {
       userEncryptedName,
@@ -30,15 +26,15 @@ export async function acceptJoinInvitation(
 
     notifications: {
       agent: {
-        groupId,
+        groupId: input.groupId,
 
         // You have accepted the invitation to join the group.
       },
 
       observers: {
-        groupId,
+        groupId: input.groupId,
 
-        agentName: userName,
+        agentName: input.userName,
 
         // ${agentName} has accepted the invitation to join the group.
       },

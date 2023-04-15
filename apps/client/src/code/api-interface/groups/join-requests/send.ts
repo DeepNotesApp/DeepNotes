@@ -3,33 +3,33 @@ import { createKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function sendJoinRequest(
-  groupId: string,
-  {
-    userName,
-  }: {
-    userName: string;
-  },
-) {
+export async function sendJoinRequest(input: {
+  groupId: string;
+  userName: string;
+}) {
   const groupPublicKeyring = createKeyring(
-    await internals.realtime.hget('group', groupId, 'public-keyring'),
+    await internals.realtime.hget('group', input.groupId, 'public-keyring'),
   );
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-requests/send`,
+    url: `/api/groups/${input.groupId}/join-requests/send`,
 
     body: {
       encryptedUserName: bytesToBase64(
-        internals.keyPair.encrypt(textToBytes(userName), groupPublicKeyring, {
-          padding: true,
-        }),
+        internals.keyPair.encrypt(
+          textToBytes(input.userName),
+          groupPublicKeyring,
+          {
+            padding: true,
+          },
+        ),
       ),
       encryptedUserNameForUser: bytesToBase64(
-        internals.symmetricKeyring.encrypt(textToBytes(userName), {
+        internals.symmetricKeyring.encrypt(textToBytes(input.userName), {
           padding: true,
           associatedData: {
             context: 'GroupJoinRequestUserNameForUser',
-            groupId: groupId,
+            groupId: input.groupId,
             userId: authStore().userId,
           },
         }),
@@ -38,16 +38,16 @@ export async function sendJoinRequest(
 
     notifications: {
       agent: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         // You have sent a join request.
       },
 
       observers: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         agentId: authStore().userId,
-        agentName: userName,
+        agentName: input.userName,
 
         // ${agentName} has sent a join request.
       },

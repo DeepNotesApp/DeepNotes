@@ -6,10 +6,7 @@ import {
 } from '@stdlib/crypto';
 import { deriveUserValues } from 'src/code/crypto';
 
-export async function changePassword({
-  oldPassword,
-  newPassword,
-}: {
+export async function changePassword(input: {
   oldPassword: string;
   newPassword: string;
 }) {
@@ -21,8 +18,8 @@ export async function changePassword({
 
   // Compute derived keys
 
-  const oldDerivedValues = await deriveUserValues(email, oldPassword);
-  const newDerivedValues = await deriveUserValues(email, newPassword);
+  const oldDerivedValues = await deriveUserValues(email, input.oldPassword);
+  const newDerivedValues = await deriveUserValues(email, input.newPassword);
 
   // Reencrypt derived keys
 

@@ -37,11 +37,11 @@ export class Pages {
 
   parentPageId?: string;
 
-  constructor({ factories }: { factories: Factories }) {
-    this.factories = factories;
+  constructor(input: { factories: Factories }) {
+    this.factories = input.factories;
 
-    this.serialization = factories.Serialization({ app: this });
-    this.pageCache = factories.PageCache({ app: this });
+    this.serialization = input.factories.Serialization({ app: this });
+    this.pageCache = input.factories.PageCache({ app: this });
 
     this.react = reactive({
       pathPageIds: [],

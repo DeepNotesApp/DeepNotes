@@ -6,24 +6,7 @@ import { createSymmetricKeyring, wrapSymmetricKey } from '@stdlib/crypto';
 import { multiModePath } from '../utils';
 import { storeClientTokenExpirations } from './tokens';
 
-export async function login({
-  demo,
-
-  rememberSession,
-
-  masterKey,
-
-  userId,
-
-  publicKeyring,
-  encryptedPrivateKeyring,
-  encryptedSymmetricKeyring,
-
-  sessionId,
-  sessionKey,
-
-  personalGroupId,
-}: {
+export async function login(input: {
   demo?: boolean;
 
   rememberSession: boolean;
@@ -41,39 +24,42 @@ export async function login({
 
   personalGroupId: string;
 }) {
-  if (demo) {
+  if (input.demo) {
     internals.localStorage.setItem('demo', 'true');
   } else {
     internals.localStorage.removeItem('demo');
   }
 
-  if (rememberSession) {
+  if (input.rememberSession) {
     internals.storage = internals.localStorage;
   } else {
     internals.storage = internals.sessionStorage;
   }
 
-  internals.storage.setItem('userId', userId);
-  internals.storage.setItem('publicKeyring', bytesToBase64(publicKeyring));
-  internals.storage.setItem('sessionId', sessionId);
-  internals.storage.setItem('personalGroupId', personalGroupId);
+  internals.storage.setItem('userId', input.userId);
+  internals.storage.setItem(
+    'publicKeyring',
+    bytesToBase64(input.publicKeyring),
+  );
+  internals.storage.setItem('sessionId', input.sessionId);
+  internals.storage.setItem('personalGroupId', input.personalGroupId);
 
-  const wrappedSessionKey = wrapSymmetricKey(sessionKey);
+  const wrappedSessionKey = wrapSymmetricKey(input.sessionKey);
 
   internals.storage.setItem(
     'encryptedPrivateKeyring',
     bytesToBase64(
-      createPrivateKeyring(encryptedPrivateKeyring)
-        .unwrapSymmetric(masterKey, {
+      createPrivateKeyring(input.encryptedPrivateKeyring)
+        .unwrapSymmetric(input.masterKey, {
           associatedData: {
             context: 'UserPrivateKeyring',
-            userId,
+            userId: input.userId,
           },
         })
         .wrapSymmetric(wrappedSessionKey, {
           associatedData: {
             context: 'SessionUserPrivateKeyring',
-            userId,
+            userId: input.userId,
           },
         }).wrappedValue,
     ),
@@ -81,17 +67,17 @@ export async function login({
   internals.storage.setItem(
     'encryptedSymmetricKeyring',
     bytesToBase64(
-      createSymmetricKeyring(encryptedSymmetricKeyring)
-        .unwrapSymmetric(masterKey, {
+      createSymmetricKeyring(input.encryptedSymmetricKeyring)
+        .unwrapSymmetric(input.masterKey, {
           associatedData: {
             context: 'UserSymmetricKeyring',
-            userId,
+            userId: input.userId,
           },
         })
         .wrapSymmetric(wrappedSessionKey, {
           associatedData: {
             context: 'SessionUserSymmetricKeyring',
-            userId,
+            userId: input.userId,
           },
         }).wrappedValue,
     ),

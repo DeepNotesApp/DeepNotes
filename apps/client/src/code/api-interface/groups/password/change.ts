@@ -4,24 +4,24 @@ import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrin
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { trpcClient } from 'src/code/trpc';
 
-export async function changeGroupPasswordProtection(
-  groupId: string,
-  {
-    currentGroupPassword,
-    newGroupPassword,
-  }: { currentGroupPassword: string; newGroupPassword: string },
-) {
+export async function changeGroupPasswordProtection(input: {
+  groupId: string;
+  currentGroupPassword: string;
+  newGroupPassword: string;
+}) {
   // Remove old password protection from group keyring
 
-  let groupContentKeyring = await groupContentKeyrings()(groupId).getAsync();
+  let groupContentKeyring = await groupContentKeyrings()(
+    input.groupId,
+  ).getAsync();
 
   if (groupContentKeyring == null) {
     throw new Error('Group keyring not found.');
   }
 
   const currentGroupPasswordValues = await computeGroupPasswordValues(
-    groupId,
-    currentGroupPassword,
+    input.groupId,
+    input.currentGroupPassword,
   );
 
   if (groupContentKeyring.topLayer === DataLayer.Symmetric) {
@@ -30,7 +30,7 @@ export async function changeGroupPasswordProtection(
       {
         associatedData: {
           context: 'GroupContentKeyringPasswordProtection',
-          groupId,
+          groupId: input.groupId,
         },
       },
     );
@@ -41,8 +41,8 @@ export async function changeGroupPasswordProtection(
   // Reprotect group keyring with new password
 
   const newGroupPasswordValues = await computeGroupPasswordValues(
-    groupId,
-    newGroupPassword,
+    input.groupId,
+    input.newGroupPassword,
   );
 
   groupContentKeyring = groupContentKeyring.wrapSymmetric(
@@ -50,14 +50,14 @@ export async function changeGroupPasswordProtection(
     {
       associatedData: {
         context: 'GroupContentKeyringPasswordProtection',
-        groupId,
+        groupId: input.groupId,
       },
     },
   );
 
   // Wrap content keyring with group keyring
 
-  const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();
+  const accessKeyring = await groupAccessKeyrings()(input.groupId).getAsync();
 
   if (accessKeyring?.topLayer !== DataLayer.Raw) {
     throw new Error('Invalid group keyring.');
@@ -66,14 +66,14 @@ export async function changeGroupPasswordProtection(
   groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
     associatedData: {
       context: 'GroupContentKeyring',
-      groupId,
+      groupId: input.groupId,
     },
   });
 
   // Send password change request
 
   await trpcClient.groups.password.change.mutate({
-    groupId,
+    groupId: input.groupId,
 
     groupCurrentPasswordHash: currentGroupPasswordValues.passwordHash,
     groupNewPasswordHash: newGroupPasswordValues.passwordHash,

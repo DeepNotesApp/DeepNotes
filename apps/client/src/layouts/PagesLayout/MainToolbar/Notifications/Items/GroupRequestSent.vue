@@ -158,7 +158,8 @@ async function _rejectJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rejectJoinRequest(notificationContent.value.groupId, {
+    await rejectJoinRequest({
+      groupId: notificationContent.value.groupId,
       patientId: notificationContent.value.agentId,
     });
 

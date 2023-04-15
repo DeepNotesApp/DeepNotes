@@ -18,22 +18,7 @@ import {
 import { dataAbstraction } from './data/data-abstraction';
 import { generateTokens } from './tokens';
 
-export async function createGroup({
-  groupId,
-  userId,
-  isPersonal,
-  encryptedName,
-  mainPageId,
-  passwordHash,
-  isPublic,
-  accessKeyring,
-  encryptedInternalKeyring,
-  encryptedContentKeyring,
-  publicKeyring,
-  encryptedPrivateKeyring,
-  encryptedUserName,
-  dtrx,
-}: {
+export async function createGroup(input: {
   groupId: string;
 
   encryptedName?: Uint8Array;
@@ -60,64 +45,60 @@ export async function createGroup({
 }) {
   await dataAbstraction().insert(
     'group',
-    groupId,
+    input.groupId,
     {
-      id: groupId,
+      id: input.groupId,
 
-      encrypted_name: encryptedName ?? new Uint8Array(),
+      encrypted_name: input.encryptedName ?? new Uint8Array(),
 
-      main_page_id: mainPageId,
+      main_page_id: input.mainPageId,
 
       encrypted_rehashed_password_hash:
-        passwordHash != null
-          ? encryptGroupRehashedPasswordHash(computePasswordHash(passwordHash))
+        input.passwordHash != null
+          ? encryptGroupRehashedPasswordHash(
+              computePasswordHash(input.passwordHash),
+            )
           : undefined,
 
-      access_keyring: isPublic ? accessKeyring : undefined,
-      encrypted_content_keyring: encryptedContentKeyring,
+      access_keyring: input.isPublic ? input.accessKeyring : undefined,
+      encrypted_content_keyring: input.encryptedContentKeyring,
 
-      user_id: isPersonal ? userId : undefined,
+      user_id: input.isPersonal ? input.userId : undefined,
 
-      public_keyring: publicKeyring,
-      encrypted_private_keyring: encryptedPrivateKeyring,
+      public_keyring: input.publicKeyring,
+      encrypted_private_keyring: input.encryptedPrivateKeyring,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   await dataAbstraction().insert(
     'group-member',
-    `${groupId}:${userId}`,
+    `${input.groupId}:${input.userId}`,
     {
-      group_id: groupId,
-      user_id: userId,
+      group_id: input.groupId,
+      user_id: input.userId,
 
       role: 'owner',
 
-      encrypted_access_keyring: isPublic ? undefined : accessKeyring,
-      encrypted_internal_keyring: encryptedInternalKeyring,
+      encrypted_access_keyring: input.isPublic
+        ? undefined
+        : input.accessKeyring,
+      encrypted_internal_keyring: input.encryptedInternalKeyring,
 
-      encrypted_name: encryptedUserName,
+      encrypted_name: input.encryptedUserName,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 }
 
-export async function generateSessionValues(
-  sessionId: string,
-  {
-    userId,
-    deviceId,
-    rememberSession,
-    reply,
-    dtrx,
-  }: {
-    userId: string;
-    deviceId?: string;
-    rememberSession: boolean;
-    reply: FastifyReply;
-    dtrx?: DataTransaction;
-  },
-) {
+export async function generateSessionValues(input: {
+  sessionId: string;
+  userId: string;
+  deviceId?: string;
+  rememberSession: boolean;
+  reply: FastifyReply;
+  dtrx?: DataTransaction;
+}) {
   // Generate session values
 
   const sessionKey = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
@@ -125,12 +106,12 @@ export async function generateSessionValues(
 
   // Update session in database
 
-  if (deviceId != null) {
-    await SessionModel.query(dtrx?.trx).insert({
-      id: sessionId,
+  if (input.deviceId != null) {
+    await SessionModel.query(input.dtrx?.trx).insert({
+      id: input.sessionId,
 
-      user_id: userId,
-      device_id: deviceId,
+      user_id: input.userId,
+      device_id: input.deviceId,
 
       encryption_key: sessionKey,
       refresh_code: refreshCode,
@@ -138,8 +119,8 @@ export async function generateSessionValues(
       expiration_date: addDays(new Date(), 7),
     });
   } else {
-    await SessionModel.query(dtrx?.trx)
-      .findById(sessionId)
+    await SessionModel.query(input.dtrx?.trx)
+      .findById(input.sessionId)
       .patch({
         encryption_key: sessionKey,
         refresh_code: refreshCode,
@@ -152,38 +133,35 @@ export async function generateSessionValues(
   // Generate tokens
 
   const tokens = generateTokens({
-    userId,
-    sessionId,
+    userId: input.userId,
+    sessionId: input.sessionId,
     refreshCode,
-    rememberSession,
+    rememberSession: input.rememberSession,
   });
 
   // Set cookies for client
 
   setCookies({
-    reply,
+    reply: input.reply,
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
-    rememberSession,
+    rememberSession: input.rememberSession,
   });
 
   return {
-    sessionId,
+    sessionId: input.sessionId,
 
     sessionKey,
     refreshCode,
   };
 }
 
-export async function checkCorrectUserPassword({
-  userId,
-  loginHash,
-}: {
+export async function checkCorrectUserPassword(input: {
   userId: string;
   loginHash: Uint8Array;
 }) {
   const user = await UserModel.query()
-    .findById(userId)
+    .findById(input.userId)
     .select('encrypted_rehashed_login_hash');
 
   if (user?.encrypted_rehashed_login_hash == null) {
@@ -198,7 +176,7 @@ export async function checkCorrectUserPassword({
   );
 
   const passwordValues = derivePasswordValues(
-    loginHash,
+    input.loginHash,
     passwordHashValues.saltBytes,
   );
 

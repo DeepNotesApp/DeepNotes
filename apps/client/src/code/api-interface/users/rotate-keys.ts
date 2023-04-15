@@ -8,10 +8,10 @@ import {
 import sodium from 'libsodium-wrappers';
 import { deriveUserValues } from 'src/code/crypto';
 
-export async function rotateUserKeys({ password }: { password: string }) {
+export async function rotateUserKeys(input: { password: string }) {
   const derivedValues = await deriveUserValues(
     await internals.realtime.hget('user', authStore().userId, 'email'),
-    password,
+    input.password,
   );
 
   const keyRotationValues = (

@@ -4,13 +4,15 @@ import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrin
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { trpcClient } from 'src/code/trpc';
 
-export async function enableGroupPasswordProtection(
-  groupId: string,
-  { groupPassword }: { groupPassword: string },
-) {
+export async function enableGroupPasswordProtection(input: {
+  groupId: string;
+  groupPassword: string;
+}) {
   // Get group content keyring
 
-  let groupContentKeyring = await groupContentKeyrings()(groupId).getAsync();
+  let groupContentKeyring = await groupContentKeyrings()(
+    input.groupId,
+  ).getAsync();
 
   if (groupContentKeyring == null) {
     throw new Error('Group keyring not found.');
@@ -23,8 +25,8 @@ export async function enableGroupPasswordProtection(
   // Password protect group keyring
 
   const groupPasswordValues = await computeGroupPasswordValues(
-    groupId,
-    groupPassword,
+    input.groupId,
+    input.groupPassword,
   );
 
   groupContentKeyring = groupContentKeyring.wrapSymmetric(
@@ -32,14 +34,14 @@ export async function enableGroupPasswordProtection(
     {
       associatedData: {
         context: 'GroupContentKeyringPasswordProtection',
-        groupId,
+        groupId: input.groupId,
       },
     },
   );
 
   // Wrap content keyring with group keyring
 
-  const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();
+  const accessKeyring = await groupAccessKeyrings()(input.groupId).getAsync();
 
   if (accessKeyring?.topLayer !== DataLayer.Raw) {
     throw new Error('Invalid group keyring.');
@@ -48,14 +50,14 @@ export async function enableGroupPasswordProtection(
   groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
     associatedData: {
       context: 'GroupContentKeyring',
-      groupId,
+      groupId: input.groupId,
     },
   });
 
   // Send password enable request
 
   await trpcClient.groups.password.enable.mutate({
-    groupId,
+    groupId: input.groupId,
 
     groupPasswordHash: groupPasswordValues.passwordHash,
 

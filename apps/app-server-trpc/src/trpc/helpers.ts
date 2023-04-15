@@ -9,12 +9,12 @@ export type InferProcedureResolver<TBuilder extends ProcedureBuilder<any>> =
 export type InferProcedureOpts<TBuilder extends ProcedureBuilder<any>> =
   Parameters<InferProcedureResolver<TBuilder>>[0];
 
-function createAuthHelper({ optional }: { optional: boolean }) {
+function createAuthHelper(input: { optional: boolean }) {
   return async ({
     ctx,
   }: Parameters<Parameters<typeof trpc.middleware>[0]>[0]) => {
     if (ctx.req.cookies['loggedIn'] !== 'true') {
-      if (optional) {
+      if (input.optional) {
         return false;
       }
 
@@ -29,7 +29,7 @@ function createAuthHelper({ optional }: { optional: boolean }) {
     const accessToken = ctx.req.cookies['accessToken'];
 
     if (accessToken == null) {
-      if (optional) {
+      if (input.optional) {
         return false;
       }
 
@@ -47,7 +47,7 @@ function createAuthHelper({ optional }: { optional: boolean }) {
     }>(accessToken);
 
     if (jwtPayload == null) {
-      if (optional) {
+      if (input.optional) {
         return false;
       }
 
@@ -66,7 +66,7 @@ function createAuthHelper({ optional }: { optional: boolean }) {
     );
 
     if (invalidated) {
-      if (optional) {
+      if (input.optional) {
         return false;
       }
 

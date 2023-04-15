@@ -29,15 +29,15 @@ export class PageCollab {
   readonly presence: PagePresence;
   readonly websocket: PageWebsocket;
 
-  constructor({ factories, page }: { factories: Factories; page: Page }) {
-    this.app = page.app;
-    this.page = page;
+  constructor(input: { factories: Factories; page: Page }) {
+    this.app = input.page.app;
+    this.page = input.page;
 
     this.store = createPageStore();
     this.doc = getYjsDoc(this.store);
 
-    this.presence = factories.PagePresence({ collab: this });
-    this.websocket = factories.PageWebsocket({ collab: this });
+    this.presence = input.factories.PagePresence({ collab: this });
+    this.websocket = input.factories.PageWebsocket({ collab: this });
   }
 
   async setup() {

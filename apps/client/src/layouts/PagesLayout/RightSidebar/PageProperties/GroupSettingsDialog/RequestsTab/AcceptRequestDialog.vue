@@ -100,7 +100,8 @@ async function _acceptJoinRequest() {
     }
 
     for (const userId of props.userIds) {
-      await acceptJoinRequest(props.groupId, {
+      await acceptJoinRequest({
+        groupId: props.groupId,
         patientId: userId,
         targetRole: targetRole.value!,
       });

@@ -12,28 +12,17 @@ import {
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { asyncPrompt } from 'src/code/utils';
 
-export async function createPage(
-  pageId: string,
-  {
-    currentGroupId,
-    pageRelativeTitle,
+export async function createPage(input: {
+  pageId: string;
+  currentGroupId: string;
+  pageRelativeTitle: string;
 
-    createGroup,
-    groupName,
-    groupMemberName,
-    groupIsPublic,
-    groupPassword,
-  }: {
-    currentGroupId: string;
-    pageRelativeTitle: string;
-
-    createGroup: boolean;
-    groupName: string;
-    groupMemberName: string;
-    groupIsPublic: boolean;
-    groupPassword?: string;
-  },
-) {
+  createGroup: boolean;
+  groupName: string;
+  groupMemberName: string;
+  groupIsPublic: boolean;
+  groupPassword?: string;
+}) {
   let groupContentKeyring: SymmetricKeyring | undefined;
 
   const request = {} as {
@@ -57,22 +46,22 @@ export async function createPage(
     groupMemberEncryptedName: string;
   };
 
-  request.parentPageId = pageId;
+  request.parentPageId = input.pageId;
 
   request.pageId = nanoid();
 
-  request.createGroup = createGroup;
+  request.createGroup = input.createGroup;
 
-  if (createGroup) {
-    if (groupName === '') {
+  if (input.createGroup) {
+    if (input.groupName === '') {
       throw new Error('Please enter a group name.');
     }
 
-    if (groupMemberName === '') {
+    if (input.groupMemberName === '') {
       throw new Error('Please enter an user alias.');
     }
 
-    if (groupPassword != null && zxcvbn(groupPassword).score <= 2) {
+    if (input.groupPassword != null && zxcvbn(input.groupPassword).score <= 2) {
       await asyncPrompt({
         title: 'Weak password',
         html: true,
@@ -89,8 +78,8 @@ export async function createPage(
 
     const groupValues = await generateGroupValues({
       userKeyPair: internals.keyPair,
-      isPublic: groupIsPublic,
-      password: groupPassword != null ? groupPassword : undefined,
+      isPublic: input.groupIsPublic,
+      password: input.groupPassword != null ? input.groupPassword : undefined,
     });
 
     request.groupId = groupValues.groupId;
@@ -98,7 +87,7 @@ export async function createPage(
     groupContentKeyring = groupValues.contentKeyring;
 
     request.groupEncryptedName = bytesToBase64(
-      groupValues.accessKeyring.encrypt(textToBytes(groupName), {
+      groupValues.accessKeyring.encrypt(textToBytes(input.groupName), {
         padding: true,
         associatedData: {
           context: 'GroupName',
@@ -111,7 +100,7 @@ export async function createPage(
       groupValues.passwordValues?.passwordHash,
     );
 
-    request.groupIsPublic = groupIsPublic;
+    request.groupIsPublic = input.groupIsPublic;
 
     request.accessKeyring = bytesToBase64(
       groupValues.finalAccessKeyring.wrappedValue,
@@ -132,16 +121,16 @@ export async function createPage(
 
     request.groupMemberEncryptedName = bytesToBase64(
       internals.keyPair.encrypt(
-        textToBytes(groupMemberName),
+        textToBytes(input.groupMemberName),
         groupValues.keyPair.publicKey,
         { padding: true },
       ),
     );
   } else {
-    request.groupId = currentGroupId;
+    request.groupId = input.currentGroupId;
 
     groupContentKeyring = await groupContentKeyrings()(
-      currentGroupId,
+      input.currentGroupId,
     ).getAsync();
 
     if (groupContentKeyring?.topLayer === DataLayer.Symmetric) {
@@ -161,7 +150,7 @@ export async function createPage(
       });
 
       groupContentKeyring = await unlockGroupContentKeyring(
-        currentGroupId,
+        input.currentGroupId,
         destGroupPassword,
       );
     }
@@ -182,7 +171,7 @@ export async function createPage(
     }).wrappedValue,
   );
   request.pageEncryptedRelativeTitle = bytesToBase64(
-    pageKeyring.encrypt(textToBytes(pageRelativeTitle), {
+    pageKeyring.encrypt(textToBytes(input.pageRelativeTitle), {
       padding: true,
       associatedData: {
         context: 'PageRelativeTitle',

@@ -171,7 +171,8 @@ async function leaveSelectedGroups() {
     });
 
     for (const groupId of finalSelectedGroupIds.value) {
-      await removeGroupUser(groupId, {
+      await removeGroupUser({
+        groupId,
         patientId: authStore().userId,
       });
     }

@@ -113,153 +113,131 @@ export async function register({
   });
 }
 
-export async function registerUser({
-  demo,
+export async function registerUser(
+  input: {
+    ip: string;
+    userAgent: string;
 
-  email,
+    demo?: boolean;
 
-  userId,
-  groupId,
-  pageId,
+    email: string;
 
-  userPublicKeyring,
-  userEncryptedPrivateKeyring,
-  userEncryptedSymmetricKeyring,
+    passwordValues: PasswordValues;
 
-  userEncryptedName,
-  userEncryptedDefaultNote,
-  userEncryptedDefaultArrow,
-
-  groupEncryptedAccessKeyring,
-  groupEncryptedInternalKeyring,
-  groupEncryptedContentKeyring,
-
-  groupPublicKeyring,
-  groupEncryptedPrivateKeyring,
-
-  pageEncryptedSymmetricKeyring,
-  pageEncryptedRelativeTitle,
-  pageEncryptedAbsoluteTitle,
-
-  passwordValues,
-
-  dtrx,
-}: {
-  ip: string;
-  userAgent: string;
-
-  demo?: boolean;
-
-  email: string;
-
-  passwordValues: PasswordValues;
-
-  dtrx?: DataTransaction;
-} & RegistrationSchema) {
+    dtrx?: DataTransaction;
+  } & RegistrationSchema,
+) {
   const emailVerificationCode = nanoid();
 
-  await UserModel.query(dtrx?.trx)
-    .where('email_hash', Buffer.from(hashUserEmail(email)))
+  await UserModel.query(input.dtrx?.trx)
+    .where('email_hash', Buffer.from(hashUserEmail(input.email)))
     .delete();
 
   const userModel = {
-    id: userId,
+    id: input.userId,
 
-    encrypted_email: encryptUserEmail(email),
-    email_hash: hashUserEmail(email),
+    encrypted_email: encryptUserEmail(input.email),
+    email_hash: hashUserEmail(input.email),
 
-    encrypted_rehashed_login_hash: demo
+    encrypted_rehashed_login_hash: input.demo
       ? new Uint8Array()
       : encryptUserRehashedLoginHash(
-          encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
+          encodePasswordHash(
+            input.passwordValues.hash,
+            input.passwordValues.salt,
+            2,
+            32,
+          ),
         ),
 
-    demo: !!demo,
+    demo: !!input.demo,
 
     email_verified: false,
-    ...(!demo
+    ...(!input.demo
       ? {
-          encrypted_new_email: encryptUserEmail(email),
+          encrypted_new_email: encryptUserEmail(input.email),
           email_verification_code: emailVerificationCode,
           email_verification_expiration_date: addHours(new Date(), 1),
         }
       : {}),
 
-    personal_group_id: groupId,
+    personal_group_id: input.groupId,
 
-    starting_page_id: pageId,
-    recent_page_ids: [pageId],
-    recent_group_ids: [groupId],
+    starting_page_id: input.pageId,
+    recent_page_ids: [input.pageId],
+    recent_group_ids: [input.groupId],
 
-    public_keyring: userPublicKeyring,
+    public_keyring: input.userPublicKeyring,
     encrypted_private_keyring: createPrivateKeyring(
-      userEncryptedPrivateKeyring,
-    ).wrapSymmetric(passwordValues.key, {
+      input.userEncryptedPrivateKeyring,
+    ).wrapSymmetric(input.passwordValues.key, {
       associatedData: {
         context: 'UserEncryptedPrivateKeyring',
-        userId,
+        userId: input.userId,
       },
     }).wrappedValue,
     encrypted_symmetric_keyring: createSymmetricKeyring(
-      userEncryptedSymmetricKeyring,
-    ).wrapSymmetric(passwordValues.key, {
+      input.userEncryptedSymmetricKeyring,
+    ).wrapSymmetric(input.passwordValues.key, {
       associatedData: {
         context: 'UserEncryptedSymmetricKeyring',
-        userId,
+        userId: input.userId,
       },
     }).wrappedValue,
 
-    encrypted_name: userEncryptedName,
-    encrypted_default_note: userEncryptedDefaultNote,
-    encrypted_default_arrow: userEncryptedDefaultArrow,
+    encrypted_name: input.userEncryptedName,
+    encrypted_default_note: input.userEncryptedDefaultNote,
+    encrypted_default_arrow: input.userEncryptedDefaultArrow,
   } as UserModel;
 
-  await dataAbstraction().insert('user', userId, userModel, { dtrx });
+  await dataAbstraction().insert('user', input.userId, userModel, {
+    dtrx: input.dtrx,
+  });
 
   await createGroup({
-    groupId: groupId,
-    mainPageId: pageId,
+    groupId: input.groupId,
+    mainPageId: input.pageId,
     isPublic: false,
     isPersonal: true,
 
-    userId: userId,
+    userId: input.userId,
 
-    accessKeyring: groupEncryptedAccessKeyring,
-    encryptedInternalKeyring: groupEncryptedInternalKeyring,
-    encryptedContentKeyring: groupEncryptedContentKeyring,
+    accessKeyring: input.groupEncryptedAccessKeyring,
+    encryptedInternalKeyring: input.groupEncryptedInternalKeyring,
+    encryptedContentKeyring: input.groupEncryptedContentKeyring,
 
-    publicKeyring: groupPublicKeyring,
-    encryptedPrivateKeyring: groupEncryptedPrivateKeyring,
+    publicKeyring: input.groupPublicKeyring,
+    encryptedPrivateKeyring: input.groupEncryptedPrivateKeyring,
 
-    dtrx,
+    dtrx: input.dtrx,
   });
 
   await dataAbstraction().insert(
     'page',
-    pageId,
+    input.pageId,
     {
-      id: pageId,
+      id: input.pageId,
 
-      encrypted_symmetric_keyring: pageEncryptedSymmetricKeyring,
+      encrypted_symmetric_keyring: input.pageEncryptedSymmetricKeyring,
 
-      encrypted_relative_title: pageEncryptedRelativeTitle,
-      encrypted_absolute_title: pageEncryptedAbsoluteTitle,
+      encrypted_relative_title: input.pageEncryptedRelativeTitle,
+      encrypted_absolute_title: input.pageEncryptedAbsoluteTitle,
 
-      group_id: groupId,
+      group_id: input.groupId,
 
       free: true,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   await dataAbstraction().insert(
     'user-page',
-    `${userId}:${pageId}`,
+    `${input.userId}:${input.pageId}`,
     {
-      user_id: userId,
-      page_id: pageId,
+      user_id: input.userId,
+      page_id: input.pageId,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   return userModel;

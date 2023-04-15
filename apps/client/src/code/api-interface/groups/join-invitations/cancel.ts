@@ -3,33 +3,29 @@ import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function cancelJoinInvitation(
-  groupId: string,
-  {
-    patientId,
-  }: {
-    patientId: string;
-  },
-) {
+export async function cancelJoinInvitation(input: {
+  groupId: string;
+  patientId: string;
+}) {
   const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(groupId).getAsync(),
+    groupNames()(input.groupId).getAsync(),
 
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    groupInvitationNames()(`${groupId}:${patientId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    groupInvitationNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/cancel`,
+    url: `/api/groups/${input.groupId}/join-invitations/cancel`,
 
     body: {
-      patientId,
+      patientId: input.patientId,
     },
 
-    patientId,
+    patientId: input.patientId,
 
     notifications: {
       agent: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         targetName: targetName.text,
@@ -38,13 +34,13 @@ export async function cancelJoinInvitation(
       },
 
       target: {
-        groupId,
+        groupId: input.groupId,
 
         // Your invitation to join the group has been canceled.
       },
 
       observers: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         agentName: agentName.text,

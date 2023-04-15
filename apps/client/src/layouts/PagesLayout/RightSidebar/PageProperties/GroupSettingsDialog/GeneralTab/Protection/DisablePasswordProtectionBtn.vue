@@ -29,7 +29,10 @@ async function disablePasswordProtection() {
       cancel: true,
     });
 
-    await disableGroupPasswordProtection(groupId, { groupPassword });
+    await disableGroupPasswordProtection({
+      groupId,
+      groupPassword,
+    });
 
     $quasar().notify({
       message: 'Group password protection disabled successfully.',

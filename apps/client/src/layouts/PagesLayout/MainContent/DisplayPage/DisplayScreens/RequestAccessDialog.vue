@@ -78,7 +78,9 @@ onMounted(async () => {
 
 async function _sendJoinRequest() {
   try {
-    await sendJoinRequest(props.groupId, {
+    await sendJoinRequest({
+      groupId: props.groupId,
+
       userName: userName.value,
     });
 

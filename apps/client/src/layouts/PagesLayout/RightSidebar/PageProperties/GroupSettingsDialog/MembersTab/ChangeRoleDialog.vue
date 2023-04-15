@@ -96,7 +96,8 @@ async function changeRole() {
     }
 
     for (const userId of props.userIds) {
-      await changeUserRole(props.groupId, {
+      await changeUserRole({
+        groupId: props.groupId,
         patientId: userId,
         role: role.value,
       });

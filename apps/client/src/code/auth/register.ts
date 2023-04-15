@@ -8,10 +8,7 @@ import type { deriveUserValues } from 'src/code/crypto';
 import { generateGroupValues, generateRandomUserKeys } from 'src/code/crypto';
 import type { ISerialObjectInput } from 'src/code/pages/serialization';
 
-export async function getRegistrationValues({
-  derivedUserValues,
-  userName,
-}: {
+export async function getRegistrationValues(input: {
   derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
   userName: string;
 }): Promise<RegistrationSchema> {
@@ -20,7 +17,7 @@ export async function getRegistrationValues({
 
   const randomUserKeys = generateRandomUserKeys(
     userId,
-    derivedUserValues.masterKey,
+    input.derivedUserValues.masterKey,
   );
   const groupValues = await generateGroupValues({
     userKeyPair: randomUserKeys.keyPair,
@@ -42,7 +39,7 @@ export async function getRegistrationValues({
       randomUserKeys.encryptedSymmetricKeyring.wrappedValue,
 
     userEncryptedName: randomUserKeys.symmetricKeyring.encrypt(
-      textToBytes(userName),
+      textToBytes(input.userName),
       {
         padding: true,
         associatedData: {

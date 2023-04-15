@@ -43,22 +43,17 @@ export const PageElem = once(
 
       private readonly _collab?: IElemCollab;
 
-      constructor({
-        page,
-        id,
-        index,
-        collab,
-      }: {
+      constructor(input: {
         page: Page;
         id: string;
         index: number;
         collab?: IElemCollab;
       }) {
-        this.page = page;
+        this.page = input.page;
 
-        this.id = id;
+        this.id = input.id;
 
-        this._collab = collab;
+        this._collab = input.collab;
 
         this.react = reactive({
           collab: computed(() => {
@@ -95,7 +90,7 @@ export const PageElem = once(
             return this.react.region.react.visible;
           }),
 
-          index,
+          index: input.index,
 
           active: this.page.activeElem.is(this.id),
           selected: this.page.selection.has(this),

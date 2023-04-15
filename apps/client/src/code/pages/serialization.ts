@@ -123,8 +123,8 @@ export interface DeserializationAux {
 export class Serialization {
   readonly app: Pages;
 
-  constructor({ app }: { app: Pages }) {
-    this.app = app;
+  constructor(input: { app: Pages }) {
+    this.app = input.app;
   }
 
   serialize(input: IRegionElemsOutput): ISerialObjectOutput {

@@ -6,42 +6,37 @@ import {
 } from '@stdlib/crypto';
 import { deriveUserValues } from 'src/code/crypto';
 
-export async function requestEmailChange({
-  newEmail,
-  oldDerivedUserValues,
-}: {
+export async function requestEmailChange(input: {
   newEmail: string;
   oldDerivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
 }) {
   await api().post('/api/users/account/general/change-email', {
-    newEmail,
+    newEmail: input.newEmail,
 
-    oldLoginHash: bytesToBase64(oldDerivedUserValues.loginHash),
+    oldLoginHash: bytesToBase64(input.oldDerivedUserValues.loginHash),
   });
 }
 
-export async function changeEmail({
-  newEmail,
-  password,
-  oldDerivedUserValues,
-  emailVerificationCode,
-}: {
+export async function changeEmail(input: {
   newEmail: string;
   password: string;
   oldDerivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
   emailVerificationCode: string;
 }) {
-  const newDerivedUserValues = await deriveUserValues(newEmail, password);
+  const newDerivedUserValues = await deriveUserValues(
+    input.newEmail,
+    input.password,
+  );
 
   const response = (
     await api().post<{
       sessionKey: string;
     }>('/api/users/account/general/change-email', {
-      newEmail,
+      newEmail: input.newEmail,
 
-      oldLoginHash: bytesToBase64(oldDerivedUserValues.loginHash),
+      oldLoginHash: bytesToBase64(input.oldDerivedUserValues.loginHash),
 
-      emailVerificationCode,
+      emailVerificationCode: input.emailVerificationCode,
     })
   ).data;
 
@@ -90,7 +85,7 @@ export async function changeEmail({
   // Request email change
 
   await api().post('/api/users/account/general/change-email', {
-    newEmail,
+    newEmail: input.newEmail,
 
     oldLoginHash: bytesToBase64(newDerivedUserValues.loginHash),
     newLoginHash: bytesToBase64(newDerivedUserValues.loginHash),
@@ -98,10 +93,10 @@ export async function changeEmail({
     encryptedPrivateKeyring,
     encryptedSymmetricKeyring,
 
-    emailVerificationCode,
+    emailVerificationCode: input.emailVerificationCode,
   });
 
   if (internals.localStorage.getItem('email') != null) {
-    internals.localStorage.setItem('email', newEmail);
+    internals.localStorage.setItem('email', input.newEmail);
   }
 }

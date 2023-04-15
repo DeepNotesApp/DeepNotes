@@ -14,8 +14,8 @@ export class PageActiveRegion {
 
   readonly react: UnwrapNestedRefs<IActiveRegionReact>;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = reactive({
       id: this.page.id,

@@ -1,8 +1,8 @@
-export async function bumpPage(
-  pageId: string,
-  { parentPageId }: { parentPageId?: string },
-) {
-  await api().post(`/api/pages/${pageId}/bump`, {
-    parentPageId,
+export async function bumpPage(input: {
+  pageId: string;
+  parentPageId?: string;
+}) {
+  await api().post(`/api/pages/${input.pageId}/bump`, {
+    parentPageId: input.parentPageId,
   });
 }

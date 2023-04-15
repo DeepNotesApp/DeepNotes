@@ -49,17 +49,17 @@ export function computePasswordHash(password: Uint8Array) {
   return result;
 }
 
-export function getDeviceHash({
-  ip,
-  userAgent,
-  userId,
-}: {
+export function getDeviceHash(input: {
   ip: string;
   userAgent: string;
   userId: string;
 }) {
   return Buffer.from(
-    sodium.crypto_generichash(16, `${ip} ${userAgent}`, nanoidToBytes(userId)),
+    sodium.crypto_generichash(
+      16,
+      `${input.ip} ${input.userAgent}`,
+      nanoidToBytes(input.userId),
+    ),
   );
 }
 

@@ -88,12 +88,7 @@ export async function getCurrentPath({
   }))!;
 }
 
-async function _getPathPageIds({
-  userId,
-  initialPageId,
-  mainPageId,
-  dataAbstraction,
-}: {
+async function _getPathPageIds(input: {
   userId: string;
   initialPageId: string;
   mainPageId: string;
@@ -103,7 +98,7 @@ async function _getPathPageIds({
 
   const visitedPageIds = new Set();
 
-  let pathPageId: string | null = initialPageId;
+  let pathPageId: string | null = input.initialPageId;
 
   while (pathPageId != null) {
     if (visitedPageIds.has(pathPageId)) {
@@ -114,13 +109,13 @@ async function _getPathPageIds({
 
     pathPageIds.unshift(pathPageId);
 
-    if (pathPageId === mainPageId) {
+    if (pathPageId === input.mainPageId) {
       return pathPageIds;
     }
 
-    const lastParentId = await dataAbstraction.hget(
+    const lastParentId = await input.dataAbstraction.hget(
       'user-page',
-      `${userId}:${pathPageId}`,
+      `${input.userId}:${pathPageId}`,
       'last-parent-id',
     );
 

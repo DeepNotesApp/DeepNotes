@@ -3,11 +3,12 @@ import { wrapSymmetricKey } from '@stdlib/crypto';
 import { Y } from '@syncedstore/core';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 
-export async function savePageSnapshot(
-  pageId: string,
-  { groupId, doc }: { groupId: string; doc: Y.Doc },
-) {
-  const pageKeyring = pageKeyrings()(`${groupId}:${pageId}`).get();
+export async function savePageSnapshot(input: {
+  pageId: string;
+  groupId: string;
+  doc: Y.Doc;
+}) {
+  const pageKeyring = pageKeyrings()(`${input.groupId}:${input.pageId}`).get();
 
   if (pageKeyring == null) {
     throw new Error('Page keyring not found.');
@@ -15,21 +16,21 @@ export async function savePageSnapshot(
 
   const symmetricKey = wrapSymmetricKey();
 
-  await api().post(`/api/pages/${pageId}/snapshots/save`, {
+  await api().post(`/api/pages/${input.pageId}/snapshots/save`, {
     encryptedSymmetricKey: bytesToBase64(
       pageKeyring.encrypt(symmetricKey.value, {
         associatedData: {
           context: 'PageSnapshotSymmetricKey',
-          pageId: pageId,
+          pageId: input.pageId,
         },
       }),
     ),
     encryptedData: bytesToBase64(
-      symmetricKey.encrypt(Y.encodeStateAsUpdateV2(doc), {
+      symmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
         padding: true,
         associatedData: {
           context: 'PageDocUpdate',
-          pageId: pageId,
+          pageId: input.pageId,
         },
       }),
     ),

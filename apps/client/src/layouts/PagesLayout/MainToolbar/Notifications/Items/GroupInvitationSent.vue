@@ -138,7 +138,8 @@ async function _cancelJoinInvitation() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinInvitation(notificationContent.value.groupId, {
+    await cancelJoinInvitation({
+      groupId: notificationContent.value.groupId,
       patientId: notificationContent.value.patientId,
     });
 

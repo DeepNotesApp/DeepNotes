@@ -44,7 +44,8 @@ async function changeGroupPassword() {
       cancel: true,
     });
 
-    await changeGroupPasswordProtection(groupId, {
+    await changeGroupPasswordProtection({
+      groupId,
       currentGroupPassword,
       newGroupPassword,
     });

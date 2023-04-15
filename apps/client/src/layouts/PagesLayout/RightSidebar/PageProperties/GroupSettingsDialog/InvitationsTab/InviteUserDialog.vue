@@ -140,7 +140,8 @@ async function inviteUser() {
       );
     }
 
-    await sendJoinInvitation(props.groupId, {
+    await sendJoinInvitation({
+      groupId: props.groupId,
       inviteeUserId,
       inviteeUserName: userName.value,
       inviteeRole: role.value,

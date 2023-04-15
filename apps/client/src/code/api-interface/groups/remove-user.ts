@@ -2,71 +2,76 @@ import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
 
-export async function removeGroupUser(
-  groupId: string,
-  { patientId }: { patientId: string },
-) {
+export async function removeGroupUser(input: {
+  groupId: string;
+  patientId: string;
+}) {
   const agentId = authStore().userId;
 
   const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(groupId).getAsync(),
+    groupNames()(input.groupId).getAsync(),
 
-    groupMemberNames()(`${groupId}:${agentId}`).getAsync(),
-    groupMemberNames()(`${groupId}:${patientId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
   const notificationRecipients = (
     await api().post<{
       notificationRecipients: Record<string, { publicKeyring: string }>;
-    }>(`/api/groups/${groupId}/remove-user/${patientId}`, {})
+    }>(`/api/groups/${input.groupId}/remove-user/${input.patientId}`, {})
   ).data.notificationRecipients;
 
-  await api().post(`/api/groups/${groupId}/remove-user/${patientId}`, {
-    notifications: await createNotifications({
-      recipients: notificationRecipients,
+  await api().post(
+    `/api/groups/${input.groupId}/remove-user/${input.patientId}`,
+    {
+      notifications: await createNotifications({
+        recipients: notificationRecipients,
 
-      patientId,
+        patientId: input.patientId,
 
-      notifications: {
-        agent: {
-          groupId,
+        notifications: {
+          agent: {
+            groupId: input.groupId,
 
-          removed: agentId !== patientId,
+            removed: agentId !== input.patientId,
 
-          groupName: groupName.text,
-          targetName: targetName.text,
+            groupName: groupName.text,
+            targetName: targetName.text,
 
-          // You left the group.
-          // You removed ${targetName} from the group.
+            // You left the group.
+            // You removed ${targetName} from the group.
+          },
+
+          ...(agentId !== input.patientId
+            ? {
+                target: {
+                  groupId: input.groupId,
+
+                  removed: true,
+
+                  groupName: groupName.text,
+
+                  // You were removed from the group.
+                },
+              }
+            : {}),
+
+          observers: {
+            groupId: input.groupId,
+
+            removed: agentId !== input.patientId,
+
+            groupName: groupName.text,
+            agentName: agentName.text,
+            ...(agentId !== input.patientId
+              ? { targetName: targetName.text }
+              : {}),
+
+            // ${agentName} left the group.
+            // ${agentName} removed ${targetName} from the group.
+          },
         },
-
-        ...(agentId !== patientId
-          ? {
-              target: {
-                groupId,
-
-                removed: true,
-
-                groupName: groupName.text,
-
-                // You were removed from the group.
-              },
-            }
-          : {}),
-
-        observers: {
-          groupId,
-
-          removed: agentId !== patientId,
-
-          groupName: groupName.text,
-          agentName: agentName.text,
-          ...(agentId !== patientId ? { targetName: targetName.text } : {}),
-
-          // ${agentName} left the group.
-          // ${agentName} removed ${targetName} from the group.
-        },
-      },
-    }),
-  });
+      }),
+    },
+  );
 }

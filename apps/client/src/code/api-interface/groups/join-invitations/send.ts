@@ -9,19 +9,13 @@ import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function sendJoinInvitation(
-  groupId: string,
-  {
-    inviteeUserId,
-    inviteeRole,
-    inviteeUserName,
-  }: {
-    inviteeUserId: string;
-    inviteeRole: GroupRoleID;
-    inviteeUserName: string;
-  },
-) {
-  if (inviteeUserId == null) {
+export async function sendJoinInvitation(input: {
+  groupId: string;
+  inviteeUserId: string;
+  inviteeRole: GroupRoleID;
+  inviteeUserName: string;
+}) {
+  if (input.inviteeUserId == null) {
     throw new Error('User not found.');
   }
 
@@ -37,18 +31,22 @@ export async function sendJoinInvitation(
   ] = await Promise.all([
     (async () =>
       createKeyring(
-        await internals.realtime.hget('user', inviteeUserId, 'public-keyring'),
+        await internals.realtime.hget(
+          'user',
+          input.inviteeUserId,
+          'public-keyring',
+        ),
       ))(),
     (async () =>
       createKeyring(
-        await internals.realtime.hget('group', groupId, 'public-keyring'),
+        await internals.realtime.hget('group', input.groupId, 'public-keyring'),
       ))(),
 
-    groupAccessKeyrings()(groupId).getAsync(),
-    groupInternalKeyrings()(groupId).getAsync(),
+    groupAccessKeyrings()(input.groupId).getAsync(),
+    groupInternalKeyrings()(input.groupId).getAsync(),
 
-    groupNames()(groupId).getAsync(),
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
+    groupNames()(input.groupId).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
   ]);
 
   if (accessKeyring == null || groupInternalKeyring == null) {
@@ -56,11 +54,11 @@ export async function sendJoinInvitation(
   }
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/send`,
+    url: `/api/groups/${input.groupId}/join-invitations/send`,
 
     body: {
-      patientId: inviteeUserId,
-      invitationRole: inviteeRole,
+      patientId: input.inviteeUserId,
+      invitationRole: input.inviteeRole,
 
       encryptedAccessKeyring: bytesToBase64(
         accessKeyring.wrapAsymmetric(internals.keyPair, inviteePublicKeyring)
@@ -75,28 +73,28 @@ export async function sendJoinInvitation(
 
       userEncryptedName: bytesToBase64Safe(
         internals.keyPair.encrypt(
-          textToBytes(inviteeUserName),
+          textToBytes(input.inviteeUserName),
           groupPublicKeyring,
           { padding: true },
         ),
       ),
     },
 
-    patientId: inviteeUserId,
+    patientId: input.inviteeUserId,
 
     notifications: {
       agent: {
-        groupId: groupId,
+        groupId: input.groupId,
 
-        patientId: inviteeUserId,
+        patientId: input.inviteeUserId,
         groupName: groupName.text,
-        targetName: inviteeUserName,
+        targetName: input.inviteeUserName,
 
         // You invited ${targetName} to join the group.
       },
 
       target: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 
@@ -104,11 +102,11 @@ export async function sendJoinInvitation(
       },
 
       observers: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         agentName: agentName.text,
-        targetName: inviteeUserName,
+        targetName: input.inviteeUserName,
 
         // ${agentName} invited ${targetName} to join the group.
       },

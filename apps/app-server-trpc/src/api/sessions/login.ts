@@ -180,7 +180,8 @@ export async function login({
 
     const sessionId = nanoid();
 
-    const { sessionKey } = await generateSessionValues(sessionId, {
+    const { sessionKey } = await generateSessionValues({
+      sessionId,
       userId: user.id,
       deviceId: device.id,
       rememberSession: input.rememberSession,
@@ -216,12 +217,7 @@ export async function login({
   });
 }
 
-async function _checkFailedLoginAttempts({
-  redis,
-
-  ip,
-  email,
-}: {
+async function _checkFailedLoginAttempts(input: {
   redis: Cluster;
 
   ip: string;
@@ -234,16 +230,20 @@ async function _checkFailedLoginAttempts({
     ipFailedLoginAttemptsTTL,
   } = await allAsyncProps({
     emailFailedLoginAttemptsStr:
-      email === 'demo'
+      input.email === 'demo'
         ? Promise.resolve('0')
-        : redis.get(`email-failed-login-attempts:${email}`),
+        : input.redis.get(`email-failed-login-attempts:${input.email}`),
     emailFailedLoginAttemptsTTL:
-      email === 'demo'
+      input.email === 'demo'
         ? Promise.resolve(0)
-        : redis.ttl(`email-failed-login-attempts:${email}`),
+        : input.redis.ttl(`email-failed-login-attempts:${input.email}`),
 
-    ipFailedLoginAttemptsStr: redis.get(`ip-failed-login-attempts:${ip}`),
-    ipFailedLoginAttemptsTTL: redis.ttl(`ip-failed-login-attempts:${ip}`),
+    ipFailedLoginAttemptsStr: input.redis.get(
+      `ip-failed-login-attempts:${input.ip}`,
+    ),
+    ipFailedLoginAttemptsTTL: input.redis.ttl(
+      `ip-failed-login-attempts:${input.ip}`,
+    ),
   });
 
   const numFailedEmailLoginAttempts =
@@ -264,48 +264,42 @@ async function _checkFailedLoginAttempts({
   };
 }
 
-async function _incrementFailedLoginAttempts({
-  redis,
-
-  email,
-  ip,
-}: {
+async function _incrementFailedLoginAttempts(input: {
   redis: Cluster;
 
   email: string;
   ip: string;
 }) {
   await Promise.all([
-    redis.incr(`email-failed-login-attempts:${email}`),
-    redis.expire(`email-failed-login-attempts:${email}`, 15 * 60),
+    input.redis.incr(`email-failed-login-attempts:${input.email}`),
+    input.redis.expire(`email-failed-login-attempts:${input.email}`, 15 * 60),
 
-    redis.incr(`ip-failed-login-attempts:${ip}`),
-    redis.expire(`ip-failed-login-attempts:${ip}`, 15 * 60),
+    input.redis.incr(`ip-failed-login-attempts:${input.ip}`),
+    input.redis.expire(`ip-failed-login-attempts:${input.ip}`, 15 * 60),
   ]);
 }
 
-export async function getUserDevice({
-  ip,
-  userAgent,
-  userId,
-  dtrx,
-}: {
+export async function getUserDevice(input: {
   ip: string;
   userAgent: string;
   userId: string;
 
   dtrx?: DataTransaction;
 }) {
-  const deviceHash = getDeviceHash({ ip, userAgent, userId });
+  const deviceHash = getDeviceHash({
+    ip: input.ip,
+    userAgent: input.userAgent,
+    userId: input.userId,
+  });
 
   let device = await DeviceModel.query()
-    .where('user_id', userId)
+    .where('user_id', input.userId)
     .where('hash', deviceHash)
     .first();
 
   if (device == null) {
-    device = await DeviceModel.query(dtrx?.trx).insert({
-      user_id: userId,
+    device = await DeviceModel.query(input.dtrx?.trx).insert({
+      user_id: input.userId,
       hash: deviceHash,
     });
   }
@@ -313,58 +307,46 @@ export async function getUserDevice({
   return device;
 }
 
-async function _checkTwoFactorAuth({
-  deviceId,
+async function _checkTwoFactorAuth(
+  input: {
+    deviceId: string;
 
-  authenticatorToken,
-  recoveryCode,
+    authenticatorToken: string;
+    recoveryCode: string;
 
-  rememberDevice,
+    rememberDevice: boolean;
 
-  user,
+    user: UserModel;
 
-  redis,
-
-  ip,
-  email,
-
-  dtrx,
-}: {
-  deviceId: string;
-
-  authenticatorToken: string;
-  recoveryCode: string;
-
-  rememberDevice: boolean;
-
-  user: UserModel;
-
-  dtrx: DataTransaction;
-} & Parameters<typeof _incrementFailedLoginAttempts>[0]) {
-  if (authenticatorToken != null) {
+    dtrx: DataTransaction;
+  } & Parameters<typeof _incrementFailedLoginAttempts>[0],
+) {
+  if (input.authenticatorToken != null) {
     // Check authenticator token
 
     if (
       !authenticator.check(
-        authenticatorToken,
-        decryptUserAuthenticatorSecret(user.encrypted_authenticator_secret!),
+        input.authenticatorToken,
+        decryptUserAuthenticatorSecret(
+          input.user.encrypted_authenticator_secret!,
+        ),
       )
     ) {
-      if (rememberDevice) {
+      if (input.rememberDevice) {
         // Mark device as trusted
 
-        await DeviceModel.query(dtrx.trx)
-          .where({ id: deviceId })
+        await DeviceModel.query(input.dtrx.trx)
+          .where({ id: input.deviceId })
           .patch({ trusted: true });
       }
 
       return;
     } else {
       await _incrementFailedLoginAttempts({
-        redis,
+        redis: input.redis,
 
-        ip,
-        email,
+        ip: input.ip,
+        email: input.email,
       });
 
       throw new TRPCError({
@@ -372,17 +354,19 @@ async function _checkTwoFactorAuth({
         code: 'UNAUTHORIZED',
       });
     }
-  } else if (recoveryCode != null) {
+  } else if (input.recoveryCode != null) {
     // Check recovery code
 
-    if (user.encrypted_recovery_codes != null) {
-      const recoveryCodes = decryptRecoveryCodes(user.encrypted_recovery_codes);
+    if (input.user.encrypted_recovery_codes != null) {
+      const recoveryCodes = decryptRecoveryCodes(
+        input.user.encrypted_recovery_codes,
+      );
 
       for (let i = 0; i < recoveryCodes.length; i++) {
-        if (verifyRecoveryCode(recoveryCode, recoveryCodes[i])) {
+        if (verifyRecoveryCode(input.recoveryCode, recoveryCodes[i])) {
           recoveryCodes.splice(i, 1);
 
-          await user.$query(dtrx.trx).patch({
+          await input.user.$query(input.dtrx.trx).patch({
             encrypted_recovery_codes: encryptRecoveryCodes(recoveryCodes),
           });
 
@@ -392,10 +376,10 @@ async function _checkTwoFactorAuth({
     }
 
     await _incrementFailedLoginAttempts({
-      redis,
+      redis: input.redis,
 
-      ip,
-      email,
+      ip: input.ip,
+      email: input.email,
     });
 
     throw new TRPCError({

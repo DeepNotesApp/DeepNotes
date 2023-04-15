@@ -8,17 +8,12 @@ import { groupNames } from 'src/code/pages/computed/group-names';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function acceptJoinRequest(
-  groupId: string,
-  {
-    patientId,
-    targetRole,
-  }: {
-    patientId: string;
-    targetRole: GroupRoleID;
-  },
-) {
-  if (targetRole == null) {
+export async function acceptJoinRequest(input: {
+  groupId: string;
+  patientId: string;
+  targetRole: GroupRoleID;
+}) {
+  if (input.targetRole == null) {
     throw new Error('Please select a role.');
   }
 
@@ -32,14 +27,14 @@ export async function acceptJoinRequest(
     agentName,
     targetName,
   ] = await Promise.all([
-    groupAccessKeyrings()(groupId).getAsync(),
-    groupInternalKeyrings()(groupId).getAsync(),
+    groupAccessKeyrings()(input.groupId).getAsync(),
+    groupInternalKeyrings()(input.groupId).getAsync(),
 
-    internals.realtime.hget('user', patientId, 'public-keyring'),
+    internals.realtime.hget('user', input.patientId, 'public-keyring'),
 
-    groupNames()(groupId).getAsync(),
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    groupRequestNames()(`${groupId}:${patientId}`).getAsync(),
+    groupNames()(input.groupId).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    groupRequestNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
   if (accessKeyring == null || groupInternalKeyring == null) {
@@ -49,11 +44,11 @@ export async function acceptJoinRequest(
   const userPublicKeyring = createKeyring(userPublicKeyringBytes);
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-requests/accept`,
+    url: `/api/groups/${input.groupId}/join-requests/accept`,
 
     body: {
-      patientId,
-      targetRole: targetRole,
+      patientId: input.patientId,
+      targetRole: input.targetRole,
 
       encryptedAccessKeyring: bytesToBase64(
         accessKeyring.wrapAsymmetric(internals.keyPair, userPublicKeyring)
@@ -67,11 +62,11 @@ export async function acceptJoinRequest(
       ),
     },
 
-    patientId,
+    patientId: input.patientId,
 
     notifications: {
       agent: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 
@@ -81,7 +76,7 @@ export async function acceptJoinRequest(
       },
 
       target: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 
@@ -89,7 +84,7 @@ export async function acceptJoinRequest(
       },
 
       observers: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 

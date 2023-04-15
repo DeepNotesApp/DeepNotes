@@ -81,13 +81,7 @@ export function getPageTitle(
   }
 }
 
-export async function createNotifications({
-  recipients,
-
-  patientId,
-
-  notifications,
-}: {
+export async function createNotifications(input: {
   recipients: Record<string, { publicKeyring: string }>;
 
   patientId?: string;
@@ -108,7 +102,7 @@ export async function createNotifications({
     // Agent
 
     ...[
-      notifications.agent != null
+      input.notifications.agent != null
         ? {
             recipients: {
               [agentId]: {
@@ -124,7 +118,7 @@ export async function createNotifications({
             encryptedContent: bytesToBase64(
               agentSymmetricKey.encrypt(
                 pack({
-                  ...notifications.agent,
+                  ...input.notifications.agent,
 
                   recipientType: 'agent',
                 }),
@@ -140,18 +134,20 @@ export async function createNotifications({
 
     // Target
 
-    ...(notifications.target != null &&
-    patientId != null &&
-    recipients[patientId] != null
+    ...(input.notifications.target != null &&
+    input.patientId != null &&
+    input.recipients[input.patientId] != null
       ? [
           {
             recipients: {
-              [patientId]: {
+              [input.patientId]: {
                 encryptedSymmetricKey: bytesToBase64(
                   internals.keyPair.encrypt(
                     targetSymmetricKey.value,
                     createKeyring(
-                      base64ToBytes(recipients[patientId].publicKeyring),
+                      base64ToBytes(
+                        input.recipients[input.patientId].publicKeyring,
+                      ),
                     ),
                   ),
                 ),
@@ -161,7 +157,7 @@ export async function createNotifications({
             encryptedContent: bytesToBase64(
               targetSymmetricKey.encrypt(
                 pack({
-                  ...notifications.target,
+                  ...input.notifications.target,
 
                   recipientType: 'target',
                 }),
@@ -177,15 +173,15 @@ export async function createNotifications({
 
     // Others
 
-    ...(notifications.observers != null
+    ...(input.notifications.observers != null
       ? [
           {
             recipients: objFromEntries(
-              objEntries(recipients)
+              objEntries(input.recipients)
                 .filter(
                   ([recipientUserId]) =>
                     recipientUserId !== agentId &&
-                    recipientUserId !== patientId,
+                    recipientUserId !== input.patientId,
                 )
                 .map(([recipientUserId, { publicKeyring }]) => [
                   recipientUserId,
@@ -203,7 +199,7 @@ export async function createNotifications({
             encryptedContent: bytesToBase64(
               observersSymmetricKey.encrypt(
                 pack({
-                  ...notifications.observers,
+                  ...input.notifications.observers,
 
                   recipientType: 'observer',
                 }),

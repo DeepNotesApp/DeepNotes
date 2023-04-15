@@ -3,32 +3,28 @@ import { groupNames } from 'src/code/pages/computed/group-names';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function rejectJoinRequest(
-  groupId: string,
-  {
-    patientId,
-  }: {
-    patientId: string;
-  },
-) {
+export async function rejectJoinRequest(input: {
+  groupId: string;
+  patientId: string;
+}) {
   const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(groupId).getAsync(),
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    groupRequestNames()(`${groupId}:${patientId}`).getAsync(),
+    groupNames()(input.groupId).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    groupRequestNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-requests/reject`,
+    url: `/api/groups/${input.groupId}/join-requests/reject`,
 
     body: {
-      patientId,
+      patientId: input.patientId,
     },
 
-    patientId,
+    patientId: input.patientId,
 
     notifications: {
       agent: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 
@@ -38,13 +34,13 @@ export async function rejectJoinRequest(
       },
 
       target: {
-        groupId,
+        groupId: input.groupId,
 
         // Your join request was rejected.
       },
 
       observers: {
-        groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
 

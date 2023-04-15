@@ -4,39 +4,34 @@ import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { requestWithNotifications } from 'src/code/pages/utils';
 
-export async function changeUserRole(
-  groupId: string,
-  {
-    patientId,
-    role,
-  }: {
-    patientId: string;
-    role: GroupRoleID;
-  },
-) {
+export async function changeUserRole(input: {
+  groupId: string;
+  patientId: string;
+  role: GroupRoleID;
+}) {
   const agentId = authStore().userId;
-  const roleName = rolesMap()[role].name;
+  const roleName = rolesMap()[input.role].name;
 
   const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(groupId).getAsync(),
+    groupNames()(input.groupId).getAsync(),
 
-    groupMemberNames()(`${groupId}:${agentId}`).getAsync(),
-    groupMemberNames()(`${groupId}:${patientId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
   await requestWithNotifications({
-    url: `/api/groups/${groupId}/change-user-role`,
+    url: `/api/groups/${input.groupId}/change-user-role`,
 
     body: {
-      patientId,
-      requestedRole: role,
+      patientId: input.patientId,
+      requestedRole: input.role,
     },
 
-    patientId,
+    patientId: input.patientId,
 
     notifications: {
       agent: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         targetName: targetName.text,
@@ -46,7 +41,7 @@ export async function changeUserRole(
       },
 
       target: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         roleName,
@@ -55,7 +50,7 @@ export async function changeUserRole(
       },
 
       observers: {
-        groupId: groupId,
+        groupId: input.groupId,
 
         groupName: groupName.text,
         agentName: agentName.text,

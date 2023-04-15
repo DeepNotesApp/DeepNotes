@@ -4,12 +4,15 @@ import { Y } from '@syncedstore/core';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import { revertToSnapshot } from 'src/code/pages/utils';
 
-export async function restorePageSnapshot(
-  pageId: string,
-  snapshotId: string,
-  { groupId, doc }: { groupId: string; doc: Y.Doc },
-) {
-  const pageKeyring = await pageKeyrings()(`${groupId}:${pageId}`).getAsync();
+export async function restorePageSnapshot(input: {
+  pageId: string;
+  snapshotId: string;
+  groupId: string;
+  doc: Y.Doc;
+}) {
+  const pageKeyring = await pageKeyrings()(
+    `${input.groupId}:${input.pageId}`,
+  ).getAsync();
 
   if (pageKeyring == null) {
     throw new Error('Page keyring not found.');
@@ -19,7 +22,7 @@ export async function restorePageSnapshot(
     await api().post<{
       encryptedSymmetricKey: string;
       encryptedData: string;
-    }>(`/api/pages/${pageId}/snapshots/load/${snapshotId}`)
+    }>(`/api/pages/${input.pageId}/snapshots/load/${input.snapshotId}`)
   ).data;
 
   // Encrypt pre-restore data
@@ -27,11 +30,11 @@ export async function restorePageSnapshot(
   const newSnapshotSymmetricKey = wrapSymmetricKey();
 
   const encryptedData = bytesToBase64(
-    newSnapshotSymmetricKey.encrypt(Y.encodeStateAsUpdateV2(doc), {
+    newSnapshotSymmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
       padding: true,
       associatedData: {
         context: 'PageSnapshotData',
-        pageId: pageId,
+        pageId: input.pageId,
       },
     }),
   );
@@ -42,7 +45,7 @@ export async function restorePageSnapshot(
     pageKeyring.decrypt(base64ToBytes(response.encryptedSymmetricKey), {
       associatedData: {
         context: 'PageSnapshotSymmetricKey',
-        pageId: pageId,
+        pageId: input.pageId,
       },
     }),
   );
@@ -53,21 +56,21 @@ export async function restorePageSnapshot(
       padding: true,
       associatedData: {
         context: 'PageSnapshotData',
-        pageId: pageId,
+        pageId: input.pageId,
       },
     },
   );
 
-  revertToSnapshot(doc, snapshotData);
+  revertToSnapshot(input.doc, snapshotData);
 
   // Save pre-restore data
 
-  await api().post(`/api/pages/${pageId}/snapshots/save`, {
+  await api().post(`/api/pages/${input.pageId}/snapshots/save`, {
     encryptedSymmetricKey: bytesToBase64(
       pageKeyring.encrypt(newSnapshotSymmetricKey.value, {
         associatedData: {
           context: 'PageSnapshotSymmetricKey',
-          pageId: pageId,
+          pageId: input.pageId,
         },
       }),
     ),

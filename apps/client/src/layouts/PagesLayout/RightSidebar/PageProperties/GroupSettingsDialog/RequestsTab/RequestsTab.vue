@@ -191,7 +191,8 @@ async function rejectSelectedRequests() {
     });
 
     for (const userId of finalSelectedUserIds.value) {
-      await rejectJoinRequest(groupId, {
+      await rejectJoinRequest({
+        groupId,
         patientId: userId,
       });
     }

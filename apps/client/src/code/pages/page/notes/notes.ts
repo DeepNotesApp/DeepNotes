@@ -19,10 +19,10 @@ export class PageNotes {
     collab: computed(() => this.page.collab.store.notes),
   });
 
-  constructor({ factories, page }: { factories: Factories; page: Page }) {
-    this.factories = factories;
+  constructor(input: { factories: Factories; page: Page }) {
+    this.factories = input.factories;
 
-    this.page = page;
+    this.page = input.page;
   }
 
   fromId(noteId: string | null, regionId?: string | null): PageNote | null {

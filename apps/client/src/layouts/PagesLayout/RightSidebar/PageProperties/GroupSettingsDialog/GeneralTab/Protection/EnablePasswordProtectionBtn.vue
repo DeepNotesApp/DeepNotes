@@ -20,7 +20,10 @@ async function enablePasswordProtection() {
       component: EnablePasswordDialog,
     });
 
-    await enableGroupPasswordProtection(groupId, { groupPassword });
+    await enableGroupPasswordProtection({
+      groupId,
+      groupPassword,
+    });
 
     $quasar().notify({
       message: 'Group password protection enabled successfully.',

@@ -233,7 +233,9 @@ async function _createPage() {
       throw new Error('Please enter a page title.');
     }
 
-    const response = await createPage(page.value.id, {
+    const response = await createPage({
+      pageId: page.value.id,
+
       currentGroupId: page.value.react.groupId,
       pageRelativeTitle: pageRelativeTitle.value,
 

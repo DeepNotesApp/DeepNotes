@@ -4,13 +4,15 @@ import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrin
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { trpcClient } from 'src/code/trpc';
 
-export async function disableGroupPasswordProtection(
-  groupId: string,
-  { groupPassword }: { groupPassword: string },
-) {
+export async function disableGroupPasswordProtection(input: {
+  groupId: string;
+  groupPassword: string;
+}) {
   // Get password protected group keyring
 
-  let groupContentKeyring = await groupContentKeyrings()(groupId).getAsync();
+  let groupContentKeyring = await groupContentKeyrings()(
+    input.groupId,
+  ).getAsync();
 
   if (groupContentKeyring == null) {
     throw new Error('Group keyring not found.');
@@ -19,8 +21,8 @@ export async function disableGroupPasswordProtection(
   // Get group password values
 
   const groupPasswordValues = await computeGroupPasswordValues(
-    groupId,
-    groupPassword,
+    input.groupId,
+    input.groupPassword,
   );
 
   // Remove password protection from group keyring
@@ -31,7 +33,7 @@ export async function disableGroupPasswordProtection(
       {
         associatedData: {
           context: 'GroupContentKeyringPasswordProtection',
-          groupId,
+          groupId: input.groupId,
         },
       },
     );
@@ -41,7 +43,7 @@ export async function disableGroupPasswordProtection(
 
   // Wrap content keyring with group keyring
 
-  const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();
+  const accessKeyring = await groupAccessKeyrings()(input.groupId).getAsync();
 
   if (accessKeyring?.topLayer !== DataLayer.Raw) {
     throw new Error('Invalid group keyring.');
@@ -50,14 +52,14 @@ export async function disableGroupPasswordProtection(
   groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
     associatedData: {
       context: 'GroupContentKeyring',
-      groupId,
+      groupId: input.groupId,
     },
   });
 
   // Send password disable request
 
   await trpcClient.groups.password.disable.mutate({
-    groupId,
+    groupId: input.groupId,
 
     groupPasswordHash: groupPasswordValues.passwordHash,
 

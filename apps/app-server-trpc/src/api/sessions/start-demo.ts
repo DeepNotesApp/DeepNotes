@@ -11,7 +11,7 @@ import { publicProcedure } from 'src/trpc/helpers';
 import { generateSessionValues } from 'src/utils';
 
 import { getUserDevice } from '../sessions/login';
-import { registerUser, registrationSchema } from '../users/register';
+import { registerUser, registrationSchema } from '../users/account/register';
 
 const baseProcedure = publicProcedure.input(registrationSchema());
 
@@ -48,7 +48,8 @@ export async function startDemo({
 
   const sessionId = nanoid();
 
-  const { sessionKey } = await generateSessionValues(sessionId, {
+  const { sessionKey } = await generateSessionValues({
+    sessionId,
     userId: user.id,
     deviceId: device.id,
     rememberSession: false,

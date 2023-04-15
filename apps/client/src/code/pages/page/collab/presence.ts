@@ -60,9 +60,9 @@ export class PagePresence {
     }),
   });
 
-  constructor({ collab }: { collab: PageCollab }) {
-    this.page = collab.page;
-    this.collab = collab;
+  constructor(input: { collab: PageCollab }) {
+    this.page = input.collab.page;
+    this.collab = input.collab;
 
     this.awareness = new awarenessProtocol.Awareness(this.collab.doc);
     (this.awareness as any).localStateBackup = null;

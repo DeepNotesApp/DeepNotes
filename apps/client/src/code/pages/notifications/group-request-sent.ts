@@ -62,7 +62,10 @@ export async function getGroupRequestSentNotificationInfo({
                 ok: { label: 'Yes', flat: true, color: 'negative' },
               });
 
-              await rejectJoinRequest(groupId, { patientId: agentId });
+              await rejectJoinRequest({
+                groupId,
+                patientId: agentId,
+              });
             } catch (error) {
               handleError(error);
             }

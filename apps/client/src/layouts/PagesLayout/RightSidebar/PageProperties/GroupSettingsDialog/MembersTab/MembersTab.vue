@@ -238,7 +238,8 @@ async function removeSelectedUsers() {
     for (const userId of finalSelectedUserIds.value.filter(
       (userId) => userId !== authStore().userId,
     )) {
-      await removeGroupUser(groupId, {
+      await removeGroupUser({
+        groupId,
         patientId: userId,
       });
     }
@@ -246,7 +247,8 @@ async function removeSelectedUsers() {
     await rotateGroupKeys(groupId);
 
     if (finalSelectedUserIds.value.includes(authStore().userId)) {
-      await removeGroupUser(groupId, {
+      await removeGroupUser({
+        groupId,
         patientId: authStore().userId,
       });
     }

@@ -40,10 +40,7 @@ export async function getNotifications({
   };
 }
 
-async function _loadNotifications({
-  userId,
-  lastNotificationId,
-}: {
+async function _loadNotifications(input: {
   userId: string;
   lastNotificationId?: number;
 }) {
@@ -53,13 +50,13 @@ async function _loadNotifications({
       'notifications.id',
       'users_notifications.notification_id',
     )
-    .where('users_notifications.user_id', userId);
+    .where('users_notifications.user_id', input.userId);
 
-  if (lastNotificationId != null) {
+  if (input.lastNotificationId != null) {
     notificationsQuery = notificationsQuery.where(
       'users_notifications.notification_id',
       '<',
-      lastNotificationId,
+      input.lastNotificationId,
     );
   }
 

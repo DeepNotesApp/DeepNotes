@@ -96,11 +96,7 @@ export function generateRandomUserKeys(
   };
 }
 
-export async function generateGroupValues({
-  userKeyPair,
-  isPublic,
-  password,
-}: {
+export async function generateGroupValues(input: {
   userKeyPair: KeyPair;
   isPublic: boolean;
   password?: string;
@@ -122,18 +118,18 @@ export async function generateGroupValues({
 
   let finalAccessKeyring = accessKeyring;
 
-  if (!isPublic) {
+  if (!input.isPublic) {
     finalAccessKeyring = finalAccessKeyring.wrapAsymmetric(
-      userKeyPair,
-      userKeyPair.publicKey,
+      input.userKeyPair,
+      input.userKeyPair.publicKey,
     );
   }
 
   // Internal keyring
 
   const encryptedInternalKeyring = internalKeyring.wrapAsymmetric(
-    userKeyPair,
-    userKeyPair.publicKey,
+    input.userKeyPair,
+    input.userKeyPair.publicKey,
   );
 
   // Content keyring
@@ -142,8 +138,8 @@ export async function generateGroupValues({
 
   let passwordValues;
 
-  if (password != null) {
-    passwordValues = await computeGroupPasswordValues(groupId, password);
+  if (input.password != null) {
+    passwordValues = await computeGroupPasswordValues(groupId, input.password);
 
     encryptedContentKeyring = encryptedContentKeyring.wrapSymmetric(
       passwordValues.passwordKey,

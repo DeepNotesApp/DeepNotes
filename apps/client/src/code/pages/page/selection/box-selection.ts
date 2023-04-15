@@ -26,8 +26,8 @@ export class PageBoxSelection {
   downEvent!: PointerEvent;
   touchTimer: NodeJS.Timeout | null = null;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = reactive({
       active: false,

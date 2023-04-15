@@ -31,22 +31,7 @@ export const RoleEnum = once(() =>
   z.enum(['owner', 'admin', 'moderator', 'member', 'viewer']),
 );
 
-export async function createGroup({
-  groupId,
-  userId,
-  isPersonal,
-  encryptedName,
-  mainPageId,
-  passwordHash,
-  isPublic,
-  accessKeyring,
-  encryptedInternalKeyring,
-  encryptedContentKeyring,
-  publicKeyring,
-  encryptedPrivateKeyring,
-  encryptedUserName,
-  dtrx,
-}: {
+export async function createGroup(input: {
   groupId: string;
 
   encryptedName?: string;
@@ -73,49 +58,52 @@ export async function createGroup({
 }) {
   await dataAbstraction().insert(
     'group',
-    groupId,
+    input.groupId,
     {
-      id: groupId,
+      id: input.groupId,
 
-      encrypted_name: base64ToBytesSafe(encryptedName) ?? new Uint8Array(),
+      encrypted_name:
+        base64ToBytesSafe(input.encryptedName) ?? new Uint8Array(),
 
-      main_page_id: mainPageId,
+      main_page_id: input.mainPageId,
 
       encrypted_rehashed_password_hash:
-        passwordHash != null
+        input.passwordHash != null
           ? encryptGroupRehashedPasswordHash(
-              computePasswordHash(base64ToBytes(passwordHash)),
+              computePasswordHash(base64ToBytes(input.passwordHash)),
             )
           : undefined,
 
-      access_keyring: isPublic ? base64ToBytes(accessKeyring) : undefined,
-      encrypted_content_keyring: base64ToBytes(encryptedContentKeyring),
+      access_keyring: input.isPublic
+        ? base64ToBytes(input.accessKeyring)
+        : undefined,
+      encrypted_content_keyring: base64ToBytes(input.encryptedContentKeyring),
 
-      user_id: isPersonal ? userId : undefined,
+      user_id: input.isPersonal ? input.userId : undefined,
 
-      public_keyring: base64ToBytes(publicKeyring),
-      encrypted_private_keyring: base64ToBytes(encryptedPrivateKeyring),
+      public_keyring: base64ToBytes(input.publicKeyring),
+      encrypted_private_keyring: base64ToBytes(input.encryptedPrivateKeyring),
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   await dataAbstraction().insert(
     'group-member',
-    `${groupId}:${userId}`,
+    `${input.groupId}:${input.userId}`,
     {
-      group_id: groupId,
-      user_id: userId,
+      group_id: input.groupId,
+      user_id: input.userId,
 
       role: 'owner',
 
-      encrypted_access_keyring: isPublic
+      encrypted_access_keyring: input.isPublic
         ? undefined
-        : base64ToBytes(accessKeyring),
-      encrypted_internal_keyring: base64ToBytes(encryptedInternalKeyring),
+        : base64ToBytes(input.accessKeyring),
+      encrypted_internal_keyring: base64ToBytes(input.encryptedInternalKeyring),
 
-      encrypted_name: base64ToBytesSafe(encryptedUserName),
+      encrypted_name: base64ToBytesSafe(input.encryptedUserName),
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 }
 
@@ -202,157 +190,136 @@ export async function userHasPermission(
   );
 }
 
-export async function createUser({
-  demo,
+export async function createUser(
+  input: {
+    ip: string;
+    userAgent: string;
 
-  email,
-  loginHash,
+    demo?: boolean;
 
-  userId,
-  groupId,
-  pageId,
+    email: string;
+    loginHash: string;
 
-  userPublicKeyring,
-  userEncryptedPrivateKeyring,
-  userEncryptedSymmetricKeyring,
+    passwordValues?: PasswordValues;
 
-  userEncryptedName,
-  userEncryptedDefaultNote,
-  userEncryptedDefaultArrow,
-
-  groupEncryptedAccessKeyring,
-  groupEncryptedInternalKeyring,
-  groupEncryptedContentKeyring,
-
-  groupPublicKeyring,
-  groupEncryptedPrivateKeyring,
-
-  pageEncryptedSymmetricKeyring,
-  pageEncryptedRelativeTitle,
-  pageEncryptedAbsoluteTitle,
-
-  passwordValues,
-
-  dtrx,
-}: {
-  ip: string;
-  userAgent: string;
-
-  demo?: boolean;
-
-  email: string;
-  loginHash: string;
-
-  passwordValues?: PasswordValues;
-
-  dtrx?: DataTransaction;
-} & RegistrationValues) {
+    dtrx?: DataTransaction;
+  } & RegistrationValues,
+) {
   const emailVerificationCode = nanoid();
 
-  passwordValues ??= derivePasswordValues(base64ToBytes(loginHash));
+  input.passwordValues ??= derivePasswordValues(base64ToBytes(input.loginHash));
 
-  await UserModel.query(dtrx?.trx)
-    .where('email_hash', Buffer.from(hashUserEmail(email)))
+  await UserModel.query(input.dtrx?.trx)
+    .where('email_hash', Buffer.from(hashUserEmail(input.email)))
     .delete();
 
   const userModel = {
-    id: userId,
+    id: input.userId,
 
-    encrypted_email: encryptUserEmail(email),
-    email_hash: hashUserEmail(email),
+    encrypted_email: encryptUserEmail(input.email),
+    email_hash: hashUserEmail(input.email),
 
-    encrypted_rehashed_login_hash: demo
+    encrypted_rehashed_login_hash: input.demo
       ? new Uint8Array()
       : encryptUserRehashedLoginHash(
-          encodePasswordHash(passwordValues.hash, passwordValues.salt, 2, 32),
+          encodePasswordHash(
+            input.passwordValues.hash,
+            input.passwordValues.salt,
+            2,
+            32,
+          ),
         ),
 
-    demo: !!demo,
+    demo: !!input.demo,
 
     email_verified: false,
-    ...(!demo
+    ...(!input.demo
       ? {
-          encrypted_new_email: encryptUserEmail(email),
+          encrypted_new_email: encryptUserEmail(input.email),
           email_verification_code: emailVerificationCode,
           email_verification_expiration_date: addHours(new Date(), 1),
         }
       : {}),
 
-    personal_group_id: groupId,
+    personal_group_id: input.groupId,
 
-    starting_page_id: pageId,
-    recent_page_ids: [pageId],
-    recent_group_ids: [groupId],
+    starting_page_id: input.pageId,
+    recent_page_ids: [input.pageId],
+    recent_group_ids: [input.groupId],
 
-    public_keyring: base64ToBytes(userPublicKeyring),
+    public_keyring: base64ToBytes(input.userPublicKeyring),
     encrypted_private_keyring: createPrivateKeyring(
-      base64ToBytes(userEncryptedPrivateKeyring),
-    ).wrapSymmetric(passwordValues.key, {
+      base64ToBytes(input.userEncryptedPrivateKeyring),
+    ).wrapSymmetric(input.passwordValues.key, {
       associatedData: {
         context: 'UserEncryptedPrivateKeyring',
-        userId,
+        userId: input.userId,
       },
     }).wrappedValue,
     encrypted_symmetric_keyring: createSymmetricKeyring(
-      base64ToBytes(userEncryptedSymmetricKeyring),
-    ).wrapSymmetric(passwordValues.key, {
+      base64ToBytes(input.userEncryptedSymmetricKeyring),
+    ).wrapSymmetric(input.passwordValues.key, {
       associatedData: {
         context: 'UserEncryptedSymmetricKeyring',
-        userId,
+        userId: input.userId,
       },
     }).wrappedValue,
 
-    encrypted_name: base64ToBytes(userEncryptedName),
-    encrypted_default_note: base64ToBytes(userEncryptedDefaultNote),
-    encrypted_default_arrow: base64ToBytes(userEncryptedDefaultArrow),
+    encrypted_name: base64ToBytes(input.userEncryptedName),
+    encrypted_default_note: base64ToBytes(input.userEncryptedDefaultNote),
+    encrypted_default_arrow: base64ToBytes(input.userEncryptedDefaultArrow),
   } as UserModel;
 
-  await dataAbstraction().insert('user', userId, userModel, { dtrx });
+  await dataAbstraction().insert('user', input.userId, userModel, {
+    dtrx: input.dtrx,
+  });
 
   await createGroup({
-    groupId: groupId,
-    mainPageId: pageId,
+    groupId: input.groupId,
+    mainPageId: input.pageId,
     isPublic: false,
     isPersonal: true,
 
-    userId: userId,
+    userId: input.userId,
 
-    accessKeyring: groupEncryptedAccessKeyring,
-    encryptedInternalKeyring: groupEncryptedInternalKeyring,
-    encryptedContentKeyring: groupEncryptedContentKeyring,
+    accessKeyring: input.groupEncryptedAccessKeyring,
+    encryptedInternalKeyring: input.groupEncryptedInternalKeyring,
+    encryptedContentKeyring: input.groupEncryptedContentKeyring,
 
-    publicKeyring: groupPublicKeyring,
-    encryptedPrivateKeyring: groupEncryptedPrivateKeyring,
+    publicKeyring: input.groupPublicKeyring,
+    encryptedPrivateKeyring: input.groupEncryptedPrivateKeyring,
 
-    dtrx,
+    dtrx: input.dtrx,
   });
 
   await dataAbstraction().insert(
     'page',
-    pageId,
+    input.pageId,
     {
-      id: pageId,
+      id: input.pageId,
 
-      encrypted_symmetric_keyring: base64ToBytes(pageEncryptedSymmetricKeyring),
+      encrypted_symmetric_keyring: base64ToBytes(
+        input.pageEncryptedSymmetricKeyring,
+      ),
 
-      encrypted_relative_title: base64ToBytes(pageEncryptedRelativeTitle),
-      encrypted_absolute_title: base64ToBytes(pageEncryptedAbsoluteTitle),
+      encrypted_relative_title: base64ToBytes(input.pageEncryptedRelativeTitle),
+      encrypted_absolute_title: base64ToBytes(input.pageEncryptedAbsoluteTitle),
 
-      group_id: groupId,
+      group_id: input.groupId,
 
       free: true,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   await dataAbstraction().insert(
     'user-page',
-    `${userId}:${pageId}`,
+    `${input.userId}:${input.pageId}`,
     {
-      user_id: userId,
-      page_id: pageId,
+      user_id: input.userId,
+      page_id: input.pageId,
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
   return userModel;

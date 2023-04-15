@@ -78,7 +78,8 @@ onMounted(async () => {
 async function accept() {
   try {
     for (const groupId of props.groupIds) {
-      await acceptJoinInvitation(groupId, {
+      await acceptJoinInvitation({
+        groupId,
         userName: userName.value,
       });
     }

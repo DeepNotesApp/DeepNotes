@@ -74,14 +74,12 @@ export async function refresh({
     });
   }
 
-  const { sessionKey: newSessionKey } = await generateSessionValues(
-    session.id,
-    {
-      userId: session.user_id,
-      rememberSession: jwtPayload.rms,
-      reply: ctx.res,
-    },
-  );
+  const { sessionKey: newSessionKey } = await generateSessionValues({
+    sessionId: session.id,
+    userId: session.user_id,
+    rememberSession: jwtPayload.rms,
+    reply: ctx.res,
+  });
 
   return {
     oldSessionKey: session.encryption_key,

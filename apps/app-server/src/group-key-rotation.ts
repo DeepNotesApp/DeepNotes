@@ -171,47 +171,39 @@ export async function getGroupKeyRotationValues(
   };
 }
 
-export async function rotateGroupKeys({
-  groupId,
+export async function rotateGroupKeys(
+  input: {
+    groupId: string;
 
-  groupAccessKeyring,
-  groupEncryptedName,
-  groupEncryptedContentKeyring,
-  groupPublicKeyring,
-  groupEncryptedPrivateKeyring,
-
-  groupMembers,
-  groupJoinInvitations,
-  groupJoinRequests,
-
-  groupPages,
-
-  dtrx,
-}: {
-  groupId: string;
-
-  dtrx?: DataTransaction;
-} & GroupKeyRotationValues) {
+    dtrx?: DataTransaction;
+  } & GroupKeyRotationValues,
+) {
   await dataAbstraction().patch(
     'group',
-    groupId,
+    input.groupId,
     {
       access_keyring:
-        groupAccessKeyring != null ? base64ToBytes(groupAccessKeyring) : null,
+        input.groupAccessKeyring != null
+          ? base64ToBytes(input.groupAccessKeyring)
+          : null,
 
-      encrypted_name: base64ToBytes(groupEncryptedName),
-      encrypted_content_keyring: base64ToBytes(groupEncryptedContentKeyring),
+      encrypted_name: base64ToBytes(input.groupEncryptedName),
+      encrypted_content_keyring: base64ToBytes(
+        input.groupEncryptedContentKeyring,
+      ),
 
-      public_keyring: base64ToBytes(groupPublicKeyring),
-      encrypted_private_keyring: base64ToBytes(groupEncryptedPrivateKeyring),
+      public_keyring: base64ToBytes(input.groupPublicKeyring),
+      encrypted_private_keyring: base64ToBytes(
+        input.groupEncryptedPrivateKeyring,
+      ),
     },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 
-  for (const [userId, groupMember] of Object.entries(groupMembers)) {
+  for (const [userId, groupMember] of Object.entries(input.groupMembers)) {
     await dataAbstraction().patch(
       'group-member',
-      `${groupId}:${userId}`,
+      `${input.groupId}:${userId}`,
       {
         encrypted_access_keyring:
           groupMember.encryptedAccessKeyring != null
@@ -223,16 +215,16 @@ export async function rotateGroupKeys({
 
         encrypted_name: base64ToBytes(groupMember.encryptedName),
       },
-      { dtrx },
+      { dtrx: input.dtrx },
     );
   }
 
   for (const [userId, groupJoinInvitation] of Object.entries(
-    groupJoinInvitations,
+    input.groupJoinInvitations,
   )) {
     await dataAbstraction().patch(
       'group-join-invitation',
-      `${groupId}:${userId}`,
+      `${input.groupId}:${userId}`,
       {
         encrypted_access_keyring:
           groupJoinInvitation.encryptedAccessKeyring != null
@@ -244,20 +236,22 @@ export async function rotateGroupKeys({
 
         encrypted_name: base64ToBytes(groupJoinInvitation.encryptedName),
       },
-      { dtrx },
+      { dtrx: input.dtrx },
     );
   }
 
-  for (const [userId, groupJoinRequest] of Object.entries(groupJoinRequests)) {
+  for (const [userId, groupJoinRequest] of Object.entries(
+    input.groupJoinRequests,
+  )) {
     await dataAbstraction().patch(
       'group-join-request',
-      `${groupId}:${userId}`,
+      `${input.groupId}:${userId}`,
       { encrypted_name: base64ToBytes(groupJoinRequest.encryptedName) },
-      { dtrx },
+      { dtrx: input.dtrx },
     );
   }
 
-  for (const [pageId, groupPage] of Object.entries(groupPages)) {
+  for (const [pageId, groupPage] of Object.entries(input.groupPages)) {
     await dataAbstraction().patch(
       'page',
       pageId,
@@ -268,7 +262,7 @@ export async function rotateGroupKeys({
 
         next_key_rotation_date: new Date(),
       },
-      { dtrx },
+      { dtrx: input.dtrx },
     );
   }
 }

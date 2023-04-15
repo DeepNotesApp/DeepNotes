@@ -37,29 +37,24 @@ export function clearCookie(
   });
 }
 
-export function setCookies({
-  reply,
-  accessToken,
-  refreshToken,
-  rememberSession,
-}: {
+export function setCookies(input: {
   reply: FastifyReply;
   accessToken: string;
   refreshToken: string;
   rememberSession: boolean;
 }) {
-  setCookie(reply, 'accessToken', accessToken, {
-    expires: rememberSession
+  setCookie(input.reply, 'accessToken', input.accessToken, {
+    expires: input.rememberSession
       ? new Date(Date.now() + ACCESS_TOKEN_DURATION)
       : undefined,
   });
-  setCookie(reply, 'refreshToken', refreshToken, {
-    expires: rememberSession
+  setCookie(input.reply, 'refreshToken', input.refreshToken, {
+    expires: input.rememberSession
       ? new Date(Date.now() + REFRESH_TOKEN_LONG_DURATION)
       : undefined,
   });
-  setCookie(reply, 'loggedIn', 'true', {
-    expires: rememberSession
+  setCookie(input.reply, 'loggedIn', 'true', {
+    expires: input.rememberSession
       ? new Date(Date.now() + REFRESH_TOKEN_LONG_DURATION)
       : undefined,
     httpOnly: false,
