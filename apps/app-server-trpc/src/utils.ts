@@ -1,4 +1,4 @@
-import { SessionModel, UserModel } from '@deeplib/db';
+import { GroupModel, SessionModel, UserModel } from '@deeplib/db';
 import { getPasswordHashValues } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
 import { addDays } from '@stdlib/misc';
@@ -10,6 +10,7 @@ import { nanoid } from 'nanoid';
 import { setCookies } from './cookies';
 import {
   computePasswordHash,
+  decryptGroupRehashedPasswordHash,
   decryptUserRehashedLoginHash,
   derivePasswordValues,
   encryptGroupRehashedPasswordHash,
@@ -209,6 +210,41 @@ export async function checkCorrectUserPassword({
   if (!passwordIsCorrect) {
     throw new TRPCError({
       message: 'Password is incorrect.',
+      code: 'BAD_REQUEST',
+    });
+  }
+}
+
+export async function checkCorrectGroupPassword(input: {
+  groupId: string;
+  groupPasswordHash: Uint8Array;
+}) {
+  const group = await GroupModel.query()
+    .findById(input.groupId)
+    .select('encrypted_rehashed_password_hash');
+
+  if (group == null) {
+    throw new TRPCError({
+      message: 'Group not found.',
+      code: 'NOT_FOUND',
+    });
+  }
+
+  if (group.encrypted_rehashed_password_hash == null) {
+    throw new TRPCError({
+      message: 'This group is not password protected.',
+      code: 'BAD_REQUEST',
+    });
+  }
+
+  if (
+    !sodium.crypto_pwhash_str_verify(
+      decryptGroupRehashedPasswordHash(group.encrypted_rehashed_password_hash),
+      input.groupPasswordHash,
+    )
+  ) {
+    throw new TRPCError({
+      message: 'Group password is incorrect.',
       code: 'BAD_REQUEST',
     });
   }

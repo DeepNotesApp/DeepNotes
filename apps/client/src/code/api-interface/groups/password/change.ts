@@ -1,8 +1,8 @@
-import { bytesToBase64 } from '@stdlib/base64';
 import { DataLayer } from '@stdlib/crypto';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
+import { trpcClient } from 'src/code/trpc';
 
 export async function changeGroupPasswordProtection(
   groupId: string,
@@ -72,14 +72,12 @@ export async function changeGroupPasswordProtection(
 
   // Send password change request
 
-  await api().post(`api/groups/${groupId}/password/change`, {
-    groupCurrentPasswordHash: bytesToBase64(
-      currentGroupPasswordValues.passwordHash,
-    ),
-    groupNewPasswordHash: bytesToBase64(newGroupPasswordValues.passwordHash),
+  await trpcClient.groups.password.change.mutate({
+    groupId,
 
-    groupEncryptedContentKeyring: bytesToBase64(
-      groupContentKeyring.wrappedValue,
-    ),
+    groupCurrentPasswordHash: currentGroupPasswordValues.passwordHash,
+    groupNewPasswordHash: newGroupPasswordValues.passwordHash,
+
+    groupEncryptedContentKeyring: groupContentKeyring.wrappedValue,
   });
 }
