@@ -79,16 +79,16 @@ export async function getRedirectDest({
   // Group main page redirection
 
   if (route.name === 'group') {
-    const group = (
-      await api().post<{ mainPageId: string }>(
-        `/api/groups/${route.params.groupId}/main-page-id`,
-        undefined,
-        getRequestConfig(cookies),
-      )
-    ).data;
+    await trpcClient.groups.getMainPageId.query({
+      groupId: route.params.groupId as string,
+    });
 
-    if (group.mainPageId != null) {
-      return { name: 'page', params: { pageId: group.mainPageId } };
+    const mainPageId = await trpcClient.groups.getMainPageId.query({
+      groupId: route.params.groupId as string,
+    });
+
+    if (mainPageId != null) {
+      return { name: 'page', params: { pageId: mainPageId } };
     }
   }
 }
