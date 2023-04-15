@@ -112,6 +112,7 @@
 <script setup lang="ts">
 import { BREAKPOINT_SM_MIN, sleep } from '@stdlib/misc';
 import QRCode from 'qrcode';
+import { trpcClient } from 'src/code/trpc';
 import { asyncPrompt, handleError } from 'src/code/utils';
 import type { Ref } from 'vue';
 
@@ -120,7 +121,7 @@ import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const props = defineProps<{
-  loginHash: string;
+  loginHash: Uint8Array;
   secret: string;
   keyUri: string;
 }>();
@@ -211,6 +212,10 @@ async function disableTwoFactorAuth() {
 
       cancel: { label: 'No', flat: true, color: 'primary' },
       ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    await trpcClient.users.account.twoFactorAuth.disable.mutate({
+      loginHash: props.loginHash,
     });
 
     await api().post<void>(
