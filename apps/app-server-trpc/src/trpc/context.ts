@@ -1,3 +1,5 @@
+import { userHasPermission as _userHasPermission } from '@deeplib/data';
+import type { IGroupRole } from '@deeplib/misc';
 import type { inferAsyncReturnType } from '@trpc/server';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { dataAbstraction } from 'src/data/data-abstraction';
@@ -13,6 +15,12 @@ export function createContext({ req, res }: CreateFastifyContextOptions) {
     dataAbstraction: dataAbstraction(),
 
     usingLocks,
+
+    userHasPermission: (
+      userId: string,
+      groupId: string,
+      permission: keyof IGroupRole['permissions'],
+    ) => _userHasPermission(dataAbstraction(), userId, groupId, permission),
   };
 }
 
