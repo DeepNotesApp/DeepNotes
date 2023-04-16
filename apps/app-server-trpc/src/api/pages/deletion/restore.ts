@@ -1,4 +1,4 @@
-import { addMonths, isNanoID } from '@stdlib/misc';
+import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
@@ -12,9 +12,9 @@ const baseProcedure = authProcedure.input(
   }),
 );
 
-export const deleteProcedure = once(() => baseProcedure.mutation(delete_));
+export const restoreProcedure = once(() => baseProcedure.mutation(restore));
 
-export async function delete_({
+export async function restore({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
@@ -42,7 +42,7 @@ export async function delete_({
             ))
           ) {
             throw new TRPCError({
-              code: 'UNAUTHORIZED',
+              code: 'FORBIDDEN',
               message: 'Insufficient permissions.',
             });
           }
@@ -56,38 +56,20 @@ export async function delete_({
               'page',
               input.pageId,
               'permanent-deletion-date',
-            )) != null
+            )) == null
           ) {
             throw new TRPCError({
               code: 'BAD_REQUEST',
-              message: 'Page is already deleted.',
+              message: 'Page is not deleted.',
             });
           }
 
           checkRedlockSignalAborted(signals);
 
-          // Check if page is main page
-
-          const mainPageId = await ctx.dataAbstraction.hget(
-            'group',
-            groupId,
-            'main-page-id',
-          );
-
-          checkRedlockSignalAborted(signals);
-
-          if (input.pageId === mainPageId) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message:
-                "Cannot delete a group's main page, either replace the main page first or delete the whole group.",
-            });
-          }
-
-          // Delete page
+          // Restore page
 
           await ctx.dataAbstraction.patch('page', input.pageId, {
-            permanent_deletion_date: addMonths(new Date(), 1),
+            permanent_deletion_date: null,
           });
         },
       );
