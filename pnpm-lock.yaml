@@ -379,6 +379,9 @@ importers:
       sib-api-v3-typescript:
         specifier: 2.2.2
         version: 2.2.2
+      stripe:
+        specifier: 11.5.0
+        version: 11.5.0
       superjson:
         specifier: npm:@deepnotes/superjson@1.12.4
         version: /@deepnotes/superjson@1.12.4
@@ -3166,14 +3169,14 @@ packages:
   /@types/fs-extra@8.1.2:
     resolution: {integrity: sha512-SvSrYXfWSc7R4eqnOzbQF4TZmfpNSM9FrSWLU3EUnWBuyZqNBOrv1B1JA3byUDPUl9z4Ab3jeZG2eDdySlgNMg==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
 
   /@types/glob@7.2.0:
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
     requiresBuild: true
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
     dev: true
     optional: true
 
@@ -3261,13 +3264,13 @@ packages:
 
   /@types/node@18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
+    dev: true
 
   /@types/node@18.13.0:
     resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
 
   /@types/node@18.15.11:
     resolution: {integrity: sha512-E5Kwq2n4SbMzQOn6wnmBjuK9ouqlURrcZDVfbo9ftDDTFt3nk7ZKK4GMOzoYgnpQJKcxwQw+lGaBvvlMo0qN/Q==}
-    dev: true
 
   /@types/nodemailer-html-to-text@3.1.0:
     resolution: {integrity: sha512-pGui3kLGuU0mu/6RsJjzOXvFE5D4JUIVoUEocK8G5odwBmxC2d+h68T04PzbSJRDAV3E/TUgld1AzgBltvfu0g==}
@@ -3406,7 +3409,7 @@ packages:
     resolution: {integrity: sha512-Cn6WYCm0tXv8p6k+A8PvbDG763EDpBoTzHdA+Q/MF6H3sapGjCm9NzoaJncJS9tUKSuCoDs9XHxYYsQDgxR6kw==}
     requiresBuild: true
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
     dev: true
     optional: true
 
@@ -5972,7 +5975,7 @@ packages:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.12
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -11144,7 +11147,7 @@ packages:
     resolution: {integrity: sha512-yjTqnzeUk2wg1yIeYWOAH6CL5qu9fINzOhqkibXfbyeWSBEBauQrfCoB8shMmREoK2qdkScz1HjahF9qUg+X3g==}
     engines: {node: '>=12.*'}
     dependencies:
-      '@types/node': 18.11.18
+      '@types/node': 18.15.11
       qs: 6.11.0
     dev: false
 
