@@ -7,11 +7,15 @@ import type { dataHashes } from './data-hashes';
 
 export async function insertPageSnapshot(input: {
   dataAbstraction: DataAbstraction<typeof dataHashes>;
+
   pageId: string;
   authorId: string;
+
   encryptedSymmetricKey: Uint8Array;
   encryptedData: Uint8Array;
+
   type: PageSnapshotType;
+
   dtrx: DataTransaction;
 }) {
   const pageSnapshotInfos: PageSnapshotInfo[] =

@@ -1,4 +1,4 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
+import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { Y } from '@syncedstore/core';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
@@ -29,14 +29,15 @@ export async function restorePageSnapshot(input: {
 
   const newSnapshotSymmetricKey = wrapSymmetricKey();
 
-  const encryptedData = bytesToBase64(
-    newSnapshotSymmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
+  const encryptedData = newSnapshotSymmetricKey.encrypt(
+    Y.encodeStateAsUpdateV2(input.doc),
+    {
       padding: true,
       associatedData: {
         context: 'PageSnapshotData',
         pageId: input.pageId,
       },
-    }),
+    },
   );
 
   // Restore snapshot
@@ -65,15 +66,15 @@ export async function restorePageSnapshot(input: {
 
   // Save pre-restore data
 
-  await api().post(`/api/pages/${input.pageId}/snapshots/save`, {
-    encryptedSymmetricKey: bytesToBase64(
-      pageKeyring.encrypt(newSnapshotSymmetricKey.value, {
-        associatedData: {
-          context: 'PageSnapshotSymmetricKey',
-          pageId: input.pageId,
-        },
-      }),
-    ),
+  await trpcClient.pages.snapshots.save.mutate({
+    pageId: input.pageId,
+
+    encryptedSymmetricKey: pageKeyring.encrypt(newSnapshotSymmetricKey.value, {
+      associatedData: {
+        context: 'PageSnapshotSymmetricKey',
+        pageId: input.pageId,
+      },
+    }),
     encryptedData,
 
     preRestore: true,

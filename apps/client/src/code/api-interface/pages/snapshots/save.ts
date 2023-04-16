@@ -1,4 +1,3 @@
-import { bytesToBase64 } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { Y } from '@syncedstore/core';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
@@ -16,23 +15,21 @@ export async function savePageSnapshot(input: {
 
   const symmetricKey = wrapSymmetricKey();
 
-  await api().post(`/api/pages/${input.pageId}/snapshots/save`, {
-    encryptedSymmetricKey: bytesToBase64(
-      pageKeyring.encrypt(symmetricKey.value, {
-        associatedData: {
-          context: 'PageSnapshotSymmetricKey',
-          pageId: input.pageId,
-        },
-      }),
-    ),
-    encryptedData: bytesToBase64(
-      symmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
-        padding: true,
-        associatedData: {
-          context: 'PageDocUpdate',
-          pageId: input.pageId,
-        },
-      }),
-    ),
+  await trpcClient.pages.snapshots.save.mutate({
+    pageId: input.pageId,
+
+    encryptedSymmetricKey: pageKeyring.encrypt(symmetricKey.value, {
+      associatedData: {
+        context: 'PageSnapshotSymmetricKey',
+        pageId: input.pageId,
+      },
+    }),
+    encryptedData: symmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
+      padding: true,
+      associatedData: {
+        context: 'PageDocUpdate',
+        pageId: input.pageId,
+      },
+    }),
   });
 }
