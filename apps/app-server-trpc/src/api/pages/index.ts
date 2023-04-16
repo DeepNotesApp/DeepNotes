@@ -3,6 +3,7 @@ import { trpc } from 'src/trpc/server';
 
 import { bumpProcedure } from './bump';
 import { createProcedure } from './create';
+import { deletionRouter } from './deletion';
 import { snapshotsRouter } from './snapshots';
 
 export const pagesRouter = once(() =>
@@ -11,5 +12,7 @@ export const pagesRouter = once(() =>
     bump: bumpProcedure(),
 
     snapshots: snapshotsRouter(),
+
+    deletion: deletionRouter(),
   }),
 );
