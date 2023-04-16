@@ -1,6 +1,7 @@
 import { once } from 'lodash';
 import { trpc } from 'src/trpc/server';
 
+import { deletionRouter } from './deletion';
 import { getGroupUserIdsProcedure } from './get-group-user-ids';
 import { getMainPageIdProcedure } from './get-main-page-id';
 import { passwordRouter } from './password';
@@ -14,5 +15,7 @@ export const groupsRouter = once(() =>
 
     password: passwordRouter(),
     privacy: privacyRouter(),
+
+    deletion: deletionRouter(),
   }),
 );
