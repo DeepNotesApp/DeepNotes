@@ -1,7 +1,7 @@
 import type { Keyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import type { RegistrationSchema } from 'deepnotes-app-server-trpc';
+import type { UserRegistrationSchema } from 'deepnotes-app-server-trpc/src/utils/users';
 import { pack } from 'msgpackr';
 import { nanoid } from 'nanoid';
 import type { deriveUserValues } from 'src/code/crypto';
@@ -11,7 +11,7 @@ import type { ISerialObjectInput } from 'src/code/pages/serialization';
 export async function getRegistrationValues(input: {
   derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
   userName: string;
-}): Promise<RegistrationSchema> {
+}): Promise<UserRegistrationSchema> {
   const userId = nanoid();
   const pageId = nanoid();
 

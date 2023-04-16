@@ -46,7 +46,7 @@ export async function buildServer() {
     prefix: '/trpc',
 
     trpcOptions: {
-      router: appRouter(),
+      router: appRouter,
 
       createContext,
     },

@@ -16,12 +16,9 @@ import { dataAbstraction } from 'src/data/data-abstraction';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { createGroup } from 'src/utils/groups';
+import type { UserRegistrationSchema } from 'src/utils/users';
 import { userRegistrationSchema } from 'src/utils/users';
 import { z } from 'zod';
-
-export type RegistrationSchema = z.output<
-  ReturnType<typeof userRegistrationSchema>
->;
 
 const baseProcedure = publicProcedure.input(
   z
@@ -99,7 +96,7 @@ export async function registerUser(
     passwordValues: PasswordValues;
 
     dtrx?: DataTransaction;
-  } & RegistrationSchema,
+  } & UserRegistrationSchema,
 ) {
   const emailVerificationCode = nanoid();
 

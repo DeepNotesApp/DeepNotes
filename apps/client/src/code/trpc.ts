@@ -1,5 +1,5 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import type { AppRouter } from 'deepnotes-app-server-trpc';
+import type { AppRouter } from 'deepnotes-app-server-trpc/src/trpc/router';
 import { once } from 'lodash';
 import superjson from 'superjson';
 

@@ -34,6 +34,9 @@ export const userRegistrationSchema = once(() =>
     pageEncryptedAbsoluteTitle: z.instanceof(Uint8Array),
   }),
 );
+export type UserRegistrationSchema = z.output<
+  ReturnType<typeof userRegistrationSchema>
+>;
 
 export async function checkCorrectUserPassword(input: {
   userId: string;
