@@ -1,4 +1,3 @@
-import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { Y } from '@syncedstore/core';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
@@ -18,12 +17,10 @@ export async function restorePageSnapshot(input: {
     throw new Error('Page keyring not found.');
   }
 
-  const response = (
-    await api().post<{
-      encryptedSymmetricKey: string;
-      encryptedData: string;
-    }>(`/api/pages/${input.pageId}/snapshots/load/${input.snapshotId}`)
-  ).data;
+  const response = await trpcClient.pages.snapshots.load.query({
+    pageId: input.pageId,
+    snapshotId: input.snapshotId,
+  });
 
   // Encrypt pre-restore data
 
@@ -43,7 +40,7 @@ export async function restorePageSnapshot(input: {
   // Restore snapshot
 
   const oldSnapshotSymmetricKey = wrapSymmetricKey(
-    pageKeyring.decrypt(base64ToBytes(response.encryptedSymmetricKey), {
+    pageKeyring.decrypt(response.encryptedSymmetricKey, {
       associatedData: {
         context: 'PageSnapshotSymmetricKey',
         pageId: input.pageId,
@@ -51,16 +48,13 @@ export async function restorePageSnapshot(input: {
     }),
   );
 
-  const snapshotData = oldSnapshotSymmetricKey.decrypt(
-    base64ToBytes(response.encryptedData),
-    {
-      padding: true,
-      associatedData: {
-        context: 'PageSnapshotData',
-        pageId: input.pageId,
-      },
+  const snapshotData = oldSnapshotSymmetricKey.decrypt(response.encryptedData, {
+    padding: true,
+    associatedData: {
+      context: 'PageSnapshotData',
+      pageId: input.pageId,
     },
-  );
+  });
 
   revertToSnapshot(input.doc, snapshotData);
 
