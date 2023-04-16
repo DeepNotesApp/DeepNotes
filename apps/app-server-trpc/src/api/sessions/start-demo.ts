@@ -8,12 +8,13 @@ import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
-import { generateSessionValues } from 'src/utils';
+import { generateSessionValues } from 'src/utils/sessions';
+import { userRegistrationSchema } from 'src/utils/users';
 
 import { getUserDevice } from '../sessions/login';
-import { registerUser, registrationSchema } from '../users/account/register';
+import { registerUser } from '../users/account/register';
 
-const baseProcedure = publicProcedure.input(registrationSchema());
+const baseProcedure = publicProcedure.input(userRegistrationSchema());
 
 export const startDemoProcedure = once(() => baseProcedure.mutation(startDemo));
 

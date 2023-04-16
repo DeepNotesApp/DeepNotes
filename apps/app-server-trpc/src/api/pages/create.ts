@@ -4,7 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { createGroup } from 'src/utils';
+import { createGroup, groupCreationSchema } from 'src/utils/groups';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -17,22 +17,7 @@ const baseProcedure = authProcedure.input(
     pageEncryptedRelativeTitle: z.instanceof(Uint8Array),
     pageEncryptedAbsoluteTitle: z.instanceof(Uint8Array),
 
-    groupCreation: z
-      .object({
-        groupEncryptedName: z.instanceof(Uint8Array),
-        groupPasswordHash: z.instanceof(Uint8Array).optional(),
-        groupIsPublic: z.boolean(),
-
-        accessKeyring: z.instanceof(Uint8Array),
-        groupEncryptedInternalKeyring: z.instanceof(Uint8Array),
-        groupEncryptedContentKeyring: z.instanceof(Uint8Array),
-
-        groupPublicKeyring: z.instanceof(Uint8Array),
-        groupEncryptedPrivateKeyring: z.instanceof(Uint8Array),
-
-        groupMemberEncryptedName: z.instanceof(Uint8Array),
-      })
-      .optional(),
+    groupCreation: groupCreationSchema().optional(),
   }),
 );
 
@@ -112,27 +97,14 @@ export async function create({
 
         if (input.groupCreation != null) {
           await createGroup({
-            groupId: input.groupId,
-            encryptedName: input.groupCreation.groupEncryptedName,
-            passwordHash: input.groupCreation.groupPasswordHash,
-            isPublic: !!input.groupCreation.groupIsPublic,
-            isPersonal: false,
-
             userId: ctx.userId,
 
-            accessKeyring: input.groupCreation.accessKeyring,
-            encryptedInternalKeyring:
-              input.groupCreation.groupEncryptedInternalKeyring,
-            encryptedContentKeyring:
-              input.groupCreation.groupEncryptedContentKeyring,
+            groupId: input.groupId,
 
-            publicKeyring: input.groupCreation.groupPublicKeyring,
-            encryptedPrivateKeyring:
-              input.groupCreation.groupEncryptedPrivateKeyring,
+            groupIsPersonal: false,
+            groupMainPageId: input.pageId,
 
-            encryptedUserName: input.groupCreation.groupMemberEncryptedName,
-
-            mainPageId: input.pageId,
+            ...input.groupCreation,
 
             dtrx,
           });

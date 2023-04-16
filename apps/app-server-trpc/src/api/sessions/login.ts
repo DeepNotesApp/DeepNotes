@@ -24,7 +24,7 @@ import {
 } from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
-import { generateSessionValues } from 'src/utils';
+import { generateSessionValues } from 'src/utils/sessions';
 import { z } from 'zod';
 
 const baseProcedure = publicProcedure.input(

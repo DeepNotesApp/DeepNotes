@@ -6,7 +6,7 @@ import {
   encodePasswordHash,
 } from '@stdlib/crypto';
 import type { DataTransaction } from '@stdlib/data';
-import { addHours, isNanoID, w3cEmailRegex } from '@stdlib/misc';
+import { addHours, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -15,38 +15,12 @@ import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
-import { createGroup } from 'src/utils';
+import { createGroup } from 'src/utils/groups';
+import { userRegistrationSchema } from 'src/utils/users';
 import { z } from 'zod';
 
-export const registrationSchema = once(() =>
-  z.object({
-    userId: z.string().refine(isNanoID),
-    groupId: z.string().refine(isNanoID),
-    pageId: z.string().refine(isNanoID),
-
-    userPublicKeyring: z.instanceof(Uint8Array),
-    userEncryptedPrivateKeyring: z.instanceof(Uint8Array),
-    userEncryptedSymmetricKeyring: z.instanceof(Uint8Array),
-
-    userEncryptedName: z.instanceof(Uint8Array),
-    userEncryptedDefaultNote: z.instanceof(Uint8Array),
-    userEncryptedDefaultArrow: z.instanceof(Uint8Array),
-
-    groupEncryptedAccessKeyring: z.instanceof(Uint8Array),
-    groupEncryptedInternalKeyring: z.instanceof(Uint8Array),
-    groupEncryptedContentKeyring: z.instanceof(Uint8Array),
-
-    groupPublicKeyring: z.instanceof(Uint8Array),
-    groupEncryptedPrivateKeyring: z.instanceof(Uint8Array),
-
-    pageEncryptedSymmetricKeyring: z.instanceof(Uint8Array),
-    pageEncryptedRelativeTitle: z.instanceof(Uint8Array),
-    pageEncryptedAbsoluteTitle: z.instanceof(Uint8Array),
-  }),
-);
-
 export type RegistrationSchema = z.output<
-  ReturnType<typeof registrationSchema>
+  ReturnType<typeof userRegistrationSchema>
 >;
 
 const baseProcedure = publicProcedure.input(
@@ -58,7 +32,7 @@ const baseProcedure = publicProcedure.input(
         .transform((email) => email.toLowerCase()),
       loginHash: z.instanceof(Uint8Array),
     })
-    .merge(registrationSchema()),
+    .merge(userRegistrationSchema()),
 );
 
 export const registerProcedure = once(() => baseProcedure.mutation(register));
@@ -195,19 +169,21 @@ export async function registerUser(
   });
 
   await createGroup({
-    groupId: input.groupId,
-    mainPageId: input.pageId,
-    isPublic: false,
-    isPersonal: true,
-
     userId: input.userId,
 
-    accessKeyring: input.groupEncryptedAccessKeyring,
-    encryptedInternalKeyring: input.groupEncryptedInternalKeyring,
-    encryptedContentKeyring: input.groupEncryptedContentKeyring,
+    groupId: input.groupId,
 
-    publicKeyring: input.groupPublicKeyring,
-    encryptedPrivateKeyring: input.groupEncryptedPrivateKeyring,
+    groupIsPersonal: true,
+    groupMainPageId: input.pageId,
+
+    groupIsPublic: false,
+
+    groupAccessKeyring: input.groupEncryptedAccessKeyring,
+    groupEncryptedInternalKeyring: input.groupEncryptedInternalKeyring,
+    groupEncryptedContentKeyring: input.groupEncryptedContentKeyring,
+
+    groupPublicKeyring: input.groupPublicKeyring,
+    groupEncryptedPrivateKeyring: input.groupEncryptedPrivateKeyring,
 
     dtrx: input.dtrx,
   });

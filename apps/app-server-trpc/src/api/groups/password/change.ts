@@ -8,7 +8,7 @@ import {
 } from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { checkCorrectGroupPassword } from 'src/utils';
+import { checkCorrectGroupPassword } from 'src/utils/groups';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
