@@ -13,6 +13,7 @@ import { some } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 import type { TransactionOrKnex } from 'objection';
 import { Model } from 'objection';
+import type { Logger } from 'unilogr';
 
 import type { DataField } from './data-field';
 import type { DataHash, DataHashes } from './data-hash';
@@ -29,7 +30,7 @@ export interface SimpleLRUCache {
   del(key: string): void;
 }
 
-export const classLogger = mainLogger.sub('DataAbstraction');
+export const classLogger: Logger = mainLogger.sub('DataAbstraction');
 
 export const DEFAULT_LOCAL_TTL = 1 * 24 * 60 * 60; // 1 day
 export const DEFAULT_REMOTE_TTL = 7 * 24 * 60 * 60; // 7 days
