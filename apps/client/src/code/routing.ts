@@ -56,7 +56,7 @@ export async function getRedirectDest(input: {
 
   // Starting page redirection
 
-  if (input.auth.loggedIn && route.name === 'pages') {
+  if (input.auth.loggedIn && input.route.name === 'pages') {
     try {
       const startingPageId =
         await trpcClient.users.pages.getStartingPageId.query(undefined, {
