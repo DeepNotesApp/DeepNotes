@@ -22,7 +22,6 @@
 <script setup lang="ts">
 import type { QInputProps } from 'quasar';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props extends QInputProps {
   placeholder?: string;
 

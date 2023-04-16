@@ -10,9 +10,7 @@ const EditorContent = internals.tiptap().EditorContent;
 type _EditorContent = typeof EditorContent;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props extends _EditorContent {
-  //
-}
+interface Props extends _EditorContent {}
 
 defineProps<Props>();
 </script>
