@@ -1,64 +1,97 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { rolesMap } from '@deeplib/misc';
+import type {
+  changeUserRoleProcedureStep1,
+  changeUserRoleProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/api/groups/change-user-role';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { requestWithNotifications } from 'src/code/pages/utils';
+import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function changeUserRole(input: {
   groupId: string;
   patientId: string;
   role: GroupRoleID;
 }) {
-  const agentId = authStore().userId;
-  const roleName = rolesMap()[input.role].name;
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.changeUserRole`,
 
-  const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(input.groupId).getAsync(),
+    steps: [step1, step2, step3],
+  });
 
-    groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
-    groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
-  ]);
-
-  await requestWithNotifications({
-    url: `/api/groups/${input.groupId}/change-user-role`,
-
-    body: {
+  async function step1(): Promise<
+    typeof changeUserRoleProcedureStep1['_def']['_input_in']
+  > {
+    return {
+      groupId: input.groupId,
       patientId: input.patientId,
       requestedRole: input.role,
-    },
+    };
+  }
 
-    patientId: input.patientId,
+  async function step2(
+    input_: typeof changeUserRoleProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof changeUserRoleProcedureStep2['_def']['_input_in']> {
+    const agentId = authStore().userId;
+    const roleName = rolesMap()[input.role].name;
 
-    notifications: {
-      agent: {
-        groupId: input.groupId,
+    const [groupName, agentName, targetName] = await Promise.all([
+      groupNames()(input.groupId).getAsync(),
 
-        groupName: groupName.text,
-        targetName: targetName.text,
-        roleName,
+      groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
+      groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
+    ]);
 
-        // You changed the role of ${targetName} to ${roleName}.
-      },
+    return {
+      notifications: await createNotifications({
+        recipients: input_.notificationRecipients,
 
-      target: {
-        groupId: input.groupId,
+        patientId: input.patientId,
 
-        groupName: groupName.text,
-        roleName,
+        notifications: {
+          agent: {
+            groupId: input.groupId,
 
-        // Your role was changed to ${roleName}.
-      },
+            groupName: groupName.text,
+            targetName: targetName.text,
+            roleName,
 
-      observers: {
-        groupId: input.groupId,
+            // You changed the role of ${targetName} to ${roleName}.
+          },
 
-        groupName: groupName.text,
-        agentName: agentName.text,
-        targetName: targetName.text,
-        roleName,
+          target: {
+            groupId: input.groupId,
 
-        // ${agentName} changed the role of ${targetName} to ${roleName}.
-      },
-    },
-  });
+            groupName: groupName.text,
+            roleName,
+
+            // Your role was changed to ${roleName}.
+          },
+
+          observers: {
+            groupId: input.groupId,
+
+            groupName: groupName.text,
+            agentName: agentName.text,
+            targetName: targetName.text,
+            roleName,
+
+            // ${agentName} changed the role of ${targetName} to ${roleName}.
+          },
+        },
+      }),
+    };
+  }
+
+  async function step3(
+    _input: typeof changeUserRoleProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

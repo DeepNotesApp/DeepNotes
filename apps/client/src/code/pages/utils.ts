@@ -1,4 +1,3 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import { createKeyring } from '@stdlib/crypto';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
@@ -82,7 +81,7 @@ export function getPageTitle(
 }
 
 export async function createNotifications(input: {
-  recipients: Record<string, { publicKeyring: string }>;
+  recipients: Record<string, { publicKeyring: Uint8Array }>;
 
   patientId?: string;
 
@@ -91,7 +90,12 @@ export async function createNotifications(input: {
     target?: object;
     observers?: object;
   };
-}) {
+}): Promise<
+  {
+    recipients: Record<string, { encryptedSymmetricKey: Uint8Array }>;
+    encryptedContent: Uint8Array;
+  }[]
+> {
   const agentId = authStore().userId;
 
   const agentSymmetricKey = wrapSymmetricKey();
@@ -101,36 +105,32 @@ export async function createNotifications(input: {
   return [
     // Agent
 
-    ...[
-      input.notifications.agent != null
-        ? {
+    ...(input.notifications.agent != null
+      ? [
+          {
             recipients: {
               [agentId]: {
-                encryptedSymmetricKey: bytesToBase64(
-                  internals.keyPair.encrypt(
-                    agentSymmetricKey.value,
-                    internals.keyPair.publicKey,
-                  ),
+                encryptedSymmetricKey: internals.keyPair.encrypt(
+                  agentSymmetricKey.value,
+                  internals.keyPair.publicKey,
                 ),
               },
             },
 
-            encryptedContent: bytesToBase64(
-              agentSymmetricKey.encrypt(
-                pack({
-                  ...input.notifications.agent,
+            encryptedContent: agentSymmetricKey.encrypt(
+              pack({
+                ...input.notifications.agent,
 
-                  recipientType: 'agent',
-                }),
-                {
-                  padding: true,
-                  associatedData: { context: 'UserNotificationContent' },
-                },
-              ),
+                recipientType: 'agent',
+              }),
+              {
+                padding: true,
+                associatedData: { context: 'UserNotificationContent' },
+              },
             ),
-          }
-        : {},
-    ],
+          },
+        ]
+      : []),
 
     // Target
 
@@ -141,31 +141,25 @@ export async function createNotifications(input: {
           {
             recipients: {
               [input.patientId]: {
-                encryptedSymmetricKey: bytesToBase64(
-                  internals.keyPair.encrypt(
-                    targetSymmetricKey.value,
-                    createKeyring(
-                      base64ToBytes(
-                        input.recipients[input.patientId].publicKeyring,
-                      ),
-                    ),
+                encryptedSymmetricKey: internals.keyPair.encrypt(
+                  targetSymmetricKey.value,
+                  createKeyring(
+                    input.recipients[input.patientId].publicKeyring,
                   ),
                 ),
               },
             },
 
-            encryptedContent: bytesToBase64(
-              targetSymmetricKey.encrypt(
-                pack({
-                  ...input.notifications.target,
+            encryptedContent: targetSymmetricKey.encrypt(
+              pack({
+                ...input.notifications.target,
 
-                  recipientType: 'target',
-                }),
-                {
-                  padding: true,
-                  associatedData: { context: 'UserNotificationContent' },
-                },
-              ),
+                recipientType: 'target',
+              }),
+              {
+                padding: true,
+                associatedData: { context: 'UserNotificationContent' },
+              },
             ),
           },
         ]
@@ -186,28 +180,24 @@ export async function createNotifications(input: {
                 .map(([recipientUserId, { publicKeyring }]) => [
                   recipientUserId,
                   {
-                    encryptedSymmetricKey: bytesToBase64(
-                      internals.keyPair.encrypt(
-                        observersSymmetricKey.value,
-                        createKeyring(base64ToBytes(publicKeyring)),
-                      ),
+                    encryptedSymmetricKey: internals.keyPair.encrypt(
+                      observersSymmetricKey.value,
+                      createKeyring(publicKeyring),
                     ),
                   },
                 ]),
             ),
 
-            encryptedContent: bytesToBase64(
-              observersSymmetricKey.encrypt(
-                pack({
-                  ...input.notifications.observers,
+            encryptedContent: observersSymmetricKey.encrypt(
+              pack({
+                ...input.notifications.observers,
 
-                  recipientType: 'observer',
-                }),
-                {
-                  padding: true,
-                  associatedData: { context: 'UserNotificationContent' },
-                },
-              ),
+                recipientType: 'observer',
+              }),
+              {
+                padding: true,
+                associatedData: { context: 'UserNotificationContent' },
+              },
             ),
           },
         ]
@@ -230,7 +220,7 @@ export async function requestWithNotifications(params: {
 }) {
   const notificationRecipients = (
     await api().post<{
-      notificationRecipients: Record<string, { publicKeyring: string }>;
+      notificationRecipients: Record<string, { publicKeyring: Uint8Array }>;
     }>(params.url, { ...params.body })
   ).data.notificationRecipients;
 

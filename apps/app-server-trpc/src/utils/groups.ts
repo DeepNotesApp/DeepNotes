@@ -1,4 +1,5 @@
-import { GroupModel } from '@deeplib/db';
+import type { UserModel } from '@deeplib/db';
+import { GroupMemberModel, GroupModel } from '@deeplib/db';
 import type { DataTransaction } from '@stdlib/data';
 import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
@@ -138,4 +139,37 @@ export async function checkCorrectGroupPassword(input: {
       code: 'BAD_REQUEST',
     });
   }
+}
+
+export async function getGroupManagers(
+  groupId: string,
+  extraUserIds?: string[],
+): Promise<{ userId: string; publicKeyring: Uint8Array }[]> {
+  return (
+    (await GroupMemberModel.query()
+      .leftJoin('users', 'users.id', 'group_members.user_id')
+      .where('group_id', groupId)
+      .whereIn('group_members.role', ['owner', 'admin', 'moderator'])
+      .orWhereIn('users.id', extraUserIds ?? [])
+      .select('users.id', 'users.public_keyring')) as unknown as UserModel[]
+  ).map((groupMember) => ({
+    userId: groupMember.id,
+    publicKeyring: groupMember.public_keyring,
+  }));
+}
+
+export async function getGroupMembers(
+  groupId: string,
+  extraUserIds?: string[],
+): Promise<{ userId: string; publicKeyring: Uint8Array }[]> {
+  return (
+    (await GroupMemberModel.query()
+      .leftJoin('users', 'users.id', 'group_members.user_id')
+      .where('group_id', groupId)
+      .orWhereIn('users.id', extraUserIds ?? [])
+      .select('users.id', 'users.public_keyring')) as unknown as UserModel[]
+  ).map((groupMember) => ({
+    userId: groupMember.id,
+    publicKeyring: groupMember.public_keyring,
+  }));
 }

@@ -14,7 +14,6 @@ import { objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { decryptUserRehashedLoginHash, derivePasswordValues } from 'src/crypto';
-import { usingLocks } from 'src/data/redlock';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
@@ -67,11 +66,9 @@ export function registerRotateKeys(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/users.account.rotateKeys',
 
-    async setup({ messageHandler, readyPromise, ctx }) {
-      await usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
+    async setup({ messageHandler, ctx }) {
+      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
         messageHandler.redlockSignals.push(...signals);
-
-        readyPromise.resolve();
 
         await messageHandler.finishPromise;
       });

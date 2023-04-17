@@ -12,10 +12,11 @@ const moduleLogger = mainLogger.sub('Websocket endpoints');
 
 function createWebsocketMessageHandler(input: {
   connection: SocketStream;
-  ctx: () => any;
+  ctx: any;
+  setup: (input) => any;
   procedures: [AnyProcedure, (...args: any) => any][];
 }) {
-  let step = 0;
+  let step = 1;
 
   const finishPromise = new Resolvable();
 
@@ -25,22 +26,26 @@ function createWebsocketMessageHandler(input: {
     finishPromise,
     redlockSignals,
 
-    handle: async (message: Buffer) => {
+    async handle(message: Buffer) {
       if (step >= input.procedures.length) {
         input.connection.end();
         finishPromise.reject(new Error('Unexpected step.'));
         return;
       }
 
-      moduleLogger.info('Received step %d', step + 1);
+      moduleLogger.info('Received step %d', step);
 
       try {
-        const input_ = (input.procedures[step][0]._def.inputs[0] as any).parse(
-          unpack(message),
-        );
+        const input_ = (
+          input.procedures[step - 1][0]._def.inputs[0] as any
+        ).parse(unpack(message));
 
-        const output = await input.procedures[step][1]({
-          ctx: input.ctx(),
+        if (step === 1) {
+          await input.setup(input_);
+        }
+
+        const output = await input.procedures[step - 1][1]({
+          ctx: input.ctx,
           input: input_,
         });
 
@@ -69,13 +74,13 @@ function createWebsocketMessageHandler(input: {
         return;
       }
 
-      step++;
-
       if (step === input.procedures.length) {
         input.connection.end();
         finishPromise.resolve();
         return;
       }
+
+      step++;
     },
   };
 }
@@ -85,23 +90,17 @@ export function createWebsocketEndpoint(input: {
   url: string;
   setup: (input: {
     messageHandler: ReturnType<typeof createWebsocketMessageHandler>;
-    readyPromise: Resolvable;
     ctx: Exclude<Awaited<ReturnType<typeof authHelper>>, false>;
+    input: any;
   }) => any;
   procedures: [AnyProcedure, (...args: any) => any][];
 }) {
   input.fastify.get(input.url, { websocket: true }, async (connection, req) => {
     try {
-      const readyPromise = new Resolvable();
-
-      const messageHandler = createWebsocketMessageHandler({
-        connection,
-        ctx: () => ctx,
-        procedures: input.procedures,
-      });
+      const ctxReadyPromise = new Resolvable();
 
       connection.socket.on('message', async (message: Buffer) => {
-        await readyPromise;
+        await ctxReadyPromise;
 
         await messageHandler.handle(message);
       });
@@ -123,7 +122,19 @@ export function createWebsocketEndpoint(input: {
         return;
       }
 
-      await input.setup({ messageHandler, readyPromise, ctx });
+      const messageHandler = createWebsocketMessageHandler({
+        connection,
+        ctx,
+        setup: (input_) =>
+          input.setup({
+            messageHandler: messageHandler!,
+            ctx: ctx as any,
+            input: input_,
+          }),
+        procedures: input.procedures,
+      });
+
+      ctxReadyPromise.resolve();
     } catch (error: any) {
       moduleLogger.error(error);
 
