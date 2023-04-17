@@ -161,8 +161,6 @@ export async function login({
 
     if (user.two_factor_auth_enabled) {
       await _checkTwoFactorAuth({
-        dtrx,
-
         deviceId: device.id,
 
         email: input.email,
@@ -175,6 +173,8 @@ export async function login({
         authenticatorToken: input.authenticatorToken!,
         recoveryCode: input.recoveryCode!,
         rememberDevice: input.rememberDevice!,
+
+        dtrx,
       });
     }
 
@@ -186,6 +186,7 @@ export async function login({
       deviceId: device.id,
       rememberSession: input.rememberSession,
       reply: ctx.res,
+      dtrx,
     });
 
     return {

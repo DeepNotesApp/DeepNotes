@@ -13,6 +13,7 @@ import { nanoid } from 'nanoid';
 import type { PasswordValues } from 'src/crypto';
 import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
+import { sendMail } from 'src/mail';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { createGroup } from 'src/utils/groups';
@@ -41,7 +42,7 @@ export async function register({
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
     // Get user
 
-    const user = await UserModel.query()
+    let user = await UserModel.query()
       .where('email_hash', Buffer.from(hashUserEmail(input.email)))
       .where((builder) =>
         builder
@@ -71,7 +72,7 @@ export async function register({
 
     // Create user
 
-    await registerUser({
+    user = await registerUser({
       ...input,
 
       ip: ctx.req.ip,
@@ -80,6 +81,22 @@ export async function register({
       passwordValues: derivePasswordValues(input.loginHash),
 
       dtrx,
+    });
+
+    // Send email
+
+    await sendMail({
+      from: {
+        name: 'DeepNotes',
+        email: 'account@deepnotes.app',
+      },
+      to: [input.email],
+      subject: 'Complete your registration',
+      html: `
+        Visit the following link to verify your email address:<br/>
+        <a href="https://deepnotes.app/verify-email/${user.email_verification_code}">https://deepnotes.app/verify-email/${user.email_verification_code}</a><br/>
+        The link above will expire in 1 hour.
+      `,
     });
   });
 }
