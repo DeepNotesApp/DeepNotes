@@ -9,6 +9,7 @@
     "@fastify/cookie": "8.3.0",
     "@fastify/cors": "8.2.0",
     "@fastify/helmet": "10.0.2",
+    "@fastify/websocket": "^7.2.0",
     "@sendgrid/mail": "7.7.0",
     "@stdlib/base64": "workspace:1.0.0",
     "@stdlib/crypto": "workspace:1.0.0",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@types/libsodium-wrappers": "0.7.10",
     "@types/lodash": "4.14.189",
+    "@types/ws": "8.5.3",
     "tsup": "6.5.0"
   },
   "license": "MIT",

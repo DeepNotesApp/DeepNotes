@@ -4,6 +4,7 @@ import { addDays } from '@stdlib/misc';
 import type { FastifyReply } from 'fastify';
 import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
+import { dataAbstraction } from 'src/data/data-abstraction';
 
 import { setCookies } from '../cookies';
 import { generateTokens } from '../tokens';
@@ -71,4 +72,25 @@ export async function generateSessionValues(input: {
     sessionKey,
     refreshCode,
   };
+}
+
+export async function invalidateAllSessions(
+  userId: string,
+  params?: { dtrx?: DataTransaction },
+) {
+  const sessions = await SessionModel.query()
+    .where('user_id', userId)
+    .whereNot('invalidated', true)
+    .select('id');
+
+  await Promise.all(
+    sessions.map((session) =>
+      dataAbstraction().patch(
+        'session',
+        session.id,
+        { invalidated: true },
+        { dtrx: params?.dtrx },
+      ),
+    ),
+  );
 }

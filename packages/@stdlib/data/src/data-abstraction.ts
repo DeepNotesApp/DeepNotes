@@ -658,7 +658,7 @@ export class DataAbstraction<
     values: Record<DataField_, any>,
     params?: HMSetParams,
   ) {
-    classLogger.sub('hmset').info(`${prefix}:${suffix}: %o`, values);
+    classLogger.sub('hmset').info(`${prefix}:${suffix}`);
 
     const dataHash = this.dataHashes[prefix];
 
@@ -925,7 +925,7 @@ export class DataAbstraction<
   }: DataUpdateParams) {
     const fullKey = `${key}>${field}`;
 
-    classLogger.sub('handleDataUpdate').info(`${fullKey}: %o`, value);
+    classLogger.sub('handleDataUpdate').info(fullKey);
 
     for (const listener of this._fullKeysToListenersMap[fullKey] ?? []) {
       listener({

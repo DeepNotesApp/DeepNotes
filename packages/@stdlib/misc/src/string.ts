@@ -19,3 +19,7 @@ const textDecoder = new TextDecoder();
 export function bytesToText(bytes: Uint8Array): string {
   return textDecoder.decode(bytes);
 }
+
+export function padZeroes(num: number | string, length: number): string {
+  return ('0'.repeat(length) + num).slice(-length);
+}

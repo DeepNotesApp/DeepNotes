@@ -3,9 +3,9 @@ import './data/knex';
 
 import { mainLogger } from '@stdlib/misc';
 
-import { buildServer } from './fastify-server';
+import { fastify } from './fastify-server';
 
-void buildServer().then(async (fastify) => {
+void fastify().then(async (fastify) => {
   await fastify.listen({
     port: parseInt(process.env.APP_SERVER_TRPC_PORT),
     host: '0.0.0.0',

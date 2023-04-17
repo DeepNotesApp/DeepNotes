@@ -30,7 +30,7 @@ export async function sendMail(opts: MailOptions) {
 
       funcLogger.info(`Mail sent via ${serviceName}.`);
 
-      break;
+      return;
     } catch (error) {
       //
     }

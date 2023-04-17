@@ -1,13 +1,16 @@
 import FastifyCookie from '@fastify/cookie';
 import FastifyCors from '@fastify/cors';
 import FastifyHelmet from '@fastify/helmet';
+import FastifyWebsocket from '@fastify/websocket';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
+import { once } from 'lodash';
 
+import { registerChangePassword } from './api/users/account/change-password';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
 
-export async function buildServer() {
+export const fastify = once(async () => {
   const fastify = Fastify({
     logger: true,
 
@@ -17,8 +20,10 @@ export async function buildServer() {
   });
 
   await fastify.register(FastifyHelmet);
-
   await fastify.register(FastifyCookie);
+  await fastify.register(FastifyWebsocket, {
+    options: { maxPayload: 500 * 1048576 },
+  });
 
   // CORS
 
@@ -52,5 +57,9 @@ export async function buildServer() {
     },
   });
 
+  // Websocket
+
+  await registerChangePassword(fastify);
+
   return fastify;
-}
+});

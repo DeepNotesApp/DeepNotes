@@ -38,7 +38,6 @@
 </template>
 
 <script setup lang="ts">
-import { sleep } from '@stdlib/misc';
 import { zxcvbn } from '@zxcvbn-ts/core';
 import { QForm } from 'quasar';
 import { changePassword } from 'src/code/api-interface/users/change-password';
@@ -114,9 +113,7 @@ async function _changePassword() {
       type: 'positive',
     });
 
-    await sleep(2000);
-
-    await logout();
+    setTimeout(logout, 2000);
   } catch (error: any) {
     handleError(error);
   }

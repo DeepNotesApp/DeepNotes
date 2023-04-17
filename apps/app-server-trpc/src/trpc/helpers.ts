@@ -8,6 +8,10 @@ export type InferProcedureResolver<TBuilder extends ProcedureBuilder<any>> =
   Parameters<TBuilder['query']>[0];
 export type InferProcedureOpts<TBuilder extends ProcedureBuilder<any>> =
   Parameters<InferProcedureResolver<TBuilder>>[0];
+export type InferProcedureInput<TBuilder extends ProcedureBuilder<any>> =
+  InferProcedureOpts<TBuilder>['input'];
+export type InferProcedureOutput<TBuilder extends ProcedureBuilder<any>> =
+  Awaited<ReturnType<InferProcedureResolver<TBuilder>>>;
 
 function createAuthHelper(input: { optional: boolean }) {
   return async ({
@@ -85,8 +89,8 @@ function createAuthHelper(input: { optional: boolean }) {
   };
 }
 
-const authHelper = createAuthHelper({ optional: false });
-const optionalAuthHelper = createAuthHelper({ optional: true });
+export const authHelper = createAuthHelper({ optional: false });
+export const optionalAuthHelper = createAuthHelper({ optional: true });
 
 export const publicProcedure = trpc.procedure;
 export const authProcedure = trpc.procedure.use(
