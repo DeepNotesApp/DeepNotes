@@ -21,7 +21,7 @@ export function usingLocks<TResult>(
   return func(signals);
 }
 
-export function checkRedlockSignalAborted(signals: RedlockAbortSignal[]) {
+export function checkRedlockSignalAborted(signals: RedlockAbortSignal[] = []) {
   for (const signal of signals) {
     if (signal.aborted) {
       throw signal.error;

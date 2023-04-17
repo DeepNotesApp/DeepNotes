@@ -4,18 +4,14 @@ import {
   createSymmetricKeyring,
   encodePasswordHash,
 } from '@stdlib/crypto';
-import { mainLogger, Resolvable } from '@stdlib/misc';
-import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import type Fastify from 'fastify';
-import { pack, unpack } from 'msgpackr';
-import type { RedlockAbortSignal } from 'redlock';
 import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
 import { usingLocks } from 'src/data/redlock';
-import { createContext } from 'src/trpc/context';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
-import { authHelper, authProcedure } from 'src/trpc/helpers';
+import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
 import { checkCorrectUserPassword } from 'src/utils/users';
+import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
 const changePasswordBaseProcedureStep1 = authProcedure.input(
@@ -38,121 +34,27 @@ export const changePasswordProcedureStep2 =
   changePasswordBaseProcedureStep2.mutation(changePasswordStep2);
 
 export async function registerChangePassword(
-  fastify_: ReturnType<typeof Fastify>,
+  fastify: ReturnType<typeof Fastify>,
 ) {
-  fastify_.get(
-    '/trpc/users.account.changePassword',
-    { websocket: true },
-    async (connection, req) => {
-      let step = 1;
+  createWebsocketEndpoint({
+    fastify,
+    url: '/trpc/users.account.changePassword',
 
-      const readyPromise = new Resolvable();
-      const finishPromise = new Resolvable();
-
-      const redlockSignals: RedlockAbortSignal[] = [];
-
-      connection.socket.on('message', async (message: Buffer) => {
-        mainLogger.info('changePassword step %d: received message', step);
-
-        await readyPromise;
-
-        if (step === 1) {
-          try {
-            const input = (
-              changePasswordBaseProcedureStep1._def.inputs[0] as any
-            ).parse(unpack(message));
-
-            const output = await changePasswordStep1({
-              ctx: ctx as any,
-              input,
-            });
-
-            checkRedlockSignalAborted(redlockSignals);
-
-            connection.socket.send(
-              pack({
-                success: true,
-
-                output,
-              }),
-            );
-          } catch (error: any) {
-            connection.socket.send(
-              pack({
-                success: false,
-
-                error: String(error?.message ?? error),
-              }),
-            );
-
-            connection.end();
-            finishPromise.reject();
-            return;
-          }
-        } else if (step === 2) {
-          try {
-            const input = (
-              changePasswordBaseProcedureStep2._def.inputs[0] as any
-            ).parse(unpack(message));
-
-            const output = await changePasswordStep2({
-              ctx: ctx as any,
-              input,
-            });
-
-            checkRedlockSignalAborted(redlockSignals);
-
-            connection.socket.send(
-              pack({
-                success: true,
-
-                output,
-              }),
-            );
-          } catch (error: any) {
-            connection.socket.send(
-              pack({
-                success: false,
-
-                error: String(error?.message ?? error),
-              }),
-            );
-
-            connection.end();
-            finishPromise.reject();
-            return;
-          }
-
-          connection.end();
-          finishPromise.resolve();
-          return;
-        } else {
-          connection.end();
-          finishPromise.reject();
-          return;
-        }
-
-        step++;
-      });
-
-      const originalCtx = createContext({ req, res: null as any });
-
-      const ctx = await authHelper({ ctx: originalCtx } as any);
-
-      if (!ctx) {
-        connection.end();
-        return;
-      }
-
+    async setup({ messageHandler, readyPromise, ctx }) {
       await usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
-        redlockSignals.push(...signals);
+        messageHandler.redlockSignals.push(...signals);
 
         readyPromise.resolve();
 
-        await finishPromise;
+        await messageHandler.finishPromise;
       });
     },
-  );
+
+    procedures: [
+      [changePasswordProcedureStep1, changePasswordStep1],
+      [changePasswordProcedureStep2, changePasswordStep2],
+    ],
+  });
 }
 
 export async function changePasswordStep1({
