@@ -57,7 +57,7 @@
 import { maxNameLength } from '@deeplib/misc';
 import { acceptJoinInvitation } from 'src/code/api-interface/groups/join-invitations/accept';
 import { selfUserName } from 'src/code/self-user-name';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc.js';
 import type { Ref } from 'vue';
 
 const props = defineProps<{

@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { deleteGroup } from 'src/code/api-interface/groups/deletion/delete';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
 import type { Ref } from 'vue';
 
 const groupId = inject<string>('groupId')!;

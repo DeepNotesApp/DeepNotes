@@ -117,7 +117,7 @@ import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';

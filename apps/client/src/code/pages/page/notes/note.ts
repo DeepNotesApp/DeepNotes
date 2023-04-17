@@ -3,7 +3,7 @@ import { Rect } from '@stdlib/misc';
 import { isNumeric } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import type { Editor } from '@tiptap/vue-3';
-import { sizeToCSS } from 'src/code/utils';
+import { sizeToCSS } from 'src/code/utils/misc';
 import type {
   ComputedRef,
   ShallowRef,

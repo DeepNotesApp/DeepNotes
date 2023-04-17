@@ -53,7 +53,7 @@ import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitat
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { getGroupInvitationSentNotificationInfo } from 'src/code/pages/notifications/group-invitation-sent';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import type { Ref } from 'vue';

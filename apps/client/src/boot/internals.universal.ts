@@ -3,7 +3,7 @@ import { boot } from 'quasar/wrappers';
 import { factories } from 'src/code/factories';
 import type { Pages } from 'src/code/pages/pages';
 import { RealtimeClient } from 'src/code/realtime/client';
-import { shouldRememberSession, wrapStorage } from 'src/code/utils';
+import { shouldRememberSession, wrapStorage } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 

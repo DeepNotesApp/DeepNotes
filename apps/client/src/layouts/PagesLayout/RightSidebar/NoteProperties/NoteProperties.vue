@@ -726,7 +726,7 @@ import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { getPageTitle } from 'src/code/pages/utils';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import NewPageDialog from './NewPageDialog.vue';

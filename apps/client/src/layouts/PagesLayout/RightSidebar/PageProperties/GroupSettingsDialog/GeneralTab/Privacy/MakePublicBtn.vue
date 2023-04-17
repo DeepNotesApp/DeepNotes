@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { makeGroupPublic } from 'src/code/api-interface/groups/privacy/make-public';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
 
 const groupId = inject<string>('groupId')!;
 

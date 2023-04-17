@@ -1,6 +1,6 @@
 import { isNanoID, splitStr } from '@stdlib/misc';
 import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
-import { handleError, isCtrlDown } from 'src/code/utils';
+import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
 export function usePageNavigationInterception() {
   onMounted(() => {

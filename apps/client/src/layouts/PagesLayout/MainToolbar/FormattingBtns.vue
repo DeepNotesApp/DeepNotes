@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import { unsetNode } from 'src/code/tiptap/utils';
-import { getCtrlKeyName } from 'src/code/utils';
+import { getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertLinkDialog from './InsertLinkDialog.vue';
 

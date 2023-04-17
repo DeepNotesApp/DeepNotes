@@ -17,7 +17,7 @@ import {
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import { createPageDoc } from 'src/code/pages/utils';
-import { asyncPrompt } from 'src/code/utils';
+import { asyncPrompt } from 'src/code/utils/misc';
 
 export interface MovePageParams {
   destGroupId: string;

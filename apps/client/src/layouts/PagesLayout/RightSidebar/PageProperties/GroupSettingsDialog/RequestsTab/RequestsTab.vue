@@ -113,7 +113,7 @@ import { rolesMap } from '@deeplib/misc';
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import AcceptRequestDialog from './AcceptRequestDialog.vue';

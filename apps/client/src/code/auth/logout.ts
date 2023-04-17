@@ -1,5 +1,5 @@
 import { trpcClient } from '../trpc';
-import { multiModePath } from '../utils';
+import { multiModePath } from '../utils/misc';
 import { clearClientTokenExpirations } from './tokens';
 
 export async function logout() {

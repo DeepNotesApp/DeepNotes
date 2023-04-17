@@ -5,7 +5,7 @@ import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
 import type { Factories } from '../factories';
 import { authStore } from '../stores';
 import { trpcClient } from '../trpc';
-import { multiModePath } from '../utils';
+import { multiModePath } from '../utils/misc';
 import type { Page } from './page/page';
 import type { PageCache } from './page-cache';
 import type { ISerialArrowInput, ISerialObjectInput } from './serialization';

@@ -35,7 +35,7 @@ import { deleteGroupPermanently } from 'src/code/api-interface/groups/deletion/d
 import { restoreGroup } from 'src/code/api-interface/groups/deletion/restore';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
 
 const page = inject<Page>('page')!;
 

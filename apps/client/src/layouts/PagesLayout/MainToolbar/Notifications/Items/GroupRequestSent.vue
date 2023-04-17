@@ -51,7 +51,7 @@ import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/c
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { getGroupRequestSentNotificationInfo } from 'src/code/pages/notifications/group-request-sent';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';
 import type { Ref } from 'vue';

@@ -10,7 +10,7 @@ import { authHelper } from 'src/trpc/helpers';
 
 const moduleLogger = mainLogger.sub('Websocket endpoints');
 
-export function createMessageHandler(input: {
+function createWebsocketMessageHandler(input: {
   connection: SocketStream;
   ctx: () => any;
   procedures: [AnyProcedure, (...args: any) => any][];
@@ -28,7 +28,7 @@ export function createMessageHandler(input: {
     handle: async (message: Buffer) => {
       if (step >= input.procedures.length) {
         input.connection.end();
-        finishPromise.reject(new Error('Too many steps.'));
+        finishPromise.reject(new Error('Unexpected step.'));
         return;
       }
 
@@ -84,7 +84,7 @@ export function createWebsocketEndpoint(input: {
   fastify: ReturnType<typeof Fastify>;
   url: string;
   setup: (input: {
-    messageHandler: ReturnType<typeof createMessageHandler>;
+    messageHandler: ReturnType<typeof createWebsocketMessageHandler>;
     readyPromise: Resolvable;
     ctx: Exclude<Awaited<ReturnType<typeof authHelper>>, false>;
   }) => any;
@@ -94,7 +94,7 @@ export function createWebsocketEndpoint(input: {
     try {
       const readyPromise = new Resolvable();
 
-      const messageHandler = createMessageHandler({
+      const messageHandler = createWebsocketMessageHandler({
         connection,
         ctx: () => ctx,
         procedures: input.procedures,
@@ -111,13 +111,29 @@ export function createWebsocketEndpoint(input: {
       const ctx = await authHelper({ ctx: originalCtx } as any);
 
       if (!ctx) {
+        connection.socket.send(
+          pack({
+            success: false,
+
+            error: 'Invalid access token.',
+          }),
+        );
+
         connection.end();
         return;
       }
 
       await input.setup({ messageHandler, readyPromise, ctx });
-    } catch (error) {
+    } catch (error: any) {
       moduleLogger.error(error);
+
+      connection.socket.send(
+        pack({
+          success: false,
+
+          error: String(error?.message ?? error),
+        }),
+      );
 
       connection.end();
     }

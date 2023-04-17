@@ -71,7 +71,7 @@
 import download from 'downloadjs';
 import html2canvas from 'html2canvas';
 import type { IRegionElemsOutput } from 'src/code/pages/page/regions/region';
-import { getCtrlKeyName } from 'src/code/utils';
+import { getCtrlKeyName } from 'src/code/utils/misc.js';
 
 defineProps<{
   popup?: boolean;

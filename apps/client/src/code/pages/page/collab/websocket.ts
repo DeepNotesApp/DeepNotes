@@ -10,7 +10,7 @@ import { Y } from '@syncedstore/core';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { cloneDeep, once, throttle } from 'lodash';
-import { isWithinTimeout } from 'src/code/utils';
+import { isWithinTimeout } from 'src/code/utils/misc';
 import * as awarenessProtocol from 'y-protocols/awareness';
 
 import { groupContentKeyrings } from '../../computed/group-content-keyrings';

@@ -20,7 +20,7 @@
 import { Y } from '@syncedstore/core';
 import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { useResizeObserver } from 'src/code/utils';
+import { useResizeObserver } from 'src/code/utils/misc.js';
 import type { ComponentPublicInstance } from 'vue';
 
 const props = defineProps<{

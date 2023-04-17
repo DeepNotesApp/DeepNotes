@@ -196,7 +196,7 @@ import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GeneralTab from './GeneralTab/GeneralTab.vue';

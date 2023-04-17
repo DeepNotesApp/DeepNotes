@@ -1,110 +1,105 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import {
   createKeyring,
   createPrivateKeyring,
   createSymmetricKeyring,
   wrapKeyPair,
 } from '@stdlib/crypto';
+import type {
+  rotateKeysProcedureStep1,
+  rotateKeysProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/api/users/account/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { deriveUserValues } from 'src/code/crypto';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function rotateUserKeys(input: { password: string }) {
-  const derivedValues = await deriveUserValues(
-    await internals.realtime.hget('user', authStore().userId, 'email'),
-    input.password,
+  // Get user email
+
+  const email = await internals.realtime.hget(
+    'user',
+    authStore().userId,
+    'email',
   );
 
-  const keyRotationValues = (
-    await api().post<{
-      email: string;
+  // Compute derived keys
 
-      userEncryptedSymmetricKeyring: string;
-      userEncryptedPrivateKeyring: string;
-      userPublicKeyring: string;
+  const derivedValues = await deriveUserValues(email, input.password);
 
-      userEncryptedDefaultNote: string;
-      userEncryptedDefaultArrow: string;
-      userEncryptedName: string;
+  // Create websocket request
 
-      groupJoinRequests: Record<string, { encryptedNameForUser: string }>;
-      groupJoinInvitations: Record<
-        string,
-        {
-          encryptedAccessKeyring: string;
-          encryptedInternalKeyring: string;
-        }
-      >;
-      groupMembers: Record<
-        string,
-        {
-          encryptedAccessKeyring: string;
-          encryptedInternalKeyring: string;
-        }
-      >;
-    }>('/api/users/account/security/rotate-keys', {
-      loginHash: bytesToBase64(derivedValues.loginHash),
-    })
-  ).data;
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/users.account.rotateKeys`,
 
-  const oldSymmetricKeyring = createSymmetricKeyring(
-    base64ToBytes(keyRotationValues.userEncryptedSymmetricKeyring),
-  ).unwrapSymmetric(derivedValues.masterKey, {
-    associatedData: {
-      context: 'UserSymmetricKeyring',
-      userId: authStore().userId,
-    },
+    steps: [step1, step2, step3],
   });
-  const oldPrivateKeyring = createPrivateKeyring(
-    base64ToBytes(keyRotationValues.userEncryptedPrivateKeyring),
-  ).unwrapSymmetric(derivedValues.masterKey, {
-    associatedData: {
-      context: 'UserPrivateKeyring',
-      userId: authStore().userId,
-    },
-  });
-  const oldPublicKeyring = createKeyring(
-    base64ToBytes(keyRotationValues.userPublicKeyring),
-  );
 
-  const newSymmetricKeyring = oldSymmetricKeyring.addKey();
+  function step1(): typeof rotateKeysProcedureStep1['_def']['_input_in'] {
+    return {
+      loginHash: derivedValues.loginHash,
+    };
+  }
 
-  const newRawKeyPair = sodium.crypto_box_keypair();
-  const newPrivateKeyring = oldPrivateKeyring.addKey(newRawKeyPair.privateKey);
-  const newPublicKeyring = oldPublicKeyring.addKey(newRawKeyPair.publicKey);
-  const newKeyPair = wrapKeyPair(newPublicKeyring, newPrivateKeyring);
+  async function step2(
+    input: typeof rotateKeysProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof rotateKeysProcedureStep2['_def']['_input_in']> {
+    const oldSymmetricKeyring = createSymmetricKeyring(
+      input.userEncryptedSymmetricKeyring,
+    ).unwrapSymmetric(derivedValues.masterKey, {
+      associatedData: {
+        context: 'UserSymmetricKeyring',
+        userId: authStore().userId,
+      },
+    });
+    const oldPrivateKeyring = createPrivateKeyring(
+      input.userEncryptedPrivateKeyring,
+    ).unwrapSymmetric(derivedValues.masterKey, {
+      associatedData: {
+        context: 'UserPrivateKeyring',
+        userId: authStore().userId,
+      },
+    });
+    const oldPublicKeyring = createKeyring(input.userPublicKeyring);
 
-  await api().post('/api/users/account/security/rotate-keys', {
-    loginHash: bytesToBase64(derivedValues.loginHash),
+    const newSymmetricKeyring = oldSymmetricKeyring.addKey();
 
-    userEncryptedSymmetricKeyring: bytesToBase64(
-      newSymmetricKeyring.wrapSymmetric(derivedValues.masterKey, {
-        associatedData: {
-          context: 'UserSymmetricKeyring',
-          userId: authStore().userId,
-        },
-      }).wrappedValue,
-    ),
-    userEncryptedPrivateKeyring: bytesToBase64(
-      newPrivateKeyring.wrapSymmetric(derivedValues.masterKey, {
-        associatedData: {
-          context: 'UserPrivateKeyring',
-          userId: authStore().userId,
-        },
-      }).wrappedValue,
-    ),
-    userPublicKeyring: bytesToBase64(newPublicKeyring.wrappedValue),
+    const newRawKeyPair = sodium.crypto_box_keypair();
+    const newPrivateKeyring = oldPrivateKeyring.addKey(
+      newRawKeyPair.privateKey,
+    );
+    const newPublicKeyring = oldPublicKeyring.addKey(newRawKeyPair.publicKey);
+    const newKeyPair = wrapKeyPair(newPublicKeyring, newPrivateKeyring);
 
-    userEncryptedDefaultNote: bytesToBase64(
-      newSymmetricKeyring.encrypt(
-        oldSymmetricKeyring.decrypt(
-          base64ToBytes(keyRotationValues.userEncryptedDefaultNote),
-          {
-            associatedData: {
-              context: 'UserDefaultNote',
-              userId: authStore().userId,
-            },
+    return {
+      userEncryptedSymmetricKeyring: newSymmetricKeyring.wrapSymmetric(
+        derivedValues.masterKey,
+        {
+          associatedData: {
+            context: 'UserSymmetricKeyring',
+            userId: authStore().userId,
           },
-        ),
+        },
+      ).wrappedValue,
+      userEncryptedPrivateKeyring: newPrivateKeyring.wrapSymmetric(
+        derivedValues.masterKey,
+        {
+          associatedData: {
+            context: 'UserPrivateKeyring',
+            userId: authStore().userId,
+          },
+        },
+      ).wrappedValue,
+      userPublicKeyring: newPublicKeyring.wrappedValue,
+
+      userEncryptedDefaultNote: newSymmetricKeyring.encrypt(
+        oldSymmetricKeyring.decrypt(input.userEncryptedDefaultNote, {
+          associatedData: {
+            context: 'UserDefaultNote',
+            userId: authStore().userId,
+          },
+        }),
         {
           associatedData: {
             context: 'UserDefaultNote',
@@ -112,18 +107,13 @@ export async function rotateUserKeys(input: { password: string }) {
           },
         },
       ),
-    ),
-    userEncryptedDefaultArrow: bytesToBase64(
-      newSymmetricKeyring.encrypt(
-        oldSymmetricKeyring.decrypt(
-          base64ToBytes(keyRotationValues.userEncryptedDefaultArrow),
-          {
-            associatedData: {
-              context: 'UserDefaultArrow',
-              userId: authStore().userId,
-            },
+      userEncryptedDefaultArrow: newSymmetricKeyring.encrypt(
+        oldSymmetricKeyring.decrypt(input.userEncryptedDefaultArrow, {
+          associatedData: {
+            context: 'UserDefaultArrow',
+            userId: authStore().userId,
           },
-        ),
+        }),
         {
           associatedData: {
             context: 'UserDefaultArrow',
@@ -131,18 +121,13 @@ export async function rotateUserKeys(input: { password: string }) {
           },
         },
       ),
-    ),
-    userEncryptedName: bytesToBase64(
-      newSymmetricKeyring.encrypt(
-        oldSymmetricKeyring.decrypt(
-          base64ToBytes(keyRotationValues.userEncryptedName),
-          {
-            associatedData: {
-              context: 'UserName',
-              userId: authStore().userId,
-            },
+      userEncryptedName: newSymmetricKeyring.encrypt(
+        oldSymmetricKeyring.decrypt(input.userEncryptedName, {
+          associatedData: {
+            context: 'UserName',
+            userId: authStore().userId,
           },
-        ),
+        }),
         {
           associatedData: {
             context: 'UserName',
@@ -150,26 +135,21 @@ export async function rotateUserKeys(input: { password: string }) {
           },
         },
       ),
-    ),
 
-    groupJoinRequests: Object.fromEntries(
-      Object.entries(keyRotationValues.groupJoinRequests).map(
-        ([groupId, { encryptedNameForUser }]) => [
-          groupId,
-          {
-            encryptedNameForUser: bytesToBase64(
-              newSymmetricKeyring.encrypt(
-                oldSymmetricKeyring.decrypt(
-                  base64ToBytes(encryptedNameForUser),
-                  {
-                    padding: true,
-                    associatedData: {
-                      context: 'GroupJoinRequestUserNameForUser',
-                      groupId,
-                      userId: authStore().userId,
-                    },
+      groupJoinRequests: Object.fromEntries(
+        Object.entries(input.groupJoinRequests).map(
+          ([groupId, { encryptedNameForUser }]) => [
+            groupId,
+            {
+              encryptedNameForUser: newSymmetricKeyring.encrypt(
+                oldSymmetricKeyring.decrypt(encryptedNameForUser, {
+                  padding: true,
+                  associatedData: {
+                    context: 'GroupJoinRequestUserNameForUser',
+                    groupId,
+                    userId: authStore().userId,
                   },
-                ),
+                }),
                 {
                   padding: true,
                   associatedData: {
@@ -179,48 +159,58 @@ export async function rotateUserKeys(input: { password: string }) {
                   },
                 },
               ),
-            ),
-          },
-        ],
+            },
+          ],
+        ),
       ),
-    ),
-    groupJoinInvitations: Object.fromEntries(
-      Object.entries(keyRotationValues.groupJoinInvitations).map(
-        ([groupId, { encryptedAccessKeyring, encryptedInternalKeyring }]) => [
-          groupId,
-          {
-            encryptedAccessKeyring: bytesToBase64(
-              createSymmetricKeyring(base64ToBytes(encryptedAccessKeyring))
+      groupJoinInvitations: Object.fromEntries(
+        Object.entries(input.groupJoinInvitations).map(
+          ([groupId, { encryptedAccessKeyring, encryptedInternalKeyring }]) => [
+            groupId,
+            {
+              encryptedAccessKeyring:
+                encryptedAccessKeyring != null
+                  ? createSymmetricKeyring(encryptedAccessKeyring)
+                      .unwrapAsymmetric(oldPrivateKeyring)
+                      .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue
+                  : null,
+              encryptedInternalKeyring: createSymmetricKeyring(
+                encryptedInternalKeyring,
+              )
                 .unwrapAsymmetric(oldPrivateKeyring)
                 .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
-            ),
-            encryptedInternalKeyring: bytesToBase64(
-              createSymmetricKeyring(base64ToBytes(encryptedInternalKeyring))
-                .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
-            ),
-          },
-        ],
+            },
+          ],
+        ),
       ),
-    ),
-    groupMembers: Object.fromEntries(
-      Object.entries(keyRotationValues.groupMembers).map(
-        ([groupId, { encryptedAccessKeyring, encryptedInternalKeyring }]) => [
-          groupId,
-          {
-            encryptedAccessKeyring: bytesToBase64(
-              createSymmetricKeyring(base64ToBytes(encryptedAccessKeyring))
+      groupMembers: Object.fromEntries(
+        Object.entries(input.groupMembers).map(
+          ([groupId, { encryptedAccessKeyring, encryptedInternalKeyring }]) => [
+            groupId,
+            {
+              encryptedAccessKeyring:
+                encryptedAccessKeyring != null
+                  ? createSymmetricKeyring(encryptedAccessKeyring)
+                      .unwrapAsymmetric(oldPrivateKeyring)
+                      .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue
+                  : null,
+              encryptedInternalKeyring: createSymmetricKeyring(
+                encryptedInternalKeyring,
+              )
                 .unwrapAsymmetric(oldPrivateKeyring)
                 .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
-            ),
-            encryptedInternalKeyring: bytesToBase64(
-              createSymmetricKeyring(base64ToBytes(encryptedInternalKeyring))
-                .unwrapAsymmetric(oldPrivateKeyring)
-                .wrapAsymmetric(newKeyPair, newPublicKeyring).wrappedValue,
-            ),
-          },
-        ],
+            },
+          ],
+        ),
       ),
-    ),
-  });
+    };
+  }
+
+  async function step3(
+    _input: typeof rotateKeysProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

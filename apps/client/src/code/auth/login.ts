@@ -3,7 +3,7 @@ import type { SymmetricKey } from '@stdlib/crypto';
 import { createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring, wrapSymmetricKey } from '@stdlib/crypto';
 
-import { multiModePath } from '../utils';
+import { multiModePath } from '../utils/misc';
 import { storeClientTokenExpirations } from './tokens';
 
 export async function login(input: {

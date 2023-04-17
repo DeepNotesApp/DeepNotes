@@ -7,6 +7,7 @@ import Fastify from 'fastify';
 import { once } from 'lodash';
 
 import { registerChangePassword } from './api/users/account/change-password';
+import { registerRotateKeys } from './api/users/account/rotate-keys';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
 
@@ -57,9 +58,10 @@ export const fastify = once(async () => {
     },
   });
 
-  // Websocket
+  // Websocket endpoints
 
-  await registerChangePassword(fastify);
+  registerChangePassword(fastify);
+  registerRotateKeys(fastify);
 
   return fastify;
 });

@@ -1,6 +1,6 @@
 import { hasVertScrollbar } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 import type { Page } from '../page';
 

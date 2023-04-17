@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';
 import ManageTwoFactorAuthDialog from './ManageTwoFactorAuthDialog.vue';

@@ -2,7 +2,7 @@ import { listenPointerEvents } from '@stdlib/misc';
 import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 import { prosemirrorJSONToYXmlFragment } from 'y-prosemirror';
 
 import { ISerialArrow } from '../../serialization';

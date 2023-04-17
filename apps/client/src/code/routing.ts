@@ -3,7 +3,7 @@ import type { AuthStore } from 'src/stores/auth';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
 import { trpcClient } from './trpc';
-import { getRequestConfig } from './utils';
+import { getRequestConfig } from './utils/misc';
 
 const moduleLogger = mainLogger.sub('routing.universal.ts');
 

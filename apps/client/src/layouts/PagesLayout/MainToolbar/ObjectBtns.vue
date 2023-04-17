@@ -171,7 +171,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils';
+import { getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertImageDialog from './InsertImageDialog.vue';
 

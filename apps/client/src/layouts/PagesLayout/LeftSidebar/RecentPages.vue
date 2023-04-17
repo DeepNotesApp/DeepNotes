@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import { pull } from 'lodash';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc.js';
 
 async function removeRecentPage(pageId: string) {
   try {

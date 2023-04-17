@@ -87,7 +87,7 @@ import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/rest
 import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;

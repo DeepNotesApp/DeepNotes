@@ -33,9 +33,7 @@ const changePasswordBaseProcedureStep2 = authProcedure.input(
 export const changePasswordProcedureStep2 =
   changePasswordBaseProcedureStep2.mutation(changePasswordStep2);
 
-export async function registerChangePassword(
-  fastify: ReturnType<typeof Fastify>,
-) {
+export function registerChangePassword(fastify: ReturnType<typeof Fastify>) {
   createWebsocketEndpoint({
     fastify,
     url: '/trpc/users.account.changePassword',

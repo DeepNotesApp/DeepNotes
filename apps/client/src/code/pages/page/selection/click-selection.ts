@@ -1,4 +1,4 @@
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 import type { PageElem } from '../elems/elem';
 import type { Page } from '../page';

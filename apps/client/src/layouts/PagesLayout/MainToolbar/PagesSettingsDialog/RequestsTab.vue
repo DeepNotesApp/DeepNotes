@@ -81,7 +81,7 @@
 import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc.js';
 import type { Ref } from 'vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;

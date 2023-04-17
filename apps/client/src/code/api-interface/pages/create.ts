@@ -9,7 +9,7 @@ import {
   unlockGroupContentKeyring,
 } from 'src/code/crypto';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
-import { asyncPrompt } from 'src/code/utils';
+import { asyncPrompt } from 'src/code/utils/misc';
 
 export async function createPage(input: {
   pageId: string;

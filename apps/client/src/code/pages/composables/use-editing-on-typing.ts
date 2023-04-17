@@ -1,4 +1,4 @@
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useEditingOnTyping() {
   const page = computed(() => internals.pages.react.page);

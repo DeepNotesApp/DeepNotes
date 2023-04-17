@@ -117,7 +117,7 @@
 import { mainLogger } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { debounceTick, useResizeObserver } from 'src/code/utils';
+import { debounceTick, useResizeObserver } from 'src/code/utils/misc';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';

@@ -125,7 +125,7 @@
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GeneralTab from './GeneralTab.vue';

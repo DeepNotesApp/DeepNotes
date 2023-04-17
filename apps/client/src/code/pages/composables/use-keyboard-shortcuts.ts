@@ -1,5 +1,5 @@
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useKeyboardShortcuts() {
   const page = computed(() => internals.pages?.react?.page);

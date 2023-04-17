@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { login } from 'src/code/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc.js';
 import type { Ref } from 'vue';
 
 const authType = inject('authType') as Ref<string>;

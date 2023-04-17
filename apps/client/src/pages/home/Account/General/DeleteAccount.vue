@@ -12,7 +12,7 @@
 import { sleep } from '@stdlib/misc';
 import { deleteAccount } from 'src/code/api-interface/users/delete-account';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
 
 async function _deleteAccount() {
   try {
