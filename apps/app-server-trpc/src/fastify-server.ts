@@ -6,6 +6,7 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import { once } from 'lodash';
 
+import { registerChangeUserRole } from './api/groups/change-user-role';
 import { registerChangePassword } from './api/users/account/change-password';
 import { registerRotateKeys } from './api/users/account/rotate-keys';
 import { createContext } from './trpc/context';
@@ -62,6 +63,7 @@ export const fastify = once(async () => {
 
   registerChangePassword(fastify);
   registerRotateKeys(fastify);
+  registerChangeUserRole(fastify);
 
   return fastify;
 });

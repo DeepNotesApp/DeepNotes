@@ -1,31 +1,49 @@
+import type {
+  removeUserProcedureStep1,
+  removeUserProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/api/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function removeGroupUser(input: {
   groupId: string;
   patientId: string;
 }) {
-  const agentId = authStore().userId;
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.removeUser`,
 
-  const [groupName, agentName, targetName] = await Promise.all([
-    groupNames()(input.groupId).getAsync(),
+    steps: [step1, step2, step3],
+  });
 
-    groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
-    groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
-  ]);
+  async function step1(): Promise<
+    typeof removeUserProcedureStep1['_def']['_input_in']
+  > {
+    return {
+      groupId: input.groupId,
+      patientId: input.patientId,
+    };
+  }
 
-  const notificationRecipients = (
-    await api().post<{
-      notificationRecipients: Record<string, { publicKeyring: string }>;
-    }>(`/api/groups/${input.groupId}/remove-user/${input.patientId}`, {})
-  ).data.notificationRecipients;
+  async function step2(
+    input_: typeof removeUserProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof removeUserProcedureStep2['_def']['_input_in']> {
+    const agentId = authStore().userId;
 
-  await api().post(
-    `/api/groups/${input.groupId}/remove-user/${input.patientId}`,
-    {
+    const [groupName, agentName, targetName] = await Promise.all([
+      groupNames()(input.groupId).getAsync(),
+
+      groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
+      groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
+    ]);
+
+    return {
       notifications: await createNotifications({
-        recipients: notificationRecipients,
+        recipients: input_.notificationRecipients,
 
         patientId: input.patientId,
 
@@ -72,6 +90,14 @@ export async function removeGroupUser(input: {
           },
         },
       }),
-    },
-  );
+    };
+  }
+
+  async function step3(
+    _input: typeof removeUserProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

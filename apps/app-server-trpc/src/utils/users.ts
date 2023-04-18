@@ -1,5 +1,7 @@
+import type { dataHashes } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { getPasswordHashValues } from '@stdlib/crypto';
+import type { DataAbstraction } from '@stdlib/data';
 import { isNanoID } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
@@ -71,6 +73,20 @@ export async function checkCorrectUserPassword(input: {
     throw new TRPCError({
       message: 'Password is incorrect.',
       code: 'BAD_REQUEST',
+    });
+  }
+}
+
+export async function checkInsufficientSubscription(input: {
+  dataAbstraction: DataAbstraction<typeof dataHashes>;
+  userId: string;
+}) {
+  if (
+    (await input.dataAbstraction.hget('user', input.userId, 'plan')) !== 'pro'
+  ) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'This action requires a Pro plan subscription.',
     });
   }
 }
