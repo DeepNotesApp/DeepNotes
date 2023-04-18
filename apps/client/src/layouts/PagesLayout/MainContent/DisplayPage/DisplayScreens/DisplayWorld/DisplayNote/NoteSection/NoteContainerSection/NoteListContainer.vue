@@ -121,7 +121,7 @@ import {
   createDoubleClickChecker,
   debounceTick,
   useResizeObserver,
-} from 'src/code/utils';
+} from 'src/code/utils/misc';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';

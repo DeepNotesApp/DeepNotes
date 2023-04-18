@@ -151,7 +151,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { enterDemo } from 'src/code/auth/demo';
 import { getRegistrationValues } from 'src/code/auth/register';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 useMeta(() => ({
   title: 'Register - DeepNotes',

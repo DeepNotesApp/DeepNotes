@@ -61,7 +61,7 @@ import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { acceptJoinRequest } from 'src/code/api-interface/groups/join-requests/accept';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils/misc.js';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const props = defineProps<{

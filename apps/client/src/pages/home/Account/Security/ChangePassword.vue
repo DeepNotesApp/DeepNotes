@@ -42,7 +42,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { QForm } from 'quasar';
 import { changePassword } from 'src/code/api-interface/users/change-password';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 // Change password
 

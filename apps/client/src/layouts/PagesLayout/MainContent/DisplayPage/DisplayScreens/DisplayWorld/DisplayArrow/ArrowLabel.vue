@@ -26,7 +26,7 @@ import { Y } from '@syncedstore/core';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
-import { createDoubleClickChecker } from 'src/code/utils';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 const props = defineProps<{
   arrow: PageArrow;

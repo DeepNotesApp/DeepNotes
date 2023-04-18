@@ -139,7 +139,7 @@ import { createPage } from 'src/code/api-interface/pages/create';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils/misc.js';
+import { handleError } from 'src/code/utils/misc';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;

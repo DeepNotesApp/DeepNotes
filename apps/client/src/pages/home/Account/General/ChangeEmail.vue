@@ -37,7 +37,7 @@ import {
 } from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const newEmail = ref('');
 

@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import { rotateUserKeys } from 'src/code/api-interface/users/rotate-keys';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils/misc.js';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 async function _rotateKeys() {
   try {

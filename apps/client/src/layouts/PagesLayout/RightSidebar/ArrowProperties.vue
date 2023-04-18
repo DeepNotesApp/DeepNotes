@@ -267,7 +267,7 @@ import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import type { ISerialArrowInput } from 'src/code/pages/serialization';
 import { ISerialArrow } from 'src/code/pages/serialization';
-import { handleError } from 'src/code/utils/misc.js';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import { yXmlFragmentToProsemirrorJSON } from 'y-prosemirror';
 

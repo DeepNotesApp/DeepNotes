@@ -99,7 +99,7 @@ import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { enterDemo } from 'src/code/auth/demo';
 import { login } from 'src/code/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
-import { handleError } from 'src/code/utils/misc.js';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 // Email

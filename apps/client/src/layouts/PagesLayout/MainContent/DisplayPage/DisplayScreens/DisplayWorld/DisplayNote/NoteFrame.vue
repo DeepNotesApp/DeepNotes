@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { Vec2 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
-import { useResizeObserver } from 'src/code/utils/misc.js';
+import { useResizeObserver } from 'src/code/utils/misc';
 
 const emit = defineEmits(['resize']);
 
