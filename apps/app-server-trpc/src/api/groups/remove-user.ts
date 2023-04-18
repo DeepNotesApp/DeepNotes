@@ -14,14 +14,6 @@ import { checkInsufficientSubscription } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
-export const RoleEnum = z.enum([
-  'owner',
-  'admin',
-  'moderator',
-  'member',
-  'viewer',
-]);
-
 const baseProcedureStep1 = authProcedure.input(
   z.object({
     groupId: z.string().refine(isNanoID),

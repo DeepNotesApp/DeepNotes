@@ -61,7 +61,7 @@ const baseProcedureStep2 = authProcedure.input(
 export const rotateKeysProcedureStep2 =
   baseProcedureStep2.mutation(rotateKeysStep2);
 
-export function registerRotateKeys(fastify: ReturnType<typeof Fastify>) {
+export function registerUsersRotateKeys(fastify: ReturnType<typeof Fastify>) {
   createWebsocketEndpoint({
     fastify,
     url: '/trpc/users.account.rotateKeys',
