@@ -209,3 +209,33 @@ export function debounceTick(func: () => any) {
     });
   };
 }
+
+export function createDoubleClickChecker() {
+  let doubleClick = false;
+
+  const pos = { x: 0, y: 0 };
+
+  return (event: MouseEvent) => {
+    if (doubleClick) {
+      doubleClick = false;
+
+      if (
+        Math.sqrt(
+          Math.pow(event.clientX - pos.x, 2) +
+            Math.pow(event.clientY - pos.y, 2),
+        ) <= 24
+      ) {
+        return true;
+      }
+    } else {
+      doubleClick = true;
+
+      pos.x = event.clientX;
+      pos.y = event.clientY;
+
+      setTimeout(() => {
+        doubleClick = false;
+      }, 250);
+    }
+  };
+}

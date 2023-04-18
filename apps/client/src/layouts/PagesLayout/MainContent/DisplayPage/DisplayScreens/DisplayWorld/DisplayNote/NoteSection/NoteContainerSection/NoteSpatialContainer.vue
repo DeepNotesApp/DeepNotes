@@ -8,7 +8,7 @@
   >
     <div
       class="note-spatial-background"
-      @dblclick.left="onLeftDoubleClick"
+      @click.left="onLeftClick"
     >
       <!-- Placeholder -->
 
@@ -49,7 +49,7 @@
 <script setup lang="ts">
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { isCtrlDown } from 'src/code/utils';
+import { createDoubleClickChecker, isCtrlDown } from 'src/code/utils';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import DisplayBoxSelection from '../../../DisplayBoxSelection.vue';
@@ -86,17 +86,21 @@ async function onLeftPointerUp() {
   await page.dropping.perform(note);
 }
 
-async function onLeftDoubleClick(event: MouseEvent) {
-  const containerWorldTopLeft = note.getContainerWorldRect()?.topLeft;
+const checkDoubleClick = createDoubleClickChecker();
 
-  if (containerWorldTopLeft == null) {
-    return;
+async function onLeftClick(event: MouseEvent) {
+  if (checkDoubleClick(event)) {
+    const containerWorldTopLeft = note.getContainerWorldRect()?.topLeft;
+
+    if (containerWorldTopLeft == null) {
+      return;
+    }
+
+    await page.notes.create(
+      note,
+      page.pos.eventToWorld(event).sub(containerWorldTopLeft),
+    );
   }
-
-  await page.notes.create(
-    note,
-    page.pos.eventToWorld(event).sub(containerWorldTopLeft),
-  );
 }
 </script>
 

@@ -26,7 +26,7 @@
         :parent-note="note"
         always-visible
         style="top: 0; bottom: 0"
-        @dblclick.left="onLeftDoubleClick"
+        @click.left="onLeftClick"
       />
     </div>
 
@@ -87,7 +87,7 @@
             always-visible
             :index="index + 1"
             style="position: absolute; min-width: 6px; min-height: 6px"
-            @dblclick.left="onLeftDoubleClick($event, index + 1)"
+            @click.left="onLeftClick($event, index + 1)"
           />
         </div>
       </div>
@@ -103,7 +103,7 @@
             left: note.react.collab.container.horizontal ? '-3px' : '3px',
             top: note.react.collab.container.horizontal ? '3px' : '-3px',
           }"
-          @dblclick.left="onLeftDoubleClick"
+          @click.left="onLeftClick"
         />
       </div>
 
@@ -117,7 +117,11 @@
 import { mainLogger } from 'src/code/logger';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { debounceTick, useResizeObserver } from 'src/code/utils';
+import {
+  createDoubleClickChecker,
+  debounceTick,
+  useResizeObserver,
+} from 'src/code/utils';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';
@@ -129,18 +133,22 @@ const note = inject<PageNote>('note')!;
 
 const logger = mainLogger().sub('NoteListContainer');
 
-async function onLeftDoubleClick(event: MouseEvent, destIndex?: number) {
-  const clientTopLeft = note.getContainerClientRect()?.topLeft;
+const checkDoubleClick = createDoubleClickChecker();
 
-  if (clientTopLeft == null) {
-    return;
+async function onLeftClick(event: MouseEvent, destIndex?: number) {
+  if (checkDoubleClick(event)) {
+    const clientTopLeft = note.getContainerClientRect()?.topLeft;
+
+    if (clientTopLeft == null) {
+      return;
+    }
+
+    const clientPos = page.pos.eventToClient(event);
+
+    const worldPos = page.sizes.screenToWorld2D(clientPos.sub(clientTopLeft));
+
+    await page.notes.create(note, worldPos, false, destIndex);
   }
-
-  const clientPos = page.pos.eventToClient(event);
-
-  const worldPos = page.sizes.screenToWorld2D(clientPos.sub(clientTopLeft));
-
-  await page.notes.create(note, worldPos, false, destIndex);
 }
 
 // Track overflow
