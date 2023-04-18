@@ -80,7 +80,7 @@ export async function createPage(input: {
 
       groupIsPublic: input.groupIsPublic,
 
-      accessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+      groupAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
       groupEncryptedInternalKeyring:
         groupValues.encryptedInternalKeyring.wrappedValue,
       groupEncryptedContentKeyring:

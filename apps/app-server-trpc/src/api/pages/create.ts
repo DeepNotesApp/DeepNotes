@@ -34,6 +34,7 @@ export async function create({
         // Check sufficient permissions
 
         if (
+          input.groupCreation == null &&
           !(await ctx.userHasPermission(
             ctx.userId,
             input.groupId,

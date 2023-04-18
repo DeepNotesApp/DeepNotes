@@ -258,9 +258,10 @@ async function _createPage() {
 
     $quasar().notify({
       message:
-        'Page created successfully.' + response.numFreePages != null
+        'Page created successfully.' +
+        (response.numFreePages != null
           ? ` (${response.numFreePages + 1}/10)`
-          : '',
+          : ''),
       type: 'positive',
     });
 
