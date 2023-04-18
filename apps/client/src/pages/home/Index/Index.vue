@@ -55,6 +55,7 @@
             autoplay
             muted
             loop
+            playsinline
           >
             <source
               src="~assets/main.mp4"
@@ -71,6 +72,7 @@
             autoplay
             muted
             loop
+            playsinline
           >
             <source
               src="~assets/collab.mp4"
@@ -137,6 +139,7 @@
             autoplay
             muted
             loop
+            playsinline
           >
             <source
               src="~assets/notes.mp4"
