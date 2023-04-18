@@ -16,7 +16,7 @@
       :editor="editor"
       :class="{ editing: arrow.react.editing }"
       @pointerdown.left.stop="onLeftPointerDown"
-      @dblclick.left="onLeftDoubleClick"
+      @click.left="onLeftClick"
     />
   </div>
 </template>
@@ -26,6 +26,7 @@ import { Y } from '@syncedstore/core';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
+import { createDoubleClickChecker } from 'src/code/utils';
 
 const props = defineProps<{
   arrow: PageArrow;
@@ -71,8 +72,12 @@ function onLeftPointerDown(event: PointerEvent) {
   page.clickSelection.perform(props.arrow, event);
 }
 
-async function onLeftDoubleClick() {
-  await page.editing.start(props.arrow);
+const checkDoubleClick = createDoubleClickChecker();
+
+async function onLeftClick(event: MouseEvent) {
+  if (checkDoubleClick(event)) {
+    await page.editing.start(props.arrow);
+  }
 }
 </script>
 

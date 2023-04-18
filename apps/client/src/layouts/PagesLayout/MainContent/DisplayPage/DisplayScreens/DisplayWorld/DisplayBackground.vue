@@ -2,7 +2,7 @@
   <div
     style="position: absolute; inset: 0"
     @pointerdown.left="onLeftPointerDown"
-    @dblclick.left="onLeftDoubleClick"
+    @click.left="onLeftClick"
   >
     <div class="display-background"></div>
 
@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
-import { isCtrlDown } from 'src/code/utils/misc';
+import { createDoubleClickChecker, isCtrlDown } from 'src/code/utils';
 
 import DisplayGrid from './DisplayGrid.vue';
 
@@ -46,11 +46,15 @@ function onLeftPointerDown(event: PointerEvent) {
   page.fixDisplay();
 }
 
-async function onLeftDoubleClick(event: MouseEvent) {
-  const clientPos = page.pos.eventToClient(event);
-  const worldPos = page.pos.clientToWorld(clientPos);
+const checkDoubleClick = createDoubleClickChecker();
 
-  await page.notes.create(page, worldPos);
+async function onLeftClick(event: MouseEvent) {
+  if (checkDoubleClick(event)) {
+    const clientPos = page.pos.eventToClient(event);
+    const worldPos = page.pos.clientToWorld(clientPos);
+
+    await page.notes.create(page, worldPos);
+  }
 }
 </script>
 
