@@ -7,6 +7,7 @@ import Fastify from 'fastify';
 import { once } from 'lodash';
 
 import { registerChangeUserRole } from './api/groups/change-user-role';
+import { registerMakePrivate } from './api/groups/privacy/make-private';
 import { registerRemoveUser } from './api/groups/remove-user';
 import { registerGroupsRotateKeys } from './api/groups/rotate-keys';
 import { registerChangePassword } from './api/users/account/change-password';
@@ -69,6 +70,7 @@ export const fastify = once(async () => {
   registerChangeUserRole(fastify);
   registerRemoveUser(fastify);
   registerGroupsRotateKeys(fastify);
+  registerMakePrivate(fastify);
 
   return fastify;
 });
