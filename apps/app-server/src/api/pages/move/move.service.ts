@@ -116,7 +116,7 @@ export class MoveService {
     groupEncryptedContentKeyring,
     groupPublicKeyring,
     groupEncryptedPrivateKeyring,
-    groupMemberEncryptedName,
+    groupOwnerEncryptedName,
 
     dtrx,
   }: EndpointValues) {
@@ -137,7 +137,7 @@ export class MoveService {
       publicKeyring: groupPublicKeyring!,
       encryptedPrivateKeyring: groupEncryptedPrivateKeyring!,
 
-      encryptedUserName: groupMemberEncryptedName!,
+      encryptedUserName: groupOwnerEncryptedName!,
 
       dtrx,
     });

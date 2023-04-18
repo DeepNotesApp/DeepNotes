@@ -91,7 +91,7 @@ export async function createPage(input: {
       groupEncryptedPrivateKeyring:
         groupValues.encryptedPrivateKeyring.wrappedValue,
 
-      groupMemberEncryptedName: internals.keyPair.encrypt(
+      groupOwnerEncryptedName: internals.keyPair.encrypt(
         textToBytes(input.groupMemberName),
         groupValues.keyPair.publicKey,
         { padding: true },

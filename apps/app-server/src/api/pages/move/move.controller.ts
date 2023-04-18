@@ -46,7 +46,7 @@ class BodyDto extends createZodDto(
       groupEncryptedContentKeyring: z.string().refine(isBase64).optional(),
       groupPublicKeyring: z.string().refine(isBase64).optional(),
       groupEncryptedPrivateKeyring: z.string().refine(isBase64).optional(),
-      groupMemberEncryptedName: z.string().refine(isBase64).optional(),
+      groupOwnerEncryptedName: z.string().refine(isBase64).optional(),
     })
     .merge(pageKeyRotationSchema.partial()),
 ) {}
@@ -146,7 +146,7 @@ export class MoveController {
                 values.groupEncryptedContentKeyring == null ||
                 values.groupPublicKeyring == null ||
                 values.groupEncryptedPrivateKeyring == null ||
-                values.groupMemberEncryptedName == null
+                values.groupOwnerEncryptedName == null
               ) {
                 throw new HttpException(
                   'Missing values for group creation.',

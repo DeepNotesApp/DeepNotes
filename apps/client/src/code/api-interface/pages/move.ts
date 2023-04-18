@@ -71,7 +71,7 @@ export async function movePage(
     groupPublicKeyring?: string;
     groupEncryptedPrivateKeyring?: string;
 
-    groupMemberEncryptedName?: string;
+    groupOwnerEncryptedName?: string;
   };
 
   request.setAsMainPage = setAsMainPage;
@@ -146,7 +146,7 @@ export async function movePage(
       groupValues.encryptedPrivateKeyring.wrappedValue,
     );
 
-    request.groupMemberEncryptedName = bytesToBase64(
+    request.groupOwnerEncryptedName = bytesToBase64(
       internals.keyPair.encrypt(
         textToBytes(groupMemberName),
         groupValues.keyPair.publicKey,

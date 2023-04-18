@@ -26,7 +26,7 @@ export const groupCreationSchema = once(() =>
     groupPublicKeyring: z.instanceof(Uint8Array),
     groupEncryptedPrivateKeyring: z.instanceof(Uint8Array),
 
-    groupMemberEncryptedName: z.instanceof(Uint8Array),
+    groupOwnerEncryptedName: z.instanceof(Uint8Array),
   }),
 );
 export type GroupCreationSchema = z.infer<
@@ -52,7 +52,7 @@ export async function createGroup(input: {
   groupPublicKeyring: Uint8Array;
   groupEncryptedPrivateKeyring: Uint8Array;
 
-  groupEncryptedUserName?: Uint8Array;
+  groupOwnerEncryptedName?: Uint8Array;
 
   dtrx?: DataTransaction;
 }) {
@@ -100,7 +100,7 @@ export async function createGroup(input: {
         : input.groupAccessKeyring,
       encrypted_internal_keyring: input.groupEncryptedInternalKeyring,
 
-      encrypted_name: input.groupEncryptedUserName,
+      encrypted_name: input.groupOwnerEncryptedName ?? new Uint8Array(),
     },
     { dtrx: input.dtrx },
   );

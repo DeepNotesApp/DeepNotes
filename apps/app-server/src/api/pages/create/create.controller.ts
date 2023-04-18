@@ -37,7 +37,7 @@ class BodyDto extends createZodDto(
     groupPublicKeyring: z.string().refine(isBase64).optional(),
     groupEncryptedPrivateKeyring: z.string().refine(isBase64).optional(),
 
-    groupMemberEncryptedName: z.string().refine(isBase64).optional(),
+    groupOwnerEncryptedName: z.string().refine(isBase64).optional(),
   }),
 ) {}
 
@@ -65,7 +65,7 @@ export class CreateController {
       groupEncryptedContentKeyring,
       groupPublicKeyring,
       groupEncryptedPrivateKeyring,
-      groupMemberEncryptedName,
+      groupOwnerEncryptedName,
     }: BodyDto,
   ) {
     return await usingLocks([[`group-lock:${groupId}`]], async (signals) => {
@@ -135,7 +135,7 @@ export class CreateController {
             groupEncryptedContentKeyring == null ||
             groupPublicKeyring == null ||
             groupEncryptedPrivateKeyring == null ||
-            groupMemberEncryptedName == null
+            groupOwnerEncryptedName == null
           ) {
             throw new HttpException(
               'Missing required fields.',
@@ -159,7 +159,7 @@ export class CreateController {
             publicKeyring: groupPublicKeyring,
             encryptedPrivateKeyring: groupEncryptedPrivateKeyring,
 
-            encryptedUserName: groupMemberEncryptedName,
+            encryptedUserName: groupOwnerEncryptedName,
 
             mainPageId: pageId,
 
