@@ -9,6 +9,7 @@ import { once } from 'lodash';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
 import { registerGroupsChangeUserRole } from './websocket/groups/change-user-role';
+import { registerGroupsJoinInvitationsSend } from './websocket/groups/join-invitations/send';
 import { registerGroupsJoinRequestsAccept } from './websocket/groups/join-requests/accept';
 import { registerGroupsJoinRequestsCancel } from './websocket/groups/join-requests/cancel';
 import { registerGroupsJoinRequestsReject } from './websocket/groups/join-requests/reject';
@@ -81,6 +82,8 @@ export const fastify = once(async () => {
   registerGroupsJoinRequestsCancel(fastify);
   registerGroupsJoinRequestsReject(fastify);
   registerGroupsJoinRequestsAccept(fastify);
+
+  registerGroupsJoinInvitationsSend(fastify);
 
   registerPagesMove(fastify);
 
