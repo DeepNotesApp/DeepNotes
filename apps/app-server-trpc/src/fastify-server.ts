@@ -88,6 +88,7 @@ export const fastify = once(async () => {
   registerGroupsJoinInvitationsSend(fastify);
   registerGroupsJoinInvitationsCancel(fastify);
   registerGroupsJoinInvitationsReject(fastify);
+  registerGroupsJoinInvitationsSend(fastify);
 
   registerPagesMove(fastify);
 
