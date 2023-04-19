@@ -10,6 +10,7 @@ import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
 import { registerGroupsChangeUserRole } from './websocket/groups/change-user-role';
 import { registerGroupsJoinInvitationsCancel } from './websocket/groups/join-invitations/cancel';
+import { registerGroupsJoinInvitationsReject } from './websocket/groups/join-invitations/reject';
 import { registerGroupsJoinInvitationsSend } from './websocket/groups/join-invitations/send';
 import { registerGroupsJoinRequestsAccept } from './websocket/groups/join-requests/accept';
 import { registerGroupsJoinRequestsCancel } from './websocket/groups/join-requests/cancel';
@@ -86,6 +87,7 @@ export const fastify = once(async () => {
 
   registerGroupsJoinInvitationsSend(fastify);
   registerGroupsJoinInvitationsCancel(fastify);
+  registerGroupsJoinInvitationsReject(fastify);
 
   registerPagesMove(fastify);
 
