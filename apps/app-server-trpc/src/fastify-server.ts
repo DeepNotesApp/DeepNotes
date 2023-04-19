@@ -9,6 +9,7 @@ import { once } from 'lodash';
 import { registerGroupsChangeUserRole } from './api/groups/change-user-role';
 import { registerGroupsJoinRequestsAccept } from './api/groups/join-requests/accept';
 import { registerGroupsJoinRequestsCancel } from './api/groups/join-requests/cancel';
+import { registerGroupsJoinRequestsReject } from './api/groups/join-requests/reject';
 import { registerGroupsJoinRequestsSend } from './api/groups/join-requests/send';
 import { registerGroupsMakePrivate } from './api/groups/privacy/make-private';
 import { registerGroupsRemoveUser } from './api/groups/remove-user';
@@ -78,6 +79,7 @@ export const fastify = once(async () => {
 
   registerGroupsJoinRequestsSend(fastify);
   registerGroupsJoinRequestsCancel(fastify);
+  registerGroupsJoinRequestsReject(fastify);
   registerGroupsJoinRequestsAccept(fastify);
 
   registerPagesMove(fastify);
