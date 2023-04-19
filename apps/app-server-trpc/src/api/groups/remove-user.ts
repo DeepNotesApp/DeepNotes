@@ -4,13 +4,13 @@ import { canManageRole } from '@deeplib/misc';
 import { isNanoID, objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
+import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { getGroupMembers } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
 import { notifyUsers } from 'src/utils/notifications';
 import { notificationsRequestSchema } from 'src/utils/notifications';
-import { checkInsufficientSubscription } from 'src/utils/users';
+import { checkUserSubscription } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -28,8 +28,8 @@ const baseProcedureStep2 = authProcedure.input(notificationsRequestSchema);
 export const removeUserProcedureStep2 =
   baseProcedureStep2.mutation(removeUserStep2);
 
-export function registerRemoveUser(fastify: ReturnType<typeof Fastify>) {
-  createWebsocketEndpoint({
+export function registerGroupsRemoveUser(fastify: ReturnType<typeof Fastify>) {
+  createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
     url: '/trpc/groups.removeUser',
 
@@ -77,7 +77,7 @@ export async function removeUserStep1({
 
     // Check sufficient subscription
 
-    await checkInsufficientSubscription({
+    await checkUserSubscription({
       userId: ctx.userId,
       dataAbstraction: ctx.dataAbstraction,
     });

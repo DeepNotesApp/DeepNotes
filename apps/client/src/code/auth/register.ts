@@ -79,34 +79,44 @@ export async function getRegistrationValues(input: {
       },
     ),
 
-    groupEncryptedAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+    groupCreation: {
+      groupEncryptedName: new Uint8Array(),
+      groupIsPublic: false,
 
-    groupEncryptedInternalKeyring:
-      groupValues.encryptedInternalKeyring.wrappedValue,
+      groupAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+      groupEncryptedInternalKeyring:
+        groupValues.encryptedInternalKeyring.wrappedValue,
+      groupEncryptedContentKeyring:
+        groupValues.encryptedContentKeyring.wrappedValue,
 
-    groupEncryptedContentKeyring:
-      groupValues.encryptedContentKeyring.wrappedValue,
+      groupPublicKeyring: (groupValues.keyPair.publicKey as Keyring)
+        .wrappedValue,
+      groupEncryptedPrivateKeyring:
+        groupValues.encryptedPrivateKeyring.wrappedValue,
 
-    groupPublicKeyring: (groupValues.keyPair.publicKey as Keyring).wrappedValue,
+      groupOwnerEncryptedName: new Uint8Array(),
+    },
 
-    groupEncryptedPrivateKeyring:
-      groupValues.encryptedPrivateKeyring.wrappedValue,
+    pageCreation: {
+      pageEncryptedSymmetricKeyring: pageKeyring.wrappedValue,
+      pageEncryptedRelativeTitle: pageKeyring.encrypt(
+        textToBytes('Main page'),
+        {
+          padding: true,
+          associatedData: {
+            context: 'PageRelativeTitle',
+            pageId,
+          },
+        },
+      ),
 
-    pageEncryptedSymmetricKeyring: pageKeyring.wrappedValue,
-    pageEncryptedRelativeTitle: pageKeyring.encrypt(textToBytes('Main page'), {
-      padding: true,
-      associatedData: {
-        context: 'PageRelativeTitle',
-        pageId,
-      },
-    }),
-
-    pageEncryptedAbsoluteTitle: pageKeyring.encrypt(textToBytes(''), {
-      padding: true,
-      associatedData: {
-        context: 'PageAbsoluteTitle',
-        pageId,
-      },
-    }),
+      pageEncryptedAbsoluteTitle: pageKeyring.encrypt(textToBytes(''), {
+        padding: true,
+        associatedData: {
+          context: 'PageAbsoluteTitle',
+          pageId,
+        },
+      }),
+    },
   };
 }

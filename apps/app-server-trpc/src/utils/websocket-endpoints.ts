@@ -85,13 +85,13 @@ function createWebsocketMessageHandler(input: {
   };
 }
 
-export function createWebsocketEndpoint(input: {
+export function createWebsocketEndpoint<Input>(input: {
   fastify: ReturnType<typeof Fastify>;
   url: string;
   setup: (input: {
     messageHandler: ReturnType<typeof createWebsocketMessageHandler>;
     ctx: Exclude<Awaited<ReturnType<typeof authHelper>>, false>;
-    input: any;
+    input: Input;
   }) => any;
   procedures: [AnyProcedure, (...args: any) => any][];
 }) {

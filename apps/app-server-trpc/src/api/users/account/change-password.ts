@@ -6,22 +6,22 @@ import {
 } from '@stdlib/crypto';
 import type Fastify from 'fastify';
 import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
+import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
 import { checkCorrectUserPassword } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
-const changePasswordBaseProcedureStep1 = authProcedure.input(
+const baseProcedureStep1 = authProcedure.input(
   z.object({
     oldLoginHash: z.instanceof(Uint8Array),
   }),
 );
 export const changePasswordProcedureStep1 =
-  changePasswordBaseProcedureStep1.mutation(changePasswordStep1);
+  baseProcedureStep1.mutation(changePasswordStep1);
 
-const changePasswordBaseProcedureStep2 = authProcedure.input(
+const baseProcedureStep2 = authProcedure.input(
   z.object({
     newLoginHash: z.instanceof(Uint8Array),
 
@@ -30,10 +30,12 @@ const changePasswordBaseProcedureStep2 = authProcedure.input(
   }),
 );
 export const changePasswordProcedureStep2 =
-  changePasswordBaseProcedureStep2.mutation(changePasswordStep2);
+  baseProcedureStep2.mutation(changePasswordStep2);
 
-export function registerChangePassword(fastify: ReturnType<typeof Fastify>) {
-  createWebsocketEndpoint({
+export function registerUsersChangePassword(
+  fastify: ReturnType<typeof Fastify>,
+) {
+  createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
     url: '/trpc/users.account.changePassword',
 
@@ -55,7 +57,7 @@ export function registerChangePassword(fastify: ReturnType<typeof Fastify>) {
 export async function changePasswordStep1({
   ctx,
   input,
-}: InferProcedureOpts<typeof changePasswordBaseProcedureStep1>) {
+}: InferProcedureOpts<typeof baseProcedureStep1>) {
   // Check if old password is correct
 
   await checkCorrectUserPassword({
@@ -81,7 +83,7 @@ export async function changePasswordStep1({
 export async function changePasswordStep2({
   ctx,
   input,
-}: InferProcedureOpts<typeof changePasswordBaseProcedureStep2>) {
+}: InferProcedureOpts<typeof baseProcedureStep2>) {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
     const passwordValues = derivePasswordValues(input.newLoginHash);
 

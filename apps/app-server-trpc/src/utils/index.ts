@@ -4,8 +4,10 @@ import { pull } from 'lodash';
 
 export async function bumpRecentItem(input: {
   userId: string;
+
   itemType: 'group' | 'page';
   itemId: string;
+
   dataAbstraction: DataAbstraction<typeof dataHashes>;
   dtrx?: DataTransaction;
 }) {

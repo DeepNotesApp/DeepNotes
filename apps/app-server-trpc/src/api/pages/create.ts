@@ -101,7 +101,6 @@ export async function create({
             userId: ctx.userId,
 
             groupId: input.groupId,
-
             groupIsPersonal: false,
             groupMainPageId: input.pageId,
 

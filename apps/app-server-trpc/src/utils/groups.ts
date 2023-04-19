@@ -33,29 +33,17 @@ export type GroupCreationSchema = z.infer<
   ReturnType<typeof groupCreationSchema>
 >;
 
-export async function createGroup(input: {
-  userId: string;
+export async function createGroup(
+  input: {
+    userId: string;
 
-  groupId: string;
+    groupId: string;
+    groupMainPageId: string;
+    groupIsPersonal: boolean;
 
-  groupMainPageId: string;
-  groupIsPersonal: boolean;
-
-  groupEncryptedName?: Uint8Array;
-  groupPasswordHash?: Uint8Array;
-  groupIsPublic: boolean;
-
-  groupAccessKeyring: Uint8Array;
-  groupEncryptedInternalKeyring: Uint8Array;
-  groupEncryptedContentKeyring: Uint8Array;
-
-  groupPublicKeyring: Uint8Array;
-  groupEncryptedPrivateKeyring: Uint8Array;
-
-  groupOwnerEncryptedName?: Uint8Array;
-
-  dtrx?: DataTransaction;
-}) {
+    dtrx?: DataTransaction;
+  } & GroupCreationSchema,
+) {
   await dataAbstraction().insert(
     'group',
     input.groupId,

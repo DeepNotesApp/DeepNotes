@@ -4,7 +4,7 @@ import { canChangeRole } from '@deeplib/misc';
 import { isNanoID, objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
+import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { getGroupMembers } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
@@ -36,8 +36,10 @@ const baseProcedureStep2 = authProcedure.input(notificationsRequestSchema);
 export const changeUserRoleProcedureStep2 =
   baseProcedureStep2.mutation(changeUserRoleStep2);
 
-export function registerChangeUserRole(fastify: ReturnType<typeof Fastify>) {
-  createWebsocketEndpoint({
+export function registerGroupsChangeUserRole(
+  fastify: ReturnType<typeof Fastify>,
+) {
+  createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
     url: '/trpc/groups.changeUserRole',
 

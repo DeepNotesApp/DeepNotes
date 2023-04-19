@@ -8,6 +8,9 @@ export type InferProcedureResolver<TBuilder extends ProcedureBuilder<any>> =
   Parameters<TBuilder['query']>[0];
 export type InferProcedureOpts<TBuilder extends ProcedureBuilder<any>> =
   Parameters<InferProcedureResolver<TBuilder>>[0];
+
+export type InferProcedureContext<TBuilder extends ProcedureBuilder<any>> =
+  InferProcedureOpts<TBuilder>['ctx'];
 export type InferProcedureInput<TBuilder extends ProcedureBuilder<any>> =
   InferProcedureOpts<TBuilder>['input'];
 export type InferProcedureOutput<TBuilder extends ProcedureBuilder<any>> =

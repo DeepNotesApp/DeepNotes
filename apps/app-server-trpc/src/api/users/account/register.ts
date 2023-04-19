@@ -186,18 +186,10 @@ export async function registerUser(
     userId: input.userId,
 
     groupId: input.groupId,
-
-    groupIsPersonal: true,
     groupMainPageId: input.pageId,
+    groupIsPersonal: true,
 
-    groupIsPublic: false,
-
-    groupAccessKeyring: input.groupEncryptedAccessKeyring,
-    groupEncryptedInternalKeyring: input.groupEncryptedInternalKeyring,
-    groupEncryptedContentKeyring: input.groupEncryptedContentKeyring,
-
-    groupPublicKeyring: input.groupPublicKeyring,
-    groupEncryptedPrivateKeyring: input.groupEncryptedPrivateKeyring,
+    ...input.groupCreation,
 
     dtrx: input.dtrx,
   });
@@ -208,10 +200,11 @@ export async function registerUser(
     {
       id: input.pageId,
 
-      encrypted_symmetric_keyring: input.pageEncryptedSymmetricKeyring,
+      encrypted_symmetric_keyring:
+        input.pageCreation.pageEncryptedSymmetricKeyring,
 
-      encrypted_relative_title: input.pageEncryptedRelativeTitle,
-      encrypted_absolute_title: input.pageEncryptedAbsoluteTitle,
+      encrypted_relative_title: input.pageCreation.pageEncryptedRelativeTitle,
+      encrypted_absolute_title: input.pageCreation.pageEncryptedAbsoluteTitle,
 
       group_id: input.groupId,
 

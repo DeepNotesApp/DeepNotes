@@ -6,11 +6,12 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import { once } from 'lodash';
 
-import { registerChangeUserRole } from './api/groups/change-user-role';
-import { registerMakePrivate } from './api/groups/privacy/make-private';
-import { registerRemoveUser } from './api/groups/remove-user';
+import { registerGroupsChangeUserRole } from './api/groups/change-user-role';
+import { registerGroupsMakePrivate } from './api/groups/privacy/make-private';
+import { registerGroupsRemoveUser } from './api/groups/remove-user';
 import { registerGroupsRotateKeys } from './api/groups/rotate-keys';
-import { registerChangePassword } from './api/users/account/change-password';
+import { registerPagesMove } from './api/pages/move';
+import { registerUsersChangePassword } from './api/users/account/change-password';
 import { registerUsersRotateKeys } from './api/users/account/rotate-keys';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
@@ -64,13 +65,15 @@ export const fastify = once(async () => {
 
   // Websocket endpoints
 
-  registerChangePassword(fastify);
+  registerUsersChangePassword(fastify);
   registerUsersRotateKeys(fastify);
 
-  registerChangeUserRole(fastify);
-  registerRemoveUser(fastify);
+  registerGroupsChangeUserRole(fastify);
+  registerGroupsRemoveUser(fastify);
   registerGroupsRotateKeys(fastify);
-  registerMakePrivate(fastify);
+  registerGroupsMakePrivate(fastify);
+
+  registerPagesMove(fastify);
 
   return fastify;
 });

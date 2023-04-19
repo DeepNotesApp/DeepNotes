@@ -14,7 +14,7 @@ import { objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { decryptUserRehashedLoginHash, derivePasswordValues } from 'src/crypto';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
+import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
 import { checkCorrectUserPassword } from 'src/utils/users';
@@ -62,7 +62,7 @@ export const rotateKeysProcedureStep2 =
   baseProcedureStep2.mutation(rotateKeysStep2);
 
 export function registerUsersRotateKeys(fastify: ReturnType<typeof Fastify>) {
-  createWebsocketEndpoint({
+  createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
     url: '/trpc/users.account.rotateKeys',
 

@@ -1,4 +1,3 @@
-import type { PageUpdate } from '@deeplib/data';
 import { PageUpdateModel } from '@deeplib/db';
 import { base64ToBytes } from '@stdlib/base64';
 import { namedPromises } from '@stdlib/misc';
@@ -37,14 +36,14 @@ export const flushPageUpdatesThrottled = throttle(
         msgpackUpdateBuffers,
       )) {
         for (const msgpackPageUpdate of msgpackPageUpdates) {
-          const [updateIndex, encryptedData] = unpack(
+          const [updateIndex, encryptedDataBase64] = unpack(
             msgpackPageUpdate,
-          ) as PageUpdate;
+          ) as [number, string];
 
           pageUpdateModels.push({
             page_id: pageId,
             index: updateIndex,
-            encrypted_data: base64ToBytes(encryptedData),
+            encrypted_data: base64ToBytes(encryptedDataBase64),
           });
 
           pageUpdateIndexes[pageId] = updateIndex;

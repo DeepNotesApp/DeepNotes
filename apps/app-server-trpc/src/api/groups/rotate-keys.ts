@@ -1,6 +1,6 @@
 import { isNanoID } from '@stdlib/misc';
 import type Fastify from 'fastify';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
+import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { getGroupKeyRotationValues } from 'src/utils/group-key-rotation';
 import { rotateGroupKeys } from 'src/utils/group-key-rotation';
@@ -21,7 +21,7 @@ export const rotateKeysProcedureStep2 =
   baseProcedureStep2.mutation(rotateKeysStep2);
 
 export function registerGroupsRotateKeys(fastify: ReturnType<typeof Fastify>) {
-  createWebsocketEndpoint({
+  createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
     url: '/trpc/groups.rotateKeys',
 

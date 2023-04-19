@@ -9,6 +9,8 @@ import { once } from 'lodash';
 import { z } from 'zod';
 
 import { decryptUserRehashedLoginHash, derivePasswordValues } from '../crypto';
+import { groupCreationSchema } from './groups';
+import { pageCreationSchema } from './pages';
 
 export const userRegistrationSchema = once(() =>
   z.object({
@@ -24,16 +26,8 @@ export const userRegistrationSchema = once(() =>
     userEncryptedDefaultNote: z.instanceof(Uint8Array),
     userEncryptedDefaultArrow: z.instanceof(Uint8Array),
 
-    groupEncryptedAccessKeyring: z.instanceof(Uint8Array),
-    groupEncryptedInternalKeyring: z.instanceof(Uint8Array),
-    groupEncryptedContentKeyring: z.instanceof(Uint8Array),
-
-    groupPublicKeyring: z.instanceof(Uint8Array),
-    groupEncryptedPrivateKeyring: z.instanceof(Uint8Array),
-
-    pageEncryptedSymmetricKeyring: z.instanceof(Uint8Array),
-    pageEncryptedRelativeTitle: z.instanceof(Uint8Array),
-    pageEncryptedAbsoluteTitle: z.instanceof(Uint8Array),
+    groupCreation: groupCreationSchema(),
+    pageCreation: pageCreationSchema(),
   }),
 );
 export type UserRegistrationSchema = z.output<
@@ -77,7 +71,7 @@ export async function checkCorrectUserPassword(input: {
   }
 }
 
-export async function checkInsufficientSubscription(input: {
+export async function checkUserSubscription(input: {
   dataAbstraction: DataAbstraction<typeof dataHashes>;
   userId: string;
 }) {
