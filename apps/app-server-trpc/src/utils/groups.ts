@@ -13,6 +13,14 @@ import {
 } from '../crypto';
 import { dataAbstraction } from '../data/data-abstraction';
 
+export const GroupRoleEnum = z.enum([
+  'owner',
+  'admin',
+  'moderator',
+  'member',
+  'viewer',
+]);
+
 export const groupCreationSchema = once(() =>
   z.object({
     groupEncryptedName: z.instanceof(Uint8Array),

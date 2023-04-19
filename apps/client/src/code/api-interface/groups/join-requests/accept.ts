@@ -3,7 +3,7 @@ import { createKeyring } from '@stdlib/crypto';
 import type {
   acceptProcedureStep1,
   acceptProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/groups/join-requests/accept';
+} from 'deepnotes-app-server-trpc/src/websocket/groups/join-requests/accept';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';

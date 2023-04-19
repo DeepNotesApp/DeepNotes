@@ -1,8 +1,7 @@
-import { groupsRouter } from 'src/api/groups';
-import { pagesRouter } from 'src/api/pages';
-import { sessionsRouter } from 'src/api/sessions';
-import { usersRouter } from 'src/api/users';
-
+import { groupsRouter } from './api/groups';
+import { pagesRouter } from './api/pages';
+import { sessionsRouter } from './api/sessions';
+import { usersRouter } from './api/users';
 import { trpc } from './server';
 
 export const appRouter = trpc.router({

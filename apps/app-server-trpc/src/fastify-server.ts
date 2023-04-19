@@ -6,19 +6,19 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import { once } from 'lodash';
 
-import { registerGroupsChangeUserRole } from './api/groups/change-user-role';
-import { registerGroupsJoinRequestsAccept } from './api/groups/join-requests/accept';
-import { registerGroupsJoinRequestsCancel } from './api/groups/join-requests/cancel';
-import { registerGroupsJoinRequestsReject } from './api/groups/join-requests/reject';
-import { registerGroupsJoinRequestsSend } from './api/groups/join-requests/send';
-import { registerGroupsMakePrivate } from './api/groups/privacy/make-private';
-import { registerGroupsRemoveUser } from './api/groups/remove-user';
-import { registerGroupsRotateKeys } from './api/groups/rotate-keys';
-import { registerPagesMove } from './api/pages/move';
-import { registerUsersChangePassword } from './api/users/account/change-password';
-import { registerUsersRotateKeys } from './api/users/account/rotate-keys';
 import { createContext } from './trpc/context';
 import { appRouter } from './trpc/router';
+import { registerGroupsChangeUserRole } from './websocket/groups/change-user-role';
+import { registerGroupsJoinRequestsAccept } from './websocket/groups/join-requests/accept';
+import { registerGroupsJoinRequestsCancel } from './websocket/groups/join-requests/cancel';
+import { registerGroupsJoinRequestsReject } from './websocket/groups/join-requests/reject';
+import { registerGroupsJoinRequestsSend } from './websocket/groups/join-requests/send';
+import { registerGroupsMakePrivate } from './websocket/groups/privacy/make-private';
+import { registerGroupsRemoveUser } from './websocket/groups/remove-user';
+import { registerGroupsRotateKeys } from './websocket/groups/rotate-keys';
+import { registerPagesMove } from './websocket/pages/move';
+import { registerUsersChangePassword } from './websocket/users/account/change-password';
+import { registerUsersRotateKeys } from './websocket/users/account/rotate-keys';
 
 export const fastify = once(async () => {
   const fastify = Fastify({

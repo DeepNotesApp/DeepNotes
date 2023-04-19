@@ -3,7 +3,7 @@ import { rolesMap } from '@deeplib/misc';
 import type {
   changeUserRoleProcedureStep1,
   changeUserRoleProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/groups/change-user-role';
+} from 'deepnotes-app-server-trpc/src/websocket/groups/change-user-role';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';

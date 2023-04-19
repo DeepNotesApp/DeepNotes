@@ -4,21 +4,19 @@ import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { getGroupManagers } from 'src/utils/groups';
+import { getGroupManagers, GroupRoleEnum } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
 import { notifyUsers } from 'src/utils/notifications';
 import { notificationsRequestSchema } from 'src/utils/notifications';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
-import { RoleEnum } from '../change-user-role';
-
 const baseProcedureStep1 = authProcedure.input(
   z.object({
     groupId: z.string().refine(isNanoID),
 
     patientId: z.string().refine(isNanoID),
-    targetRole: RoleEnum,
+    targetRole: GroupRoleEnum,
 
     encryptedAccessKeyring: z.instanceof(Uint8Array),
     encryptedInternalKeyring: z.instanceof(Uint8Array),

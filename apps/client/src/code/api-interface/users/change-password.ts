@@ -7,7 +7,7 @@ import {
 import type {
   changePasswordProcedureStep1,
   changePasswordProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/users/account/change-password';
+} from 'deepnotes-app-server-trpc/src/websocket/users/account/change-password';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 

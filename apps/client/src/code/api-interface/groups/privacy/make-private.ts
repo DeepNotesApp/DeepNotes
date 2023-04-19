@@ -1,7 +1,7 @@
 import type {
   makePrivateProcedureStep1,
   makePrivateProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/groups/privacy/make-private';
+} from 'deepnotes-app-server-trpc/src/websocket/groups/privacy/make-private';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 import { processGroupKeyRotationValues } from '../key-rotation';

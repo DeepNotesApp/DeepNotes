@@ -1,7 +1,7 @@
 import type {
   removeUserProcedureStep1,
   removeUserProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/groups/remove-user';
+} from 'deepnotes-app-server-trpc/src/websocket/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';

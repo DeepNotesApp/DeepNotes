@@ -8,7 +8,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import type {
   moveProcedureStep1,
   moveProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/pages/move';
+} from 'deepnotes-app-server-trpc/src/websocket/pages/move';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,

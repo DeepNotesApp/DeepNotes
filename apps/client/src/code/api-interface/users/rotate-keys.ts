@@ -7,7 +7,7 @@ import {
 import type {
   rotateKeysProcedureStep1,
   rotateKeysProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/users/account/rotate-keys';
+} from 'deepnotes-app-server-trpc/src/websocket/users/account/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';

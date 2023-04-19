@@ -8,7 +8,7 @@ import { objEntries, objFromEntries } from '@stdlib/misc';
 import type {
   rotateKeysProcedureStep1,
   rotateKeysProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/api/groups/rotate-keys';
+} from 'deepnotes-app-server-trpc/src/websocket/groups/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { asyncPrompt } from 'src/code/utils/misc';
