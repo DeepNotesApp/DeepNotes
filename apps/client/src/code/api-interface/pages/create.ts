@@ -12,7 +12,7 @@ import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyr
 import { asyncPrompt } from 'src/code/utils/misc';
 
 export async function createPage(input: {
-  pageId: string;
+  parentPageId: string;
   currentGroupId: string;
   pageRelativeTitle: string;
 
@@ -24,11 +24,13 @@ export async function createPage(input: {
 }) {
   let groupContentKeyring: SymmetricKeyring | undefined;
 
-  const request = {} as Parameters<typeof trpcClient.pages.create.mutate>[0];
+  const pageId = nanoid();
 
-  request.parentPageId = input.pageId;
+  let groupId;
 
-  request.pageId = nanoid();
+  let groupCreation: Parameters<
+    typeof trpcClient.pages.create.mutate
+  >[0]['groupCreation'];
 
   if (input.createGroup) {
     if (input.groupName === '') {
@@ -60,11 +62,11 @@ export async function createPage(input: {
       password: input.groupPassword != null ? input.groupPassword : undefined,
     });
 
-    request.groupId = groupValues.groupId;
+    groupId = groupValues.groupId;
 
     groupContentKeyring = groupValues.contentKeyring;
 
-    request.groupCreation = {
+    groupCreation = {
       groupEncryptedName: groupValues.accessKeyring.encrypt(
         textToBytes(input.groupName),
         {
@@ -98,7 +100,7 @@ export async function createPage(input: {
       ),
     };
   } else {
-    request.groupId = input.currentGroupId;
+    groupId = input.currentGroupId;
 
     groupContentKeyring = await groupContentKeyrings()(
       input.currentGroupId,
@@ -133,32 +135,42 @@ export async function createPage(input: {
 
   const pageKeyring = createSymmetricKeyring();
 
-  request.pageEncryptedSymmetricKeyring = pageKeyring.wrapSymmetric(
+  const pageEncryptedSymmetricKeyring = pageKeyring.wrapSymmetric(
     groupContentKeyring,
     {
       associatedData: {
         context: 'PageKeyring',
-        pageId: request.pageId,
+        pageId,
       },
     },
   ).wrappedValue;
-  request.pageEncryptedRelativeTitle = pageKeyring.encrypt(
+  const pageEncryptedRelativeTitle = pageKeyring.encrypt(
     textToBytes(input.pageRelativeTitle),
     {
       padding: true,
       associatedData: {
         context: 'PageRelativeTitle',
-        pageId: request.pageId,
+        pageId,
       },
     },
   );
-  request.pageEncryptedAbsoluteTitle = pageKeyring.encrypt(textToBytes(''), {
+  const pageEncryptedAbsoluteTitle = pageKeyring.encrypt(textToBytes(''), {
     padding: true,
     associatedData: {
       context: 'PageAbsoluteTitle',
-      pageId: request.pageId,
+      pageId,
     },
   });
 
-  return await trpcClient.pages.create.mutate(request);
+  return await trpcClient.pages.create.mutate({
+    parentPageId: input.parentPageId,
+    groupId,
+    pageId,
+
+    pageEncryptedSymmetricKeyring,
+    pageEncryptedRelativeTitle,
+    pageEncryptedAbsoluteTitle,
+
+    groupCreation,
+  });
 }
