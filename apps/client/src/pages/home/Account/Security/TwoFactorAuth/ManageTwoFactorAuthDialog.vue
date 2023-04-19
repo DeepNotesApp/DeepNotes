@@ -212,11 +212,6 @@ async function disableTwoFactorAuth() {
       loginHash: props.loginHash,
     });
 
-    await api().post<void>(
-      '/api/users/account/security/two-factor-auth/disable',
-      { loginHash: props.loginHash },
-    );
-
     $quasar().notify({
       message: 'Two-factor authentication has been disabled.',
       type: 'positive',

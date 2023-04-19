@@ -113,7 +113,6 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
@@ -195,7 +194,7 @@ async function goToPage(pageId: string) {
 
 async function movePages() {
   try {
-    const movePageParams: MovePageParams = await asyncPrompt({
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncPrompt({
       component: MovePageDialog,
 
       componentProps: {
@@ -204,7 +203,11 @@ async function movePages() {
     });
 
     for (const pageId of finalSelectedPageIds.value) {
-      await movePage(pageId, movePageParams);
+      await movePage({
+        ...movePageParams,
+
+        pageId,
+      });
     }
 
     $quasar().notify({

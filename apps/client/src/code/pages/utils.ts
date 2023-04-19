@@ -204,35 +204,3 @@ export async function createNotifications(input: {
       : []),
   ];
 }
-
-export async function requestWithNotifications(params: {
-  url: string;
-
-  body?: object;
-
-  patientId?: string;
-
-  notifications: {
-    agent?: object;
-    target?: object;
-    observers?: object;
-  };
-}) {
-  const notificationRecipients = (
-    await api().post<{
-      notificationRecipients: Record<string, { publicKeyring: Uint8Array }>;
-    }>(params.url, { ...params.body })
-  ).data.notificationRecipients;
-
-  await api().post(params.url, {
-    ...params.body,
-
-    notifications: await createNotifications({
-      recipients: notificationRecipients,
-
-      patientId: params.patientId,
-
-      notifications: params.notifications,
-    }),
-  });
-}
