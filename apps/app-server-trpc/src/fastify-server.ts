@@ -7,6 +7,7 @@ import Fastify from 'fastify';
 import { once } from 'lodash';
 
 import { registerGroupsChangeUserRole } from './api/groups/change-user-role';
+import { registerGroupsJoinRequestsCancel } from './api/groups/join-requests/cancel';
 import { registerGroupsJoinRequestsSend } from './api/groups/join-requests/send';
 import { registerGroupsMakePrivate } from './api/groups/privacy/make-private';
 import { registerGroupsRemoveUser } from './api/groups/remove-user';
@@ -75,6 +76,7 @@ export const fastify = once(async () => {
   registerGroupsMakePrivate(fastify);
 
   registerGroupsJoinRequestsSend(fastify);
+  registerGroupsJoinRequestsCancel(fastify);
 
   registerPagesMove(fastify);
 
