@@ -14,11 +14,9 @@ const baseProcedure = authProcedure.input(
     .optional(),
 );
 
-export const getNotificationsProcedure = once(() =>
-  baseProcedure.query(getNotifications),
-);
+export const loadProcedure = once(() => baseProcedure.query(load));
 
-export async function getNotifications({
+export async function load({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {

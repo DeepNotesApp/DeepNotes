@@ -136,9 +136,9 @@ async function onBeforeShow() {
 
 async function onLoad(index: number, done: (stop?: boolean) => void) {
   try {
-    const notifications = await trpcClient.users.pages.getNotifications.query({
-      lastNotificationId: pagesStore().notifications.items.at(-1)?.id,
-    });
+    const notifications = await trpcClient.users.pages.notifications.load.query(
+      { lastNotificationId: pagesStore().notifications.items.at(-1)?.id },
+    );
 
     pagesStore().notifications.items.push(...notifications.items);
     pagesStore().notifications.hasMore = notifications.hasMore;

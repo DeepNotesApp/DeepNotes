@@ -65,7 +65,7 @@ export class Pages {
     promises.push(
       (async () => {
         pagesStore().notifications =
-          await trpcClient.users.pages.getNotifications.query();
+          await trpcClient.users.pages.notifications.load.query();
       })(),
     );
 
