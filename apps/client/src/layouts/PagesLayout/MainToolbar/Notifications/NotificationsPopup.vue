@@ -128,7 +128,7 @@ async function onBeforeShow() {
     pagesStore().notifications.lastNotificationRead =
       pagesStore().notifications.items[0].id;
 
-    await api().post('/api/users/notifications/mark-as-read');
+    await trpcClient.users.pages.notifications.markAsRead.mutate();
   } catch (error: any) {
     handleError(error);
   }
