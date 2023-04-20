@@ -9,10 +9,9 @@ import { nanoid } from 'nanoid';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { generateSessionValues } from 'src/utils/sessions';
-import { userRegistrationSchema } from 'src/utils/users';
+import { registerUser, userRegistrationSchema } from 'src/utils/users';
 
 import { getUserDevice } from '../sessions/login';
-import { registerUser } from '../users/account/register';
 
 const baseProcedure = publicProcedure.input(userRegistrationSchema());
 
