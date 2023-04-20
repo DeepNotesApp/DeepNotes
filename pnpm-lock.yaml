@@ -343,6 +343,9 @@ importers:
       fastify:
         specifier: 4.10.0
         version: 4.10.0
+      fastify-raw-body:
+        specifier: ^4.2.0
+        version: 4.2.0
       http-status-codes:
         specifier: ^2.2.0
         version: 2.2.0
@@ -4353,7 +4356,7 @@ packages:
       normalize-package-data: 2.5.0
       read-config-file: 5.0.2
       sanitize-filename: 1.6.3
-      semver: 7.3.8
+      semver: 7.4.0
       temp-file: 3.4.0
     transitivePeerDependencies:
       - supports-color
@@ -6106,7 +6109,7 @@ packages:
       compare-version: 0.1.2
       debug: 2.6.9
       isbinaryfile: 3.0.3
-      minimist: 1.2.7
+      minimist: 1.2.8
       plist: 3.0.6
     transitivePeerDependencies:
       - supports-color
@@ -7162,6 +7165,15 @@ packages:
     resolution: {integrity: sha512-M3+i368lV0OYTJ5TfClIoPKEKSOF7112iiPdwgfSR0gN98BjA1Nk+c6oBHtfcVt9KiMxl+EQKHC1QNWo3ZOpYQ==}
     dev: false
 
+  /fastify-raw-body@4.2.0:
+    resolution: {integrity: sha512-3CUeuNYq1g8ur5Po/Wa8kSmbTSpDhvk5X8scoXVwc9zvhVZxNL1chGp21ATThMo6vmrZmNPxOO+/LhkRU7nMSQ==}
+    engines: {node: '>= 10'}
+    dependencies:
+      fastify-plugin: 4.3.0
+      raw-body: 2.5.1
+      secure-json-parse: 2.5.0
+    dev: false
+
   /fastify@4.10.0:
     resolution: {integrity: sha512-8yQPT+c/EbETjNxwM9PHeu2U4eXMoXTva0L9zoVgv7/ZCBtovWpfK4RKexhyh5Va3Jg82HovnfCxoZmwcZDfsQ==}
     dependencies:
@@ -7198,7 +7210,7 @@ packages:
       proxy-addr: 2.0.7
       rfdc: 1.3.0
       secure-json-parse: 2.5.0
-      semver: 7.3.8
+      semver: 7.4.0
       tiny-lru: 9.0.3
     transitivePeerDependencies:
       - supports-color
@@ -10922,7 +10934,6 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
-    dev: true
 
   /send@0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
@@ -12813,7 +12824,7 @@ packages:
     engines: {node: '>= 6.4.0'}
     dependencies:
       logform: 2.4.2
-      readable-stream: 3.6.0
+      readable-stream: 3.6.2
       triple-beam: 1.3.0
     dev: false
 

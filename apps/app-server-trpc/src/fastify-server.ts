@@ -4,6 +4,7 @@ import FastifyHelmet from '@fastify/helmet';
 import FastifyWebsocket from '@fastify/websocket';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
+import FastifyRawBody from 'fastify-raw-body';
 import { once } from 'lodash';
 
 import { createContext } from './trpc/context';
@@ -35,6 +36,7 @@ export const fastify = once(async () => {
 
   await fastify.register(FastifyHelmet);
   await fastify.register(FastifyCookie);
+  await fastify.register(FastifyRawBody);
   await fastify.register(FastifyWebsocket, {
     options: { maxPayload: 500 * 1048576 },
   });
