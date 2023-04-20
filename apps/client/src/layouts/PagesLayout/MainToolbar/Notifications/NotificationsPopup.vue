@@ -92,9 +92,8 @@
 </template>
 
 <script setup lang="ts">
-import type { DeepNotesNotification } from '@deeplib/misc';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 
 import GroupInvitationAccepted from './Items/GroupInvitationAccepted.vue';
 import GroupInvitationCanceled from './Items/GroupInvitationCanceled.vue';
@@ -129,7 +128,7 @@ async function onBeforeShow() {
     pagesStore().notifications.lastNotificationRead =
       pagesStore().notifications.items[0].id;
 
-    await api().post('/api/users/notifications/mark-as-read');
+    await trpcClient.users.pages.notifications.markAsRead.mutate();
   } catch (error: any) {
     handleError(error);
   }
@@ -137,17 +136,9 @@ async function onBeforeShow() {
 
 async function onLoad(index: number, done: (stop?: boolean) => void) {
   try {
-    const notifications = (
-      await api().post<{
-        notifications: {
-          items: DeepNotesNotification[];
-
-          hasMore: boolean;
-        };
-      }>('/api/users/notifications/load', {
-        lastNotificationId: pagesStore().notifications.items.at(-1)?.id,
-      })
-    ).data.notifications;
+    const notifications = await trpcClient.users.pages.notifications.load.query(
+      { lastNotificationId: pagesStore().notifications.items.at(-1)?.id },
+    );
 
     pagesStore().notifications.items.push(...notifications.items);
     pagesStore().notifications.hasMore = notifications.hasMore;

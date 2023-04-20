@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
 
-import { isCtrlDown } from './code/utils';
+import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
   title: 'DeepNotes - The next level of note-taking',

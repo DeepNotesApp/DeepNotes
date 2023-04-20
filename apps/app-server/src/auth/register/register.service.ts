@@ -1,8 +1,8 @@
 import { hashUserEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { Injectable } from '@nestjs/common';
+import { mainLogger } from '@stdlib/misc';
 import { createUser } from 'src/deep-utils';
-import { mainLogger } from 'src/logger';
 import { sendMail } from 'src/mail';
 
 import type { EndpointValues } from './register.controller';
@@ -45,7 +45,7 @@ export class RegisterService {
         `,
       });
     } catch (error) {
-      mainLogger().error('Email sending error: %o', error);
+      mainLogger.error('Email sending error: %o', error);
     }
   }
 }

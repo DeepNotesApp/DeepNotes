@@ -4,9 +4,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { base64ToBytes } from '@stdlib/base64';
 import { getPasswordHashValues } from '@stdlib/crypto';
 import { equalUint8Arrays } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import type { FastifyRequest } from 'fastify';
 import { derivePasswordValues } from 'src/crypto';
-import { mainLogger } from 'src/logger';
 import { decryptUserRehashedLoginHash } from 'src/utils';
 
 export function makePasswordGuard(
@@ -15,7 +15,7 @@ export function makePasswordGuard(
   @Injectable()
   class PasswordGuard implements CanActivate {
     async canActivate(context: ExecutionContext) {
-      mainLogger().sub('account/PasswordGuard.canActivate').info('Checking');
+      mainLogger.sub('account/PasswordGuard.canActivate').info('Checking');
 
       const request = context.switchToHttp().getRequest<FastifyRequest>();
 

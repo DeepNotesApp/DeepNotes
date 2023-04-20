@@ -54,11 +54,13 @@ const status = ref<boolean | undefined>(undefined);
 
 onMounted(async () => {
   try {
-    await api().post(`/auth/verify-email/${route().value.params.code}`, {});
+    await trpcClient.users.account.verifyEmail.mutate({
+      emailVerificationCode: route().value.params.code as string,
+    });
 
     status.value = true;
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
 
     status.value = false;
   }

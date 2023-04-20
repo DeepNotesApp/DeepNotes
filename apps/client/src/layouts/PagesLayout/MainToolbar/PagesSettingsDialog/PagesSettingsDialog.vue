@@ -125,7 +125,7 @@
 <script setup lang="ts">
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GeneralTab from './GeneralTab.vue';
@@ -152,13 +152,7 @@ const mounted = ref(false);
 
 onMounted(async () => {
   try {
-    const request = (
-      await api().post<{
-        groupIds: string[];
-      }>('/api/users/load-settings')
-    ).data;
-
-    groupIds.value = request.groupIds;
+    groupIds.value = await trpcClient.users.pages.getGroupIds.query();
 
     await watchUntilTrue(() => !internals.realtime.loading);
 

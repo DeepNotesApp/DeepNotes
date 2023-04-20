@@ -1,117 +1,146 @@
 import type { GroupRoleID } from '@deeplib/misc';
-import { bytesToBase64 } from '@stdlib/base64';
-import { bytesToBase64Safe } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
+import type {
+  sendProcedureStep1,
+  sendProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/send';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { requestWithNotifications } from 'src/code/pages/utils';
+import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function sendJoinInvitation(
-  groupId: string,
-  {
-    inviteeUserId,
-    inviteeRole,
-    inviteeUserName,
-  }: {
-    inviteeUserId: string;
-    inviteeRole: GroupRoleID;
-    inviteeUserName: string;
-  },
-) {
-  if (inviteeUserId == null) {
+export async function sendJoinInvitation(input: {
+  groupId: string;
+  inviteeUserId: string;
+  inviteeRole: GroupRoleID;
+  inviteeUserName: string;
+}) {
+  if (input.inviteeUserId == null) {
     throw new Error('User not found.');
   }
 
-  const [
-    inviteePublicKeyring,
-    groupPublicKeyring,
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.joinRequests.send`,
 
-    accessKeyring,
-    groupInternalKeyring,
+    steps: [step1, step2, step3],
+  });
 
-    groupName,
-    agentName,
-  ] = await Promise.all([
-    (async () =>
-      createPublicKeyring(
-        await internals.realtime.hget('user', inviteeUserId, 'public-keyring'),
-      ))(),
-    (async () =>
-      createPublicKeyring(
-        await internals.realtime.hget('group', groupId, 'public-keyring'),
-      ))(),
+  async function step1(): Promise<
+    typeof sendProcedureStep1['_def']['_input_in']
+  > {
+    const [
+      inviteePublicKeyring,
+      groupPublicKeyring,
 
-    groupAccessKeyrings()(groupId).getAsync(),
-    groupInternalKeyrings()(groupId).getAsync(),
+      accessKeyring,
+      groupInternalKeyring,
+    ] = await Promise.all([
+      (async () =>
+        createKeyring(
+          await internals.realtime.hget(
+            'user',
+            input.inviteeUserId,
+            'public-keyring',
+          ),
+        ))(),
+      (async () =>
+        createKeyring(
+          await internals.realtime.hget(
+            'group',
+            input.groupId,
+            'public-keyring',
+          ),
+        ))(),
 
-    groupNames()(groupId).getAsync(),
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-  ]);
+      groupAccessKeyrings()(input.groupId).getAsync(),
+      groupInternalKeyrings()(input.groupId).getAsync(),
+    ]);
 
-  if (accessKeyring == null || groupInternalKeyring == null) {
-    throw new Error('Group keyrings not found.');
+    if (accessKeyring == null || groupInternalKeyring == null) {
+      throw new Error('Group keyrings not found.');
+    }
+
+    return {
+      groupId: input.groupId,
+
+      patientId: input.inviteeUserId,
+      invitationRole: input.inviteeRole,
+
+      encryptedAccessKeyring: accessKeyring.wrapAsymmetric(
+        internals.keyPair,
+        inviteePublicKeyring,
+      ).wrappedValue,
+      encryptedInternalKeyring: groupInternalKeyring.wrapAsymmetric(
+        internals.keyPair,
+        inviteePublicKeyring,
+      ).wrappedValue,
+
+      userEncryptedName: internals.keyPair.encrypt(
+        textToBytes(input.inviteeUserName),
+        groupPublicKeyring,
+        { padding: true },
+      ),
+    };
   }
 
-  await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/send`,
+  async function step2(
+    input_: typeof sendProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof sendProcedureStep2['_def']['_input_in']> {
+    const [groupName, agentName] = await Promise.all([
+      groupNames()(input.groupId).getAsync(),
+      groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    ]);
 
-    body: {
-      patientId: inviteeUserId,
-      invitationRole: inviteeRole,
+    return {
+      notifications: await createNotifications({
+        recipients: input_.notificationRecipients,
 
-      encryptedAccessKeyring: bytesToBase64(
-        accessKeyring.wrapAsymmetric(internals.keyPair, inviteePublicKeyring)
-          .fullValue,
-      ),
-      encryptedInternalKeyring: bytesToBase64(
-        groupInternalKeyring.wrapAsymmetric(
-          internals.keyPair,
-          inviteePublicKeyring,
-        ).fullValue,
-      ),
+        patientId: input.inviteeUserId,
 
-      userEncryptedName: bytesToBase64Safe(
-        internals.keyPair.encrypt(
-          textToBytes(inviteeUserName),
-          groupPublicKeyring,
-          { padding: true },
-        ),
-      ),
-    },
+        notifications: {
+          agent: {
+            groupId: input.groupId,
 
-    patientId: inviteeUserId,
+            patientId: input.inviteeUserId,
+            groupName: groupName.text,
+            targetName: input.inviteeUserName,
 
-    notifications: {
-      agent: {
-        groupId: groupId,
+            // You invited ${targetName} to join the group.
+          },
 
-        patientId: inviteeUserId,
-        groupName: groupName.text,
-        targetName: inviteeUserName,
+          target: {
+            groupId: input.groupId,
 
-        // You invited ${targetName} to join the group.
-      },
+            groupName: groupName.text,
 
-      target: {
-        groupId: groupId,
+            // Your were invited to join the group.
+          },
 
-        groupName: groupName.text,
+          observers: {
+            groupId: input.groupId,
 
-        // Your were invited to join the group.
-      },
+            groupName: groupName.text,
+            agentName: agentName.text,
+            targetName: input.inviteeUserName,
 
-      observers: {
-        groupId: groupId,
+            // ${agentName} invited ${targetName} to join the group.
+          },
+        },
+      }),
+    };
+  }
 
-        groupName: groupName.text,
-        agentName: agentName.text,
-        targetName: inviteeUserName,
+  async function step3(
+    _input: typeof sendProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
 
-        // ${agentName} invited ${targetName} to join the group.
-      },
-    },
-  });
+  return promise;
 }

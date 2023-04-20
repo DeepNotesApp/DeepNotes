@@ -21,8 +21,8 @@ export class PageEditing {
 
   readonly react: UnwrapNestedRefs<IEditingReact>;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = reactive({
       elemId: null,

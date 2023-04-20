@@ -125,7 +125,7 @@ import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
+import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import ChangeRoleDialog from './ChangeRoleDialog.vue';
@@ -238,7 +238,8 @@ async function removeSelectedUsers() {
     for (const userId of finalSelectedUserIds.value.filter(
       (userId) => userId !== authStore().userId,
     )) {
-      await removeGroupUser(groupId, {
+      await removeGroupUser({
+        groupId,
         patientId: userId,
       });
     }
@@ -246,7 +247,8 @@ async function removeSelectedUsers() {
     await rotateGroupKeys(groupId);
 
     if (finalSelectedUserIds.value.includes(authStore().userId)) {
-      await removeGroupUser(groupId, {
+      await removeGroupUser({
+        groupId,
         patientId: authStore().userId,
       });
     }

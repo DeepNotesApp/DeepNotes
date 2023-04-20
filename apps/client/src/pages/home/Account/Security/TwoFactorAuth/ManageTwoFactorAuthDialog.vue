@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { BREAKPOINT_SM_MIN, sleep } from '@stdlib/misc';
 import QRCode from 'qrcode';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
@@ -120,7 +120,7 @@ import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const props = defineProps<{
-  loginHash: string;
+  loginHash: Uint8Array;
   secret: string;
   keyUri: string;
 }>();
@@ -154,10 +154,9 @@ async function forgetTrustedDevices() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post(
-      '/api/users/account/security/two-factor-auth/untrust-devices',
-      { loginHash: props.loginHash },
-    );
+    await trpcClient.users.account.twoFactorAuth.forgetDevices.mutate({
+      loginHash: props.loginHash,
+    });
 
     $quasar().notify({
       message: 'All devices have been untrusted.',
@@ -180,20 +179,16 @@ async function regenerateRecoveryCodes() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const recoveryCodes = (
-      await api().post<{
-        recoveryCodes: string[];
-      }>(
-        '/api/users/account/security/two-factor-auth/generate-recovery-codes',
+    const recoveryCodes =
+      await trpcClient.users.account.twoFactorAuth.generateRecoveryCodes.mutate(
         { loginHash: props.loginHash },
-      )
-    ).data.recoveryCodes;
+      );
 
     $quasar().dialog({
       component: RecoveryCodeDialog,
 
       componentProps: {
-        recoveryCodes: recoveryCodes,
+        recoveryCodes,
       },
     });
   } catch (error: any) {
@@ -213,10 +208,9 @@ async function disableTwoFactorAuth() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await api().post<void>(
-      '/api/users/account/security/two-factor-auth/disable',
-      { loginHash: props.loginHash },
-    );
+    await trpcClient.users.account.twoFactorAuth.disable.mutate({
+      loginHash: props.loginHash,
+    });
 
     $quasar().notify({
       message: 'Two-factor authentication has been disabled.',

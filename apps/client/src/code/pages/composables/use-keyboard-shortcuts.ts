@@ -1,5 +1,5 @@
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useKeyboardShortcuts() {
   const page = computed(() => internals.pages?.react?.page);
@@ -13,7 +13,7 @@ export function useKeyboardShortcuts() {
   });
 
   async function onKeyDown(event: KeyboardEvent): Promise<any> {
-    mainLogger().info(`Keydown: ${event.code}`);
+    mainLogger.info(`Keydown: ${event.code}`);
 
     if (page.value == null) {
       return;

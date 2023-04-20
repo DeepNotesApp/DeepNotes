@@ -30,8 +30,8 @@ export class PageSelection {
 
   readonly react: UnwrapNestedRefs<ISelectionReact>;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = reactive({
       noteSet: {},

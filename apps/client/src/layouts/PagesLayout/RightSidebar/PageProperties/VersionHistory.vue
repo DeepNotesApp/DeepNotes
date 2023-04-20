@@ -87,7 +87,7 @@ import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/rest
 import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
@@ -109,7 +109,9 @@ async function restoreVersion(snapshotId: string) {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await restorePageSnapshot(page.value.id, snapshotId, {
+    await restorePageSnapshot({
+      pageId: page.value.id,
+      snapshotId,
       groupId: page.value.react.groupId,
       doc: page.value.collab.doc,
     });
@@ -135,7 +137,8 @@ async function saveVersion() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await savePageSnapshot(page.value.id, {
+    await savePageSnapshot({
+      pageId: page.value.id,
       groupId: page.value.react.groupId,
       doc: page.value.collab.doc,
     });

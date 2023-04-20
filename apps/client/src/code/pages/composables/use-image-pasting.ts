@@ -17,7 +17,7 @@ export function useImagePasting() {
       return;
     }
 
-    mainLogger().sub('useImagePasting').info('Perform');
+    mainLogger.sub('useImagePasting').info('Perform');
 
     for (const file of Array.from(event.clipboardData!.files)) {
       if (!file.type.startsWith('image/')) {

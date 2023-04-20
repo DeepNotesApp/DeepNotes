@@ -35,7 +35,7 @@ import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/del
 import { restorePageDeletion } from 'src/code/api-interface/pages/deletion/restore';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const page = inject<Page>('page')!;
 

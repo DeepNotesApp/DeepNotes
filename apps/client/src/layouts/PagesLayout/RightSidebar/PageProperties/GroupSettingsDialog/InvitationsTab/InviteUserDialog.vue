@@ -74,7 +74,7 @@ import { maxNameLength, roles, rolesMap } from '@deeplib/misc';
 import { isNanoID, maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { sendJoinInvitation } from 'src/code/api-interface/groups/join-invitations/send';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import { z } from 'zod';
 
@@ -140,7 +140,8 @@ async function inviteUser() {
       );
     }
 
-    await sendJoinInvitation(props.groupId, {
+    await sendJoinInvitation({
+      groupId: props.groupId,
       inviteeUserId,
       inviteeUserName: userName.value,
       inviteeRole: role.value,

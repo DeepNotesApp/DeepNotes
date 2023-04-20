@@ -10,6 +10,7 @@ export * from './emails';
 export * from './geometry';
 export * from './hash';
 export * from './line';
+export * from './logger';
 export * from './math';
 export * from './nanoid';
 export * from './node-colors';

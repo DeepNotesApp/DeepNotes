@@ -6,10 +6,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { mainLogger } from '@stdlib/misc';
 
 import { AppModule } from './app.module';
 import { initKnex } from './data/knex';
-import { mainLogger } from './logger';
 
 initKnex();
 
@@ -25,7 +25,7 @@ async function bootstrap() {
 
       cors: {
         origin: (requestOrigin, callback) => {
-          mainLogger().sub('CORS').info('Origin: %s', requestOrigin);
+          mainLogger.sub('CORS').info('Origin: %s', requestOrigin);
 
           if (
             process.env.DEV ||
@@ -54,5 +54,8 @@ async function bootstrap() {
   );
 
   await app.listen(parseInt(process.env.APP_SERVER_PORT), '0.0.0.0');
+
+  mainLogger.info(`app-server started on port ${process.env.APP_SERVER_PORT}`);
 }
+
 void bootstrap();

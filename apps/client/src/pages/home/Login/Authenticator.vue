@@ -50,10 +50,9 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { login } from 'src/code/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const authType = inject('authType') as Ref<string>;
@@ -72,27 +71,14 @@ async function onSubmit() {
 
     const derivedKeys = await deriveUserValues(email.value, password.value);
 
-    const response = (
-      await api().post<{
-        publicKeyring: string;
-        encryptedPrivateKeyring: string;
-        encryptedSymmetricKeyring: string;
+    const response = await trpcClient.sessions.login.mutate({
+      email: email.value,
+      loginHash: derivedKeys.loginHash,
 
-        sessionKey: string;
-
-        personalGroupId: string;
-
-        userId: string;
-        sessionId: string;
-      }>('/auth/login', {
-        email: email.value,
-        loginHash: bytesToBase64(derivedKeys.loginHash),
-
-        authenticatorToken: authenticatorToken.value,
-        rememberDevice: rememberDevice.value,
-        rememberSession: rememberSession.value,
-      })
-    ).data;
+      authenticatorToken: authenticatorToken.value,
+      rememberDevice: rememberDevice.value,
+      rememberSession: rememberSession.value,
+    });
 
     await login({
       ...response,

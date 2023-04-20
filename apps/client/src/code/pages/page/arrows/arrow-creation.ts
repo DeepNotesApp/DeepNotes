@@ -2,7 +2,7 @@ import { listenPointerEvents } from '@stdlib/misc';
 import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 import { prosemirrorJSONToYXmlFragment } from 'y-prosemirror';
 
 import { ISerialArrow } from '../../serialization';
@@ -24,11 +24,11 @@ export class PageArrowCreation {
 
   readonly fakeArrow: PageArrow;
 
-  constructor({ factories, page }: { factories: Factories; page: Page }) {
-    this.page = page;
+  constructor(input: { factories: Factories; page: Page }) {
+    this.page = input.page;
 
-    this.fakeArrow = factories.PageArrow({
-      page,
+    this.fakeArrow = input.factories.PageArrow({
+      page: input.page,
       id: '',
       index: -1,
       collab: reactive(IArrowCollab().parse({})),

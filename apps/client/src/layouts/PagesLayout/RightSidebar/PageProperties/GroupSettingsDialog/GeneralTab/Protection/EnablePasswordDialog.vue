@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;

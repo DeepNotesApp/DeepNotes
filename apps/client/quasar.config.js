@@ -140,6 +140,7 @@ module.exports = configure(function (ctx) {
             'vue-router',
             {
               'src/boot/axios.universal': ['api'],
+              'src/code/trpc': ['trpcClient'],
 
               'src/code/internals': ['internals'],
 
@@ -150,9 +151,10 @@ module.exports = configure(function (ctx) {
                 'pagesStore',
               ],
               'src/code/helpers': ['router', 'route', '$quasar'],
-              'src/code/logger': ['mainLogger'],
 
               'src/components/CustomDialog.vue': [['default', 'CustomDialog']],
+
+              '@stdlib/misc': ['mainLogger'],
 
               quasar: [
                 'useQuasar',

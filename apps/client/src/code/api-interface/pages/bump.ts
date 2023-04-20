@@ -1,8 +1,11 @@
-export async function bumpPage(
-  pageId: string,
-  { parentPageId }: { parentPageId?: string },
-) {
-  await api().post(`/api/pages/${pageId}/bump`, {
-    parentPageId,
+export async function bumpPage(input: {
+  pageId: string;
+
+  parentPageId?: string;
+}) {
+  await trpcClient.pages.bump.mutate({
+    pageId: input.pageId,
+
+    parentPageId: input.parentPageId,
   });
 }

@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
-import { createDoubleClickChecker } from 'src/code/utils';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 import CurveArrow from './Bodies/CurveArrow.vue';
 import LineArrow from './Bodies/LineArrow.vue';

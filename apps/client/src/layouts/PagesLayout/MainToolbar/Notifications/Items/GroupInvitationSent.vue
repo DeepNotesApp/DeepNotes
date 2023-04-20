@@ -45,7 +45,6 @@
 <script setup lang="ts">
 import type { DeepNotesNotification } from '@deeplib/misc';
 import { canManageRole } from '@deeplib/misc';
-import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
@@ -54,7 +53,7 @@ import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitat
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { getGroupInvitationSentNotificationInfo } from 'src/code/pages/notifications/group-invitation-sent';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import type { Ref } from 'vue';
@@ -95,13 +94,11 @@ const canAcceptInvitation = computed(() =>
 
 const notificationContent = computed(() => {
   const symmetricKey = wrapSymmetricKey(
-    internals.keyPair.decrypt(
-      base64ToBytes(props.notification.encryptedSymmetricKey),
-    ),
+    internals.keyPair.decrypt(props.notification.encryptedSymmetricKey),
   );
 
   return unpack(
-    symmetricKey.decrypt(base64ToBytes(props.notification.encryptedContent), {
+    symmetricKey.decrypt(props.notification.encryptedContent, {
       padding: true,
       associatedData: { context: 'UserNotificationContent' },
     }),
@@ -141,7 +138,8 @@ async function _cancelJoinInvitation() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinInvitation(notificationContent.value.groupId, {
+    await cancelJoinInvitation({
+      groupId: notificationContent.value.groupId,
       patientId: notificationContent.value.patientId,
     });
 

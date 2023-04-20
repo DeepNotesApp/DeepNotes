@@ -1,3 +1,3 @@
 export async function deletePage(pageId: string) {
-  await api().post(`/api/pages/${pageId}/deletion/delete`);
+  await trpcClient.pages.deletion.delete.mutate({ pageId });
 }

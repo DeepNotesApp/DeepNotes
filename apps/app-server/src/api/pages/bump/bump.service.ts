@@ -1,9 +1,9 @@
 import { GroupMemberModel, PageLinkModel, PageModel } from '@deeplib/db';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { mainLogger } from '@stdlib/misc';
 import { pull } from 'lodash';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { bumpRecentItem } from 'src/deep-utils';
-import { mainLogger } from 'src/logger';
 
 import type { EndpointValues } from './bump.controller';
 
@@ -27,9 +27,7 @@ export class BumpService {
 
     while (loopCheckPageId != null) {
       if (visitedPageIds.has(loopCheckPageId)) {
-        mainLogger()
-          .sub('api/pages/bump')
-          .info('Loop detected in parent chain');
+        mainLogger.sub('api/pages/bump').info('Loop detected in parent chain');
         return;
       }
 
@@ -45,7 +43,7 @@ export class BumpService {
         )) ?? undefined;
     }
 
-    mainLogger().sub('api/pages/bump').info('No loop detected in parent chain');
+    mainLogger.sub('api/pages/bump').info('No loop detected in parent chain');
 
     // Check that root page is personal group's main page
 

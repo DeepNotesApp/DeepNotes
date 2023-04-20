@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { makeGroupPrivate } from 'src/code/api-interface/groups/privacy/make-private';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
@@ -24,7 +24,7 @@ async function makePrivate() {
       cancel: { label: 'No', flat: true, color: 'primary' },
     });
 
-    await makeGroupPrivate(groupId);
+    await makeGroupPrivate({ groupId });
 
     $quasar().notify({
       message: 'Group is now private.',

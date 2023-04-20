@@ -129,7 +129,7 @@ export const extensions = once(() => [
                           await embedImages(node.content);
                         }
                       } catch (error) {
-                        mainLogger().error(error);
+                        mainLogger.error(error);
                       }
                     })(),
                   );

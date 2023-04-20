@@ -1,10 +1,9 @@
+import { mainLogger } from '@stdlib/misc';
 import { once } from 'lodash';
 import { SocketAuxObject } from 'src/sockets';
 import { Server } from 'ws';
 
-import { mainLogger } from './logger';
-
-const moduleLogger = mainLogger().sub('ws-server.ts');
+const moduleLogger = mainLogger.sub('ws-server.ts');
 
 export const wsServer = once(() => new Server({ noServer: true }));
 

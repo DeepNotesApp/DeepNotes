@@ -1,5 +1,5 @@
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';
 
@@ -62,7 +62,10 @@ export async function getGroupRequestSentNotificationInfo({
                 ok: { label: 'Yes', flat: true, color: 'negative' },
               });
 
-              await rejectJoinRequest(groupId, { patientId: agentId });
+              await rejectJoinRequest({
+                groupId,
+                patientId: agentId,
+              });
             } catch (error) {
               handleError(error);
             }

@@ -11,10 +11,9 @@
 </template>
 
 <script setup lang="ts">
-import { sleep } from '@stdlib/misc';
 import { rotateUserKeys } from 'src/code/api-interface/users/rotate-keys';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 async function _rotateKeys() {
   try {
@@ -50,9 +49,7 @@ async function _rotateKeys() {
       type: 'positive',
     });
 
-    await sleep(2000);
-
-    await logout();
+    setTimeout(logout, 2000);
   } catch (error) {
     handleError(error);
   }

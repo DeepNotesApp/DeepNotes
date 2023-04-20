@@ -1,18 +1,31 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
+import { base64ToBytes } from '@stdlib/base64';
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
   wrapSymmetricKey,
 } from '@stdlib/crypto';
+import type {
+  changePasswordProcedureStep1,
+  changePasswordProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/websocket/users/account/change-password';
 import { deriveUserValues } from 'src/code/crypto';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function changePassword({
-  oldPassword,
-  newPassword,
-}: {
+export async function changePassword(input: {
   oldPassword: string;
   newPassword: string;
 }) {
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/users.account.changePassword`,
+
+    steps: [step1, step2, step3],
+  });
+
+  // Get user email
+
   const email = await internals.realtime.hget(
     'user',
     authStore().userId,
@@ -21,27 +34,24 @@ export async function changePassword({
 
   // Compute derived keys
 
-  const oldDerivedValues = await deriveUserValues(email, oldPassword);
-  const newDerivedValues = await deriveUserValues(email, newPassword);
+  const oldDerivedValues = await deriveUserValues(email, input.oldPassword);
 
-  // Reencrypt derived keys
+  function step1(): typeof changePasswordProcedureStep1['_def']['_input_in'] {
+    return {
+      oldLoginHash: oldDerivedValues.loginHash,
+    };
+  }
 
-  const response = (
-    await api().post<{
-      sessionKey: string;
-    }>('/api/users/account/security/change-password', {
-      oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
-    })
-  ).data;
+  async function step2(
+    input_: typeof changePasswordProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof changePasswordProcedureStep2['_def']['_input_in']> {
+    const newDerivedValues = await deriveUserValues(email, input.newPassword);
 
-  const wrappedSessionKey = wrapSymmetricKey(
-    base64ToBytes(response.sessionKey),
-  );
+    const wrappedSessionKey = wrapSymmetricKey(input_.sessionKey);
 
-  // Reencrypt values
+    // Reencrypt values
 
-  const encryptedPrivateKeyring = bytesToBase64(
-    createPrivateKeyring(
+    const encryptedPrivateKeyring = createPrivateKeyring(
       base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
     )
       .unwrapSymmetric(wrappedSessionKey, {
@@ -55,11 +65,9 @@ export async function changePassword({
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
-  );
+      }).wrappedValue;
 
-  const encryptedSymmetricKeyring = bytesToBase64(
-    createSymmetricKeyring(
+    const encryptedSymmetricKeyring = createSymmetricKeyring(
       base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
     )
       .unwrapSymmetric(wrappedSessionKey, {
@@ -73,16 +81,21 @@ export async function changePassword({
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
-      }).fullValue,
-  );
+      }).wrappedValue;
 
-  // Request password change
+    return {
+      newLoginHash: newDerivedValues.loginHash,
 
-  await api().post('/api/users/account/security/change-password', {
-    oldLoginHash: bytesToBase64(oldDerivedValues.loginHash),
-    newLoginHash: bytesToBase64(newDerivedValues.loginHash),
+      encryptedPrivateKeyring,
+      encryptedSymmetricKeyring,
+    };
+  }
 
-    encryptedPrivateKeyring,
-    encryptedSymmetricKeyring,
-  });
+  async function step3(
+    _input: typeof changePasswordProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

@@ -137,7 +137,7 @@
 
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, isIncluded } from '@stdlib/misc';
-import { useResizeObserver } from 'src/code/utils';
+import { useResizeObserver } from 'src/code/utils/misc';
 import AccountItems from 'src/pages/home/Account/AccountItems.vue';
 import PrivacyPolicyItems from 'src/pages/home/PrivacyPolicy/PrivacyPolicyItems.vue';
 import TermsOfServiceItems from 'src/pages/home/TermsOfService/TermsOfServiceItems.vue';

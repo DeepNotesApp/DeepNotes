@@ -20,10 +20,16 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import type { QInputProps } from 'quasar';
+
+interface Props extends QInputProps {
+  placeholder?: string;
+
   modelValue: string;
   autocomplete: 'current-password' | 'new-password';
-}>();
+}
+
+defineProps<Props>();
 
 const showPassword = ref(false);
 </script>

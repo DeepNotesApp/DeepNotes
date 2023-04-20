@@ -12,22 +12,16 @@ export class DisableService {
     );
   }
 
-  async disableTwoFactorAuth({
-    userId,
-    dtrx,
-  }: {
-    userId: string;
-    dtrx: DataTransaction;
-  }) {
+  async disableTwoFactorAuth(input: { userId: string; dtrx: DataTransaction }) {
     await dataAbstraction().patch(
       'user',
-      userId,
+      input.userId,
       {
         two_factor_auth_enabled: false,
         encrypted_authenticator_secret: null,
         encrypted_recovery_codes: null,
       },
-      { dtrx },
+      { dtrx: input.dtrx },
     );
   }
 }

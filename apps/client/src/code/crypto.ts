@@ -1,5 +1,5 @@
 import type { KeyPair, SymmetricKey } from '@stdlib/crypto';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
@@ -12,7 +12,7 @@ import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 
 import { groupContentKeyrings } from './pages/computed/group-content-keyrings';
 
-const moduleLogger = mainLogger().sub('crypto.client.ts');
+const moduleLogger = mainLogger.sub('crypto.client.ts');
 
 export async function derivePasswordValues(
   password: string | Uint8Array,
@@ -66,7 +66,7 @@ export function generateRandomUserKeys(
 ) {
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
@@ -96,11 +96,7 @@ export function generateRandomUserKeys(
   };
 }
 
-export async function generateGroupValues({
-  userKeyPair,
-  isPublic,
-  password,
-}: {
+export async function generateGroupValues(input: {
   userKeyPair: KeyPair;
   isPublic: boolean;
   password?: string;
@@ -113,7 +109,7 @@ export async function generateGroupValues({
 
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
@@ -122,18 +118,18 @@ export async function generateGroupValues({
 
   let finalAccessKeyring = accessKeyring;
 
-  if (!isPublic) {
+  if (!input.isPublic) {
     finalAccessKeyring = finalAccessKeyring.wrapAsymmetric(
-      userKeyPair,
-      userKeyPair.publicKey,
+      input.userKeyPair,
+      input.userKeyPair.publicKey,
     );
   }
 
   // Internal keyring
 
   const encryptedInternalKeyring = internalKeyring.wrapAsymmetric(
-    userKeyPair,
-    userKeyPair.publicKey,
+    input.userKeyPair,
+    input.userKeyPair.publicKey,
   );
 
   // Content keyring
@@ -142,8 +138,8 @@ export async function generateGroupValues({
 
   let passwordValues;
 
-  if (password != null) {
-    passwordValues = await computeGroupPasswordValues(groupId, password);
+  if (input.password != null) {
+    passwordValues = await computeGroupPasswordValues(groupId, input.password);
 
     encryptedContentKeyring = encryptedContentKeyring.wrapSymmetric(
       passwordValues.passwordKey,

@@ -24,8 +24,8 @@ export class NoteDragging {
 
   private _cancelPointerEvents?: () => void;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = refProp<IDraggingReact>(this, 'react', {
       active: false,

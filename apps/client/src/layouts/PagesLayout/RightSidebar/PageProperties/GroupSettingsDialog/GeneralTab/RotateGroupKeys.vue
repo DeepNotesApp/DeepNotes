@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 

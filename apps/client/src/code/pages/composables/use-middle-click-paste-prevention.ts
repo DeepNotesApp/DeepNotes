@@ -5,7 +5,7 @@ export function useMiddleClickPastePrevention() {
 
   function onAuxClick(event: MouseEvent) {
     if (event.button === 1) {
-      mainLogger()
+      mainLogger
         .sub('useMiddleClickPastePrevention')
         .info('Prevent middle click paste');
 

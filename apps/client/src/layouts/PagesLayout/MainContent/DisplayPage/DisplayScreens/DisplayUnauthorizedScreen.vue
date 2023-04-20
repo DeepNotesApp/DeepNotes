@@ -66,8 +66,8 @@
 import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
-import { multiModePath } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { multiModePath } from 'src/code/utils/misc';
 
 import RequestAccessDialog from './RequestAccessDialog.vue';
 

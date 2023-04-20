@@ -4,8 +4,8 @@ import type { Page } from '../page';
 export class NoteCloning {
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   async perform() {

@@ -4,8 +4,17 @@
   "compilerOptions": {
     "baseUrl": ".",
 
-    "rootDir": "."
+    "rootDir": "src",
+    "outDir": "dist"
   },
 
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

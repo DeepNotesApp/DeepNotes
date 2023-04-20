@@ -45,7 +45,7 @@ async function onClick(args: any[], attrs: any) {
   try {
     await attrs.onClick(...args);
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
   }
 
   loading.value = false;

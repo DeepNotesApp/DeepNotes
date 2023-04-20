@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { disableGroupPasswordProtection } from 'src/code/api-interface/groups/password/disable';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
@@ -29,7 +29,10 @@ async function disablePasswordProtection() {
       cancel: true,
     });
 
-    await disableGroupPasswordProtection(groupId, { groupPassword });
+    await disableGroupPasswordProtection({
+      groupId,
+      groupPassword,
+    });
 
     $quasar().notify({
       message: 'Group password protection disabled successfully.',

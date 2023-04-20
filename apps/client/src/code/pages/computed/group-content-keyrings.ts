@@ -7,7 +7,7 @@ import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 
 import { groupAccessKeyrings } from './group-access-keyrings';
 
-const _moduleLogger = once(() => mainLogger().sub('groupContentKeyrings'));
+const _moduleLogger = once(() => mainLogger.sub('groupContentKeyrings'));
 
 export const groupContentKeyrings = once(() =>
   createSmartComputedDict({

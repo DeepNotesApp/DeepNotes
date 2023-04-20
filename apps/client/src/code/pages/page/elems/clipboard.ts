@@ -18,8 +18,8 @@ export class PageClipboard {
 
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   copy() {
@@ -168,7 +168,7 @@ export class PageClipboard {
         type: 'negative',
       });
 
-      mainLogger().error(error);
+      mainLogger.error(error);
     }
   }
 

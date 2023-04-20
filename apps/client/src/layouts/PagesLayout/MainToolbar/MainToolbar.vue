@@ -158,7 +158,7 @@
 
 <script setup lang="ts">
 import { isIncluded } from '@stdlib/misc';
-import { multiModePath, useResizeObserver } from 'src/code/utils';
+import { multiModePath, useResizeObserver } from 'src/code/utils/misc';
 
 import AccountPopup from './AccountPopup.vue';
 import AlignmentBtns from './AlignmentBtns.vue';

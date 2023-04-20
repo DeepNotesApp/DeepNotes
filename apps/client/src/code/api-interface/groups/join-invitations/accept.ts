@@ -1,47 +1,76 @@
-import { bytesToBase64 } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import { requestWithNotifications } from 'src/code/pages/utils';
+import type {
+  acceptProcedureStep1,
+  acceptProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/accept';
+import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function acceptJoinInvitation(
-  groupId: string,
-  {
-    userName,
-  }: {
-    userName: string;
-  },
-) {
-  const groupPublicKeyring = createPublicKeyring(
-    await internals.realtime.hget('group', groupId, 'public-keyring'),
-  );
+export async function acceptJoinInvitation(input: {
+  groupId: string;
+  userName: string;
+}) {
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.joinInvitations.accept`,
 
-  const userEncryptedName = bytesToBase64(
-    internals.keyPair.encrypt(textToBytes(userName), groupPublicKeyring, {
-      padding: true,
-    }),
-  );
-
-  await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-invitations/accept`,
-
-    body: {
-      userEncryptedName,
-    },
-
-    notifications: {
-      agent: {
-        groupId,
-
-        // You have accepted the invitation to join the group.
-      },
-
-      observers: {
-        groupId,
-
-        agentName: userName,
-
-        // ${agentName} has accepted the invitation to join the group.
-      },
-    },
+    steps: [step1, step2, step3],
   });
+
+  async function step1(): Promise<
+    typeof acceptProcedureStep1['_def']['_input_in']
+  > {
+    const groupPublicKeyring = createKeyring(
+      await internals.realtime.hget('group', input.groupId, 'public-keyring'),
+    );
+
+    const userEncryptedName = internals.keyPair.encrypt(
+      textToBytes(input.userName),
+      groupPublicKeyring,
+      { padding: true },
+    );
+
+    return {
+      groupId: input.groupId,
+
+      userEncryptedName,
+    };
+  }
+
+  async function step2(
+    input_: typeof acceptProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof acceptProcedureStep2['_def']['_input_in']> {
+    return {
+      notifications: await createNotifications({
+        recipients: input_.notificationRecipients,
+
+        notifications: {
+          agent: {
+            groupId: input.groupId,
+
+            // You have accepted the invitation to join the group.
+          },
+
+          observers: {
+            groupId: input.groupId,
+
+            agentName: input.userName,
+
+            // ${agentName} has accepted the invitation to join the group.
+          },
+        },
+      }),
+    };
+  }
+
+  async function step3(
+    _input: typeof acceptProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

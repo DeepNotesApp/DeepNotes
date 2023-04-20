@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { changeGroupPasswordProtection } from 'src/code/api-interface/groups/password/change';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
@@ -44,7 +44,8 @@ async function changeGroupPassword() {
       cancel: true,
     });
 
-    await changeGroupPasswordProtection(groupId, {
+    await changeGroupPasswordProtection({
+      groupId,
       currentGroupPassword,
       newGroupPassword,
     });

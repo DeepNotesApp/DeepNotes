@@ -14,8 +14,8 @@ export class PagePanning {
 
   cancelPointerEvents?: () => void;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   start(event: PointerEvent) {

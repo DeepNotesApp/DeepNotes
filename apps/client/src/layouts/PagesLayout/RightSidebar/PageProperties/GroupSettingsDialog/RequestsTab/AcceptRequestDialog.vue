@@ -61,7 +61,7 @@ import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { acceptJoinRequest } from 'src/code/api-interface/groups/join-requests/accept';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const props = defineProps<{
@@ -100,7 +100,8 @@ async function _acceptJoinRequest() {
     }
 
     for (const userId of props.userIds) {
-      await acceptJoinRequest(props.groupId, {
+      await acceptJoinRequest({
+        groupId: props.groupId,
         patientId: userId,
         targetRole: targetRole.value!,
       });

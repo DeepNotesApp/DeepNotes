@@ -35,5 +35,5 @@
 
 <script setup lang="ts">
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import { multiModePath } from 'src/code/utils';
+import { multiModePath } from 'src/code/utils/misc';
 </script>

@@ -6,18 +6,29 @@
   "compilerOptions": {
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
 
+      "@deeplib/*": ["../../../packages/@deeplib/*/src"],
       "@stdlib/*": ["../../../packages/@stdlib/*/src"]
     }
   },
 
   "references": [
-    { "path": "../../../packages/@stdlib/data/tsconfig.build.json" }
+    { "path": "../../../packages/@deeplib/misc/tsconfig.json" },
+    { "path": "../../../packages/@stdlib/data/tsconfig.json" }
   ],
 
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

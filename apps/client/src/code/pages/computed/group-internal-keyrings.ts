@@ -2,7 +2,7 @@ import { createSymmetricKeyring, DataLayer } from '@stdlib/crypto';
 import { createSmartComputedDict } from '@stdlib/vue';
 import { once } from 'lodash';
 
-const _moduleLogger = once(() => mainLogger().sub('groupInternalKeyrings'));
+const _moduleLogger = once(() => mainLogger.sub('groupInternalKeyrings'));
 
 export const groupInternalKeyrings = once(() =>
   createSmartComputedDict({

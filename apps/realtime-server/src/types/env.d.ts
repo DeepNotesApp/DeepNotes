@@ -8,6 +8,9 @@ declare namespace NodeJS {
     APP_SERVER_PORT: string;
     APP_SERVER_URL: string;
 
+    APP_SERVER_TRPC_PORT: string;
+    APP_SERVER_TRPC_URL: string;
+
     CLIENT_PORT: string;
     CLIENT_URL: string;
 

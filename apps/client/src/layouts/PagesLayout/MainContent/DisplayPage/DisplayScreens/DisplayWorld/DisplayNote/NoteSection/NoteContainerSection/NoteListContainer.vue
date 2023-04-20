@@ -114,14 +114,14 @@
 </template>
 
 <script setup lang="ts">
-import { mainLogger } from 'src/code/logger';
+import { mainLogger } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import {
   createDoubleClickChecker,
   debounceTick,
   useResizeObserver,
-} from 'src/code/utils';
+} from 'src/code/utils/misc';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';
@@ -131,7 +131,7 @@ import NoteDropZone from '../../NoteDropZones/NoteDropZone.vue';
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;
 
-const logger = mainLogger().sub('NoteListContainer');
+const logger = mainLogger.sub('NoteListContainer');
 
 const checkDoubleClick = createDoubleClickChecker();
 

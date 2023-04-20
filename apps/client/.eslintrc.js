@@ -77,6 +77,7 @@ module.exports = {
     'src-capacitor',
     'src-electron',
     'src-ssr',
+    'public/argon2-bundled.min.js',
   ],
 
   // add your custom rules here

@@ -1,4 +1,3 @@
-import { bytesToBase64 } from '@stdlib/base64';
 import { DataLayer } from '@stdlib/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 
@@ -9,7 +8,9 @@ export async function makeGroupPublic(groupId: string) {
     throw new Error('Invalid group keyring.');
   }
 
-  await api().post(`/api/groups/${groupId}/privacy/make-public`, {
-    accessKeyring: bytesToBase64(accessKeyring.fullValue),
+  await trpcClient.groups.privacy.makePublic.mutate({
+    groupId,
+
+    accessKeyring: accessKeyring.wrappedValue,
   });
 }

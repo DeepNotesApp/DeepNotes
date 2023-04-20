@@ -28,7 +28,7 @@
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
-import { createDoubleClickChecker, isCtrlDown } from 'src/code/utils';
+import { createDoubleClickChecker, isCtrlDown } from 'src/code/utils/misc';
 
 import DisplayGrid from './DisplayGrid.vue';
 

@@ -37,7 +37,7 @@ import {
 } from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 const newEmail = ref('');
 
@@ -84,7 +84,13 @@ async function _changeEmail() {
 
     // Compute derived keys
 
-    const oldDerivedValues = await deriveUserValues(currentEmail!, password);
+    const oldDerivedValues = await deriveUserValues(currentEmail, password);
+
+    await trpcClient.users.account.emailChange.request.mutate({
+      oldLoginHash: oldDerivedValues.loginHash,
+
+      newEmail: newEmail.value,
+    });
 
     await requestEmailChange({
       newEmail: newEmail.value,

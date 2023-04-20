@@ -151,7 +151,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { enterDemo } from 'src/code/auth/demo';
 import { getRegistrationValues } from 'src/code/auth/register';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 useMeta(() => ({
   title: 'Register - DeepNotes',
@@ -219,12 +219,21 @@ async function register() {
       );
     }
 
-    const derivedKeys = await deriveUserValues(email.value, password.value);
+    const derivedUserValues = await deriveUserValues(
+      email.value,
+      password.value,
+    );
 
-    await api().post('/auth/register', {
+    const registrationValues = await getRegistrationValues({
+      derivedUserValues,
+      userName: userName.value,
+    });
+
+    await trpcClient.users.account.register.mutate({
       email: email.value,
+      loginHash: derivedUserValues.loginHash,
 
-      ...(await getRegistrationValues(derivedKeys, userName.value)),
+      ...registrationValues,
     });
 
     internals.sessionStorage.setItem('email', email.value);

@@ -44,7 +44,7 @@ import type {
   PageNote,
 } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { createDoubleClickChecker } from 'src/code/utils';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 const props = defineProps<{
   side: NoteSide;

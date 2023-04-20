@@ -5,8 +5,8 @@ import type { Page } from '../page';
 export class PagePos {
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   get rects() {

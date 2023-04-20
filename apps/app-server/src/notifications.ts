@@ -60,8 +60,6 @@ export async function notifyUsers(
           ).id as any,
         );
 
-        const encryptedContentBase64 = bytesToBase64(encryptedContent);
-
         await Promise.all(
           objEntries(recipients).map(
             async ([userId, { encryptedSymmetricKey }]) => {
@@ -79,8 +77,8 @@ export async function notifyUsers(
 
                   type,
 
-                  encryptedSymmetricKey: bytesToBase64(encryptedSymmetricKey),
-                  encryptedContent: encryptedContentBase64,
+                  encryptedSymmetricKey: encryptedSymmetricKey,
+                  encryptedContent: encryptedContent,
 
                   dateTime,
                 } as DeepNotesNotification),

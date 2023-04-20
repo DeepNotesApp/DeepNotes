@@ -1,39 +1,23 @@
-import { bytesToBase64 } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import sodium from 'libsodium-wrappers';
 
 import type { deriveUserValues } from '../crypto';
+import { trpcClient } from '../trpc';
 import { login } from './login';
 import { getRegistrationValues } from './register';
 
 export async function enterDemo() {
-  const derivedKeys: Awaited<ReturnType<typeof deriveUserValues>> = {
+  const derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>> = {
     loginHash: sodium.randombytes_buf(64),
     masterKey: wrapSymmetricKey(sodium.randombytes_buf(32)),
   };
 
-  const response = (
-    await api().post<{
-      twoFactorAuth: boolean;
-
-      publicKeyring: string;
-      encryptedPrivateKeyring: string;
-      encryptedSymmetricKeyring: string;
-
-      sessionKey: string;
-
-      personalGroupId: string;
-
-      userId: string;
-      sessionId: string;
-    }>('/auth/login', {
-      email: 'demo',
-      loginHash: bytesToBase64(derivedKeys.loginHash),
-      rememberSession: false,
-
-      demo: await getRegistrationValues(derivedKeys, 'Demo'),
-    })
-  ).data;
+  const response = await trpcClient.sessions.startDemo.mutate(
+    await getRegistrationValues({
+      derivedUserValues,
+      userName: 'Demo',
+    }),
+  );
 
   await login({
     ...response,
@@ -41,6 +25,6 @@ export async function enterDemo() {
     demo: true,
     rememberSession: false,
 
-    masterKey: derivedKeys.masterKey,
+    masterKey: derivedUserValues.masterKey,
   });
 }

@@ -23,9 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';
 import ManageTwoFactorAuthDialog from './ManageTwoFactorAuthDialog.vue';
@@ -53,18 +52,12 @@ async function enableTwoFactorAuth() {
       'email',
     );
 
-    const loginHash = bytesToBase64(
-      (await deriveUserValues(email, password)).loginHash,
-    );
+    const loginHash = (await deriveUserValues(email, password)).loginHash;
 
-    const response = (
-      await api().post<{
-        secret: string;
-        keyUri: string;
-      }>('/api/users/account/security/two-factor-auth/enable/request', {
+    const response =
+      await trpcClient.users.account.twoFactorAuth.enable.request.mutate({
         loginHash,
-      })
-    ).data;
+      });
 
     $quasar().dialog({
       component: EnableTwoFactorAuthDialog,
@@ -105,19 +98,11 @@ async function manageTwoFactorAuth() {
       'email',
     );
 
-    const loginHash = bytesToBase64(
-      (await deriveUserValues(email, password)).loginHash,
-    );
+    const loginHash = (await deriveUserValues(email, password)).loginHash;
 
-    const response = (
-      await api().post<{
-        secret: string;
-        keyUri: string;
-        recoveryCodes: string[];
-      }>('/api/users/account/security/two-factor-auth/load', {
-        loginHash,
-      })
-    ).data;
+    const response = await trpcClient.users.account.twoFactorAuth.load.query({
+      loginHash,
+    });
 
     $quasar().dialog({
       component: ManageTwoFactorAuthDialog,

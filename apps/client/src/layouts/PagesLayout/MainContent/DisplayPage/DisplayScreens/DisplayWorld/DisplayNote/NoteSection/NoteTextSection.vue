@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { createDoubleClickChecker } from 'src/code/utils';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 import NoteEditor from './NoteEditor.vue';
 import NoteSection from './NoteSection.vue';

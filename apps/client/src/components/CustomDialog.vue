@@ -20,14 +20,18 @@
 </template>
 
 <script setup lang="ts">
+import type { QDialogProps } from 'quasar';
+
 defineEmits([...useDialogPluginComponent.emits]);
 
 const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
   useDialogPluginComponent();
 
-defineProps<{
+interface Props extends QDialogProps {
   cardStyle?: any;
-}>();
+}
+
+defineProps<Props>();
 
 defineExpose({
   onDialogHide,

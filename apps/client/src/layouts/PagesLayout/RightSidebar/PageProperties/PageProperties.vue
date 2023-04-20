@@ -116,7 +116,7 @@ import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncPrompt, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
