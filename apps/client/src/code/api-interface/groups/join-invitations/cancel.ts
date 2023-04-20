@@ -8,7 +8,7 @@ import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function cancelJoinRequest(input: {
+export async function cancelJoinInvitation(input: {
   groupId: string;
   patientId: string;
 }) {

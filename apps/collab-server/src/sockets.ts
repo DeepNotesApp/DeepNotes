@@ -6,7 +6,7 @@ import {
   CollabServerDocMessageType,
   rolesMap,
 } from '@deeplib/misc';
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
+import { bytesToBase64 } from '@stdlib/base64';
 import { getSelfPublisherIdBytes } from '@stdlib/data';
 import { patchMultiple } from '@stdlib/db';
 import { addDays, addMinutes, splitStr } from '@stdlib/misc';
@@ -227,7 +227,7 @@ export class SocketAuxObject {
     encoding.writeVarUint(encoder, pageUpdates.length);
 
     for (const pageUpdate of pageUpdates) {
-      encoding.writeVarUint8Array(encoder, base64ToBytes(pageUpdate[1]));
+      encoding.writeVarUint8Array(encoder, pageUpdate[1]);
     }
 
     // Write values for key rotation
