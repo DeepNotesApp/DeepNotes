@@ -1,19 +1,19 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
-import {
-  createPrivateKeyring,
-  createSymmetricKeyring,
-  wrapSymmetricKey,
-} from '@stdlib/crypto';
+import { createPrivateKeyring, createSymmetricKeyring } from '@stdlib/crypto';
+import type {
+  finishProcedureStep1,
+  finishProcedureStep2,
+} from 'deepnotes-app-server-trpc/src/websocket/users/account/email-change/finish';
 import { deriveUserValues } from 'src/code/crypto';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function requestEmailChange(input: {
   newEmail: string;
   oldDerivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
 }) {
-  await api().post('/api/users/account/general/change-email', {
-    newEmail: input.newEmail,
+  await trpcClient.users.account.emailChange.request.mutate({
+    oldLoginHash: input.oldDerivedUserValues.loginHash,
 
-    oldLoginHash: bytesToBase64(input.oldDerivedUserValues.loginHash),
+    newEmail: input.newEmail,
   });
 }
 
@@ -23,36 +23,37 @@ export async function changeEmail(input: {
   oldDerivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
   emailVerificationCode: string;
 }) {
-  const newDerivedUserValues = await deriveUserValues(
-    input.newEmail,
-    input.password,
-  );
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/users.account.emailChange.finish`,
 
-  const response = (
-    await api().post<{
-      sessionKey: string;
-    }>('/api/users/account/general/change-email', {
-      newEmail: input.newEmail,
+    steps: [step1, step2, step3],
+  });
 
-      oldLoginHash: bytesToBase64(input.oldDerivedUserValues.loginHash),
+  function step1(): typeof finishProcedureStep1['_def']['_input_in'] {
+    return {
+      oldLoginHash: input.oldDerivedUserValues.loginHash,
 
       emailVerificationCode: input.emailVerificationCode,
-    })
-  ).data;
+    };
+  }
 
-  const wrappedSessionKey = wrapSymmetricKey(
-    base64ToBytes(response.sessionKey),
-  );
+  async function step2(
+    input_: typeof finishProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof finishProcedureStep2['_def']['_input_in']> {
+    const newDerivedUserValues = await deriveUserValues(
+      input.newEmail,
+      input.password,
+    );
 
-  // Reencrypt values
-
-  const encryptedPrivateKeyring = bytesToBase64(
-    createPrivateKeyring(
-      base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
+    const newEncryptedPrivateKeyring = createPrivateKeyring(
+      input_.encryptedPrivateKeyring,
     )
-      .unwrapSymmetric(wrappedSessionKey, {
+      .unwrapSymmetric(input.oldDerivedUserValues.masterKey, {
         associatedData: {
-          context: 'SessionUserPrivateKeyring',
+          context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
       })
@@ -61,16 +62,13 @@ export async function changeEmail(input: {
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
-      }).wrappedValue,
-  );
-
-  const encryptedSymmetricKeyring = bytesToBase64(
-    createSymmetricKeyring(
-      base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
+      }).wrappedValue;
+    const newEncryptedSymmetricKeyring = createSymmetricKeyring(
+      input_.encryptedSymmetricKeyring,
     )
-      .unwrapSymmetric(wrappedSessionKey, {
+      .unwrapSymmetric(input.oldDerivedUserValues.masterKey, {
         associatedData: {
-          context: 'SessionUserSymmetricKeyring',
+          context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
       })
@@ -79,24 +77,21 @@ export async function changeEmail(input: {
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
-      }).wrappedValue,
-  );
+      }).wrappedValue;
 
-  // Request email change
+    return {
+      newLoginHash: newDerivedUserValues.loginHash,
 
-  await api().post('/api/users/account/general/change-email', {
-    newEmail: input.newEmail,
-
-    oldLoginHash: bytesToBase64(newDerivedUserValues.loginHash),
-    newLoginHash: bytesToBase64(newDerivedUserValues.loginHash),
-
-    encryptedPrivateKeyring,
-    encryptedSymmetricKeyring,
-
-    emailVerificationCode: input.emailVerificationCode,
-  });
-
-  if (internals.localStorage.getItem('email') != null) {
-    internals.localStorage.setItem('email', input.newEmail);
+      newEncryptedSymmetricKeyring,
+      newEncryptedPrivateKeyring,
+    };
   }
+
+  async function step3(
+    _input: typeof finishProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }
