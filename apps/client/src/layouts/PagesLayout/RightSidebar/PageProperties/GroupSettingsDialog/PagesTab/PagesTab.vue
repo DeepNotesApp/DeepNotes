@@ -166,14 +166,11 @@ function select(id: string, event: MouseEvent) {
 
 async function onLoad(index: number, done: (stop?: boolean) => void) {
   try {
-    const response = (
-      await api().post<{
-        pageIds: string[];
-        hasMore: boolean;
-      }>(`/api/groups/${groupId}/load-pages`, {
-        lastPageId: basePageIds.value.at(-1),
-      })
-    ).data;
+    const response = await trpcClient.groups.getPages.query({
+      groupId,
+
+      lastPageId: basePageIds.value.at(-1),
+    });
 
     basePageIds.value.push(...response.pageIds);
     hasMorePages.value = response.hasMore;
