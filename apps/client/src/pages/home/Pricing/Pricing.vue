@@ -110,25 +110,14 @@
           @click="createCheckoutSession()"
         />
 
-        <form
+        <DeepBtn
           v-else
-          :action="`${appServerURL}/api/stripe/create-portal-session`"
-          method="POST"
-          style="display: flex"
-        >
-          <input
-            type="hidden"
-            name="returnUrl"
-            :value="global.location?.href"
-          />
-
-          <DeepBtn
-            label="Manage"
-            color="primary"
-            type="submit"
-            style="flex: 1"
-          />
-        </form>
+          label="Manage"
+          color="primary"
+          type="submit"
+          style="flex: 1"
+          @click="createPortalSession()"
+        />
       </PlanCard>
     </div>
 
@@ -142,8 +131,6 @@
 import { watchUntilTrue } from '@stdlib/vue';
 
 import PlanCard from './PlanCard.vue';
-
-const appServerURL = process.env.APP_SERVER_URL;
 
 const plan = computed(() =>
   internals.realtime.globalCtx.hget('user', authStore().userId, 'plan'),
@@ -162,5 +149,14 @@ async function createCheckoutSession() {
     await trpcClient.users.account.createCheckoutSession.mutate();
 
   location.href = checkoutSessionUrl;
+}
+
+async function createPortalSession() {
+  const { portalSessionUrl } =
+    await trpcClient.users.account.createPortalSession.mutate({
+      returnUrl: location.href,
+    });
+
+  location.href = portalSessionUrl;
 }
 </script>

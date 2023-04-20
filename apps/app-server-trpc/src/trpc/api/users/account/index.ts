@@ -1,6 +1,7 @@
 import { trpc } from 'src/trpc/server';
 
 import { createCheckoutSessionProcedure } from './create-checkout-session';
+import { createPortalSessionProcedure } from './create-portal-session';
 import { deleteProcedure } from './delete';
 import { emailChangeRouter } from './email-change';
 import { registerProcedure } from './register';
@@ -15,6 +16,7 @@ export const accountRouter = trpc.router({
   twoFactorAuth: twoFactorAuthRouter,
 
   createCheckoutSession: createCheckoutSessionProcedure(),
+  createPortalSession: createPortalSessionProcedure(),
 
   delete: deleteProcedure(),
 });
