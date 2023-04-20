@@ -14,7 +14,6 @@ import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { clearCookies } from 'src/cookies';
 import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
-import { stripe } from 'src/stripe';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
@@ -170,7 +169,7 @@ export async function changeEmailStep2({
       invalidateAllSessions(ctx.userId, { dtrx }),
     ]);
 
-    await stripe.customers.update(user.customer_id!, {
+    await ctx.stripe.customers.update(user.customer_id!, {
       email: newEmail,
     });
 

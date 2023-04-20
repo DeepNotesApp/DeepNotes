@@ -12,7 +12,6 @@ import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import { clearCookies } from 'src/cookies';
-import { stripe } from 'src/stripe';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { checkCorrectUserPassword } from 'src/utils/users';
@@ -163,7 +162,7 @@ export async function delete_({
         ]);
 
         if (user?.customer_id != null) {
-          await stripe.customers.del(user.customer_id);
+          await ctx.stripe.customers.del(user.customer_id);
         }
 
         clearCookies(ctx.res);

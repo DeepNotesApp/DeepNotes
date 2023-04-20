@@ -101,31 +101,14 @@
           :to="{ name: 'register', query: { plan: 'pro' } }"
         />
 
-        <form
+        <DeepBtn
           v-else-if="plan !== 'pro'"
-          :action="`${appServerURL}/api/stripe/create-checkout-session`"
-          method="POST"
-          style="display: flex"
-        >
-          <input
-            type="hidden"
-            name="plan"
-            value="pro"
-          />
-
-          <input
-            type="hidden"
-            name="returnUrl"
-            :value="global.location?.href"
-          />
-
-          <DeepBtn
-            label="Choose"
-            color="primary"
-            type="submit"
-            style="flex: 1"
-          />
-        </form>
+          label="Choose"
+          color="primary"
+          type="submit"
+          style="flex: 1"
+          @click="createCheckoutSession()"
+        />
 
         <form
           v-else
@@ -173,4 +156,11 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+async function createCheckoutSession() {
+  const { checkoutSessionUrl } =
+    await trpcClient.users.account.createCheckoutSession.mutate();
+
+  location.href = checkoutSessionUrl;
+}
 </script>

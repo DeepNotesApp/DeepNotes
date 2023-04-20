@@ -5,6 +5,7 @@ import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify'
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { getRedis } from 'src/data/redis';
 import { usingLocks } from 'src/data/redlock';
+import { stripe } from 'src/stripe';
 
 export function createContext({ req, res }: CreateFastifyContextOptions) {
   return {
@@ -21,6 +22,8 @@ export function createContext({ req, res }: CreateFastifyContextOptions) {
       groupId: string,
       permission: keyof IGroupRole['permissions'],
     ) => _userHasPermission(dataAbstraction(), userId, groupId, permission),
+
+    stripe,
   };
 }
 
