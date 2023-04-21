@@ -10,11 +10,15 @@ export const logoutProcedure = once(() =>
 export async function logout({
   ctx,
 }: InferProcedureOpts<typeof optionalAuthProcedure>) {
+  // Invalidate session
+
   if (ctx.sessionId != null) {
     await ctx.dataAbstraction.patch('session', ctx.sessionId, {
       invalidated: true,
     });
   }
+
+  // Clear cookies
 
   clearCookies(ctx.res);
 }

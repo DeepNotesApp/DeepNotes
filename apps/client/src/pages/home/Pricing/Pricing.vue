@@ -146,14 +146,14 @@ onMounted(async () => {
 
 async function createCheckoutSession() {
   const { checkoutSessionUrl } =
-    await trpcClient.users.account.createCheckoutSession.mutate();
+    await trpcClient.users.account.stripe.createCheckoutSession.mutate();
 
   location.href = checkoutSessionUrl;
 }
 
 async function createPortalSession() {
   const { portalSessionUrl } =
-    await trpcClient.users.account.createPortalSession.mutate({
+    await trpcClient.users.account.stripe.createPortalSession.mutate({
       returnUrl: location.href,
     });
 

@@ -76,8 +76,6 @@ export async function delete_({
             .select('encrypted_email', 'personal_group_id', 'customer_id'),
         ]);
 
-        checkRedlockSignalAborted(signals);
-
         if (user == null) {
           throw new TRPCError({
             message: 'User not found',
@@ -161,9 +159,15 @@ export async function delete_({
           ctx.dataAbstraction.delete('user', ctx.userId, { dtrx }),
         ]);
 
+        checkRedlockSignalAborted(signals);
+
+        // Delete Stripe customer
+
         if (user?.customer_id != null) {
           await ctx.stripe.customers.del(user.customer_id);
         }
+
+        // Clear cookies
 
         clearCookies(ctx.res);
       });
