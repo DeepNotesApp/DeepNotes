@@ -47,8 +47,6 @@ export async function restore({
             });
           }
 
-          checkRedlockSignalAborted(signals);
-
           // Check if page is deleted
 
           if (

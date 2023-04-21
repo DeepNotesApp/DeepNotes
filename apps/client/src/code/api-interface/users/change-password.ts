@@ -15,15 +15,6 @@ export async function changePassword(input: {
   oldPassword: string;
   newPassword: string;
 }) {
-  const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
-      'http',
-      'ws',
-    )}/users.account.changePassword`,
-
-    steps: [step1, step2, step3],
-  });
-
   // Get user email
 
   const email = await internals.realtime.hget(
@@ -35,6 +26,15 @@ export async function changePassword(input: {
   // Compute derived keys
 
   const oldDerivedValues = await deriveUserValues(email, input.oldPassword);
+
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/users.account.changePassword`,
+
+    steps: [step1, step2, step3],
+  });
 
   function step1(): typeof changePasswordProcedureStep1['_def']['_input_in'] {
     return {

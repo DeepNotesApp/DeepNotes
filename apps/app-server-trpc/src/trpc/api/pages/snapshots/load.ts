@@ -50,8 +50,6 @@ export async function load({
             });
           }
 
-          checkRedlockSignalAborted(signals);
-
           // Load page snapshot infos
 
           const snapshot = await PageSnapshotModel.query()
@@ -64,6 +62,8 @@ export async function load({
               message: 'Snapshot not found.',
             });
           }
+
+          checkRedlockSignalAborted(signals);
 
           return {
             encryptedSymmetricKey: snapshot.encrypted_symmetric_key,

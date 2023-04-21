@@ -60,6 +60,8 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
       return await ctx.usingLocks(
         [[`page-lock:${input.pageId}`]],
         async (signals) => {
+          // Get source group ID
+
           const sourceGroupId = await ctx.dataAbstraction.hget(
             'page',
             input.pageId,

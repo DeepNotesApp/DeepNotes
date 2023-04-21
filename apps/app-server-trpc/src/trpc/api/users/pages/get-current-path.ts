@@ -21,6 +21,8 @@ export async function getCurrentPath({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
+  // Check if page exists
+
   if (
     (await ctx.dataAbstraction.hget('page', input.initialPageId, 'group-id')) ==
     null
@@ -31,11 +33,15 @@ export async function getCurrentPath({
     });
   }
 
+  // Get personal group ID
+
   const personalGroupId = await ctx.dataAbstraction.hget(
     'user',
     ctx.userId,
     'personal-group-id',
   );
+
+  // Get main page ID of personal group
 
   const mainPageId = await ctx.dataAbstraction.hget(
     'group',

@@ -39,8 +39,6 @@ export async function change({
           groupPasswordHash: input.groupCurrentPasswordHash,
         });
 
-        checkRedlockSignalAborted(signals);
-
         // Check if user can edit group settings
 
         if (
@@ -56,8 +54,6 @@ export async function change({
           });
         }
 
-        checkRedlockSignalAborted(signals);
-
         // Check if group is password protected
 
         if (
@@ -72,8 +68,6 @@ export async function change({
             message: 'This group is not password protected.',
           });
         }
-
-        checkRedlockSignalAborted(signals);
 
         // Change group password
 

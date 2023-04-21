@@ -45,8 +45,6 @@ export async function enable({
           });
         }
 
-        checkRedlockSignalAborted(signals);
-
         // Check if group is password protected
 
         if (
@@ -61,8 +59,6 @@ export async function enable({
             message: 'This group is already password protected.',
           });
         }
-
-        checkRedlockSignalAborted(signals);
 
         // Enable password protection
 

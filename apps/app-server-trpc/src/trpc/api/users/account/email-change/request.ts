@@ -32,12 +32,12 @@ export async function request({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check correct password
+
         await checkCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.oldLoginHash,
         });
-
-        checkRedlockSignalAborted(signals);
 
         // Check email in use
 
@@ -52,8 +52,6 @@ export async function request({
             message: 'Email is already in use',
           });
         }
-
-        checkRedlockSignalAborted(signals);
 
         // Send verification email
 
@@ -71,6 +69,8 @@ export async function request({
 
         checkRedlockSignalAborted(signals);
 
+        // Send email
+
         await sendMail({
           from: {
             name: 'DeepNotes',
@@ -83,8 +83,6 @@ export async function request({
             If you did not request this action, you can safely ignore this email.
           `,
         });
-
-        checkRedlockSignalAborted(signals);
       });
     },
   );

@@ -8,38 +8,37 @@ function createWebsocketMessageHandler(input: {
   steps: ((...args: any) => any)[];
   promise: Resolvable;
 }) {
-  let step = 0;
+  let step = 1;
 
   return async (message: Uint8Array) => {
-    moduleLogger.info('Received message %d', step);
+    try {
+      moduleLogger.info('Received message %d', step);
 
-    if (step >= input.steps.length) {
+      const response: {
+        success: boolean;
+        output: any;
+        error?: string;
+      } = unpack(message);
+
+      if (!response.success) {
+        input.socket.close();
+        input.promise.reject(new Error(response.error));
+        return;
+      }
+
+      const request = await input.steps[step - 1](response.output);
+
+      if (++step === input.steps.length) {
+        input.socket.close();
+        input.promise.resolve();
+        return;
+      }
+
+      input.socket.send(pack(request));
+    } catch (error) {
       input.socket.close();
-      input.promise.reject(new Error('Unexpected step.'));
-      return;
+      input.promise.reject(error);
     }
-
-    const response: {
-      success: boolean;
-      output: any;
-      error?: string;
-    } = unpack(message);
-
-    if (!response.success) {
-      input.socket.close();
-      input.promise.reject(new Error(response.error));
-      return;
-    }
-
-    const request = await input.steps[step++](response.output);
-
-    if (step === input.steps.length) {
-      input.socket.close();
-      input.promise.resolve();
-      return;
-    }
-
-    input.socket.send(pack(request));
   };
 }
 

@@ -27,15 +27,9 @@ function createWebsocketMessageHandler(input: {
     redlockSignals,
 
     async handle(message: Buffer) {
-      if (step >= input.procedures.length) {
-        input.connection.end();
-        finishPromise.reject(new Error('Unexpected step.'));
-        return;
-      }
-
-      moduleLogger.info('Received step %d', step);
-
       try {
+        moduleLogger.info('Received step %d', step);
+
         const input_ = (
           input.procedures[step - 1][0]._def.inputs[0] as any
         ).parse(unpack(message));
@@ -58,6 +52,11 @@ function createWebsocketMessageHandler(input: {
             output,
           }),
         );
+
+        if (++step === input.procedures.length) {
+          input.connection.end();
+          finishPromise.resolve();
+        }
       } catch (error: any) {
         const errorMessage = String(error?.message ?? error);
 
@@ -71,16 +70,7 @@ function createWebsocketMessageHandler(input: {
 
         input.connection.end();
         finishPromise.reject(errorMessage);
-        return;
       }
-
-      if (step === input.procedures.length) {
-        input.connection.end();
-        finishPromise.resolve();
-        return;
-      }
-
-      step++;
     },
   };
 }

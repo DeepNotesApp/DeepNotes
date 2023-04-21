@@ -16,6 +16,8 @@ export async function markAsRead({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
+      // Get last notification ID
+
       const lastNotificationId = parseInt(
         (
           await UserNotificationModel.query()
@@ -27,6 +29,8 @@ export async function markAsRead({
       );
 
       checkRedlockSignalAborted(signals);
+
+      // Update last notification read
 
       await ctx.dataAbstraction.patch('user', ctx.userId, {
         last_notification_read: lastNotificationId,

@@ -25,12 +25,14 @@ export async function load({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
+      // Check correct password
+
       await checkCorrectUserPassword({
         userId: ctx.userId,
         loginHash: input.loginHash,
       });
 
-      checkRedlockSignalAborted(signals);
+      // Get user data
 
       const user = await UserModel.query().findById(ctx.userId).select(
         'two_factor_auth_enabled',
@@ -48,6 +50,8 @@ export async function load({
         });
       }
 
+      // Check if two-factor authentication is enabled
+
       if (
         !user.two_factor_auth_enabled ||
         user.encrypted_authenticator_secret == null
@@ -58,9 +62,13 @@ export async function load({
         });
       }
 
+      // Decrypt authenticator secret
+
       const authenticatorSecret = decryptUserAuthenticatorSecret(
         user.encrypted_authenticator_secret,
       );
+
+      // Return 2FA infos
 
       return {
         secret: authenticatorSecret,

@@ -7,23 +7,28 @@
 
   <Gap style="height: 24px" />
 
-  <DeepBtn
-    v-if="
-      internals.realtime.globalCtx.hget('user', authStore().userId, 'plan') !==
-      'pro'
-    "
-    label="See subscription plans"
-    color="primary"
-    :to="{ name: 'pricing' }"
-  />
+  <div>
+    <DeepBtn
+      v-if="
+        internals.realtime.globalCtx.hget(
+          'user',
+          authStore().userId,
+          'plan',
+        ) !== 'pro'
+      "
+      label="See subscription plans"
+      color="primary"
+      :to="{ name: 'pricing' }"
+    />
 
-  <DeepBtn
-    v-else
-    label="Manage subscription"
-    color="secondary"
-    type="submit"
-    @click="createPortalSession()"
-  />
+    <DeepBtn
+      v-else
+      label="Manage subscription"
+      color="secondary"
+      type="submit"
+      @click="createPortalSession()"
+    />
+  </div>
 
   <LoadingOverlay v-if="loading" />
 </template>
@@ -45,7 +50,7 @@ onMounted(async () => {
 
 async function createPortalSession() {
   const { portalSessionUrl } =
-    await trpcClient.users.account.createPortalSession.mutate({
+    await trpcClient.users.account.stripe.createPortalSession.mutate({
       returnUrl: location.href,
     });
 

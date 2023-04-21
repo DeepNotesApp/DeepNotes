@@ -42,8 +42,6 @@ export async function makePublic({
           });
         }
 
-        checkRedlockSignalAborted(signals);
-
         // Check if group is already public
 
         if (
@@ -54,8 +52,6 @@ export async function makePublic({
             message: 'Group is already public.',
           });
         }
-
-        checkRedlockSignalAborted(signals);
 
         await Promise.all([
           // Set group access keyring
@@ -97,6 +93,8 @@ export async function makePublic({
             ),
           ),
         ]);
+
+        checkRedlockSignalAborted(signals);
       });
     },
   );

@@ -26,8 +26,6 @@ export async function disable({
         loginHash: input.loginHash,
       });
 
-      checkRedlockSignalAborted(signals);
-
       // Check if two-factor authentication is enabled
 
       if (

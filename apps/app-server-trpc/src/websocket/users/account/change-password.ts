@@ -40,10 +40,16 @@ export function registerUsersChangePassword(
     url: '/trpc/users.account.changePassword',
 
     async setup({ messageHandler, ctx }) {
-      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
-        messageHandler.redlockSignals.push(...signals);
+      return new Promise<void>((resolve, reject) => {
+        void ctx
+          .usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
+            messageHandler.redlockSignals.push(...signals);
 
-        await messageHandler.finishPromise;
+            resolve();
+
+            await messageHandler.finishPromise;
+          })
+          .catch(reject);
       });
     },
 

@@ -38,8 +38,6 @@ export async function deletePermanently({
         });
       }
 
-      checkRedlockSignalAborted(signals);
-
       // Check if group is deleted
 
       if (

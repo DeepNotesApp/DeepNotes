@@ -21,6 +21,8 @@ export async function createPortalSession({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
+      // Get customer ID
+
       const customerId = await ctx.dataAbstraction.hget(
         'user',
         ctx.userId,
@@ -29,10 +31,14 @@ export async function createPortalSession({
 
       checkRedlockSignalAborted(signals);
 
+      // Create portal session
+
       const portalSession = await ctx.stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: input.returnUrl,
       });
+
+      // Return portal session URL
 
       return {
         portalSessionUrl: portalSession.url,

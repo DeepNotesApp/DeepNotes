@@ -52,8 +52,6 @@ export async function delete_({
               });
             }
 
-            checkRedlockSignalAborted(signals);
-
             // Load page snapshot infos
 
             const pageSnapshotInfos: PageSnapshotInfo[] =
@@ -63,15 +61,11 @@ export async function delete_({
                 'infos',
               );
 
-            checkRedlockSignalAborted(signals);
-
             // Remove page snapshot
 
             await PageSnapshotModel.query(dtrx.trx)
               .findById(input.snapshotId)
               .delete();
-
-            checkRedlockSignalAborted(signals);
 
             remove(
               pageSnapshotInfos,

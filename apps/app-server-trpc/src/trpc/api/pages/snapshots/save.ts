@@ -54,8 +54,6 @@ export async function save({
               });
             }
 
-            checkRedlockSignalAborted(signals);
-
             // Save snapshot
 
             await insertPageSnapshot({

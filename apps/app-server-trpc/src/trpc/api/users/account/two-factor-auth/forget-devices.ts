@@ -36,8 +36,6 @@ export async function forgetDevices({
         await DeviceModel.query(dtrx.trx)
           .where('user_id', ctx.userId)
           .patch({ trusted: false });
-
-        checkRedlockSignalAborted(signals);
       });
     },
   );

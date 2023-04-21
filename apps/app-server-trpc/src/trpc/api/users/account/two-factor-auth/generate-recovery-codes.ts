@@ -25,16 +25,20 @@ export async function generateRecoveryCodes({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check correct password
+
         await checkCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });
 
-        checkRedlockSignalAborted(signals);
+        // Generate recovery codes
 
         const recoveryCodes = Array(6)
           .fill(null)
           .map(() => sodium.to_hex(sodium.randombytes_buf(16)));
+
+        // Save recovery codes
 
         await ctx.dataAbstraction.patch(
           'user',

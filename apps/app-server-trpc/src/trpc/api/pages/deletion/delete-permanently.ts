@@ -49,8 +49,6 @@ export async function deletePermanently({
             });
           }
 
-          checkRedlockSignalAborted(signals);
-
           // Check if page is deleted
 
           if (

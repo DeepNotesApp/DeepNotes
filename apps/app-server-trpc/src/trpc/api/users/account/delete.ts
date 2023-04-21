@@ -33,10 +33,14 @@ export async function delete_({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check correct password
+
         await checkCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });
+
+        // Get all user data
 
         const [
           groupPageIds,
@@ -82,6 +86,8 @@ export async function delete_({
             code: 'NOT_FOUND',
           });
         }
+
+        // Delete all user data
 
         await Promise.all([
           ...groupPageIds.map((page) =>

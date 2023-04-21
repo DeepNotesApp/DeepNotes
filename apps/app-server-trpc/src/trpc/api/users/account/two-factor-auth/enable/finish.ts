@@ -31,20 +31,18 @@ export async function finish({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check correct password
+
         await checkCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });
-
-        checkRedlockSignalAborted(signals);
 
         // Get authenticator secret from the database.
 
         const user = await UserModel.query()
           .findById(ctx.userId)
           .select('encrypted_authenticator_secret');
-
-        checkRedlockSignalAborted(signals);
 
         if (user == null) {
           throw new TRPCError({
@@ -53,12 +51,16 @@ export async function finish({
           });
         }
 
+        // Check if two-factor authentication is enabled
+
         if (user.encrypted_authenticator_secret == null) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'Two-factor authentication is not enabled.',
           });
         }
+
+        // Decrypt authenticator secret
 
         const authenticatorSecret = decryptUserAuthenticatorSecret(
           user.encrypted_authenticator_secret,

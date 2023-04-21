@@ -47,8 +47,6 @@ export async function delete_({
             });
           }
 
-          checkRedlockSignalAborted(signals);
-
           // Check if page is deleted
 
           if (
@@ -64,8 +62,6 @@ export async function delete_({
             });
           }
 
-          checkRedlockSignalAborted(signals);
-
           // Check if page is main page
 
           const mainPageId = await ctx.dataAbstraction.hget(
@@ -74,8 +70,6 @@ export async function delete_({
             'main-page-id',
           );
 
-          checkRedlockSignalAborted(signals);
-
           if (input.pageId === mainPageId) {
             throw new TRPCError({
               code: 'BAD_REQUEST',
@@ -83,6 +77,8 @@ export async function delete_({
                 "Cannot delete a group's main page, either replace the main page first or delete the whole group.",
             });
           }
+
+          checkRedlockSignalAborted(signals);
 
           // Delete page
 

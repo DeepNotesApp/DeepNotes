@@ -36,8 +36,6 @@ export async function delete_({
         });
       }
 
-      checkRedlockSignalAborted(signals);
-
       // Check if group is deleted
 
       if (

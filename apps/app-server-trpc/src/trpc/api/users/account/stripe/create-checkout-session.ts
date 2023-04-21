@@ -116,6 +116,8 @@ export async function createCheckoutSession({
         });
       }
 
+      // Return checkout session URL
+
       return {
         checkoutSessionUrl: session.url,
       };

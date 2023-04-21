@@ -23,13 +23,15 @@ export async function removeRecentPage({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
+      // Get recent page IDs
+
       const recentPageIds: string[] = await ctx.dataAbstraction.hget(
         'user',
         ctx.userId,
         'recent-page-ids',
       );
 
-      checkRedlockSignalAborted(signals);
+      // Remove page ID from recent page IDs
 
       if (pull(recentPageIds, input.pageId).length === 0) {
         throw new TRPCError({
@@ -37,6 +39,10 @@ export async function removeRecentPage({
           code: 'NOT_FOUND',
         });
       }
+
+      checkRedlockSignalAborted(signals);
+
+      // Update recent page IDs
 
       await ctx.dataAbstraction.patch('user', ctx.userId, {
         recent_page_ids: recentPageIds,
