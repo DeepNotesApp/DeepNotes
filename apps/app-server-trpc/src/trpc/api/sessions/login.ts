@@ -19,11 +19,11 @@ import {
   decryptUserRehashedLoginHash,
   derivePasswordValues,
   encryptRecoveryCodes,
-  getDeviceHash,
   verifyRecoveryCode,
 } from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { getUserDevice } from 'src/utils/devices';
 import { generateSessionValues } from 'src/utils/sessions';
 import { z } from 'zod';
 
@@ -178,6 +178,8 @@ export async function login({
       });
     }
 
+    // Generate session
+
     const sessionId = nanoid();
 
     const { sessionKey } = await generateSessionValues({
@@ -188,6 +190,8 @@ export async function login({
       reply: ctx.res,
       dtrx,
     });
+
+    // Return session values
 
     return {
       userId: user.id,
@@ -278,34 +282,6 @@ async function _incrementFailedLoginAttempts(input: {
     input.redis.incr(`ip-failed-login-attempts:${input.ip}`),
     input.redis.expire(`ip-failed-login-attempts:${input.ip}`, 15 * 60),
   ]);
-}
-
-export async function getUserDevice(input: {
-  ip: string;
-  userAgent: string;
-  userId: string;
-
-  dtrx?: DataTransaction;
-}) {
-  const deviceHash = getDeviceHash({
-    ip: input.ip,
-    userAgent: input.userAgent,
-    userId: input.userId,
-  });
-
-  let device = await DeviceModel.query()
-    .where('user_id', input.userId)
-    .where('hash', deviceHash)
-    .first();
-
-  if (device == null) {
-    device = await DeviceModel.query(input.dtrx?.trx).insert({
-      user_id: input.userId,
-      hash: deviceHash,
-    });
-  }
-
-  return device;
 }
 
 async function _checkTwoFactorAuth(

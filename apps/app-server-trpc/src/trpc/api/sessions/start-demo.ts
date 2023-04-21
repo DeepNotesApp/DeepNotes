@@ -8,10 +8,9 @@ import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { getUserDevice } from 'src/utils/devices';
 import { generateSessionValues } from 'src/utils/sessions';
 import { registerUser, userRegistrationSchema } from 'src/utils/users';
-
-import { getUserDevice } from '../sessions/login';
 
 const baseProcedure = publicProcedure.input(userRegistrationSchema());
 
@@ -21,11 +20,15 @@ export async function startDemo({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
+  // Generate random password values
+
   const passwordValues = {
     hash: sodium.randombytes_buf(64),
     key: wrapSymmetricKey(sodium.randombytes_buf(32)),
     salt: new Uint8Array(sodium.randombytes_buf(16)),
   };
+
+  // Register the demo account
 
   const user = await registerUser({
     ...input,
@@ -40,11 +43,15 @@ export async function startDemo({
     passwordValues,
   });
 
+  // Get the user's device
+
   const device = await getUserDevice({
     ip: ctx.req.ip,
     userAgent: ctx.req.headers['user-agent'] ?? '',
     userId: user.id,
   });
+
+  // Generate a new session
 
   const sessionId = nanoid();
 
@@ -55,6 +62,8 @@ export async function startDemo({
     rememberSession: false,
     reply: ctx.res,
   });
+
+  // Return session values
 
   return {
     userId: user.id,
