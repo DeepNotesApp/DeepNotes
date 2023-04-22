@@ -6,25 +6,26 @@ import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
 import FastifyRawBody from 'fastify-raw-body';
 import { once } from 'lodash';
+import { createContext } from 'src/trpc/context';
+import { appRouter } from 'src/trpc/router';
+import { registerGroupsChangeUserRole } from 'src/websocket/groups/change-user-role';
+import { registerGroupsJoinInvitationsAccept } from 'src/websocket/groups/join-invitations/accept';
+import { registerGroupsJoinInvitationsCancel } from 'src/websocket/groups/join-invitations/cancel';
+import { registerGroupsJoinInvitationsReject } from 'src/websocket/groups/join-invitations/reject';
+import { registerGroupsJoinInvitationsSend } from 'src/websocket/groups/join-invitations/send';
+import { registerGroupsJoinRequestsAccept } from 'src/websocket/groups/join-requests/accept';
+import { registerGroupsJoinRequestsCancel } from 'src/websocket/groups/join-requests/cancel';
+import { registerGroupsJoinRequestsReject } from 'src/websocket/groups/join-requests/reject';
+import { registerGroupsJoinRequestsSend } from 'src/websocket/groups/join-requests/send';
+import { registerGroupsMakePrivate } from 'src/websocket/groups/privacy/make-private';
+import { registerGroupsRemoveUser } from 'src/websocket/groups/remove-user';
+import { registerGroupsRotateKeys } from 'src/websocket/groups/rotate-keys';
+import { registerPagesMove } from 'src/websocket/pages/move';
+import { registerUsersChangePassword } from 'src/websocket/users/account/change-password';
+import { registerUsersChangeEmailFinish } from 'src/websocket/users/account/email-change/finish';
+import { registerUsersRotateKeys } from 'src/websocket/users/account/rotate-keys';
 
-import { createContext } from './trpc/context';
-import { appRouter } from './trpc/router';
-import { registerGroupsChangeUserRole } from './websocket/groups/change-user-role';
-import { registerGroupsJoinInvitationsAccept } from './websocket/groups/join-invitations/accept';
-import { registerGroupsJoinInvitationsCancel } from './websocket/groups/join-invitations/cancel';
-import { registerGroupsJoinInvitationsReject } from './websocket/groups/join-invitations/reject';
-import { registerGroupsJoinInvitationsSend } from './websocket/groups/join-invitations/send';
-import { registerGroupsJoinRequestsAccept } from './websocket/groups/join-requests/accept';
-import { registerGroupsJoinRequestsCancel } from './websocket/groups/join-requests/cancel';
-import { registerGroupsJoinRequestsReject } from './websocket/groups/join-requests/reject';
-import { registerGroupsJoinRequestsSend } from './websocket/groups/join-requests/send';
-import { registerGroupsMakePrivate } from './websocket/groups/privacy/make-private';
-import { registerGroupsRemoveUser } from './websocket/groups/remove-user';
-import { registerGroupsRotateKeys } from './websocket/groups/rotate-keys';
-import { registerPagesMove } from './websocket/pages/move';
-import { registerUsersChangePassword } from './websocket/users/account/change-password';
-import { registerUsersChangeEmailFinish } from './websocket/users/account/email-change/finish';
-import { registerUsersRotateKeys } from './websocket/users/account/rotate-keys';
+import { registerStripeWebhook } from './stripe-webhook';
 
 export const fastify = once(async () => {
   const fastify = Fastify({
@@ -37,7 +38,9 @@ export const fastify = once(async () => {
 
   await fastify.register(FastifyHelmet);
   await fastify.register(FastifyCookie);
-  await fastify.register(FastifyRawBody);
+  await fastify.register(FastifyRawBody, {
+    global: false,
+  });
   await fastify.register(FastifyWebsocket, {
     options: { maxPayload: 500 * 1048576 },
   });
@@ -73,6 +76,10 @@ export const fastify = once(async () => {
       createContext,
     },
   });
+
+  // Fastify endpoints
+
+  registerStripeWebhook(fastify);
 
   // Websocket endpoints
 

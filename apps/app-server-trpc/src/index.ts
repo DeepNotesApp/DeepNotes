@@ -3,7 +3,7 @@ import './data/knex';
 
 import { mainLogger } from '@stdlib/misc';
 
-import { fastify } from './fastify-server';
+import { fastify } from './fastify/server';
 
 void fastify().then(async (fastify) => {
   await fastify.listen({

@@ -1,6 +1,8 @@
 import { TRPCError } from '@trpc/server';
+import type Fastify from 'fastify';
 import { once } from 'lodash';
 import { dataAbstraction } from 'src/data/data-abstraction';
+import { createContext } from 'src/trpc/context';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import type Stripe from 'stripe';
@@ -8,6 +10,20 @@ import type Stripe from 'stripe';
 const baseProcedure = publicProcedure;
 
 export const webhookProcedure = once(() => baseProcedure.mutation(webhook));
+
+export function registerStripeWebhook(fastify: ReturnType<typeof Fastify>) {
+  fastify.post('/stripe/webhook', {
+    config: {
+      rawBody: true,
+    },
+
+    handler: async (req, res) => {
+      const ctx = createContext({ req, res });
+
+      return await webhook({ ctx, input: undefined });
+    },
+  });
+}
 
 export async function webhook({
   ctx,
