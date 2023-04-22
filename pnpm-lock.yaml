@@ -132,6 +132,9 @@ importers:
       '@trpc/server':
         specifier: ^10.20.0
         version: 10.20.0
+      crypto-js:
+        specifier: ^4.1.1
+        version: 4.1.1
       dotenv:
         specifier: 16.0.3
         version: 16.0.3

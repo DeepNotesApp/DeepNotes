@@ -10,6 +10,7 @@ import {
   textToBytes,
 } from '@stdlib/misc';
 import { mainLogger } from '@stdlib/misc';
+import CryptoJS from 'crypto-js';
 import sodium from 'libsodium-wrappers';
 import { pack, unpack } from 'msgpackr';
 

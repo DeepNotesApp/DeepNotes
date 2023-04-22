@@ -154,12 +154,12 @@ async function forgetTrustedDevices() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await trpcClient.users.account.twoFactorAuth.forgetDevices.mutate({
+    await trpcClient.users.account.twoFactorAuth.forgetTrustedDevices.mutate({
       loginHash: props.loginHash,
     });
 
     $quasar().notify({
-      message: 'All devices have been untrusted.',
+      message: 'All trusted devices have been forgotten.',
       type: 'positive',
     });
   } catch (error: any) {

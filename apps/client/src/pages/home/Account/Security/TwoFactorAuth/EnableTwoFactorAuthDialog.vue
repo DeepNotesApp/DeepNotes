@@ -124,6 +124,7 @@
         />
 
         <DeepBtn
+          ref="continueBtn"
           label="Continue"
           type="submit"
           flat
@@ -141,6 +142,7 @@ import { sleep } from '@stdlib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import QRCode from 'qrcode';
 import { handleError } from 'src/code/utils/misc';
+import DeepBtn from 'src/components/DeepBtn.vue';
 import type { Ref } from 'vue';
 
 import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
@@ -172,6 +174,14 @@ onMounted(async () => {
 // Verification
 
 const authenticatorToken = ref('');
+
+const continueBtn = ref<InstanceType<typeof DeepBtn>>();
+
+watch(authenticatorToken, (value) => {
+  if (/^\d{6}$/.test(value)) {
+    continueBtn.value?.$el.click();
+  }
+});
 
 async function verify() {
   try {

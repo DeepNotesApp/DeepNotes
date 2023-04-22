@@ -12,11 +12,11 @@ const baseProcedure = authProcedure.input(
   }),
 );
 
-export const forgetDevicesProcedure = once(() =>
-  baseProcedure.mutation(forgetDevices),
+export const forgetTrustedDevicesProcedure = once(() =>
+  baseProcedure.mutation(forgetTrustedDevices),
 );
 
-export async function forgetDevices({
+export async function forgetTrustedDevices({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
