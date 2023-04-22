@@ -28,13 +28,20 @@ function createWebsocketMessageHandler(input: {
 
       const request = await input.steps[step - 1](response.output);
 
-      if (++step === input.steps.length) {
+      if (step === input.steps.length) {
         input.socket.close();
         input.promise.resolve();
+
+        moduleLogger.info('Finished websocket request');
+
         return;
       }
 
+      moduleLogger.info('Sending message %d', step);
+
       input.socket.send(pack(request));
+
+      step++;
     } catch (error) {
       input.socket.close();
       input.promise.reject(error);

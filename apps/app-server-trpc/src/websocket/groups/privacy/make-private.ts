@@ -28,15 +28,8 @@ export function registerGroupsMakePrivate(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/groups.privacy.makePrivate',
 
-    async setup({ messageHandler, ctx, input }) {
-      await ctx.usingLocks(
-        [[`group-lock:${input.groupId}`]],
-        async (signals) => {
-          messageHandler.redlockSignals.push(...signals);
-
-          await messageHandler.finishPromise;
-        },
-      );
+    async setup({ ctx, input, run }) {
+      await ctx.usingLocks([[`group-lock:${input.groupId}`]], run);
     },
 
     procedures: [

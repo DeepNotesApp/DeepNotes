@@ -52,7 +52,7 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/pages.move',
 
-    async setup({ messageHandler, ctx, input }) {
+    async setup({ ctx, input, run }) {
       (ctx as Context).pageId = input.pageId;
       (ctx as Context).destGroupId = input.destGroupId;
       (ctx as Context).setAsMainPage = input.setAsMainPage;
@@ -77,11 +77,10 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
               [`group-lock:${sourceGroupId}`],
               [`group-lock:${input.destGroupId}`],
             ],
-            async (signals) => {
-              messageHandler.redlockSignals.push(...signals);
 
-              await messageHandler.finishPromise;
-            },
+            run,
+
+            signals,
           );
         },
       );

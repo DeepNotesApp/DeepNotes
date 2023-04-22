@@ -66,12 +66,8 @@ export function registerUsersRotateKeys(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/users.account.rotateKeys',
 
-    async setup({ messageHandler, ctx }) {
-      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
-        messageHandler.redlockSignals.push(...signals);
-
-        await messageHandler.finishPromise;
-      });
+    async setup({ ctx, run }) {
+      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], run);
     },
 
     procedures: [

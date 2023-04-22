@@ -39,18 +39,8 @@ export function registerUsersChangePassword(
     fastify,
     url: '/trpc/users.account.changePassword',
 
-    async setup({ messageHandler, ctx }) {
-      return new Promise<void>((resolve, reject) => {
-        void ctx
-          .usingLocks([[`user-lock:${ctx.userId}`]], async (signals) => {
-            messageHandler.redlockSignals.push(...signals);
-
-            resolve();
-
-            await messageHandler.finishPromise;
-          })
-          .catch(reject);
-      });
+    async setup({ ctx, run }) {
+      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], run);
     },
 
     procedures: [

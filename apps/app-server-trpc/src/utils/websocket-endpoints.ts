@@ -10,6 +10,22 @@ import { authHelper } from 'src/trpc/helpers';
 
 const moduleLogger = mainLogger.sub('Websocket endpoints');
 
+function sendErrorAndDisconnect(connection: SocketStream, error: string) {
+  try {
+    connection.socket.send(
+      pack({
+        success: false,
+
+        error: error,
+      }),
+    );
+
+    connection.end();
+  } catch (error) {
+    moduleLogger.error('Error while disconnecting websocket: %o', error);
+  }
+}
+
 function createWebsocketMessageHandler(input: {
   connection: SocketStream;
   ctx: any;
@@ -28,7 +44,7 @@ function createWebsocketMessageHandler(input: {
 
     async handle(message: Buffer) {
       try {
-        moduleLogger.info('Received step %d', step);
+        moduleLogger.info('Received message %d', step);
 
         const input_ = (
           input.procedures[step - 1][0]._def.inputs[0] as any
@@ -45,6 +61,8 @@ function createWebsocketMessageHandler(input: {
 
         checkRedlockSignalAborted(redlockSignals);
 
+        moduleLogger.info('Sending message %d', step);
+
         input.connection.socket.send(
           pack({
             success: true,
@@ -53,22 +71,19 @@ function createWebsocketMessageHandler(input: {
           }),
         );
 
-        if (++step === input.procedures.length) {
+        if (step === input.procedures.length) {
           input.connection.end();
           finishPromise.resolve();
+
+          moduleLogger.info('Finished websocket request');
         }
+
+        step++;
       } catch (error: any) {
         const errorMessage = String(error?.message ?? error);
 
-        input.connection.socket.send(
-          pack({
-            success: false,
+        sendErrorAndDisconnect(input.connection, errorMessage);
 
-            error: errorMessage,
-          }),
-        );
-
-        input.connection.end();
         finishPromise.reject(errorMessage);
       }
     },
@@ -79,10 +94,11 @@ export function createWebsocketEndpoint<Input>(input: {
   fastify: ReturnType<typeof Fastify>;
   url: string;
   setup: (input: {
-    messageHandler: ReturnType<typeof createWebsocketMessageHandler>;
     ctx: Exclude<Awaited<ReturnType<typeof authHelper>>, false>;
     input: Input;
-  }) => any;
+
+    run(signals: RedlockAbortSignal[]): Promise<void>;
+  }) => Promise<void>;
   procedures: [AnyProcedure, (...args: any) => any][];
 }) {
   input.fastify.get(input.url, { websocket: true }, async (connection, req) => {
@@ -100,15 +116,8 @@ export function createWebsocketEndpoint<Input>(input: {
       const ctx = await authHelper({ ctx: originalCtx } as any);
 
       if (!ctx) {
-        connection.socket.send(
-          pack({
-            success: false,
+        sendErrorAndDisconnect(connection, 'Unauthorized.');
 
-            error: 'Invalid access token.',
-          }),
-        );
-
-        connection.end();
         return;
       }
 
@@ -116,11 +125,24 @@ export function createWebsocketEndpoint<Input>(input: {
         connection,
         ctx,
         setup: (input_) =>
-          input.setup({
-            messageHandler: messageHandler!,
-            ctx: ctx as any,
-            input: input_,
-          }),
+          new Promise<void>((resolve) =>
+            input
+              .setup({
+                ctx: ctx as any,
+                input: input_,
+
+                async run(signals: RedlockAbortSignal[]) {
+                  messageHandler.redlockSignals.push(...signals);
+
+                  resolve();
+
+                  await messageHandler.finishPromise;
+                },
+              })
+              .catch((error) => {
+                sendErrorAndDisconnect(connection, String(error));
+              }),
+          ),
         procedures: input.procedures,
       });
 
@@ -128,15 +150,7 @@ export function createWebsocketEndpoint<Input>(input: {
     } catch (error: any) {
       moduleLogger.error(error);
 
-      connection.socket.send(
-        pack({
-          success: false,
-
-          error: String(error?.message ?? error),
-        }),
-      );
-
-      connection.end();
+      sendErrorAndDisconnect(connection, String(error));
     }
   });
 }
