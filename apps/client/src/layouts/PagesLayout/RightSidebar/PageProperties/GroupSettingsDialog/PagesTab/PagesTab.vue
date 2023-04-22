@@ -116,7 +116,7 @@ import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -191,7 +191,7 @@ async function goToPage(pageId: string) {
 
 async function movePages() {
   try {
-    const movePageParams: Parameters<typeof movePage>[0] = await asyncPrompt({
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
       component: MovePageDialog,
 
       componentProps: {
@@ -218,7 +218,7 @@ async function movePages() {
 
 async function deletePages() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete pages',
       message: 'Are you sure you want to delete these pages?',
 

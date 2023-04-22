@@ -113,7 +113,7 @@ import { rolesMap } from '@deeplib/misc';
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import AcceptRequestDialog from './AcceptRequestDialog.vue';
@@ -180,7 +180,7 @@ function select(id: string, event: MouseEvent) {
 
 async function rejectSelectedRequests() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Reject request(s)',
       message: 'Are you sure you want to reject the selected join requests?',
 

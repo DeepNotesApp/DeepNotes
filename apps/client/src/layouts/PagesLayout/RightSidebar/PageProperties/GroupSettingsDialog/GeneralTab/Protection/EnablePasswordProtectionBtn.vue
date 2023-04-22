@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { enableGroupPasswordProtection } from 'src/code/api-interface/groups/password/enable';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import EnablePasswordDialog from './EnablePasswordDialog.vue';
 
@@ -16,7 +16,7 @@ const groupId = inject<string>('groupId')!;
 
 async function enablePasswordProtection() {
   try {
-    const groupPassword = await asyncPrompt<string>({
+    const groupPassword = await asyncDialog<string>({
       component: EnablePasswordDialog,
     });
 

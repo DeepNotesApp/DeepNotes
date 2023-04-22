@@ -34,7 +34,7 @@ import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
 import { changeEmail } from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const newEmail = ref('');
 
@@ -59,7 +59,7 @@ async function _changeEmail() {
       throw new Error('New email address is the same as the current one.');
     }
 
-    const password = await asyncPrompt<string>({
+    const password = await asyncDialog<string>({
       title: 'Change email',
       message: 'Enter your password:',
 
@@ -92,7 +92,7 @@ async function _changeEmail() {
 
     // Finish email change
 
-    const emailVerificationCode = await asyncPrompt<string>({
+    const emailVerificationCode = await asyncDialog<string>({
       html: true,
       title: 'Verify the new email',
       message: `Enter the verification code sent to the new email:<br/>

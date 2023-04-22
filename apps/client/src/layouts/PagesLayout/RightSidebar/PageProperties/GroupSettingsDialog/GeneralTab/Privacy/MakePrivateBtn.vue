@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import { makeGroupPrivate } from 'src/code/api-interface/groups/privacy/make-private';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
 async function makePrivate() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Make group private',
       message: 'Are you sure you want to make this group private?',
 

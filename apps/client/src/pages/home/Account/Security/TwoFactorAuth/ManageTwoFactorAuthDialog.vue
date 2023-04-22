@@ -112,7 +112,7 @@
 <script setup lang="ts">
 import { BREAKPOINT_SM_MIN, sleep } from '@stdlib/misc';
 import QRCode from 'qrcode';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
@@ -143,7 +143,7 @@ onMounted(async () => {
 
 async function forgetTrustedDevices() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Forget trusted devices',
       message:
         'Are you sure you want to forget trusted devices in regard to two-factor authentication?',
@@ -169,7 +169,7 @@ async function forgetTrustedDevices() {
 
 async function regenerateRecoveryCodes() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Regenerate recovery codes',
       message: 'Are you sure you want to regenerate the recovery codes?',
 
@@ -198,7 +198,7 @@ async function regenerateRecoveryCodes() {
 
 async function disableTwoFactorAuth() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Disable two-factor authentication',
       message: 'Are you sure you want to disable two-factor authentication?',
 

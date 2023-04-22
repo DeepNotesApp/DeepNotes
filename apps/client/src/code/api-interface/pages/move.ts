@@ -16,7 +16,7 @@ import {
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import { createPageDoc } from 'src/code/pages/utils';
-import { asyncPrompt } from 'src/code/utils/misc';
+import { asyncDialog } from 'src/code/utils/misc';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function movePage(input: {
@@ -63,7 +63,7 @@ export async function movePage(input: {
         input.groupCreation.groupPassword != null &&
         zxcvbn(input.groupCreation.groupPassword).score <= 2
       ) {
-        await asyncPrompt({
+        await asyncDialog({
           title: 'Weak password',
           html: true,
           message:
@@ -142,7 +142,7 @@ export async function movePage(input: {
       ).getAsync();
 
       if (destGroupContentKeyring?.topLayer === DataLayer.Symmetric) {
-        const destGroupPassword = await asyncPrompt<string>({
+        const destGroupPassword = await asyncDialog<string>({
           title: 'Destination group password',
           message: 'Enter the destination group password:',
           color: 'primary',

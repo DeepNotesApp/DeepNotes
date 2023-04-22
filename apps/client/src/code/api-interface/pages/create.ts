@@ -9,7 +9,7 @@ import {
   unlockGroupContentKeyring,
 } from 'src/code/crypto';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
-import { asyncPrompt } from 'src/code/utils/misc';
+import { asyncDialog } from 'src/code/utils/misc';
 
 export async function createPage(input: {
   parentPageId: string;
@@ -42,7 +42,7 @@ export async function createPage(input: {
     }
 
     if (input.groupPassword != null && zxcvbn(input.groupPassword).score <= 2) {
-      await asyncPrompt({
+      await asyncDialog({
         title: 'Weak password',
         html: true,
         message:
@@ -107,7 +107,7 @@ export async function createPage(input: {
     ).getAsync();
 
     if (groupContentKeyring?.topLayer === DataLayer.Symmetric) {
-      const destGroupPassword = await asyncPrompt<string>({
+      const destGroupPassword = await asyncDialog<string>({
         title: 'Destination group password',
         message: 'Enter the destination group password:',
         color: 'primary',

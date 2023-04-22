@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import { changeGroupPasswordProtection } from 'src/code/api-interface/groups/password/change';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
 async function changeGroupPassword() {
   try {
-    const currentGroupPassword = await asyncPrompt<string>({
+    const currentGroupPassword = await asyncDialog<string>({
       title: 'Change group password',
       message: 'Enter the current group password:',
       color: 'primary',
@@ -29,7 +29,7 @@ async function changeGroupPassword() {
       cancel: true,
     });
 
-    const newGroupPassword = await asyncPrompt<string>({
+    const newGroupPassword = await asyncDialog<string>({
       title: 'Change group password',
       message: 'Enter the new group password:',
       color: 'primary',

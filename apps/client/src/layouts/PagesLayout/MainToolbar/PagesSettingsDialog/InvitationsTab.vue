@@ -104,7 +104,7 @@ import { rolesMap } from '@deeplib/misc';
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import AcceptInvitationDialog from '../../MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
@@ -176,7 +176,7 @@ async function acceptSelectedInvitations() {
 }
 async function rejectSelectedInvitations() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Reject invitation(s)',
       message: 'Are you sure you want to reject the selected join invitations?',
 

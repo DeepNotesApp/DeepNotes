@@ -11,7 +11,7 @@ import type {
 } from 'deepnotes-app-server-trpc/src/websocket/groups/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { computeGroupPasswordValues } from 'src/code/crypto';
-import { asyncPrompt } from 'src/code/utils/misc';
+import { asyncDialog } from 'src/code/utils/misc';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function rotateGroupKeys(input: { groupId: string }) {
@@ -98,7 +98,7 @@ export async function processGroupKeyRotationValues(
   );
 
   if (passwordProtected) {
-    const groupPassword = await asyncPrompt<string>({
+    const groupPassword = await asyncDialog<string>({
       title: 'Password protection',
       message: 'Enter the group password:',
       color: 'primary',

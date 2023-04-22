@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import { disableGroupPasswordProtection } from 'src/code/api-interface/groups/password/disable';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
 async function disablePasswordProtection() {
   try {
-    const groupPassword = await asyncPrompt<string>({
+    const groupPassword = await asyncDialog<string>({
       title: 'Disable password protection',
       message: 'Enter the group password:',
       color: 'primary',

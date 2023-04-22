@@ -42,7 +42,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { QForm } from 'quasar';
 import { changePassword } from 'src/code/api-interface/users/change-password';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 // Change password
 
@@ -75,7 +75,7 @@ async function _changePassword() {
     }
 
     if (zxcvbnResult.score <= 2) {
-      await asyncPrompt({
+      await asyncDialog({
         title: 'Weak password',
         html: true,
         message:
@@ -89,7 +89,7 @@ async function _changePassword() {
       });
     }
 
-    await asyncPrompt({
+    await asyncDialog({
       html: true,
       title: 'Change password',
       message: `Are you sure you want to change password?<br/>

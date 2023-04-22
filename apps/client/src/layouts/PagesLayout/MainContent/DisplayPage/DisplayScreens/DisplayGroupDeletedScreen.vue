@@ -35,7 +35,7 @@ import { deleteGroupPermanently } from 'src/code/api-interface/groups/deletion/d
 import { restoreGroup } from 'src/code/api-interface/groups/deletion/restore';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const page = inject<Page>('page')!;
 
@@ -84,7 +84,7 @@ async function _restoreGroup() {
 
 async function deletePermanently() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete group permanently',
       message: 'Are you sure you want to delete this group permanently?',
 

@@ -116,7 +116,7 @@ import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
@@ -128,7 +128,7 @@ const page = inject<Ref<Page>>('page')!;
 
 async function _movePage() {
   try {
-    const movePageParams: MovePageParams = await asyncPrompt({
+    const movePageParams: MovePageParams = await asyncDialog({
       component: MovePageDialog,
 
       componentProps: {
@@ -149,7 +149,7 @@ async function _movePage() {
 
 async function _deletePage() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete page',
       message: 'Are you sure you want to delete this page?',
 

@@ -1,5 +1,5 @@
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 
 import type { NotificationInfo } from './notifications';
@@ -38,7 +38,7 @@ export async function getGroupInvitationSentNotificationInfo({
 
           handler: async () => {
             try {
-              await asyncPrompt({
+              await asyncDialog({
                 title: 'Reject join invitation',
                 message: 'Are you sure you want to reject the join invitation?',
 

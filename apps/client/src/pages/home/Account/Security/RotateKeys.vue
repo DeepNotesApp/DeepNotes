@@ -13,11 +13,11 @@
 <script setup lang="ts">
 import { rotateUserKeys } from 'src/code/api-interface/users/rotate-keys';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 async function _rotateKeys() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Rotate encryption keys',
       message: 'Are you sure you want to rotate encryption keys?',
 
@@ -27,7 +27,7 @@ async function _rotateKeys() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const password = await asyncPrompt<string>({
+    const password = await asyncDialog<string>({
       title: 'Rotate encryption keys',
       message: 'Enter your password:',
       color: 'primary',

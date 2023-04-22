@@ -24,14 +24,14 @@
 
 <script setup lang="ts">
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import EnableTwoFactorAuthDialog from './EnableTwoFactorAuthDialog.vue';
 import ManageTwoFactorAuthDialog from './ManageTwoFactorAuthDialog.vue';
 
 async function enableTwoFactorAuth() {
   try {
-    const password = await asyncPrompt<string>({
+    const password = await asyncDialog<string>({
       title: 'Enable two-factor authentication',
       message: 'Enter your password:',
       color: 'primary',
@@ -77,7 +77,7 @@ async function manageTwoFactorAuth() {
   try {
     // Use password to load two-factor authentication data
 
-    const password = await asyncPrompt<string>({
+    const password = await asyncDialog<string>({
       title: 'Manage two-factor authentication',
       message: 'Enter your password:',
       color: 'primary',

@@ -130,7 +130,7 @@ import { rolesMap } from '@deeplib/misc';
 import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitations/cancel';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils/misc';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import InviteUserDialog from './InviteUserDialog.vue';
@@ -183,7 +183,7 @@ function select(id: string, event: MouseEvent) {
 
 async function cancelSelectedInvitations() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Cancel invitation',
       message: 'Are you sure you want to cancel this invitation?',
 

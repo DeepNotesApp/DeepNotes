@@ -10,7 +10,7 @@ import { nanoid } from 'nanoid';
 import type { Cookies } from 'quasar';
 import type { QDialogOptions } from 'quasar';
 
-export async function asyncPrompt<T = any>(opts: QDialogOptions): Promise<T> {
+export async function asyncDialog<T = any>(opts: QDialogOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     $quasar()
       .dialog(opts)

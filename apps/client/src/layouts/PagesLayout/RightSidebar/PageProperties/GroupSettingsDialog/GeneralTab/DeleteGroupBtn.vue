@@ -8,7 +8,7 @@
 
 <script setup lang="ts">
 import { deleteGroup } from 'src/code/api-interface/groups/deletion/delete';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const groupId = inject<string>('groupId')!;
@@ -17,7 +17,7 @@ const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
 async function _deleteGroup() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete group',
       message: 'Are you sure you want to delete this group?',
 

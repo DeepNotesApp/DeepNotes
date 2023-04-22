@@ -12,11 +12,11 @@
 import { sleep } from '@stdlib/misc';
 import { deleteAccount } from 'src/code/api-interface/users/delete-account';
 import { logout } from 'src/code/auth/logout';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 async function _deleteAccount() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete account',
       message: 'Are you sure you want to delete your account?',
 
@@ -26,7 +26,7 @@ async function _deleteAccount() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    const password = await asyncPrompt<string>({
+    const password = await asyncDialog<string>({
       title: 'Delete account',
       message: 'Enter your password:',
       color: 'primary',

@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
 async function _rotateGroupKeys() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Rotate encryption keys',
       message: 'Are you sure you want to rotate the group encryption keys?',
 

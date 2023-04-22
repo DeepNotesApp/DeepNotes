@@ -51,7 +51,7 @@ import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/c
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { getGroupRequestSentNotificationInfo } from 'src/code/pages/notifications/group-request-sent';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';
 import type { Ref } from 'vue';
@@ -128,7 +128,7 @@ async function onClick() {
 
 async function _cancelJoinRequest() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Cancel join request',
       message: 'Are you sure you want to cancel the join request?',
 
@@ -148,7 +148,7 @@ async function _cancelJoinRequest() {
 
 async function _rejectJoinRequest() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Reject join request',
       message: 'Are you sure you want to reject the join request?',
 

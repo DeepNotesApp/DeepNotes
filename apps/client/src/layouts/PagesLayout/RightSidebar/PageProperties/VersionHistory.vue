@@ -87,7 +87,7 @@ import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/rest
 import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
@@ -99,7 +99,7 @@ const snapshotInfos = computed(
 
 async function restoreVersion(snapshotId: string) {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Restore version',
       message: 'Are you sure you want to restore this version?',
 
@@ -127,7 +127,7 @@ async function restoreVersion(snapshotId: string) {
 
 async function saveVersion() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Save version',
       message: 'Are you sure you want to save this version?',
 
@@ -154,7 +154,7 @@ async function saveVersion() {
 
 async function deleteSnapshot(snapshotId: string) {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete version',
       message: 'Are you sure you want to delete this version?',
 
