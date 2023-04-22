@@ -36,6 +36,10 @@ function createWebsocketMessageHandler(input: {
 
   const finishPromise = new Resolvable();
 
+  finishPromise.catch((reason) =>
+    sendErrorAndDisconnect(input.connection, reason),
+  );
+
   const redlockSignals: RedlockAbortSignal[] = [];
 
   return {
@@ -80,11 +84,7 @@ function createWebsocketMessageHandler(input: {
 
         step++;
       } catch (error: any) {
-        const errorMessage = String(error?.message ?? error);
-
-        sendErrorAndDisconnect(input.connection, errorMessage);
-
-        finishPromise.reject(errorMessage);
+        finishPromise.reject(String(error?.message ?? error));
       }
     },
   };

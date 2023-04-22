@@ -23,6 +23,7 @@ import { registerGroupsRemoveUser } from './websocket/groups/remove-user';
 import { registerGroupsRotateKeys } from './websocket/groups/rotate-keys';
 import { registerPagesMove } from './websocket/pages/move';
 import { registerUsersChangePassword } from './websocket/users/account/change-password';
+import { registerUsersChangeEmailFinish } from './websocket/users/account/email-change/finish';
 import { registerUsersRotateKeys } from './websocket/users/account/rotate-keys';
 
 export const fastify = once(async () => {
@@ -77,6 +78,7 @@ export const fastify = once(async () => {
 
   registerUsersChangePassword(fastify);
   registerUsersRotateKeys(fastify);
+  registerUsersChangeEmailFinish(fastify);
 
   registerGroupsChangeUserRole(fastify);
   registerGroupsRemoveUser(fastify);

@@ -6,17 +6,6 @@ import type {
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function requestEmailChange(input: {
-  newEmail: string;
-  oldDerivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
-}) {
-  await trpcClient.users.account.emailChange.request.mutate({
-    oldLoginHash: input.oldDerivedUserValues.loginHash,
-
-    newEmail: input.newEmail,
-  });
-}
-
 export async function changeEmail(input: {
   newEmail: string;
   password: string;

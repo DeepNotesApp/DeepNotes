@@ -31,10 +31,7 @@
 
 <script setup lang="ts">
 import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
-import {
-  changeEmail,
-  requestEmailChange,
-} from 'src/code/api-interface/users/change-email';
+import { changeEmail } from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
 import { asyncPrompt, handleError } from 'src/code/utils/misc';
@@ -63,12 +60,8 @@ async function _changeEmail() {
     }
 
     const password = await asyncPrompt<string>({
-      html: true,
       title: 'Change email',
-      message: `Enter your password:<br/>
-        <span style="color: #a0a0a0">
-          <span style="color: red">Note</span>: This action will log you out of all devices.
-        </span>`,
+      message: 'Enter your password:',
 
       color: 'primary',
       prompt: {
@@ -82,7 +75,7 @@ async function _changeEmail() {
       cancel: true,
     });
 
-    // Compute derived keys
+    // Request email change
 
     const oldDerivedValues = await deriveUserValues(currentEmail, password);
 
@@ -92,21 +85,21 @@ async function _changeEmail() {
       newEmail: newEmail.value,
     });
 
-    await requestEmailChange({
-      newEmail: newEmail.value,
-      oldDerivedUserValues: oldDerivedValues,
-    });
-
     $quasar().notify({
       message: 'A verification code has been sent to the new email address.',
       color: 'positive',
     });
 
-    // Verification code promise
+    // Finish email change
 
     const emailVerificationCode = await asyncPrompt<string>({
+      html: true,
       title: 'Verify the new email',
-      message: 'Enter the verification code sent to the new email:',
+      message: `Enter the verification code sent to the new email:<br/>
+        <span style="color: #a0a0a0">
+          <span style="color: red">Note</span>: This action will log you out of all devices.
+        </span>`,
+
       color: 'primary',
       prompt: {
         model: '',

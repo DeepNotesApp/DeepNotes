@@ -9,7 +9,6 @@ import {
   createSymmetricKeyring,
   encodePasswordHash,
 } from '@stdlib/crypto';
-import { isNanoID } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { clearCookies } from 'src/cookies';
@@ -25,7 +24,7 @@ const baseProcedureStep1 = authProcedure.input(
   z.object({
     oldLoginHash: z.instanceof(Uint8Array),
 
-    emailVerificationCode: z.string().refine(isNanoID),
+    emailVerificationCode: z.string().regex(/^\d{6}$/),
   }),
 );
 export const finishProcedureStep1 =
@@ -47,7 +46,7 @@ export function registerUsersChangeEmailFinish(
 ) {
   createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
-    url: '/trpc/users.account.changeEmail',
+    url: '/trpc/users.account.emailChange.finish',
 
     async setup({ ctx, run }) {
       await ctx.usingLocks([[`user-lock:${ctx.userId}`]], run);
