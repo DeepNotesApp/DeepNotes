@@ -52,7 +52,7 @@ async function enableTwoFactorAuth() {
       'email',
     );
 
-    const loginHash = (await deriveUserValues(email, password)).loginHash;
+    const loginHash = (await deriveUserValues({ email, password })).loginHash;
 
     const response =
       await trpcClient.users.account.twoFactorAuth.enable.request.mutate({
@@ -98,7 +98,7 @@ async function manageTwoFactorAuth() {
       'email',
     );
 
-    const loginHash = (await deriveUserValues(email, password)).loginHash;
+    const loginHash = (await deriveUserValues({ email, password })).loginHash;
 
     const response = await trpcClient.users.account.twoFactorAuth.load.query({
       loginHash,

@@ -77,7 +77,10 @@ async function _changeEmail() {
 
     // Request email change
 
-    const oldDerivedValues = await deriveUserValues(currentEmail, password);
+    const oldDerivedValues = await deriveUserValues({
+      email: currentEmail,
+      password,
+    });
 
     await trpcClient.users.account.emailChange.request.mutate({
       oldLoginHash: oldDerivedValues.loginHash,

@@ -8,11 +8,15 @@ import {
   createPrivateKeyring,
   createSymmetricKeyring,
   encodePasswordHash,
+  getPasswordHashValues,
 } from '@stdlib/crypto';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import { clearCookies } from 'src/cookies';
-import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
+import {
+  decryptUserRehashedLoginHash,
+  derivePasswordValues,
+  encryptUserRehashedLoginHash,
+} from 'src/crypto';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
@@ -70,9 +74,11 @@ export async function changeEmailStep1({
     loginHash: input.oldLoginHash,
   });
 
-  // Get user encrypted private keyring
+  // Get user data
 
   const user = await UserModel.query().findById(ctx.userId).select(
+    'encrypted_rehashed_login_hash',
+
     'email_verification_code',
 
     'encrypted_symmetric_keyring',
@@ -93,9 +99,36 @@ export async function changeEmailStep1({
     });
   }
 
+  // Get password values
+
+  const passwordHashValues = getPasswordHashValues(
+    decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
+  );
+
+  const passwordValues = derivePasswordValues({
+    password: input.oldLoginHash,
+    salt: passwordHashValues.saltBytes,
+  });
+
+  // Return old encrypted keyrings
+
   return {
-    encryptedSymmetricKeyring: user.encrypted_symmetric_keyring,
-    encryptedPrivateKeyring: user.encrypted_private_keyring,
+    encryptedPrivateKeyring: createPrivateKeyring(
+      user.encrypted_private_keyring,
+    ).unwrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedPrivateKeyring',
+        userId: ctx.userId,
+      },
+    }).wrappedValue,
+    encryptedSymmetricKeyring: createSymmetricKeyring(
+      user.encrypted_symmetric_keyring,
+    ).unwrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedSymmetricKeyring',
+        userId: ctx.userId,
+      },
+    }).wrappedValue,
   };
 }
 
@@ -124,7 +157,9 @@ export async function changeEmailStep2({
 
     const newEmail = decryptUserEmail(user.encrypted_new_email);
 
-    const passwordValues = derivePasswordValues(input.newLoginHash);
+    const passwordValues = derivePasswordValues({
+      password: input.newLoginHash,
+    });
 
     await Promise.all([
       ctx.dataAbstraction.patch(
@@ -167,7 +202,5 @@ export async function changeEmailStep2({
     await ctx.stripe.customers.update(user.customer_id!, {
       email: newEmail,
     });
-
-    clearCookies(ctx.res);
   });
 }

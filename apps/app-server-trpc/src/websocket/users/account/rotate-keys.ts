@@ -14,7 +14,11 @@ import { objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { decryptUserRehashedLoginHash, derivePasswordValues } from 'src/crypto';
-import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
+import type {
+  InferProcedureContext,
+  InferProcedureInput,
+  InferProcedureOpts,
+} from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
 import { checkCorrectUserPassword } from 'src/utils/users';
@@ -61,6 +65,10 @@ const baseProcedureStep2 = authProcedure.input(
 export const rotateKeysProcedureStep2 =
   baseProcedureStep2.mutation(rotateKeysStep2);
 
+interface Context extends InferProcedureContext<typeof baseProcedureStep1> {
+  loginHash: Uint8Array;
+}
+
 export function registerUsersRotateKeys(fastify: ReturnType<typeof Fastify>) {
   createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
@@ -81,7 +89,7 @@ export async function rotateKeysStep1({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
-  (ctx as any).loginHash = input.loginHash;
+  (ctx as Context).loginHash = input.loginHash;
 
   // Check if old password is correct
 
@@ -141,10 +149,10 @@ export async function rotateKeysStep1({
     decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
   );
 
-  const passwordValues = derivePasswordValues(
-    input.loginHash,
-    passwordHashValues.saltBytes,
-  );
+  const passwordValues = derivePasswordValues({
+    password: input.loginHash,
+    salt: passwordHashValues.saltBytes,
+  });
 
   return {
     userEmail: decryptUserEmail(user.encrypted_email),
@@ -221,10 +229,10 @@ export async function rotateKeysStep2({
       decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
     );
 
-    const passwordValues = derivePasswordValues(
-      (ctx as any).loginHash,
-      passwordHashValues.saltBytes,
-    );
+    const passwordValues = derivePasswordValues({
+      password: (ctx as Context).loginHash,
+      salt: passwordHashValues.saltBytes,
+    });
 
     await Promise.all([
       await ctx.dataAbstraction.patch(

@@ -32,10 +32,10 @@ export async function changeEmail(input: {
   async function step2(
     input_: typeof finishProcedureStep1['_def']['_output_out'],
   ): Promise<typeof finishProcedureStep2['_def']['_input_in']> {
-    const newDerivedUserValues = await deriveUserValues(
-      input.newEmail,
-      input.password,
-    );
+    const newDerivedUserValues = await deriveUserValues({
+      email: input.newEmail,
+      password: input.password,
+    });
 
     const newEncryptedPrivateKeyring = createPrivateKeyring(
       input_.encryptedPrivateKeyring,

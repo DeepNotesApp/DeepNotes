@@ -23,7 +23,10 @@ export async function rotateUserKeys(input: { password: string }) {
 
   // Compute derived keys
 
-  const derivedValues = await deriveUserValues(email, input.password);
+  const derivedValues = await deriveUserValues({
+    email,
+    password: input.password,
+  });
 
   // Create websocket request
 

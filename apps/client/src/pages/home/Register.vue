@@ -219,10 +219,10 @@ async function register() {
       );
     }
 
-    const derivedUserValues = await deriveUserValues(
-      email.value,
-      password.value,
-    );
+    const derivedUserValues = await deriveUserValues({
+      email: email.value,
+      password: password.value,
+    });
 
     const registrationValues = await getRegistrationValues({
       derivedUserValues,

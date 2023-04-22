@@ -123,10 +123,10 @@ export async function login({
       decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
     );
 
-    const passwordValues = derivePasswordValues(
-      input.loginHash,
-      passwordHashValues.saltBytes,
-    );
+    const passwordValues = derivePasswordValues({
+      password: input.loginHash,
+      salt: passwordHashValues.saltBytes,
+    });
 
     const passwordIsCorrect = sodium.memcmp(
       passwordValues.hash,

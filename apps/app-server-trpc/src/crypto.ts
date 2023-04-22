@@ -13,15 +13,18 @@ import { mainLogger } from '@stdlib/misc';
 import sodium from 'libsodium-wrappers';
 import { pack, unpack } from 'msgpackr';
 
-export function derivePasswordValues(password: Uint8Array, salt?: Uint8Array) {
+export function derivePasswordValues(input: {
+  password: Uint8Array;
+  salt?: Uint8Array;
+}) {
   mainLogger.info('Started hashing password');
 
-  salt ??= sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
+  input.salt ??= sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
 
   const derivedKey = sodium.crypto_pwhash(
     32 + 64,
-    password,
-    salt,
+    input.password,
+    input.salt,
     2,
     32 * 1048576,
     sodium.crypto_pwhash_ALG_ARGON2ID13,
@@ -32,7 +35,7 @@ export function derivePasswordValues(password: Uint8Array, salt?: Uint8Array) {
   return {
     key: wrapSymmetricKey(derivedKey.slice(0, 32)),
     hash: derivedKey.slice(32),
-    salt,
+    salt: input.salt,
   };
 }
 

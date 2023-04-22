@@ -64,6 +64,8 @@ export function createWebsocketRequest(input: {
   });
 
   socket.addEventListener('open', async () => {
+    moduleLogger.info('Sending message 0');
+
     const request = await input.steps[0]();
 
     socket.send(pack(request));

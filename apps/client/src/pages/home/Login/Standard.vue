@@ -163,7 +163,10 @@ async function onSubmit() {
 
     // Compute password hash
 
-    const derivedKeys = await deriveUserValues(email.value, password.value);
+    const derivedKeys = await deriveUserValues({
+      email: email.value,
+      password: password.value,
+    });
 
     // Login
 

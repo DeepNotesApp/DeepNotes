@@ -67,7 +67,7 @@ export async function register({
       ip: ctx.req.ip,
       userAgent: ctx.req.headers['user-agent'] ?? '',
 
-      passwordValues: derivePasswordValues(input.loginHash),
+      passwordValues: derivePasswordValues({ password: input.loginHash }),
 
       dtrx,
     });

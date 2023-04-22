@@ -14,16 +14,16 @@ import { groupContentKeyrings } from './pages/computed/group-content-keyrings';
 
 const moduleLogger = mainLogger.sub('crypto.client.ts');
 
-export async function derivePasswordValues(
-  password: string | Uint8Array,
-  salt: Uint8Array,
-) {
+export async function derivePasswordValues(input: {
+  password: string | Uint8Array;
+  salt: Uint8Array;
+}) {
   moduleLogger.info('Started key derivation');
 
   const derivedKey = (
     await (globalThis as any).argon2.hash({
-      pass: password,
-      salt,
+      pass: input.password,
+      salt: input.salt,
 
       hashLen: 32 + 64,
 
@@ -43,17 +43,23 @@ export async function derivePasswordValues(
   };
 }
 
-export async function deriveUserValues(email: string, password: string) {
+export async function deriveUserValues(input: {
+  email: string;
+  password: string;
+}) {
   const emailHash = sodium.crypto_generichash(
     sodium.crypto_pwhash_SALTBYTES,
     (process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
       .split(';')
-      .includes(email)
-      ? email
-      : email.toLowerCase(),
+      .includes(input.email)
+      ? input.email
+      : input.email.toLowerCase(),
   );
 
-  const passwordValues = await derivePasswordValues(password, emailHash);
+  const passwordValues = await derivePasswordValues({
+    password: input.password,
+    salt: emailHash,
+  });
 
   return {
     masterKey: passwordValues.key,
@@ -189,10 +195,10 @@ export async function computeGroupPasswordValues(
   groupId: string,
   groupPassword: string,
 ) {
-  const passwordValues = await derivePasswordValues(
-    groupPassword,
-    nanoidToBytes(groupId),
-  );
+  const passwordValues = await derivePasswordValues({
+    password: groupPassword,
+    salt: nanoidToBytes(groupId),
+  });
 
   return {
     passwordHash: passwordValues.hash,

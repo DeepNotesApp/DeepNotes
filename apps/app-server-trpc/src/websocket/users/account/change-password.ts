@@ -81,7 +81,9 @@ export async function changePasswordStep2({
   input,
 }: InferProcedureOpts<typeof baseProcedureStep2>) {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
-    const passwordValues = derivePasswordValues(input.newLoginHash);
+    const passwordValues = derivePasswordValues({
+      password: input.newLoginHash,
+    });
 
     await ctx.dataAbstraction.patch(
       'user',

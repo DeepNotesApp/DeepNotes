@@ -69,7 +69,10 @@ async function onSubmit() {
       throw new Error('Please enter a valid 6-digit code.');
     }
 
-    const derivedKeys = await deriveUserValues(email.value, password.value);
+    const derivedKeys = await deriveUserValues({
+      email: email.value,
+      password: password.value,
+    });
 
     const response = await trpcClient.sessions.login.mutate({
       email: email.value,

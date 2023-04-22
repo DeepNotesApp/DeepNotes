@@ -59,7 +59,10 @@ const recoveryCode = ref('');
 
 async function onSubmit() {
   try {
-    const derivedKeys = await deriveUserValues(email.value, password.value);
+    const derivedKeys = await deriveUserValues({
+      email: email.value,
+      password: password.value,
+    });
 
     const response = await trpcClient.sessions.login.mutate({
       email: email.value,

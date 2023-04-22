@@ -25,7 +25,10 @@ export async function changePassword(input: {
 
   // Compute derived keys
 
-  const oldDerivedValues = await deriveUserValues(email, input.oldPassword);
+  const oldDerivedValues = await deriveUserValues({
+    email,
+    password: input.oldPassword,
+  });
 
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
@@ -45,7 +48,10 @@ export async function changePassword(input: {
   async function step2(
     input_: typeof changePasswordProcedureStep1['_def']['_output_out'],
   ): Promise<typeof changePasswordProcedureStep2['_def']['_input_in']> {
-    const newDerivedValues = await deriveUserValues(email, input.newPassword);
+    const newDerivedValues = await deriveUserValues({
+      email,
+      password: input.newPassword,
+    });
 
     const wrappedSessionKey = wrapSymmetricKey(input_.sessionKey);
 
