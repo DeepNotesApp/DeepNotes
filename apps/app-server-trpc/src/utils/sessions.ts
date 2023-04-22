@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 import { dataAbstraction } from 'src/data/data-abstraction';
 
 import { setCookies } from '../cookies';
-import { generateTokens } from '../tokens';
+import { generateTokens } from '../jwt';
 
 export async function generateSessionValues(input: {
   sessionId: string;

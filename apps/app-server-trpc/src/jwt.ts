@@ -1,3 +1,4 @@
+import type { AccessTokenPayload, RefreshTokenPayload } from '@deeplib/misc';
 import {
   ACCESS_TOKEN_DURATION,
   REFRESH_TOKEN_LONG_DURATION,
@@ -6,15 +7,15 @@ import {
 import { createDecoder } from 'fast-jwt';
 import { createSigner, createVerifier } from 'fast-jwt';
 
-export const signAccessJWT = createSigner({
+const signAccessJWT = createSigner({
   key: process.env.ACCESS_SECRET,
   expiresIn: ACCESS_TOKEN_DURATION,
 });
-export const signShortRefreshJWT = createSigner({
+const signShortRefreshJWT = createSigner({
   key: process.env.REFRESH_SECRET,
   expiresIn: REFRESH_TOKEN_SHORT_DURATION,
 });
-export const signLongRefreshJWT = createSigner({
+const signLongRefreshJWT = createSigner({
   key: process.env.REFRESH_SECRET,
   expiresIn: REFRESH_TOKEN_LONG_DURATION,
 });
@@ -63,4 +64,37 @@ export function decodeRefreshJWT<TokenType>(
   } catch (error) {
     return null;
   }
+}
+
+export function generateTokens(input: {
+  userId: string;
+  sessionId: string;
+  refreshCode: string;
+  rememberSession: boolean;
+}) {
+  const accessToken = signAccessJWT({
+    uid: input.userId,
+    sid: input.sessionId,
+  } as AccessTokenPayload);
+
+  let refreshToken: string;
+
+  if (input.rememberSession) {
+    refreshToken = signLongRefreshJWT({
+      sid: input.sessionId,
+      rfc: input.refreshCode,
+      rms: input.rememberSession,
+    } as RefreshTokenPayload);
+  } else {
+    refreshToken = signShortRefreshJWT({
+      sid: input.sessionId,
+      rfc: input.refreshCode,
+      rms: input.rememberSession,
+    } as RefreshTokenPayload);
+  }
+
+  return {
+    accessToken,
+    refreshToken,
+  };
 }
