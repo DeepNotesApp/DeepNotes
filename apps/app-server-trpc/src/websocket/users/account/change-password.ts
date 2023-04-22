@@ -1,11 +1,17 @@
-import { SessionModel } from '@deeplib/db';
+import { UserModel } from '@deeplib/db';
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
   encodePasswordHash,
+  getPasswordHashValues,
 } from '@stdlib/crypto';
+import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
+import {
+  decryptUserRehashedLoginHash,
+  derivePasswordValues,
+  encryptUserRehashedLoginHash,
+} from 'src/crypto';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { invalidateAllSessions } from 'src/utils/sessions';
@@ -25,8 +31,8 @@ const baseProcedureStep2 = authProcedure.input(
   z.object({
     newLoginHash: z.instanceof(Uint8Array),
 
-    encryptedPrivateKeyring: z.instanceof(Uint8Array),
-    encryptedSymmetricKeyring: z.instanceof(Uint8Array),
+    newEncryptedPrivateKeyring: z.instanceof(Uint8Array),
+    newEncryptedSymmetricKeyring: z.instanceof(Uint8Array),
   }),
 );
 export const changePasswordProcedureStep2 =
@@ -61,18 +67,52 @@ export async function changePasswordStep1({
     loginHash: input.oldLoginHash,
   });
 
-  // Get session encryption key
+  // Get user data
 
-  const userSession = (await SessionModel.query()
-    .findById(ctx.sessionId)
-    .leftJoin('users', 'users.id', 'sessions.user_id')
-    .select('sessions.encryption_key'))! as unknown as Pick<
-    SessionModel,
-    'encryption_key'
-  >;
+  const user = await UserModel.query().findById(ctx.userId).select(
+    'encrypted_rehashed_login_hash',
+
+    'encrypted_symmetric_keyring',
+    'encrypted_private_keyring',
+  );
+
+  if (user == null) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'User not found.',
+    });
+  }
+
+  // Get password values
+
+  const passwordHashValues = getPasswordHashValues(
+    decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),
+  );
+
+  const passwordValues = derivePasswordValues({
+    password: input.oldLoginHash,
+    salt: passwordHashValues.saltBytes,
+  });
+
+  // Return old encrypted keyrings
 
   return {
-    sessionKey: userSession.encryption_key,
+    encryptedPrivateKeyring: createPrivateKeyring(
+      user.encrypted_private_keyring,
+    ).unwrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedPrivateKeyring',
+        userId: ctx.userId,
+      },
+    }).wrappedValue,
+    encryptedSymmetricKeyring: createSymmetricKeyring(
+      user.encrypted_symmetric_keyring,
+    ).unwrapSymmetric(passwordValues.key, {
+      associatedData: {
+        context: 'UserEncryptedSymmetricKeyring',
+        userId: ctx.userId,
+      },
+    }).wrappedValue,
   };
 }
 
@@ -94,7 +134,7 @@ export async function changePasswordStep2({
         ),
 
         encrypted_private_keyring: createPrivateKeyring(
-          input.encryptedPrivateKeyring,
+          input.newEncryptedPrivateKeyring,
         ).wrapSymmetric(passwordValues.key, {
           associatedData: {
             context: 'UserEncryptedPrivateKeyring',
@@ -102,7 +142,7 @@ export async function changePasswordStep2({
           },
         }).wrappedValue,
         encrypted_symmetric_keyring: createSymmetricKeyring(
-          input.encryptedSymmetricKeyring,
+          input.newEncryptedSymmetricKeyring,
         ).wrapSymmetric(passwordValues.key, {
           associatedData: {
             context: 'UserEncryptedSymmetricKeyring',

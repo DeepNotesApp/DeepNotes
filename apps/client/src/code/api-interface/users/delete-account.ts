@@ -6,12 +6,12 @@ export async function deleteAccount(input: { password: string }) {
     authStore().userId,
     'email',
   );
-  const derivedValues = await deriveUserValues({
+  const derivedUserValues = await deriveUserValues({
     email,
     password: input.password,
   });
 
   await trpcClient.users.account.delete.mutate({
-    loginHash: derivedValues.loginHash,
+    loginHash: derivedUserValues.loginHash,
   });
 }

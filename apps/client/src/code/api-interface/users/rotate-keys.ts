@@ -23,7 +23,7 @@ export async function rotateUserKeys(input: { password: string }) {
 
   // Compute derived keys
 
-  const derivedValues = await deriveUserValues({
+  const derivedUserValues = await deriveUserValues({
     email,
     password: input.password,
   });
@@ -41,7 +41,7 @@ export async function rotateUserKeys(input: { password: string }) {
 
   function step1(): typeof rotateKeysProcedureStep1['_def']['_input_in'] {
     return {
-      loginHash: derivedValues.loginHash,
+      loginHash: derivedUserValues.loginHash,
     };
   }
 
@@ -50,7 +50,7 @@ export async function rotateUserKeys(input: { password: string }) {
   ): Promise<typeof rotateKeysProcedureStep2['_def']['_input_in']> {
     const oldSymmetricKeyring = createSymmetricKeyring(
       input.userEncryptedSymmetricKeyring,
-    ).unwrapSymmetric(derivedValues.masterKey, {
+    ).unwrapSymmetric(derivedUserValues.masterKey, {
       associatedData: {
         context: 'UserSymmetricKeyring',
         userId: authStore().userId,
@@ -58,7 +58,7 @@ export async function rotateUserKeys(input: { password: string }) {
     });
     const oldPrivateKeyring = createPrivateKeyring(
       input.userEncryptedPrivateKeyring,
-    ).unwrapSymmetric(derivedValues.masterKey, {
+    ).unwrapSymmetric(derivedUserValues.masterKey, {
       associatedData: {
         context: 'UserPrivateKeyring',
         userId: authStore().userId,
@@ -77,7 +77,7 @@ export async function rotateUserKeys(input: { password: string }) {
 
     return {
       userEncryptedSymmetricKeyring: newSymmetricKeyring.wrapSymmetric(
-        derivedValues.masterKey,
+        derivedUserValues.masterKey,
         {
           associatedData: {
             context: 'UserSymmetricKeyring',
@@ -86,7 +86,7 @@ export async function rotateUserKeys(input: { password: string }) {
         },
       ).wrappedValue,
       userEncryptedPrivateKeyring: newPrivateKeyring.wrapSymmetric(
-        derivedValues.masterKey,
+        derivedUserValues.masterKey,
         {
           associatedData: {
             context: 'UserPrivateKeyring',

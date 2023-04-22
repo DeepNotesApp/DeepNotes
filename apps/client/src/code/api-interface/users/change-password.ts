@@ -1,9 +1,4 @@
-import { base64ToBytes } from '@stdlib/base64';
-import {
-  createPrivateKeyring,
-  createSymmetricKeyring,
-  wrapSymmetricKey,
-} from '@stdlib/crypto';
+import { createPrivateKeyring, createSymmetricKeyring } from '@stdlib/crypto';
 import type {
   changePasswordProcedureStep1,
   changePasswordProcedureStep2,
@@ -25,7 +20,7 @@ export async function changePassword(input: {
 
   // Compute derived keys
 
-  const oldDerivedValues = await deriveUserValues({
+  const oldDerivedUserValues = await deriveUserValues({
     email,
     password: input.oldPassword,
   });
@@ -41,48 +36,45 @@ export async function changePassword(input: {
 
   function step1(): typeof changePasswordProcedureStep1['_def']['_input_in'] {
     return {
-      oldLoginHash: oldDerivedValues.loginHash,
+      oldLoginHash: oldDerivedUserValues.loginHash,
     };
   }
 
   async function step2(
     input_: typeof changePasswordProcedureStep1['_def']['_output_out'],
   ): Promise<typeof changePasswordProcedureStep2['_def']['_input_in']> {
-    const newDerivedValues = await deriveUserValues({
+    const newDerivedUserValues = await deriveUserValues({
       email,
       password: input.newPassword,
     });
 
-    const wrappedSessionKey = wrapSymmetricKey(input_.sessionKey);
-
     // Reencrypt values
 
-    const encryptedPrivateKeyring = createPrivateKeyring(
-      base64ToBytes(internals.storage.getItem('encryptedPrivateKeyring')!),
+    const newEncryptedPrivateKeyring = createPrivateKeyring(
+      input_.encryptedPrivateKeyring,
     )
-      .unwrapSymmetric(wrappedSessionKey, {
+      .unwrapSymmetric(oldDerivedUserValues.masterKey, {
         associatedData: {
-          context: 'SessionUserPrivateKeyring',
+          context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
       })
-      .wrapSymmetric(newDerivedValues.masterKey, {
+      .wrapSymmetric(newDerivedUserValues.masterKey, {
         associatedData: {
           context: 'UserPrivateKeyring',
           userId: authStore().userId,
         },
       }).wrappedValue;
-
-    const encryptedSymmetricKeyring = createSymmetricKeyring(
-      base64ToBytes(internals.storage.getItem('encryptedSymmetricKeyring')!),
+    const newEncryptedSymmetricKeyring = createSymmetricKeyring(
+      input_.encryptedSymmetricKeyring,
     )
-      .unwrapSymmetric(wrappedSessionKey, {
+      .unwrapSymmetric(oldDerivedUserValues.masterKey, {
         associatedData: {
-          context: 'SessionUserSymmetricKeyring',
+          context: 'UserSymmetricKeyring',
           userId: authStore().userId,
         },
       })
-      .wrapSymmetric(newDerivedValues.masterKey, {
+      .wrapSymmetric(newDerivedUserValues.masterKey, {
         associatedData: {
           context: 'UserSymmetricKeyring',
           userId: authStore().userId,
@@ -90,10 +82,10 @@ export async function changePassword(input: {
       }).wrappedValue;
 
     return {
-      newLoginHash: newDerivedValues.loginHash,
+      newLoginHash: newDerivedUserValues.loginHash,
 
-      encryptedPrivateKeyring,
-      encryptedSymmetricKeyring,
+      newEncryptedPrivateKeyring,
+      newEncryptedSymmetricKeyring,
     };
   }
 
