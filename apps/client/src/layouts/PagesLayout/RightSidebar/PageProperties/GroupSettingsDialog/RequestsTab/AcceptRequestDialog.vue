@@ -103,7 +103,7 @@ async function _acceptJoinRequest() {
       await acceptJoinRequest({
         groupId: props.groupId,
         patientId: userId,
-        targetRole: targetRole.value!,
+        targetRole: targetRole.value,
       });
     }
 

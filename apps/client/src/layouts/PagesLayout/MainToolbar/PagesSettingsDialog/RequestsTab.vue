@@ -153,7 +153,9 @@ async function cancelSelectedRequests() {
     });
 
     for (const groupId of finalSelectedGroupIds.value) {
-      await cancelJoinRequest(groupId);
+      await cancelJoinRequest({
+        groupId,
+      });
     }
 
     baseSelectedGroupIds.value.clear();

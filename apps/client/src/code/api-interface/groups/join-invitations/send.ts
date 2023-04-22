@@ -18,10 +18,6 @@ export async function sendJoinInvitation(input: {
   inviteeRole: GroupRoleID;
   inviteeUserName: string;
 }) {
-  if (input.inviteeUserId == null) {
-    throw new Error('User not found.');
-  }
-
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',

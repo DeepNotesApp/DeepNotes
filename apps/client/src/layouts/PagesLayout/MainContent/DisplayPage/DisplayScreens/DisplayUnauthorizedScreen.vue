@@ -95,7 +95,9 @@ async function _cancelJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinRequest(page.react.groupId);
+    await cancelJoinRequest({
+      groupId: page.react.groupId,
+    });
   } catch (error: any) {
     handleError(error);
   }

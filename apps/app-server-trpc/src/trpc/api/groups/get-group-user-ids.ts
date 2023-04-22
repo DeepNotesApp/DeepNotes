@@ -36,5 +36,5 @@ export async function getGroupUserIds({
         .select('user_id'),
     );
 
-  return groupUsers.map((groupMember) => groupMember.user_id);
+  return groupUsers.map((groupUser) => groupUser.user_id);
 }

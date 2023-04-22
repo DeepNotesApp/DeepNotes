@@ -140,6 +140,10 @@ async function inviteUser() {
       );
     }
 
+    if (inviteeUserId == null) {
+      throw new Error('User not found.');
+    }
+
     await sendJoinInvitation({
       groupId: props.groupId,
       inviteeUserId,

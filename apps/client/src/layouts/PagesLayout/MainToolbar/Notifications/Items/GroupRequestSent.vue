@@ -138,7 +138,9 @@ async function _cancelJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinRequest(notificationContent.value.groupId);
+    await cancelJoinRequest({
+      groupId: notificationContent.value.groupId,
+    });
 
     notificationsMenu.value.hide();
   } catch (error) {

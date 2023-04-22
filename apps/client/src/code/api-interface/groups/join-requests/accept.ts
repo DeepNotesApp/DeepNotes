@@ -17,19 +17,6 @@ export async function acceptJoinRequest(input: {
   patientId: string;
   targetRole: GroupRoleID;
 }) {
-  if (input.targetRole == null) {
-    throw new Error('Please select a role.');
-  }
-
-  const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
-      'http',
-      'ws',
-    )}/groups.joinRequests.accept`,
-
-    steps: [step1, step2, step3],
-  });
-
   const [
     accessKeyring,
     groupInternalKeyring,
@@ -49,6 +36,15 @@ export async function acceptJoinRequest(input: {
     groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
     groupRequestNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
+
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.joinRequests.accept`,
+
+    steps: [step1, step2, step3],
+  });
 
   async function step1(): Promise<
     typeof acceptProcedureStep1['_def']['_input_in']
