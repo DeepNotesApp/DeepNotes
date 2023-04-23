@@ -52,15 +52,15 @@ export async function disable({
         // Check if group is password protected
 
         if (
-          await ctx.dataAbstraction.hget(
+          !(await ctx.dataAbstraction.hget(
             'group',
             input.groupId,
             'is-password-protected',
-          )
+          ))
         ) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
-            message: 'This group is already password protected.',
+            message: 'This group is not password protected.',
           });
         }
 
