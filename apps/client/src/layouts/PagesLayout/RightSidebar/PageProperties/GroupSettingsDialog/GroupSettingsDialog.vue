@@ -262,7 +262,7 @@ onMounted(async () => {
       props.groupId !== internals.personalGroupId &&
       authStore().loggedIn
     ) {
-      const groupUserIds = await trpcClient.groups.getGroupUserIds.query({
+      const groupUserIds = await trpcClient.groups.getUserIds.query({
         groupId: props.groupId,
       });
 

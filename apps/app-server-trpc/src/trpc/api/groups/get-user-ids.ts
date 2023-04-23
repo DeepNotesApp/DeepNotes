@@ -15,11 +15,9 @@ const baseProcedure = authProcedure.input(
   }),
 );
 
-export const getGroupUserIdsProcedure = once(() =>
-  baseProcedure.query(getGroupUserIds),
-);
+export const getUserIdsProcedure = once(() => baseProcedure.query(getUserIds));
 
-export async function getGroupUserIds({
+export async function getUserIds({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   const groupUsers = await GroupMemberModel.query()
