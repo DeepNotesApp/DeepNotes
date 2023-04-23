@@ -6,10 +6,7 @@ import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function rejectJoinInvitation(input: {
-  groupId: string;
-  patientId: string;
-}) {
+export async function rejectJoinInvitation(input: { groupId: string }) {
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',

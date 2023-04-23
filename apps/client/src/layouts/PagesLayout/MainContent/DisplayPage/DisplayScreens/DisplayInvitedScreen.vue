@@ -61,7 +61,9 @@ async function _rejectJoinInvitation() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rejectJoinInvitation(page.react.groupId);
+    await rejectJoinInvitation({
+      groupId: page.react.groupId,
+    });
   } catch (error: any) {
     handleError(error);
   }

@@ -1,5 +1,5 @@
-export async function restoreGroup(groupId: string) {
+export async function restoreGroup(input: { groupId: string }) {
   await trpcClient.groups.deletion.restore.mutate({
-    groupId,
+    groupId: input.groupId,
   });
 }

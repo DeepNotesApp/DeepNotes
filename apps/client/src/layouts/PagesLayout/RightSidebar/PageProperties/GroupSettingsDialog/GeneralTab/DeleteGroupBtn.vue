@@ -27,7 +27,7 @@ async function _deleteGroup() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await deleteGroup(groupId);
+    await deleteGroup({ groupId });
 
     $quasar().notify({
       message: 'Group deleted successfully.',

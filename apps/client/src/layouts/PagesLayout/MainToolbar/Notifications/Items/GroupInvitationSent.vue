@@ -161,7 +161,9 @@ async function _rejectJoinInvitation() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rejectJoinInvitation(notificationContent.value.groupId);
+    await rejectJoinInvitation({
+      groupId: notificationContent.value.groupId,
+    });
 
     notificationsMenu.value.hide();
   } catch (error) {

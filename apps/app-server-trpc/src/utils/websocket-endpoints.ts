@@ -103,6 +103,8 @@ export function createWebsocketEndpoint<Input>(input: {
 }) {
   input.fastify.get(input.url, { websocket: true }, async (connection, req) => {
     try {
+      moduleLogger.info(`Starting websocket request: ${input.url}`);
+
       const ctxReadyPromise = new Resolvable();
 
       connection.socket.on('message', async (message: Buffer) => {

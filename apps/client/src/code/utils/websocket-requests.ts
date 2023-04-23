@@ -53,6 +53,8 @@ export function createWebsocketRequest(input: {
   url: string;
   steps: ((...args: any) => any)[];
 }) {
+  moduleLogger.info(`Starting websocket request: ${input.url}`);
+
   const promise = new Resolvable();
 
   const socket = new WebSocket(input.url);

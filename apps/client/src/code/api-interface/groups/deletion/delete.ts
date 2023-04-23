@@ -1,5 +1,5 @@
-export async function deleteGroup(groupId: string) {
+export async function deleteGroup(input: { groupId: string }) {
   await trpcClient.groups.deletion.delete.mutate({
-    groupId,
+    groupId: input.groupId,
   });
 }

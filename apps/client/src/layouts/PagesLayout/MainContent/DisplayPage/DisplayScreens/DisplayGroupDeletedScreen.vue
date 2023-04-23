@@ -71,7 +71,9 @@ const canRestore = computed(() => {
 
 async function _restoreGroup() {
   try {
-    await restoreGroup(page.react.groupId);
+    await restoreGroup({
+      groupId: page.react.groupId,
+    });
 
     $quasar().notify({
       message: 'Group restored successfully.',
@@ -94,7 +96,9 @@ async function deletePermanently() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await deleteGroupPermanently(page.react.groupId);
+    await deleteGroupPermanently({
+      groupId: page.react.groupId,
+    });
 
     $quasar().notify({
       message: 'Group deleted permanently.',

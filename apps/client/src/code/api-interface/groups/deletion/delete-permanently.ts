@@ -1,5 +1,5 @@
-export async function deleteGroupPermanently(groupId: string) {
+export async function deleteGroupPermanently(input: { groupId: string }) {
   await trpcClient.groups.deletion.deletePermanently.mutate({
-    groupId,
+    groupId: input.groupId,
   });
 }

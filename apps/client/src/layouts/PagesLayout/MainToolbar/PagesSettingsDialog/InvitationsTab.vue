@@ -187,7 +187,7 @@ async function rejectSelectedInvitations() {
     });
 
     for (const groupId of finalSelectedGroupIds.value) {
-      await rejectJoinInvitation(groupId);
+      await rejectJoinInvitation({ groupId });
     }
 
     baseSelectedGroupIds.value.clear();

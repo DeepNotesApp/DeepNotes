@@ -24,7 +24,7 @@ async function makePublic() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await makeGroupPublic(groupId);
+    await makeGroupPublic({ groupId });
 
     $quasar().notify({
       message: 'Group is now public.',

@@ -48,7 +48,7 @@ export async function getGroupInvitationSentNotificationInfo({
                 ok: { label: 'Yes', flat: true, color: 'negative' },
               });
 
-              await rejectJoinInvitation(groupId);
+              await rejectJoinInvitation({ groupId });
             } catch (error) {
               handleError(error);
             }
