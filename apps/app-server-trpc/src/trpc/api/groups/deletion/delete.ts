@@ -43,7 +43,7 @@ export async function delete_({
           'group',
           input.groupId,
           'permanent-deletion-date',
-        )) == null
+        )) != null
       ) {
         throw new TRPCError({
           code: 'BAD_REQUEST',
