@@ -1,7 +1,11 @@
 import { isNanoID } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
+import type {
+  InferProcedureContext,
+  InferProcedureInput,
+  InferProcedureOpts,
+} from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import {
   getGroupKeyRotationValues,
@@ -23,6 +27,10 @@ const baseProcedureStep2 = authProcedure.input(groupKeyRotationSchema);
 export const makePrivateProcedureStep2 =
   baseProcedureStep2.mutation(makePrivateStep2);
 
+interface Context extends InferProcedureContext<typeof baseProcedureStep1> {
+  groupId: string;
+}
+
 export function registerGroupsMakePrivate(fastify: ReturnType<typeof Fastify>) {
   createWebsocketEndpoint<InferProcedureInput<typeof baseProcedureStep1>>({
     fastify,
@@ -43,6 +51,8 @@ export async function makePrivateStep1({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
+  (ctx as Context).groupId = input.groupId;
+
   // Check sufficient permissions
 
   if (
@@ -80,7 +90,7 @@ export async function makePrivateStep2({
     return await rotateGroupKeys({
       ...input,
 
-      groupId: (ctx as any).groupId,
+      groupId: (ctx as Context).groupId,
 
       dtrx,
     });

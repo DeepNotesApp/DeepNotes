@@ -31,6 +31,8 @@ export async function makeGroupPrivate(input: { groupId: string }) {
       ...input_,
 
       groupId: input.groupId,
+
+      groupIsPublic: false,
     });
   }
 
