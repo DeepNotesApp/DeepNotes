@@ -24,7 +24,7 @@ async function _rotateGroupKeys() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rotateGroupKeys(groupId);
+    await rotateGroupKeys({ groupId });
   } catch (error: any) {
     handleError(error);
   }

@@ -94,7 +94,7 @@ export async function cancelStep1({
 
     return {
       notificationRecipients: objFromEntries(
-        (await getGroupManagers(input.groupId)).map(
+        (await getGroupManagers(input.groupId, [input.patientId])).map(
           ({ userId, publicKeyring }) => [
             userId,
             { publicKeyring: publicKeyring },

@@ -22,7 +22,7 @@ export async function sendJoinInvitation(input: {
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
       'ws',
-    )}/groups.joinRequests.send`,
+    )}/groups.joinInvitations.send`,
 
     steps: [step1, step2, step3],
   });

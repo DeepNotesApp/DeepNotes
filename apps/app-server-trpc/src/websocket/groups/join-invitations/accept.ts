@@ -5,7 +5,7 @@ import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { getGroupManagers } from 'src/utils/groups';
+import { getGroupMembers } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
 import { notifyUsers } from 'src/utils/notifications';
 import { notificationsRequestSchema } from 'src/utils/notifications';
@@ -104,7 +104,7 @@ export async function acceptStep1({
 
     return {
       notificationRecipients: objFromEntries(
-        (await getGroupManagers(input.groupId)).map(
+        (await getGroupMembers(input.groupId)).map(
           ({ userId, publicKeyring }) => [
             userId,
             { publicKeyring: publicKeyring },
@@ -120,7 +120,7 @@ export async function acceptStep2({
 }: InferProcedureOpts<typeof baseProcedureStep2>) {
   await notifyUsers(
     input.notifications.map(({ recipients, encryptedContent }) => ({
-      type: 'group-request-accepted',
+      type: 'group-invitation-accepted',
 
       recipients,
       encryptedContent,

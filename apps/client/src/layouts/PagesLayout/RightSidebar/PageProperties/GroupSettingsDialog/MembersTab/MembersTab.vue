@@ -244,7 +244,7 @@ async function removeSelectedUsers() {
       });
     }
 
-    await rotateGroupKeys(groupId);
+    await rotateGroupKeys({ groupId });
 
     if (finalSelectedUserIds.value.includes(authStore().userId)) {
       await removeGroupUser({

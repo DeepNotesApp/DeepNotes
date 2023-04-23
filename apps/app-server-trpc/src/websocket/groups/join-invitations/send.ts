@@ -62,7 +62,7 @@ export async function sendStep1({
       'role',
     );
 
-    if (canManageRole(agentRole, input.invitationRole)) {
+    if (!canManageRole(agentRole, input.invitationRole)) {
       throw new TRPCError({
         code: 'FORBIDDEN',
         message: 'Insufficient permissions',
@@ -139,7 +139,7 @@ export async function sendStep1({
 
     return {
       notificationRecipients: objFromEntries(
-        (await getGroupManagers(input.groupId)).map(
+        (await getGroupManagers(input.groupId, [input.patientId])).map(
           ({ userId, publicKeyring }) => [
             userId,
             { publicKeyring: publicKeyring },
