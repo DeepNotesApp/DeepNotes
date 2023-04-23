@@ -11,6 +11,15 @@ export async function removeGroupUser(input: {
   groupId: string;
   patientId: string;
 }) {
+  const agentId = authStore().userId;
+
+  const [groupName, agentName, targetName] = await Promise.all([
+    groupNames()(input.groupId).getAsync(),
+
+    groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
+    groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
+  ]);
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
@@ -32,15 +41,6 @@ export async function removeGroupUser(input: {
   async function step2(
     input_: typeof removeUserProcedureStep1['_def']['_output_out'],
   ): Promise<typeof removeUserProcedureStep2['_def']['_input_in']> {
-    const agentId = authStore().userId;
-
-    const [groupName, agentName, targetName] = await Promise.all([
-      groupNames()(input.groupId).getAsync(),
-
-      groupMemberNames()(`${input.groupId}:${agentId}`).getAsync(),
-      groupMemberNames()(`${input.groupId}:${input.patientId}`).getAsync(),
-    ]);
-
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
