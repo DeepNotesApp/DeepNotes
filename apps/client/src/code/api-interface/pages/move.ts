@@ -32,6 +32,16 @@ export async function movePage(input: {
     groupPassword?: string;
   };
 }) {
+  const sourceGroupId = await internals.realtime.hget(
+    'page',
+    input.pageId,
+    'group-id',
+  );
+
+  if (sourceGroupId === input.destGroupId && !input.setAsMainPage) {
+    throw new Error('No changes were requested on page move.');
+  }
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',

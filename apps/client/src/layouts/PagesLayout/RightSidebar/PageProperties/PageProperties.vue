@@ -111,7 +111,6 @@
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
@@ -128,7 +127,7 @@ const page = inject<Ref<Page>>('page')!;
 
 async function _movePage() {
   try {
-    const movePageParams: MovePageParams = await asyncDialog({
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
       component: MovePageDialog,
 
       componentProps: {
@@ -136,7 +135,11 @@ async function _movePage() {
       },
     });
 
-    await movePage(page.value.id, movePageParams);
+    await movePage({
+      ...movePageParams,
+
+      pageId: page.value.id,
+    });
 
     $quasar().notify({
       message: 'Page moved successfully.',

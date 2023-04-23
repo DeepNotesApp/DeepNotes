@@ -191,17 +191,18 @@ async function _movePage() {
     destGroupId: destGroupId.value!,
     setAsMainPage: setAsMainPage.value,
 
-    groupCreation:
-      destGroupId.value === 'new'
-        ? {
+    ...(destGroupId.value === 'new'
+      ? {
+          groupCreation: {
             groupName: groupName.value,
             groupMemberName: groupMemberName.value,
             groupIsPublic: groupIsPublic.value,
             groupPassword: groupIsPasswordProtected.value
               ? groupPassword.value
               : undefined,
-          }
-        : {},
+          },
+        }
+      : {}),
   } as Parameters<typeof movePage>[0]);
 }
 </script>

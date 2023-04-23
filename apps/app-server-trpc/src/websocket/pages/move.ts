@@ -68,6 +68,13 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
             'group-id',
           );
 
+          if (sourceGroupId === input.destGroupId && !input.setAsMainPage) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: 'No changes were requested on page move.',
+            });
+          }
+
           (ctx as Context).sourceGroupId = sourceGroupId;
 
           checkRedlockSignalAborted(signals);
