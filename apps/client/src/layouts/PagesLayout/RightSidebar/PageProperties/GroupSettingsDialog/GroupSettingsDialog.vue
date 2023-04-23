@@ -64,7 +64,7 @@
                   `${groupId}:${authStore().userId}`,
                   'role',
                 )
-              ]?.permissions.manageLowerRanks &&
+              ]?.permissions.viewGroup &&
               !loading
             "
           >
@@ -74,17 +74,29 @@
               label="Members"
             />
 
-            <q-tab
-              name="Join invitations"
-              icon="mdi-calendar"
-              label="Join invitations"
-            />
+            <template
+              v-if="
+                rolesMap()[
+                  realtimeCtx.hget(
+                    'group-member',
+                    `${groupId}:${authStore().userId}`,
+                    'role',
+                  )
+                ]?.permissions.manageLowerRanks
+              "
+            >
+              <q-tab
+                name="Join invitations"
+                icon="mdi-calendar"
+                label="Join invitations"
+              />
 
-            <q-tab
-              name="Join requests"
-              icon="mdi-account-multiple-plus"
-              label="Join requests"
-            />
+              <q-tab
+                name="Join requests"
+                icon="mdi-account-multiple-plus"
+                label="Join requests"
+              />
+            </template>
           </template>
         </q-tabs>
       </template>
@@ -127,7 +139,7 @@
                     `${groupId}:${authStore().userId}`,
                     'role',
                   )
-                ]?.permissions.manageLowerRanks &&
+                ]?.permissions.viewGroup &&
                 !loading
               "
             >
@@ -138,19 +150,31 @@
                 @set-tab="(targetTab: string) => tab = targetTab"
               />
 
-              <TabBtn
-                name="Join invitations"
-                icon="mdi-calendar"
-                :current-tab="tab"
-                @set-tab="(targetTab: string) => tab = targetTab"
-              />
+              <template
+                v-if="
+                  rolesMap()[
+                    realtimeCtx.hget(
+                      'group-member',
+                      `${groupId}:${authStore().userId}`,
+                      'role',
+                    )
+                  ]?.permissions.manageLowerRanks
+                "
+              >
+                <TabBtn
+                  name="Join invitations"
+                  icon="mdi-calendar"
+                  :current-tab="tab"
+                  @set-tab="(targetTab: string) => tab = targetTab"
+                />
 
-              <TabBtn
-                name="Join requests"
-                icon="mdi-account-multiple-plus"
-                :current-tab="tab"
-                @set-tab="(targetTab: string) => tab = targetTab"
-              />
+                <TabBtn
+                  name="Join requests"
+                  icon="mdi-account-multiple-plus"
+                  :current-tab="tab"
+                  @set-tab="(targetTab: string) => tab = targetTab"
+                />
+              </template>
             </template>
           </q-list>
 
