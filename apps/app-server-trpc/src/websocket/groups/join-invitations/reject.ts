@@ -48,19 +48,19 @@ export async function rejectStep1({
     // Check pending invitation
 
     if (
-      await ctx.dataAbstraction.hget(
+      !(await ctx.dataAbstraction.hget(
         'group-join-invitation',
         `${input.groupId}:${ctx.userId}`,
         'exists',
-      )
+      ))
     ) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'No pending join request',
+        message: 'No pending join invitation.',
       });
     }
 
-    // Reject join request
+    // Delete join request
 
     await ctx.dataAbstraction.delete(
       'group-join-invitation',

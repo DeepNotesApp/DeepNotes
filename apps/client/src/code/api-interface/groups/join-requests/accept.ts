@@ -21,7 +21,7 @@ export async function acceptJoinRequest(input: {
     accessKeyring,
     groupInternalKeyring,
 
-    userPublicKeyringBytes,
+    userPublicKeyring,
 
     groupName,
     agentName,
@@ -30,7 +30,14 @@ export async function acceptJoinRequest(input: {
     groupAccessKeyrings()(input.groupId).getAsync(),
     groupInternalKeyrings()(input.groupId).getAsync(),
 
-    internals.realtime.hget('user', input.patientId, 'public-keyring'),
+    (async () =>
+      createKeyring(
+        await internals.realtime.hget(
+          'user',
+          input.patientId,
+          'public-keyring',
+        ),
+      ))(),
 
     groupNames()(input.groupId).getAsync(),
     groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
@@ -52,8 +59,6 @@ export async function acceptJoinRequest(input: {
     if (accessKeyring == null || groupInternalKeyring == null) {
       throw new Error('Group keyrings not found.');
     }
-
-    const userPublicKeyring = createKeyring(userPublicKeyringBytes);
 
     return {
       groupId: input.groupId,

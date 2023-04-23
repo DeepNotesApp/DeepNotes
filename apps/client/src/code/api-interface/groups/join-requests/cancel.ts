@@ -7,6 +7,10 @@ import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function cancelJoinRequest(input: { groupId: string }) {
+  const agentName = await groupRequestNames()(
+    `${input.groupId}:${authStore().userId}`,
+  ).getAsync();
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
@@ -27,10 +31,6 @@ export async function cancelJoinRequest(input: { groupId: string }) {
   async function step2(
     input_: typeof cancelProcedureStep1['_def']['_output_out'],
   ): Promise<typeof cancelProcedureStep2['_def']['_input_in']> {
-    const agentName = await groupRequestNames()(
-      `${input.groupId}:${authStore().userId}`,
-    ).getAsync();
-
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,

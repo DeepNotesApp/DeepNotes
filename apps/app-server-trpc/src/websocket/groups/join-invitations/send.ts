@@ -22,6 +22,7 @@ const baseProcedureStep1 = authProcedure.input(
     encryptedInternalKeyring: z.instanceof(Uint8Array),
 
     userEncryptedName: z.instanceof(Uint8Array),
+    userEncryptedNameForUser: z.instanceof(Uint8Array),
   }),
 );
 export const sendProcedureStep1 = baseProcedureStep1.mutation(sendStep1);
@@ -132,6 +133,7 @@ export async function sendStep1({
           encrypted_internal_keyring: input.encryptedInternalKeyring,
 
           encrypted_name: input.userEncryptedName,
+          encrypted_name_for_user: input.userEncryptedNameForUser,
         },
         { dtrx },
       ),

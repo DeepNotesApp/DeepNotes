@@ -26,7 +26,7 @@ export const groupRequestNames = once(() =>
 
       const isSelf = userId === authStore().userId;
 
-      const [privateKeyring, encryptedName] = await Promise.all([
+      const [groupPrivateKeyring, encryptedName] = await Promise.all([
         groupPrivateKeyrings()(groupId).getAsync(),
 
         internals.realtime.globalCtx.hgetAsync(
@@ -49,10 +49,10 @@ export const groupRequestNames = once(() =>
       }
 
       try {
-        let groupRequestUserName;
+        let result;
 
         if (isSelf) {
-          groupRequestUserName = bytesToText(
+          result = bytesToText(
             internals.symmetricKeyring.decrypt(encryptedName, {
               padding: true,
               associatedData: {
@@ -63,20 +63,20 @@ export const groupRequestNames = once(() =>
             }),
           );
         } else {
-          if (privateKeyring == null) {
+          if (groupPrivateKeyring == null) {
             _getLogger.info(`${key}: No group private key found`);
 
             return { text: '[Encrypted name]', status: 'encrypted' };
           }
 
-          groupRequestUserName = bytesToText(
-            privateKeyring.decrypt(encryptedName, { padding: true }),
+          result = bytesToText(
+            groupPrivateKeyring.decrypt(encryptedName, { padding: true }),
           );
         }
 
-        _getLogger.info(`${key}: ${groupRequestUserName}`);
+        _getLogger.info(`${key}: ${result}`);
 
-        return { text: groupRequestUserName, status: 'success' };
+        return { text: result, status: 'success' };
       } catch (error) {
         _getLogger.info(`${key}: Failed to decrypt page title`);
 

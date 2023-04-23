@@ -18,6 +18,36 @@ export async function sendJoinInvitation(input: {
   inviteeRole: GroupRoleID;
   inviteeUserName: string;
 }) {
+  const [
+    inviteePublicKeyring,
+    groupPublicKeyring,
+
+    accessKeyring,
+    groupInternalKeyring,
+
+    groupName,
+    agentName,
+  ] = await Promise.all([
+    (async () =>
+      createKeyring(
+        await internals.realtime.hget(
+          'user',
+          input.inviteeUserId,
+          'public-keyring',
+        ),
+      ))(),
+    (async () =>
+      createKeyring(
+        await internals.realtime.hget('group', input.groupId, 'public-keyring'),
+      ))(),
+
+    groupAccessKeyrings()(input.groupId).getAsync(),
+    groupInternalKeyrings()(input.groupId).getAsync(),
+
+    groupNames()(input.groupId).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+  ]);
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
@@ -30,34 +60,6 @@ export async function sendJoinInvitation(input: {
   async function step1(): Promise<
     typeof sendProcedureStep1['_def']['_input_in']
   > {
-    const [
-      inviteePublicKeyring,
-      groupPublicKeyring,
-
-      accessKeyring,
-      groupInternalKeyring,
-    ] = await Promise.all([
-      (async () =>
-        createKeyring(
-          await internals.realtime.hget(
-            'user',
-            input.inviteeUserId,
-            'public-keyring',
-          ),
-        ))(),
-      (async () =>
-        createKeyring(
-          await internals.realtime.hget(
-            'group',
-            input.groupId,
-            'public-keyring',
-          ),
-        ))(),
-
-      groupAccessKeyrings()(input.groupId).getAsync(),
-      groupInternalKeyrings()(input.groupId).getAsync(),
-    ]);
-
     if (accessKeyring == null || groupInternalKeyring == null) {
       throw new Error('Group keyrings not found.');
     }
@@ -82,17 +84,17 @@ export async function sendJoinInvitation(input: {
         groupPublicKeyring,
         { padding: true },
       ),
+      userEncryptedNameForUser: internals.keyPair.encrypt(
+        textToBytes(input.inviteeUserName),
+        inviteePublicKeyring,
+        { padding: true },
+      ),
     };
   }
 
   async function step2(
     input_: typeof sendProcedureStep1['_def']['_output_out'],
   ): Promise<typeof sendProcedureStep2['_def']['_input_in']> {
-    const [groupName, agentName] = await Promise.all([
-      groupNames()(input.groupId).getAsync(),
-      groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
-    ]);
-
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,

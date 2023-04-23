@@ -12,6 +12,13 @@ export async function cancelJoinInvitation(input: {
   groupId: string;
   patientId: string;
 }) {
+  const [groupName, agentName, targetName] = await Promise.all([
+    groupNames()(input.groupId).getAsync(),
+
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    groupInvitationNames()(`${input.groupId}:${input.patientId}`).getAsync(),
+  ]);
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
@@ -34,13 +41,6 @@ export async function cancelJoinInvitation(input: {
   async function step2(
     input_: typeof cancelProcedureStep1['_def']['_output_out'],
   ): Promise<typeof cancelProcedureStep2['_def']['_input_in']> {
-    const [groupName, agentName, targetName] = await Promise.all([
-      groupNames()(input.groupId).getAsync(),
-
-      groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
-      groupInvitationNames()(`${input.groupId}:${input.patientId}`).getAsync(),
-    ]);
-
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,

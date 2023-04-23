@@ -2,11 +2,15 @@ import type {
   rejectProcedureStep1,
   rejectProcedureStep2,
 } from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/reject';
-import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
+import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function rejectJoinInvitation(input: { groupId: string }) {
+  const agentName = await groupInvitationNames()(
+    `${input.groupId}:${authStore().userId}`,
+  ).getAsync();
+
   const { promise } = createWebsocketRequest({
     url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
       'http',
@@ -27,10 +31,6 @@ export async function rejectJoinInvitation(input: { groupId: string }) {
   async function step2(
     input_: typeof rejectProcedureStep1['_def']['_output_out'],
   ): Promise<typeof rejectProcedureStep2['_def']['_input_in']> {
-    const agentName = await groupMemberNames()(
-      `${input.groupId}:${authStore().userId}`,
-    ).getAsync();
-
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
