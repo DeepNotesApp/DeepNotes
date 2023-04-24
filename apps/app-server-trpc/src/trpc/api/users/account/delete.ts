@@ -11,6 +11,7 @@ import {
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
+import { raw } from 'objection';
 import { clearCookies } from 'src/cookies';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -40,29 +41,71 @@ export async function delete_({
           loginHash: input.loginHash,
         });
 
+        // Check if any group has more than one member
+
+        const memberships = await GroupMemberModel.query(dtrx.trx)
+          .where('group_members.user_id', ctx.userId)
+          .leftJoin(
+            GroupMemberModel.query(dtrx.trx)
+              .groupBy('group_id')
+              .select('group_id')
+              .count('* as member_count')
+              .as('member_counts'),
+            'group_members.group_id',
+            'member_counts.group_id',
+          )
+          .leftJoin(
+            GroupMemberModel.query(dtrx.trx)
+              .where('role', 'owner')
+              .groupBy('group_id')
+              .select('group_id')
+              .count('* as owner_count')
+              .as('owner_counts'),
+            'group_members.group_id',
+            'owner_counts.group_id',
+          )
+          .select(
+            'group_members.group_id',
+            raw('COALESCE(member_counts.member_count, 0) as member_count'),
+            raw('COALESCE(owner_counts.owner_count, 0) as owner_count'),
+          );
+
+        if (
+          memberships.some(
+            (count) =>
+              (count as any).member_count > 1 &&
+              (count as any).owner_count <= 1,
+          )
+        ) {
+          throw new TRPCError({
+            message:
+              'Some groups would be left without an owner. Transfer ownership before deleting your account.',
+            code: 'BAD_REQUEST',
+          });
+        }
+
+        const idsOfGroupsToDelete = memberships
+          .filter((membership) => (membership as any).member_count <= 1)
+          .map((membership) => membership.group_id);
+
         // Get all user data
 
         const [
           groupPageIds,
           invitations,
           requests,
-          members,
           visitedPageIds,
           sessions,
           user,
         ] = await Promise.all([
           PageModel.query(dtrx.trx)
-            .join('users', 'users.personal_group_id', 'pages.group_id')
-            .where('users.id', ctx.userId)
+            .whereIn('group_id', idsOfGroupsToDelete)
             .select('pages.id'),
 
           GroupJoinInvitationModel.query(dtrx.trx)
             .where('user_id', ctx.userId)
             .select('group_id'),
           GroupJoinRequestModel.query(dtrx.trx)
-            .where('user_id', ctx.userId)
-            .select('group_id'),
-          GroupMemberModel.query(dtrx.trx)
             .where('user_id', ctx.userId)
             .select('group_id'),
 
@@ -111,12 +154,18 @@ export async function delete_({
               { dtrx, cacheOnly: true },
             ),
           ),
-          ...members.map((member) =>
+          ...memberships.map((member) =>
             ctx.dataAbstraction.delete(
               'group-member',
               `${member.group_id}:${ctx.userId}`,
               { dtrx, cacheOnly: true },
             ),
+          ),
+
+          ...idsOfGroupsToDelete.map((groupId) =>
+            ctx.dataAbstraction.delete('group', groupId, {
+              dtrx,
+            }),
           ),
 
           ...visitedPageIds.map((page) =>
@@ -138,11 +187,6 @@ export async function delete_({
               { dtrx, cacheOnly: true },
             ),
           ),
-
-          ctx.dataAbstraction.delete('group', user.personal_group_id, {
-            dtrx,
-            cacheOnly: true,
-          }),
 
           ...(user.customer_id != null
             ? [
