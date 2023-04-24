@@ -2,9 +2,9 @@ import { SessionModel } from '@deeplib/db';
 import type { RefreshTokenPayload } from '@deeplib/misc';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
-import { decodeRefreshJWT, verifyRefreshJWT } from 'src/jwt';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { decodeRefreshJWT, verifyRefreshJWT } from 'src/utils/jwt';
 import { generateSessionValues } from 'src/utils/sessions';
 
 const baseProcedure = publicProcedure;

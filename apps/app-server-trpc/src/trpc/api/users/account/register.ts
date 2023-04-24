@@ -3,10 +3,10 @@ import { UserModel } from '@deeplib/db';
 import { w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
-import { derivePasswordValues } from 'src/crypto';
 import { sendMail } from 'src/mail';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
+import { derivePasswordValues } from 'src/utils/crypto';
 import { registerUser, userRegistrationSchema } from 'src/utils/users';
 import { z } from 'zod';
 

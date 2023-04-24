@@ -1,9 +1,9 @@
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
-import { encryptRecoveryCodes, hashRecoveryCode } from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { encryptRecoveryCodes, hashRecoveryCode } from 'src/utils/crypto';
 import { checkCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 

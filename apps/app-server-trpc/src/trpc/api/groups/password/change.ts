@@ -2,12 +2,12 @@ import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
+import type { InferProcedureOpts } from 'src/trpc/helpers';
+import { authProcedure } from 'src/trpc/helpers';
 import {
   computePasswordHash,
   encryptGroupRehashedPasswordHash,
-} from 'src/crypto';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
-import { authProcedure } from 'src/trpc/helpers';
+} from 'src/utils/crypto';
 import { checkCorrectGroupPassword } from 'src/utils/groups';
 import { z } from 'zod';
 

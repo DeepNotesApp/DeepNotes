@@ -1,6 +1,6 @@
 import { DeviceModel } from '@deeplib/db';
 import type { DataTransaction } from '@stdlib/data';
-import { getDeviceHash } from 'src/crypto';
+import { getDeviceHash } from 'src/utils/crypto';
 
 export async function getUserDevice(input: {
   ip: string;

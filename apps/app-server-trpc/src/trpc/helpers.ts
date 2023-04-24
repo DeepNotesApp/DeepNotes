@@ -1,6 +1,6 @@
 import type { ProcedureBuilder } from '@trpc/server';
 import { TRPCError } from '@trpc/server';
-import { verifyAccessJWT } from 'src/jwt';
+import { verifyAccessJWT } from 'src/utils/jwt';
 
 import { trpc } from './server';
 

@@ -13,6 +13,8 @@ import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import { authenticator } from 'otplib';
+import type { InferProcedureOpts } from 'src/trpc/helpers';
+import { publicProcedure } from 'src/trpc/helpers';
 import {
   decryptRecoveryCodes,
   decryptUserAuthenticatorSecret,
@@ -20,9 +22,7 @@ import {
   derivePasswordValues,
   encryptRecoveryCodes,
   verifyRecoveryCode,
-} from 'src/crypto';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
-import { publicProcedure } from 'src/trpc/helpers';
+} from 'src/utils/crypto';
 import { getUserDevice } from 'src/utils/devices';
 import { generateSessionValues } from 'src/utils/sessions';
 import { z } from 'zod';

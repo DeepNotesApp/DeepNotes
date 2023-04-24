@@ -15,10 +15,13 @@ import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
-import type { PasswordValues } from 'src/crypto';
-import { decryptUserRehashedLoginHash } from 'src/crypto';
-import { derivePasswordValues, encryptUserRehashedLoginHash } from 'src/crypto';
 import { dataAbstraction } from 'src/data/data-abstraction';
+import type { PasswordValues } from 'src/utils/crypto';
+import { decryptUserRehashedLoginHash } from 'src/utils/crypto';
+import {
+  derivePasswordValues,
+  encryptUserRehashedLoginHash,
+} from 'src/utils/crypto';
 import { createGroup } from 'src/utils/groups';
 import { z } from 'zod';
 

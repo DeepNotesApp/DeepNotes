@@ -4,13 +4,13 @@ import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { authenticator } from 'otplib';
+import type { InferProcedureOpts } from 'src/trpc/helpers';
+import { authProcedure } from 'src/trpc/helpers';
 import {
   decryptUserAuthenticatorSecret,
   encryptRecoveryCodes,
   hashRecoveryCode,
-} from 'src/crypto';
-import type { InferProcedureOpts } from 'src/trpc/helpers';
-import { authProcedure } from 'src/trpc/helpers';
+} from 'src/utils/crypto';
 import { checkCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 

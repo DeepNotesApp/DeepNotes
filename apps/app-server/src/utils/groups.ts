@@ -6,12 +6,12 @@ import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { z } from 'zod';
 
-import { dataAbstraction } from '../data/data-abstraction';
 import {
   computePasswordHash,
   decryptGroupRehashedPasswordHash,
   encryptGroupRehashedPasswordHash,
 } from '../utils/crypto';
+import { dataAbstraction } from '../data/data-abstraction';
 
 export const GroupRoleEnum = z.enum([
   'owner',

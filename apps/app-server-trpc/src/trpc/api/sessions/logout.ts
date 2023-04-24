@@ -1,7 +1,7 @@
 import { once } from 'lodash';
-import { clearCookies } from 'src/cookies';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { optionalAuthProcedure } from 'src/trpc/helpers';
+import { clearCookies } from 'src/utils/cookies';
 
 export const logoutProcedure = once(() =>
   optionalAuthProcedure.mutation(logout),

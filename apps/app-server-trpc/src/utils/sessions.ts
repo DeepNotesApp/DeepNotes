@@ -6,8 +6,8 @@ import sodium from 'libsodium-wrappers';
 import { nanoid } from 'nanoid';
 import { dataAbstraction } from 'src/data/data-abstraction';
 
-import { setCookies } from '../cookies';
-import { generateTokens } from '../jwt';
+import { setCookies } from '../utils/cookies';
+import { generateTokens } from '../utils/jwt';
 
 export async function generateSessionValues(input: {
   sessionId: string;

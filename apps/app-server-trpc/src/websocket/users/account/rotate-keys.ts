@@ -13,13 +13,16 @@ import {
 import { objFromEntries } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
-import { decryptUserRehashedLoginHash, derivePasswordValues } from 'src/crypto';
 import type {
   InferProcedureContext,
   InferProcedureInput,
   InferProcedureOpts,
 } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import {
+  decryptUserRehashedLoginHash,
+  derivePasswordValues,
+} from 'src/utils/crypto';
 import { invalidateAllSessions } from 'src/utils/sessions';
 import { checkCorrectUserPassword } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';

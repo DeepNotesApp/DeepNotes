@@ -2,9 +2,9 @@ import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import { authenticator } from 'otplib';
-import { encryptUserAuthenticatorSecret } from 'src/crypto';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { encryptUserAuthenticatorSecret } from 'src/utils/crypto';
 import { checkCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
