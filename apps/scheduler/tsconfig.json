@@ -14,7 +14,11 @@
 
       "@deeplib/*": ["../../packages/@deeplib/*/src"],
       "@stdlib/*": ["../../packages/@stdlib/*/src"]
-    }
+    },
+
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
   },
 
   "references": [
