@@ -13,7 +13,7 @@ import { initKnex } from './data/knex';
 
 initKnex();
 
-setInterval(async () => {
+async function cleanDeletedObjects() {
   const [
     permanentlyDeletedPages,
 
@@ -80,4 +80,8 @@ setInterval(async () => {
       ),
     ]);
   });
-}, 24 * 60 * 60 * 1000);
+}
+
+void cleanDeletedObjects();
+
+setInterval(cleanDeletedObjects, 24 * 60 * 60 * 1000);
