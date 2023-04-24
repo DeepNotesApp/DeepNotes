@@ -7,7 +7,6 @@ declare global {
   const Dialog: typeof import('quasar')['Dialog']
   const EffectScope: typeof import('vue')['EffectScope']
   const Notify: typeof import('quasar')['Notify']
-  const api: typeof import('src/boot/axios.universal')['api']
   const appStore: typeof import('src/code/stores')['appStore']
   const authStore: typeof import('src/code/stores')['authStore']
   const computed: typeof import('vue')['computed']
