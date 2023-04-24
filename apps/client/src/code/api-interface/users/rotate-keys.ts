@@ -7,7 +7,7 @@ import {
 import type {
   rotateKeysProcedureStep1,
   rotateKeysProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/users/account/rotate-keys';
+} from 'deepnotes-app-server/src/websocket/users/account/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
@@ -31,7 +31,7 @@ export async function rotateUserKeys(input: { password: string }) {
   // Create websocket request
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/users.account.rotateKeys`,

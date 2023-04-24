@@ -1,7 +1,7 @@
 import type {
   rejectProcedureStep1,
   rejectProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/reject';
+} from 'deepnotes-app-server/src/websocket/groups/join-invitations/reject';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
@@ -12,7 +12,7 @@ export async function rejectJoinInvitation(input: { groupId: string }) {
   ).getAsync();
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.joinInvitations.reject`,

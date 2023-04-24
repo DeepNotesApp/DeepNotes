@@ -1,7 +1,7 @@
 import type {
   cancelProcedureStep1,
   cancelProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/cancel';
+} from 'deepnotes-app-server/src/websocket/groups/join-invitations/cancel';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
@@ -20,7 +20,7 @@ export async function cancelJoinInvitation(input: {
   ]);
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.joinInvitations.cancel`,

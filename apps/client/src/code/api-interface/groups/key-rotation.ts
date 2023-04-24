@@ -8,7 +8,7 @@ import { objEntries, objFromEntries } from '@stdlib/misc';
 import type {
   rotateKeysProcedureStep1,
   rotateKeysProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/rotate-keys';
+} from 'deepnotes-app-server/src/websocket/groups/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { asyncDialog } from 'src/code/utils/misc';
@@ -16,7 +16,7 @@ import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 export async function rotateGroupKeys(input: { groupId: string }) {
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.rotateKeys`,

@@ -1,5 +1,5 @@
 import { createTRPCProxyClient, httpLink } from '@trpc/client';
-import type { AppRouter } from 'deepnotes-app-server-trpc/src/trpc/router';
+import type { AppRouter } from 'deepnotes-app-server/src/trpc/router';
 import { once } from 'lodash';
 import superjson from 'superjson';
 
@@ -16,7 +16,7 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
 
   links: [
     httpLink({
-      url: process.env.APP_SERVER_TRPC_URL,
+      url: process.env.APP_SERVER_URL,
 
       headers({ op }) {
         return {

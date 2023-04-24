@@ -8,7 +8,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import type {
   moveProcedureStep1,
   moveProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/pages/move';
+} from 'deepnotes-app-server/src/websocket/pages/move';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,
@@ -43,10 +43,7 @@ export async function movePage(input: {
   }
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
-      'http',
-      'ws',
-    )}/pages.move`,
+    url: `${process.env.APP_SERVER_URL.replaceAll('http', 'ws')}/pages.move`,
 
     steps: [step1, step2, step3],
   });

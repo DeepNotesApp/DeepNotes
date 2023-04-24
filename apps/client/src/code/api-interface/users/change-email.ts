@@ -2,7 +2,7 @@ import { createPrivateKeyring, createSymmetricKeyring } from '@stdlib/crypto';
 import type {
   finishProcedureStep1,
   finishProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/users/account/email-change/finish';
+} from 'deepnotes-app-server/src/websocket/users/account/email-change/finish';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
@@ -13,7 +13,7 @@ export async function changeEmail(input: {
   emailVerificationCode: string;
 }) {
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/users.account.emailChange.finish`,

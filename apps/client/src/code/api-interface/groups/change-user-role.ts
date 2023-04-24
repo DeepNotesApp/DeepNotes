@@ -3,7 +3,7 @@ import { rolesMap } from '@deeplib/misc';
 import type {
   changeUserRoleProcedureStep1,
   changeUserRoleProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/change-user-role';
+} from 'deepnotes-app-server/src/websocket/groups/change-user-role';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
@@ -15,7 +15,7 @@ export async function changeUserRole(input: {
   role: GroupRoleID;
 }) {
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.changeUserRole`,

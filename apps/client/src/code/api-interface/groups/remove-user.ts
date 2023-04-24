@@ -1,7 +1,7 @@
 import type {
   removeUserProcedureStep1,
   removeUserProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/remove-user';
+} from 'deepnotes-app-server/src/websocket/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { createNotifications } from 'src/code/pages/utils';
@@ -21,7 +21,7 @@ export async function removeGroupUser(input: {
   ]);
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.removeUser`,

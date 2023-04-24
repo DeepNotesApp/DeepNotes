@@ -9,7 +9,7 @@
     "paths": {
       "src/*": ["src/*"],
 
-      "deepnotes-app-server-trpc": ["../app-server-trpc/src"],
+      "deepnotes-app-server": ["../app-server/src"],
       "@deeplib/*": ["../../packages/@deeplib/*/src"],
       "@stdlib/*": ["../../packages/@stdlib/*/src"]
     },
@@ -18,7 +18,7 @@
   },
 
   "references": [
-    { "path": "../app-server-trpc/tsconfig.json" },
+    { "path": "../app-server/tsconfig.json" },
     { "path": "../../packages/@deeplib/data/tsconfig.json" },
     { "path": "../../packages/@deeplib/misc/tsconfig.json" },
     { "path": "../../packages/@stdlib/base64/tsconfig.json" },

@@ -4,7 +4,7 @@ import { textToBytes } from '@stdlib/misc';
 import type {
   sendProcedureStep1,
   sendProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/join-invitations/send';
+} from 'deepnotes-app-server/src/websocket/groups/join-invitations/send';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
@@ -49,7 +49,7 @@ export async function sendJoinInvitation(input: {
   ]);
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.joinInvitations.send`,

@@ -1,7 +1,7 @@
 import type {
   cancelProcedureStep1,
   cancelProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/join-requests/cancel';
+} from 'deepnotes-app-server/src/websocket/groups/join-requests/cancel';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
@@ -12,7 +12,7 @@ export async function cancelJoinRequest(input: { groupId: string }) {
   ).getAsync();
 
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.joinRequests.cancel`,

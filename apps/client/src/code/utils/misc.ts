@@ -185,13 +185,6 @@ export async function useAsyncData<T>(
   return result;
 }
 
-export async function usePost<T>(url: string, data?: any): Promise<T> {
-  return await useAsyncData<T>(
-    url,
-    async () => (await api().post(url, data)).data,
-  );
-}
-
 export function debounceTick(func: () => any) {
   let scheduled = false;
 

@@ -7,11 +7,9 @@ import { fastify } from './fastify/server';
 
 void fastify().then(async (fastify) => {
   await fastify.listen({
-    port: parseInt(process.env.APP_SERVER_TRPC_PORT),
+    port: parseInt(process.env.APP_SERVER_PORT),
     host: '0.0.0.0',
   });
 
-  mainLogger.info(
-    `app-server-trpc started on port ${process.env.APP_SERVER_TRPC_PORT}`,
-  );
+  mainLogger.info(`app-server started on port ${process.env.APP_SERVER_PORT}`);
 });

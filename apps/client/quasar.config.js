@@ -54,7 +54,6 @@ module.exports = configure(function (ctx) {
       { path: 'helpers.universal' },
       { path: 'sodium.universal' },
       { path: 'i18n.universal' },
-      { path: 'axios.universal' },
       { path: 'vue.universal' },
       { path: 'disable-cache.universal' },
 
@@ -139,7 +138,6 @@ module.exports = configure(function (ctx) {
             'vue',
             'vue-router',
             {
-              'src/boot/axios.universal': ['api'],
               'src/code/trpc': ['trpcClient'],
 
               'src/code/internals': ['internals'],

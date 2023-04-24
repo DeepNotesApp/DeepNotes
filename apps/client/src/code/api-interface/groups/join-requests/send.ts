@@ -3,7 +3,7 @@ import { textToBytes } from '@stdlib/misc';
 import type {
   sendProcedureStep1,
   sendProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/join-requests/send';
+} from 'deepnotes-app-server/src/websocket/groups/join-requests/send';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
@@ -12,7 +12,7 @@ export async function sendJoinRequest(input: {
   userName: string;
 }) {
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.joinRequests.send`,

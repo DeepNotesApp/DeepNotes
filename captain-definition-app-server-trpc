@@ -1,7 +1,0 @@
-{
-  "schemaVersion": 2,
-  "caproverName": "captain-01",
-  "caproverApp": "deepnotes-app-server-trpc",
-  "branch": "main",
-  "dockerfilePath": "./apps/app-server-trpc/Dockerfile"
-}

@@ -1,14 +1,14 @@
 import type {
   makePrivateProcedureStep1,
   makePrivateProcedureStep2,
-} from 'deepnotes-app-server-trpc/src/websocket/groups/privacy/make-private';
+} from 'deepnotes-app-server/src/websocket/groups/privacy/make-private';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
 import { processGroupKeyRotationValues } from '../key-rotation';
 
 export async function makeGroupPrivate(input: { groupId: string }) {
   const { promise } = createWebsocketRequest({
-    url: `${process.env.APP_SERVER_TRPC_URL.replaceAll(
+    url: `${process.env.APP_SERVER_URL.replaceAll(
       'http',
       'ws',
     )}/groups.privacy.makePrivate`,
