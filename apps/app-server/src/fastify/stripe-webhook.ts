@@ -30,8 +30,8 @@ export async function webhook({
 }: InferProcedureOpts<typeof baseProcedure>) {
   const event = ctx.stripe.webhooks.constructEvent(
     ctx.req.rawBody!,
-    ctx.req.headers['signature']!,
-    process.env.DEV
+    ctx.req.headers['stripe-signature']!,
+    process.env.DEV || process.env.STAGING
       ? process.env.STRIPE_TEST_WEBHOOK_SECRET
       : process.env.STRIPE_LIVE_WEBHOOK_SECRET,
   );
