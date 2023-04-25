@@ -12,6 +12,7 @@ import {
   groupKeyRotationSchema,
   rotateGroupKeys,
 } from 'src/utils/group-key-rotation';
+import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -37,7 +38,10 @@ export function registerGroupsMakePrivate(fastify: ReturnType<typeof Fastify>) {
     url: '/trpc/groups.privacy.makePrivate',
 
     async setup({ ctx, input, run }) {
-      await ctx.usingLocks([[`group-lock:${input.groupId}`]], run);
+      await ctx.usingLocks(
+        [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
+        run,
+      );
     },
 
     procedures: [
@@ -52,6 +56,13 @@ export async function makePrivateStep1({
   input,
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
   (ctx as Context).groupId = input.groupId;
+
+  // Assert that user is subscribed
+
+  await assertUserSubscribed({
+    userId: ctx.userId,
+    dataAbstraction: ctx.dataAbstraction,
+  });
 
   // Check sufficient permissions
 

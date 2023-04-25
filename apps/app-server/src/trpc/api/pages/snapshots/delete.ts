@@ -23,15 +23,13 @@ export async function delete_({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`page-lock:${input.pageId}`]],
+    [[`user-lock:${ctx.userId}`], [`page-lock:${input.pageId}`]],
     async (signals) => {
       const groupId = await ctx.dataAbstraction.hget(
         'page',
         input.pageId,
         'group-id',
       );
-
-      checkRedlockSignalAborted(signals);
 
       return await ctx.usingLocks(
         [[`group-lock:${groupId}`]],
@@ -84,6 +82,7 @@ export async function delete_({
             checkRedlockSignalAborted(signals);
           });
         },
+        signals,
       );
     },
   );

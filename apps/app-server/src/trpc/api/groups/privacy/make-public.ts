@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -24,9 +25,16 @@ export async function makePublic({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`group-lock:${input.groupId}`]],
+    [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Assert agent is subscribed
+
+        await assertUserSubscribed({
+          userId: ctx.userId,
+          dataAbstraction: ctx.dataAbstraction,
+        });
+
         // Check if user has sufficient permissions
 
         if (

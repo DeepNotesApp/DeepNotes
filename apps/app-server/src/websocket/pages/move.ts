@@ -7,7 +7,6 @@ import {
   objEntries,
   objFromEntries,
 } from '@stdlib/misc';
-import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import { getRedis } from 'src/data/redis';
@@ -20,7 +19,7 @@ import { authProcedure } from 'src/trpc/helpers';
 import { bumpRecentItem } from 'src/utils';
 import { createGroup, groupCreationSchema } from 'src/utils/groups';
 import { pageKeyRotationSchema } from 'src/utils/pages';
-import { checkUserSubscription } from 'src/utils/users';
+import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -58,7 +57,7 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
       (ctx as Context).setAsMainPage = input.setAsMainPage;
 
       return await ctx.usingLocks(
-        [[`page-lock:${input.pageId}`]],
+        [[`user-lock:${ctx.userId}`], [`page-lock:${input.pageId}`]],
         async (signals) => {
           // Get source group ID
 
@@ -76,8 +75,6 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
           }
 
           (ctx as Context).sourceGroupId = sourceGroupId;
-
-          checkRedlockSignalAborted(signals);
 
           return await ctx.usingLocks(
             [
@@ -105,6 +102,13 @@ export async function moveStep1({
   input,
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
+    // Assert user is subscribed
+
+    await assertUserSubscribed({
+      userId: ctx.userId,
+      dataAbstraction: ctx.dataAbstraction,
+    });
+
     // Check sufficient permissions
 
     const [canEditSourceGroupSettings, canEditDestGroupPages] =
@@ -126,13 +130,6 @@ export async function moveStep1({
         message: 'Insufficient permissions.',
       });
     }
-
-    // Check user subscription
-
-    await checkUserSubscription({
-      userId: ctx.userId,
-      dataAbstraction: ctx.dataAbstraction,
-    });
 
     // Check if page is main page of source group
 

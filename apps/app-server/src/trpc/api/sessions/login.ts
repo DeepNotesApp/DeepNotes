@@ -117,7 +117,7 @@ export async function login({
       });
     }
 
-    // Check correct password
+    // Assert correct password
 
     const passwordHashValues = getPasswordHashValues(
       decryptUserRehashedLoginHash(user.encrypted_rehashed_login_hash),

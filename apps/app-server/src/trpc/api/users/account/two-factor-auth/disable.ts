@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { checkCorrectUserPassword } from 'src/utils/users';
+import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -21,34 +21,43 @@ export async function disable({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
-      await checkCorrectUserPassword({
-        userId: ctx.userId,
-        loginHash: input.loginHash,
-      });
+      return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Assert correct password
 
-      // Check if two-factor authentication is enabled
+        await assertCorrectUserPassword({
+          userId: ctx.userId,
+          loginHash: input.loginHash,
+        });
 
-      if (
-        !(await ctx.dataAbstraction.hget(
+        // Check if two-factor authentication is enabled
+
+        if (
+          !(await ctx.dataAbstraction.hget(
+            'user',
+            ctx.userId,
+            'two-factor-auth-enabled',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Two factor authentication is not enabled.',
+          });
+        }
+
+        // Disable two-factor authentication
+
+        await ctx.dataAbstraction.patch(
           'user',
           ctx.userId,
-          'two-factor-auth-enabled',
-        ))
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Two factor authentication is not enabled.',
-        });
-      }
+          {
+            two_factor_auth_enabled: false,
+            encrypted_authenticator_secret: null,
+            encrypted_recovery_codes: null,
+          },
+          { dtrx },
+        );
 
-      checkRedlockSignalAborted(signals);
-
-      // Disable two-factor authentication
-
-      await ctx.dataAbstraction.patch('user', ctx.userId, {
-        two_factor_auth_enabled: false,
-        encrypted_authenticator_secret: null,
-        encrypted_recovery_codes: null,
+        checkRedlockSignalAborted(signals);
       });
     },
   );

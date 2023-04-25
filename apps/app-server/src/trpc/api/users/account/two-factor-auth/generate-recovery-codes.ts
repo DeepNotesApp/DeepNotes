@@ -1,10 +1,11 @@
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
+import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { encryptRecoveryCodes, hashRecoveryCode } from 'src/utils/crypto';
-import { checkCorrectUserPassword } from 'src/utils/users';
+import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -25,19 +26,33 @@ export async function generateRecoveryCodes({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
-        // Check correct password
+        // Assert correct password
 
-        await checkCorrectUserPassword({
+        await assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });
+
+        // Check if two-factor authentication is enabled
+
+        if (
+          !(await ctx.dataAbstraction.hget(
+            'user',
+            ctx.userId,
+            'two-factor-auth-enabled',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Two factor authentication is not enabled.',
+          });
+        }
 
         // Generate recovery codes
 
         const recoveryCodes = Array(6)
           .fill(null)
           .map(() => sodium.to_hex(sodium.randombytes_buf(16)));
-
         // Save recovery codes
 
         await ctx.dataAbstraction.patch(

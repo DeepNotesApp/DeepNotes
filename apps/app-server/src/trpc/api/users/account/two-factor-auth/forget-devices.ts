@@ -1,9 +1,10 @@
 import { DeviceModel } from '@deeplib/db';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
+import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { checkCorrectUserPassword } from 'src/utils/users';
+import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -24,18 +25,35 @@ export async function forgetTrustedDevices({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
-        await checkCorrectUserPassword({
+        // Assert correct password
+
+        await assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });
 
-        checkRedlockSignalAborted(signals);
+        // Check if two-factor authentication is enabled
+
+        if (
+          !(await ctx.dataAbstraction.hget(
+            'user',
+            ctx.userId,
+            'two-factor-auth-enabled',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Two factor authentication is not enabled.',
+          });
+        }
 
         // Forget all devices
 
         await DeviceModel.query(dtrx.trx)
           .where('user_id', ctx.userId)
           .patch({ trusted: false });
+
+        checkRedlockSignalAborted(signals);
       });
     },
   );

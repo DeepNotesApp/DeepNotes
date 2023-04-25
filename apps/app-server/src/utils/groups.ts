@@ -102,7 +102,7 @@ export async function createGroup(
   );
 }
 
-export async function checkCorrectGroupPassword(input: {
+export async function assertCorrectGroupPassword(input: {
   groupId: string;
   groupPasswordHash: Uint8Array;
 }) {

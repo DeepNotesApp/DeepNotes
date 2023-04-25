@@ -247,68 +247,75 @@ export class SocketAuxObject {
               'group-id',
             );
 
-            checkRedlockSignalAborted(signals);
+            await usingLocks(
+              [[`group-lock:${groupId}`]],
+              async (signals) => {
+                // Recheck page key rotation, but within locks
 
-            await usingLocks([[`group-lock:${groupId}`]], async (signals) => {
-              // Recheck page key rotation, but within locks
-
-              const nextKeyRotationDate = await dataAbstraction().hget(
-                'page',
-                this.room.pageId,
-                'next-key-rotation-date',
-              );
-
-              const rotatePageKey = new Date() >= nextKeyRotationDate;
-
-              encoding.writeUint8(encoder, rotatePageKey ? 1 : 0);
-
-              if (!rotatePageKey) {
-                return;
-              }
-
-              await dataAbstraction().patch('page', this.room.pageId, {
-                next_key_rotation_date: addDays(new Date(), 7),
-              });
-
-              checkRedlockSignalAborted(signals);
-
-              const [
-                pageEncryptedRelativeTitle,
-                pageEncryptedAbsoluteTitle,
-                pageSnapshots,
-              ] = await Promise.all([
-                dataAbstraction().hget(
+                const nextKeyRotationDate = await dataAbstraction().hget(
                   'page',
                   this.room.pageId,
-                  'encrypted-relative-title',
-                ),
+                  'next-key-rotation-date',
+                );
 
-                dataAbstraction().hget(
-                  'page',
-                  this.room.pageId,
-                  'encrypted-absolute-title',
-                ),
+                checkRedlockSignalAborted(signals);
 
-                PageSnapshotModel.query()
-                  .where('page_id', this.room.pageId)
-                  .select('id', 'encrypted_symmetric_key'),
-              ]);
+                const rotatePageKey = new Date() >= nextKeyRotationDate;
 
-              checkRedlockSignalAborted(signals);
+                encoding.writeUint8(encoder, rotatePageKey ? 1 : 0);
 
-              encoding.writeVarUint8Array(encoder, pageEncryptedRelativeTitle);
-              encoding.writeVarUint8Array(encoder, pageEncryptedAbsoluteTitle);
+                if (!rotatePageKey) {
+                  return;
+                }
 
-              encoding.writeVarUint(encoder, pageSnapshots.length);
+                await dataAbstraction().patch('page', this.room.pageId, {
+                  next_key_rotation_date: addDays(new Date(), 7),
+                });
 
-              for (const pageSnapshot of pageSnapshots) {
-                encoding.writeVarString(encoder, pageSnapshot.id);
+                const [
+                  pageEncryptedRelativeTitle,
+                  pageEncryptedAbsoluteTitle,
+                  pageSnapshots,
+                ] = await Promise.all([
+                  dataAbstraction().hget(
+                    'page',
+                    this.room.pageId,
+                    'encrypted-relative-title',
+                  ),
+
+                  dataAbstraction().hget(
+                    'page',
+                    this.room.pageId,
+                    'encrypted-absolute-title',
+                  ),
+
+                  PageSnapshotModel.query()
+                    .where('page_id', this.room.pageId)
+                    .select('id', 'encrypted_symmetric_key'),
+                ]);
+
                 encoding.writeVarUint8Array(
                   encoder,
-                  pageSnapshot.encrypted_symmetric_key,
+                  pageEncryptedRelativeTitle,
                 );
-              }
-            });
+                encoding.writeVarUint8Array(
+                  encoder,
+                  pageEncryptedAbsoluteTitle,
+                );
+
+                encoding.writeVarUint(encoder, pageSnapshots.length);
+
+                for (const pageSnapshot of pageSnapshots) {
+                  encoding.writeVarString(encoder, pageSnapshot.id);
+                  encoding.writeVarUint8Array(
+                    encoder,
+                    pageSnapshot.encrypted_symmetric_key,
+                  );
+                }
+              },
+
+              signals,
+            );
           },
         );
       } catch (error) {
@@ -526,8 +533,6 @@ export class SocketAuxObject {
         'group-id',
       );
 
-      checkRedlockSignalAborted(signals);
-
       await usingLocks(
         [[`group-lock:${groupId}`]],
         async (signals) => {
@@ -572,8 +577,6 @@ export class SocketAuxObject {
                 { dtrx },
               );
 
-              checkRedlockSignalAborted(signals);
-
               await patchMultiple(
                 'page_snapshots',
 
@@ -586,8 +589,6 @@ export class SocketAuxObject {
 
                 { trx: dtrx.trx },
               );
-
-              checkRedlockSignalAborted(signals);
             }
 
             // Read encrypted update
@@ -613,8 +614,6 @@ export class SocketAuxObject {
                 type: 'periodic',
                 dtrx,
               });
-
-              checkRedlockSignalAborted(signals);
             }
 
             // Delete old unmerged updates
@@ -623,8 +622,6 @@ export class SocketAuxObject {
               .delete()
               .where('page_id', this.room.pageId)
               .andWhere('index', '<=', updateIndex);
-
-            checkRedlockSignalAborted(signals);
 
             // Insert encrypted update in the database
 

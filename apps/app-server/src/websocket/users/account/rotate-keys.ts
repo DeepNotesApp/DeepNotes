@@ -24,7 +24,10 @@ import {
   derivePasswordValues,
 } from 'src/utils/crypto';
 import { invalidateAllSessions } from 'src/utils/sessions';
-import { checkCorrectUserPassword } from 'src/utils/users';
+import {
+  assertCorrectUserPassword,
+  assertNonDemoAccount,
+} from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -94,11 +97,18 @@ export async function rotateKeysStep1({
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
   (ctx as Context).loginHash = input.loginHash;
 
-  // Check if old password is correct
+  // Assert correct old password
 
-  await checkCorrectUserPassword({
+  await assertCorrectUserPassword({
     userId: ctx.userId,
     loginHash: input.loginHash,
+  });
+
+  // Assert non-demo account
+
+  await assertNonDemoAccount({
+    userId: ctx.userId,
+    dataAbstraction: ctx.dataAbstraction,
   });
 
   // Get session encryption key

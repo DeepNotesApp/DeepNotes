@@ -19,7 +19,7 @@ export async function restore({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`page-lock:${input.pageId}`]],
+    [[`user-lock:${ctx.userId}`], [`page-lock:${input.pageId}`]],
     async (signals) => {
       const groupId = await ctx.dataAbstraction.hget(
         'page',
@@ -27,49 +27,53 @@ export async function restore({
         'group-id',
       );
 
-      checkRedlockSignalAborted(signals);
-
       return await ctx.usingLocks(
         [[`group-lock:${groupId}`]],
         async (signals) => {
-          // Check permissions
+          return await ctx.dataAbstraction.transaction(async (dtrx) => {
+            // Check permissions
 
-          if (
-            !(await ctx.userHasPermission(
-              ctx.userId,
-              groupId,
-              'editGroupPages',
-            ))
-          ) {
-            throw new TRPCError({
-              code: 'FORBIDDEN',
-              message: 'Insufficient permissions.',
-            });
-          }
+            if (
+              !(await ctx.userHasPermission(
+                ctx.userId,
+                groupId,
+                'editGroupPages',
+              ))
+            ) {
+              throw new TRPCError({
+                code: 'FORBIDDEN',
+                message: 'Insufficient permissions.',
+              });
+            }
 
-          // Check if page is deleted
+            // Check if page is deleted
 
-          if (
-            (await ctx.dataAbstraction.hget(
+            if (
+              (await ctx.dataAbstraction.hget(
+                'page',
+                input.pageId,
+                'permanent-deletion-date',
+              )) == null
+            ) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Page is not deleted.',
+              });
+            }
+
+            // Restore page
+
+            await ctx.dataAbstraction.patch(
               'page',
               input.pageId,
-              'permanent-deletion-date',
-            )) == null
-          ) {
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: 'Page is not deleted.',
-            });
-          }
+              { permanent_deletion_date: null },
+              { dtrx },
+            );
 
-          checkRedlockSignalAborted(signals);
-
-          // Restore page
-
-          await ctx.dataAbstraction.patch('page', input.pageId, {
-            permanent_deletion_date: null,
+            checkRedlockSignalAborted(signals);
           });
         },
+        signals,
       );
     },
   );

@@ -5,6 +5,7 @@ import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { createGroup, groupCreationSchema } from 'src/utils/groups';
+import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -28,49 +29,46 @@ export async function create({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`group-lock:${input.groupId}`]],
+    [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
-      return await ctx.dataAbstraction.transaction(async (dtrx) => {
-        // Check sufficient permissions
+      // Check sufficient permissions
 
-        if (
-          input.groupCreation == null &&
-          !(await ctx.userHasPermission(
-            ctx.userId,
-            input.groupId,
-            'editGroupPages',
-          ))
-        ) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'Insufficient permissions.',
-          });
-        }
-
-        // Get some necessary user data
-
-        const [userPlan, personalGroupId] = await ctx.dataAbstraction.hmget(
-          'user',
+      if (
+        input.groupCreation == null &&
+        !(await ctx.userHasPermission(
           ctx.userId,
-          ['plan', 'personal-group-id'],
-        );
+          input.groupId,
+          'editGroupPages',
+        ))
+      ) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message: 'Insufficient permissions.',
+        });
+      }
 
-        // Check valid destination group
+      // Get some necessary user data
 
-        if (
-          userPlan !== 'pro' &&
-          (input.groupId !== personalGroupId || input.groupCreation != null)
-        ) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'This action requires a Pro plan subscription.',
-          });
-        }
+      const [userPlan, personalGroupId] = await ctx.dataAbstraction.hmget(
+        'user',
+        ctx.userId,
+        ['plan', 'personal-group-id'],
+      );
 
-        // Check if can create page
+      // Assert agent is subscribed
 
-        let numFreePages;
+      if (input.groupId !== personalGroupId || input.groupCreation != null) {
+        await assertUserSubscribed({
+          userId: ctx.userId,
+          dataAbstraction: ctx.dataAbstraction,
+        });
+      }
 
+      // Check if can create page
+
+      let numFreePages;
+
+      return await ctx.dataAbstraction.transaction(async (dtrx) => {
         if (userPlan !== 'pro') {
           numFreePages =
             (await ctx.dataAbstraction.hget(
@@ -108,8 +106,6 @@ export async function create({
 
             dtrx,
           });
-
-          checkRedlockSignalAborted(signals);
         }
 
         // Create page
@@ -141,6 +137,8 @@ export async function create({
             { dtrx },
           ),
         ]);
+
+        checkRedlockSignalAborted(signals);
 
         return {
           pageId: input.pageId,

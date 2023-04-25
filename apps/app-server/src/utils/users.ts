@@ -175,7 +175,7 @@ export async function registerUser(
   return userModel;
 }
 
-export async function checkCorrectUserPassword(input: {
+export async function assertCorrectUserPassword(input: {
   userId: string;
   loginHash: Uint8Array;
 }) {
@@ -212,9 +212,9 @@ export async function checkCorrectUserPassword(input: {
   }
 }
 
-export async function checkUserSubscription(input: {
-  dataAbstraction: DataAbstraction<typeof dataHashes>;
+export async function assertUserSubscribed(input: {
   userId: string;
+  dataAbstraction: DataAbstraction<typeof dataHashes>;
 }) {
   if (
     (await input.dataAbstraction.hget('user', input.userId, 'plan')) !== 'pro'
@@ -222,6 +222,18 @@ export async function checkUserSubscription(input: {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: 'This action requires a Pro plan subscription.',
+    });
+  }
+}
+
+export async function assertNonDemoAccount(input: {
+  userId: string;
+  dataAbstraction: DataAbstraction<typeof dataHashes>;
+}) {
+  if (await input.dataAbstraction.hget('user', input.userId, 'demo')) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'This action is unavailable for demo account.',
     });
   }
 }

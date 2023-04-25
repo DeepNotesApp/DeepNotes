@@ -5,7 +5,10 @@ import { authenticator } from 'otplib';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { encryptUserAuthenticatorSecret } from 'src/utils/crypto';
-import { checkCorrectUserPassword } from 'src/utils/users';
+import {
+  assertCorrectUserPassword,
+  assertNonDemoAccount,
+} from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -24,11 +27,18 @@ export async function request({
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
-        // Check correct password
+        // Assert correct password
 
-        await checkCorrectUserPassword({
+        await assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
+        });
+
+        // Assert non-demo account
+
+        await assertNonDemoAccount({
+          userId: ctx.userId,
+          dataAbstraction: ctx.dataAbstraction,
         });
 
         // Check if two-factor authentication is already enabled

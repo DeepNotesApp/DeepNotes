@@ -21,44 +21,49 @@ export async function deletePermanently({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`group-lock:${input.groupId}`]],
+    [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
-      // Check permissions
+      return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check permissions
 
-      if (
-        !(await ctx.userHasPermission(
-          ctx.userId,
-          input.groupId,
-          'editGroupSettings',
-        ))
-      ) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Insufficient permissions.',
-        });
-      }
+        if (
+          !(await ctx.userHasPermission(
+            ctx.userId,
+            input.groupId,
+            'editGroupSettings',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Insufficient permissions.',
+          });
+        }
 
-      // Check if group is deleted
+        // Check if group is deleted
 
-      if (
-        (await ctx.dataAbstraction.hget(
+        if (
+          (await ctx.dataAbstraction.hget(
+            'group',
+            input.groupId,
+            'permanent-deletion-date',
+          )) == null
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Group is not deleted.',
+          });
+        }
+
+        // Delete group permanently
+
+        await ctx.dataAbstraction.patch(
           'group',
           input.groupId,
-          'permanent-deletion-date',
-        )) == null
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Group is not deleted.',
-        });
-      }
+          { permanent_deletion_date: new Date() },
+          { dtrx },
+        );
 
-      checkRedlockSignalAborted(signals);
-
-      // Delete group permanently
-
-      await ctx.dataAbstraction.patch('group', input.groupId, {
-        permanent_deletion_date: new Date(),
+        checkRedlockSignalAborted(signals);
       });
     },
   );

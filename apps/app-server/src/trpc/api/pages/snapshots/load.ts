@@ -5,6 +5,7 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -22,7 +23,7 @@ export async function load({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`page-lock:${input.pageId}`]],
+    [[`user-lock:${ctx.userId}`], [`page-lock:${input.pageId}`]],
     async (signals) => {
       const groupId = await ctx.dataAbstraction.hget(
         'page',
@@ -30,11 +31,16 @@ export async function load({
         'group-id',
       );
 
-      checkRedlockSignalAborted(signals);
-
       return await ctx.usingLocks(
         [[`group-lock:${groupId}`]],
         async (signals) => {
+          // Assert agent is subscribed
+
+          await assertUserSubscribed({
+            userId: ctx.userId,
+            dataAbstraction: ctx.dataAbstraction,
+          });
+
           // Check if user has sufficient permissions
 
           if (
@@ -70,6 +76,7 @@ export async function load({
             encryptedData: snapshot.encrypted_data,
           };
         },
+        signals,
       );
     },
   );

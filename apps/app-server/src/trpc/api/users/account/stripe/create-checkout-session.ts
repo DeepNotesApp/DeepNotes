@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
+import { assertNonDemoAccount } from 'src/utils/users';
 import type Stripe from 'stripe';
 
 const baseProcedure = authProcedure;
@@ -18,6 +19,13 @@ export async function createCheckoutSession({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
+      // Assert non-demo account
+
+      await assertNonDemoAccount({
+        userId: ctx.userId,
+        dataAbstraction: ctx.dataAbstraction,
+      });
+
       // Get customer ID
 
       const customerId = await ctx.dataAbstraction.hget(

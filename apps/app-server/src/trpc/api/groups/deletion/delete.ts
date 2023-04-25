@@ -19,44 +19,49 @@ export async function delete_({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`group-lock:${input.groupId}`]],
+    [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
-      // Check permissions
+      return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check permissions
 
-      if (
-        !(await ctx.userHasPermission(
-          ctx.userId,
-          input.groupId,
-          'editGroupSettings',
-        ))
-      ) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Insufficient permissions.',
-        });
-      }
+        if (
+          !(await ctx.userHasPermission(
+            ctx.userId,
+            input.groupId,
+            'editGroupSettings',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'Insufficient permissions.',
+          });
+        }
 
-      // Check if group is deleted
+        // Check if group is deleted
 
-      if (
-        (await ctx.dataAbstraction.hget(
+        if (
+          (await ctx.dataAbstraction.hget(
+            'group',
+            input.groupId,
+            'permanent-deletion-date',
+          )) != null
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Group is already deleted.',
+          });
+        }
+
+        // Delete group
+
+        await ctx.dataAbstraction.patch(
           'group',
           input.groupId,
-          'permanent-deletion-date',
-        )) != null
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Group is already deleted.',
-        });
-      }
+          { permanent_deletion_date: addMonths(new Date(), 1) },
+          { dtrx },
+        );
 
-      checkRedlockSignalAborted(signals);
-
-      // Delete group
-
-      await ctx.dataAbstraction.patch('group', input.groupId, {
-        permanent_deletion_date: addMonths(new Date(), 1),
+        checkRedlockSignalAborted(signals);
       });
     },
   );

@@ -1,4 +1,5 @@
 import { isNanoID } from '@stdlib/misc';
+import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -26,7 +27,10 @@ export function registerGroupsRotateKeys(fastify: ReturnType<typeof Fastify>) {
     url: '/trpc/groups.rotateKeys',
 
     async setup({ ctx, input, run }) {
-      await ctx.usingLocks([[`group-lock:${input.groupId}`]], run);
+      await ctx.usingLocks(
+        [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
+        run,
+      );
     },
 
     procedures: [
@@ -41,6 +45,21 @@ export async function rotateKeysStep1({
   input,
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
   (ctx as any).groupId = input.groupId;
+
+  // Check sufficient permissions
+
+  if (
+    !(await ctx.userHasPermission(
+      ctx.userId,
+      input.groupId,
+      'manageLowerRanks',
+    ))
+  ) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Insufficient permissions.',
+    });
+  }
 
   return await getGroupKeyRotationValues(input.groupId, ctx.userId);
 }

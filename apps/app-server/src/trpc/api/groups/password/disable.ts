@@ -4,7 +4,8 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { checkCorrectGroupPassword } from 'src/utils/groups';
+import { assertCorrectGroupPassword } from 'src/utils/groups';
+import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -24,12 +25,19 @@ export async function disable({
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
-    [[`group-lock:${input.groupId}`]],
+    [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Assert agent is subscribed
+
+        await assertUserSubscribed({
+          userId: ctx.userId,
+          dataAbstraction: ctx.dataAbstraction,
+        });
+
         // Check if given group password is correct
 
-        await checkCorrectGroupPassword({
+        await assertCorrectGroupPassword({
           groupId: input.groupId,
           groupPasswordHash: input.groupPasswordHash,
         });

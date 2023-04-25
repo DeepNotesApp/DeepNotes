@@ -8,6 +8,7 @@ import { getGroupMembers, GroupRoleEnum } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
 import { notifyUsers } from 'src/utils/notifications';
 import { notificationsRequestSchema } from 'src/utils/notifications';
+import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -35,7 +36,14 @@ export function registerGroupsJoinRequestsAccept(
     url: '/trpc/groups.joinRequests.accept',
 
     async setup({ ctx, input, run }) {
-      await ctx.usingLocks([[`group-lock:${input.groupId}`]], run);
+      await ctx.usingLocks(
+        [
+          [`user-lock:${ctx.userId}`],
+          [`user-lock:${input.patientId}`],
+          [`group-lock:${input.groupId}`],
+        ],
+        run,
+      );
     },
 
     procedures: [
@@ -52,6 +60,13 @@ export async function acceptStep1({
   typeof baseProcedureStep1
 >): Promise<NotificationsResponse> {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
+    // Assert that user is subscribed
+
+    await assertUserSubscribed({
+      userId: ctx.userId,
+      dataAbstraction: ctx.dataAbstraction,
+    });
+
     // Check sufficient permissions
 
     const agentRole = await ctx.dataAbstraction.hget(
