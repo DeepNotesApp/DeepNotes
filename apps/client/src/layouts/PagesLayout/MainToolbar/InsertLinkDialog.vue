@@ -37,19 +37,7 @@
           flat
           label="New page"
           color="primary"
-          @click="
-            () => {
-              dialogRef.onDialogHide();
-
-              $q.dialog({
-                component: NewPageDialog,
-
-                componentProps: {
-                  initialPageTitle,
-                },
-              });
-            }
-          "
+          @click="createNewPage()"
         />
 
         <DeepBtn
@@ -93,5 +81,23 @@ function insertLink() {
   );
 
   dialogRef.value.onDialogOK();
+}
+
+function createNewPage() {
+  dialogRef.value.onDialogHide();
+
+  $quasar()
+    .dialog({
+      component: NewPageDialog,
+
+      componentProps: {
+        initialPageTitle,
+      },
+    })
+    .onOk((newPageUrl) => {
+      page.value.selection.format((chain) =>
+        chain.setMark('link', { href: newPageUrl }),
+      );
+    });
 }
 </script>

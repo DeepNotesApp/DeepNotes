@@ -264,8 +264,6 @@ async function _createPage() {
           : ''),
       type: 'positive',
     });
-
-    dialogRef.value.onDialogOK();
   } catch (error) {
     handleError(error);
   }
