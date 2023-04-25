@@ -302,7 +302,7 @@ async function _checkTwoFactorAuth(
     // Check authenticator token
 
     if (
-      !authenticator.check(
+      authenticator.check(
         input.authenticatorToken,
         decryptUserAuthenticatorSecret(
           input.user.encrypted_authenticator_secret!,
