@@ -1,8 +1,8 @@
-import { createPrivateKeyring, createSymmetricKeyring } from '@stdlib/crypto';
 import type {
   changePasswordProcedureStep1,
   changePasswordProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/users/account/change-password';
+} from '@deepnotes/app-server/src/websocket/users/account/change-password';
+import { createPrivateKeyring, createSymmetricKeyring } from '@stdlib/crypto';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 

@@ -11,8 +11,8 @@ RUN npm install -g pnpm
 
 WORKDIR /build
 COPY ./ ./
-RUN pnpm install --filter deepnotes --filter deepnotes-client...
-RUN pnpm turbo run build --filter deepnotes-client...
+RUN pnpm install --filter deepnotes --filter @deepnotes/client...
+RUN pnpm turbo run build --filter @deepnotes/client...
 WORKDIR /build/apps/client
 RUN pnpm run build:ssr
 RUN pnpm tsup
@@ -31,5 +31,5 @@ COPY --from=builder /build/.npmrc ./
 RUN sed -i 's/"use strict";//g' ./index.cjs
 RUN pnpm remove @deeplib/data @deeplib/misc @stdlib/base64 \
   @stdlib/color @stdlib/crypto @stdlib/data @stdlib/misc \
-  @stdlib/vue deepnotes-app-server
+  @stdlib/vue @deepnotes/app-server
 CMD pm2 start ./index.cjs -i max && pm2 logs

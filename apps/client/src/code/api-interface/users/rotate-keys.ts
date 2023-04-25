@@ -1,13 +1,13 @@
+import type {
+  rotateKeysProcedureStep1,
+  rotateKeysProcedureStep2,
+} from '@deepnotes/app-server/src/websocket/users/account/rotate-keys';
 import {
   createKeyring,
   createPrivateKeyring,
   createSymmetricKeyring,
   wrapKeyPair,
 } from '@stdlib/crypto';
-import type {
-  rotateKeysProcedureStep1,
-  rotateKeysProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/users/account/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';

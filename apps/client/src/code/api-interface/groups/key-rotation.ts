@@ -1,3 +1,7 @@
+import type {
+  rotateKeysProcedureStep1,
+  rotateKeysProcedureStep2,
+} from '@deepnotes/app-server/src/websocket/groups/rotate-keys';
 import {
   createKeyring,
   createPrivateKeyring,
@@ -5,10 +9,6 @@ import {
   DataLayer,
 } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
-import type {
-  rotateKeysProcedureStep1,
-  rotateKeysProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/groups/rotate-keys';
 import sodium from 'libsodium-wrappers';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { asyncDialog } from 'src/code/utils/misc';

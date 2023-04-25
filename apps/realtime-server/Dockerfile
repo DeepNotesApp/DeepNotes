@@ -4,8 +4,8 @@ RUN npm install -g pnpm
 
 WORKDIR /build
 COPY ./ ./
-RUN pnpm install --filter deepnotes --filter deepnotes-realtime-server...
-RUN pnpm --filter deepnotes-realtime-server run bundle
+RUN pnpm install --filter deepnotes --filter @deepnotes/realtime-server...
+RUN pnpm --filter @deepnotes/realtime-server run bundle
 
 FROM node:16-alpine AS runner
 

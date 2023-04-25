@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-scheduler",
+  "name": "@deepnotes/scheduler",
   "version": "1.0.0",
   "dependencies": {
     "@deeplib/data": "workspace:1.0.0",

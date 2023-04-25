@@ -1,7 +1,7 @@
+import type { UserRegistrationSchema } from '@deepnotes/app-server/src/utils/users';
 import type { Keyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import type { UserRegistrationSchema } from 'deepnotes-app-server/src/utils/users';
 import { pack } from 'msgpackr';
 import { nanoid } from 'nanoid';
 import type { deriveUserValues } from 'src/code/crypto';

@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-app-server",
+  "name": "@deepnotes/app-server",
   "version": "1.0.0",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {

@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-realtime-server",
+  "name": "@deepnotes/realtime-server",
   "version": "1.0.0",
   "dependencies": {
     "@deeplib/data": "workspace:1.0.0",

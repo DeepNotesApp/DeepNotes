@@ -1,7 +1,7 @@
 import type {
   cancelProcedureStep1,
   cancelProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/groups/join-requests/cancel';
+} from '@deepnotes/app-server/src/websocket/groups/join-requests/cancel';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';

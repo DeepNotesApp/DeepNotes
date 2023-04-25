@@ -1,10 +1,10 @@
 import type { GroupRoleID } from '@deeplib/misc';
-import { createKeyring } from '@stdlib/crypto';
-import { textToBytes } from '@stdlib/misc';
 import type {
   sendProcedureStep1,
   sendProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/groups/join-invitations/send';
+} from '@deepnotes/app-server/src/websocket/groups/join-invitations/send';
+import { createKeyring } from '@stdlib/crypto';
+import { textToBytes } from '@stdlib/misc';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';

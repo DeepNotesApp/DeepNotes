@@ -1,9 +1,9 @@
-import { createKeyring } from '@stdlib/crypto';
-import { textToBytes } from '@stdlib/misc';
 import type {
   acceptProcedureStep1,
   acceptProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/groups/join-invitations/accept';
+} from '@deepnotes/app-server/src/websocket/groups/join-invitations/accept';
+import { createKeyring } from '@stdlib/crypto';
+import { textToBytes } from '@stdlib/misc';
 import { createNotifications } from 'src/code/pages/utils';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 

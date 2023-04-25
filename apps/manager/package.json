@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-manager",
+  "name": "@deepnotes/manager",
   "version": "1.0.0",
   "dependencies": {
     "@deeplib/db": "workspace:1.0.0",

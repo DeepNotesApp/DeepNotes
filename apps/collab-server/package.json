@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-collab-server",
+  "name": "@deepnotes/collab-server",
   "version": "1.0.0",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {

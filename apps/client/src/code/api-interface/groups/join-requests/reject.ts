@@ -1,7 +1,7 @@
 import type {
   rejectProcedureStep1,
   rejectProcedureStep2,
-} from 'deepnotes-app-server/src/websocket/groups/join-requests/reject';
+} from '@deepnotes/app-server/src/websocket/groups/join-requests/reject';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
