@@ -17,6 +17,7 @@ declare module '@vue/runtime-core' {
     DisplayBtn: typeof import('./src/components/DisplayBtn.vue')['default']
     EvaluatedPasswordField: typeof import('./src/components/EvaluatedPasswordField.vue')['default']
     Gap: typeof import('./src/components/Gap.vue')['default']
+    LinkURL: typeof import('./src/components/LinkURL.vue')['default']
     LoadingOverlay: typeof import('./src/components/LoadingOverlay.vue')['default']
     MiniSidebarBtn: typeof import('./src/components/MiniSidebarBtn.vue')['default']
     PasswordDialog: typeof import('./src/components/PasswordDialog.vue')['default']

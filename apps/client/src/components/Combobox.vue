@@ -32,14 +32,16 @@
   </q-select>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
 import type { QSelectProps } from 'quasar';
 
-interface Props extends QSelectProps {
+export interface ComboboxProps extends QSelectProps {
   modelValue: any;
 }
+</script>
 
-defineProps<Props>();
+<script setup lang="ts">
+defineProps<ComboboxProps>();
 
 const combobox = ref();
 </script>

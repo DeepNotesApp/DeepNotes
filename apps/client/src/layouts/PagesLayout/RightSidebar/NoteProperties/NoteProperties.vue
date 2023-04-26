@@ -129,37 +129,14 @@
     <!-- Link -->
 
     <div style="padding: 20px; display: flex; flex-direction: column">
-      <Combobox
-        label="Link URL"
-        :disable="page.react.readOnly"
-        :options="linkOptions"
+      <LinkURL
         :model-value="note.react.collab.link"
         @update:model-value="
           changeProp($event, (selectedNote, value) => {
             selectedNote.react.collab.link = value;
           })
         "
-      >
-        <template #item="scope">
-          <q-item-section>
-            <q-item-label caption>
-              {{
-                groupNames()(
-                  realtimeCtx.hget(
-                    'page',
-                    splitStr(scope.opt.value, '/').at(-1)!,
-                    'group-id',
-                  ),
-                ).get().text
-              }}
-            </q-item-label>
-
-            <q-item-label>
-              {{ scope.opt.label }}
-            </q-item-label>
-          </q-item-section>
-        </template>
-      </Combobox>
+      />
 
       <Gap style="height: 16px" />
 
@@ -721,11 +698,8 @@
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
-import { groupNames } from 'src/code/pages/computed/group-names';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { getPageTitle } from 'src/code/pages/utils';
-import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
@@ -735,8 +709,6 @@ const page = inject<Ref<Page>>('page')!;
 
 const note = computed(() => page.value.activeElem.react.value as PageNote);
 
-const realtimeCtx = useRealtimeContext();
-
 function changeProp(value: any, func: (note: PageNote, value: any) => void) {
   page.value.collab.doc.transact(() => {
     for (const selectedNote of page.value.selection.react.notes) {
@@ -744,30 +716,6 @@ function changeProp(value: any, func: (note: PageNote, value: any) => void) {
     }
   });
 }
-
-const linkOptions = computed(() =>
-  internals.pages.react.recentPageIds
-    .map((pageId) => {
-      const groupId = realtimeCtx.hget('page', pageId, 'group-id');
-
-      if (groupId == null) {
-        return;
-      }
-
-      if (
-        realtimeCtx.hget('group', groupId, 'permanent-deletion-date') != null ||
-        realtimeCtx.hget('page', pageId, 'permanent-deletion-date') != null
-      ) {
-        return;
-      }
-
-      return {
-        label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-        value: `/pages/${pageId}`,
-      };
-    })
-    .filter((page) => page != null),
-);
 
 function createNewPage() {
   let initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];

@@ -10,13 +10,9 @@
       <q-card-section
         style="padding: 20px; display: flex; flex-direction: column"
       >
-        <TextField
+        <LinkURL
           ref="urlElem"
-          label="URL"
-          filled
-          dense
           v-model="url"
-          :maxlength="maxUrlLength"
         />
       </q-card-section>
     </template>
@@ -53,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { maxUrlLength, sleep, splitStr } from '@stdlib/misc';
+import { sleep, splitStr } from '@stdlib/misc';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 import NewPageDialog from '../RightSidebar/NoteProperties/NewPageDialog.vue';
