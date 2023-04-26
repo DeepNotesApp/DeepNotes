@@ -231,7 +231,10 @@ defineProps<Props>();
       // Links
 
       a {
-        color: #47a7ff !important;
+        color: #6ab7ff !important;
+      }
+      &[contenteditable='false'] a:hover {
+        color: #8cc8ff !important;
       }
 
       // Blockquotes
