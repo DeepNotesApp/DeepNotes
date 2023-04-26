@@ -250,7 +250,7 @@ defineProps<Props>();
       // Highlight
 
       mark {
-        color: rgba(255, 255, 255, 0.95);
+        color: unset;
 
         background-color: #585800;
       }
