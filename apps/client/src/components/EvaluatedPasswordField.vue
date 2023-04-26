@@ -64,9 +64,7 @@ import { zxcvbn } from '@zxcvbn-ts/core';
 import { useResizeObserver } from 'src/code/utils/misc';
 import type { ComponentPublicInstance } from 'vue';
 
-import PasswordField from './PasswordField.vue';
-
-type PasswordFieldProps = InstanceType<typeof PasswordField>['$props'];
+import type { PasswordFieldProps } from './PasswordField.vue';
 
 interface Props extends PasswordFieldProps {
   modelValue: string;

@@ -27,8 +27,12 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import type { DeepBtnProps } from './DeepBtn.vue';
+
+interface Props extends DeepBtnProps {
   icon: string;
   tooltip?: string;
-}>();
+}
+
+defineProps<Props>();
 </script>

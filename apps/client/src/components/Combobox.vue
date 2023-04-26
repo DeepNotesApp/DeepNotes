@@ -1,8 +1,6 @@
 <template>
   <q-select
     ref="combobox"
-    :label="label"
-    :options="options"
     :model-value="modelValue"
     @input-value="
       (event: any) => {
@@ -11,7 +9,6 @@
         }
       }
     "
-    :disable="disable"
     filled
     dense
     use-input
@@ -36,12 +33,13 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  label: string;
-  options: any;
+import type { QSelectProps } from 'quasar';
+
+interface Props extends QSelectProps {
   modelValue: any;
-  disable?: boolean;
-}>();
+}
+
+defineProps<Props>();
 
 const combobox = ref();
 </script>

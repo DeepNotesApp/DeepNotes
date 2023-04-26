@@ -28,8 +28,11 @@
 
 <script setup lang="ts">
 import { setClipboardText } from '@stdlib/misc';
+import type { QIconProps } from 'quasar';
 
-defineProps<{
+interface Props extends QIconProps {
   text: string;
-}>();
+}
+
+defineProps<Props>();
 </script>
