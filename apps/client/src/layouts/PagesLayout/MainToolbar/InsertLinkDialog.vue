@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { sleep, splitStr } from '@stdlib/misc';
+import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 import NewPageDialog from '../RightSidebar/NoteProperties/NewPageDialog.vue';
@@ -77,6 +78,11 @@ function insertLink() {
   );
 
   dialogRef.value.onDialogOK();
+
+  void createPageBacklink({
+    sourcePageId: page.value.id,
+    targetUrl: url.value,
+  });
 }
 
 function createNewPage() {
@@ -90,10 +96,15 @@ function createNewPage() {
         initialPageTitle,
       },
     })
-    .onOk((newPageUrl) => {
+    .onOk(async (newPageUrl: string) => {
       page.value.selection.format((chain) =>
         chain.setMark('link', { href: newPageUrl }),
       );
+
+      void createPageBacklink({
+        sourcePageId: page.value.id,
+        targetUrl: newPageUrl,
+      });
     });
 }
 </script>

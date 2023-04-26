@@ -1,12 +1,13 @@
 import type { dataHashes } from '@deeplib/data';
-import { GroupMemberModel, PageLinkModel, PageModel } from '@deeplib/db';
+import { GroupMemberModel, PageModel } from '@deeplib/db';
 import type { DataAbstraction } from '@stdlib/data';
 import { isNanoID, mainLogger } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
-import { once, pull } from 'lodash';
+import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { bumpRecentItem } from 'src/utils';
+import { addPageBacklink } from 'src/utils/pages';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -42,16 +43,6 @@ export async function bump({
       dataAbstraction: ctx.dataAbstraction,
     }),
 
-    _updatePageLink({
-      pageId: input.pageId,
-      parentPageId: input.parentPageId,
-    }),
-    _updatePageBacklinks({
-      pageId: input.pageId,
-      parentPageId: input.parentPageId,
-      dataAbstraction: ctx.dataAbstraction,
-    }),
-
     _updateRecentPageIds({
       userId: ctx.userId,
       pageId: input.pageId,
@@ -60,6 +51,12 @@ export async function bump({
     _updateRecentGroupIds({
       userId: ctx.userId,
       groupId,
+      dataAbstraction: ctx.dataAbstraction,
+    }),
+
+    _updatePageBacklink({
+      pageId: input.pageId,
+      parentPageId: input.parentPageId,
       dataAbstraction: ctx.dataAbstraction,
     }),
 
@@ -149,59 +146,6 @@ async function _updateLastParentId(input: {
   );
 }
 
-async function _updatePageLink(input: {
-  pageId: string;
-  parentPageId?: string;
-}) {
-  if (input.parentPageId == null) {
-    return;
-  }
-
-  try {
-    await PageLinkModel.query()
-      .insert({
-        target_page_id: input.pageId,
-        source_page_id: input.parentPageId,
-
-        last_activity_date: new Date(),
-      })
-      .onConflict(['source_page_id', 'target_page_id'])
-      .merge();
-  } catch (error) {
-    // Ignore error: Page doesn't need to exist
-  }
-}
-async function _updatePageBacklinks(input: {
-  pageId: string;
-  parentPageId?: string;
-  dataAbstraction: DataAbstraction<typeof dataHashes>;
-}) {
-  if (input.parentPageId == null) {
-    return;
-  }
-
-  const pageBacklinks: string[] = await input.dataAbstraction.hget(
-    'page-backlinks',
-    input.pageId,
-    'list',
-  );
-
-  // Prepend page ID to backlinks
-
-  pull(pageBacklinks, input.parentPageId);
-  pageBacklinks.splice(0, 0, input.parentPageId);
-
-  while (pageBacklinks.length > 100) {
-    pageBacklinks.pop();
-  }
-
-  // Update backlinks
-
-  await input.dataAbstraction.hmset('page-backlinks', input.pageId, {
-    list: pageBacklinks,
-  });
-}
-
 async function _updateRecentPageIds(input: {
   userId: string;
   pageId: string;
@@ -219,16 +163,32 @@ async function _updateRecentGroupIds(input: {
   groupId: string;
   dataAbstraction: DataAbstraction<typeof dataHashes>;
 }) {
-  if (input.groupId == null) {
-    return;
+  if (input.groupId != null) {
+    await bumpRecentItem({
+      userId: input.userId,
+      itemType: 'group',
+      itemId: input.groupId,
+      dataAbstraction: input.dataAbstraction,
+    });
   }
+}
 
-  await bumpRecentItem({
-    userId: input.userId,
-    itemType: 'group',
-    itemId: input.groupId,
-    dataAbstraction: input.dataAbstraction,
-  });
+async function _updatePageBacklink(input: {
+  pageId: string;
+  parentPageId?: string;
+  dataAbstraction: DataAbstraction<typeof dataHashes>;
+}) {
+  if (input.parentPageId != null) {
+    try {
+      await addPageBacklink({
+        targetPageId: input.pageId,
+        sourcePageId: input.parentPageId,
+        dataAbstraction: input.dataAbstraction,
+      });
+    } catch (error) {
+      // Ignore error: Page doesn't need to exist for bump to succeed
+    }
+  }
 }
 
 async function _updatePageLastActivityDate(input: { pageId: string }) {
@@ -237,24 +197,22 @@ async function _updatePageLastActivityDate(input: { pageId: string }) {
       last_activity_date: new Date(),
     });
   } catch (error) {
-    // Ignore error: Page doesn't need to exist
+    // Ignore error: Page doesn't need to exist for bump to succeed
   }
 }
 async function _updateGroupLastActivityDate(input: {
   userId: string;
   groupId: string;
 }) {
-  if (input.groupId == null) {
-    return;
-  }
-
-  try {
-    await GroupMemberModel.query()
-      .findById([input.groupId, input.userId])
-      .patch({
-        last_activity_date: new Date(),
-      });
-  } catch (error) {
-    // Ignore error: Page doesn't need to exist
+  if (input.groupId != null) {
+    try {
+      await GroupMemberModel.query()
+        .findById([input.groupId, input.userId])
+        .patch({
+          last_activity_date: new Date(),
+        });
+    } catch (error) {
+      // Ignore error: Page doesn't need to exist for bump to succeed
+    }
   }
 }

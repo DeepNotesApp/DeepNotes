@@ -4,6 +4,7 @@
     :disable="page.react.readOnly"
     :options="linkOptions"
     :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #item="scope">
       <q-item-section>
@@ -35,8 +36,9 @@ import { useRealtimeContext } from 'src/code/realtime/context';
 
 import type { ComboboxProps } from './Combobox.vue';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props extends ComboboxProps {}
+interface Props extends ComboboxProps {
+  modelValue: any;
+}
 
 defineProps<Props>();
 

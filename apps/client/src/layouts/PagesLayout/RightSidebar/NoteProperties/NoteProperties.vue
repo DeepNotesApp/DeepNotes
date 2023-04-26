@@ -132,9 +132,16 @@
       <LinkURL
         :model-value="note.react.collab.link"
         @update:model-value="
-          changeProp($event, (selectedNote, value) => {
-            selectedNote.react.collab.link = value;
-          })
+          (event) => {
+            changeProp(event, (selectedNote, value) => {
+              selectedNote.react.collab.link = value;
+            });
+
+            void createPageBacklink({
+              sourcePageId: page.id,
+              targetUrl: event,
+            });
+          }
         "
       />
 
@@ -698,6 +705,7 @@
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
+import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { handleError } from 'src/code/utils/misc';

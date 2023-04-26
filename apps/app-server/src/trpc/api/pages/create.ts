@@ -31,44 +31,44 @@ export async function create({
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
     async (signals) => {
-      // Check sufficient permissions
-
-      if (
-        input.groupCreation == null &&
-        !(await ctx.userHasPermission(
-          ctx.userId,
-          input.groupId,
-          'editGroupPages',
-        ))
-      ) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Insufficient permissions.',
-        });
-      }
-
-      // Get some necessary user data
-
-      const [userPlan, personalGroupId] = await ctx.dataAbstraction.hmget(
-        'user',
-        ctx.userId,
-        ['plan', 'personal-group-id'],
-      );
-
-      // Assert agent is subscribed
-
-      if (input.groupId !== personalGroupId || input.groupCreation != null) {
-        await assertUserSubscribed({
-          userId: ctx.userId,
-          dataAbstraction: ctx.dataAbstraction,
-        });
-      }
-
-      // Check if can create page
-
-      let numFreePages;
-
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
+        // Check sufficient permissions
+
+        if (
+          input.groupCreation == null &&
+          !(await ctx.userHasPermission(
+            ctx.userId,
+            input.groupId,
+            'editGroupPages',
+          ))
+        ) {
+          throw new TRPCError({
+            code: 'FORBIDDEN',
+            message: 'Insufficient permissions.',
+          });
+        }
+
+        // Get some necessary user data
+
+        const [userPlan, personalGroupId] = await ctx.dataAbstraction.hmget(
+          'user',
+          ctx.userId,
+          ['plan', 'personal-group-id'],
+        );
+
+        // Assert agent is subscribed
+
+        if (input.groupId !== personalGroupId || input.groupCreation != null) {
+          await assertUserSubscribed({
+            userId: ctx.userId,
+            dataAbstraction: ctx.dataAbstraction,
+          });
+        }
+
+        // Check if can create page
+
+        let numFreePages;
+
         if (userPlan !== 'pro') {
           numFreePages =
             (await ctx.dataAbstraction.hget(

@@ -1,4 +1,4 @@
-import { isNanoID, splitStr } from '@stdlib/misc';
+import { splitStr } from '@stdlib/misc';
 import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
 import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
@@ -40,7 +40,6 @@ export function usePageNavigationInterception() {
 
       if (
         !(
-          isNanoID(href) ||
           href.startsWith('/pages/') ||
           href.startsWith('/groups/') ||
           href.startsWith(`${window.location.origin}/pages/`) ||
@@ -50,7 +49,7 @@ export function usePageNavigationInterception() {
         mainLogger
           .sub('usePageNavigationInterception')
           .info(
-            "[usePageNavigationInterception] Link doesn' point to a DeepNotes page: allow default action.",
+            "[usePageNavigationInterception] Link doesn't point to a DeepNotes page: allow default action.",
           );
         return;
       }
