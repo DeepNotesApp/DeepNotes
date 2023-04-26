@@ -114,7 +114,6 @@
 </template>
 
 <script setup lang="ts">
-import { mainLogger } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import {

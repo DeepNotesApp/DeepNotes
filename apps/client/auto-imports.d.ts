@@ -24,7 +24,7 @@ declare global {
   const isReactive: typeof import('vue')['isReactive']
   const isReadonly: typeof import('vue')['isReadonly']
   const isRef: typeof import('vue')['isRef']
-  const mainLogger: typeof import('@stdlib/misc')['mainLogger']
+  const mainLogger: typeof import('src/boot/logger.client')['mainLogger']
   const markRaw: typeof import('vue')['markRaw']
   const nextTick: typeof import('vue')['nextTick']
   const onActivated: typeof import('vue')['onActivated']
