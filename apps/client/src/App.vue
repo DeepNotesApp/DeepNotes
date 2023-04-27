@@ -11,6 +11,31 @@ import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
   title: 'DeepNotes - The next level of note-taking',
+
+  meta: {
+    description: {
+      name: 'description',
+      content:
+        'DeepNotes is an end-to-end encrypted visual note-taking tool with deep page navigation.',
+    },
+    keywords: {
+      name: 'keywords',
+      content:
+        'deepnotes, deep notes, note-taking, visual, spatial, end-to-end encrypted, collaborative, open source',
+    },
+    robots: {
+      name: 'robots',
+      content: 'index, follow',
+    },
+    equiv: {
+      'http-equiv': 'Content-Type',
+      content: 'text/html; charset=UTF-8',
+    },
+    language: {
+      name: 'language',
+      content: 'English',
+    },
+  },
 }));
 
 onMounted(() => {
