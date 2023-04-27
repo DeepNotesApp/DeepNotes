@@ -1,5 +1,6 @@
 import { hashUserEmail } from '@deeplib/data';
-import { DeviceModel, UserModel } from '@deeplib/db';
+import type { DeviceModel } from '@deeplib/db';
+import { UserModel } from '@deeplib/db';
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
@@ -161,7 +162,7 @@ export async function login({
 
     if (user.two_factor_auth_enabled) {
       await _checkTwoFactorAuth({
-        deviceId: device.id,
+        device,
 
         email: input.email,
         ip: ctx.req.ip,
@@ -286,7 +287,7 @@ async function _incrementFailedLoginAttempts(input: {
 
 async function _checkTwoFactorAuth(
   input: {
-    deviceId: string;
+    device: DeviceModel;
 
     authenticatorToken: string;
     recoveryCode: string;
@@ -298,6 +299,10 @@ async function _checkTwoFactorAuth(
     dtrx: DataTransaction;
   } & Parameters<typeof _incrementFailedLoginAttempts>[0],
 ) {
+  if (input.device.trusted) {
+    return;
+  }
+
   if (input.authenticatorToken != null) {
     // Check authenticator token
 
@@ -312,9 +317,7 @@ async function _checkTwoFactorAuth(
       if (input.rememberDevice) {
         // Mark device as trusted
 
-        await DeviceModel.query(input.dtrx.trx)
-          .where({ id: input.deviceId })
-          .patch({ trusted: true });
+        await input.device.$query(input.dtrx.trx).patch({ trusted: true });
       }
 
       return;
