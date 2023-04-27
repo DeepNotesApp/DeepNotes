@@ -1,12 +1,12 @@
 <template>
   <div
-    v-if="
-      !page.react.readOnly &&
-      !page.arrowCreation.react.active &&
-      note.react.active &&
-      !note.react.dragging
-    "
+    v-if="!page.react.readOnly && note.react.active && !note.react.dragging"
     class="note-arrow-handles"
+    :style="{
+      // Arrow creation pointer events only work on Firefox mobile if the handles exist.
+      // So we have to use visibility. We can't use v-if or display: none to hide them.
+      visibility: page.arrowCreation.react.active ? 'hidden' : undefined,
+    }"
   >
     <NoteArrowHandle
       style="top: 50%"
