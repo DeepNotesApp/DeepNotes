@@ -1,11 +1,7 @@
-import FastifyCookie from '@fastify/cookie';
-import FastifyCors from '@fastify/cors';
-import FastifyHelmet from '@fastify/helmet';
-import FastifyWebsocket from '@fastify/websocket';
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
 import Fastify from 'fastify';
-import FastifyRawBody from 'fastify-raw-body';
 import { once } from 'lodash';
+import { getRedis } from 'src/data/redis';
 import { createContext } from 'src/trpc/context';
 import { appRouter } from 'src/trpc/router';
 import { registerGroupsChangeUserRole } from 'src/websocket/groups/change-user-role';
@@ -36,18 +32,19 @@ export const fastify = once(async () => {
     maxParamLength: 5000, // Needs to be quite high for tRPC
   });
 
-  await fastify.register(FastifyHelmet);
-  await fastify.register(FastifyCookie);
-  await fastify.register(FastifyRawBody, {
+  await fastify.register(import('@fastify/helmet'));
+
+  await fastify.register(import('@fastify/cookie'));
+
+  await fastify.register(import('fastify-raw-body'), {
     global: false,
   });
-  await fastify.register(FastifyWebsocket, {
+
+  await fastify.register(import('@fastify/websocket'), {
     options: { maxPayload: 500 * 1048576 },
   });
 
-  // CORS
-
-  await fastify.register(FastifyCors, {
+  await fastify.register(import('@fastify/cors'), {
     origin: (requestOrigin, callback) => {
       console.log('CORS Origin: %s', requestOrigin);
 
@@ -63,6 +60,13 @@ export const fastify = once(async () => {
       }
     },
     credentials: true,
+  });
+
+  await fastify.register(import('@fastify/rate-limit'), {
+    max: 5 * 60,
+    timeWindow: 5 * 1000,
+
+    redis: getRedis(),
   });
 
   // TRPC

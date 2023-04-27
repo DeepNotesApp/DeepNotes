@@ -9,6 +9,7 @@
     "@fastify/cookie": "8.3.0",
     "@fastify/cors": "8.2.0",
     "@fastify/helmet": "10.0.2",
+    "@fastify/rate-limit": "^8.0.0",
     "@fastify/websocket": "^7.2.0",
     "@sendgrid/mail": "7.7.0",
     "@stdlib/base64": "workspace:1.0.0",
