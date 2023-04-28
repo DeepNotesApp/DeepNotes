@@ -1,5 +1,6 @@
 import { PageLinkModel } from '@deeplib/db';
 import { isNanoID } from '@stdlib/misc';
+import { TRPCError } from '@trpc/server';
 import { once, pull } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -18,10 +19,31 @@ export async function delete_({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
+  // Check if user has sufficient permissions
+
+  const targetGroupId = await ctx.dataAbstraction.hget(
+    'page',
+    input.targetPageId,
+    'group-id',
+  );
+
+  if (
+    !(await ctx.userHasPermission(ctx.userId, targetGroupId, 'editGroupPages'))
+  ) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Insufficient permissions.',
+    });
+  }
+
+  // Delete page link
+
   await PageLinkModel.query()
     .where('source_page_id', input.sourcePageId)
     .where('target_page_id', input.targetPageId)
     .delete();
+
+  // Update cache
 
   const pageBacklinks: string[] = await ctx.dataAbstraction.hget(
     'page-backlinks',
