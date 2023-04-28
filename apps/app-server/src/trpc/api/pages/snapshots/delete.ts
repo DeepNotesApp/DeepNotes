@@ -2,7 +2,6 @@ import { PageSnapshotModel } from '@deeplib/db';
 import type { PageSnapshotInfo } from '@deeplib/misc';
 import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
-import { TRPCError } from '@trpc/server';
 import { once, remove } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -37,18 +36,11 @@ export async function delete_({
           return await ctx.dataAbstraction.transaction(async (dtrx) => {
             // Check if user has sufficient permissions
 
-            if (
-              !(await ctx.userHasPermission(
-                ctx.userId,
-                groupId,
-                'editGroupPages',
-              ))
-            ) {
-              throw new TRPCError({
-                code: 'UNAUTHORIZED',
-                message: 'Insufficient permissions.',
-              });
-            }
+            await ctx.assertSufficientGroupPermissions({
+              userId: ctx.userId,
+              groupId: groupId,
+              permission: 'editGroupPages',
+            });
 
             // Load page snapshot infos
 

@@ -12,7 +12,7 @@ export const encryptedAbsoluteTitle: DataField<PageModel> = {
       dataAbstraction,
       userId,
       await dataAbstraction.hget('page', pageId, 'group-id'),
-      'viewGroup',
+      'viewGroupPages',
     ),
   userSettable: async ({ userId, suffix: pageId, dataAbstraction }) => {
     const groupId = await dataAbstraction.hget<DataPrefix>(

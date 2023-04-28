@@ -18,8 +18,19 @@ const baseProcedure = authProcedure.input(
 export const getUserIdsProcedure = once(() => baseProcedure.query(getUserIds));
 
 export async function getUserIds({
+  ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
+  // Check if user has sufficient permissions
+
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: input.groupId,
+    permission: 'viewGroupMembers',
+  });
+
+  // Get group user IDs
+
   const groupUsers = await GroupMemberModel.query()
     .where('group_id', input.groupId)
     .select('user_id')

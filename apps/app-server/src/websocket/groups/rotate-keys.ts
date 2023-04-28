@@ -1,5 +1,4 @@
 import { isNanoID } from '@stdlib/misc';
-import { TRPCError } from '@trpc/server';
 import type Fastify from 'fastify';
 import type { InferProcedureInput, InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -48,18 +47,11 @@ export async function rotateKeysStep1({
 
   // Check sufficient permissions
 
-  if (
-    !(await ctx.userHasPermission(
-      ctx.userId,
-      input.groupId,
-      'manageLowerRanks',
-    ))
-  ) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Insufficient permissions.',
-    });
-  }
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: input.groupId,
+    permission: 'manageLowerRanks',
+  });
 
   return await getGroupKeyRotationValues(input.groupId, ctx.userId);
 }

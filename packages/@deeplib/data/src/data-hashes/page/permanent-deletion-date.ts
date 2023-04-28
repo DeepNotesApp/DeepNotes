@@ -11,7 +11,7 @@ export const permanentDeletionDate: DataField<PageModel> = {
       dataAbstraction,
       userId,
       await dataAbstraction.hget('page', pageId, 'group-id'),
-      'viewGroup',
+      'viewGroupPages',
     ),
 
   columns: ['permanent_deletion_date'],

@@ -64,18 +64,11 @@ export async function rejectStep1({
 
     // Check sufficient permissions
 
-    if (
-      !(await ctx.userHasPermission(
-        ctx.userId,
-        input.groupId,
-        'manageLowerRanks',
-      ))
-    ) {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Insufficient permissions',
-      });
-    }
+    await ctx.assertSufficientGroupPermissions({
+      userId: ctx.userId,
+      groupId: input.groupId,
+      permission: 'manageLowerRanks',
+    });
 
     // Check pending request
 

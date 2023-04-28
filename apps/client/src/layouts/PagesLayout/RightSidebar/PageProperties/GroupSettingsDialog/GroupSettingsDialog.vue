@@ -64,7 +64,7 @@
                   `${groupId}:${authStore().userId}`,
                   'role',
                 )
-              ]?.permissions.viewGroup &&
+              ]?.permissions.viewGroupPages &&
               !loading
             "
           >
@@ -139,7 +139,7 @@
                     `${groupId}:${authStore().userId}`,
                     'role',
                   )
-                ]?.permissions.viewGroup &&
+                ]?.permissions.viewGroupPages &&
                 !loading
               "
             >

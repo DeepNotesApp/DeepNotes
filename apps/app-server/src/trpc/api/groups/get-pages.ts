@@ -1,12 +1,11 @@
 import { PageModel } from '@deeplib/db';
 import { isNanoID } from '@stdlib/misc';
-import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
-import { authProcedure } from 'src/trpc/helpers';
+import { optionalAuthProcedure } from 'src/trpc/helpers';
 import { z } from 'zod';
 
-const baseProcedure = authProcedure.input(
+const baseProcedure = optionalAuthProcedure.input(
   z.object({
     groupId: z.string().refine(isNanoID),
 
@@ -20,12 +19,15 @@ export async function getPages({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
-  if (!(await ctx.userHasPermission(ctx.userId, input.groupId, 'viewGroup'))) {
-    throw new TRPCError({
-      message: 'Insufficient permissions.',
-      code: 'FORBIDDEN',
-    });
-  }
+  // Assert that user has sufficient permissions
+
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: input.groupId,
+    permission: 'viewGroupPages',
+  });
+
+  // Get pages
 
   let pagesQuery = PageModel.query().where('group_id', input.groupId);
 

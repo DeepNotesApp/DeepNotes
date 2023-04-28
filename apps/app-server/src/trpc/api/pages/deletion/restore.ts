@@ -33,18 +33,11 @@ export async function restore({
           return await ctx.dataAbstraction.transaction(async (dtrx) => {
             // Check permissions
 
-            if (
-              !(await ctx.userHasPermission(
-                ctx.userId,
-                groupId,
-                'editGroupPages',
-              ))
-            ) {
-              throw new TRPCError({
-                code: 'FORBIDDEN',
-                message: 'Insufficient permissions.',
-              });
-            }
+            await ctx.assertSufficientGroupPermissions({
+              userId: ctx.userId,
+              groupId: groupId,
+              permission: 'editGroupPages',
+            });
 
             // Check if page is deleted
 

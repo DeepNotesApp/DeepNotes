@@ -34,19 +34,11 @@ export async function create({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Check sufficient permissions
 
-        if (
-          input.groupCreation == null &&
-          !(await ctx.userHasPermission(
-            ctx.userId,
-            input.groupId,
-            'editGroupPages',
-          ))
-        ) {
-          throw new TRPCError({
-            code: 'FORBIDDEN',
-            message: 'Insufficient permissions.',
-          });
-        }
+        await ctx.assertSufficientGroupPermissions({
+          userId: ctx.userId,
+          groupId: input.groupId,
+          permission: 'editGroupPages',
+        });
 
         // Get some necessary user data
 

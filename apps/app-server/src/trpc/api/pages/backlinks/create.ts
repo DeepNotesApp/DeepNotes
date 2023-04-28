@@ -1,6 +1,5 @@
 import { hget } from '@deeplib/data';
 import { isNanoID } from '@stdlib/misc';
-import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -27,21 +26,17 @@ export async function create({
     hget('page', input.targetPageId, 'group-id'),
   ]);
 
-  if (
-    !(
-      (await ctx.userHasPermission(
-        ctx.userId,
-        sourceGroupId,
-        'editGroupPages',
-      )) &&
-      (await ctx.userHasPermission(ctx.userId, targetGroupId, 'editGroupPages'))
-    )
-  ) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Insufficient permissions.',
-    });
-  }
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: sourceGroupId,
+    permission: 'editGroupPages',
+  });
+
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: targetGroupId,
+    permission: 'editGroupPages',
+  });
 
   // Create page link
 

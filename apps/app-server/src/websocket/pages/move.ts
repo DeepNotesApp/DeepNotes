@@ -111,23 +111,17 @@ export async function moveStep1({
 
     // Check sufficient permissions
 
-    const [canEditSourceGroupSettings, canEditDestGroupPages] =
-      await Promise.all([
-        ctx.userHasPermission(
-          ctx.userId,
-          (ctx as Context).sourceGroupId,
-          'editGroupSettings',
-        ),
-        ctx.userHasPermission(ctx.userId, input.destGroupId, 'editGroupPages'),
-      ]);
+    await ctx.assertSufficientGroupPermissions({
+      userId: ctx.userId,
+      groupId: (ctx as Context).sourceGroupId,
+      permission: 'editGroupSettings',
+    });
 
-    if (
-      !canEditSourceGroupSettings ||
-      (input.groupCreation == null && !canEditDestGroupPages)
-    ) {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Insufficient permissions.',
+    if (input.groupCreation == null) {
+      await ctx.assertSufficientGroupPermissions({
+        userId: ctx.userId,
+        groupId: input.destGroupId,
+        permission: 'editGroupPages',
       });
     }
 

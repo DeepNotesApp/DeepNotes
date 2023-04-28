@@ -1,7 +1,6 @@
 import { insertPageSnapshot } from '@deeplib/data';
 import { isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
-import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
@@ -47,18 +46,11 @@ export async function save({
 
             // Check if user has sufficient permissions
 
-            if (
-              !(await ctx.userHasPermission(
-                ctx.userId,
-                groupId,
-                'editGroupPages',
-              ))
-            ) {
-              throw new TRPCError({
-                code: 'FORBIDDEN',
-                message: 'Insufficient permissions.',
-              });
-            }
+            await ctx.assertSufficientGroupPermissions({
+              userId: ctx.userId,
+              groupId: groupId,
+              permission: 'editGroupPages',
+            });
 
             // Save snapshot
 

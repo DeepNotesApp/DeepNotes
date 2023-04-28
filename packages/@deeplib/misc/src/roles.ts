@@ -11,10 +11,13 @@ export interface IGroupRole {
     editGroupSettings: boolean;
     editGroupPages: boolean;
 
-    viewGroup: boolean;
+    viewGroupMembers: boolean;
+    viewGroupPages: boolean;
   };
   description: string;
 }
+
+export type GroupRolePermission = keyof IGroupRole['permissions'];
 
 export type GroupRoleID = 'owner' | 'admin' | 'moderator' | 'member' | 'viewer';
 
@@ -32,7 +35,8 @@ export const roles = once((): IGroupRole[] => [
       editGroupSettings: true,
       editGroupPages: true,
 
-      viewGroup: true,
+      viewGroupMembers: true,
+      viewGroupPages: true,
     },
 
     description: 'Manages everyone in the group',
@@ -50,7 +54,8 @@ export const roles = once((): IGroupRole[] => [
       editGroupSettings: true,
       editGroupPages: true,
 
-      viewGroup: true,
+      viewGroupMembers: true,
+      viewGroupPages: true,
     },
 
     description: 'Autonomous role. Manages everyone, except the owner(s)',
@@ -68,7 +73,8 @@ export const roles = once((): IGroupRole[] => [
       editGroupSettings: false,
       editGroupPages: true,
 
-      viewGroup: true,
+      viewGroupMembers: true,
+      viewGroupPages: true,
     },
 
     description: 'Manages members and viewers of the group',
@@ -86,7 +92,8 @@ export const roles = once((): IGroupRole[] => [
       editGroupSettings: false,
       editGroupPages: true,
 
-      viewGroup: true,
+      viewGroupMembers: true,
+      viewGroupPages: true,
     },
 
     description: 'Can see and edit pages',
@@ -104,7 +111,8 @@ export const roles = once((): IGroupRole[] => [
       editGroupSettings: false,
       editGroupPages: false,
 
-      viewGroup: true,
+      viewGroupMembers: true,
+      viewGroupPages: true,
     },
 
     description: 'Can see pages, but not edit them',

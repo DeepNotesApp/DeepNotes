@@ -11,7 +11,7 @@ export const infos: DataField<PageSnapshotModel[]> = {
       dataAbstraction,
       userId,
       await dataAbstraction.hget('page', pageId, 'group-id'),
-      'viewGroup',
+      'viewGroupPages',
     ),
 
   get: ({ model }) =>

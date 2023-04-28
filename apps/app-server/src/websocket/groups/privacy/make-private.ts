@@ -66,18 +66,11 @@ export async function makePrivateStep1({
 
   // Check sufficient permissions
 
-  if (
-    !(await ctx.userHasPermission(
-      ctx.userId,
-      input.groupId,
-      'editGroupSettings',
-    ))
-  ) {
-    throw new TRPCError({
-      code: 'FORBIDDEN',
-      message: 'Insufficient permissions.',
-    });
-  }
+  await ctx.assertSufficientGroupPermissions({
+    userId: ctx.userId,
+    groupId: input.groupId,
+    permission: 'editGroupSettings',
+  });
 
   // Check if group is already private
 

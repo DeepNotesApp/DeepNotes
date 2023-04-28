@@ -43,18 +43,11 @@ export async function load({
 
           // Check if user has sufficient permissions
 
-          if (
-            !(await ctx.userHasPermission(
-              ctx.userId,
-              groupId,
-              'editGroupPages',
-            ))
-          ) {
-            throw new TRPCError({
-              code: 'UNAUTHORIZED',
-              message: 'Insufficient permissions.',
-            });
-          }
+          await ctx.assertSufficientGroupPermissions({
+            userId: ctx.userId,
+            groupId: groupId,
+            permission: 'editGroupPages',
+          });
 
           // Load page snapshot infos
 
