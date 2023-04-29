@@ -12,7 +12,6 @@ import {
   groupKeyRotationSchema,
   rotateGroupKeys,
 } from 'src/utils/group-key-rotation';
-import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -59,10 +58,7 @@ export async function makePrivateStep1({
 
   // Assert that user is subscribed
 
-  await assertUserSubscribed({
-    userId: ctx.userId,
-    dataAbstraction: ctx.dataAbstraction,
-  });
+  await ctx.assertUserSubscribed({ userId: ctx.userId });
 
   // Check sufficient permissions
 

@@ -11,7 +11,6 @@ import {
   encryptRecoveryCodes,
   hashRecoveryCode,
 } from 'src/utils/crypto';
-import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -33,7 +32,7 @@ export async function finish({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert correct password
 
-        await assertCorrectUserPassword({
+        await ctx.assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });

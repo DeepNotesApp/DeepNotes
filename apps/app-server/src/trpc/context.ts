@@ -1,12 +1,18 @@
-import { userHasPermission } from '@deeplib/data';
-import type { GroupRolePermission } from '@deeplib/misc';
 import type { inferAsyncReturnType } from '@trpc/server';
-import { TRPCError } from '@trpc/server';
 import type { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { dataAbstraction } from 'src/data/data-abstraction';
 import { getRedis } from 'src/data/redis';
 import { usingLocks } from 'src/data/redlock';
 import { stripe } from 'src/stripe';
+import {
+  assertCorrectGroupPassword,
+  assertSufficientGroupPermissions,
+} from 'src/utils/groups';
+import {
+  assertCorrectUserPassword,
+  assertNonDemoAccount,
+  assertUserSubscribed,
+} from 'src/utils/users';
 
 export function createContext({ req, res }: CreateFastifyContextOptions) {
   return {
@@ -18,25 +24,12 @@ export function createContext({ req, res }: CreateFastifyContextOptions) {
 
     usingLocks,
 
-    async assertSufficientGroupPermissions(input: {
-      userId: any;
-      groupId: any;
-      permission: GroupRolePermission;
-    }) {
-      if (
-        !(await userHasPermission(
-          dataAbstraction(),
-          input.userId,
-          input.groupId,
-          input.permission,
-        ))
-      ) {
-        throw new TRPCError({
-          code: 'FORBIDDEN',
-          message: 'Insufficient permissions.',
-        });
-      }
-    },
+    assertSufficientGroupPermissions,
+    assertCorrectGroupPassword,
+
+    assertCorrectUserPassword,
+    assertUserSubscribed,
+    assertNonDemoAccount,
 
     stripe,
   };

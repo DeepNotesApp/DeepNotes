@@ -24,10 +24,6 @@ import {
   derivePasswordValues,
 } from 'src/utils/crypto';
 import { invalidateAllSessions } from 'src/utils/sessions';
-import {
-  assertCorrectUserPassword,
-  assertNonDemoAccount,
-} from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -99,17 +95,14 @@ export async function rotateKeysStep1({
 
   // Assert correct old password
 
-  await assertCorrectUserPassword({
+  await ctx.assertCorrectUserPassword({
     userId: ctx.userId,
     loginHash: input.loginHash,
   });
 
   // Assert non-demo account
 
-  await assertNonDemoAccount({
-    userId: ctx.userId,
-    dataAbstraction: ctx.dataAbstraction,
-  });
+  await ctx.assertNonDemoAccount({ userId: ctx.userId });
 
   // Get session encryption key
 

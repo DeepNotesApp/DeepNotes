@@ -19,7 +19,6 @@ import { authProcedure } from 'src/trpc/helpers';
 import { bumpRecentItem } from 'src/utils';
 import { createGroup, groupCreationSchema } from 'src/utils/groups';
 import { pageKeyRotationSchema } from 'src/utils/pages';
-import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -104,10 +103,7 @@ export async function moveStep1({
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
     // Assert user is subscribed
 
-    await assertUserSubscribed({
-      userId: ctx.userId,
-      dataAbstraction: ctx.dataAbstraction,
-    });
+    await ctx.assertUserSubscribed({ userId: ctx.userId });
 
     // Check sufficient permissions
 

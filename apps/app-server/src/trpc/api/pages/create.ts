@@ -5,7 +5,6 @@ import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { createGroup, groupCreationSchema } from 'src/utils/groups';
-import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -51,10 +50,7 @@ export async function create({
         // Assert agent is subscribed
 
         if (input.groupId !== personalGroupId || input.groupCreation != null) {
-          await assertUserSubscribed({
-            userId: ctx.userId,
-            dataAbstraction: ctx.dataAbstraction,
-          });
+          await ctx.assertUserSubscribed({ userId: ctx.userId });
         }
 
         // Check if can create page

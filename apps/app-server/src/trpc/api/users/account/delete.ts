@@ -15,7 +15,6 @@ import { raw } from 'objection';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { clearCookies } from 'src/utils/cookies';
-import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -36,7 +35,7 @@ export async function delete_({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert correct password
 
-        await assertCorrectUserPassword({
+        await ctx.assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });

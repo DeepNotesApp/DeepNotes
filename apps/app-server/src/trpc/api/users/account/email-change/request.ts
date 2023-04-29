@@ -8,10 +8,6 @@ import { once } from 'lodash';
 import { sendMail } from 'src/mail';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import {
-  assertCorrectUserPassword,
-  assertNonDemoAccount,
-} from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -37,17 +33,14 @@ export async function request({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert correct password
 
-        await assertCorrectUserPassword({
+        await ctx.assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.oldLoginHash,
         });
 
         // Assert non-demo account
 
-        await assertNonDemoAccount({
-          userId: ctx.userId,
-          dataAbstraction: ctx.dataAbstraction,
-        });
+        await ctx.assertNonDemoAccount({ userId: ctx.userId });
 
         // Check email in use
 

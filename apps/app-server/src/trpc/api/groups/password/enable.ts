@@ -8,7 +8,6 @@ import {
   computePasswordHash,
   encryptGroupRehashedPasswordHash,
 } from 'src/utils/crypto';
-import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -33,10 +32,7 @@ export async function enable({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert agent is subscribed
 
-        await assertUserSubscribed({
-          userId: ctx.userId,
-          dataAbstraction: ctx.dataAbstraction,
-        });
+        await ctx.assertUserSubscribed({ userId: ctx.userId });
 
         // Check if user can edit group settings
 

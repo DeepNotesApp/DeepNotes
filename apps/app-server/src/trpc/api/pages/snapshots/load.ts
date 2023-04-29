@@ -5,7 +5,6 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -36,10 +35,7 @@ export async function load({
         async (signals) => {
           // Assert agent is subscribed
 
-          await assertUserSubscribed({
-            userId: ctx.userId,
-            dataAbstraction: ctx.dataAbstraction,
-          });
+          await ctx.assertUserSubscribed({ userId: ctx.userId });
 
           // Check if user has sufficient permissions
 

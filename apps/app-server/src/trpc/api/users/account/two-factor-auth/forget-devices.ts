@@ -4,7 +4,6 @@ import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -27,7 +26,7 @@ export async function forgetTrustedDevices({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert correct password
 
-        await assertCorrectUserPassword({
+        await ctx.assertCorrectUserPassword({
           userId: ctx.userId,
           loginHash: input.loginHash,
         });

@@ -2,7 +2,6 @@ import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { assertNonDemoAccount } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -24,10 +23,7 @@ export async function createPortalSession({
     async (signals) => {
       // Assert non-demo account
 
-      await assertNonDemoAccount({
-        userId: ctx.userId,
-        dataAbstraction: ctx.dataAbstraction,
-      });
+      await ctx.assertNonDemoAccount({ userId: ctx.userId });
 
       // Get customer ID
 

@@ -15,10 +15,6 @@ import {
   encryptUserRehashedLoginHash,
 } from 'src/utils/crypto';
 import { invalidateAllSessions } from 'src/utils/sessions';
-import {
-  assertCorrectUserPassword,
-  assertNonDemoAccount,
-} from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -65,17 +61,14 @@ export async function changePasswordStep1({
 }: InferProcedureOpts<typeof baseProcedureStep1>) {
   // Assert correct old password
 
-  await assertCorrectUserPassword({
+  await ctx.assertCorrectUserPassword({
     userId: ctx.userId,
     loginHash: input.oldLoginHash,
   });
 
   // Assert non-demo account
 
-  await assertNonDemoAccount({
-    userId: ctx.userId,
-    dataAbstraction: ctx.dataAbstraction,
-  });
+  await ctx.assertNonDemoAccount({ userId: ctx.userId });
 
   // Get user data
 

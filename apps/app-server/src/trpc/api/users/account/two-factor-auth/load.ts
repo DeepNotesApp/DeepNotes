@@ -7,7 +7,6 @@ import { authenticator } from 'otplib';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import { decryptUserAuthenticatorSecret } from 'src/utils/crypto';
-import { assertCorrectUserPassword } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -27,7 +26,7 @@ export async function load({
     async (signals) => {
       // Assert correct password
 
-      await assertCorrectUserPassword({
+      await ctx.assertCorrectUserPassword({
         userId: ctx.userId,
         loginHash: input.loginHash,
       });

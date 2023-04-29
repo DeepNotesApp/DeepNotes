@@ -4,7 +4,6 @@ import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -39,10 +38,7 @@ export async function save({
           return await ctx.dataAbstraction.transaction(async (dtrx) => {
             // Assert agent is subscribed
 
-            await assertUserSubscribed({
-              userId: ctx.userId,
-              dataAbstraction: ctx.dataAbstraction,
-            });
+            await ctx.assertUserSubscribed({ userId: ctx.userId });
 
             // Check if user has sufficient permissions
 

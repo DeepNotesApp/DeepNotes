@@ -1,4 +1,3 @@
-import type { dataHashes } from '@deeplib/data';
 import { encryptUserEmail, hashUserEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
 import { getPasswordHashValues } from '@stdlib/crypto';
@@ -7,7 +6,6 @@ import {
   createSymmetricKeyring,
   encodePasswordHash,
 } from '@stdlib/crypto';
-import type { DataAbstraction } from '@stdlib/data';
 import type { DataTransaction } from '@stdlib/data';
 import { isNanoID } from '@stdlib/misc';
 import { addHours } from '@stdlib/misc';
@@ -212,13 +210,8 @@ export async function assertCorrectUserPassword(input: {
   }
 }
 
-export async function assertUserSubscribed(input: {
-  userId: string;
-  dataAbstraction: DataAbstraction<typeof dataHashes>;
-}) {
-  if (
-    (await input.dataAbstraction.hget('user', input.userId, 'plan')) !== 'pro'
-  ) {
+export async function assertUserSubscribed(input: { userId: string }) {
+  if ((await dataAbstraction().hget('user', input.userId, 'plan')) !== 'pro') {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: 'This action requires a Pro plan subscription.',
@@ -226,14 +219,11 @@ export async function assertUserSubscribed(input: {
   }
 }
 
-export async function assertNonDemoAccount(input: {
-  userId: string;
-  dataAbstraction: DataAbstraction<typeof dataHashes>;
-}) {
-  if (await input.dataAbstraction.hget('user', input.userId, 'demo')) {
+export async function assertNonDemoAccount(input: { userId: string }) {
+  if (await dataAbstraction().hget('user', input.userId, 'demo')) {
     throw new TRPCError({
       code: 'FORBIDDEN',
-      message: 'This action is unavailable for demo account.',
+      message: 'This action is unavailable for demo accounts.',
     });
   }
 }

@@ -8,8 +8,6 @@ import {
   computePasswordHash,
   encryptGroupRehashedPasswordHash,
 } from 'src/utils/crypto';
-import { assertCorrectGroupPassword } from 'src/utils/groups';
-import { assertUserSubscribed } from 'src/utils/users';
 import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
@@ -35,14 +33,11 @@ export async function change({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Assert agent is subscribed
 
-        await assertUserSubscribed({
-          userId: ctx.userId,
-          dataAbstraction: ctx.dataAbstraction,
-        });
+        await ctx.assertUserSubscribed({ userId: ctx.userId });
 
         // Check if given group password is correct
 
-        await assertCorrectGroupPassword({
+        await ctx.assertCorrectGroupPassword({
           groupId: input.groupId,
           groupPasswordHash: input.groupCurrentPasswordHash,
         });

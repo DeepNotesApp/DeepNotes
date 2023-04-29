@@ -8,7 +8,6 @@ import { getGroupMembers, GroupRoleEnum } from 'src/utils/groups';
 import type { NotificationsResponse } from 'src/utils/notifications';
 import { notifyUsers } from 'src/utils/notifications';
 import { notificationsRequestSchema } from 'src/utils/notifications';
-import { assertUserSubscribed } from 'src/utils/users';
 import { createWebsocketEndpoint } from 'src/utils/websocket-endpoints';
 import { z } from 'zod';
 
@@ -62,10 +61,7 @@ export async function acceptStep1({
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
     // Assert that user is subscribed
 
-    await assertUserSubscribed({
-      userId: ctx.userId,
-      dataAbstraction: ctx.dataAbstraction,
-    });
+    await ctx.assertUserSubscribed({ userId: ctx.userId });
 
     // Check sufficient permissions
 

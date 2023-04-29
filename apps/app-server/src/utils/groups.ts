@@ -1,5 +1,7 @@
+import { userHasPermission } from '@deeplib/data';
 import type { UserModel } from '@deeplib/db';
 import { GroupMemberModel, GroupModel } from '@deeplib/db';
+import type { GroupRolePermission } from '@deeplib/misc';
 import type { DataTransaction } from '@stdlib/data';
 import { TRPCError } from '@trpc/server';
 import sodium from 'libsodium-wrappers';
@@ -168,4 +170,24 @@ export async function getGroupMembers(
     userId: groupMember.id,
     publicKeyring: groupMember.public_keyring,
   }));
+}
+
+export async function assertSufficientGroupPermissions(input: {
+  userId: any;
+  groupId: any;
+  permission: GroupRolePermission;
+}) {
+  if (
+    !(await userHasPermission(
+      dataAbstraction(),
+      input.userId,
+      input.groupId,
+      input.permission,
+    ))
+  ) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Insufficient permissions.',
+    });
+  }
 }
