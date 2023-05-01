@@ -23,7 +23,7 @@ export const groupNames = once(() =>
       }
 
       if (groupId === internals.personalGroupId) {
-        return { status: 'success', text: 'Default group' };
+        return { status: 'success', text: 'Personal group' };
       }
 
       const [accessKeyring, groupEncryptedName] = await Promise.all([
