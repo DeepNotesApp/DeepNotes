@@ -4,16 +4,7 @@
       flat
       style="width: 100%; height: 50px; border-radius: 0"
       no-caps
-      @click="
-        () => {
-          uiStore().currentPathExpanded = !uiStore().currentPathExpanded;
-
-          internals.localStorage.setItem(
-            'currentPathExpanded',
-            uiStore().currentPathExpanded.toString(),
-          );
-        }
-      "
+      @click="negateProp(uiStore(), 'currentPathExpanded')"
     >
       <div style="width: 100%; display: flex; align-items: center">
         <q-avatar style="margin-left: -8px">
@@ -69,3 +60,7 @@
     />
   </q-list>
 </template>
+
+<script setup lang="ts">
+import { negateProp } from '@stdlib/misc';
+</script>

@@ -13,32 +13,33 @@
     "
   >
     <q-item-section avatar>
-      <div
+      <q-icon
+        name="mdi-note-text"
         class="page-icon"
         :class="{
           encrypted: pageTitleInfo.status === 'encrypted',
           empty: isEmpty,
         }"
-      >
-        {{ pageCharacter }}
-      </div>
+      />
     </q-item-section>
 
     <q-item-section>
       <q-item-label
         caption
-        style="color: rgba(255, 255, 255, 0.6)"
+        style="color: #60b2ff"
       >
         {{ groupNameInfo.text }}
       </q-item-label>
 
-      <q-item-label>
+      <q-item-label
+        class="page-title"
+        :class="{
+          encrypted: pageTitleInfo.status === 'encrypted',
+          empty: isEmpty,
+        }"
+      >
         {{ pageTitleInfo.text }}
       </q-item-label>
-    </q-item-section>
-
-    <q-item-section side>
-      <slot name="side"></slot>
     </q-item-section>
 
     <q-tooltip
@@ -89,48 +90,13 @@ const isEmpty = computed(
     (pageTitleInfo.value.status !== 'success' &&
       groupNameInfo.value.status !== 'success'),
 );
-
-const pageCharacter = computed(() => {
-  if (pageTitleInfo.value.status === 'success') {
-    return [...pageTitleInfo.value.text.trimStart()][0];
-  }
-
-  if (groupNameInfo.value.status === 'success') {
-    return [...groupNameInfo.value.text.trimStart()][0];
-  }
-
-  return '?';
-});
 </script>
 
 <style scoped>
-.page-icon {
-  margin-left: -5px;
-
-  width: 34px;
-  height: 34px;
-
-  border-radius: 8px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background-color: rgba(255, 255, 255, 0.2);
-
-  color: rgba(255, 255, 255, 0.95);
-
-  font-weight: bold;
-  font-size: 18px;
-}
-.page-icon.encrypted {
-  background-color: rgba(127, 127, 255, 0.2);
-
+.encrypted {
   color: rgba(150, 150, 255, 1);
 }
-.page-icon.empty {
-  background-color: rgba(255, 127, 127, 0.2);
-
+.empty {
   color: rgba(255, 150, 150, 1);
 }
 </style>

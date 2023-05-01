@@ -1,12 +1,23 @@
 import { negateProp } from '@stdlib/misc';
 import { defineStore } from 'pinia';
 
+function watchProp<State>(state: State, prop: Extract<keyof State, string>) {
+  watch(
+    () => state[prop],
+    (value) => {
+      internals.localStorage.setItem(prop, String(value));
+    },
+  );
+}
+
 export const useUIStore = defineStore('ui', () => {
   const state = reactive({
     loggedIn: false,
 
     leftSidebarExpanded: false,
     rightSidebarExpanded: false,
+
+    leftSidebarWidth: 260,
 
     currentPathExpanded: true,
     recentPagesExpanded: true,
@@ -16,6 +27,14 @@ export const useUIStore = defineStore('ui', () => {
     width: 0,
     height: 0,
   });
+
+  watchProp(state, 'leftSidebarExpanded');
+  watchProp(state, 'rightSidebarExpanded');
+
+  watchProp(state, 'leftSidebarWidth');
+
+  watchProp(state, 'currentPathExpanded');
+  watchProp(state, 'recentPagesExpanded');
 
   return {
     ...toRefs(state),

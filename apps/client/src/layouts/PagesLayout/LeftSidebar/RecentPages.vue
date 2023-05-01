@@ -4,16 +4,7 @@
       flat
       style="width: 100%; height: 50px; border-radius: 0"
       no-caps
-      @click="
-        () => {
-          uiStore().recentPagesExpanded = !uiStore().recentPagesExpanded;
-
-          internals.localStorage.setItem(
-            'recentPagesExpanded',
-            uiStore().recentPagesExpanded.toString(),
-          );
-        }
-      "
+      @click="negateProp(uiStore(), 'recentPagesExpanded')"
     >
       <div style="width: 100%; display: flex; align-items: center">
         <q-avatar style="margin-left: -8px">
@@ -78,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { negateProp } from '@stdlib/misc';
 import { pull } from 'lodash';
 import { handleError } from 'src/code/utils/misc';
 

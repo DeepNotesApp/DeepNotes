@@ -79,12 +79,6 @@ body {
 <style lang="scss" scoped>
 .pages-layout :deep() {
   .q-drawer {
-    overflow-x: hidden;
-
-    > .q-drawer__content {
-      overflow-x: hidden;
-    }
-
     &.q-drawer--mini {
       .q-item {
         justify-content: normal !important;
