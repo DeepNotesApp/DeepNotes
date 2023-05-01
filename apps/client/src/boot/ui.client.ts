@@ -3,13 +3,17 @@ import { boot } from 'quasar/wrappers';
 export default boot(({ store }) => {
   if (internals.localStorage.getItem('leftSidebarExpanded') != null) {
     uiStore(store).leftSidebarExpanded =
-      internals.localStorage.getItem('leftSidebarExpanded') !== 'false';
+      internals.localStorage.getItem('leftSidebarExpanded') === 'true';
   } else {
     uiStore(store).leftSidebarExpanded = window.innerWidth > 1000;
   }
 
-  uiStore(store).rightSidebarExpanded =
-    internals.localStorage.getItem('rightSidebarExpanded') === 'true';
+  if (internals.localStorage.getItem('rightSidebarExpanded') != null) {
+    uiStore(store).rightSidebarExpanded =
+      internals.localStorage.getItem('rightSidebarExpanded') === 'true';
+  } else {
+    uiStore(store).rightSidebarExpanded = window.innerWidth > 1000;
+  }
 
   if (internals.localStorage.getItem('leftSidebarWidth') != null) {
     uiStore(store).leftSidebarWidth = parseInt(
