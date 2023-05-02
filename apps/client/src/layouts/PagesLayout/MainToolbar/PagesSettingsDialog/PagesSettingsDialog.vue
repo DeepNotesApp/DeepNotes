@@ -104,7 +104,7 @@
           <InvitationsTab v-if="tab === 'Join invitations'" />
           <RequestsTab v-if="tab === 'Join requests'" />
 
-          <LoadingOverlay v-if="!mounted || realtimeCtx.loading" />
+          <LoadingOverlay v-if="!mounted" />
         </div>
       </q-card-section>
     </template>

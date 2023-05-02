@@ -197,7 +197,7 @@
           <InvitationsTab v-if="tab === 'Join invitations'" />
           <RequestsTab v-if="tab === 'Join requests'" />
 
-          <LoadingOverlay v-if="loading || realtimeCtx.loading" />
+          <LoadingOverlay v-if="loading" />
         </div>
       </q-card-section>
     </template>
