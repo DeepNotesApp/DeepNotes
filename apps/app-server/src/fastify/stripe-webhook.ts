@@ -31,9 +31,7 @@ export async function webhook({
   const event = ctx.stripe.webhooks.constructEvent(
     ctx.req.rawBody!,
     ctx.req.headers['stripe-signature']!,
-    process.env.DEV || process.env.STAGING
-      ? process.env.STRIPE_TEST_WEBHOOK_SECRET
-      : process.env.STRIPE_LIVE_WEBHOOK_SECRET,
+    process.env.STRIPE_WEBHOOK_SECRET,
   );
 
   switch (event.type) {
