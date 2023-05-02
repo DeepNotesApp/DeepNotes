@@ -48,23 +48,28 @@
     "
     :style="{ flex: uiStore().recentPagesExpanded ? '1' : '0' }"
   >
-    <SidebarPage
+    <div
       v-for="pageId in internals.pages.react.recentPageIds"
       :key="pageId"
-      group="recent-pages"
-      :page-id="pageId"
-      prefer="absolute"
+      class="recent-page"
     >
-      <template #side>
-        <DeepBtn
-          icon="mdi-close"
-          round
-          flat
-          style="min-width: 32px; min-height: 32px; width: 32px; height: 32px"
-          @click.stop="removeRecentPage(pageId)"
-        />
-      </template>
-    </SidebarPage>
+      <PageItem
+        icon
+        :page-id="pageId"
+        :active="pageId === internals.pages.react.pageId"
+        prefer="absolute"
+        class="recent-pages"
+      />
+
+      <DeepBtn
+        icon="mdi-close"
+        size="14px"
+        round
+        flat
+        class="remove-btn"
+        @click.stop="removeRecentPage(pageId)"
+      />
+    </div>
   </q-list>
 </template>
 
@@ -83,3 +88,30 @@ async function removeRecentPage(pageId: string) {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.recent-page {
+  position: relative;
+
+  > .remove-btn {
+    position: absolute;
+
+    top: 50%;
+    right: -6px;
+
+    transform: translate(-50%, -50%);
+
+    min-width: 30px;
+    min-height: 30px;
+    width: 30px;
+    height: 30px;
+
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+}
+
+.recent-page:hover > .remove-btn {
+  opacity: 1;
+}
+</style>

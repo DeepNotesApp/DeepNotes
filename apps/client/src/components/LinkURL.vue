@@ -7,31 +7,16 @@
     @update:model-value="$emit('update:modelValue', $event)"
   >
     <template #item="scope">
-      <q-item-section>
-        <q-item-label caption>
-          {{
-            groupNames()(
-              realtimeCtx.hget(
-                'page',
-                splitStr(scope.opt.value, '/').at(-1)!,
-                'group-id',
-              ),
-            ).get().text
-          }}
-        </q-item-label>
-
-        <q-item-label>
-          {{ scope.opt.label }}
-        </q-item-label>
-      </q-item-section>
+      <PageItemContent
+        :icon="false"
+        :page-id="scope.opt"
+        prefer="absolute"
+      />
     </template>
   </Combobox>
 </template>
 
 <script setup lang="ts">
-import { splitStr } from '@stdlib/misc';
-import { groupNames } from 'src/code/pages/computed/group-names';
-import { getPageTitle } from 'src/code/pages/utils';
 import { useRealtimeContext } from 'src/code/realtime/context';
 
 import type { ComboboxProps } from './Combobox.vue';
@@ -62,11 +47,14 @@ const linkOptions = computed(() =>
         return;
       }
 
-      return {
-        label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-        value: `/pages/${pageId}`,
-      };
+      return pageId;
     })
     .filter((page) => page != null),
 );
 </script>
+
+<style scoped>
+.group-name {
+  color: #60b2ff;
+}
+</style>

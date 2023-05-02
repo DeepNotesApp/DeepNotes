@@ -51,12 +51,14 @@
     "
     :style="{ flex: uiStore().currentPathExpanded ? '1' : '0' }"
   >
-    <SidebarPage
+    <PageItem
       v-for="pageId in internals.pages.react.pathPageIds"
       :key="pageId"
-      group="current-path"
+      icon
       :page-id="pageId"
+      :active="pageId === internals.pages.react.pageId"
       prefer="relative"
+      class="current-path"
     />
   </q-list>
 </template>

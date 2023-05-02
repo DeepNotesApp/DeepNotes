@@ -58,7 +58,7 @@
         </q-item>
 
         <DeepBtn
-          class="snapshot-delete-btn"
+          class="delete-btn"
           size="12px"
           icon="mdi-close"
           round
@@ -180,7 +180,7 @@ async function deleteSnapshot(snapshotId: string) {
 .snapshot {
   position: relative;
 
-  > .snapshot-delete-btn {
+  > .delete-btn {
     position: absolute;
 
     top: 4px;
@@ -196,7 +196,7 @@ async function deleteSnapshot(snapshotId: string) {
   }
 }
 
-.snapshot:hover > .snapshot-delete-btn {
+.snapshot:hover > .delete-btn {
   opacity: 1;
 }
 </style>

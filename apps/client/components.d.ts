@@ -20,6 +20,8 @@ declare module '@vue/runtime-core' {
     LinkURL: typeof import('./src/components/LinkURL.vue')['default']
     LoadingOverlay: typeof import('./src/components/LoadingOverlay.vue')['default']
     MiniSidebarBtn: typeof import('./src/components/MiniSidebarBtn.vue')['default']
+    PageItem: typeof import('./src/components/PageItem.vue')['default']
+    PageItemContent: typeof import('./src/components/PageItemContent.vue')['default']
     PasswordDialog: typeof import('./src/components/PasswordDialog.vue')['default']
     PasswordField: typeof import('./src/components/PasswordField.vue')['default']
     QMenuHover: typeof import('./src/components/QMenuHover.vue')['default']
