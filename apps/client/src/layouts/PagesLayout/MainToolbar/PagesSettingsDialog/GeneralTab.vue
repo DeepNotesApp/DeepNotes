@@ -1,7 +1,7 @@
 <template>
   <div style="display: flex; flex-direction: column">
     <div>
-      Display name
+      Default user alias
 
       <q-icon
         name="mdi-information"
