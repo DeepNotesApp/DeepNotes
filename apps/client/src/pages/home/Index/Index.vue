@@ -153,6 +153,19 @@
 
       <PricingSection />
 
+      <template v-if="!authStore().loggedIn">
+        <Gap style="height: 150px" />
+
+        <div style="text-align: center">
+          <DeepBtn
+            label="Get started for free"
+            color="primary"
+            style="padding: 14px 25px; font-size: 15px"
+            :to="{ name: 'register' }"
+          />
+        </div>
+      </template>
+
       <Gap style="height: 180px" />
     </ResponsiveContainer>
 
