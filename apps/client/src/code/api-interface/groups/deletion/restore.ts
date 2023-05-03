@@ -1,3 +1,5 @@
-export async function restoreGroup(groupId: string) {
-  await api().post(`/api/groups/${groupId}/deletion/restore`);
+export async function restoreGroup(input: { groupId: string }) {
+  await trpcClient.groups.deletion.restore.mutate({
+    groupId: input.groupId,
+  });
 }

@@ -1,15 +1,14 @@
 <template>
   <div
-    v-if="
-      !page.react.readOnly &&
-      !page.arrowCreation.react.active &&
-      note.react.active &&
-      !note.react.dragging
-    "
+    v-if="!page.react.readOnly && note.react.active && !note.react.dragging"
     class="note-arrow-handles"
+    :style="{
+      // Arrow creation pointer events only work on Firefox mobile if the handles exist.
+      // So we have to use visibility. We can't use v-if or display: none to hide them.
+      visibility: page.arrowCreation.react.active ? 'hidden' : undefined,
+    }"
   >
     <NoteArrowHandle
-      :note="note"
       style="top: 50%"
       :style="{
         left: `${-20 * page.camera.react.handleScale}px`,
@@ -18,7 +17,6 @@
     />
 
     <NoteArrowHandle
-      :note="note"
       style="top: 50%"
       :style="{
         right: `${-20 * page.camera.react.handleScale}px`,
@@ -27,8 +25,6 @@
     />
 
     <NoteArrowHandle
-      :note="note"
-      style="top: -20px"
       :style="{
         top: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, -50%) rotateZ(0deg) scale(${page.camera.react.handleScale})`,
@@ -36,8 +32,6 @@
     />
 
     <NoteArrowHandle
-      :note="note"
-      style="bottom: -20px"
       :style="{
         bottom: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, 50%) rotateZ(180deg) scale(${page.camera.react.handleScale})`,

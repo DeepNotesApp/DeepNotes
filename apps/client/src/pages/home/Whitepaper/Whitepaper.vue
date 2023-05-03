@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
-import { multiModePath } from 'src/code/utils';
+import { multiModePath } from 'src/code/utils/misc';
 
 import WhitepaperItems from './WhitepaperItems.vue';
 

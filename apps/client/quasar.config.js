@@ -54,11 +54,11 @@ module.exports = configure(function (ctx) {
       { path: 'helpers.universal' },
       { path: 'sodium.universal' },
       { path: 'i18n.universal' },
-      { path: 'axios.universal' },
       { path: 'vue.universal' },
       { path: 'disable-cache.universal' },
 
       { path: 'array-at-polyfill.client', server: false },
+      { path: 'logger.client', server: false },
       { path: 'cross-tab-session-storage.client', server: false },
       { path: 'auth.client', server: false },
       { path: 'ui.client', server: false },
@@ -139,7 +139,9 @@ module.exports = configure(function (ctx) {
             'vue',
             'vue-router',
             {
-              'src/boot/axios.universal': ['api'],
+              'src/boot/logger.client': ['mainLogger'],
+
+              'src/code/trpc': ['trpcClient'],
 
               'src/code/internals': ['internals'],
 
@@ -150,7 +152,6 @@ module.exports = configure(function (ctx) {
                 'pagesStore',
               ],
               'src/code/helpers': ['router', 'route', '$quasar'],
-              'src/code/logger': ['mainLogger'],
 
               'src/components/CustomDialog.vue': [['default', 'CustomDialog']],
 
@@ -299,7 +300,7 @@ module.exports = configure(function (ctx) {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'deepnotes-client',
+        appId: '@deepnotes/client',
       },
     },
 

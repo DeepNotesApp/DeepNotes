@@ -125,7 +125,7 @@ import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import ChangeRoleDialog from './ChangeRoleDialog.vue';
@@ -221,7 +221,7 @@ function select(id: string, event: MouseEvent) {
 
 async function removeSelectedUsers() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Remove users',
       message: `Are you sure you want to remove ${
         finalSelectedUserIds.value.length
@@ -235,13 +235,23 @@ async function removeSelectedUsers() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const userId of finalSelectedUserIds.value) {
-      await removeGroupUser(groupId, {
+    for (const userId of finalSelectedUserIds.value.filter(
+      (userId) => userId !== authStore().userId,
+    )) {
+      await removeGroupUser({
+        groupId,
         patientId: userId,
       });
     }
 
-    await rotateGroupKeys(groupId);
+    await rotateGroupKeys({ groupId });
+
+    if (finalSelectedUserIds.value.includes(authStore().userId)) {
+      await removeGroupUser({
+        groupId,
+        patientId: authStore().userId,
+      });
+    }
 
     baseSelectedUserIds.value.clear();
   } catch (error: any) {

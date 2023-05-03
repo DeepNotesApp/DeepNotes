@@ -1,29 +1,12 @@
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
+import { bytesToBase64 } from '@stdlib/base64';
 import type { SymmetricKey } from '@stdlib/crypto';
 import { createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring, wrapSymmetricKey } from '@stdlib/crypto';
 
-import { multiModePath } from '../utils';
+import { multiModePath } from '../utils/misc';
 import { storeClientTokenExpirations } from './tokens';
 
-export async function login({
-  demo,
-
-  rememberSession,
-
-  masterKey,
-
-  userId,
-
-  publicKeyring,
-  encryptedPrivateKeyring,
-  encryptedSymmetricKeyring,
-
-  sessionId,
-  sessionKey,
-
-  personalGroupId,
-}: {
+export async function login(input: {
   demo?: boolean;
 
   rememberSession: boolean;
@@ -32,68 +15,71 @@ export async function login({
 
   userId: string;
 
-  publicKeyring: string;
-  encryptedPrivateKeyring: string;
-  encryptedSymmetricKeyring: string;
+  publicKeyring: Uint8Array;
+  encryptedPrivateKeyring: Uint8Array;
+  encryptedSymmetricKeyring: Uint8Array;
 
   sessionId: string;
-  sessionKey: string;
+  sessionKey: Uint8Array;
 
   personalGroupId: string;
 }) {
-  if (demo) {
+  if (input.demo) {
     internals.localStorage.setItem('demo', 'true');
   } else {
     internals.localStorage.removeItem('demo');
   }
 
-  if (rememberSession) {
+  if (input.rememberSession) {
     internals.storage = internals.localStorage;
   } else {
     internals.storage = internals.sessionStorage;
   }
 
-  internals.storage.setItem('userId', userId);
-  internals.storage.setItem('publicKeyring', publicKeyring);
-  internals.storage.setItem('sessionId', sessionId);
-  internals.storage.setItem('personalGroupId', personalGroupId);
+  internals.storage.setItem('userId', input.userId);
+  internals.storage.setItem(
+    'publicKeyring',
+    bytesToBase64(input.publicKeyring),
+  );
+  internals.storage.setItem('sessionId', input.sessionId);
+  internals.storage.setItem('personalGroupId', input.personalGroupId);
 
-  const wrappedSessionKey = wrapSymmetricKey(base64ToBytes(sessionKey));
+  const wrappedSessionKey = wrapSymmetricKey(input.sessionKey);
 
   internals.storage.setItem(
     'encryptedPrivateKeyring',
     bytesToBase64(
-      createPrivateKeyring(base64ToBytes(encryptedPrivateKeyring))
-        .unwrapSymmetric(masterKey, {
+      createPrivateKeyring(input.encryptedPrivateKeyring)
+        .unwrapSymmetric(input.masterKey, {
           associatedData: {
             context: 'UserPrivateKeyring',
-            userId,
+            userId: input.userId,
           },
         })
         .wrapSymmetric(wrappedSessionKey, {
           associatedData: {
             context: 'SessionUserPrivateKeyring',
-            userId,
+            userId: input.userId,
           },
-        }).fullValue,
+        }).wrappedValue,
     ),
   );
   internals.storage.setItem(
     'encryptedSymmetricKeyring',
     bytesToBase64(
-      createSymmetricKeyring(base64ToBytes(encryptedSymmetricKeyring))
-        .unwrapSymmetric(masterKey, {
+      createSymmetricKeyring(input.encryptedSymmetricKeyring)
+        .unwrapSymmetric(input.masterKey, {
           associatedData: {
             context: 'UserSymmetricKeyring',
-            userId,
+            userId: input.userId,
           },
         })
         .wrapSymmetric(wrappedSessionKey, {
           associatedData: {
             context: 'SessionUserSymmetricKeyring',
-            userId,
+            userId: input.userId,
           },
-        }).fullValue,
+        }).wrappedValue,
     ),
   );
 

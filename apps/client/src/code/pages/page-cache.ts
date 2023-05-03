@@ -12,8 +12,8 @@ export class PageCache {
 
   readonly react: UnwrapNestedRefs<IPageCacheReact>;
 
-  constructor({ app }: { app: Pages }) {
-    this.app = app;
+  constructor(input: { app: Pages }) {
+    this.app = input.app;
 
     this.react = reactive({
       cache: shallowReactive([]),

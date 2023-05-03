@@ -70,6 +70,14 @@
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.setTextAlign('justify'))"
   />
+  <ToolbarBtn
+    :tooltip="`Highlight\n(${getCtrlKeyName()} + Shift + H)`"
+    icon="mdi-marker"
+    icon-size="20px"
+    style="padding-top: 1px"
+    :disable="page.react.readOnly || !page.activeElem.react.exists"
+    @click="page.selection.format((chain) => chain.toggleHighlight())"
+  />
 
   <q-separator
     vertical
@@ -102,7 +110,7 @@
     icon="mdi-link-off"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
-    @click="page.selection.unsetMark('link')"
+    @click="page.selection.format((chain) => chain.unsetMark('link'))"
   />
   <ToolbarBtn
     :tooltip="`Code\n(${getCtrlKeyName()} + E)`"
@@ -122,33 +130,38 @@
     icon="mdi-format-header-1"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
-    @click="page.selection.format((chain) => chain.setHeading({ level: 1 }))"
+    @click="page.selection.toggleNode('heading', { level: 1 })"
   />
   <ToolbarBtn
     :tooltip="`Heading 2\n(${getCtrlKeyName()} + Alt + 2)`"
     icon="mdi-format-header-2"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
-    @click="page.selection.format((chain) => chain.setHeading({ level: 2 }))"
+    @click="page.selection.toggleNode('heading', { level: 2 })"
   />
   <ToolbarBtn
     :tooltip="`Heading 3\n(${getCtrlKeyName()} + Alt + 3)`"
     icon="mdi-format-header-3"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
-    @click="page.selection.format((chain) => chain.setHeading({ level: 3 }))"
+    @click="page.selection.toggleNode('heading', { level: 3 })"
   />
   <ToolbarBtn
     tooltip="Remove heading"
     icon="mdi-format-header-pound"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
-    @click="page.selection.format((chain) => chain.clearNodes())"
+    @click="
+      page.selection.format((chain, editor) =>
+        unsetNode(editor, chain, 'heading'),
+      )
+    "
   />
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils';
+import { unsetNode } from 'src/code/tiptap/utils';
+import { getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertLinkDialog from './InsertLinkDialog.vue';
 

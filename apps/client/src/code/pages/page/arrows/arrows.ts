@@ -18,10 +18,10 @@ export class PageArrows {
     collab: computed(() => this.page.collab.store.arrows),
   });
 
-  constructor({ factories, page }: { factories: Factories; page: Page }) {
-    this.factories = factories;
+  constructor(input: { factories: Factories; page: Page }) {
+    this.factories = input.factories;
 
-    this.page = page;
+    this.page = input.page;
   }
 
   fromId(arrowId: string | null): PageArrow | null {

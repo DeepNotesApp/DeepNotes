@@ -60,9 +60,9 @@ export class PagePresence {
     }),
   });
 
-  constructor({ collab }: { collab: PageCollab }) {
-    this.page = collab.page;
-    this.collab = collab;
+  constructor(input: { collab: PageCollab }) {
+    this.page = input.collab.page;
+    this.collab = input.collab;
 
     this.awareness = new awarenessProtocol.Awareness(this.collab.doc);
     (this.awareness as any).localStateBackup = null;
@@ -113,16 +113,19 @@ export class PagePresence {
           },
         });
       } else {
+        const groupMemberName = groupMemberNames()(
+          `${this.page.react.groupId}:${authStore().userId}`,
+        ).get();
+
         this.mergeLocalState({
           user: {
             id: authStore().userId,
 
-            name: groupMemberNames()(
-              `${this.page.react.groupId}:${authStore().userId}`,
-            ).get().text,
+            name:
+              groupMemberName.status === 'success' ? groupMemberName.text : '?',
 
             color: Color(
-              `hsl(${hashFNV1a(authStore().userId) % 360}, 100%, 45%)`,
+              `hsl(${hashFNV1a(authStore().userId) % 360}, 100%, 35%)`,
             ).hex(),
           },
         });

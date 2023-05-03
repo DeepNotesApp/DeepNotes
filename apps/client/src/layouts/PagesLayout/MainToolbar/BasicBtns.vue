@@ -25,7 +25,7 @@
   />
   <ToolbarBtn
     :tooltip="`Take screenshot`"
-    icon="mdi-camera"
+    icon="mdi-camera-outline"
     @click="takeScreenshot()"
   />
 
@@ -59,7 +59,7 @@
     @click="page.selection.selectAll()"
   />
   <ToolbarBtn
-    :tooltip="`Delete\n(Delete)`"
+    :tooltip="`Delete\n(Del)`"
     icon="mdi-delete-outline"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -71,7 +71,7 @@
 import download from 'downloadjs';
 import html2canvas from 'html2canvas';
 import type { IRegionElemsOutput } from 'src/code/pages/page/regions/region';
-import { getCtrlKeyName } from 'src/code/utils';
+import { getCtrlKeyName } from 'src/code/utils/misc';
 
 defineProps<{
   popup?: boolean;

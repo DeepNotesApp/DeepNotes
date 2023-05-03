@@ -50,9 +50,11 @@
 
     <q-separator />
 
-    <VerticalColorPalette
+    <ColorPalette
       type="arrows"
-      style="margin: 6px; border-radius: 4px; width: 44px; overflow: hidden"
+      orientation="vertical"
+      :split="2"
+      style="margin: 6px; width: 44px"
       :disable="page.react.readOnly"
       @select="
         changeProp($event, (arrow, value) => {
@@ -228,20 +230,20 @@
     <q-separator />
 
     <div style="padding: 20px">
-      <q-color
-        :disable="page.react.readOnly"
-        :model-value="colorNameToColorHex('ui', arrow.react.collab.color)"
-        @update:model-value="
-          changeProp(colorHexToColorName('ui', $event), (arrow, value) => {
-            arrow.react.collab.color = value;
-          })
-        "
-        default-view="palette"
-        no-header
-        no-header-tabs
-        no-footer
-        :palette="Object.values(colorMap().ui)"
-      />
+      <div style="display: flex; justify-content: center">
+        <ColorPalette
+          type="arrows"
+          orientation="horizontal"
+          :split="2"
+          :disable="page.react.readOnly"
+          style="width: 160px"
+          @select="
+            changeProp($event, (arrow, value) => {
+              arrow.react.collab.color = value;
+            })
+          "
+        />
+      </div>
     </div>
 
     <q-separator />
@@ -260,18 +262,12 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { pack } from 'msgpackr';
-import {
-  colorHexToColorName,
-  colorMap,
-  colorNameToColorHex,
-} from 'src/code/pages/colors';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import type { ISerialArrowInput } from 'src/code/pages/serialization';
 import { ISerialArrow } from 'src/code/pages/serialization';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import { yXmlFragmentToProsemirrorJSON } from 'y-prosemirror';
 
@@ -300,17 +296,15 @@ async function setAsDefault() {
 
     internals.pages.defaultArrow = serialArrow;
 
-    await api().post('/api/users/set-encrypted-default-arrow', {
-      encryptedDefaultArrow: bytesToBase64(
-        internals.symmetricKeyring.encrypt(pack(serialArrow), {
-          padding: true,
-          associatedData: {
-            context: 'UserDefaultArrow',
-            userId: authStore().userId,
-          },
-        }),
-      ),
-    });
+    await trpcClient.users.pages.setEncryptedDefaultArrow.mutate(
+      internals.symmetricKeyring.encrypt(pack(serialArrow), {
+        padding: true,
+        associatedData: {
+          context: 'UserDefaultArrow',
+          userId: authStore().userId,
+        },
+      }),
+    );
 
     $quasar().notify({
       message: 'Default arrow updated.',

@@ -113,11 +113,10 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -167,14 +166,11 @@ function select(id: string, event: MouseEvent) {
 
 async function onLoad(index: number, done: (stop?: boolean) => void) {
   try {
-    const response = (
-      await api().post<{
-        pageIds: string[];
-        hasMore: boolean;
-      }>(`/api/groups/${groupId}/load-pages`, {
-        lastPageId: basePageIds.value.at(-1),
-      })
-    ).data;
+    const response = await trpcClient.groups.getPages.query({
+      groupId,
+
+      lastPageId: basePageIds.value.at(-1),
+    });
 
     basePageIds.value.push(...response.pageIds);
     hasMorePages.value = response.hasMore;
@@ -195,7 +191,7 @@ async function goToPage(pageId: string) {
 
 async function movePages() {
   try {
-    const movePageParams: MovePageParams = await asyncPrompt({
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
       component: MovePageDialog,
 
       componentProps: {
@@ -204,7 +200,11 @@ async function movePages() {
     });
 
     for (const pageId of finalSelectedPageIds.value) {
-      await movePage(pageId, movePageParams);
+      await movePage({
+        ...movePageParams,
+
+        pageId,
+      });
     }
 
     $quasar().notify({
@@ -218,7 +218,7 @@ async function movePages() {
 
 async function deletePages() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete pages',
       message: 'Are you sure you want to delete these pages?',
 

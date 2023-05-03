@@ -15,17 +15,17 @@
 export default {
   inheritAttrs: false,
 };
+
+export interface DeepBtnProps extends QBtnProps {
+  delay?: boolean;
+}
 </script>
 
 <script setup lang="ts">
 import { sleep } from '@stdlib/misc';
 import type { QBtnProps } from 'quasar';
 
-interface Props extends QBtnProps {
-  delay?: boolean;
-}
-
-const props = defineProps<Props>();
+const props = defineProps<DeepBtnProps>();
 
 const loading = ref(false);
 
@@ -45,7 +45,7 @@ async function onClick(args: any[], attrs: any) {
   try {
     await attrs.onClick(...args);
   } catch (error) {
-    mainLogger().error(error);
+    mainLogger.error(error);
   }
 
   loading.value = false;

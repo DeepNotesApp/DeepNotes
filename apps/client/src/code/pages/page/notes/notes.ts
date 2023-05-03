@@ -19,10 +19,10 @@ export class PageNotes {
     collab: computed(() => this.page.collab.store.notes),
   });
 
-  constructor({ factories, page }: { factories: Factories; page: Page }) {
-    this.factories = factories;
+  constructor(input: { factories: Factories; page: Page }) {
+    this.factories = input.factories;
 
-    this.page = page;
+    this.page = input.page;
   }
 
   fromId(noteId: string | null, regionId?: string | null): PageNote | null {
@@ -77,8 +77,6 @@ export class PageNotes {
       this.page.selection.remove(note);
 
       note.react.index = index;
-
-      note.react.initialized = false;
     }
   }
   createAndObserveIds(noteIds: string[]) {
@@ -118,7 +116,7 @@ export class PageNotes {
   async create(
     region: PageRegion,
     worldPos: Vec2,
-    centralize = true,
+    center = true,
     destIndex?: number,
   ) {
     if (this.page.react.readOnly) {
@@ -136,7 +134,7 @@ export class PageNotes {
     note.react.collab.pos.x = worldPos.x;
     note.react.collab.pos.y = worldPos.y;
 
-    if (centralize) {
+    if (center) {
       const worldSize = note.getWorldRect('note-frame')?.size;
 
       if (worldSize != null) {

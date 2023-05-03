@@ -1,5 +1,5 @@
 import type { KeyPair, SymmetricKey } from '@stdlib/crypto';
-import { createPublicKeyring } from '@stdlib/crypto';
+import { createKeyring } from '@stdlib/crypto';
 import { createPrivateKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
@@ -12,18 +12,18 @@ import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 
 import { groupContentKeyrings } from './pages/computed/group-content-keyrings';
 
-const moduleLogger = mainLogger().sub('crypto.client.ts');
+const moduleLogger = mainLogger.sub('crypto.client.ts');
 
-export async function derivePasswordValues(
-  password: string | Uint8Array,
-  salt: Uint8Array,
-) {
+export async function derivePasswordValues(input: {
+  password: string | Uint8Array;
+  salt: Uint8Array;
+}) {
   moduleLogger.info('Started key derivation');
 
   const derivedKey = (
     await (globalThis as any).argon2.hash({
-      pass: password,
-      salt,
+      pass: input.password,
+      salt: input.salt,
 
       hashLen: 32 + 64,
 
@@ -43,17 +43,23 @@ export async function derivePasswordValues(
   };
 }
 
-export async function deriveUserValues(email: string, password: string) {
+export async function deriveUserValues(input: {
+  email: string;
+  password: string;
+}) {
   const emailHash = sodium.crypto_generichash(
     sodium.crypto_pwhash_SALTBYTES,
     (process.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? '')
       .split(';')
-      .includes(email)
-      ? email
-      : email.toLowerCase(),
+      .includes(input.email)
+      ? input.email
+      : input.email.toLowerCase(),
   );
 
-  const passwordValues = await derivePasswordValues(password, emailHash);
+  const passwordValues = await derivePasswordValues({
+    password: input.password,
+    salt: emailHash,
+  });
 
   return {
     masterKey: passwordValues.key,
@@ -66,7 +72,7 @@ export function generateRandomUserKeys(
 ) {
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
@@ -96,11 +102,7 @@ export function generateRandomUserKeys(
   };
 }
 
-export async function generateGroupValues({
-  userKeyPair,
-  isPublic,
-  password,
-}: {
+export async function generateGroupValues(input: {
   userKeyPair: KeyPair;
   isPublic: boolean;
   password?: string;
@@ -113,7 +115,7 @@ export async function generateGroupValues({
 
   const rawKeyPair = sodium.crypto_box_keypair();
 
-  const publicKeyring = createPublicKeyring(rawKeyPair.publicKey);
+  const publicKeyring = createKeyring(rawKeyPair.publicKey);
   const privateKeyring = createPrivateKeyring(rawKeyPair.privateKey);
 
   const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
@@ -122,18 +124,18 @@ export async function generateGroupValues({
 
   let finalAccessKeyring = accessKeyring;
 
-  if (!isPublic) {
+  if (!input.isPublic) {
     finalAccessKeyring = finalAccessKeyring.wrapAsymmetric(
-      userKeyPair,
-      userKeyPair.publicKey,
+      input.userKeyPair,
+      input.userKeyPair.publicKey,
     );
   }
 
   // Internal keyring
 
   const encryptedInternalKeyring = internalKeyring.wrapAsymmetric(
-    userKeyPair,
-    userKeyPair.publicKey,
+    input.userKeyPair,
+    input.userKeyPair.publicKey,
   );
 
   // Content keyring
@@ -142,8 +144,8 @@ export async function generateGroupValues({
 
   let passwordValues;
 
-  if (password != null) {
-    passwordValues = await computeGroupPasswordValues(groupId, password);
+  if (input.password != null) {
+    passwordValues = await computeGroupPasswordValues(groupId, input.password);
 
     encryptedContentKeyring = encryptedContentKeyring.wrapSymmetric(
       passwordValues.passwordKey,
@@ -193,10 +195,10 @@ export async function computeGroupPasswordValues(
   groupId: string,
   groupPassword: string,
 ) {
-  const passwordValues = await derivePasswordValues(
-    groupPassword,
-    nanoidToBytes(groupId),
-  );
+  const passwordValues = await derivePasswordValues({
+    password: groupPassword,
+    salt: nanoidToBytes(groupId),
+  });
 
   return {
     passwordHash: passwordValues.hash,

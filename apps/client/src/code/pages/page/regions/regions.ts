@@ -7,8 +7,8 @@ import type { IRegionElemsOutput, PageRegion } from './region';
 export class PageRegions {
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   fromId(regionId: string): PageRegion {
@@ -79,13 +79,8 @@ export class PageRegions {
       );
     }
 
-    if (
-      !isFinite(regionWorldRect.size.x) ||
-      !isFinite(regionWorldRect.size.y)
-    ) {
-      return;
+    if (isFinite(regionWorldRect.size.x) && isFinite(regionWorldRect.size.y)) {
+      return regionWorldRect;
     }
-
-    return regionWorldRect;
   }
 }

@@ -4,12 +4,21 @@
   "extends": "tsconfig/base.json",
 
   "compilerOptions": {
+    "types": ["vitest/globals"],
+
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
-    "typeRoots": ["node_modules/@types"] // Needed for tests
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
   },
+
+  "references": [{ "path": "../../../packages/@stdlib/misc/tsconfig.json" }],
 
   "include": ["*.ts", "src/**/*.ts"]
 }

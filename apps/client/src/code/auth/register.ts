@@ -1,5 +1,5 @@
-import { bytesToBase64 } from '@stdlib/base64';
-import type { PublicKeyring } from '@stdlib/crypto';
+import type { UserRegistrationSchema } from '@deepnotes/app-server/src/utils/users';
+import type { Keyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
 import { pack } from 'msgpackr';
@@ -8,16 +8,16 @@ import type { deriveUserValues } from 'src/code/crypto';
 import { generateGroupValues, generateRandomUserKeys } from 'src/code/crypto';
 import type { ISerialObjectInput } from 'src/code/pages/serialization';
 
-export async function getRegistrationValues(
-  derivedUserKeys: Awaited<ReturnType<typeof deriveUserValues>>,
-  userName: string,
-) {
+export async function getRegistrationValues(input: {
+  derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
+  userName: string;
+}): Promise<UserRegistrationSchema> {
   const userId = nanoid();
   const pageId = nanoid();
 
   const randomUserKeys = generateRandomUserKeys(
     userId,
-    derivedUserKeys.masterKey,
+    input.derivedUserValues.masterKey,
   );
   const groupValues = await generateGroupValues({
     userKeyPair: randomUserKeys.keyPair,
@@ -30,95 +30,93 @@ export async function getRegistrationValues(
     groupId: groupValues.groupId,
     pageId,
 
-    loginHash: bytesToBase64(derivedUserKeys.loginHash),
+    userPublicKeyring: (randomUserKeys.keyPair.publicKey as Keyring)
+      .wrappedValue,
+    userEncryptedPrivateKeyring:
+      randomUserKeys.encryptedPrivateKeyring.wrappedValue,
 
-    userPublicKeyring: bytesToBase64(
-      (randomUserKeys.keyPair.publicKey as PublicKeyring).fullValue,
-    ),
-    userEncryptedPrivateKeyring: bytesToBase64(
-      randomUserKeys.encryptedPrivateKeyring.fullValue,
-    ),
+    userEncryptedSymmetricKeyring:
+      randomUserKeys.encryptedSymmetricKeyring.wrappedValue,
 
-    userEncryptedSymmetricKeyring: bytesToBase64(
-      randomUserKeys.encryptedSymmetricKeyring.fullValue,
-    ),
-
-    userEncryptedName: bytesToBase64(
-      randomUserKeys.symmetricKeyring.encrypt(textToBytes(userName), {
+    userEncryptedName: randomUserKeys.symmetricKeyring.encrypt(
+      textToBytes(input.userName),
+      {
         padding: true,
         associatedData: {
           context: 'UserName',
           userId,
         },
-      }),
+      },
     ),
 
-    userEncryptedDefaultNote: bytesToBase64(
-      randomUserKeys.symmetricKeyring.encrypt(
-        pack({
-          root: { noteIdxs: [0] },
-          notes: [
-            {
-              anchor: {
-                y: 0,
-              },
+    userEncryptedDefaultNote: randomUserKeys.symmetricKeyring.encrypt(
+      pack({
+        root: { noteIdxs: [0] },
+        notes: [
+          {
+            anchor: {
+              y: 0,
             },
-          ],
-        } as ISerialObjectInput),
-        {
-          padding: true,
-          associatedData: {
-            context: 'UserDefaultNote',
-            userId,
           },
+        ],
+      } as ISerialObjectInput),
+      {
+        padding: true,
+        associatedData: {
+          context: 'UserDefaultNote',
+          userId,
         },
-      ),
+      },
     ),
-    userEncryptedDefaultArrow: bytesToBase64(
-      randomUserKeys.symmetricKeyring.encrypt(pack({}), {
+    userEncryptedDefaultArrow: randomUserKeys.symmetricKeyring.encrypt(
+      pack({}),
+      {
         padding: true,
         associatedData: {
           context: 'UserDefaultArrow',
           userId,
         },
-      }),
+      },
     ),
 
-    groupEncryptedAccessKeyring: bytesToBase64(
-      groupValues.finalAccessKeyring.fullValue,
-    ),
-    groupEncryptedInternalKeyring: bytesToBase64(
-      groupValues.encryptedInternalKeyring.fullValue,
-    ),
-    groupEncryptedContentKeyring: bytesToBase64(
-      groupValues.encryptedContentKeyring.fullValue,
-    ),
+    groupCreation: {
+      groupEncryptedName: new Uint8Array(),
+      groupIsPublic: false,
 
-    groupPublicKeyring: bytesToBase64(
-      (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
-    ),
-    groupEncryptedPrivateKeyring: bytesToBase64(
-      groupValues.encryptedPrivateKeyring.fullValue,
-    ),
+      groupAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+      groupEncryptedInternalKeyring:
+        groupValues.encryptedInternalKeyring.wrappedValue,
+      groupEncryptedContentKeyring:
+        groupValues.encryptedContentKeyring.wrappedValue,
 
-    pageEncryptedSymmetricKeyring: bytesToBase64(pageKeyring.fullValue),
-    pageEncryptedRelativeTitle: bytesToBase64(
-      pageKeyring.encrypt(textToBytes('Main page'), {
-        padding: true,
-        associatedData: {
-          context: 'PageRelativeTitle',
-          pageId,
+      groupPublicKeyring: (groupValues.keyPair.publicKey as Keyring)
+        .wrappedValue,
+      groupEncryptedPrivateKeyring:
+        groupValues.encryptedPrivateKeyring.wrappedValue,
+
+      groupOwnerEncryptedName: new Uint8Array(),
+    },
+
+    pageCreation: {
+      pageEncryptedSymmetricKeyring: pageKeyring.wrappedValue,
+      pageEncryptedRelativeTitle: pageKeyring.encrypt(
+        textToBytes('Main page'),
+        {
+          padding: true,
+          associatedData: {
+            context: 'PageRelativeTitle',
+            pageId,
+          },
         },
-      }),
-    ),
-    pageEncryptedAbsoluteTitle: bytesToBase64(
-      pageKeyring.encrypt(textToBytes(''), {
+      ),
+
+      pageEncryptedAbsoluteTitle: pageKeyring.encrypt(textToBytes(''), {
         padding: true,
         associatedData: {
           context: 'PageAbsoluteTitle',
           pageId,
         },
       }),
-    ),
+    },
   };
 }

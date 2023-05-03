@@ -12,7 +12,12 @@ export const encryptedName: DataField<GroupJoinRequestModel> = {
 
     return (
       userId === targetId ||
-      (await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup'))
+      (await userHasPermission(
+        dataAbstraction,
+        userId,
+        groupId,
+        'viewGroupPages',
+      ))
     );
   },
   userSettable: ({ userId, suffix }) => userId === splitStr(suffix, ':', 2)[1],

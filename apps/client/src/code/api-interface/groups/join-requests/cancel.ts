@@ -1,28 +1,64 @@
+import type {
+  cancelProcedureStep1,
+  cancelProcedureStep2,
+} from '@deepnotes/app-server/src/websocket/groups/join-requests/cancel';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
-import { requestWithNotifications } from 'src/code/pages/utils';
+import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function cancelJoinRequest(groupId: string) {
+export async function cancelJoinRequest(input: { groupId: string }) {
   const agentName = await groupRequestNames()(
-    `${groupId}:${authStore().userId}`,
+    `${input.groupId}:${authStore().userId}`,
   ).getAsync();
 
-  await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-requests/cancel`,
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.joinRequests.cancel`,
 
-    notifications: {
-      agent: {
-        groupId: groupId,
-
-        // You canceled your join request.
-      },
-
-      observers: {
-        groupId: groupId,
-
-        agentName: agentName.text,
-
-        // ${agentName} canceled their join request.
-      },
-    },
+    steps: [step1, step2, step3],
   });
+
+  async function step1(): Promise<
+    typeof cancelProcedureStep1['_def']['_input_in']
+  > {
+    return {
+      groupId: input.groupId,
+    };
+  }
+
+  async function step2(
+    input_: typeof cancelProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof cancelProcedureStep2['_def']['_input_in']> {
+    return {
+      notifications: await createNotifications({
+        recipients: input_.notificationRecipients,
+
+        notifications: {
+          agent: {
+            groupId: input.groupId,
+
+            // You canceled your join request.
+          },
+
+          observers: {
+            groupId: input.groupId,
+
+            agentName: agentName.text,
+
+            // ${agentName} canceled their join request.
+          },
+        },
+      }),
+    };
+  }
+
+  async function step3(
+    _input: typeof cancelProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
+
+  return promise;
 }

@@ -1,104 +1,128 @@
 import type { GroupRoleID } from '@deeplib/misc';
-import { bytesToBase64 } from '@stdlib/base64';
-import { createPublicKeyring } from '@stdlib/crypto';
+import type {
+  acceptProcedureStep1,
+  acceptProcedureStep2,
+} from '@deepnotes/app-server/src/websocket/groups/join-requests/accept';
+import { createKeyring } from '@stdlib/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupInternalKeyrings } from 'src/code/pages/computed/group-internal-keyrings';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
-import { requestWithNotifications } from 'src/code/pages/utils';
+import { createNotifications } from 'src/code/pages/utils';
+import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 
-export async function acceptJoinRequest(
-  groupId: string,
-  {
-    patientId,
-    targetRole,
-  }: {
-    patientId: string;
-    targetRole: GroupRoleID;
-  },
-) {
-  if (targetRole == null) {
-    throw new Error('Please select a role.');
-  }
-
+export async function acceptJoinRequest(input: {
+  groupId: string;
+  patientId: string;
+  targetRole: GroupRoleID;
+}) {
   const [
     accessKeyring,
     groupInternalKeyring,
 
-    userPublicKeyringBytes,
+    userPublicKeyring,
 
     groupName,
     agentName,
     targetName,
   ] = await Promise.all([
-    groupAccessKeyrings()(groupId).getAsync(),
-    groupInternalKeyrings()(groupId).getAsync(),
+    groupAccessKeyrings()(input.groupId).getAsync(),
+    groupInternalKeyrings()(input.groupId).getAsync(),
 
-    internals.realtime.hget('user', patientId, 'public-keyring'),
+    (async () =>
+      createKeyring(
+        await internals.realtime.hget(
+          'user',
+          input.patientId,
+          'public-keyring',
+        ),
+      ))(),
 
-    groupNames()(groupId).getAsync(),
-    groupMemberNames()(`${groupId}:${authStore().userId}`).getAsync(),
-    groupRequestNames()(`${groupId}:${patientId}`).getAsync(),
+    groupNames()(input.groupId).getAsync(),
+    groupMemberNames()(`${input.groupId}:${authStore().userId}`).getAsync(),
+    groupRequestNames()(`${input.groupId}:${input.patientId}`).getAsync(),
   ]);
 
-  if (accessKeyring == null || groupInternalKeyring == null) {
-    throw new Error('Group keyrings not found.');
+  const { promise } = createWebsocketRequest({
+    url: `${process.env.APP_SERVER_URL.replaceAll(
+      'http',
+      'ws',
+    )}/groups.joinRequests.accept`,
+
+    steps: [step1, step2, step3],
+  });
+
+  async function step1(): Promise<
+    typeof acceptProcedureStep1['_def']['_input_in']
+  > {
+    if (accessKeyring == null || groupInternalKeyring == null) {
+      throw new Error('Group keyrings not found.');
+    }
+
+    return {
+      groupId: input.groupId,
+
+      patientId: input.patientId,
+      targetRole: input.targetRole,
+
+      encryptedAccessKeyring: accessKeyring.wrapAsymmetric(
+        internals.keyPair,
+        userPublicKeyring,
+      ).wrappedValue,
+      encryptedInternalKeyring: groupInternalKeyring.wrapAsymmetric(
+        internals.keyPair,
+        userPublicKeyring,
+      ).wrappedValue,
+    };
   }
 
-  const userPublicKeyring = createPublicKeyring(userPublicKeyringBytes);
+  async function step2(
+    input_: typeof acceptProcedureStep1['_def']['_output_out'],
+  ): Promise<typeof acceptProcedureStep2['_def']['_input_in']> {
+    return {
+      notifications: await createNotifications({
+        recipients: input_.notificationRecipients,
 
-  await requestWithNotifications({
-    url: `/api/groups/${groupId}/join-requests/accept`,
+        patientId: input.patientId,
 
-    body: {
-      patientId,
-      targetRole: targetRole,
+        notifications: {
+          agent: {
+            groupId: input.groupId,
 
-      encryptedAccessKeyring: bytesToBase64(
-        accessKeyring.wrapAsymmetric(internals.keyPair, userPublicKeyring)
-          .fullValue,
-      ),
-      encryptedInternalKeyring: bytesToBase64(
-        groupInternalKeyring.wrapAsymmetric(
-          internals.keyPair,
-          userPublicKeyring,
-        ).fullValue,
-      ),
-    },
+            groupName: groupName.text,
+            targetName: targetName.text,
 
-    patientId,
+            // You have accepted the join request of ${targetName}.
+          },
 
-    notifications: {
-      agent: {
-        groupId,
+          target: {
+            groupId: input.groupId,
 
-        groupName: groupName.text,
+            groupName: groupName.text,
 
-        targetName: targetName.text,
+            // Your join request was accepted.
+          },
 
-        // You have accepted the join request of ${targetName}.
-      },
+          observers: {
+            groupId: input.groupId,
 
-      target: {
-        groupId,
+            groupName: groupName.text,
+            agentName: agentName.text,
+            targetName: targetName.text,
 
-        groupName: groupName.text,
+            // ${agentName} has accepted the join request of ${targetName}.
+          },
+        },
+      }),
+    };
+  }
 
-        // Your join request was accepted.
-      },
+  async function step3(
+    _input: typeof acceptProcedureStep2['_def']['_output_out'],
+  ) {
+    //
+  }
 
-      observers: {
-        groupId,
-
-        groupName: groupName.text,
-
-        agentName: agentName.text,
-
-        targetName: targetName.text,
-
-        // ${agentName} has accepted the join request of ${targetName}.
-      },
-    },
-  });
+  return promise;
 }

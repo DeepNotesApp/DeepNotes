@@ -1,5 +1,6 @@
-import { isNanoID, splitStr } from '@stdlib/misc';
-import { handleError, isCtrlDown } from 'src/code/utils';
+import { splitStr } from '@stdlib/misc';
+import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
+import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
 export function usePageNavigationInterception() {
   onMounted(() => {
@@ -18,8 +19,13 @@ export function usePageNavigationInterception() {
         return;
       }
 
-      if (event.altKey || internals.mobileAltKey || target.isContentEditable) {
-        mainLogger()
+      if (
+        event.altKey ||
+        internals.mobileAltKey ||
+        target.isContentEditable ||
+        imageResizing.active
+      ) {
+        mainLogger
           .sub('usePageNavigationInterception')
           .info('Prevent default action');
 
@@ -34,22 +40,21 @@ export function usePageNavigationInterception() {
 
       if (
         !(
-          isNanoID(href) ||
           href.startsWith('/pages/') ||
           href.startsWith('/groups/') ||
           href.startsWith(`${window.location.origin}/pages/`) ||
           href.startsWith(`${window.location.origin}/groups/`)
         )
       ) {
-        mainLogger()
+        mainLogger
           .sub('usePageNavigationInterception')
           .info(
-            "[usePageNavigationInterception] Link doesn' point to a DeepNotes page: allow default action.",
+            "[usePageNavigationInterception] Link doesn't point to a DeepNotes page: allow default action.",
           );
         return;
       }
 
-      mainLogger().info(
+      mainLogger.info(
         'Link points to a DeepNotes page: prevent default action.',
       );
 

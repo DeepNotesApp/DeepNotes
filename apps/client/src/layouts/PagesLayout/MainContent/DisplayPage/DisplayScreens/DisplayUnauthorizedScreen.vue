@@ -66,8 +66,8 @@
 import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
-import { multiModePath } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
+import { multiModePath } from 'src/code/utils/misc';
 
 import RequestAccessDialog from './RequestAccessDialog.vue';
 
@@ -85,7 +85,7 @@ const groupJoinRequestRejected = computed(() =>
 
 async function _cancelJoinRequest() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Cancel join request',
       message: 'Are you sure you want to cancel your join request?',
 
@@ -95,7 +95,9 @@ async function _cancelJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinRequest(page.react.groupId);
+    await cancelJoinRequest({
+      groupId: page.react.groupId,
+    });
   } catch (error: any) {
     handleError(error);
   }

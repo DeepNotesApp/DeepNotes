@@ -115,7 +115,7 @@
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import type { MovePageParams } from 'src/code/api-interface/pages/move';
+import type { movePage } from 'src/code/api-interface/pages/move';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { selfUserName } from 'src/code/self-user-name';
@@ -191,13 +191,18 @@ async function _movePage() {
     destGroupId: destGroupId.value!,
     setAsMainPage: setAsMainPage.value,
 
-    createGroup: destGroupId.value === 'new',
-    groupName: groupName.value,
-    groupMemberName: groupMemberName.value,
-    groupIsPublic: groupIsPublic.value,
-    groupPassword: groupIsPasswordProtected.value
-      ? groupPassword.value
-      : undefined,
-  } as MovePageParams);
+    ...(destGroupId.value === 'new'
+      ? {
+          groupCreation: {
+            groupName: groupName.value,
+            groupMemberName: groupMemberName.value,
+            groupIsPublic: groupIsPublic.value,
+            groupPassword: groupIsPasswordProtected.value
+              ? groupPassword.value
+              : undefined,
+          },
+        }
+      : {}),
+  } as Parameters<typeof movePage>[0]);
 }
 </script>

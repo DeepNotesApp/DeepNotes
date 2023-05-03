@@ -111,12 +111,11 @@
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import type { MovePageParams } from 'src/code/api-interface/pages/move';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
@@ -128,7 +127,7 @@ const page = inject<Ref<Page>>('page')!;
 
 async function _movePage() {
   try {
-    const movePageParams: MovePageParams = await asyncPrompt({
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
       component: MovePageDialog,
 
       componentProps: {
@@ -136,7 +135,11 @@ async function _movePage() {
       },
     });
 
-    await movePage(page.value.id, movePageParams);
+    await movePage({
+      ...movePageParams,
+
+      pageId: page.value.id,
+    });
 
     $quasar().notify({
       message: 'Page moved successfully.',
@@ -149,7 +152,7 @@ async function _movePage() {
 
 async function _deletePage() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete page',
       message: 'Are you sure you want to delete this page?',
 

@@ -1,10 +1,16 @@
 <template>
-  <img
+  <svg
     class="note-arrow-handle"
-    draggable="false"
-    src="data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIxOHB4IiBoZWlnaHQ9IjI4cHgiIHZlcnNpb249IjEuMSI+PHBhdGggZD0ibSA2IDI2IEwgMTIgMjYgTCAxMiAxMiBMIDE4IDEyIEwgOSAxIEwgMSAxMiBMIDYgMTIgeiIgc3Ryb2tlPSIjZmZmIiBmaWxsPSIjMjliNmYyIi8+PC9zdmc+"
+    width="20px"
+    height="27px"
     @pointerdown.left.stop="page.arrowCreation.start(note, $event)"
-  />
+  >
+    <path
+      d="M 6 27 L 14 27 L 14 14 L 20 14 L 10 0 L 0 14 L 6 14 Z"
+      stroke="none"
+      fill="#2196f3"
+    />
+  </svg>
 </template>
 
 <script setup lang="ts">
@@ -26,7 +32,7 @@ const note = inject<PageNote>('note')!;
   z-index: 2147483647;
 }
 .note-arrow-handle:hover {
-  opacity: 1;
+  opacity: 0.8;
 }
 </style>
 

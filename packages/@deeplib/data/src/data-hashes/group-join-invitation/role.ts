@@ -12,7 +12,12 @@ export const role: DataField<GroupJoinInvitationModel> = {
 
     return (
       userId === targetId ||
-      (await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup'))
+      (await userHasPermission(
+        dataAbstraction,
+        userId,
+        groupId,
+        'viewGroupPages',
+      ))
     );
   },
 

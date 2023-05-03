@@ -156,17 +156,9 @@ export class Page implements IPageRegion {
     return new Vec2();
   }
 
-  constructor({
-    factories,
-    app,
-    id,
-  }: {
-    factories: Factories;
-    app: Pages;
-    id: string;
-  }) {
-    this.app = app;
-    this.id = id;
+  constructor(input: { factories: Factories; app: Pages; id: string }) {
+    this.app = input.app;
+    this.id = input.id;
 
     this.realtimeCtx = new (RealtimeContext())();
 
@@ -233,40 +225,40 @@ export class Page implements IPageRegion {
       loading: true,
     });
 
-    this.collab = factories.PageCollab({ page: this });
-    this.undoRedo = factories.PageUndoRedo({ page: this });
+    this.collab = input.factories.PageCollab({ page: this });
+    this.undoRedo = input.factories.PageUndoRedo({ page: this });
 
-    this.pos = factories.PagePos({ page: this });
-    this.rects = factories.PageRects({ page: this });
-    this.sizes = factories.PageSizes({ page: this });
+    this.pos = input.factories.PagePos({ page: this });
+    this.rects = input.factories.PageRects({ page: this });
+    this.sizes = input.factories.PageSizes({ page: this });
 
-    this.camera = factories.PageCamera({ page: this });
-    this.panning = factories.PagePanning({ page: this });
-    this.zooming = factories.PageZooming({ page: this });
-    this.pinching = factories.PagePinching({ page: this });
+    this.camera = input.factories.PageCamera({ page: this });
+    this.panning = input.factories.PagePanning({ page: this });
+    this.zooming = input.factories.PageZooming({ page: this });
+    this.pinching = input.factories.PagePinching({ page: this });
 
-    this.selection = factories.PageSelection({ page: this });
-    this.activeElem = factories.PageActiveElem({ page: this });
-    this.activeRegion = factories.PageActiveRegion({ page: this });
-    this.clickSelection = factories.PageClickSelection({ page: this });
-    this.boxSelection = factories.PageBoxSelection({ page: this });
+    this.selection = input.factories.PageSelection({ page: this });
+    this.activeElem = input.factories.PageActiveElem({ page: this });
+    this.activeRegion = input.factories.PageActiveRegion({ page: this });
+    this.clickSelection = input.factories.PageClickSelection({ page: this });
+    this.boxSelection = input.factories.PageBoxSelection({ page: this });
 
-    this.regions = factories.PageRegions({ page: this });
+    this.regions = input.factories.PageRegions({ page: this });
 
-    this.elems = factories.PageElems({ page: this });
-    this.deleting = factories.PageDeleting({ page: this });
-    this.clipboard = factories.PageClipboard({ page: this });
+    this.elems = input.factories.PageElems({ page: this });
+    this.deleting = input.factories.PageDeleting({ page: this });
+    this.clipboard = input.factories.PageClipboard({ page: this });
 
-    this.notes = factories.PageNotes({ page: this });
-    this.editing = factories.PageEditing({ page: this });
-    this.dragging = factories.PageNoteDragging({ page: this });
-    this.dropping = factories.PageNoteDropping({ page: this });
-    this.cloning = factories.PageNoteCloning({ page: this });
-    this.resizing = factories.PageNoteResizing({ page: this });
-    this.aligning = factories.PageNoteAligning({ page: this });
+    this.notes = input.factories.PageNotes({ page: this });
+    this.editing = input.factories.PageEditing({ page: this });
+    this.dragging = input.factories.PageNoteDragging({ page: this });
+    this.dropping = input.factories.PageNoteDropping({ page: this });
+    this.cloning = input.factories.PageNoteCloning({ page: this });
+    this.resizing = input.factories.PageNoteResizing({ page: this });
+    this.aligning = input.factories.PageNoteAligning({ page: this });
 
-    this.arrows = factories.PageArrows({ page: this });
-    this.arrowCreation = factories.PageArrowCreation({ page: this });
+    this.arrows = input.factories.PageArrows({ page: this });
+    this.arrowCreation = input.factories.PageArrowCreation({ page: this });
   }
 
   setStatus(status: PageStatus, loading = false) {
@@ -301,13 +293,13 @@ export class Page implements IPageRegion {
         return true;
       });
 
-      mainLogger().sub('page.finishSetup').info('All notes loaded');
+      mainLogger.sub('page.finishSetup').info('All notes loaded');
 
       this.camera.fitToScreen();
 
       await sleep();
     } catch (error) {
-      mainLogger().error(error);
+      mainLogger.error(error);
     }
 
     this.react.loading = false;
@@ -335,7 +327,10 @@ export class Page implements IPageRegion {
     // Bump on server
 
     if (authStore().loggedIn) {
-      await bumpPage(this.id, { parentPageId });
+      await bumpPage({
+        pageId: this.id,
+        parentPageId,
+      });
     }
   }
 

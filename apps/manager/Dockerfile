@@ -4,8 +4,8 @@ RUN npm install -g pnpm
 
 WORKDIR /build
 COPY ./ ./
-RUN pnpm install --filter deepnotes --filter deepnotes-scheduler...
-RUN pnpm --filter deepnotes-scheduler run bundle
+RUN pnpm install --filter deepnotes --filter @deepnotes/scheduler...
+RUN pnpm --filter @deepnotes/scheduler run bundle
 
 FROM node:16-alpine AS runner
 

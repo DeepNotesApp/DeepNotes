@@ -33,7 +33,7 @@
         : {}),
     }"
     @pointerdown.left.stop="onLeftPointerDown"
-    @dblclick.left="onLeftDoubleClick"
+    @click.left="onLeftClick"
   ></div>
 </template>
 
@@ -44,6 +44,7 @@ import type {
   PageNote,
 } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 const props = defineProps<{
   side: NoteSide;
@@ -67,8 +68,12 @@ async function onLeftPointerDown(event: PointerEvent) {
   await page.resizing.start(event, note, props.side, section.value);
 }
 
-async function onLeftDoubleClick() {
-  page.resizing.fitContent(props.side, section.value!);
+const checkDoubleClick = createDoubleClickChecker();
+
+async function onLeftClick(event: MouseEvent) {
+  if (checkDoubleClick(event)) {
+    page.resizing.fitContent(props.side, section.value!);
+  }
 }
 </script>
 

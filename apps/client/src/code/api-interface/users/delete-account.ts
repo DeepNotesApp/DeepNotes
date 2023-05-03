@@ -1,15 +1,17 @@
-import { bytesToBase64 } from '@stdlib/base64';
 import { deriveUserValues } from 'src/code/crypto';
 
-export async function deleteAccount({ password }: { password: string }) {
+export async function deleteAccount(input: { password: string }) {
   const email = await internals.realtime.hget(
     'user',
     authStore().userId,
     'email',
   );
-  const derivedValues = await deriveUserValues(email, password);
+  const derivedUserValues = await deriveUserValues({
+    email,
+    password: input.password,
+  });
 
-  await api().post('/api/users/account/general/delete', {
-    loginHash: bytesToBase64(derivedValues.loginHash),
+  await trpcClient.users.account.delete.mutate({
+    loginHash: derivedUserValues.loginHash,
   });
 }

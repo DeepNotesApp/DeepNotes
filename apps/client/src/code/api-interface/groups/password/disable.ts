@@ -1,17 +1,17 @@
-import { bytesToBase64 } from '@stdlib/base64';
-import type { SymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { groupAccessKeyrings } from 'src/code/pages/computed/group-access-keyrings';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 
-export async function disableGroupPasswordProtection(
-  groupId: string,
-  { groupPassword }: { groupPassword: string },
-) {
+export async function disableGroupPasswordProtection(input: {
+  groupId: string;
+  groupPassword: string;
+}) {
   // Get password protected group keyring
 
-  let groupContentKeyring = await groupContentKeyrings()(groupId).getAsync();
+  let groupContentKeyring = await groupContentKeyrings()(
+    input.groupId,
+  ).getAsync();
 
   if (groupContentKeyring == null) {
     throw new Error('Group keyring not found.');
@@ -20,8 +20,8 @@ export async function disableGroupPasswordProtection(
   // Get group password values
 
   const groupPasswordValues = await computeGroupPasswordValues(
-    groupId,
-    groupPassword,
+    input.groupId,
+    input.groupPassword,
   );
 
   // Remove password protection from group keyring
@@ -32,17 +32,17 @@ export async function disableGroupPasswordProtection(
       {
         associatedData: {
           context: 'GroupContentKeyringPasswordProtection',
-          groupId,
+          groupId: input.groupId,
         },
       },
-    ) as SymmetricKeyring;
+    );
   } else if (groupContentKeyring.topLayer !== DataLayer.Raw) {
     throw new Error('Group is not password protected.');
   }
 
   // Wrap content keyring with group keyring
 
-  const accessKeyring = await groupAccessKeyrings()(groupId).getAsync();
+  const accessKeyring = await groupAccessKeyrings()(input.groupId).getAsync();
 
   if (accessKeyring?.topLayer !== DataLayer.Raw) {
     throw new Error('Invalid group keyring.');
@@ -51,15 +51,17 @@ export async function disableGroupPasswordProtection(
   groupContentKeyring = groupContentKeyring.wrapSymmetric(accessKeyring, {
     associatedData: {
       context: 'GroupContentKeyring',
-      groupId,
+      groupId: input.groupId,
     },
-  }) as SymmetricKeyring;
+  });
 
   // Send password disable request
 
-  await api().post(`api/groups/${groupId}/password/disable`, {
-    groupPasswordHash: bytesToBase64(groupPasswordValues.passwordHash),
+  await trpcClient.groups.password.disable.mutate({
+    groupId: input.groupId,
 
-    groupEncryptedContentKeyring: bytesToBase64(groupContentKeyring.fullValue),
+    groupPasswordHash: groupPasswordValues.passwordHash,
+
+    groupEncryptedContentKeyring: groupContentKeyring.wrappedValue,
   });
 }

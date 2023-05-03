@@ -2,17 +2,22 @@ import { isIncluded } from '@stdlib/misc';
 import type { AuthStore } from 'src/stores/auth';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
-import { getRequestConfig } from './utils';
+import { trpcClient } from './trpc';
+import { getRequestConfig } from './utils/misc';
 
-const moduleLogger = mainLogger().sub('routing.universal.ts');
+const moduleLogger = mainLogger.sub('routing.universal.ts');
 
-export async function redirectIfNecessary(
-  router: Router,
-  route: RouteLocationNormalized,
-  auth: AuthStore,
-  cookies?: typeof Cookies,
-) {
-  const redirectDest = await getRedirectDest(route, auth, cookies);
+export async function redirectIfNecessary(input: {
+  router: Router;
+  route: RouteLocationNormalized;
+  auth: AuthStore;
+  cookies?: typeof Cookies;
+}) {
+  const redirectDest = await getRedirectDest({
+    route: input.route,
+    auth: input.auth,
+    cookies: input.cookies,
+  });
 
   if (redirectDest != null) {
     moduleLogger.info(
@@ -20,29 +25,29 @@ export async function redirectIfNecessary(
       JSON.stringify(redirectDest),
     );
 
-    await router.replace(redirectDest);
+    await input.router.replace(redirectDest);
   }
 }
 
-export async function getRedirectDest(
-  route: RouteLocationNormalized,
-  auth: AuthStore,
-  cookies?: typeof Cookies,
-) {
+export async function getRedirectDest(input: {
+  route: RouteLocationNormalized;
+  auth: AuthStore;
+  cookies?: typeof Cookies;
+}) {
   // Page requires auth
 
   if (
-    !auth.loggedIn &&
-    route.matched.some((record) => record.meta.requiresAuth)
+    !input.auth.loggedIn &&
+    input.route.matched.some((record) => record.meta.requiresAuth)
   ) {
-    return { name: 'login', query: { redirect: route.fullPath } };
+    return { name: 'login', query: { redirect: input.route.fullPath } };
   }
 
   // Page requires guest
 
   if (
-    auth.loggedIn &&
-    route.matched.some((record) => record.meta.requiresGuest)
+    input.auth.loggedIn &&
+    input.route.matched.some((record) => record.meta.requiresGuest)
   ) {
     return {
       name: isIncluded(process.env.MODE, ['ssr', 'spa']) ? 'home' : 'pages',
@@ -51,15 +56,12 @@ export async function getRedirectDest(
 
   // Starting page redirection
 
-  if (auth.loggedIn && route.name === 'pages') {
+  if (input.auth.loggedIn && input.route.name === 'pages') {
     try {
-      const startingPageId = (
-        await api().post<{ startingPageId: string }>(
-          '/api/users/starting-page-id',
-          undefined,
-          getRequestConfig(cookies),
-        )
-      ).data.startingPageId;
+      const startingPageId =
+        await trpcClient.users.pages.getStartingPageId.query(undefined, {
+          context: getRequestConfig(input.cookies),
+        });
 
       return { name: 'page', params: { pageId: startingPageId } };
     } catch (error) {
@@ -71,17 +73,17 @@ export async function getRedirectDest(
 
   // Group main page redirection
 
-  if (route.name === 'group') {
-    const group = (
-      await api().post<{ mainPageId: string }>(
-        `/api/groups/${route.params.groupId}/main-page-id`,
-        undefined,
-        getRequestConfig(cookies),
-      )
-    ).data;
+  if (input.route.name === 'group') {
+    await trpcClient.groups.getMainPageId.query({
+      groupId: input.route.params.groupId as string,
+    });
 
-    if (group.mainPageId != null) {
-      return { name: 'page', params: { pageId: group.mainPageId } };
+    const mainPageId = await trpcClient.groups.getMainPageId.query({
+      groupId: input.route.params.groupId as string,
+    });
+
+    if (mainPageId != null) {
+      return { name: 'page', params: { pageId: mainPageId } };
     }
   }
 }

@@ -7,35 +7,28 @@
 
   <Gap style="height: 24px" />
 
-  <div
-    v-if="
-      internals.realtime.globalCtx.hget('user', authStore().userId, 'plan') !==
-      'pro'
-    "
-  >
+  <div>
     <DeepBtn
+      v-if="
+        internals.realtime.globalCtx.hget(
+          'user',
+          authStore().userId,
+          'plan',
+        ) !== 'pro'
+      "
       label="See subscription plans"
       color="primary"
       :to="{ name: 'pricing' }"
     />
-  </div>
-  <form
-    v-else
-    :action="`${appServerURL}/api/stripe/create-portal-session`"
-    method="POST"
-  >
-    <input
-      type="hidden"
-      name="returnUrl"
-      :value="global.location?.href"
-    />
 
     <DeepBtn
+      v-else
       label="Manage subscription"
       color="secondary"
       type="submit"
+      @click="createPortalSession()"
     />
-  </form>
+  </div>
 
   <LoadingOverlay v-if="loading" />
 </template>
@@ -47,8 +40,6 @@ useMeta(() => ({
   title: 'Billing - Account - DeepNotes',
 }));
 
-const appServerURL = process.env.APP_SERVER_URL;
-
 const loading = ref(true);
 
 onMounted(async () => {
@@ -56,4 +47,13 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+async function createPortalSession() {
+  const { portalSessionUrl } =
+    await trpcClient.users.account.stripe.createPortalSession.mutate({
+      returnUrl: location.href,
+    });
+
+  location.href = portalSessionUrl;
+}
 </script>

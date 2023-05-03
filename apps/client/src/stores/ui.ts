@@ -1,12 +1,23 @@
 import { negateProp } from '@stdlib/misc';
 import { defineStore } from 'pinia';
 
-export const useUIStore = defineStore('ui', {
-  state: () => ({
+function watchProp<State>(state: State, prop: Extract<keyof State, string>) {
+  watch(
+    () => state[prop],
+    (value) => {
+      internals.localStorage.setItem(prop, String(value));
+    },
+  );
+}
+
+export const useUIStore = defineStore('ui', () => {
+  const state = reactive({
     loggedIn: false,
 
     leftSidebarExpanded: false,
     rightSidebarExpanded: false,
+
+    leftSidebarWidth: 260,
 
     currentPathExpanded: true,
     recentPagesExpanded: true,
@@ -15,26 +26,34 @@ export const useUIStore = defineStore('ui', {
 
     width: 0,
     height: 0,
-  }),
+  });
 
-  getters: {},
+  watchProp(state, 'leftSidebarExpanded');
+  watchProp(state, 'rightSidebarExpanded');
 
-  actions: {
+  watchProp(state, 'leftSidebarWidth');
+
+  watchProp(state, 'currentPathExpanded');
+  watchProp(state, 'recentPagesExpanded');
+
+  return {
+    ...toRefs(state),
+
     toggleLeftSidebar() {
-      negateProp(this, 'leftSidebarExpanded');
+      negateProp(state, 'leftSidebarExpanded');
 
-      if (this.leftSidebarExpanded && window.innerWidth < 1065) {
-        this.rightSidebarExpanded = false;
+      if (state.leftSidebarExpanded && window.innerWidth < 1065) {
+        state.rightSidebarExpanded = false;
       }
     },
     toggleRightSidebar() {
-      negateProp(this, 'rightSidebarExpanded');
+      negateProp(state, 'rightSidebarExpanded');
 
-      if (this.rightSidebarExpanded && window.innerWidth < 1065) {
-        this.leftSidebarExpanded = false;
+      if (state.rightSidebarExpanded && window.innerWidth < 1065) {
+        state.leftSidebarExpanded = false;
       }
     },
-  },
+  };
 });
 
 export type UIStore = ReturnType<typeof useUIStore>;

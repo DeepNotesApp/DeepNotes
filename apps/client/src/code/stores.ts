@@ -1,12 +1,12 @@
-import type { Pinia, StoreDefinition } from 'pinia';
+import type { Pinia } from 'pinia';
 import { useAppStore } from 'src/stores/app';
 import { useAuthStore } from 'src/stores/auth';
 import { usePagesStore } from 'src/stores/pages';
 import { useUIStore } from 'src/stores/ui';
 
-const moduleLogger = mainLogger().sub('stores.universal.ts');
+const moduleLogger = mainLogger.sub('stores.universal.ts');
 
-function makeStoreFunc<T extends StoreDefinition>(storeDefinition: T) {
+function makeStoreFunc<T extends (...args: any[]) => any>(storeDefinition: T) {
   let _store: ReturnType<T>;
 
   return (pinia?: Pinia): ReturnType<T> => {

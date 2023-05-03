@@ -58,7 +58,7 @@
         </q-item>
 
         <DeepBtn
-          class="snapshot-delete-btn"
+          class="delete-btn"
           size="12px"
           icon="mdi-close"
           round
@@ -87,7 +87,7 @@ import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/rest
 import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
@@ -99,7 +99,7 @@ const snapshotInfos = computed(
 
 async function restoreVersion(snapshotId: string) {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Restore version',
       message: 'Are you sure you want to restore this version?',
 
@@ -109,7 +109,9 @@ async function restoreVersion(snapshotId: string) {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await restorePageSnapshot(page.value.id, snapshotId, {
+    await restorePageSnapshot({
+      pageId: page.value.id,
+      snapshotId,
       groupId: page.value.react.groupId,
       doc: page.value.collab.doc,
     });
@@ -125,7 +127,7 @@ async function restoreVersion(snapshotId: string) {
 
 async function saveVersion() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Save version',
       message: 'Are you sure you want to save this version?',
 
@@ -135,7 +137,8 @@ async function saveVersion() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await savePageSnapshot(page.value.id, {
+    await savePageSnapshot({
+      pageId: page.value.id,
       groupId: page.value.react.groupId,
       doc: page.value.collab.doc,
     });
@@ -151,7 +154,7 @@ async function saveVersion() {
 
 async function deleteSnapshot(snapshotId: string) {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete version',
       message: 'Are you sure you want to delete this version?',
 
@@ -177,7 +180,7 @@ async function deleteSnapshot(snapshotId: string) {
 .snapshot {
   position: relative;
 
-  > .snapshot-delete-btn {
+  > .delete-btn {
     position: absolute;
 
     top: 4px;
@@ -193,7 +196,7 @@ async function deleteSnapshot(snapshotId: string) {
   }
 }
 
-.snapshot:hover > .snapshot-delete-btn {
+.snapshot:hover > .delete-btn {
   opacity: 1;
 }
 </style>

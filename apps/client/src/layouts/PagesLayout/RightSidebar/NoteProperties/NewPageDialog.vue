@@ -139,7 +139,7 @@ import { createPage } from 'src/code/api-interface/pages/create';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -233,7 +233,9 @@ async function _createPage() {
       throw new Error('Please enter a page title.');
     }
 
-    const response = await createPage(page.value.id, {
+    const response = await createPage({
+      parentPageId: page.value.id,
+
       currentGroupId: page.value.react.groupId,
       pageRelativeTitle: pageRelativeTitle.value,
 
@@ -255,11 +257,13 @@ async function _createPage() {
     await internals.pages.goToPage(response.pageId, { fromParent: true });
 
     $quasar().notify({
-      message: response.message ?? 'Page created successfully.',
+      message:
+        'Page created successfully.' +
+        (response.numFreePages != null
+          ? ` (${response.numFreePages + 1}/10)`
+          : ''),
       type: 'positive',
     });
-
-    dialogRef.value.onDialogOK();
   } catch (error) {
     handleError(error);
   }

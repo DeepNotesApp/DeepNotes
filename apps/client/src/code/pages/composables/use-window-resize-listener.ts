@@ -11,9 +11,7 @@ export function useWindowResizeListener() {
       uiStore().leftSidebarExpanded &&
       uiStore().rightSidebarExpanded
     ) {
-      mainLogger()
-        .sub('useWindowResizeListener')
-        .info('Collapse right sidebar');
+      mainLogger.sub('useWindowResizeListener').info('Collapse right sidebar');
 
       uiStore().rightSidebarExpanded = false;
     }

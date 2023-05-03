@@ -31,7 +31,7 @@ import {
 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;

@@ -61,13 +61,17 @@
 
 <script setup lang="ts">
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { useResizeObserver } from 'src/code/utils';
+import { useResizeObserver } from 'src/code/utils/misc';
 import type { ComponentPublicInstance } from 'vue';
 
-const props = defineProps<{
+import type { PasswordFieldProps } from './PasswordField.vue';
+
+interface Props extends PasswordFieldProps {
   modelValue: string;
   autocomplete: 'current-password' | 'new-password';
-}>();
+}
+
+const props = defineProps<Props>();
 
 const focused = ref(false);
 

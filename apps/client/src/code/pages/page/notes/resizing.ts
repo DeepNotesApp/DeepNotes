@@ -1,7 +1,7 @@
 import { listenPointerEvents } from '@stdlib/misc';
 import { Rect } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 import type { Page } from '../page';
 import type { NoteSection, NoteSide } from './note';
@@ -13,8 +13,8 @@ export class NoteResizing {
   side!: NoteSide;
   section!: NoteSection | null;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   async start(

@@ -3,7 +3,7 @@ import { Rect } from '@stdlib/misc';
 import { isNumeric } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import type { Editor } from '@tiptap/vue-3';
-import { sizeToCSS } from 'src/code/utils';
+import { sizeToCSS } from 'src/code/utils/misc';
 import type {
   ComputedRef,
   ShallowRef,
@@ -114,9 +114,7 @@ export interface INoteReact extends IRegionReact, IElemReact {
 
   editors: ComputedRef<Editor[]>;
 
-  initialized: boolean;
-  numEditorsLoading: number;
-  loaded: ComputedRef<boolean>;
+  loaded: boolean;
 }
 
 function makeSectionHeightCSS(note: PageNote, section: NoteSection) {
@@ -513,26 +511,18 @@ export class PageNote extends PageElem() implements IPageRegion {
         return result;
       }),
 
-      initialized: true,
-      numEditorsLoading: 0,
-      loaded: computed(() => {
-        if (this.react.initialized) {
-          return true;
-        }
-
-        if (this.react.collab.container.enabled) {
-          for (const childNote of this.react.notes) {
-            if (!childNote.react.loaded) {
-              return false;
-            }
-          }
-        }
-
-        return this.react.numEditorsLoading === 0;
-      }),
+      loaded: false,
     };
 
     Object.assign(this.react, react);
+
+    setTimeout(() => {
+      setTimeout(() => {
+        this.react.loaded = true;
+
+        mainLogger.info(`Note loaded (${this.id})`);
+      });
+    });
   }
 
   bringToTop() {

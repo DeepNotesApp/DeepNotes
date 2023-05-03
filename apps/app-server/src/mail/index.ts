@@ -1,4 +1,4 @@
-import { mainLogger } from 'src/logger';
+import { mainLogger } from '@stdlib/misc';
 
 import { sendMailjetMail } from './mailjet';
 import { sendSendGridMail } from './send-grid';
@@ -22,7 +22,7 @@ const _sendMailFuncs: [string, MailSendFunc][] = [
 ];
 
 export async function sendMail(opts: MailOptions) {
-  const funcLogger = mainLogger().sub('sendMail');
+  const funcLogger = mainLogger.sub('sendMail');
 
   for (const [serviceName, sendFunc] of _sendMailFuncs) {
     try {
@@ -30,7 +30,7 @@ export async function sendMail(opts: MailOptions) {
 
       funcLogger.info(`Mail sent via ${serviceName}.`);
 
-      break;
+      return;
     } catch (error) {
       //
     }

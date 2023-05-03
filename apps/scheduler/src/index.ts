@@ -6,17 +6,14 @@ import {
   GroupMemberModel,
   GroupModel,
   PageModel,
-  SessionModel,
-  UserModel,
 } from '@deeplib/db';
-import { addDays } from '@stdlib/misc';
 
 import { dataAbstraction } from './data/data-abstraction';
 import { initKnex } from './data/knex';
 
 initKnex();
 
-setInterval(async () => {
+async function cleanDeletedObjects() {
   const [
     permanentlyDeletedPages,
 
@@ -25,10 +22,6 @@ setInterval(async () => {
     groupMembers,
 
     permanentlyDeletedGroups,
-
-    invalidatedSessions,
-
-    expiredDemoUsers,
   ] = await Promise.all([
     PageModel.query()
       .join('groups', 'groups.id', 'pages.group_id')
@@ -48,12 +41,6 @@ setInterval(async () => {
 
     GroupModel.query()
       .where('permanent_deletion_date', '>', new Date())
-      .select('id'),
-
-    SessionModel.query().where('invalidated', true).select('id'),
-
-    UserModel.query()
-      .where('creation_date', '<', addDays(new Date(), -7))
       .select('id'),
   ]);
 
@@ -91,14 +78,10 @@ setInterval(async () => {
       ...permanentlyDeletedGroups.map((group) =>
         dataAbstraction().delete('group', group.id, { dtrx }),
       ),
-
-      ...invalidatedSessions.map((session) =>
-        dataAbstraction().delete('session', session.id, { dtrx }),
-      ),
-
-      ...expiredDemoUsers.map((user) =>
-        dataAbstraction().delete('user', user.id, { dtrx }),
-      ),
     ]);
   });
-}, 24 * 60 * 60 * 1000);
+}
+
+void cleanDeletedObjects();
+
+setInterval(cleanDeletedObjects, 24 * 60 * 60 * 1000);

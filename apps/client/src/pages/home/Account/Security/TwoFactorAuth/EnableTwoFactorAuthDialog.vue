@@ -124,6 +124,7 @@
         />
 
         <DeepBtn
+          ref="continueBtn"
           label="Continue"
           type="submit"
           flat
@@ -140,7 +141,8 @@
 import { sleep } from '@stdlib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import QRCode from 'qrcode';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
+import DeepBtn from 'src/components/DeepBtn.vue';
 import type { Ref } from 'vue';
 
 import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
@@ -148,7 +150,7 @@ import RecoveryCodeDialog from './RecoveryCodeDialog.vue';
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 
 const props = defineProps<{
-  loginHash: string;
+  loginHash: Uint8Array;
   secret: string;
   keyUri: string;
 }>();
@@ -173,6 +175,14 @@ onMounted(async () => {
 
 const authenticatorToken = ref('');
 
+const continueBtn = ref<InstanceType<typeof DeepBtn>>();
+
+watch(authenticatorToken, (value) => {
+  if (/^\d{6}$/.test(value)) {
+    continueBtn.value?.$el.click();
+  }
+});
+
 async function verify() {
   try {
     if (!/^\d{6}$/.test(authenticatorToken.value)) {
@@ -180,19 +190,17 @@ async function verify() {
     }
 
     const recoveryCodes = (
-      await api().post<{
-        recoveryCodes: string[];
-      }>('/api/users/account/security/two-factor-auth/enable/verify', {
+      await trpcClient.users.account.twoFactorAuth.enable.finish.mutate({
         loginHash: props.loginHash,
         authenticatorToken: authenticatorToken.value,
       })
-    ).data.recoveryCodes;
+    ).recoveryCodes;
 
     $quasar().dialog({
       component: RecoveryCodeDialog,
 
       componentProps: {
-        recoveryCodes: recoveryCodes,
+        recoveryCodes,
       },
     });
 

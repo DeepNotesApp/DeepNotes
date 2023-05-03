@@ -4,8 +4,8 @@ import { once } from 'lodash';
 
 import { groupPrivateKeyrings } from './group-private-keyrings';
 
-const _getLogger = mainLogger().sub('groupMemberNames.get');
-const _setLogger = mainLogger().sub('groupMemberNames.set');
+const _getLogger = mainLogger.sub('groupMemberNames.get');
+const _setLogger = mainLogger.sub('groupMemberNames.set');
 
 export const groupInvitationNames = once(() =>
   createSmartComputedDict<
@@ -22,15 +22,17 @@ export const groupInvitationNames = once(() =>
         return { text: '[Unknown user]', status: 'unknown' };
       }
 
-      const groupId = splitStr(key, ':', 2)[0];
+      const [groupId, userId] = splitStr(key, ':', 2);
 
-      const [privateKeyring, encryptedName] = await Promise.all([
+      const isSelf = userId === authStore().userId;
+
+      const [groupPrivateKeyring, encryptedName] = await Promise.all([
         groupPrivateKeyrings()(groupId).getAsync(),
 
         internals.realtime.globalCtx.hgetAsync(
           'group-join-invitation',
           key,
-          'encrypted-name',
+          isSelf ? 'encrypted-name-for-user' : 'encrypted-name',
         ),
       ]);
 
@@ -41,21 +43,29 @@ export const groupInvitationNames = once(() =>
       }
 
       if (groupId == null) {
-        mainLogger().info(`${key}: No group ID found`);
-
-        return { text: '[Encrypted name]', status: 'encrypted' };
-      }
-
-      if (privateKeyring == null) {
-        _getLogger.info(`${key}: No group private key found`);
+        mainLogger.info(`${key}: No group ID found`);
 
         return { text: '[Encrypted name]', status: 'encrypted' };
       }
 
       try {
-        const result = bytesToText(
-          privateKeyring.decrypt(encryptedName, { padding: true }),
-        );
+        let result;
+
+        if (isSelf) {
+          result = bytesToText(
+            internals.keyPair.decrypt(encryptedName, { padding: true }),
+          );
+        } else {
+          if (groupPrivateKeyring == null) {
+            _getLogger.info(`${key}: No group private key found`);
+
+            return { text: '[Encrypted name]', status: 'encrypted' };
+          }
+
+          result = bytesToText(
+            groupPrivateKeyring.decrypt(encryptedName, { padding: true }),
+          );
+        }
 
         _getLogger.info(`${key}: ${result}`);
 

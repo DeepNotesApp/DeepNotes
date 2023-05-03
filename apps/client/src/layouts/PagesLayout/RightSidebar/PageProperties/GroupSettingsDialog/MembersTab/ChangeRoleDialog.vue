@@ -57,7 +57,7 @@ import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { changeUserRole } from 'src/code/api-interface/groups/change-user-role';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const props = defineProps<{
@@ -96,7 +96,8 @@ async function changeRole() {
     }
 
     for (const userId of props.userIds) {
-      await changeUserRole(props.groupId, {
+      await changeUserRole({
+        groupId: props.groupId,
         patientId: userId,
         role: role.value,
       });

@@ -4,8 +4,8 @@ import { once } from 'lodash';
 
 import { groupAccessKeyrings } from './group-access-keyrings';
 
-const _getLogger = mainLogger().sub('groupNames.get');
-const _setLogger = mainLogger().sub('groupNames.set');
+const _getLogger = mainLogger.sub('groupNames.get');
+const _setLogger = mainLogger.sub('groupNames.set');
 
 export const groupNames = once(() =>
   createSmartComputedDict<
@@ -23,7 +23,7 @@ export const groupNames = once(() =>
       }
 
       if (groupId === internals.personalGroupId) {
-        return { status: 'success', text: 'Default group' };
+        return { status: 'success', text: 'Personal group' };
       }
 
       const [accessKeyring, groupEncryptedName] = await Promise.all([

@@ -1,16 +1,16 @@
 import './env';
 
+import { mainLogger } from '@stdlib/misc';
 import { httpServer } from 'src/http-server';
 
 import { initKnex } from './data/knex';
-import { mainLogger } from './logger';
 
-const moduleLogger = mainLogger().sub('index.ts');
+const moduleLogger = mainLogger.sub('index.ts');
 
 initKnex();
 
 httpServer().listen(parseInt(process.env.REALTIME_SERVER_PORT), () => {
   moduleLogger.info(
-    `Server started on port ${process.env.REALTIME_SERVER_PORT}`,
+    `realtime-server started on port ${process.env.REALTIME_SERVER_PORT}`,
   );
 });

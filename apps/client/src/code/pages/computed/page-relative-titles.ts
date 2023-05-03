@@ -6,8 +6,8 @@ import { once } from 'lodash';
 import { pageGroupIds } from './page-group-id';
 import { pageKeyrings } from './page-keyrings';
 
-const _getLogger = mainLogger().sub('pageRelativeTitles.get');
-const _setLogger = mainLogger().sub('pageRelativeTitles.set');
+const _getLogger = mainLogger.sub('pageRelativeTitles.get');
+const _setLogger = mainLogger.sub('pageRelativeTitles.set');
 
 export const pageRelativeTitles = once(() =>
   createSmartComputedDict<
@@ -39,7 +39,7 @@ export const pageRelativeTitles = once(() =>
       }
 
       if (groupId == null) {
-        mainLogger().info(`${pageId}: No group ID found`);
+        mainLogger.info(`${pageId}: No group ID found`);
 
         return { text: `[Page ${pageId}]`, status: 'unknown' };
       }

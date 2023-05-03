@@ -10,13 +10,9 @@
       <q-card-section
         style="padding: 20px; display: flex; flex-direction: column"
       >
-        <TextField
+        <LinkURL
           ref="urlElem"
-          label="URL"
-          filled
-          dense
           v-model="url"
-          :maxlength="maxUrlLength"
         />
       </q-card-section>
     </template>
@@ -37,19 +33,7 @@
           flat
           label="New page"
           color="primary"
-          @click="
-            () => {
-              dialogRef.onDialogHide();
-
-              $q.dialog({
-                component: NewPageDialog,
-
-                componentProps: {
-                  initialPageTitle,
-                },
-              });
-            }
-          "
+          @click="createNewPage()"
         />
 
         <DeepBtn
@@ -65,7 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import { maxUrlLength, sleep, splitStr } from '@stdlib/misc';
+import { sleep, splitStr } from '@stdlib/misc';
+import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 import NewPageDialog from '../RightSidebar/NoteProperties/NewPageDialog.vue';
@@ -88,8 +73,38 @@ onMounted(async () => {
 });
 
 function insertLink() {
-  page.value.selection.setMark('link', { href: url.value });
+  page.value.selection.format((chain) =>
+    chain.setMark('link', { href: url.value }),
+  );
 
   dialogRef.value.onDialogOK();
+
+  void createPageBacklink({
+    sourcePageId: page.value.id,
+    targetUrl: url.value,
+  });
+}
+
+function createNewPage() {
+  dialogRef.value.onDialogHide();
+
+  $quasar()
+    .dialog({
+      component: NewPageDialog,
+
+      componentProps: {
+        initialPageTitle,
+      },
+    })
+    .onOk(async (newPageUrl: string) => {
+      page.value.selection.format((chain) =>
+        chain.setMark('link', { href: newPageUrl }),
+      );
+
+      void createPageBacklink({
+        sourcePageId: page.value.id,
+        targetUrl: newPageUrl,
+      });
+    });
 }
 </script>

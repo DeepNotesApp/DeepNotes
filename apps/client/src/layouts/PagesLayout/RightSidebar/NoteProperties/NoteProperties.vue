@@ -107,9 +107,11 @@
 
     <q-separator />
 
-    <VerticalColorPalette
+    <ColorPalette
       type="notes"
-      style="margin: 6px; border-radius: 4px; width: 44px; overflow: hidden"
+      orientation="vertical"
+      :split="2"
+      style="margin: 6px; width: 44px"
       :disable="page.react.readOnly"
       @select="
         changeProp($event, (selectedNote, value) => {
@@ -127,37 +129,21 @@
     <!-- Link -->
 
     <div style="padding: 20px; display: flex; flex-direction: column">
-      <Combobox
-        label="Link URL"
-        :disable="page.react.readOnly"
-        :options="linkOptions"
+      <LinkURL
         :model-value="note.react.collab.link"
         @update:model-value="
-          changeProp($event, (selectedNote, value) => {
-            selectedNote.react.collab.link = value;
-          })
-        "
-      >
-        <template #item="scope">
-          <q-item-section>
-            <q-item-label caption>
-              {{
-                groupNames()(
-                  realtimeCtx.hget(
-                    'page',
-                    splitStr(scope.opt.value, '/').at(-1)!,
-                    'group-id',
-                  ),
-                ).get().text
-              }}
-            </q-item-label>
+          (event) => {
+            changeProp(event, (selectedNote, value) => {
+              selectedNote.react.collab.link = value;
+            });
 
-            <q-item-label>
-              {{ scope.opt.label }}
-            </q-item-label>
-          </q-item-section>
-        </template>
-      </Combobox>
+            void createPageBacklink({
+              sourcePageId: page.id,
+              targetUrl: event,
+            });
+          }
+        "
+      />
 
       <Gap style="height: 16px" />
 
@@ -450,27 +436,24 @@
 
       <Gap style="height: 16px" />
 
-      <q-color
-        :disable="page.react.readOnly"
-        :model-value="colorNameToColorHex('ui', note.react.collab.color.value)"
-        @update:model-value="
-          changeProp(
-            colorHexToColorName('ui', $event),
-            (selectedNote, value) => {
+      <div style="display: flex; justify-content: center">
+        <ColorPalette
+          type="notes"
+          orientation="horizontal"
+          :split="2"
+          :disable="page.react.readOnly"
+          style="width: 160px"
+          @select="
+            changeProp($event, (selectedNote, value) => {
               if (selectedNote.react.region.type === 'note') {
                 selectedNote.react.collab.color.inherit = false;
               }
 
               selectedNote.react.collab.color.value = value;
-            },
-          )
-        "
-        default-view="palette"
-        no-header
-        no-header-tabs
-        no-footer
-        :palette="Object.values(colorMap().ui)"
-      />
+            })
+          "
+        />
+      </div>
     </div>
 
     <q-separator />
@@ -720,20 +703,12 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
-import {
-  colorHexToColorName,
-  colorMap,
-  colorNameToColorHex,
-} from 'src/code/pages/colors';
-import { groupNames } from 'src/code/pages/computed/group-names';
+import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { getPageTitle } from 'src/code/pages/utils';
-import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import NewPageDialog from './NewPageDialog.vue';
@@ -742,8 +717,6 @@ const page = inject<Ref<Page>>('page')!;
 
 const note = computed(() => page.value.activeElem.react.value as PageNote);
 
-const realtimeCtx = useRealtimeContext();
-
 function changeProp(value: any, func: (note: PageNote, value: any) => void) {
   page.value.collab.doc.transact(() => {
     for (const selectedNote of page.value.selection.react.notes) {
@@ -751,30 +724,6 @@ function changeProp(value: any, func: (note: PageNote, value: any) => void) {
     }
   });
 }
-
-const linkOptions = computed(() =>
-  internals.pages.react.recentPageIds
-    .map((pageId) => {
-      const groupId = realtimeCtx.hget('page', pageId, 'group-id');
-
-      if (groupId == null) {
-        return;
-      }
-
-      if (
-        realtimeCtx.hget('group', groupId, 'permanent-deletion-date') != null ||
-        realtimeCtx.hget('page', pageId, 'permanent-deletion-date') != null
-      ) {
-        return;
-      }
-
-      return {
-        label: getPageTitle(pageId, { prefer: 'absolute' }).text,
-        value: `/pages/${pageId}`,
-      };
-    })
-    .filter((page) => page != null),
-);
 
 function createNewPage() {
   let initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];
@@ -817,17 +766,15 @@ async function setAsDefault() {
 
     internals.pages.defaultNote = serialObject;
 
-    await api().post('/api/users/set-encrypted-default-note', {
-      encryptedDefaultNote: bytesToBase64(
-        internals.symmetricKeyring.encrypt(pack(serialObject), {
-          padding: true,
-          associatedData: {
-            context: 'UserDefaultNote',
-            userId: authStore().userId,
-          },
-        }),
-      ),
-    });
+    await trpcClient.users.pages.setEncryptedDefaultNote.mutate(
+      internals.symmetricKeyring.encrypt(pack(serialObject), {
+        padding: true,
+        associatedData: {
+          context: 'UserDefaultNote',
+          userId: authStore().userId,
+        },
+      }),
+    );
 
     $quasar().notify({
       message: 'Default note updated.',

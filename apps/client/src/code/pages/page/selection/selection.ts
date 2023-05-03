@@ -1,7 +1,9 @@
-import type { MarkName } from '@stdlib/misc';
+import type { MarkName, NodeName } from '@stdlib/misc';
 import { getClipboardText, setClipboardText } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
-import type { ChainedCommands } from '@tiptap/vue-3';
+import type { ChainedCommands, Editor } from '@tiptap/vue-3';
+import { every } from 'lodash';
+import { unsetNode } from 'src/code/tiptap/utils';
 import type { ComputedRef, UnwrapNestedRefs } from 'vue';
 
 import type { PageArrow } from '../arrows/arrow';
@@ -28,8 +30,8 @@ export class PageSelection {
 
   readonly react: UnwrapNestedRefs<ISelectionReact>;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
 
     this.react = reactive({
       noteSet: {},
@@ -143,67 +145,50 @@ export class PageSelection {
     });
   }
 
-  isMarkActive(name: MarkName) {
-    for (const elem of this.react.elems) {
-      for (const editor of elem.react.editors) {
-        if (!internals.tiptap().isMarkActive(editor.state, name)) {
-          return false;
+  format(
+    chainFunc: (chain: ChainedCommands, editor: Editor) => ChainedCommands,
+  ) {
+    this.page.collab.doc.transact(() => {
+      if (this.page.editing.react.editor != null) {
+        chainFunc(
+          this.page.editing.react.editor.chain().focus(),
+          this.page.editing.react.editor,
+        ).run();
+      } else {
+        for (const elem of this.react.elems) {
+          for (const editor of elem.react.editors) {
+            chainFunc(editor.chain().selectAll(), editor).run();
+          }
         }
       }
-    }
+    });
+  }
 
-    return true;
-  }
-  setMark(name: MarkName, attribs?: Record<string, any>) {
-    this.page.collab.doc.transact(() => {
-      if (this.page.editing.react.editor != null) {
-        this.page.editing.react.editor
-          .chain()
-          .focus()
-          .setMark(name, attribs)
-          .run();
-      } else {
-        for (const elem of this.react.elems) {
-          for (const editor of elem.react.editors) {
-            editor.chain().selectAll().setMark(name, attribs).run();
-          }
-        }
-      }
-    });
-  }
-  unsetMark(name: MarkName) {
-    this.page.collab.doc.transact(() => {
-      if (this.page.editing.react.editor != null) {
-        this.page.editing.react.editor.chain().focus().unsetMark(name).run();
-      } else {
-        for (const elem of this.react.elems) {
-          for (const editor of elem.react.editors) {
-            editor.chain().selectAll().unsetMark(name).run();
-          }
-        }
-      }
-    });
-  }
   toggleMark(name: MarkName, attribs?: Record<string, any>) {
-    if (this.isMarkActive(name)) {
-      this.unsetMark(name);
+    if (
+      every(this.react.elems, (elem) =>
+        every(elem.react.editors, (editor) =>
+          internals.tiptap().isMarkActive(editor.state, name),
+        ),
+      )
+    ) {
+      this.format((chain) => chain.unsetMark(name));
     } else {
-      this.setMark(name, attribs);
+      this.format((chain) => chain.setMark(name, attribs));
     }
   }
-
-  format(chainFunc: (chain: ChainedCommands) => ChainedCommands) {
-    this.page.collab.doc.transact(() => {
-      if (this.page.editing.react.editor != null) {
-        chainFunc(this.page.editing.react.editor.chain().focus()).run();
-      } else {
-        for (const elem of this.react.elems) {
-          for (const editor of elem.react.editors) {
-            chainFunc(editor.chain().selectAll()).run();
-          }
-        }
-      }
-    });
+  toggleNode(name: NodeName, attribs?: Record<string, any>) {
+    if (
+      every(this.react.elems, (elem) =>
+        every(elem.react.editors, (editor) =>
+          internals.tiptap().isNodeActive(editor.state, name, attribs),
+        ),
+      )
+    ) {
+      this.format((chain, editor) => unsetNode(editor, chain, name, attribs));
+    } else {
+      this.format((chain) => chain.setNode(name, attribs));
+    }
   }
 
   copy() {

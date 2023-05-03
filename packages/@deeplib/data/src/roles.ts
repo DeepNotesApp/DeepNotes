@@ -30,5 +30,5 @@ export async function userHasPermission(
     'is-public',
   );
 
-  return !!groupIsPublic && permission === 'viewGroup';
+  return !!groupIsPublic && permission === 'viewGroupPages';
 }

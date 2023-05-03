@@ -3,7 +3,7 @@ import { once } from 'lodash';
 import { mainLogger } from './logger';
 import { Resolvable } from './resolvable';
 
-const classLogger = mainLogger().sub('ClientSocket');
+const classLogger = mainLogger.sub('ClientSocket');
 
 export const ClientSocket = once(
   () =>

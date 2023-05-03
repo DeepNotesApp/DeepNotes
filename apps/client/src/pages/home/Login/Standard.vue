@@ -95,12 +95,11 @@
 </template>
 
 <script setup lang="ts">
-import { bytesToBase64 } from '@stdlib/base64';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { enterDemo } from 'src/code/auth/demo';
 import { login } from 'src/code/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 // Email
@@ -164,35 +163,18 @@ async function onSubmit() {
 
     // Compute password hash
 
-    const derivedKeys = await deriveUserValues(email.value, password.value);
+    const derivedKeys = await deriveUserValues({
+      email: email.value,
+      password: password.value,
+    });
 
     // Login
 
-    const response = (
-      await api().post<{
-        twoFactorAuth: boolean;
-
-        publicKeyring: string;
-        encryptedPrivateKeyring: string;
-        encryptedSymmetricKeyring: string;
-
-        sessionKey: string;
-
-        personalGroupId: string;
-
-        userId: string;
-        sessionId: string;
-      }>('/auth/login', {
-        email: email.value,
-        loginHash: bytesToBase64(derivedKeys.loginHash),
-        rememberSession: rememberSession.value,
-      })
-    ).data;
-
-    if (response.twoFactorAuth && authType.value === 'standard') {
-      authType.value = 'authenticator';
-      return;
-    }
+    const response = await trpcClient.sessions.login.mutate({
+      email: email.value,
+      loginHash: derivedKeys.loginHash,
+      rememberSession: rememberSession.value,
+    });
 
     await login({
       ...response,
@@ -201,8 +183,15 @@ async function onSubmit() {
 
       masterKey: derivedKeys.masterKey,
     });
-  } catch (error) {
-    handleError(error);
+  } catch (error: any) {
+    if (
+      error.message === 'Requires two-factor authentication.' &&
+      authType.value === 'standard'
+    ) {
+      authType.value = 'authenticator';
+    } else {
+      handleError(error);
+    }
   }
 }
 </script>

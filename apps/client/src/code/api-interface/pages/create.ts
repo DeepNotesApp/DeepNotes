@@ -1,5 +1,4 @@
-import { bytesToBase64, bytesToBase64Safe } from '@stdlib/base64';
-import type { PublicKeyring, SymmetricKeyring } from '@stdlib/crypto';
+import type { Keyring, SymmetricKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
@@ -10,70 +9,40 @@ import {
   unlockGroupContentKeyring,
 } from 'src/code/crypto';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
-import { asyncPrompt } from 'src/code/utils';
+import { asyncDialog } from 'src/code/utils/misc';
 
-export async function createPage(
-  pageId: string,
-  {
-    currentGroupId,
-    pageRelativeTitle,
+export async function createPage(input: {
+  parentPageId: string;
+  currentGroupId: string;
+  pageRelativeTitle: string;
 
-    createGroup,
-    groupName,
-    groupMemberName,
-    groupIsPublic,
-    groupPassword,
-  }: {
-    currentGroupId: string;
-    pageRelativeTitle: string;
-
-    createGroup: boolean;
-    groupName: string;
-    groupMemberName: string;
-    groupIsPublic: boolean;
-    groupPassword?: string;
-  },
-) {
+  createGroup: boolean;
+  groupName: string;
+  groupMemberName: string;
+  groupIsPublic: boolean;
+  groupPassword?: string;
+}) {
   let groupContentKeyring: SymmetricKeyring | undefined;
 
-  const request = {} as {
-    parentPageId: string;
-    groupId: string;
-    pageId: string;
+  const pageId = nanoid();
 
-    pageEncryptedSymmetricKeyring: string;
-    pageEncryptedRelativeTitle: string;
-    pageEncryptedAbsoluteTitle: string;
+  let groupId;
 
-    createGroup: boolean;
-    groupEncryptedName: string;
-    groupPasswordHash?: string;
-    groupIsPublic: boolean;
-    accessKeyring: string;
-    groupEncryptedInternalKeyring: string;
-    groupEncryptedContentKeyring: string;
-    groupPublicKeyring: string;
-    groupEncryptedPrivateKeyring: string;
-    groupMemberEncryptedName: string;
-  };
+  let groupCreation: Parameters<
+    typeof trpcClient.pages.create.mutate
+  >[0]['groupCreation'];
 
-  request.parentPageId = pageId;
-
-  request.pageId = nanoid();
-
-  request.createGroup = createGroup;
-
-  if (createGroup) {
-    if (groupName === '') {
+  if (input.createGroup) {
+    if (input.groupName === '') {
       throw new Error('Please enter a group name.');
     }
 
-    if (groupMemberName === '') {
+    if (input.groupMemberName === '') {
       throw new Error('Please enter an user alias.');
     }
 
-    if (groupPassword != null && zxcvbn(groupPassword).score <= 2) {
-      await asyncPrompt({
+    if (input.groupPassword != null && zxcvbn(input.groupPassword).score <= 2) {
+      await asyncDialog({
         title: 'Weak password',
         html: true,
         message:
@@ -89,63 +58,56 @@ export async function createPage(
 
     const groupValues = await generateGroupValues({
       userKeyPair: internals.keyPair,
-      isPublic: groupIsPublic,
-      password: groupPassword != null ? groupPassword : undefined,
+      isPublic: input.groupIsPublic,
+      password: input.groupPassword != null ? input.groupPassword : undefined,
     });
 
-    request.groupId = groupValues.groupId;
+    groupId = groupValues.groupId;
 
     groupContentKeyring = groupValues.contentKeyring;
 
-    request.groupEncryptedName = bytesToBase64(
-      groupValues.accessKeyring.encrypt(textToBytes(groupName), {
-        padding: true,
-        associatedData: {
-          context: 'GroupName',
-          groupId: groupValues.groupId,
+    groupCreation = {
+      groupEncryptedName: groupValues.accessKeyring.encrypt(
+        textToBytes(input.groupName),
+        {
+          padding: true,
+          associatedData: {
+            context: 'GroupName',
+            groupId: groupValues.groupId,
+          },
         },
-      }),
-    );
+      ),
 
-    request.groupPasswordHash = bytesToBase64Safe(
-      groupValues.passwordValues?.passwordHash,
-    );
+      groupPasswordHash: groupValues.passwordValues?.passwordHash,
 
-    request.groupIsPublic = groupIsPublic;
+      groupIsPublic: input.groupIsPublic,
 
-    request.accessKeyring = bytesToBase64(
-      groupValues.finalAccessKeyring.fullValue,
-    );
-    request.groupEncryptedInternalKeyring = bytesToBase64(
-      groupValues.encryptedInternalKeyring.fullValue,
-    );
-    request.groupEncryptedContentKeyring = bytesToBase64(
-      groupValues.encryptedContentKeyring.fullValue,
-    );
+      groupAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
+      groupEncryptedInternalKeyring:
+        groupValues.encryptedInternalKeyring.wrappedValue,
+      groupEncryptedContentKeyring:
+        groupValues.encryptedContentKeyring.wrappedValue,
 
-    request.groupPublicKeyring = bytesToBase64(
-      (groupValues.keyPair.publicKey as PublicKeyring).fullValue,
-    );
-    request.groupEncryptedPrivateKeyring = bytesToBase64(
-      groupValues.encryptedPrivateKeyring.fullValue,
-    );
+      groupPublicKeyring: (groupValues.keyPair.publicKey as Keyring)
+        .wrappedValue,
+      groupEncryptedPrivateKeyring:
+        groupValues.encryptedPrivateKeyring.wrappedValue,
 
-    request.groupMemberEncryptedName = bytesToBase64(
-      internals.keyPair.encrypt(
-        textToBytes(groupMemberName),
+      groupOwnerEncryptedName: internals.keyPair.encrypt(
+        textToBytes(input.groupMemberName),
         groupValues.keyPair.publicKey,
         { padding: true },
       ),
-    );
+    };
   } else {
-    request.groupId = currentGroupId;
+    groupId = input.currentGroupId;
 
     groupContentKeyring = await groupContentKeyrings()(
-      currentGroupId,
+      input.currentGroupId,
     ).getAsync();
 
     if (groupContentKeyring?.topLayer === DataLayer.Symmetric) {
-      const destGroupPassword = await asyncPrompt<string>({
+      const destGroupPassword = await asyncDialog<string>({
         title: 'Destination group password',
         message: 'Enter the destination group password:',
         color: 'primary',
@@ -161,7 +123,7 @@ export async function createPage(
       });
 
       groupContentKeyring = await unlockGroupContentKeyring(
-        currentGroupId,
+        input.currentGroupId,
         destGroupPassword,
       );
     }
@@ -173,37 +135,42 @@ export async function createPage(
 
   const pageKeyring = createSymmetricKeyring();
 
-  request.pageEncryptedSymmetricKeyring = bytesToBase64(
-    pageKeyring.wrapSymmetric(groupContentKeyring, {
+  const pageEncryptedSymmetricKeyring = pageKeyring.wrapSymmetric(
+    groupContentKeyring,
+    {
       associatedData: {
         context: 'PageKeyring',
-        pageId: request.pageId,
+        pageId,
       },
-    }).fullValue,
-  );
-  request.pageEncryptedRelativeTitle = bytesToBase64(
-    pageKeyring.encrypt(textToBytes(pageRelativeTitle), {
+    },
+  ).wrappedValue;
+  const pageEncryptedRelativeTitle = pageKeyring.encrypt(
+    textToBytes(input.pageRelativeTitle),
+    {
       padding: true,
       associatedData: {
         context: 'PageRelativeTitle',
-        pageId: request.pageId,
+        pageId,
       },
-    }),
+    },
   );
-  request.pageEncryptedAbsoluteTitle = bytesToBase64(
-    pageKeyring.encrypt(textToBytes(''), {
-      padding: true,
-      associatedData: {
-        context: 'PageAbsoluteTitle',
-        pageId: request.pageId,
-      },
-    }),
-  );
+  const pageEncryptedAbsoluteTitle = pageKeyring.encrypt(textToBytes(''), {
+    padding: true,
+    associatedData: {
+      context: 'PageAbsoluteTitle',
+      pageId,
+    },
+  });
 
-  return (
-    await api().post<{
-      pageId: string;
-      message?: string;
-    }>('/api/pages/create', request)
-  ).data;
+  return await trpcClient.pages.create.mutate({
+    parentPageId: input.parentPageId,
+    groupId,
+    pageId,
+
+    pageEncryptedSymmetricKeyring,
+    pageEncryptedRelativeTitle,
+    pageEncryptedAbsoluteTitle,
+
+    groupCreation,
+  });
 }

@@ -64,7 +64,7 @@
                   `${groupId}:${authStore().userId}`,
                   'role',
                 )
-              ]?.permissions.manageLowerRanks &&
+              ]?.permissions.viewGroupPages &&
               !loading
             "
           >
@@ -74,17 +74,29 @@
               label="Members"
             />
 
-            <q-tab
-              name="Join invitations"
-              icon="mdi-calendar"
-              label="Join invitations"
-            />
+            <template
+              v-if="
+                rolesMap()[
+                  realtimeCtx.hget(
+                    'group-member',
+                    `${groupId}:${authStore().userId}`,
+                    'role',
+                  )
+                ]?.permissions.manageLowerRanks
+              "
+            >
+              <q-tab
+                name="Join invitations"
+                icon="mdi-calendar"
+                label="Join invitations"
+              />
 
-            <q-tab
-              name="Join requests"
-              icon="mdi-account-multiple-plus"
-              label="Join requests"
-            />
+              <q-tab
+                name="Join requests"
+                icon="mdi-account-multiple-plus"
+                label="Join requests"
+              />
+            </template>
           </template>
         </q-tabs>
       </template>
@@ -127,7 +139,7 @@
                     `${groupId}:${authStore().userId}`,
                     'role',
                   )
-                ]?.permissions.manageLowerRanks &&
+                ]?.permissions.viewGroupPages &&
                 !loading
               "
             >
@@ -138,19 +150,31 @@
                 @set-tab="(targetTab: string) => tab = targetTab"
               />
 
-              <TabBtn
-                name="Join invitations"
-                icon="mdi-calendar"
-                :current-tab="tab"
-                @set-tab="(targetTab: string) => tab = targetTab"
-              />
+              <template
+                v-if="
+                  rolesMap()[
+                    realtimeCtx.hget(
+                      'group-member',
+                      `${groupId}:${authStore().userId}`,
+                      'role',
+                    )
+                  ]?.permissions.manageLowerRanks
+                "
+              >
+                <TabBtn
+                  name="Join invitations"
+                  icon="mdi-calendar"
+                  :current-tab="tab"
+                  @set-tab="(targetTab: string) => tab = targetTab"
+                />
 
-              <TabBtn
-                name="Join requests"
-                icon="mdi-account-multiple-plus"
-                :current-tab="tab"
-                @set-tab="(targetTab: string) => tab = targetTab"
-              />
+                <TabBtn
+                  name="Join requests"
+                  icon="mdi-account-multiple-plus"
+                  :current-tab="tab"
+                  @set-tab="(targetTab: string) => tab = targetTab"
+                />
+              </template>
             </template>
           </q-list>
 
@@ -173,7 +197,7 @@
           <InvitationsTab v-if="tab === 'Join invitations'" />
           <RequestsTab v-if="tab === 'Join requests'" />
 
-          <LoadingOverlay v-if="loading || realtimeCtx.loading" />
+          <LoadingOverlay v-if="loading" />
         </div>
       </q-card-section>
     </template>
@@ -196,7 +220,7 @@ import { rolesMap } from '@deeplib/misc';
 import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { handleError } from 'src/code/utils';
+import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import GeneralTab from './GeneralTab/GeneralTab.vue';
@@ -238,14 +262,12 @@ onMounted(async () => {
       props.groupId !== internals.personalGroupId &&
       authStore().loggedIn
     ) {
-      const response = (
-        await api().post<{
-          groupMemberIds: string[];
-        }>(`/api/groups/${props.groupId}/load-settings`)
-      ).data;
+      const groupUserIds = await trpcClient.groups.getUserIds.query({
+        groupId: props.groupId,
+      });
 
       pagesStore().groups[props.groupId] = {
-        userIds: new Set(response.groupMemberIds),
+        userIds: new Set(groupUserIds),
       };
     }
 

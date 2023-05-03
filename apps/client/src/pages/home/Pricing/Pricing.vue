@@ -64,7 +64,7 @@
 
       <PlanCard
         title="Pro"
-        :price="8"
+        :price="5"
         previous="Basic"
         :features="[
           {
@@ -101,51 +101,23 @@
           :to="{ name: 'register', query: { plan: 'pro' } }"
         />
 
-        <form
+        <DeepBtn
           v-else-if="plan !== 'pro'"
-          :action="`${appServerURL}/api/stripe/create-checkout-session`"
-          method="POST"
-          style="display: flex"
-        >
-          <input
-            type="hidden"
-            name="plan"
-            value="pro"
-          />
+          label="Choose"
+          color="primary"
+          type="submit"
+          style="flex: 1"
+          @click="createCheckoutSession()"
+        />
 
-          <input
-            type="hidden"
-            name="returnUrl"
-            :value="global.location?.href"
-          />
-
-          <DeepBtn
-            label="Choose"
-            color="primary"
-            type="submit"
-            style="flex: 1"
-          />
-        </form>
-
-        <form
+        <DeepBtn
           v-else
-          :action="`${appServerURL}/api/stripe/create-portal-session`"
-          method="POST"
-          style="display: flex"
-        >
-          <input
-            type="hidden"
-            name="returnUrl"
-            :value="global.location?.href"
-          />
-
-          <DeepBtn
-            label="Manage"
-            color="primary"
-            type="submit"
-            style="flex: 1"
-          />
-        </form>
+          label="Manage"
+          color="primary"
+          type="submit"
+          style="flex: 1"
+          @click="createPortalSession()"
+        />
       </PlanCard>
     </div>
 
@@ -160,8 +132,6 @@ import { watchUntilTrue } from '@stdlib/vue';
 
 import PlanCard from './PlanCard.vue';
 
-const appServerURL = process.env.APP_SERVER_URL;
-
 const plan = computed(() =>
   internals.realtime.globalCtx.hget('user', authStore().userId, 'plan'),
 );
@@ -173,4 +143,20 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+async function createCheckoutSession() {
+  const { checkoutSessionUrl } =
+    await trpcClient.users.account.stripe.createCheckoutSession.mutate();
+
+  location.href = checkoutSessionUrl;
+}
+
+async function createPortalSession() {
+  const { portalSessionUrl } =
+    await trpcClient.users.account.stripe.createPortalSession.mutate({
+      returnUrl: location.href,
+    });
+
+  location.href = portalSessionUrl;
+}
 </script>

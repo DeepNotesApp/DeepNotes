@@ -1,5 +1,5 @@
 import { once } from '@stdlib/misc';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
 Object.defineProperty(process, 'env', {

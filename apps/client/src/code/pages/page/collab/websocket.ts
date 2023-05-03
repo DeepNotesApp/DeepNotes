@@ -10,7 +10,7 @@ import { Y } from '@syncedstore/core';
 import * as decoding from 'lib0/decoding';
 import * as encoding from 'lib0/encoding';
 import { cloneDeep, once, throttle } from 'lodash';
-import { isWithinTimeout } from 'src/code/utils';
+import { isWithinTimeout } from 'src/code/utils/misc';
 import * as awarenessProtocol from 'y-protocols/awareness';
 
 import { groupContentKeyrings } from '../../computed/group-content-keyrings';
@@ -39,16 +39,16 @@ export const PageWebsocket = once(
 
       syncPromise?: Resolvable;
 
-      constructor({ collab }: { collab: PageCollab }) {
-        super(`${process.env.COLLAB_SERVER_URL}/page:${collab.page.id}`);
+      constructor(input: { collab: PageCollab }) {
+        super(`${process.env.COLLAB_SERVER_URL}/page:${input.collab.page.id}`);
 
-        this.page = collab.page;
-        this.collab = collab;
+        this.page = input.collab.page;
+        this.collab = input.collab;
 
-        this.doc = collab.doc;
-        this.awareness = collab.presence.awareness;
+        this.doc = input.collab.doc;
+        this.awareness = input.collab.presence.awareness;
 
-        this._logger = mainLogger().sub('Websocket').sub(this.page.id);
+        this._logger = mainLogger.sub('Websocket').sub(this.page.id);
       }
 
       connect() {
@@ -157,17 +157,7 @@ export const PageWebsocket = once(
         this._sendDocSingleUpdateMessageThrottled();
       };
 
-      private _sendDocAllUpdatesUnmergedResponseMessage({
-        requestIdBytes,
-
-        rotatePageKey,
-        encryptedPageRelativeTitle,
-        encryptedPageAbsoluteTitle,
-        encryptedSnapshotSymmetricKeys,
-
-        createSnapshot,
-        updateIndex,
-      }: {
+      private _sendDocAllUpdatesUnmergedResponseMessage(input: {
         requestIdBytes: Uint8Array;
 
         rotatePageKey: boolean;
@@ -198,13 +188,13 @@ export const PageWebsocket = once(
 
         // Write request ID
 
-        encoding.writeVarUint8Array(encoder, requestIdBytes);
+        encoding.writeVarUint8Array(encoder, input.requestIdBytes);
 
         // Rotate page key
 
-        encoding.writeUint8(encoder, rotatePageKey ? 1 : 0);
+        encoding.writeUint8(encoder, input.rotatePageKey ? 1 : 0);
 
-        if (rotatePageKey) {
+        if (input.rotatePageKey) {
           this._logger.info('Rotating page key');
 
           const oldPageKeyring = pageKeyring;
@@ -222,13 +212,13 @@ export const PageWebsocket = once(
                 context: 'PageKeyring',
                 pageId: this.page.id,
               },
-            }).fullValue,
+            }).wrappedValue,
           );
 
           encoding.writeVarUint8Array(
             encoder,
             newPageKeyring.encrypt(
-              oldPageKeyring.decrypt(encryptedPageRelativeTitle, {
+              oldPageKeyring.decrypt(input.encryptedPageRelativeTitle, {
                 padding: true,
                 associatedData: {
                   context: 'PageRelativeTitle',
@@ -248,7 +238,7 @@ export const PageWebsocket = once(
           encoding.writeVarUint8Array(
             encoder,
             newPageKeyring.encrypt(
-              oldPageKeyring.decrypt(encryptedPageAbsoluteTitle, {
+              oldPageKeyring.decrypt(input.encryptedPageAbsoluteTitle, {
                 padding: true,
                 associatedData: {
                   context: 'PageAbsoluteTitle',
@@ -265,12 +255,15 @@ export const PageWebsocket = once(
             ),
           );
 
-          encoding.writeVarUint(encoder, encryptedSnapshotSymmetricKeys.size);
+          encoding.writeVarUint(
+            encoder,
+            input.encryptedSnapshotSymmetricKeys.size,
+          );
 
           for (const [
             snapshotId,
             encryptedSymmetricKey,
-          ] of encryptedSnapshotSymmetricKeys) {
+          ] of input.encryptedSnapshotSymmetricKeys) {
             encoding.writeVarString(encoder, snapshotId);
 
             encoding.writeVarUint8Array(
@@ -295,7 +288,7 @@ export const PageWebsocket = once(
 
         // Write full update
 
-        encoding.writeVarUint(encoder, updateIndex);
+        encoding.writeVarUint(encoder, input.updateIndex);
 
         const rawUpdate = Y.encodeStateAsUpdateV2(this.doc);
         const encryptedUpdate = pageKeyring.encrypt(rawUpdate, {
@@ -307,9 +300,9 @@ export const PageWebsocket = once(
         });
         encoding.writeVarUint8Array(encoder, encryptedUpdate);
 
-        encoding.writeUint8(encoder, createSnapshot ? 1 : 0);
+        encoding.writeUint8(encoder, input.createSnapshot ? 1 : 0);
 
-        if (createSnapshot) {
+        if (input.createSnapshot) {
           const snapshotSymmetricKey = wrapSymmetricKey();
 
           const snapshotEncryptedSymmetricKey = pageKeyring.encrypt(

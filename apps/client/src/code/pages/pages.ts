@@ -1,11 +1,11 @@
-import type { DeepNotesNotification } from '@deeplib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { unpack } from 'msgpackr';
 import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
 
 import type { Factories } from '../factories';
 import { authStore } from '../stores';
-import { multiModePath } from '../utils';
+import { trpcClient } from '../trpc';
+import { multiModePath } from '../utils/misc';
 import type { Page } from './page/page';
 import type { PageCache } from './page-cache';
 import type { ISerialArrowInput, ISerialObjectInput } from './serialization';
@@ -37,11 +37,11 @@ export class Pages {
 
   parentPageId?: string;
 
-  constructor({ factories }: { factories: Factories }) {
-    this.factories = factories;
+  constructor(input: { factories: Factories }) {
+    this.factories = input.factories;
 
-    this.serialization = factories.Serialization({ app: this });
-    this.pageCache = factories.PageCache({ app: this });
+    this.serialization = input.factories.Serialization({ app: this });
+    this.pageCache = input.factories.PageCache({ app: this });
 
     this.react = reactive({
       pathPageIds: [],
@@ -64,17 +64,8 @@ export class Pages {
 
     promises.push(
       (async () => {
-        const userData = (
-          await api().post<{
-            notifications: {
-              items: DeepNotesNotification[];
-              hasMore: boolean;
-              lastNotificationRead: number | undefined;
-            };
-          }>('/api/users/data')
-        ).data;
-
-        pagesStore().notifications = userData.notifications;
+        pagesStore().notifications =
+          await trpcClient.users.pages.notifications.load.query();
       })(),
     );
 
@@ -175,17 +166,14 @@ export class Pages {
 
     if (authStore().loggedIn) {
       try {
-        this.react.pathPageIds = (
-          await api().post<{
-            pathPageIds: string[];
-          }>('/api/users/current-path', {
+        this.react.pathPageIds =
+          await trpcClient.users.pages.getCurrentPath.query({
             initialPageId: pageId,
-          })
-        ).data.pathPageIds;
+          });
 
         return;
       } catch (error) {
-        mainLogger().error(error);
+        mainLogger.error(error);
       }
     }
 
@@ -210,7 +198,7 @@ export class Pages {
     pageId: string,
     params?: { fromParent?: boolean; openInNewTab?: boolean },
   ) {
-    mainLogger().sub('Pages.goToPage').info('pageId: %s', pageId);
+    mainLogger.sub('Pages.goToPage').info('pageId: %s', pageId);
 
     if (params?.openInNewTab) {
       window.open(multiModePath(`/pages/${pageId}`), '_blank');
@@ -226,7 +214,7 @@ export class Pages {
     groupId: string,
     params?: { fromParent?: boolean; openInNewTab?: boolean },
   ) {
-    mainLogger().sub('Pages.goToGroup').info('groupId: %s', groupId);
+    mainLogger.sub('Pages.goToGroup').info('groupId: %s', groupId);
 
     if (params?.openInNewTab) {
       window.open(multiModePath(`/groups/${groupId}`), '_blank');

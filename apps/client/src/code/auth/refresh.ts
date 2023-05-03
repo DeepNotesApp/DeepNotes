@@ -3,15 +3,17 @@ import {
   base64ToBytesSafe,
   bytesToBase64,
 } from '@stdlib/base64';
+import type { SymmetricKey } from '@stdlib/crypto';
 import {
+  createKeyring,
   createPrivateKeyring,
-  createPublicKeyring,
   createSymmetricKeyring,
   wrapKeyPair,
   wrapSymmetricKey,
 } from '@stdlib/crypto';
 
 import { redirectIfNecessary } from '../routing';
+import { trpcClient } from '../trpc';
 import { logout } from './logout';
 import {
   areClientTokensExpiring,
@@ -19,7 +21,7 @@ import {
   storeClientTokenExpirations,
 } from './tokens';
 
-const moduleLogger = mainLogger().sub('auth/refresh.client.ts');
+const moduleLogger = mainLogger.sub('auth/refresh.client.ts');
 
 export async function tryRefreshTokens(): Promise<void> {
   if (!authStore().loggedIn) {
@@ -50,21 +52,27 @@ export async function tryRefreshTokens(): Promise<void> {
   // Try to refresh tokens
 
   try {
-    let response;
+    let oldSessionKey: SymmetricKey;
+    let newSessionKey: SymmetricKey;
 
     if (authStore().oldSessionKey && authStore().newSessionKey) {
       moduleLogger.info(
         'Tokens already refreshed on server, skipping refresh request.',
       );
+
+      oldSessionKey = wrapSymmetricKey(
+        base64ToBytes(authStore().oldSessionKey),
+      );
+      newSessionKey = wrapSymmetricKey(
+        base64ToBytes(authStore().newSessionKey),
+      );
     } else {
       moduleLogger.info('Sending refresh request');
 
-      response = (
-        await api().post<{
-          oldSessionKey: string;
-          newSessionKey: string;
-        }>('/auth/refresh')
-      ).data;
+      const response = await trpcClient.sessions.refresh.mutate(undefined);
+
+      oldSessionKey = wrapSymmetricKey(response.oldSessionKey);
+      newSessionKey = wrapSymmetricKey(response.newSessionKey);
     }
 
     // Reencrypt keys
@@ -73,14 +81,7 @@ export async function tryRefreshTokens(): Promise<void> {
 
     internals.personalGroupId = internals.storage.getItem('personalGroupId')!;
 
-    const oldSessionKey = wrapSymmetricKey(
-      base64ToBytes(authStore().oldSessionKey || response?.oldSessionKey!),
-    );
-    const newSessionKey = wrapSymmetricKey(
-      base64ToBytes(authStore().newSessionKey || response?.newSessionKey!),
-    );
-
-    const publicKeyring = createPublicKeyring(
+    const publicKeyring = createKeyring(
       base64ToBytesSafe(internals.storage.getItem('publicKeyring'))!,
     );
 
@@ -114,7 +115,7 @@ export async function tryRefreshTokens(): Promise<void> {
             context: 'SessionUserPrivateKeyring',
             userId: authStore().userId,
           },
-        }).fullValue,
+        }).wrappedValue,
       ),
     );
 
@@ -126,7 +127,7 @@ export async function tryRefreshTokens(): Promise<void> {
             context: 'SessionUserSymmetricKeyring',
             userId: authStore().userId,
           },
-        }).fullValue,
+        }).wrappedValue,
       ),
     );
 
@@ -141,7 +142,11 @@ export async function tryRefreshTokens(): Promise<void> {
 
     moduleLogger.info('Tokens refreshed successfully');
 
-    await redirectIfNecessary(router(), route().value, authStore());
+    await redirectIfNecessary({
+      router: router(),
+      route: route().value,
+      auth: authStore(),
+    });
   } catch (error) {
     if (authStore().oldSessionKey && authStore().newSessionKey) {
       moduleLogger.info('Failed refreshing tokens server session keys.');

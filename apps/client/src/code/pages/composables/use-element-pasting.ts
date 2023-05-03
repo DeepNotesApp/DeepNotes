@@ -22,7 +22,7 @@ export function useElementPasting() {
       return;
     }
 
-    mainLogger().sub('useElementPasting').info('Perform');
+    mainLogger.sub('useElementPasting').info('Perform');
 
     const text = (event.clipboardData || window.clipboardData).getData('text');
 

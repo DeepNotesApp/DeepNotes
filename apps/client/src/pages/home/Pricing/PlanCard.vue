@@ -96,9 +96,7 @@ ul :deep() {
     margin-bottom: 20px;
   }
 }
-</style>
 
-<style scoped>
 .feature-icon {
   position: absolute;
   left: -44px;

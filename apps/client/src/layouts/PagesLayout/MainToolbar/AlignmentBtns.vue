@@ -7,14 +7,14 @@
     @click="page.aligning.alignLeft()"
   />
   <ToolbarBtn
-    tooltip="Centralize horizontally"
+    tooltip="Center horizontally"
     icon="mdi-align-horizontal-center"
     icon-size="25px"
     :disable="page.react.readOnly || page.selection.react.notes.length < 2"
     @click="page.aligning.alignCenterHorizontal()"
   />
   <ToolbarBtn
-    tooltip="Align right"
+    tooltip="Center right"
     icon="mdi-align-horizontal-right"
     icon-size="25px"
     :disable="page.react.readOnly || page.selection.react.notes.length < 2"
@@ -34,7 +34,7 @@
     @click="page.aligning.alignTop()"
   />
   <ToolbarBtn
-    tooltip="Centralize vertically"
+    tooltip="Center vertically"
     icon="mdi-align-vertical-center"
     icon-size="25px"
     :disable="page.react.readOnly || page.selection.react.notes.length < 2"

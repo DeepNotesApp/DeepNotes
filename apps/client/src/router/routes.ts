@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
         name: 'home',
         component: () =>
           isIncluded(process.env.MODE, ['ssr', 'spa'])
-            ? import('src/pages/home/Index.vue')
+            ? import('src/pages/home/Index/Index.vue')
             : import('src/pages/home/Login/Login.vue'),
       },
     ],

@@ -1,8 +1,8 @@
 <template>
   <template v-if="region.type === 'page'">
-    <!-- Centralizer -->
+    <!-- Centerer -->
 
-    <div class="dom-centralizer">
+    <div class="dom-centerer">
       <!-- Viewbox -->
 
       <div
@@ -53,7 +53,7 @@ const page = inject<Page>('page')!;
 </script>
 
 <style scoped>
-.dom-centralizer {
+.dom-centerer {
   position: absolute;
 
   left: 50%;

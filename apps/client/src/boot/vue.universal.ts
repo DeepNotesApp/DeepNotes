@@ -6,8 +6,6 @@ export default boot(async ({ app }) => {
   app.config.globalProperties.global = globalThis;
   app.config.globalProperties.internals = internals;
 
-  app.config.globalProperties.api = api;
-
   app.config.globalProperties.appStore = appStore;
   app.config.globalProperties.authStore = authStore;
   app.config.globalProperties.uiStore = uiStore;

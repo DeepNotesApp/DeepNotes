@@ -5,36 +5,29 @@ import { addDays } from '@stdlib/misc';
 
 import type { dataHashes } from './data-hashes';
 
-export async function insertPageSnapshot({
-  dataAbstraction,
-  pageId,
-  authorId,
-  encryptedSymmetricKey,
-  encryptedData,
-  type,
-  dtrx,
-}: {
+export async function insertPageSnapshot(input: {
   dataAbstraction: DataAbstraction<typeof dataHashes>;
+
   pageId: string;
   authorId: string;
+
   encryptedSymmetricKey: Uint8Array;
   encryptedData: Uint8Array;
+
   type: PageSnapshotType;
+
   dtrx: DataTransaction;
 }) {
-  const pageSnapshotInfos: PageSnapshotInfo[] = await dataAbstraction.hget(
-    'page-snaphots',
-    pageId,
-    'infos',
-  );
+  const pageSnapshotInfos: PageSnapshotInfo[] =
+    await input.dataAbstraction.hget('page-snaphots', input.pageId, 'infos');
 
-  const pageSnapshot = await PageSnapshotModel.query(dtrx.trx)
+  const pageSnapshot = await PageSnapshotModel.query(input.dtrx.trx)
     .insert({
-      page_id: pageId,
-      encrypted_symmetric_key: encryptedSymmetricKey,
-      encrypted_data: encryptedData,
-      author_id: authorId,
-      type,
+      page_id: input.pageId,
+      encrypted_symmetric_key: input.encryptedSymmetricKey,
+      encrypted_data: input.encryptedData,
+      author_id: input.authorId,
+      type: input.type,
     })
     .returning(['id', 'creation_date']);
 
@@ -58,16 +51,16 @@ export async function insertPageSnapshot({
     deletedSnapshotIds.push(pageSnapshotInfos.pop()!.id);
   }
 
-  await PageSnapshotModel.query(dtrx.trx)
+  await PageSnapshotModel.query(input.dtrx.trx)
     .whereIn('id', deletedSnapshotIds)
     .delete();
 
   // Update page snapshot infos
 
-  await dataAbstraction.hmset(
+  await input.dataAbstraction.hmset(
     'page-snaphots',
-    pageId,
+    input.pageId,
     { infos: pageSnapshotInfos },
-    { dtrx },
+    { dtrx: input.dtrx },
   );
 }

@@ -1,14 +1,20 @@
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useKeyboardShortcuts() {
   const page = computed(() => internals.pages?.react?.page);
 
   onMounted(() => {
-    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('keydown', async (event: KeyboardEvent) => {
+      if (await onKeyDown(event)) {
+        event.preventDefault();
+      }
+    });
   });
 
-  async function onKeyDown(event: KeyboardEvent): Promise<void> {
+  async function onKeyDown(event: KeyboardEvent): Promise<any> {
+    mainLogger.info(`Keydown: ${event.code}`);
+
     if (page.value == null) {
       return;
     }
@@ -23,123 +29,116 @@ export function useKeyboardShortcuts() {
       target.isContentEditable
     ) {
       if (event.code === 'Escape') {
-        event.preventDefault();
         page.value.editing.stop();
-        return;
+        return true;
       }
 
       return;
     }
-
-    // If there is an element selected
 
     const activeElem = page.value.activeElem.react.value;
 
-    if (activeElem != null) {
-      if (event.code === 'F2') {
-        event.preventDefault();
-        await page.value.editing.start(activeElem);
-        return;
-      }
+    // Basic
 
-      if (event.code === 'Backspace') {
-        event.preventDefault();
-        await page.value.editing.start(activeElem);
-        page.value.editing.react.editor?.commands.deleteSelection();
-        return;
-      }
-
-      if (isCtrlDown(event) && event.code === 'KeyB') {
-        event.preventDefault();
-        page.value.selection.toggleMark('bold');
-        return;
-      }
-      if (isCtrlDown(event) && event.code === 'KeyI') {
-        event.preventDefault();
-        page.value.selection.toggleMark('italic');
-        return;
-      }
-      if (isCtrlDown(event) && event.code === 'KeyU') {
-        event.preventDefault();
-        page.value.selection.toggleMark('underline');
-        return;
-      }
-      if (isCtrlDown(event) && event.code === 'KeyE') {
-        event.preventDefault();
-        page.value.selection.toggleMark('code');
-        return;
-      }
-      if (isCtrlDown(event) && event.shiftKey && event.code === 'KeyX') {
-        event.preventDefault();
-        page.value.selection.toggleMark('strike');
-        return;
-      }
+    if (isCtrlDown(event) && event.code === 'KeyX') {
+      page.value.clipboard.cut();
+      return true;
     }
-
-    if (event.code === 'Delete') {
-      event.preventDefault();
-      page.value.deleting.perform();
-      return;
-    }
-
-    if (isCtrlDown(event) && event.code === 'KeyA') {
-      event.preventDefault();
-      page.value.selection.selectAll();
-      return;
-    }
-
-    if (isCtrlDown(event) && event.code === 'KeyD') {
-      event.preventDefault();
-      await page.value.cloning.perform();
-      return;
-    }
-
     if (isCtrlDown(event) && event.code === 'KeyC') {
-      event.preventDefault();
       page.value.clipboard.copy();
-      return;
+      return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyV' && window.clipboardData) {
-      event.preventDefault();
       await page.value.clipboard.paste();
-      return;
+      return true;
     }
-    if (isCtrlDown(event) && event.code === 'KeyX') {
-      event.preventDefault();
-      page.value.clipboard.cut();
-      return;
+    if (isCtrlDown(event) && event.code === 'KeyD') {
+      await page.value.cloning.perform();
+      return true;
     }
 
     if (isCtrlDown(event) && event.code === 'KeyZ') {
-      event.preventDefault();
       page.value.undoRedo.undo();
-      return;
+      return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyY') {
-      event.preventDefault();
       page.value.undoRedo.redo();
-      return;
+      return true;
+    }
+
+    if (isCtrlDown(event) && event.code === 'KeyA') {
+      page.value.selection.selectAll();
+      return true;
+    }
+    if (event.code === 'Delete') {
+      page.value.deleting.perform();
+      return true;
+    }
+
+    // Formatting
+
+    if (isCtrlDown(event) && event.code === 'KeyB') {
+      page.value.selection.toggleMark('bold');
+      return true;
+    }
+    if (isCtrlDown(event) && event.code === 'KeyI') {
+      page.value.selection.toggleMark('italic');
+      return true;
+    }
+    if (isCtrlDown(event) && event.code === 'KeyU') {
+      page.value.selection.toggleMark('underline');
+      return true;
+    }
+    if (isCtrlDown(event) && event.code === 'KeyE') {
+      page.value.selection.toggleMark('code');
+      return true;
+    }
+    if (isCtrlDown(event) && event.shiftKey && event.code === 'KeyX') {
+      page.value.selection.toggleMark('strike');
+      return true;
+    }
+
+    if (isCtrlDown(event) && event.altKey && event.code === 'Digit1') {
+      page.value.selection.toggleNode('heading', { level: 1 });
+      return true;
+    }
+    if (isCtrlDown(event) && event.altKey && event.code === 'Digit2') {
+      page.value.selection.toggleNode('heading', { level: 2 });
+      return true;
+    }
+    if (isCtrlDown(event) && event.altKey && event.code === 'Digit3') {
+      page.value.selection.toggleNode('heading', { level: 3 });
+      return true;
+    }
+
+    // Others
+
+    if (event.code === 'F2' && activeElem != null) {
+      await page.value.editing.start(activeElem);
+      return true;
+    }
+
+    if (event.code === 'Backspace' && activeElem != null) {
+      await page.value.editing.start(activeElem);
+      page.value.editing.react.editor?.commands.deleteSelection();
+      return true;
     }
 
     if (event.code === 'ArrowLeft') {
-      event.preventDefault();
       page.value.selection.shift(new Vec2(-1, 0));
-      return;
+      return true;
     }
     if (event.code === 'ArrowRight') {
-      event.preventDefault();
       page.value.selection.shift(new Vec2(1, 0));
-      return;
+      return true;
     }
     if (event.code === 'ArrowUp') {
-      event.preventDefault();
       page.value.selection.shift(new Vec2(0, -1));
-      return;
+      return true;
     }
     if (event.code === 'ArrowDown') {
-      event.preventDefault();
       page.value.selection.shift(new Vec2(0, 1));
-      return;
+      return true;
     }
   }
 

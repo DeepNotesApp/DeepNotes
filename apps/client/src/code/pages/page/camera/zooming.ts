@@ -1,14 +1,14 @@
 import { hasVertScrollbar } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 import type { Page } from '../page';
 
 export class PageZooming {
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   perform(event: WheelEvent) {
@@ -43,8 +43,11 @@ export class PageZooming {
         elem = elem.parentElement;
       }
 
-      this.page.camera.react.pos.y +=
-        event.deltaY / Math.pow(this.page.camera.react.zoom, 0.8) / 2;
+      this.page.camera.react.pos = this.page.camera.react.pos.add(
+        new Vec2(event.deltaX, event.deltaY).divScalar(
+          Math.pow(this.page.camera.react.zoom, 0.8) * 2,
+        ),
+      );
     }
   }
 }

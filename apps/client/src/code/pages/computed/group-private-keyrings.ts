@@ -4,7 +4,7 @@ import { once } from 'lodash';
 
 import { groupInternalKeyrings } from './group-internal-keyrings';
 
-const _moduleLogger = once(() => mainLogger().sub('groupPrivateKeyrings'));
+const _moduleLogger = once(() => mainLogger.sub('groupPrivateKeyrings'));
 
 export const groupPrivateKeyrings = once(() =>
   createSmartComputedDict({

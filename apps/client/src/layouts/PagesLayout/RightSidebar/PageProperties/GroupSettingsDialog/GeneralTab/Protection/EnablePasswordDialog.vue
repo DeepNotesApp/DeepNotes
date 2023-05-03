@@ -53,7 +53,7 @@
 
 <script setup lang="ts">
 import { zxcvbn } from '@zxcvbn-ts/core';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
@@ -68,7 +68,7 @@ async function enablePasswordProtection() {
     }
 
     if (zxcvbn(password.value).score <= 2) {
-      await asyncPrompt({
+      await asyncDialog({
         title: 'Weak password',
         html: true,
         message:

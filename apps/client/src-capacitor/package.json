@@ -1,5 +1,5 @@
 {
-  "name": "deepnotes-client-capacitor",
+  "name": "@deepnotes/client-capacitor",
   "description": "DeepNotes",
   "version": "0.0.1",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",

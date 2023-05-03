@@ -10,6 +10,9 @@ export function createRedisInstance() {
     {
       redisOptions: {
         password: process.env.KEYDB_PASSWORD,
+
+        connectTimeout: 500,
+        maxRetriesPerRequest: 1,
       },
 
       enableAutoPipelining: true,

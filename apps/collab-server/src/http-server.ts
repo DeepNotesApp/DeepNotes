@@ -1,4 +1,5 @@
 import type { AccessTokenPayload } from '@deeplib/misc';
+import { mainLogger } from '@stdlib/misc';
 import cookie from 'cookie';
 import type { IncomingMessage } from 'http';
 import { createServer } from 'http';
@@ -7,7 +8,6 @@ import { once } from 'lodash';
 import type { Socket } from 'net';
 import { collectDefaultMetrics, Registry } from 'prom-client';
 
-import { mainLogger } from './logger';
 import { wsServer } from './ws-server';
 
 const prometheusRegistry = new Registry();
@@ -26,7 +26,7 @@ export const httpServer = once(() =>
 );
 
 httpServer().on('upgrade', (req: IncomingMessage, socket: Socket, head) => {
-  const upgradeLogger = mainLogger().sub('Upgrade');
+  const upgradeLogger = mainLogger.sub('Upgrade');
 
   const cookies = cookie.parse(req.headers.cookie ?? '');
 

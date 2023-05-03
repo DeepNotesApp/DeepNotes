@@ -10,9 +10,7 @@ const EditorContent = internals.tiptap().EditorContent;
 type _EditorContent = typeof EditorContent;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Props extends _EditorContent {
-  //
-}
+interface Props extends _EditorContent {}
 
 defineProps<Props>();
 </script>
@@ -45,7 +43,7 @@ defineProps<Props>();
       }
 
       > * + * {
-        margin-top: 10px;
+        margin-top: 10px !important;
       }
 
       > * + pre,
@@ -55,17 +53,17 @@ defineProps<Props>();
 
       > * + hr,
       > hr + * {
-        margin-top: 14px;
+        margin-top: 14px !important;
       }
 
       > * + .tableWrapper,
       > .tableWrapper + * {
-        margin-top: 14px;
+        margin-top: 14px !important;
       }
 
       td {
         > * + * {
-          margin-top: 10px;
+          margin-top: 10px !important;
         }
 
         > * + pre,
@@ -75,12 +73,12 @@ defineProps<Props>();
 
         > * + hr,
         > hr + * {
-          margin-top: 14px;
+          margin-top: 14px !important;
         }
 
         > * + .tableWrapper,
         > .tableWrapper + * {
-          margin-top: 14px;
+          margin-top: 14px !important;
         }
       }
 
@@ -142,7 +140,7 @@ defineProps<Props>();
 
       ul,
       ol {
-        margin: 0;
+        margin: 0 !important;
       }
       ul:not([data-type]) {
         padding-inline-start: 24px;
@@ -233,18 +231,28 @@ defineProps<Props>();
       // Links
 
       a {
-        color: #47a7ff !important;
+        color: #6ab7ff !important;
+      }
+      &[contenteditable='false'] a:hover {
+        color: #8cc8ff !important;
       }
 
       // Blockquotes
 
       blockquote {
-        margin-left: 4px;
-        margin-right: 0px;
+        margin: 4px 0px 4px 4px;
 
         border-left: 5px solid rgba(#fff, 0.5);
 
         padding-left: 1.3rem;
+      }
+
+      // Highlight
+
+      mark {
+        color: unset;
+
+        background-color: #585800;
       }
 
       // Cursors

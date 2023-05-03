@@ -7,7 +7,7 @@ export const encryptedContentKeyring: DataField<GroupModel> = {
   notifyUpdates: true,
 
   userGettable: async ({ userId, suffix: groupId, dataAbstraction }) =>
-    await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup'),
+    await userHasPermission(dataAbstraction, userId, groupId, 'viewGroupPages'),
 
   columns: ['encrypted_content_keyring'],
 };

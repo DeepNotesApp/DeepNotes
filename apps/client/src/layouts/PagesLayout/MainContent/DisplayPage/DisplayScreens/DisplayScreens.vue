@@ -25,14 +25,13 @@
       v-else-if="page.react.status === 'unauthorized'"
     />
     <DisplayPasswordScreen v-else-if="page.react.status === 'password'" />
-    <DisplayContentScreen v-else-if="page.react.status === 'success'" />
+    <DisplayWorld v-else-if="page.react.status === 'success'" />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
 
-import DisplayContentScreen from './DisplayContentScreen.vue';
 import DisplayErrorScreen from './DisplayErrorScreen.vue';
 import DisplayGroupDeletedScreen from './DisplayGroupDeletedScreen.vue';
 import DisplayInvitedScreen from './DisplayInvitedScreen.vue';
@@ -43,6 +42,7 @@ import DisplayPasswordScreen from './DisplayPasswordScreen.vue';
 import DisplayProPlanRequiredScreen from './DisplayProPlanRequiredScreen.vue';
 import DisplayRejectedScreen from './DisplayRejectedScreen.vue';
 import DisplayUnauthorizedScreen from './DisplayUnauthorizedScreen.vue';
+import DisplayWorld from './DisplayWorld/DisplayWorld.vue';
 
 const page = inject<Page>('page')!;
 </script>

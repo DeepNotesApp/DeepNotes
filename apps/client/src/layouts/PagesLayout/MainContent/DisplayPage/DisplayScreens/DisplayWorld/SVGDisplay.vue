@@ -5,7 +5,7 @@
     height="100%"
   >
     <svg
-      class="svg-centralizer"
+      class="svg-centerer"
       v-if="region.type === 'page'"
       x="50%"
       y="50%"
@@ -54,7 +54,7 @@ const page = inject<Page>('page')!;
   overflow: visible;
 }
 
-.svg-centralizer {
+.svg-centerer {
   overflow: visible;
 }
 </style>

@@ -31,13 +31,10 @@
 
 <script setup lang="ts">
 import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
-import {
-  changeEmail,
-  requestEmailChange,
-} from 'src/code/api-interface/users/change-email';
+import { changeEmail } from 'src/code/api-interface/users/change-email';
 import { logout } from 'src/code/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const newEmail = ref('');
 
@@ -62,13 +59,9 @@ async function _changeEmail() {
       throw new Error('New email address is the same as the current one.');
     }
 
-    const password = await asyncPrompt<string>({
-      html: true,
+    const password = await asyncDialog<string>({
       title: 'Change email',
-      message: `Enter your password:<br/>
-        <span style="color: #a0a0a0">
-          <span style="color: red">Note</span>: This action will log you out of all devices.
-        </span>`,
+      message: 'Enter your password:',
 
       color: 'primary',
       prompt: {
@@ -82,13 +75,17 @@ async function _changeEmail() {
       cancel: true,
     });
 
-    // Compute derived keys
+    // Request email change
 
-    const oldDerivedValues = await deriveUserValues(currentEmail!, password);
+    const oldDerivedUserValues = await deriveUserValues({
+      email: currentEmail,
+      password,
+    });
 
-    await requestEmailChange({
+    await trpcClient.users.account.emailChange.request.mutate({
+      oldLoginHash: oldDerivedUserValues.loginHash,
+
       newEmail: newEmail.value,
-      oldDerivedUserValues: oldDerivedValues,
     });
 
     $quasar().notify({
@@ -96,11 +93,16 @@ async function _changeEmail() {
       color: 'positive',
     });
 
-    // Verification code promise
+    // Finish email change
 
-    const emailVerificationCode = await asyncPrompt<string>({
+    const emailVerificationCode = await asyncDialog<string>({
+      html: true,
       title: 'Verify the new email',
-      message: 'Enter the verification code sent to the new email:',
+      message: `Enter the verification code sent to the new email:<br/>
+        <span style="color: #a0a0a0">
+          <span style="color: red">Note</span>: This action will log you out of all devices.
+        </span>`,
+
       color: 'primary',
       prompt: {
         model: '',
@@ -115,7 +117,7 @@ async function _changeEmail() {
     await changeEmail({
       newEmail: newEmail.value,
       password,
-      oldDerivedUserValues: oldDerivedValues,
+      oldDerivedUserValues: oldDerivedUserValues,
       emailVerificationCode,
     });
 

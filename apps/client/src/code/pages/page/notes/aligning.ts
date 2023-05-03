@@ -6,8 +6,8 @@ import type { PageNote } from './note';
 export class NoteAligning {
   readonly page: Page;
 
-  constructor({ page }: { page: Page }) {
-    this.page = page;
+  constructor(input: { page: Page }) {
+    this.page = input.page;
   }
 
   alignLeft() {

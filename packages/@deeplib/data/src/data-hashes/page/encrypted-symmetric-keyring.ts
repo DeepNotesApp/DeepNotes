@@ -11,7 +11,7 @@ export const encryptedSymmetricKeyring: DataField<PageModel> = {
       dataAbstraction,
       userId,
       await dataAbstraction.hget('page', pageId, 'group-id'),
-      'viewGroup',
+      'viewGroupPages',
     ),
 
   columns: ['encrypted_symmetric_keyring'],

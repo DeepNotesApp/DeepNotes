@@ -4,16 +4,7 @@
       flat
       style="width: 100%; height: 50px; border-radius: 0"
       no-caps
-      @click="
-        () => {
-          uiStore().currentPathExpanded = !uiStore().currentPathExpanded;
-
-          internals.localStorage.setItem(
-            'currentPathExpanded',
-            uiStore().currentPathExpanded.toString(),
-          );
-        }
-      "
+      @click="negateProp(uiStore(), 'currentPathExpanded')"
     >
       <div style="width: 100%; display: flex; align-items: center">
         <q-avatar style="margin-left: -8px">
@@ -60,12 +51,18 @@
     "
     :style="{ flex: uiStore().currentPathExpanded ? '1' : '0' }"
   >
-    <SidebarPage
+    <PageItem
       v-for="pageId in internals.pages.react.pathPageIds"
       :key="pageId"
-      group="current-path"
+      icon
       :page-id="pageId"
+      :active="pageId === internals.pages.react.pageId"
       prefer="relative"
+      class="current-path"
     />
   </q-list>
 </template>
+
+<script setup lang="ts">
+import { negateProp } from '@stdlib/misc';
+</script>

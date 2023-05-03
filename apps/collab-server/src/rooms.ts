@@ -1,11 +1,11 @@
 import { getSelfPublisherIdBytes } from '@stdlib/data';
 import { bytesToText, equalUint8Arrays, splitStr } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import type { WebSocket } from 'ws';
 
 import { getSub } from './data/redis';
-import { mainLogger } from './logger';
 
-const moduleLogger = mainLogger().sub('rooms.ts');
+const moduleLogger = mainLogger.sub('rooms.ts');
 
 export type AwarenessChanges = {
   added: number[];

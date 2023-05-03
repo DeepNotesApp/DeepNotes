@@ -7,7 +7,7 @@
     }"
   >
     <div
-      v-if="!editor?.isEmpty"
+      v-if="editor != null && !isTiptapEditorEmpty(editor)"
       class="arrow-label-background"
     ></div>
 
@@ -16,7 +16,7 @@
       :editor="editor"
       :class="{ editing: arrow.react.editing }"
       @pointerdown.left.stop="onLeftPointerDown"
-      @dblclick.left="onLeftDoubleClick"
+      @click.left="onLeftClick"
     />
   </div>
 </template>
@@ -25,14 +25,14 @@
 import { Y } from '@syncedstore/core';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
+import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
+import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 const props = defineProps<{
   arrow: PageArrow;
 }>();
 
 const page = inject<Page>('page')!;
-
-props.arrow!.react.loaded = false;
 
 const editor = internals.tiptap().useEditor({
   content:
@@ -57,15 +57,14 @@ const editor = internals.tiptap().useEditor({
       : []),
   ],
 
-  onCreate({ editor }: any) {
+  onBeforeCreate({ editor }: any) {
     props.arrow!.react.editor = editor;
-
-    props.arrow!.react.loaded = true;
+  },
+  onCreate() {
+    mainLogger.info(`Arrow Editor loaded (${props.arrow.id})`);
   },
   onDestroy() {
     props.arrow!.react.editor = null;
-
-    props.arrow!.react.loaded = true;
   },
 });
 
@@ -73,8 +72,12 @@ function onLeftPointerDown(event: PointerEvent) {
   page.clickSelection.perform(props.arrow, event);
 }
 
-async function onLeftDoubleClick() {
-  await page.editing.start(props.arrow);
+const checkDoubleClick = createDoubleClickChecker();
+
+async function onLeftClick(event: MouseEvent) {
+  if (checkDoubleClick(event)) {
+    await page.editing.start(props.arrow);
+  }
 }
 </script>
 

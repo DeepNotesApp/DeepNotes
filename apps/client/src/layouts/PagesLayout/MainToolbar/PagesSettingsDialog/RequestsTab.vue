@@ -81,7 +81,7 @@
 import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError, isCtrlDown } from 'src/code/utils';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
@@ -142,7 +142,7 @@ function select(groupId: string, event: MouseEvent) {
 
 async function cancelSelectedRequests() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Cancel request(s)',
       message: 'Are you sure you want to cancel the selected join requests?',
 
@@ -153,7 +153,9 @@ async function cancelSelectedRequests() {
     });
 
     for (const groupId of finalSelectedGroupIds.value) {
-      await cancelJoinRequest(groupId);
+      await cancelJoinRequest({
+        groupId,
+      });
     }
 
     baseSelectedGroupIds.value.clear();

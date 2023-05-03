@@ -136,5 +136,5 @@
 import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import { logout } from 'src/code/auth/logout';
 import { selfUserName } from 'src/code/self-user-name';
-import { multiModePath } from 'src/code/utils';
+import { multiModePath } from 'src/code/utils/misc';
 </script>

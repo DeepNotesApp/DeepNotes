@@ -8,13 +8,13 @@
 
 <script setup lang="ts">
 import { makeGroupPublic } from 'src/code/api-interface/groups/privacy/make-public';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
 
 async function makePublic() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Make group public',
       message: 'Are you sure you want to make this group public?',
 
@@ -24,7 +24,7 @@ async function makePublic() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await makeGroupPublic(groupId);
+    await makeGroupPublic({ groupId });
 
     $quasar().notify({
       message: 'Group is now public.',

@@ -35,7 +35,7 @@ import { deleteGroupPermanently } from 'src/code/api-interface/groups/deletion/d
 import { restoreGroup } from 'src/code/api-interface/groups/deletion/restore';
 import type { Page } from 'src/code/pages/page/page';
 import { useRealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const page = inject<Page>('page')!;
 
@@ -71,7 +71,9 @@ const canRestore = computed(() => {
 
 async function _restoreGroup() {
   try {
-    await restoreGroup(page.react.groupId);
+    await restoreGroup({
+      groupId: page.react.groupId,
+    });
 
     $quasar().notify({
       message: 'Group restored successfully.',
@@ -84,7 +86,7 @@ async function _restoreGroup() {
 
 async function deletePermanently() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Delete group permanently',
       message: 'Are you sure you want to delete this group permanently?',
 
@@ -94,7 +96,9 @@ async function deletePermanently() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await deleteGroupPermanently(page.react.groupId);
+    await deleteGroupPermanently({
+      groupId: page.react.groupId,
+    });
 
     $quasar().notify({
       message: 'Group deleted permanently.',

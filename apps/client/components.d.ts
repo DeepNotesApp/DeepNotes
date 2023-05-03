@@ -8,6 +8,7 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     Checkbox: typeof import('./src/components/Checkbox.vue')['default']
+    ColorPalette: typeof import('./src/components/ColorPalette.vue')['default']
     ColorSquare: typeof import('./src/components/ColorSquare.vue')['default']
     Combobox: typeof import('./src/components/Combobox.vue')['default']
     CopyBtn: typeof import('./src/components/CopyBtn.vue')['default']
@@ -16,8 +17,11 @@ declare module '@vue/runtime-core' {
     DisplayBtn: typeof import('./src/components/DisplayBtn.vue')['default']
     EvaluatedPasswordField: typeof import('./src/components/EvaluatedPasswordField.vue')['default']
     Gap: typeof import('./src/components/Gap.vue')['default']
+    LinkURL: typeof import('./src/components/LinkURL.vue')['default']
     LoadingOverlay: typeof import('./src/components/LoadingOverlay.vue')['default']
     MiniSidebarBtn: typeof import('./src/components/MiniSidebarBtn.vue')['default']
+    PageItem: typeof import('./src/components/PageItem.vue')['default']
+    PageItemContent: typeof import('./src/components/PageItemContent.vue')['default']
     PasswordDialog: typeof import('./src/components/PasswordDialog.vue')['default']
     PasswordField: typeof import('./src/components/PasswordField.vue')['default']
     QMenuHover: typeof import('./src/components/QMenuHover.vue')['default']
@@ -31,7 +35,6 @@ declare module '@vue/runtime-core' {
     TextEditor: typeof import('./src/components/TextEditor.vue')['default']
     TextField: typeof import('./src/components/TextField.vue')['default']
     ToolbarBtn: typeof import('./src/components/ToolbarBtn.vue')['default']
-    VerticalColorPalette: typeof import('./src/components/VerticalColorPalette.vue')['default']
     ViewportLoadingOverlay: typeof import('./src/components/ViewportLoadingOverlay.vue')['default']
   }
 }

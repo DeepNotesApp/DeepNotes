@@ -1,10 +1,10 @@
 import { lightenByRatio } from '@stdlib/color';
-import type { MarkName, Rect } from '@stdlib/misc';
+import type { Rect } from '@stdlib/misc';
 import { Line } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { getLineRectIntersection } from '@stdlib/misc';
 import { Y } from '@syncedstore/core';
-import type { ChainedCommands, Editor } from '@tiptap/vue-3';
+import type { Editor } from '@tiptap/vue-3';
 import Color from 'color';
 import { once } from 'lodash';
 import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
@@ -401,10 +401,18 @@ export const PageArrow = once(
             this.react.editor ? [this.react.editor] : [],
           ),
 
-          loaded: true,
+          loaded: false,
         };
 
         Object.assign(this.react, react);
+
+        setTimeout(() => {
+          setTimeout(() => {
+            this.react.loaded = true;
+
+            mainLogger.info(`Arrow loaded (${this.id})`);
+          });
+        });
       }
 
       removeFromRegion() {
@@ -424,57 +432,6 @@ export const PageArrow = once(
 
           region.react.collab.arrowIds.push(this.id);
         });
-      }
-
-      isMarkActive(name: MarkName) {
-        for (const editor of this.react.editors) {
-          if (!internals.tiptap().isMarkActive(editor.state, name)) {
-            return false;
-          }
-        }
-
-        return true;
-      }
-      setMark(name: MarkName, attribs?: Record<string, any>) {
-        if (this.react.editing) {
-          if (this.react.editor != null) {
-            this.react.editor.chain().focus().setMark(name, attribs).run();
-          }
-        } else {
-          for (const editor of this.react.editors) {
-            editor.chain().selectAll().setMark(name, attribs).run();
-          }
-        }
-      }
-      unsetMark(name: MarkName) {
-        if (this.react.editing) {
-          if (this.react.editor != null) {
-            this.react.editor.chain().focus().unsetMark(name).run();
-          }
-        } else {
-          for (const editor of this.react.editors) {
-            editor.chain().selectAll().unsetMark(name).run();
-          }
-        }
-      }
-      toggleMark(name: MarkName, attribs?: Record<string, any>) {
-        if (this.isMarkActive(name)) {
-          this.unsetMark(name);
-        } else {
-          this.setMark(name, attribs);
-        }
-      }
-
-      format(chainFunc: (chain: ChainedCommands) => ChainedCommands) {
-        if (this.react.editing) {
-          if (this.react.editor != null) {
-            chainFunc(this.react.editor.chain().focus()).run();
-          }
-        } else {
-          for (const editor of this.react.editors) {
-            chainFunc(editor.chain().selectAll()).run();
-          }
-        }
       }
 
       getHitboxElem(): SVGPathElement | null {

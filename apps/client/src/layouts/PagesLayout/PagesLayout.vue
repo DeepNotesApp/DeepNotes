@@ -24,6 +24,7 @@
 import { watchUntilTrue } from '@stdlib/vue';
 import { useEditingOnTyping } from 'src/code/pages/composables/use-editing-on-typing';
 import { useElementPasting } from 'src/code/pages/composables/use-element-pasting';
+import { useImagePasting } from 'src/code/pages/composables/use-image-pasting';
 import { useKeyboardShortcuts } from 'src/code/pages/composables/use-keyboard-shortcuts';
 import { useMiddleClickPastePrevention } from 'src/code/pages/composables/use-middle-click-paste-prevention';
 import { usePageNavigationInterception } from 'src/code/pages/composables/use-page-navigation-interception';
@@ -55,6 +56,7 @@ if (process.env.CLIENT) {
   useKeyboardShortcuts();
   useEditingOnTyping();
   useElementPasting();
+  useImagePasting();
   usePageNavigationInterception();
   useMiddleClickPastePrevention();
   useTableContextMenu();
@@ -77,12 +79,6 @@ body {
 <style lang="scss" scoped>
 .pages-layout :deep() {
   .q-drawer {
-    overflow-x: hidden;
-
-    > .q-drawer__content {
-      overflow-x: hidden;
-    }
-
     &.q-drawer--mini {
       .q-item {
         justify-content: normal !important;

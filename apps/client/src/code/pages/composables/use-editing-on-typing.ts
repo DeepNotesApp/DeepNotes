@@ -1,4 +1,4 @@
-import { isCtrlDown } from 'src/code/utils';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useEditingOnTyping() {
   const page = computed(() => internals.pages.react.page);
@@ -32,7 +32,7 @@ export function useEditingOnTyping() {
       return;
     }
 
-    mainLogger().sub('useEditingOnTyping').info('Start');
+    mainLogger.sub('useEditingOnTyping').info('Start');
 
     await page.value.editing.start(activeElem);
 

@@ -1,3 +1,5 @@
-export async function deleteGroup(groupId: string) {
-  await api().post(`/api/groups/${groupId}/deletion/delete`);
+export async function deleteGroup(input: { groupId: string }) {
+  await trpcClient.groups.deletion.delete.mutate({
+    groupId: input.groupId,
+  });
 }

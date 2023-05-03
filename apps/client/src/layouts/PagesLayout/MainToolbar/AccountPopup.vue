@@ -72,5 +72,5 @@
 <script setup lang="ts">
 import { logout } from 'src/code/auth/logout';
 import { selfUserName } from 'src/code/self-user-name';
-import { multiModePath } from 'src/code/utils';
+import { multiModePath } from 'src/code/utils/misc';
 </script>

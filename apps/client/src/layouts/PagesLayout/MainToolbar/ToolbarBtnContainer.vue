@@ -1,5 +1,5 @@
 <template>
-  <template v-if="toolbarWidth >= breakpoint">
+  <template v-if="expanded">
     <slot></slot>
   </template>
 
@@ -21,8 +21,7 @@
 
 <script setup lang="ts">
 defineProps<{
-  toolbarWidth: number;
-  breakpoint: number;
+  expanded: boolean;
   tooltip: string;
   icon: string;
 }>();

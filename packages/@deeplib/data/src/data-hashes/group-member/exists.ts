@@ -12,7 +12,12 @@ export const exists: DataField<GroupMemberModel> = {
 
     return (
       userId === targetId ||
-      (await userHasPermission(dataAbstraction, userId, groupId, 'viewGroup'))
+      (await userHasPermission(
+        dataAbstraction,
+        userId,
+        groupId,
+        'viewGroupPages',
+      ))
     );
   },
 

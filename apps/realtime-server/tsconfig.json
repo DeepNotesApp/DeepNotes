@@ -10,27 +10,38 @@
   "files": ["src/types/env.d.ts", "src/types/http.d.ts", "src/types/ws.d.ts"],
 
   "compilerOptions": {
-    "typeRoots": ["node_modules/@types"], // Needed for tests
-
     "baseUrl": ".",
 
-    "rootDir": ".",
+    "rootDir": "src",
+    "outDir": "dist",
 
     "paths": {
       "src/*": ["src/*"],
 
       "@deeplib/*": ["../../packages/@deeplib/*/src"],
       "@stdlib/*": ["../../packages/@stdlib/*/src"]
-    }
+    },
+
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
   },
 
   "references": [
-    { "path": "../../packages/@deeplib/data/tsconfig.build.json" },
-    { "path": "../../packages/@deeplib/misc/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/base64/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/data/tsconfig.build.json" },
-    { "path": "../../packages/@stdlib/misc/tsconfig.build.json" }
+    { "path": "../../packages/@deeplib/data/tsconfig.json" },
+    { "path": "../../packages/@deeplib/misc/tsconfig.json" },
+    { "path": "../../packages/@stdlib/base64/tsconfig.json" },
+    { "path": "../../packages/@stdlib/data/tsconfig.json" },
+    { "path": "../../packages/@stdlib/misc/tsconfig.json" }
   ],
 
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
 }

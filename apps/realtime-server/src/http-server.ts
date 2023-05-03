@@ -1,4 +1,5 @@
 import type { AccessTokenPayload } from '@deeplib/misc';
+import { mainLogger } from '@stdlib/misc';
 import cookie from 'cookie';
 import type { IncomingMessage } from 'http';
 import { createServer } from 'http';
@@ -8,9 +9,7 @@ import type { Socket } from 'net';
 import { collectDefaultMetrics, Registry } from 'prom-client';
 import { wsServer } from 'src/ws-server';
 
-import { mainLogger } from './logger';
-
-const moduleLogger = mainLogger().sub('http-server.ts');
+const moduleLogger = mainLogger.sub('http-server.ts');
 
 const prometheusRegistry = new Registry();
 collectDefaultMetrics({ register: prometheusRegistry });

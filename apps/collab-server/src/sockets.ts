@@ -1,4 +1,4 @@
-import { getAllPageUpdates, hget, insertPageSnapshot } from '@deeplib/data';
+import { getAllPageUpdates, insertPageSnapshot } from '@deeplib/data';
 import { PageSnapshotModel, PageUpdateModel } from '@deeplib/db';
 import {
   CollabClientDocMessageType,
@@ -6,10 +6,11 @@ import {
   CollabServerDocMessageType,
   rolesMap,
 } from '@deeplib/misc';
-import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
+import { bytesToBase64 } from '@stdlib/base64';
 import { getSelfPublisherIdBytes } from '@stdlib/data';
 import { patchMultiple } from '@stdlib/db';
 import { addDays, addMinutes, splitStr } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { randomBytes } from 'crypto';
 import type { IncomingMessage } from 'http';
@@ -22,11 +23,10 @@ import { bufferizePageUpdate } from './data/redis/bufferize-page-update';
 import { flushPageUpdateBuffer } from './data/redis/flush-page-update-buffer';
 import { squashPageUpdates } from './data/redis/squash-page-updates';
 import { usingLocks } from './data/redlock';
-import { mainLogger } from './logger';
 import type { Room } from './rooms';
 import { getRoom } from './rooms';
 
-const moduleLogger = mainLogger().sub('sockets.ts');
+const moduleLogger = mainLogger.sub('sockets.ts');
 
 const _pendingRequests = new Map<string, NodeJS.Timeout>();
 
@@ -169,22 +169,31 @@ export class SocketAuxObject {
 
       await this.room.setup();
 
-      await this._sendDocAllUpdatesUnmergedMessage(false);
+      await this._sendDocAllUpdatesUnmergedMessage();
       await this._sendAwarenessSyncMessage();
     })();
 
     return await this._setupPromise;
   }
 
-  private async _sendDocAllUpdatesUnmergedMessage(createSnapshot: boolean) {
-    const [pageUpdates, nextKeyRotationDate] = await Promise.all([
+  private async _sendDocAllUpdatesUnmergedMessage() {
+    const [
+      pageUpdates,
+
+      userPlan,
+
+      [nextSnapshotDate, nextSnapshotUpdateIndex, nextKeyRotationDate],
+    ] = await Promise.all([
       getAllPageUpdates(this.room.pageId, getRedis()),
 
-      dataAbstraction().hget(
-        'page',
-        this.room.pageId,
+      dataAbstraction().hget('user', this.userId!, 'plan'),
+
+      dataAbstraction().hmget('page', this.room.pageId, [
+        'next-snapshot-date',
+        'next-snapshot-update-index',
+
         'next-key-rotation-date',
-      ),
+      ]),
     ]);
 
     const encoder = encoding.createEncoder();
@@ -201,6 +210,11 @@ export class SocketAuxObject {
 
     const pageUpdateIndex = pageUpdates.at(-1)?.[0] ?? 0;
 
+    const createSnapshot =
+      userPlan === 'pro' &&
+      new Date() >= nextSnapshotDate &&
+      pageUpdateIndex >= nextSnapshotUpdateIndex;
+
     if (createSnapshot) {
       void dataAbstraction().patch('page', this.room.pageId, {
         next_snapshot_date: addMinutes(new Date(), 15),
@@ -213,7 +227,7 @@ export class SocketAuxObject {
     encoding.writeVarUint(encoder, pageUpdates.length);
 
     for (const pageUpdate of pageUpdates) {
-      encoding.writeVarUint8Array(encoder, base64ToBytes(pageUpdate[1]));
+      encoding.writeVarUint8Array(encoder, pageUpdate[1]);
     }
 
     // Write values for key rotation
@@ -233,68 +247,75 @@ export class SocketAuxObject {
               'group-id',
             );
 
-            checkRedlockSignalAborted(signals);
+            await usingLocks(
+              [[`group-lock:${groupId}`]],
+              async (signals) => {
+                // Recheck page key rotation, but within locks
 
-            await usingLocks([[`group-lock:${groupId}`]], async (signals) => {
-              // Recheck page key rotation, but within locks
-
-              const nextKeyRotationDate = await dataAbstraction().hget(
-                'page',
-                this.room.pageId,
-                'next-key-rotation-date',
-              );
-
-              const rotatePageKey = new Date() >= nextKeyRotationDate;
-
-              encoding.writeUint8(encoder, rotatePageKey ? 1 : 0);
-
-              if (!rotatePageKey) {
-                return;
-              }
-
-              await dataAbstraction().patch('page', this.room.pageId, {
-                next_key_rotation_date: addDays(new Date(), 7),
-              });
-
-              checkRedlockSignalAborted(signals);
-
-              const [
-                pageEncryptedRelativeTitle,
-                pageEncryptedAbsoluteTitle,
-                pageSnapshots,
-              ] = await Promise.all([
-                dataAbstraction().hget(
+                const nextKeyRotationDate = await dataAbstraction().hget(
                   'page',
                   this.room.pageId,
-                  'encrypted-relative-title',
-                ),
+                  'next-key-rotation-date',
+                );
 
-                dataAbstraction().hget(
-                  'page',
-                  this.room.pageId,
-                  'encrypted-absolute-title',
-                ),
+                checkRedlockSignalAborted(signals);
 
-                PageSnapshotModel.query()
-                  .where('page_id', this.room.pageId)
-                  .select('id', 'encrypted_symmetric_key'),
-              ]);
+                const rotatePageKey = new Date() >= nextKeyRotationDate;
 
-              checkRedlockSignalAborted(signals);
+                encoding.writeUint8(encoder, rotatePageKey ? 1 : 0);
 
-              encoding.writeVarUint8Array(encoder, pageEncryptedRelativeTitle);
-              encoding.writeVarUint8Array(encoder, pageEncryptedAbsoluteTitle);
+                if (!rotatePageKey) {
+                  return;
+                }
 
-              encoding.writeVarUint(encoder, pageSnapshots.length);
+                await dataAbstraction().patch('page', this.room.pageId, {
+                  next_key_rotation_date: addDays(new Date(), 7),
+                });
 
-              for (const pageSnapshot of pageSnapshots) {
-                encoding.writeVarString(encoder, pageSnapshot.id);
+                const [
+                  pageEncryptedRelativeTitle,
+                  pageEncryptedAbsoluteTitle,
+                  pageSnapshots,
+                ] = await Promise.all([
+                  dataAbstraction().hget(
+                    'page',
+                    this.room.pageId,
+                    'encrypted-relative-title',
+                  ),
+
+                  dataAbstraction().hget(
+                    'page',
+                    this.room.pageId,
+                    'encrypted-absolute-title',
+                  ),
+
+                  PageSnapshotModel.query()
+                    .where('page_id', this.room.pageId)
+                    .select('id', 'encrypted_symmetric_key'),
+                ]);
+
                 encoding.writeVarUint8Array(
                   encoder,
-                  pageSnapshot.encrypted_symmetric_key,
+                  pageEncryptedRelativeTitle,
                 );
-              }
-            });
+                encoding.writeVarUint8Array(
+                  encoder,
+                  pageEncryptedAbsoluteTitle,
+                );
+
+                encoding.writeVarUint(encoder, pageSnapshots.length);
+
+                for (const pageSnapshot of pageSnapshots) {
+                  encoding.writeVarString(encoder, pageSnapshot.id);
+                  encoding.writeVarUint8Array(
+                    encoder,
+                    pageSnapshot.encrypted_symmetric_key,
+                  );
+                }
+              },
+
+              signals,
+            );
           },
         );
       } catch (error) {
@@ -512,8 +533,6 @@ export class SocketAuxObject {
         'group-id',
       );
 
-      checkRedlockSignalAborted(signals);
-
       await usingLocks(
         [[`group-lock:${groupId}`]],
         async (signals) => {
@@ -558,8 +577,6 @@ export class SocketAuxObject {
                 { dtrx },
               );
 
-              checkRedlockSignalAborted(signals);
-
               await patchMultiple(
                 'page_snapshots',
 
@@ -572,8 +589,6 @@ export class SocketAuxObject {
 
                 { trx: dtrx.trx },
               );
-
-              checkRedlockSignalAborted(signals);
             }
 
             // Read encrypted update
@@ -599,8 +614,6 @@ export class SocketAuxObject {
                 type: 'periodic',
                 dtrx,
               });
-
-              checkRedlockSignalAborted(signals);
             }
 
             // Delete old unmerged updates
@@ -609,8 +622,6 @@ export class SocketAuxObject {
               .delete()
               .where('page_id', this.room.pageId)
               .andWhere('index', '<=', updateIndex);
-
-            checkRedlockSignalAborted(signals);
 
             // Insert encrypted update in the database
 
@@ -688,20 +699,8 @@ export class SocketAuxObject {
 
     // Send merge updates message periodically
 
-    const [userPlan, nextSnapshotDate, nextSnapshotUpdateIndex] =
-      await dataAbstraction().mhget([
-        hget('user', this.userId!, 'plan'),
-        hget('page', this.room.pageId, 'next-snapshot-date'),
-        hget('page', this.room.pageId, 'next-snapshot-update-index'),
-      ]);
-
-    if (
-      userPlan === 'pro' &&
-      updateIndex % 100 === 0 &&
-      new Date() >= nextSnapshotDate &&
-      updateIndex >= nextSnapshotUpdateIndex
-    ) {
-      await this._sendDocAllUpdatesUnmergedMessage(true);
+    if (updateIndex % 100 === 0) {
+      await this._sendDocAllUpdatesUnmergedMessage();
     }
   }
 

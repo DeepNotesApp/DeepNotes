@@ -1,3 +1,4 @@
+import { bytesToBase64 } from '@stdlib/base64';
 import { route } from 'quasar/wrappers';
 import { clearCookie } from 'src/code/cookies';
 import { getRedirectDest } from 'src/code/routing';
@@ -11,7 +12,7 @@ import {
 
 import routes from './routes';
 
-const moduleLogger = mainLogger().sub('router/index.ts');
+const moduleLogger = mainLogger.sub('router/index.ts');
 
 moduleLogger.info('Running module');
 
@@ -54,37 +55,31 @@ export default route(async function ({ store, ssrContext }) {
       cookies.get('loggedIn') === 'true'
     ) {
       try {
-        const response = await api().post<{
-          oldSessionKey: string;
-          newSessionKey: string;
-        }>(
-          '/auth/refresh',
-          {},
-          {
+        moduleLogger.info('Refreshing tokens...');
+
+        const response = await trpcClient.sessions.refresh.mutate(undefined, {
+          context: {
             headers: {
               cookie: `refreshToken=${cookies.get(
                 'refreshToken',
               )}; loggedIn=true`,
             },
-          },
-        );
 
-        ssrContext?.res.setHeader(
-          'set-cookie',
-          response.headers['set-cookie']!,
-        );
+            ssrContext,
+          },
+        });
 
         // Set auth values
 
-        auth.oldSessionKey = response.data.oldSessionKey;
-        auth.newSessionKey = response.data.newSessionKey;
+        auth.oldSessionKey = bytesToBase64(response.oldSessionKey);
+        auth.newSessionKey = bytesToBase64(response.newSessionKey);
 
         moduleLogger.info('Tokens refreshed successfully');
 
         auth.loggedIn = true;
         uiStore(store).loggedIn = true;
       } catch (error) {
-        moduleLogger.error('Failed to refresh tokens. Logging out');
+        moduleLogger.error('Failed to refresh tokens: %s', error);
 
         clearCookie(cookies, 'accessToken');
         clearCookie(cookies, 'refreshToken');
@@ -109,7 +104,11 @@ export default route(async function ({ store, ssrContext }) {
 
       auth.redirect = '';
     } else {
-      redirectDest = await getRedirectDest(to, auth, cookies);
+      redirectDest = await getRedirectDest({
+        route: to,
+        auth,
+        cookies,
+      });
     }
 
     if (redirectDest != null) {

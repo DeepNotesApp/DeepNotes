@@ -43,7 +43,6 @@
 <script setup lang="ts">
 import type { DeepNotesNotification } from '@deeplib/misc';
 import { rolesMap } from '@deeplib/misc';
-import { base64ToBytes } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { createSmartComputed } from '@stdlib/vue';
 import { unpack } from 'msgpackr';
@@ -52,7 +51,7 @@ import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/c
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { getGroupRequestSentNotificationInfo } from 'src/code/pages/notifications/group-request-sent';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';
 import type { Ref } from 'vue';
@@ -97,13 +96,11 @@ const canAcceptRequest = computed(() => {
 
 const notificationContent = computed(() => {
   const symmetricKey = wrapSymmetricKey(
-    internals.keyPair.decrypt(
-      base64ToBytes(props.notification.encryptedSymmetricKey),
-    ),
+    internals.keyPair.decrypt(props.notification.encryptedSymmetricKey),
   );
 
   return unpack(
-    symmetricKey.decrypt(base64ToBytes(props.notification.encryptedContent), {
+    symmetricKey.decrypt(props.notification.encryptedContent, {
       padding: true,
       associatedData: { context: 'UserNotificationContent' },
     }),
@@ -131,7 +128,7 @@ async function onClick() {
 
 async function _cancelJoinRequest() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Cancel join request',
       message: 'Are you sure you want to cancel the join request?',
 
@@ -141,7 +138,9 @@ async function _cancelJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await cancelJoinRequest(notificationContent.value.groupId);
+    await cancelJoinRequest({
+      groupId: notificationContent.value.groupId,
+    });
 
     notificationsMenu.value.hide();
   } catch (error) {
@@ -151,7 +150,7 @@ async function _cancelJoinRequest() {
 
 async function _rejectJoinRequest() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Reject join request',
       message: 'Are you sure you want to reject the join request?',
 
@@ -161,7 +160,8 @@ async function _rejectJoinRequest() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rejectJoinRequest(notificationContent.value.groupId, {
+    await rejectJoinRequest({
+      groupId: notificationContent.value.groupId,
       patientId: notificationContent.value.agentId,
     });
 

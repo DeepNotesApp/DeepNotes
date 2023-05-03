@@ -17,11 +17,10 @@
 </template>
 
 <script setup lang="ts">
-import { watchUntilTrue } from '@stdlib/vue';
 import { Y } from '@syncedstore/core';
 import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { useResizeObserver } from 'src/code/utils';
+import { useResizeObserver } from 'src/code/utils/misc';
 import type { ComponentPublicInstance } from 'vue';
 
 const props = defineProps<{
@@ -38,35 +37,6 @@ const paddingFix = computed(
     note.react.collab.collapsing.enabled &&
     props.section === note.react.topSection,
 );
-
-// Setup Tiptap editor
-
-note.react.initialized = false;
-note.react.numEditorsLoading++;
-
-let loading = true;
-
-function finishLoading() {
-  if (!loading) {
-    return;
-  }
-
-  loading = false;
-
-  note.react.numEditorsLoading--;
-
-  if (note.react.numEditorsLoading === 0) {
-    void watchUntilTrue(() => {
-      if (!note.react.loaded) {
-        return false;
-      }
-
-      note.react.initialized = true;
-
-      return true;
-    });
-  }
-}
 
 const value = note.react.collab[props.section].value;
 
@@ -117,17 +87,16 @@ const editor = internals.tiptap().useEditor({
       : []),
   ],
 
+  onBeforeCreate({ editor }: any) {
+    note.react[props.section].editor = editor;
+  },
   onCreate({ editor }) {
-    note.react[props.section].editor = editor as any;
+    mainLogger.info(`Note Editor loaded (${note.id})`);
 
     editor.setEditable(note.react.editing);
-
-    finishLoading();
   },
   onDestroy() {
     note.react[props.section].editor = null;
-
-    finishLoading();
   },
 
   onUpdate() {

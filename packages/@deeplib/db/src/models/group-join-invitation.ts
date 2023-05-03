@@ -17,6 +17,7 @@ export class GroupJoinInvitationModel extends Model {
   encrypted_internal_keyring!: Uint8Array;
 
   encrypted_name!: Uint8Array;
+  encrypted_name_for_user!: Uint8Array;
 
   creation_date!: Date;
 }

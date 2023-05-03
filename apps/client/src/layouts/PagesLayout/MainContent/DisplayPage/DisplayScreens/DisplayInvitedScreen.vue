@@ -31,7 +31,7 @@
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { Page } from 'src/code/pages/page/page';
-import { asyncPrompt, handleError } from 'src/code/utils';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import AcceptInvitationDialog from './AcceptInvitationDialog.vue';
 
@@ -51,7 +51,7 @@ async function _acceptJoinInvitation() {
 
 async function _rejectJoinInvitation() {
   try {
-    await asyncPrompt({
+    await asyncDialog({
       title: 'Reject invitation',
       message: 'Are you sure you want to reject the invitation?',
 
@@ -61,7 +61,9 @@ async function _rejectJoinInvitation() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    await rejectJoinInvitation(page.react.groupId);
+    await rejectJoinInvitation({
+      groupId: page.react.groupId,
+    });
   } catch (error: any) {
     handleError(error);
   }

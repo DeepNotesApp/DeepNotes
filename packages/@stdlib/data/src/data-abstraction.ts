@@ -7,16 +7,17 @@ import {
   equalUint8Arrays,
   splitStr,
 } from '@stdlib/misc';
+import { mainLogger } from '@stdlib/misc';
 import type { Cluster, Redis, Result } from 'ioredis';
 import { some } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 import type { TransactionOrKnex } from 'objection';
 import { Model } from 'objection';
+import type { Logger } from 'unilogr';
 
 import type { DataField } from './data-field';
 import type { DataHash, DataHashes } from './data-hash';
 import { getSelfPublisherIdBytes } from './data-publishing';
-import { mainLogger } from './logger';
 
 export interface SimpleLRUCache {
   cache: Record<string, any>;
@@ -29,7 +30,7 @@ export interface SimpleLRUCache {
   del(key: string): void;
 }
 
-export const classLogger = mainLogger().sub('DataAbstraction');
+export const classLogger: Logger = mainLogger.sub('DataAbstraction');
 
 export const DEFAULT_LOCAL_TTL = 1 * 24 * 60 * 60; // 1 day
 export const DEFAULT_REMOTE_TTL = 7 * 24 * 60 * 60; // 7 days
@@ -657,7 +658,7 @@ export class DataAbstraction<
     values: Record<DataField_, any>,
     params?: HMSetParams,
   ) {
-    classLogger.sub('hmset').info(`${prefix}:${suffix}: %o`, values);
+    classLogger.sub('hmset').info(`${prefix}:${suffix}`);
 
     const dataHash = this.dataHashes[prefix];
 
@@ -924,7 +925,7 @@ export class DataAbstraction<
   }: DataUpdateParams) {
     const fullKey = `${key}>${field}`;
 
-    classLogger.sub('handleDataUpdate').info(`${fullKey}: %o`, value);
+    classLogger.sub('handleDataUpdate').info(fullKey);
 
     for (const listener of this._fullKeysToListenersMap[fullKey] ?? []) {
       listener({
