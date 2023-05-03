@@ -64,7 +64,7 @@
 
       <PlanCard
         title="Pro"
-        :price="8"
+        :price="5"
         previous="Basic"
         :features="[
           {

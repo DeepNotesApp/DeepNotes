@@ -88,7 +88,7 @@
         <Gap style="height: 32px" />
 
         <div style="text-align: center; font-weight: bold">
-          <span style="font-size: 46px">$8</span>
+          <span style="font-size: 46px">$5</span>
           <span style="font-size: 12px; color: #d0d0d0">/ month</span>
         </div>
 
