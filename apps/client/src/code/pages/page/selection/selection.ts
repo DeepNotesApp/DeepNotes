@@ -88,7 +88,10 @@ export class PageSelection {
           continue;
         }
 
-        if (elem.react.region !== this.page.activeRegion.react.value) {
+        if (
+          elem.type === 'note' &&
+          elem.react.region !== this.page.activeRegion.react.value
+        ) {
           this.clear(elem.react.region);
         }
 
@@ -99,7 +102,7 @@ export class PageSelection {
           this.page.activeElem.set(elem);
         }
 
-        if (elem?.type === 'note') {
+        if (elem.type === 'note') {
           (elem as PageNote).bringToTop();
         }
       }
@@ -131,7 +134,58 @@ export class PageSelection {
   }
 
   selectAll() {
-    this.add(...this.page.activeRegion.react.value.react.elems);
+    const elemsToSelect: PageElem[] = [];
+
+    const rootMap = new Map<PageNote, PageNote>();
+
+    const descendantArrows: PageArrow[] = [];
+
+    const processDescendants = (root: PageNote, note: PageNote) => {
+      rootMap.set(note, root);
+
+      descendantArrows.push(
+        ...this.page.arrows.fromIds([
+          ...note.incomingArrowIds,
+          ...note.outgoingArrowIds,
+        ]),
+      );
+
+      for (const child of note.react.notes) {
+        processDescendants(root, child);
+      }
+    };
+
+    // Add root notes and arrows and gather descendant arrows
+
+    for (const note of this.page.activeRegion.react.value.react.notes) {
+      elemsToSelect.push(note);
+
+      elemsToSelect.push(
+        ...this.page.arrows.fromIds([
+          ...note.incomingArrowIds,
+          ...note.outgoingArrowIds,
+        ]),
+      );
+
+      processDescendants(note, note);
+    }
+
+    // Add interregional arrows
+
+    for (const arrow of descendantArrows) {
+      const sourceRootNote = rootMap.get(arrow.react.sourceNote);
+      const targetRootNote = rootMap.get(arrow.react.targetNote);
+
+      if (
+        sourceRootNote != null &&
+        targetRootNote != null &&
+        sourceRootNote !== targetRootNote
+      ) {
+        elemsToSelect.push(arrow);
+      }
+    }
+
+    this.add(...new Set(elemsToSelect));
   }
 
   shift(shift: Vec2) {
