@@ -1,19 +1,19 @@
 import 'highlight.js/styles/atom-one-dark.css';
 
 import { columnResizing } from '@_ueberdosis/prosemirror-tables';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import Highlight from '@tiptap/extension-highlight';
-import HorizontalRule from '@tiptap/extension-horizontal-rule';
-import Link from '@tiptap/extension-link';
-import Subscript from '@tiptap/extension-subscript';
-import Superscript from '@tiptap/extension-superscript';
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
-import TaskList from '@tiptap/extension-task-list';
-import TextAlign from '@tiptap/extension-text-align';
-import Underline from '@tiptap/extension-underline';
+import CodeBlockLowlightExtension from '@tiptap/extension-code-block-lowlight';
+import HighlightExtension from '@tiptap/extension-highlight';
+import HorizontalRuleExtension from '@tiptap/extension-horizontal-rule';
+import LinkExtension from '@tiptap/extension-link';
+import SubscriptExtension from '@tiptap/extension-subscript';
+import SuperscriptExtension from '@tiptap/extension-superscript';
+import TableExtension from '@tiptap/extension-table';
+import TableCellExtension from '@tiptap/extension-table-cell';
+import TableHeaderExtension from '@tiptap/extension-table-header';
+import TableRowExtension from '@tiptap/extension-table-row';
+import TaskListExtension from '@tiptap/extension-task-list';
+import TextAlignExtension from '@tiptap/extension-text-align';
+import UnderlineExtension from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 import { Extension } from '@tiptap/vue-3';
 import { once } from 'lodash';
@@ -21,10 +21,11 @@ import { lowlight } from 'lowlight/lib/common';
 import type { Fragment, Slice } from 'prosemirror-model';
 import { Plugin } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
-import { TaskItem } from 'src/boot/tiptap/task-item.client';
+import { TaskItemExtension } from 'src/boot/tiptap/task-item.client';
 import { ImageResizeExtension } from 'src/code/tiptap/image-resize/image-resize-extension';
 import { InlineMathExtension } from 'src/code/tiptap/inline-math/inline-math-extension';
 import { MathBlockExtension } from 'src/code/tiptap/math-block/math-block-extension';
+import { YoutubeVideoExtension } from 'src/code/tiptap/youtube-video/extension';
 
 export const extensions = once(() => [
   StarterKit.configure({
@@ -38,22 +39,22 @@ export const extensions = once(() => [
     },
   }),
 
-  HorizontalRule.configure({
+  HorizontalRuleExtension.configure({
     HTMLAttributes: {
       draggable: 'false',
     },
   }),
 
-  Underline,
+  UnderlineExtension,
 
-  TextAlign.configure({
+  TextAlignExtension.configure({
     types: ['heading', 'paragraph'],
   }),
 
-  Subscript,
-  Superscript,
+  SubscriptExtension,
+  SuperscriptExtension,
 
-  Link.configure({
+  LinkExtension.configure({
     openOnClick: false,
     HTMLAttributes: {
       draggable: 'false',
@@ -65,20 +66,20 @@ export const extensions = once(() => [
     allowBase64: true,
   }),
 
-  TaskList,
-  TaskItem().configure({
+  TaskListExtension,
+  TaskItemExtension().configure({
     nested: true,
     onReadOnlyChecked: () => true,
   }),
 
-  Table.configure({
+  TableExtension.configure({
     resizable: true,
   }),
-  TableRow,
-  TableHeader,
-  TableCell,
+  TableRowExtension,
+  TableHeaderExtension,
+  TableCellExtension,
 
-  CodeBlockLowlight.configure({
+  CodeBlockLowlightExtension.configure({
     lowlight,
   }),
 
@@ -156,5 +157,7 @@ export const extensions = once(() => [
   InlineMathExtension,
   MathBlockExtension,
 
-  Highlight,
+  HighlightExtension,
+
+  YoutubeVideoExtension,
 ]);

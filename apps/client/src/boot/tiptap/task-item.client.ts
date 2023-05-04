@@ -8,7 +8,7 @@ export interface TaskItemOptions {
   HTMLAttributes: Record<string, any>;
 }
 
-export const TaskItem = once(() =>
+export const TaskItemExtension = once(() =>
   Node.create<TaskItemOptions>({
     name: 'taskItem',
 

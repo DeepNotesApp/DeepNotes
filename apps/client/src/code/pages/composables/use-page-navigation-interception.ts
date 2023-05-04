@@ -1,5 +1,6 @@
 import { splitStr } from '@stdlib/misc';
 import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
+import { youtubeResizing } from 'src/code/tiptap/youtube-video/NodeView.vue';
 import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
 export function usePageNavigationInterception() {
@@ -23,7 +24,8 @@ export function usePageNavigationInterception() {
         event.altKey ||
         internals.mobileAltKey ||
         target.isContentEditable ||
-        imageResizing.active
+        imageResizing.active ||
+        youtubeResizing.active
       ) {
         mainLogger
           .sub('usePageNavigationInterception')
