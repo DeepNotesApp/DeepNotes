@@ -1,14 +1,16 @@
 <template>
   <NodeViewWrapper
-    as="span"
-    class="image-wrapper"
+    as="div"
+    class="youtube-wrapper"
+    data-youtube-video
   >
-    <img
-      ref="imageElem"
-      v-bind="node.attrs"
-      draggable="true"
-      data-drag-handle
-    />
+    <iframe
+      ref="youtubeElem"
+      v-bind="{ ...extension.options, ...node.attrs, src: embedUrl }"
+      :style="{
+        'pointer-events': youtubeResizing.active ? 'none' : undefined,
+      }"
+    ></iframe>
 
     <div
       class="resize-handle"
@@ -21,41 +23,58 @@
 </template>
 
 <script lang="ts">
-export const imageResizing = {
+export const youtubeResizing = reactive({
   active: false,
-};
+});
 </script>
 
 <script setup lang="ts">
-import { listenPointerEvents } from '@stdlib/misc';
+import { listenPointerEvents, Vec2 } from '@stdlib/misc';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
 
+import { getEmbedUrlFromYoutubeUrl } from './utils';
+
 const props = defineProps(nodeViewProps);
 
-const imageElem = ref<Element>();
+const embedUrl = getEmbedUrlFromYoutubeUrl({
+  ...props.extension.options,
 
-let startWidth: number;
-let startPos: number;
+  ...props.node.attrs,
+
+  url: props.node.attrs.src,
+});
+
+const youtubeElem = ref<Element>();
+
+let startSize = new Vec2();
+let startPos = new Vec2();
 
 function onResizeHandleLeftPointerDown(event: PointerEvent) {
-  startWidth = imageElem.value!.clientWidth;
-  startPos = event.clientX;
+  startSize = new Vec2(
+    youtubeElem.value!.clientWidth,
+    youtubeElem.value!.clientHeight,
+  );
+  startPos = new Vec2(event.clientX, event.clientY);
 
-  imageResizing.active = true;
+  youtubeResizing.active = true;
 
   listenPointerEvents(event, {
     move: (event) => {
       props.updateAttributes({
         width:
-          startWidth +
-          (event.clientX - startPos) /
+          startSize.x +
+          (event.clientX - startPos.x) /
+            internals.pages.react.page.camera.react.zoom,
+        height:
+          startSize.y +
+          (event.clientY - startPos.y) /
             internals.pages.react.page.camera.react.zoom,
       });
     },
     up: () => {
       setTimeout(() => {
-        imageResizing.active = false;
+        youtubeResizing.active = false;
       });
     },
   });
@@ -63,7 +82,7 @@ function onResizeHandleLeftPointerDown(event: PointerEvent) {
 </script>
 
 <style lang="scss" scoped>
-.image-wrapper {
+.youtube-wrapper {
   display: inline-flex;
   flex-grow: 0;
 

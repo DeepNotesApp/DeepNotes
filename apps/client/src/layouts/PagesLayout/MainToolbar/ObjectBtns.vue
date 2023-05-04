@@ -72,11 +72,33 @@
   />
 
   <ToolbarBtn
-    :tooltip="`YouTube video\n(Coming soon)`"
+    tooltip="YouTube video"
     icon="mdi-youtube"
     icon-size="24px"
-    disable
-    @click="$q.dialog({ component: InsertImageDialog })"
+    :disable="page.react.readOnly || !page.editing.react.active"
+    @click="
+      $q.dialog({
+        title: 'Insert YouTube video',
+        message: 'Enter the video URL:',
+
+        prompt: {
+          type: 'url',
+          model: '',
+          filled: true,
+        },
+        color: 'primary',
+
+        cancel: { flat: true, color: 'negative' },
+
+        focus: 'cancel',
+      }).onOk((url: string) =>
+        page.selection.format((chain) =>
+          chain.setYoutubeVideo({
+            src: url,
+          }),
+        ),
+      )
+    "
   />
 
   <q-separator
