@@ -1,5 +1,5 @@
 import { splitStr } from '@stdlib/misc';
-import { imageResizing } from 'src/code/tiptap/image-resize/ImageResize.vue';
+import { imageResizing } from 'src/code/tiptap/image-resize/NodeView.vue';
 import { youtubeResizing } from 'src/code/tiptap/youtube-video/NodeView.vue';
 import { handleError, isCtrlDown } from 'src/code/utils/misc';
 

@@ -8,7 +8,7 @@ import {
   yXmlFragmentToProsemirrorJSON,
 } from 'y-prosemirror';
 
-import { extensions } from './extensions.client';
+import { extensions } from './extensions';
 
 export function swapXmlFragments(frag1: Y.XmlFragment, frag2: Y.XmlFragment) {
   const json1 = yXmlFragmentToProsemirrorJSON(frag1);
