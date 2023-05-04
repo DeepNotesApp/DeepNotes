@@ -7,9 +7,9 @@ import { shouldRememberSession, wrapStorage } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import type { RouteLocationNormalized, Router } from 'vue-router';
 
-import type { tiptap } from './tiptap/index.client';
+import type { tiptap } from './tiptap.client';
 
-const moduleLogger = mainLogger.sub('boot/internals.client.ts');
+const moduleLogger = mainLogger.sub('boot/internals.universal.ts');
 
 export interface DeepNotesInternals {
   dict: Record<string, any>;

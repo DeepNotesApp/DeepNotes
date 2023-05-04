@@ -1,17 +1,16 @@
 import { Node } from '@tiptap/core';
 import { VueNodeViewRenderer } from '@tiptap/vue-3';
 
-import InlineMath from './InlineMath.vue';
+import NodeView from './NodeView.vue';
 
-export const InlineMathExtension = Node.create({
-  name: 'inlineMath',
+export const MathBlockExtension = Node.create({
+  name: 'mathBlock',
 
-  group: 'inline',
+  group: 'block',
 
   marks: '',
 
   atom: true,
-  inline: true,
   selectable: true,
   draggable: true,
 
@@ -24,26 +23,26 @@ export const InlineMathExtension = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'inline-math',
+        tag: 'math-block',
         getAttrs: (elem) => ({ input: (elem as any).innerText }),
       },
     ];
   },
 
   renderHTML({ HTMLAttributes: { input } }) {
-    return ['inline-math', input];
+    return ['math-block', input];
   },
   renderText({ node }) {
-    return `$${node.attrs.input}$`;
+    return `$$\n${node.attrs.input}\n$$\n\n`;
   },
 
   addNodeView() {
-    return VueNodeViewRenderer(InlineMath);
+    return VueNodeViewRenderer(NodeView);
   },
 
   addCommands(): any {
     return {
-      addInlineMath:
+      addMathBlock:
         (options: any) =>
         ({ commands }: any) =>
           commands.insertContent({

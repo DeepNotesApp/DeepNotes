@@ -64,7 +64,7 @@ module.exports = configure(function (ctx) {
       { path: 'ui.client', server: false },
       { path: 'prosemirror.client', server: false },
       { path: 'syncedstore.client', server: false },
-      { path: 'tiptap/index.client', server: false },
+      { path: 'tiptap.client', server: false },
       { path: 'stripe.client', server: false },
       { path: 'zxcvbn.client', server: false },
     ],

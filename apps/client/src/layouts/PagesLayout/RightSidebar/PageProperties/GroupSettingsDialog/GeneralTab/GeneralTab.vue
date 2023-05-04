@@ -54,7 +54,7 @@
         <Gap style="height: 20px" />
 
         <div>
-          Your in-group name
+          Your name in this group
 
           <q-icon
             name="mdi-information"

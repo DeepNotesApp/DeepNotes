@@ -28,21 +28,10 @@ export const imageResizing = {
 
 <script setup lang="ts">
 import { listenPointerEvents } from '@stdlib/misc';
-import type { Editor } from '@tiptap/vue-3';
+import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
-import type { Node as ProseMirrorNode } from 'prosemirror-model';
-import type { Decoration } from 'prosemirror-view';
 
-const props = defineProps<{
-  editor: Editor;
-  node: ProseMirrorNode;
-  decorations: Decoration[];
-  selected: boolean;
-  extension: Node;
-  getPos: () => number;
-  updateAttributes: (attributes: Record<string, any>) => void;
-  deleteNode: () => void;
-}>();
+const props = defineProps(nodeViewProps);
 
 const imageElem = ref<Element>();
 
