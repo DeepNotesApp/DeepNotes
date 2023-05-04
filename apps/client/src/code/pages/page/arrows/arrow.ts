@@ -431,6 +431,14 @@ export const PageArrow = once(
           this.react.collab.regionId = region.id;
 
           region.react.collab.arrowIds.push(this.id);
+
+          this.react.loaded = false;
+
+          setTimeout(() => {
+            setTimeout(() => {
+              this.react.loaded = true;
+            });
+          });
         });
       }
 

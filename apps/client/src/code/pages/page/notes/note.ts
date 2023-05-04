@@ -624,6 +624,14 @@ export class PageNote extends PageElem() implements IPageRegion {
         0,
         this.id,
       );
+
+      this.react.loaded = false;
+
+      setTimeout(() => {
+        setTimeout(() => {
+          this.react.loaded = true;
+        });
+      });
     });
   }
 
