@@ -88,10 +88,6 @@ export class PageSelection {
           continue;
         }
 
-        if (elem.react.region !== this.page.activeRegion.react.value) {
-          this.clear(elem.react.region);
-        }
-
         elem.react.selected = true;
         this.react[`${elem.type}Set`][elem.id] = true;
 
@@ -131,7 +127,18 @@ export class PageSelection {
   }
 
   selectAll() {
-    this.add(...this.page.activeRegion.react.value.react.elems);
+    const elems = this.page.activeRegion.react.value.react.elems.slice();
+
+    for (const note of this.page.activeRegion.react.value.react.notes) {
+      elems.push(
+        ...this.page.arrows.fromIds([
+          ...note.incomingArrowIds,
+          ...note.outgoingArrowIds,
+        ]),
+      );
+    }
+
+    this.add(...new Set(elems));
   }
 
   shift(shift: Vec2) {
