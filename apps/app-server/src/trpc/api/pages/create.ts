@@ -33,11 +33,13 @@ export async function create({
       return await ctx.dataAbstraction.transaction(async (dtrx) => {
         // Check sufficient permissions
 
-        await ctx.assertSufficientGroupPermissions({
-          userId: ctx.userId,
-          groupId: input.groupId,
-          permission: 'editGroupPages',
-        });
+        if (input.groupCreation == null) {
+          await ctx.assertSufficientGroupPermissions({
+            userId: ctx.userId,
+            groupId: input.groupId,
+            permission: 'editGroupPages',
+          });
+        }
 
         // Get some necessary user data
 
