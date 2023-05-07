@@ -9,7 +9,7 @@
     <template #item="scope">
       <PageItemContent
         :icon="false"
-        :page-id="scope.opt"
+        :page-id="scope.opt.pageId"
         prefer="absolute"
       />
     </template>
@@ -47,7 +47,10 @@ const linkOptions = computed(() =>
         return;
       }
 
-      return pageId;
+      return {
+        pageId,
+        value: `/pages/${pageId}`,
+      };
     })
     .filter((page) => page != null),
 );
