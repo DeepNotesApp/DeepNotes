@@ -1,21 +1,15 @@
+import { useEventListener } from '@vueuse/core';
+
 export function useTouchscreenPointerCaptureRelease() {
-  onMounted(() => {
-    document.addEventListener('pointerdown', onPointerDownCapture, {
-      capture: true,
-    });
-  });
+  useEventListener(
+    'pointerdown',
+    (event) => {
+      mainLogger
+        .sub('useTouchscreenPointerCaptureRelease')
+        .info('Release pointer capture');
 
-  function onPointerDownCapture(event: PointerEvent) {
-    mainLogger
-      .sub('useTouchscreenPointerCaptureRelease')
-      .info('Release pointer capture');
-
-    (event.target as Element).releasePointerCapture(event.pointerId);
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('pointerdown', onPointerDownCapture, {
-      capture: true,
-    });
-  });
+      (event.target as Element).releasePointerCapture(event.pointerId);
+    },
+    { capture: true },
+  );
 }

@@ -1,21 +1,20 @@
 import { Vec2 } from '@stdlib/misc';
+import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useKeyboardShortcuts() {
-  const page = computed(() => internals.pages?.react?.page);
-
-  onMounted(() => {
-    document.addEventListener('keydown', async (event: KeyboardEvent) => {
-      if (await onKeyDown(event)) {
-        event.preventDefault();
-      }
-    });
+  useEventListener('keydown', async (event) => {
+    if (await onKeyDown(event)) {
+      event.preventDefault();
+    }
   });
 
   async function onKeyDown(event: KeyboardEvent): Promise<any> {
     mainLogger.info(`Keydown: ${event.code}`);
 
-    if (page.value == null) {
+    const page = internals.pages?.react?.page;
+
+    if (page == null) {
       return;
     }
 
@@ -29,120 +28,116 @@ export function useKeyboardShortcuts() {
       target.isContentEditable
     ) {
       if (event.code === 'Escape') {
-        page.value.editing.stop();
+        page.editing.stop();
         return true;
       }
 
       return;
     }
 
-    const activeElem = page.value.activeElem.react.value;
+    const activeElem = page.activeElem.react.value;
 
     // Basic
 
     if (isCtrlDown(event) && event.code === 'KeyX') {
-      page.value.clipboard.cut();
+      page.clipboard.cut();
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyC') {
-      page.value.clipboard.copy();
+      page.clipboard.copy();
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyV' && window.clipboardData) {
-      await page.value.clipboard.paste();
+      await page.clipboard.paste();
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyD') {
-      await page.value.cloning.perform();
+      await page.cloning.perform();
       return true;
     }
 
     if (isCtrlDown(event) && event.code === 'KeyZ') {
-      page.value.undoRedo.undo();
+      page.undoRedo.undo();
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyY') {
-      page.value.undoRedo.redo();
+      page.undoRedo.redo();
       return true;
     }
 
     if (isCtrlDown(event) && event.code === 'KeyA') {
-      page.value.selection.selectAll();
+      page.selection.selectAll();
       return true;
     }
     if (event.code === 'Delete') {
-      page.value.deleting.perform();
+      page.deleting.perform();
       return true;
     }
 
     // Formatting
 
     if (isCtrlDown(event) && event.code === 'KeyB') {
-      page.value.selection.toggleMark('bold');
+      page.selection.toggleMark('bold');
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyI') {
-      page.value.selection.toggleMark('italic');
+      page.selection.toggleMark('italic');
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyU') {
-      page.value.selection.toggleMark('underline');
+      page.selection.toggleMark('underline');
       return true;
     }
     if (isCtrlDown(event) && event.code === 'KeyE') {
-      page.value.selection.toggleMark('code');
+      page.selection.toggleMark('code');
       return true;
     }
     if (isCtrlDown(event) && event.shiftKey && event.code === 'KeyX') {
-      page.value.selection.toggleMark('strike');
+      page.selection.toggleMark('strike');
       return true;
     }
 
     if (isCtrlDown(event) && event.altKey && event.code === 'Digit1') {
-      page.value.selection.toggleNode('heading', { level: 1 });
+      page.selection.toggleNode('heading', { level: 1 });
       return true;
     }
     if (isCtrlDown(event) && event.altKey && event.code === 'Digit2') {
-      page.value.selection.toggleNode('heading', { level: 2 });
+      page.selection.toggleNode('heading', { level: 2 });
       return true;
     }
     if (isCtrlDown(event) && event.altKey && event.code === 'Digit3') {
-      page.value.selection.toggleNode('heading', { level: 3 });
+      page.selection.toggleNode('heading', { level: 3 });
       return true;
     }
 
     // Others
 
     if (event.code === 'F2' && activeElem != null) {
-      await page.value.editing.start(activeElem);
+      await page.editing.start(activeElem);
       return true;
     }
 
     if (event.code === 'Backspace' && activeElem != null) {
-      await page.value.editing.start(activeElem);
-      page.value.editing.react.editor?.commands.deleteSelection();
+      await page.editing.start(activeElem);
+      page.editing.react.editor?.commands.deleteSelection();
       return true;
     }
 
     if (event.code === 'ArrowLeft') {
-      page.value.selection.shift(new Vec2(-1, 0));
+      page.selection.shift(new Vec2(-1, 0));
       return true;
     }
     if (event.code === 'ArrowRight') {
-      page.value.selection.shift(new Vec2(1, 0));
+      page.selection.shift(new Vec2(1, 0));
       return true;
     }
     if (event.code === 'ArrowUp') {
-      page.value.selection.shift(new Vec2(0, -1));
+      page.selection.shift(new Vec2(0, -1));
       return true;
     }
     if (event.code === 'ArrowDown') {
-      page.value.selection.shift(new Vec2(0, 1));
+      page.selection.shift(new Vec2(0, 1));
       return true;
     }
   }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('keydown', onKeyDown);
-  });
 }

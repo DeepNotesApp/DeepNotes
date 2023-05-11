@@ -1,18 +1,15 @@
+import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from 'src/code/utils/misc';
 
 export function useEditingOnTyping() {
-  const page = computed(() => internals.pages.react.page);
-
-  onMounted(() => {
-    document.addEventListener('keypress', onKeyPress);
-  });
-
-  async function onKeyPress(event: KeyboardEvent) {
+  useEventListener('keypress', async (event) => {
     if (isCtrlDown(event)) {
       return;
     }
 
-    if (page.value == null) {
+    const page = internals.pages.react.page;
+
+    if (page == null) {
       return;
     }
 
@@ -26,7 +23,7 @@ export function useEditingOnTyping() {
       return;
     }
 
-    const activeElem = page.value.activeElem.react.value;
+    const activeElem = page.activeElem.react.value;
 
     if (activeElem == null) {
       return;
@@ -34,13 +31,13 @@ export function useEditingOnTyping() {
 
     mainLogger.sub('useEditingOnTyping').info('Start');
 
-    await page.value.editing.start(activeElem);
+    await page.editing.start(activeElem);
 
-    if (page.value.editing.react.editor == null) {
+    if (page.editing.react.editor == null) {
       return;
     }
 
-    let chain = page.value.editing.react.editor.chain().deleteSelection();
+    let chain = page.editing.react.editor.chain().deleteSelection();
 
     if (event.key === 'Enter') {
       chain = chain.insertContent('<p></p><p></p>');
@@ -49,9 +46,5 @@ export function useEditingOnTyping() {
     }
 
     chain.run();
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('keypress', onKeyPress);
   });
 }
