@@ -1,3 +1,5 @@
+import { Vec2 } from './vec2';
+
 export function hasVertScrollbar(elem: HTMLElement) {
   const computedStyle = window.getComputedStyle(elem);
 
@@ -66,8 +68,15 @@ export function isMouseOverScrollbar(event: PointerEvent) {
 export function listenPointerEvents(
   downEvent: PointerEvent,
   options: {
-    move?: (event: PointerEvent) => void;
-    up?: (event: PointerEvent) => void;
+    move?: (event: PointerEvent, downEvent: PointerEvent) => void;
+    up?: (event: PointerEvent, downEvent: PointerEvent) => void;
+
+    dragStartDistance?: number;
+    dragStartDelay?: number;
+
+    dragStart?: (event: PointerEvent, downEvent: PointerEvent) => void;
+    dragUpdate?: (event: PointerEvent, downEvent: PointerEvent) => void;
+    dragEnd?: (event: PointerEvent, downEvent: PointerEvent) => void;
   },
 ): () => void {
   document.addEventListener('pointermove', onPointerMove);
@@ -75,19 +84,57 @@ export function listenPointerEvents(
   document.addEventListener('pointerup', onPointerUp);
   document.addEventListener('pointercancel', onPointerUp);
 
+  let dragStartTimeout: ReturnType<typeof setTimeout> | undefined;
+
   function cancel() {
+    clearTimeout(dragStartTimeout);
+
     document.removeEventListener('pointermove', onPointerMove);
 
     document.removeEventListener('pointerup', onPointerUp);
     document.removeEventListener('pointercancel', onPointerUp);
   }
 
+  let dragging = false;
+
+  const downClientPos = new Vec2(downEvent.clientX, downEvent.clientY);
+
   function onPointerMove(moveEvent: PointerEvent) {
     if (moveEvent.pointerId !== downEvent.pointerId) {
       return;
     }
 
-    options.move?.(moveEvent);
+    options.move?.(moveEvent, downEvent);
+
+    if (options.dragStartDistance != null) {
+      if (!dragging) {
+        const moveClientPos = new Vec2(moveEvent.clientX, moveEvent.clientY);
+
+        const distance = downClientPos.dist(moveClientPos);
+
+        if (options.dragStartDelay != null) {
+          if (dragStartTimeout == null) {
+            dragStartTimeout = setTimeout(() => {
+              dragging = true;
+
+              options.dragStart?.(moveEvent, downEvent);
+            }, options.dragStartDelay);
+          }
+
+          if (distance > options.dragStartDistance) {
+            cancel();
+          }
+        } else {
+          if (distance > options.dragStartDistance) {
+            dragging = true;
+
+            options.dragStart?.(moveEvent, downEvent);
+          }
+        }
+      } else {
+        options.dragUpdate?.(moveEvent, downEvent);
+      }
+    }
   }
 
   function onPointerUp(upEvent: PointerEvent) {
@@ -97,7 +144,11 @@ export function listenPointerEvents(
 
     cancel();
 
-    options.up?.(upEvent);
+    options.up?.(upEvent, downEvent);
+
+    if (dragging) {
+      options.dragEnd?.(upEvent, downEvent);
+    }
   }
 
   return cancel;
