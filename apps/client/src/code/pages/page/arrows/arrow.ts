@@ -68,9 +68,8 @@ export const IArrowCollabDefault = once(() => IArrowCollab().parse({}));
 export interface IArrowReact extends IElemReact {
   collab: ComputedRef<IArrowCollabOutput>;
 
-  fakeTargetPos?: Vec2;
-
-  modifying?: 'source' | 'target';
+  fakePos?: Vec2;
+  looseEndpoint?: 'source' | 'target';
 
   interregional: ComputedRef<boolean>;
 
@@ -133,7 +132,7 @@ export const PageArrow = once(
               return false;
             }
 
-            if (this.react.fakeTargetPos != null) {
+            if (this.react.fakePos != null) {
               return true;
             }
 
@@ -155,8 +154,12 @@ export const PageArrow = once(
               return false;
             }
 
-            if (this.react.fakeTargetPos != null) {
-              return this.react.sourceNote != null;
+            if (this.react.fakePos != null) {
+              if (this.react.looseEndpoint === 'source') {
+                return this.react.targetNote != null;
+              } else if (this.react.looseEndpoint === 'target') {
+                return this.react.sourceNote != null;
+              }
             }
 
             if (
@@ -209,8 +212,12 @@ export const PageArrow = once(
           ),
 
           sourcePos: computed(() => {
-            if (this.react.fakeTargetPos != null) {
-              return this.react.sourceNote.react.islandRect.center;
+            if (this.react.fakePos != null) {
+              if (this.react.looseEndpoint === 'source') {
+                return this.react.fakePos;
+              } else {
+                return this.react.sourceNote.react.islandRect.center;
+              }
             }
 
             if (
@@ -223,8 +230,12 @@ export const PageArrow = once(
             }
           }),
           targetPos: computed(() => {
-            if (this.react.fakeTargetPos != null) {
-              return this.react.fakeTargetPos;
+            if (this.react.fakePos != null) {
+              if (this.react.looseEndpoint === 'target') {
+                return this.react.fakePos;
+              } else {
+                return this.react.targetNote.react.islandRect.center;
+              }
             }
 
             if (
@@ -239,9 +250,15 @@ export const PageArrow = once(
 
           halfSizes: computed(() => {
             const sourceSize =
-              this.react.sourceNote.react.relativeRect.halfSize ?? new Vec2(1);
+              this.react.fakePos != null &&
+              this.react.looseEndpoint === 'source'
+                ? new Vec2(1)
+                : this.react.sourceNote.react.relativeRect.halfSize ??
+                  new Vec2(1);
+
             const targetSize =
-              this.react.fakeTargetPos != null
+              this.react.fakePos != null &&
+              this.react.looseEndpoint === 'target'
                 ? new Vec2(1)
                 : this.react.targetNote.react.relativeRect.halfSize ??
                   new Vec2(1);
@@ -439,6 +456,16 @@ export const PageArrow = once(
               this.react.loaded = true;
             });
           });
+        });
+      }
+
+      delete() {
+        this.page.collab.doc.transact(() => {
+          this.removeFromRegion();
+
+          if (this.page.collab.store.arrows[this.id] != null) {
+            delete this.page.collab.store.arrows[this.id];
+          }
         });
       }
 

@@ -3,7 +3,13 @@
     class="note-arrow-handle"
     width="20px"
     height="27px"
-    @pointerdown.left.stop="page.arrowCreation.start(note, $event)"
+    @pointerdown.left.stop="
+      page.arrowCreation.start({
+        anchorNote: note,
+        looseEndpoint: 'target',
+        event: $event,
+      })
+    "
   >
     <path
       d="M 6 27 L 14 27 L 14 14 L 20 14 L 10 0 L 0 14 L 6 14 Z"
