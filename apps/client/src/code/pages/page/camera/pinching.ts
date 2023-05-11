@@ -37,7 +37,7 @@ export class PagePinching {
         if (this.react.active) {
           this.page.panning.cancel();
           this.page.dragging.cancel();
-          this.page.boxSelection.clearTimer();
+          this.page.boxSelection.cancel();
 
           this.page.selection.clear();
 

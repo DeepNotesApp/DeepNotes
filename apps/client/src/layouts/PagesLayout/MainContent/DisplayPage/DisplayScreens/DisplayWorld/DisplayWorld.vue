@@ -24,7 +24,7 @@
     <InterregionalArrows :region="page" />
     <ArrowCreation :region="page" />
 
-    <DisplayBoxSelection :region="page" />
+    <DisplayBoxSelection />
   </div>
 </template>
 

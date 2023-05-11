@@ -1,31 +1,21 @@
 <template>
   <div
-    v-if="boxSelection.react.active && boxSelection.react.region === region"
+    v-if="boxSelection.react.active"
     class="box-selection-display"
-    :style="{
-      transform:
-        boxSelection.react.region.type === 'note'
-          ? `scale(${1 / page.camera.react.zoom})`
-          : undefined,
-    }"
   >
     <div
       class="box-selection"
       :style="{
         left: `${Math.min(
-          boxSelection.react.startPos.x,
-          boxSelection.react.endPos.x,
+          boxSelection.react.displayRect.topLeft.x,
+          boxSelection.react.displayRect.bottomRight.x,
         )}px`,
         top: `${Math.min(
-          boxSelection.react.startPos.y,
-          boxSelection.react.endPos.y,
+          boxSelection.react.displayRect.topLeft.y,
+          boxSelection.react.displayRect.bottomRight.y,
         )}px`,
-        width: `${Math.abs(
-          boxSelection.react.endPos.x - boxSelection.react.startPos.x,
-        )}px`,
-        height: `${Math.abs(
-          boxSelection.react.endPos.y - boxSelection.react.startPos.y,
-        )}px`,
+        width: `${Math.abs(boxSelection.react.displayRect.size.x)}px`,
+        height: `${Math.abs(boxSelection.react.displayRect.size.y)}px`,
       }"
     ></div>
   </div>
@@ -33,11 +23,6 @@
 
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
-import type { PageRegion } from 'src/code/pages/page/regions/region';
-
-defineProps<{
-  region: PageRegion;
-}>();
 
 const page = inject<Page>('page')!;
 const boxSelection = page.boxSelection;
