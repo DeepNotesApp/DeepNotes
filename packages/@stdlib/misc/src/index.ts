@@ -21,6 +21,7 @@ export * from './resize-observer';
 export * from './resolvable';
 export * from './responsive';
 export * from './string';
+export * from './svg';
 export * from './tiptap';
 export * from './typescript';
 export * from './urls';

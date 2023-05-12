@@ -3,7 +3,10 @@ import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories';
 import { isCtrlDown } from 'src/code/utils/misc';
-import { prosemirrorJSONToYXmlFragment } from 'y-prosemirror';
+import {
+  prosemirrorJSONToYXmlFragment,
+  yXmlFragmentToProsemirrorJSON,
+} from 'y-prosemirror';
 
 import { ISerialArrow } from '../../serialization';
 import { makeSlim } from '../../slim';
@@ -20,7 +23,7 @@ export class PageArrowCreation {
     active: false,
   });
 
-  sourceNote!: PageNote;
+  anchorNote!: PageNote;
 
   readonly fakeArrow: PageArrow;
 
@@ -35,32 +38,52 @@ export class PageArrowCreation {
     });
   }
 
-  start(sourceNote: PageNote, event: PointerEvent) {
+  start(input: {
+    anchorNote: PageNote;
+    looseEndpoint: 'source' | 'target';
+    event: PointerEvent;
+    baseArrow?: PageArrow;
+  }) {
     if (this.page.react.readOnly) {
       return;
     }
 
     this.react.active = true;
 
-    this.sourceNote = sourceNote;
+    this.anchorNote = input.anchorNote;
 
-    const serialArrow = ISerialArrow().parse(internals.pages.defaultArrow);
+    const serialArrow =
+      input.baseArrow?.react.collab != null
+        ? ISerialArrow().parse({
+            ...input.baseArrow.react.collab,
+
+            source: undefined,
+            target: undefined,
+
+            label: yXmlFragmentToProsemirrorJSON(
+              input.baseArrow.react.collab.label,
+            ),
+          })
+        : ISerialArrow().parse(internals.pages.defaultArrow);
 
     const arrowCollab = IArrowCollab().parse({
       ...serialArrow,
 
-      regionId: sourceNote.react.region.id,
+      regionId: input.anchorNote.react.region.id,
 
-      source: sourceNote.id,
+      source: '',
       target: '',
+
+      [input.looseEndpoint === 'source' ? 'target' : 'source']:
+        input.anchorNote.id,
     } as IArrowCollabInput);
 
     Object.assign(this.fakeArrow.react.collab, arrowCollab);
 
-    this.fakeArrow.react.modifying = 'target';
-    this.fakeArrow.react.fakeTargetPos = this.page.pos.eventToWorld(event);
+    this.fakeArrow.react.looseEndpoint = input.looseEndpoint;
+    this.fakeArrow.react.fakePos = this.page.pos.eventToWorld(input.event);
 
-    listenPointerEvents(event, {
+    listenPointerEvents(input.event, {
       move: this._update,
       up: async (event) => {
         if (!this.react.active) {
@@ -82,15 +105,15 @@ export class PageArrowCreation {
       },
     });
 
-    this._update(event);
+    this._update(input.event);
   }
 
   private _update = (event: PointerEvent) => {
-    this.fakeArrow.react.fakeTargetPos = this.page.pos.eventToWorld(event);
+    this.fakeArrow.react.fakePos = this.page.pos.eventToWorld(event);
   };
 
-  linkNote(targetNote: PageNote) {
-    this.fakeArrow.react.collab.target = targetNote.id;
+  linkNote(note: PageNote) {
+    this.fakeArrow.react.collab[this.fakeArrow.react.looseEndpoint!] = note.id;
 
     return this.finishArrowCreation();
   }
@@ -121,7 +144,7 @@ export class PageArrowCreation {
     this.page.collab.doc.transact(() => {
       this.page.arrows.react.collab[arrowId] = newCollab;
 
-      this.sourceNote.react.region.react.collab.arrowIds.push(arrowId);
+      this.anchorNote.react.region.react.collab.arrowIds.push(arrowId);
     });
 
     // Select arrow

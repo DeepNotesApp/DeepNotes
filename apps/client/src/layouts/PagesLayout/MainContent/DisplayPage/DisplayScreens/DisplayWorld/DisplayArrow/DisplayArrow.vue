@@ -6,17 +6,11 @@
   >
     <!-- Bodies -->
 
-    <CurveArrow
-      v-if="arrow.react.collab.bodyType === 'curve'"
+    <component
+      :is="arrow.react.collab.bodyType === 'curve' ? CurveArrow : LineArrow"
       @pointerdown.left.stop="onLeftPointerDown"
       @click.left="onLeftClick"
-    />
-
-    <LineArrow
-      v-if="arrow.react.collab.bodyType === 'line'"
-      @pointerdown.left.stop="onLeftPointerDown"
-      @click.left="onLeftClick"
-    />
+    ></component>
 
     <!-- Heads -->
 
@@ -35,6 +29,11 @@
 </template>
 
 <script setup lang="ts">
+import {
+  getClosestPathPointPercent,
+  listenPointerEvents,
+  Vec2,
+} from '@stdlib/misc';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import { createDoubleClickChecker } from 'src/code/utils/misc';
@@ -68,6 +67,58 @@ watchEffect(() => {
 
 function onLeftPointerDown(event: PointerEvent) {
   page.clickSelection.perform(props.arrow, event);
+
+  const path = document.querySelector(
+    `#arrow-${props.arrow.id} .arrow`,
+  ) as SVGPathElement;
+
+  if (path != null) {
+    const absoluteWorldPos = page.pos.clientToWorld(
+      new Vec2(event.clientX, event.clientY),
+    );
+
+    const originWorldPos = props.arrow.react.interregional
+      ? props.arrow.react.region.react.islandRoot.getOriginWorldPos()
+      : props.arrow.react.region.getOriginWorldPos();
+
+    if (originWorldPos == null) {
+      return;
+    }
+
+    const relativeWorldPos = absoluteWorldPos.sub(originWorldPos);
+
+    if (getClosestPathPointPercent(path, relativeWorldPos) < 0.5) {
+      listenPointerEvents(event, {
+        dragStartDistance: 5,
+
+        dragStart() {
+          page.arrowCreation.start({
+            anchorNote: props.arrow.react.targetNote,
+            looseEndpoint: 'source',
+            baseArrow: props.arrow,
+            event,
+          });
+
+          props.arrow.delete();
+        },
+      });
+    } else {
+      listenPointerEvents(event, {
+        dragStartDistance: 5,
+
+        dragStart() {
+          page.arrowCreation.start({
+            anchorNote: props.arrow.react.sourceNote,
+            looseEndpoint: 'target',
+            baseArrow: props.arrow,
+            event,
+          });
+
+          props.arrow.delete();
+        },
+      });
+    }
+  }
 }
 
 const checkDoubleClick = createDoubleClickChecker();

@@ -12,19 +12,18 @@ export interface IBoxSelectionReact {
   regionId?: string;
   region: ComputedRef<PageRegion>;
 
-  startPos: Vec2;
-  endPos: Vec2;
+  clientStartPos: Vec2;
+  clientEndPos: Vec2;
+
+  displayRect: ComputedRef<Rect>;
 }
 
 export class PageBoxSelection {
-  static readonly MIN_DISTANCE = 5;
-
   readonly page: Page;
 
   readonly react: UnwrapNestedRefs<IBoxSelectionReact>;
 
-  downEvent!: PointerEvent;
-  touchTimer: NodeJS.Timeout | null = null;
+  private _cancelPointerEvents?: () => void;
 
   constructor(input: { page: Page }) {
     this.page = input.page;
@@ -34,109 +33,67 @@ export class PageBoxSelection {
 
       region: computed(() => this.page.regions.fromId(this.react.regionId!)),
 
-      startPos: new Vec2(),
-      endPos: new Vec2(),
+      clientStartPos: new Vec2(),
+      clientEndPos: new Vec2(),
+
+      displayRect: computed(() =>
+        this.page.rects.clientToDisplay(
+          new Rect(this.react.clientStartPos, this.react.clientEndPos),
+        ),
+      ),
     });
   }
 
   start(event: PointerEvent, region: PageRegion) {
     const clientPos = this.page.pos.eventToClient(event);
 
-    const containerClientPos = region.getContainerClientRect()?.topLeft;
-
-    if (containerClientPos == null) {
-      return;
-    }
-
-    const offsetPos = clientPos.sub(containerClientPos);
-
     this.react.active = false;
 
     this.react.regionId = region.id;
 
-    this.react.startPos = new Vec2(offsetPos);
-    this.react.endPos = new Vec2(offsetPos);
-
-    this.downEvent = event;
+    this.react.clientStartPos = new Vec2(clientPos);
+    this.react.clientEndPos = new Vec2(clientPos);
 
     if (event.pointerType === 'mouse') {
-      listenPointerEvents(event, {
-        move: this._pointerMove,
-        up: this._pointerUp,
+      this._cancelPointerEvents = listenPointerEvents(event, {
+        dragStartDistance: 5,
+
+        dragStart: this._dragStart,
+        dragUpdate: this._dragUpdate,
+        dragEnd: this._dragEnd,
       });
-
-      return;
     } else {
-      // Only activate box-selection if the touch stays
-      // in the same place for 300ms
+      this._cancelPointerEvents = listenPointerEvents(event, {
+        dragStartDistance: 5,
+        dragStartDelay: 300,
 
-      this.clearTimer();
-
-      this.touchTimer = setTimeout(() => {
-        this.react.active = true;
-        this.touchTimer = null;
-
-        listenPointerEvents(event, {
-          move: this._pointerMove,
-          up: this._pointerUp,
-        });
-      }, 300);
-
-      listenPointerEvents(event, {
-        move: this._timerPointerMove,
-        up: this.clearTimer,
+        dragStart: this._dragStart,
+        dragUpdate: this._dragUpdate,
+        dragEnd: this._dragEnd,
       });
     }
   }
 
-  private _pointerMove = (event: PointerEvent) => {
-    const clientPos = this.page.pos.eventToClient(event);
-
-    const containerClientPos =
-      this.react.region.getContainerClientRect()?.topLeft;
-
-    if (containerClientPos == null) {
-      return;
-    }
-
-    const offsetPos = clientPos.sub(containerClientPos);
-
-    if (!this.react.active) {
-      const dist = offsetPos.sub(this.react.startPos).length();
-
-      this.react.active = dist >= PageBoxSelection.MIN_DISTANCE;
-
-      if (!this.react.active) {
-        return;
-      }
-    }
-
-    this.react.endPos = new Vec2(offsetPos);
+  private _dragStart = () => {
+    this.react.active = true;
   };
 
-  private _pointerUp = (event: PointerEvent) => {
-    if (!this.react.active) {
-      return;
-    }
+  private _dragUpdate = (event: PointerEvent) => {
+    this.react.clientEndPos = this.page.pos.eventToClient(event);
+  };
 
+  private _dragEnd = (event: PointerEvent) => {
     this.react.active = false;
-
-    const containerClientPos =
-      this.react.region.getContainerClientRect()?.topLeft;
-
-    if (containerClientPos == null) {
-      return;
-    }
 
     const boxClientRect = new Rect(
       new Vec2(
-        Math.min(this.react.startPos.x, this.react.endPos.x),
-        Math.min(this.react.startPos.y, this.react.endPos.y),
-      ).add(containerClientPos),
+        Math.min(this.react.clientStartPos.x, this.react.clientEndPos.x),
+        Math.min(this.react.clientStartPos.y, this.react.clientEndPos.y),
+      ),
       new Vec2(
-        Math.max(this.react.startPos.x, this.react.endPos.x),
-        Math.max(this.react.startPos.y, this.react.endPos.y),
-      ).add(containerClientPos),
+        Math.max(this.react.clientStartPos.x, this.react.clientEndPos.x),
+        Math.max(this.react.clientStartPos.y, this.react.clientEndPos.y),
+      ),
     );
 
     this.page.collab.doc.transact(() => {
@@ -182,32 +139,9 @@ export class PageBoxSelection {
     });
   };
 
-  private _timerPointerMove = (event: PointerEvent) => {
-    if (this.touchTimer == null || this.react.active) {
-      return;
-    }
+  cancel() {
+    this.react.active = false;
 
-    const clientPos = this.page.pos.eventToClient(event);
-    const clientTopLeft = this.react.region.getContainerClientRect()?.topLeft;
-
-    if (clientTopLeft == null) {
-      return;
-    }
-
-    const offsetPos = clientPos.sub(clientTopLeft);
-
-    const dist = offsetPos.sub(this.react.startPos).length();
-
-    if (dist >= PageBoxSelection.MIN_DISTANCE) {
-      this.clearTimer();
-
-      this.page.panning.start(this.downEvent);
-    }
-  };
-
-  clearTimer = () => {
-    clearTimeout(this.touchTimer!);
-
-    this.touchTimer = null;
-  };
+    this._cancelPointerEvents?.();
+  }
 }

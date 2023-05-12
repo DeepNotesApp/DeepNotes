@@ -1,11 +1,8 @@
 import { Vec2 } from '@stdlib/misc';
+import { useEventListener } from '@vueuse/core';
 
 export function useTableContextMenu() {
-  onMounted(() => {
-    document.addEventListener('contextmenu', onContextMenu);
-  });
-
-  function onContextMenu(event: MouseEvent) {
+  useEventListener('contextmenu', (event) => {
     let elem = event.target as HTMLElement | null;
 
     if (!elem?.isContentEditable) {
@@ -31,9 +28,5 @@ export function useTableContextMenu() {
     }
 
     internals.pages.react.tableContextMenu = false;
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('contextmenu', onContextMenu);
   });
 }

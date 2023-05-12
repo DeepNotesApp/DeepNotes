@@ -1,9 +1,7 @@
-export function useMiddleClickPastePrevention() {
-  onMounted(() => {
-    document.addEventListener('auxclick', onAuxClick);
-  });
+import { useEventListener } from '@vueuse/core';
 
-  function onAuxClick(event: MouseEvent) {
+export function useMiddleClickPastePrevention() {
+  useEventListener('auxclick', (event) => {
     if (event.button === 1) {
       mainLogger
         .sub('useMiddleClickPastePrevention')
@@ -11,23 +9,11 @@ export function useMiddleClickPastePrevention() {
 
       event.preventDefault();
     }
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('auxclick', onAuxClick);
   });
 
-  onMounted(() => {
-    document.addEventListener('pointerup', onPointerUp);
-  });
-
-  function onPointerUp(event: PointerEvent) {
+  useEventListener('pointerup', (event) => {
     if (event.button === 1) {
       event.preventDefault();
     }
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('pointerup', onPointerUp);
   });
 }

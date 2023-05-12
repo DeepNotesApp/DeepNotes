@@ -1,37 +1,30 @@
 import { isDetachedDOM } from '@stdlib/misc';
+import { useEventListener } from '@vueuse/core';
 
 export function useElementPasting() {
-  const page = computed(() => internals.pages.react.page);
+  useEventListener(
+    'paste',
+    async (event) => {
+      const target = event.target as HTMLElement;
 
-  onMounted(() => {
-    document.addEventListener('paste', onPaste, {
-      capture: true,
-    });
-  });
+      if (
+        target.nodeName === 'INPUT' ||
+        target.nodeName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('.ProseMirror') != null ||
+        isDetachedDOM(target)
+      ) {
+        return;
+      }
 
-  async function onPaste(event: ClipboardEvent) {
-    const target = event.target as HTMLElement;
+      mainLogger.sub('useElementPasting').info('Perform');
 
-    if (
-      target.nodeName === 'INPUT' ||
-      target.nodeName === 'TEXTAREA' ||
-      target.isContentEditable ||
-      target.closest('.ProseMirror') != null ||
-      isDetachedDOM(target)
-    ) {
-      return;
-    }
+      const text = (event.clipboardData || window.clipboardData).getData(
+        'text',
+      );
 
-    mainLogger.sub('useElementPasting').info('Perform');
-
-    const text = (event.clipboardData || window.clipboardData).getData('text');
-
-    await page.value.clipboard.paste(text);
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('paste', onPaste, {
-      capture: true,
-    });
-  });
+      await internals.pages.react.page.clipboard.paste(text);
+    },
+    { capture: true },
+  );
 }

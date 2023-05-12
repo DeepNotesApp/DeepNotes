@@ -8,7 +8,6 @@ import type { Page } from '../page';
 export interface IDraggingReact {
   active: boolean;
 
-  startPos: Vec2;
   currentPos: Vec2;
 
   dropRegionId?: string;
@@ -16,8 +15,6 @@ export interface IDraggingReact {
 }
 
 export class NoteDragging {
-  static readonly MIN_DISTANCE = 5;
-
   readonly page: Page;
 
   react: UnwrapRef<IDraggingReact>;
@@ -30,7 +27,6 @@ export class NoteDragging {
     this.react = refProp<IDraggingReact>(this, 'react', {
       active: false,
 
-      startPos: new Vec2(),
       currentPos: new Vec2(),
     });
   }
@@ -56,17 +52,41 @@ export class NoteDragging {
     this.react = {
       active: false,
 
-      startPos: this.page.pos.eventToClient(event),
       currentPos: this.page.pos.eventToClient(event),
     };
 
     this._cancelPointerEvents = listenPointerEvents(event, {
-      move: this._update,
-      up: this._finish,
+      dragStartDistance: 5,
+
+      dragStart: this._dragStart,
+      dragUpdate: this._dragUpdate,
+      dragEnd: this._dragFinish,
     });
   }
 
-  private _update = async (event: PointerEvent) => {
+  private _dragStart = async (event: PointerEvent) => {
+    this.react.active = true;
+
+    // Update note dragging states
+
+    for (const selectedNote of this.page.selection.react.notes) {
+      selectedNote.react.dragging = selectedNote.react.collab.movable;
+
+      if (!selectedNote.react.dragging) {
+        this.page.selection.remove(selectedNote);
+      }
+    }
+
+    // Drag out of note
+
+    if (this.page.activeRegion.react.value.type === 'note') {
+      await this._dragOut();
+    }
+
+    this._dragUpdate(event);
+  };
+
+  private _dragUpdate = (event: PointerEvent) => {
     const clientPos = this.page.pos.eventToClient(event);
 
     const worldDelta = this.page.sizes.screenToWorld2D(
@@ -74,47 +94,6 @@ export class NoteDragging {
     );
 
     this.react.currentPos = clientPos;
-
-    if (!this.react.active) {
-      const gapClientDelta = clientPos.sub(this.react.startPos);
-
-      const gapDist = gapClientDelta.length();
-
-      this.react.active = gapDist >= NoteDragging.MIN_DISTANCE;
-
-      if (!this.react.active) {
-        return;
-      }
-
-      // Update dragging states
-
-      for (const selectedNote of this.page.selection.react.notes) {
-        selectedNote.react.dragging = selectedNote.react.collab.movable;
-
-        if (!selectedNote.react.dragging) {
-          this.page.selection.remove(selectedNote);
-        }
-      }
-
-      const gapWorldDelta = this.page.sizes.screenToWorld2D(gapClientDelta);
-
-      this.page.collab.doc.transact(() => {
-        for (const selectedNote of this.page.selection.react.notes) {
-          const newPos = new Vec2(selectedNote.react.collab.pos).add(
-            gapWorldDelta,
-          );
-
-          selectedNote.react.collab.pos.x = newPos.x;
-          selectedNote.react.collab.pos.y = newPos.y;
-        }
-      });
-
-      if (this.page.activeRegion.react.value.type === 'note') {
-        await this._dragOut();
-      }
-
-      return;
-    }
 
     // Move selected notes
 
@@ -224,7 +203,7 @@ export class NoteDragging {
     }
   }
 
-  private _finish = () => {
+  private _dragFinish = () => {
     this.react.active = false;
 
     for (const selectedNote of this.page.selection.react.notes) {
@@ -235,6 +214,6 @@ export class NoteDragging {
   cancel = () => {
     this._cancelPointerEvents?.();
 
-    this._finish();
+    this._dragFinish();
   };
 }

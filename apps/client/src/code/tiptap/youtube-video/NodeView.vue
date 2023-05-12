@@ -8,7 +8,7 @@
       ref="youtubeElem"
       v-bind="{ ...extension.options, ...node.attrs, src: embedUrl }"
       :style="{
-        'pointer-events': youtubeResizing.active ? 'none' : undefined,
+        'pointer-events': pointerDown ? 'none' : undefined,
       }"
     ></iframe>
 
@@ -32,6 +32,7 @@ export const youtubeResizing = reactive({
 import { listenPointerEvents, Vec2 } from '@stdlib/misc';
 import { nodeViewProps } from '@tiptap/vue-3';
 import { NodeViewWrapper } from '@tiptap/vue-3';
+import { useEventListener } from '@vueuse/core';
 
 import { getEmbedUrlFromYoutubeUrl } from './utils';
 
@@ -79,6 +80,20 @@ function onResizeHandleLeftPointerDown(event: PointerEvent) {
     },
   });
 }
+
+const pointerDown = ref(false);
+
+useEventListener(
+  'pointerdown',
+  (event) => {
+    pointerDown.value = true;
+
+    listenPointerEvents(event, {
+      up: () => (pointerDown.value = false),
+    });
+  },
+  { capture: true },
+);
 </script>
 
 <style lang="scss" scoped>

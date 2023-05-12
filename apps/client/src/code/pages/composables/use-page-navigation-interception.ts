@@ -1,14 +1,11 @@
 import { splitStr } from '@stdlib/misc';
+import { useEventListener } from '@vueuse/core';
 import { imageResizing } from 'src/code/tiptap/image-resize/NodeView.vue';
 import { youtubeResizing } from 'src/code/tiptap/youtube-video/NodeView.vue';
 import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
 export function usePageNavigationInterception() {
-  onMounted(() => {
-    document.addEventListener('click', onClick);
-  });
-
-  async function onClick(event: MouseEvent) {
+  useEventListener('click', async (event) => {
     try {
       const target = event.target as HTMLElement;
 
@@ -78,9 +75,5 @@ export function usePageNavigationInterception() {
     } catch (error) {
       handleError(error);
     }
-  }
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('click', onClick);
   });
 }

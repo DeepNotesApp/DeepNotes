@@ -44,11 +44,7 @@ export class PageDeleting {
       );
 
       for (const arrow of sortedArrows) {
-        arrow.removeFromRegion();
-
-        if (this.page.collab.store.arrows[arrow.id] != null) {
-          delete this.page.collab.store.arrows[arrow.id];
-        }
+        arrow.delete();
       }
 
       // Delete notes

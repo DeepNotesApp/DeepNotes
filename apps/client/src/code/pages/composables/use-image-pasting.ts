@@ -1,48 +1,40 @@
+import { useEventListener } from '@vueuse/core';
+
 export function useImagePasting() {
-  const page = computed(() => internals.pages.react.page);
+  useEventListener(
+    'paste',
+    async (event) => {
+      const target = event.target as HTMLElement;
 
-  onMounted(() => {
-    document.addEventListener('paste', onPaste, {
-      capture: true,
-    });
-  });
-
-  async function onPaste(event: ClipboardEvent) {
-    const target = event.target as HTMLElement;
-
-    if (
-      target.closest('.ProseMirror') == null ||
-      (event.clipboardData?.files?.length ?? 0) === 0
-    ) {
-      return;
-    }
-
-    mainLogger.sub('useImagePasting').info('Perform');
-
-    for (const file of Array.from(event.clipboardData!.files)) {
-      if (!file.type.startsWith('image/')) {
-        continue;
+      if (
+        target.closest('.ProseMirror') == null ||
+        (event.clipboardData?.files?.length ?? 0) === 0
+      ) {
+        return;
       }
 
-      const reader = new FileReader();
+      mainLogger.sub('useImagePasting').info('Perform');
 
-      reader.addEventListener('loadend', (event) => {
-        page.value.selection.format((chain) =>
-          chain.setImage({
-            src: event.target!.result as string,
-          }),
-        );
-      });
+      for (const file of Array.from(event.clipboardData!.files)) {
+        if (!file.type.startsWith('image/')) {
+          continue;
+        }
 
-      reader.readAsDataURL(file);
-    }
+        const reader = new FileReader();
 
-    event.preventDefault();
-  }
+        reader.addEventListener('loadend', (event) => {
+          internals.pages.react.page.selection.format((chain) =>
+            chain.setImage({
+              src: event.target!.result as string,
+            }),
+          );
+        });
 
-  onBeforeUnmount(() => {
-    document.removeEventListener('paste', onPaste, {
-      capture: true,
-    });
-  });
+        reader.readAsDataURL(file);
+      }
+
+      event.preventDefault();
+    },
+    { capture: true },
+  );
 }

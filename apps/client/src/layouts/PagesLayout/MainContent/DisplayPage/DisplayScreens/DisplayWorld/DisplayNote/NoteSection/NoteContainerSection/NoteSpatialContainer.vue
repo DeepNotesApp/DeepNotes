@@ -31,8 +31,6 @@
 
     <InterregionalArrows :region="note" />
 
-    <DisplayBoxSelection :region="note" />
-
     <!-- Fake drop zone -->
 
     <div
@@ -52,7 +50,6 @@ import type { Page } from 'src/code/pages/page/page';
 import { createDoubleClickChecker, isCtrlDown } from 'src/code/utils/misc';
 
 import DisplayArrows from '../../../DisplayArrows.vue';
-import DisplayBoxSelection from '../../../DisplayBoxSelection.vue';
 import DOMDisplay from '../../../DOMDisplay.vue';
 import InterregionalArrows from '../../../InterregionalArrows.vue';
 import DisplayNote from '../../DisplayNote.vue';
