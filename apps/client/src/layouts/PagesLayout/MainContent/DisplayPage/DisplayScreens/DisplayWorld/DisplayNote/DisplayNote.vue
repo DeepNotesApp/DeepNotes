@@ -32,6 +32,8 @@
         </NoteContent>
 
         <NoteResizeHandles />
+
+        <ArrowLinkZones />
       </NoteFrame>
     </NoteAnchor>
   </Teleport>
@@ -40,6 +42,7 @@
 <script lang="ts">
 export default {
   inheritAttrs: false,
+  components: { ArrowLinkZones },
 };
 </script>
 
@@ -48,6 +51,7 @@ export default {
 
 import type { PageNote } from 'src/code/pages/page/notes/note';
 
+import ArrowLinkZones from './ArrowLinkZones/ArrowLinkZones.vue';
 import NoteAnchor from './NoteAnchor.vue';
 import NoteArrowHandles from './NoteArrowHandles/NoteArrowHandles.vue';
 import NoteContent from './NoteContent.vue';

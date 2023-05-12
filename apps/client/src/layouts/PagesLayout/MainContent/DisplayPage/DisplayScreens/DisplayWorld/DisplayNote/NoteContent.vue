@@ -75,7 +75,7 @@ function onLeftPointerDown(event: PointerEvent) {
 
 function onLeftPointerUp(event: PointerEvent) {
   if (page.arrowCreation.react.active && !isCtrlDown(event)) {
-    const arrow = page.arrowCreation.linkNote(note);
+    const arrow = page.arrowCreation.finish({ note, anchor: null });
 
     if (arrow != null) {
       page.selection.set(arrow);

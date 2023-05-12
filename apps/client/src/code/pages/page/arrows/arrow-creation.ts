@@ -1,8 +1,8 @@
+import type { Vec2 } from '@stdlib/misc';
 import { listenPointerEvents } from '@stdlib/misc';
 import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Factories } from 'src/code/factories';
-import { isCtrlDown } from 'src/code/utils/misc';
 import {
   prosemirrorJSONToYXmlFragment,
   yXmlFragmentToProsemirrorJSON,
@@ -76,6 +76,8 @@ export class PageArrowCreation {
 
       [input.looseEndpoint === 'source' ? 'target' : 'source']:
         input.anchorNote.id,
+
+      [`${input.looseEndpoint}Anchor`]: null,
     } as IArrowCollabInput);
 
     Object.assign(this.fakeArrow.react.collab, arrowCollab);
@@ -85,24 +87,7 @@ export class PageArrowCreation {
 
     listenPointerEvents(input.event, {
       move: this._update,
-      up: async (event) => {
-        if (!this.react.active) {
-          return;
-        }
-
-        this.react.active = false;
-
-        if (isCtrlDown(event) || internals.mobileAltKey) {
-          const clientPos = this.page.pos.eventToClient(event);
-          const worldPos = this.page.pos.clientToWorld(clientPos);
-
-          const note = await this.page.notes.create(this.page, worldPos);
-
-          if (note != null) {
-            this.linkNote(note);
-          }
-        }
-      },
+      up: () => (this.react.active = false),
     });
 
     this._update(input.event);
@@ -112,14 +97,9 @@ export class PageArrowCreation {
     this.fakeArrow.react.fakePos = this.page.pos.eventToWorld(event);
   };
 
-  linkNote(note: PageNote) {
-    this.fakeArrow.react.collab[this.fakeArrow.react.looseEndpoint!] = note.id;
-
-    return this.finishArrowCreation();
-  }
-
-  finishArrowCreation() {
-    this.react.active = false;
+  finish(input: { note: PageNote; anchor: Vec2 | null }) {
+    this.fakeArrow.react.collab[this.fakeArrow.react.looseEndpoint!] =
+      input.note.id;
 
     if (!this.fakeArrow.react.valid) {
       return;
@@ -131,6 +111,8 @@ export class PageArrowCreation {
       cloneDeep(this.fakeArrow.react.collab),
       IArrowCollabDefault(),
     );
+
+    newCollab[`${this.fakeArrow.react.looseEndpoint!}Anchor`] = input.anchor;
 
     newCollab.label = prosemirrorJSONToYXmlFragment(
       internals.tiptap().schema,
@@ -150,6 +132,8 @@ export class PageArrowCreation {
     // Select arrow
 
     const arrow = this.page.arrows.fromId(arrowId)!;
+
+    this.page.selection.set(arrow);
 
     return arrow;
   }

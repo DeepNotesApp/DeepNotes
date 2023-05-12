@@ -54,6 +54,7 @@
         v-for="(childNote, index) in note.react.notes"
         :key="childNote?.id ?? index"
         class="note-container-child"
+        style="z-index: 2147483646"
         :style="{
           'flex-direction': note.react.collab.container.horizontal
             ? 'row'
