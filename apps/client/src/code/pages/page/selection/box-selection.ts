@@ -67,12 +67,21 @@ export class PageBoxSelection {
         dragStartDistance: 5,
         dragStartDelay: 300,
 
+        dragCancel: this._dragCancel,
         dragStart: this._dragStart,
         dragUpdate: this._dragUpdate,
         dragEnd: this._dragEnd,
       });
     }
   }
+
+  private _dragCancel = (event: PointerEvent, external: boolean) => {
+    this.react.active = false;
+
+    if (!external) {
+      this.page.panning.start(event);
+    }
+  };
 
   private _dragStart = () => {
     this.react.active = true;

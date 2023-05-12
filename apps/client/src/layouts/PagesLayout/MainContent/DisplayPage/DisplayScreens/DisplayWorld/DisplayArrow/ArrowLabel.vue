@@ -7,7 +7,7 @@
     }"
   >
     <div
-      v-if="editor != null && !isTiptapEditorEmpty(editor)"
+      v-if="!empty"
       class="arrow-label-background"
     ></div>
 
@@ -68,8 +68,14 @@ const editor = internals.tiptap().useEditor({
   },
 });
 
+const empty = computed(
+  () => editor.value == null || isTiptapEditorEmpty(editor.value),
+);
+
 function onLeftPointerDown(event: PointerEvent) {
-  page.clickSelection.perform(props.arrow, event);
+  if (!editor.value?.isEditable) {
+    props.arrow.grab(event);
+  }
 }
 
 const checkDoubleClick = createDoubleClickChecker();
@@ -86,6 +92,8 @@ async function onLeftClick(event: MouseEvent) {
   position: absolute;
 
   transform: translate(-50%, -50%);
+
+  cursor: grab;
 }
 
 .arrow-label-background {

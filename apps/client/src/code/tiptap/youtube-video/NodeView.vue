@@ -119,6 +119,8 @@ useEventListener(
     transition: opacity 0.3s ease;
 
     opacity: 0;
+
+    cursor: nwse-resize;
   }
 
   &:hover > .resize-handle {
