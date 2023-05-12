@@ -16,7 +16,6 @@
       }"
       @touchstart="onTouchStart"
       @pointerdown.left.stop="onLeftPointerDown"
-      @pointerup.left="onLeftPointerUp"
     >
       <slot></slot>
     </div>
@@ -31,7 +30,6 @@ import {
 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
-import { isCtrlDown } from 'src/code/utils/misc';
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;
@@ -70,16 +68,6 @@ function onLeftPointerDown(event: PointerEvent) {
 
   if (note.react.selected) {
     page.dragging.start(event);
-  }
-}
-
-function onLeftPointerUp(event: PointerEvent) {
-  if (page.arrowCreation.react.active && !isCtrlDown(event)) {
-    const arrow = page.arrowCreation.finish({ note, anchor: null });
-
-    if (arrow != null) {
-      page.selection.set(arrow);
-    }
   }
 }
 </script>
