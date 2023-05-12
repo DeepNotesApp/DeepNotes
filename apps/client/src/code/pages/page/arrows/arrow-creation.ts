@@ -41,6 +41,7 @@ export class PageArrowCreation {
   start(input: {
     anchorNote: PageNote;
     looseEndpoint: 'source' | 'target';
+    anchor?: Vec2 | null;
     event: PointerEvent;
     baseArrow?: PageArrow;
   }) {
@@ -66,6 +67,9 @@ export class PageArrowCreation {
           })
         : ISerialArrow().parse(internals.pages.defaultArrow);
 
+    const fixedEndpoint =
+      input.looseEndpoint === 'source' ? 'target' : 'source';
+
     const arrowCollab = IArrowCollab().parse({
       ...serialArrow,
 
@@ -74,11 +78,14 @@ export class PageArrowCreation {
       source: '',
       target: '',
 
-      [input.looseEndpoint === 'source' ? 'target' : 'source']:
-        input.anchorNote.id,
+      [fixedEndpoint]: input.anchorNote.id,
 
       [`${input.looseEndpoint}Anchor`]: null,
     } as IArrowCollabInput);
+
+    if (input.anchor != null) {
+      arrowCollab[`${fixedEndpoint}Anchor`] = input.anchor;
+    }
 
     Object.assign(this.fakeArrow.react.collab, arrowCollab);
 
