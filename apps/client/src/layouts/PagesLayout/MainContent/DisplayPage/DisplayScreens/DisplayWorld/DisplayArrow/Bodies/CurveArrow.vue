@@ -50,9 +50,7 @@ watchEffect(async () => {
 });
 
 function getPathDefinition() {
-  const absDiff = arrow.react.targetHeadPos
-    .sub(arrow.react.sourceHeadPos)
-    .abs();
+  const diff = arrow.react.targetHeadPos.sub(arrow.react.sourceHeadPos);
 
   const targetDirection = arrow.react.targetHeadPos
     .sub(arrow.react.sourceHeadPos)
@@ -62,17 +60,29 @@ function getPathDefinition() {
   const sourceCosine = arrow.react.normals.source.cosineTo(targetDirection);
   const targetCosine = arrow.react.normals.target.cosineTo(sourceDirection);
 
-  const sourceAbsDot = Math.abs(arrow.react.normals.source.dot(absDiff));
-  const targetAbsDot = Math.abs(arrow.react.normals.target.dot(absDiff));
+  let sourceDot = arrow.react.normals.source.dot(diff);
+  let targetDot = -arrow.react.normals.target.dot(diff);
+
+  const minDot = 75;
+  const dotMultiplier = 0.6;
+
+  const modifiedSourceDot =
+    sourceDot > minDot
+      ? sourceDot
+      : minDot - (sourceDot - minDot) * dotMultiplier;
+  const modifiedTargetDot =
+    targetDot > minDot
+      ? targetDot
+      : minDot - (targetDot - minDot) * dotMultiplier;
 
   const sourceControlOffset = lerp(
-    Math.max(50, sourceAbsDot * 0.75),
-    sourceAbsDot * 0.5,
+    modifiedSourceDot * 0.75,
+    Math.abs(sourceDot) * 0.5,
     (Math.max(0.785, sourceCosine) - 0.785) / (1 - 0.785),
   );
   const targetControlOffset = lerp(
-    Math.max(50, targetAbsDot * 0.75),
-    targetAbsDot * 0.5,
+    modifiedTargetDot * 0.75,
+    Math.abs(targetDot) * 0.5,
     (Math.max(0.785, targetCosine) - 0.785) / (1 - 0.785),
   );
 
