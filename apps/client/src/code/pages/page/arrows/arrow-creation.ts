@@ -1,4 +1,4 @@
-import type { Vec2 } from '@stdlib/misc';
+import type { IVec2 } from '@stdlib/misc';
 import { listenPointerEvents } from '@stdlib/misc';
 import { cloneDeep } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -41,7 +41,7 @@ export class PageArrowCreation {
   start(input: {
     anchorNote: PageNote;
     looseEndpoint: 'source' | 'target';
-    anchor?: Vec2 | null;
+    anchor?: IVec2 | null;
     event: PointerEvent;
     baseArrow?: PageArrow;
   }) {
@@ -104,7 +104,7 @@ export class PageArrowCreation {
     this.fakeArrow.react.fakePos = this.page.pos.eventToWorld(event);
   };
 
-  finish(input: { note: PageNote; anchor: Vec2 | null }) {
+  finish(input: { note: PageNote; anchor: IVec2 | null }) {
     this.fakeArrow.react.collab[this.fakeArrow.react.looseEndpoint!] =
       input.note.id;
 

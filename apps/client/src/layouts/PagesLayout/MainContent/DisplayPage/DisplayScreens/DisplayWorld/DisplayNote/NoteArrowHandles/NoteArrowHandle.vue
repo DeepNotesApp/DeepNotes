@@ -21,12 +21,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Vec2 } from '@stdlib/misc';
+import type { IVec2 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 
 defineProps<{
-  anchor: Vec2;
+  anchor: IVec2;
 }>();
 
 const page = inject<Page>('page')!;

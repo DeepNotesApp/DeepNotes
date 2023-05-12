@@ -11,7 +11,7 @@
       points="0,0 100,0 75,25 25,25"
       class="arrow-link-zone"
       @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: new Vec2(0, -1) })
+        page.arrowCreation.finish({ note, anchor: { x: 0, y: -1 } })
       "
     ></polygon>
 
@@ -19,7 +19,7 @@
       points="0,0 25,25 25,75 0,100"
       class="arrow-link-zone"
       @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: new Vec2(-1, 0) })
+        page.arrowCreation.finish({ note, anchor: { x: -1, y: 0 } })
       "
     ></polygon>
 
@@ -27,7 +27,7 @@
       points="0,100 25,75 75,75 100,100"
       class="arrow-link-zone"
       @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: new Vec2(0, 1) })
+        page.arrowCreation.finish({ note, anchor: { x: 0, y: 1 } })
       "
     ></polygon>
 
@@ -35,7 +35,7 @@
       points="100,100 75,75 75,25 100,0"
       class="arrow-link-zone"
       @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: new Vec2(1, 0) })
+        page.arrowCreation.finish({ note, anchor: { x: 1, y: 0 } })
       "
     ></polygon>
 
@@ -48,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { Vec2 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 

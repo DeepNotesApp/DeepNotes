@@ -9,7 +9,7 @@
     }"
   >
     <NoteArrowHandle
-      :anchor="new Vec2(-1, 0)"
+      :anchor="{ x: -1, y: 0 }"
       style="top: 50%"
       :style="{
         left: `${-20 * page.camera.react.handleScale}px`,
@@ -18,7 +18,7 @@
     />
 
     <NoteArrowHandle
-      :anchor="new Vec2(1, 0)"
+      :anchor="{ x: 1, y: 0 }"
       style="top: 50%"
       :style="{
         right: `${-20 * page.camera.react.handleScale}px`,
@@ -27,7 +27,7 @@
     />
 
     <NoteArrowHandle
-      :anchor="new Vec2(0, -1)"
+      :anchor="{ x: 0, y: -1 }"
       :style="{
         top: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, -50%) rotateZ(0deg) scale(${page.camera.react.handleScale})`,
@@ -35,7 +35,7 @@
     />
 
     <NoteArrowHandle
-      :anchor="new Vec2(0, 1)"
+      :anchor="{ x: 0, y: 1 }"
       :style="{
         bottom: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, 50%) rotateZ(180deg) scale(${page.camera.react.handleScale})`,
@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import { Vec2 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 
