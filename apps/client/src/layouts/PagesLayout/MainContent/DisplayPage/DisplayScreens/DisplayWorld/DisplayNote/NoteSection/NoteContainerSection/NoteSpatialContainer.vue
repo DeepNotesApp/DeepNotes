@@ -18,18 +18,28 @@
       </template>
     </div>
 
-    <DisplayArrows :region="note" />
+    <div
+      style="
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
 
-    <DOMDisplay :region="note">
-      <DisplayNote
-        v-for="(childNote, index) in note.react.notes"
-        :key="childNote.id"
-        :note="childNote"
-        :index="index"
-      />
-    </DOMDisplay>
+        z-index: 2147483646;
+      "
+    >
+      <DisplayArrows :region="note" />
 
-    <InterregionalArrows :region="note" />
+      <DOMDisplay :region="note">
+        <DisplayNote
+          v-for="(childNote, index) in note.react.notes"
+          :key="childNote.id"
+          :note="childNote"
+          :index="index"
+        />
+      </DOMDisplay>
+
+      <InterregionalArrows :region="note" />
+    </div>
 
     <!-- Fake drop zone -->
 
@@ -102,16 +112,6 @@ async function onLeftClick(event: MouseEvent) {
 </script>
 
 <style scoped>
-.note-spatial-layer {
-  position: absolute;
-
-  inset: 0;
-
-  pointer-events: none;
-
-  isolation: isolate;
-}
-
 .note-spatial-container {
   position: absolute;
 
@@ -120,8 +120,6 @@ async function onLeftClick(event: MouseEvent) {
   border-radius: 5px;
 
   background-color: rgba(0, 0, 0, 0.4);
-
-  z-index: 2147483646;
 }
 
 .note-spatial-background {

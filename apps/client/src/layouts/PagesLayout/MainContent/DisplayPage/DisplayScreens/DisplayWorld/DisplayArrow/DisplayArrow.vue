@@ -8,6 +8,9 @@
 
     <component
       :is="arrow.react.collab.bodyType === 'curve' ? CurveArrow : LineArrow"
+      :style="{
+        'pointer-events': page.arrowCreation.react.active ? 'none' : undefined,
+      }"
       @pointerdown.left.stop="onLeftPointerDown"
       @click.left="onLeftClick"
     ></component>

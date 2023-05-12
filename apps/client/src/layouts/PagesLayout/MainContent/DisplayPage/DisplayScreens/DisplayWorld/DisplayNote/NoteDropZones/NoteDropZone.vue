@@ -8,6 +8,9 @@
         page.dragging.react.dropRegionId == parentNote.id &&
         page.dragging.react.dropIndex === targetIndex,
     }"
+    :style="{
+      'pointer-events': page.arrowCreation.react.active ? 'none' : undefined,
+    }"
     @pointerover="onPointerOver"
     @pointerout="onPointerOut"
     @pointerup.left="onLeftPointerUp"
@@ -60,6 +63,7 @@ async function onLeftPointerUp() {
 <style scoped>
 .note-drop-zone {
   position: absolute;
+
   left: 0;
   right: 0;
   top: 0;

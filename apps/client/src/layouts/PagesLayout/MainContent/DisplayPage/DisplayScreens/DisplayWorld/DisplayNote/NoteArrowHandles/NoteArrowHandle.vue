@@ -6,6 +6,7 @@
     @pointerdown.left.stop="
       page.arrowCreation.start({
         anchorNote: note,
+        anchor,
         looseEndpoint: 'target',
         event: $event,
       })
@@ -20,8 +21,13 @@
 </template>
 
 <script setup lang="ts">
+import type { IVec2 } from '@stdlib/misc';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
+
+defineProps<{
+  anchor: IVec2;
+}>();
 
 const page = inject<Page>('page')!;
 const note = inject<PageNote>('note')!;

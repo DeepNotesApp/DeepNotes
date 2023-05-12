@@ -9,6 +9,7 @@
     }"
   >
     <NoteArrowHandle
+      :anchor="{ x: -1, y: 0 }"
       style="top: 50%"
       :style="{
         left: `${-20 * page.camera.react.handleScale}px`,
@@ -17,6 +18,7 @@
     />
 
     <NoteArrowHandle
+      :anchor="{ x: 1, y: 0 }"
       style="top: 50%"
       :style="{
         right: `${-20 * page.camera.react.handleScale}px`,
@@ -25,6 +27,7 @@
     />
 
     <NoteArrowHandle
+      :anchor="{ x: 0, y: -1 }"
       :style="{
         top: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, -50%) rotateZ(0deg) scale(${page.camera.react.handleScale})`,
@@ -32,6 +35,7 @@
     />
 
     <NoteArrowHandle
+      :anchor="{ x: 0, y: 1 }"
       :style="{
         bottom: `${-20 * page.camera.react.handleScale}px`,
         transform: `translate(-50%, 50%) rotateZ(180deg) scale(${page.camera.react.handleScale})`,
