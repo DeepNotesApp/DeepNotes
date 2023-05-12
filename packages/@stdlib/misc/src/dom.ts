@@ -74,6 +74,7 @@ export function listenPointerEvents(
     dragStartDistance?: number;
     dragStartDelay?: number;
 
+    dragCancel?: (downEvent: PointerEvent, external: boolean) => void;
     dragStart?: (event: PointerEvent, downEvent: PointerEvent) => void;
     dragUpdate?: (event: PointerEvent, downEvent: PointerEvent) => void;
     dragEnd?: (event: PointerEvent, downEvent: PointerEvent) => void;
@@ -86,7 +87,9 @@ export function listenPointerEvents(
 
   let dragStartTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  function cancel() {
+  let dragging = false;
+
+  function destroy() {
     clearTimeout(dragStartTimeout);
 
     document.removeEventListener('pointermove', onPointerMove);
@@ -95,7 +98,11 @@ export function listenPointerEvents(
     document.removeEventListener('pointercancel', onPointerUp);
   }
 
-  let dragging = false;
+  function cancel(external: boolean) {
+    options.dragCancel?.(downEvent, external);
+
+    destroy();
+  }
 
   const downClientPos = new Vec2(downEvent.clientX, downEvent.clientY);
 
@@ -122,7 +129,7 @@ export function listenPointerEvents(
           }
 
           if (distance > options.dragStartDistance) {
-            cancel();
+            cancel(false);
           }
         } else {
           if (distance > options.dragStartDistance) {
@@ -142,7 +149,7 @@ export function listenPointerEvents(
       return;
     }
 
-    cancel();
+    destroy();
 
     options.up?.(upEvent, downEvent);
 
@@ -151,7 +158,7 @@ export function listenPointerEvents(
     }
   }
 
-  return cancel;
+  return () => cancel(true);
 }
 
 export function isDetachedDOM(node: Node | null) {
