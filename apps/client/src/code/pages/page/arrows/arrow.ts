@@ -1,5 +1,6 @@
 import { lightenByRatio } from '@stdlib/color';
 import type { Rect } from '@stdlib/misc';
+import { getClosestPathPointPercent, listenPointerEvents } from '@stdlib/misc';
 import { Line } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { getLineRectIntersection } from '@stdlib/misc';
@@ -506,6 +507,64 @@ export const PageArrow = once(
             ),
           ) ?? false
         );
+      }
+
+      grab(event: PointerEvent) {
+        this.page.clickSelection.perform(this, event);
+
+        const path = document.querySelector(
+          `#arrow-${this.id} .arrow`,
+        ) as SVGPathElement;
+
+        if (path == null) {
+          return;
+        }
+
+        const absoluteWorldPos = this.page.pos.clientToWorld(
+          new Vec2(event.clientX, event.clientY),
+        );
+
+        const originWorldPos = this.react.interregional
+          ? this.react.region.react.islandRoot.getOriginWorldPos()
+          : this.react.region.getOriginWorldPos();
+
+        if (originWorldPos == null) {
+          return;
+        }
+
+        const relativeWorldPos = absoluteWorldPos.sub(originWorldPos);
+
+        if (getClosestPathPointPercent(path, relativeWorldPos) < 0.5) {
+          listenPointerEvents(event, {
+            dragStartDistance: 5,
+
+            dragStart: () => {
+              this.page.arrowCreation.start({
+                anchorNote: this.react.targetNote,
+                looseEndpoint: 'source',
+                baseArrow: this,
+                event,
+              });
+
+              this.delete();
+            },
+          });
+        } else {
+          listenPointerEvents(event, {
+            dragStartDistance: 5,
+
+            dragStart: () => {
+              this.page.arrowCreation.start({
+                anchorNote: this.react.sourceNote,
+                looseEndpoint: 'target',
+                baseArrow: this,
+                event,
+              });
+
+              this.delete();
+            },
+          });
+        }
       }
     },
 );
