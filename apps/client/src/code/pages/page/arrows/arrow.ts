@@ -214,7 +214,10 @@ export const PageArrow = once(
 
           sourcePos: computed(() => {
             if (this.react.fakePos != null) {
-              if (this.react.looseEndpoint === 'source') {
+              if (
+                this.react.looseEndpoint === 'source' &&
+                this.react.sourceNote == null
+              ) {
                 return this.react.fakePos;
               } else {
                 return this.react.sourceNote.react.islandRect.center;
@@ -232,7 +235,10 @@ export const PageArrow = once(
           }),
           targetPos: computed(() => {
             if (this.react.fakePos != null) {
-              if (this.react.looseEndpoint === 'target') {
+              if (
+                this.react.looseEndpoint === 'target' &&
+                this.react.targetNote == null
+              ) {
                 return this.react.fakePos;
               } else {
                 return this.react.targetNote.react.islandRect.center;
@@ -252,14 +258,16 @@ export const PageArrow = once(
           halfSizes: computed(() => {
             const sourceSize =
               this.react.fakePos != null &&
-              this.react.looseEndpoint === 'source'
+              this.react.looseEndpoint === 'source' &&
+              this.react.sourceNote == null
                 ? new Vec2(1)
                 : this.react.sourceNote.react.relativeRect.halfSize ??
                   new Vec2(1);
 
             const targetSize =
               this.react.fakePos != null &&
-              this.react.looseEndpoint === 'target'
+              this.react.looseEndpoint === 'target' &&
+              this.react.targetNote == null
                 ? new Vec2(1)
                 : this.react.targetNote.react.relativeRect.halfSize ??
                   new Vec2(1);
