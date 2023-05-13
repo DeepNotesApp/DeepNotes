@@ -39,7 +39,7 @@
               class="feature-icon"
             />
 
-            Create up to <b>10 pages</b>
+            Create up to <b>50 pages</b>
           </li>
 
           <Gap style="height: 8px" />

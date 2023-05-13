@@ -18,7 +18,7 @@
         :features="[
           {
             icon: 'mdi-note',
-            text: 'Create up to 10 pages',
+            text: 'Create up to 50 pages',
           },
           {
             icon: 'mdi-server-security',
