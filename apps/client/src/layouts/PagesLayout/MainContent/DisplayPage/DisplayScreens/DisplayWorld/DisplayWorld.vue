@@ -5,6 +5,7 @@
     style="position: absolute; inset: 0"
     @wheel="onWheel"
     @pointerdown.left.capture="onLeftPointerDown"
+    @pointerup.left="onLeftPointerUp"
     @pointerdown.middle.prevent="onMiddlePointerDown"
     @auxclick.capture.middle="onMiddleAuxClick"
   >
@@ -31,6 +32,7 @@
 <script setup lang="ts">
 import { isMouseOverScrollbar } from '@stdlib/misc';
 import type { Page } from 'src/code/pages/page/page';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 import ArrowCreation from './ArrowCreation.vue';
 import DisplayArrows from './DisplayArrows.vue';
@@ -55,6 +57,28 @@ function onLeftPointerDown(event: PointerEvent) {
 
   if (page.pinching.react.active) {
     event.stopPropagation();
+  }
+}
+
+async function onLeftPointerUp(event: PointerEvent) {
+  if (
+    page.arrowCreation.react.active &&
+    (isCtrlDown(event) || internals.mobileAltKey)
+  ) {
+    event.stopPropagation();
+
+    page.arrowCreation.react.active = false;
+
+    const clientPos = page.pos.eventToClient(event);
+    const worldPos = page.pos.clientToWorld(clientPos);
+
+    const note = await page.notes.create(page, worldPos);
+
+    if (note != null) {
+      page.arrowCreation.finish({ note, anchor: null });
+
+      page.selection.set(note);
+    }
   }
 }
 

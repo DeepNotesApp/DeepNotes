@@ -85,12 +85,33 @@ function onLeftPointerDown(event: PointerEvent) {
 
   page.boxSelection.start(event, note);
 }
-async function onLeftPointerUp() {
-  if (!page.dragging.react.active) {
-    return;
+async function onLeftPointerUp(event: PointerEvent) {
+  if (page.dragging.react.active) {
+    await page.dropping.perform(note);
   }
 
-  await page.dropping.perform(note);
+  if (page.arrowCreation.react.active) {
+    event.stopPropagation();
+
+    page.arrowCreation.react.active = false;
+
+    const containerWorldTopLeft = note.getContainerWorldRect()?.topLeft;
+
+    if (containerWorldTopLeft == null) {
+      return;
+    }
+
+    const newNote = await page.notes.create(
+      note,
+      page.pos.eventToWorld(event).sub(containerWorldTopLeft),
+    );
+
+    if (newNote != null) {
+      page.arrowCreation.finish({ note: newNote, anchor: null });
+
+      page.selection.set(newNote);
+    }
+  }
 }
 
 const checkDoubleClick = createDoubleClickChecker();

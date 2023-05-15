@@ -6,6 +6,9 @@
     height="100%"
     viewBox="0 0 100 100"
     preserveAspectRatio="none"
+    :style="{
+      display: keyDown['Control'] ? 'none' : undefined,
+    }"
   >
     <ArrowLinkZone
       points="0,0 100,0 75,25 25,25"
@@ -35,6 +38,7 @@
 </template>
 
 <script setup lang="ts">
+import { keyDown } from 'src/code/pages/composables/use-key-state-tracking';
 import type { Page } from 'src/code/pages/page/page';
 
 import ArrowLinkZone from './ArrowLinkZone.vue';
