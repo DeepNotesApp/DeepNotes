@@ -140,8 +140,11 @@ defineProps<Props>();
 
       ul,
       ol {
+        position: relative;
+
         margin: 0 !important;
       }
+
       ul:not([data-type]) {
         padding-inline-start: 24px;
 
@@ -150,31 +153,57 @@ defineProps<Props>();
           font-size: 15px;
         }
       }
+
       ol {
         padding-inline-start: 24px;
       }
 
       ul[data-type='taskList'] {
-        padding-inline-start: 5px;
+        list-style: none;
 
-        li {
-          display: flex;
+        padding-inline-start: 24px;
 
-          > label {
-            flex: none;
-            user-select: none;
-            width: 19px;
+        > li {
+          position: relative;
 
-            > input {
-              position: relative;
-              top: 2px;
-            }
+          > label > input {
+            position: absolute;
+
+            left: -15px;
+            top: 3px;
+
+            width: 13px;
+            height: 13px;
           }
 
-          > div {
-            flex: 1 1 auto;
+          > div > p {
+            margin-left: 4px;
           }
         }
+      }
+
+      ul ul::before {
+        position: absolute;
+
+        left: -9px;
+        top: 0;
+        bottom: 0;
+
+        content: '';
+
+        border-left: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      ol ol::before {
+        position: absolute;
+
+        left: -9px;
+        top: 0;
+        bottom: 0;
+
+        content: '';
+
+        border-left: 1px solid rgba(255, 255, 255, 0.15);
       }
 
       // Inline code
