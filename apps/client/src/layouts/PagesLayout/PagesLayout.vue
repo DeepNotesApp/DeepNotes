@@ -25,6 +25,7 @@ import { watchUntilTrue } from '@stdlib/vue';
 import { useEditingOnTyping } from 'src/code/pages/composables/use-editing-on-typing';
 import { useElementPasting } from 'src/code/pages/composables/use-element-pasting';
 import { useImagePasting } from 'src/code/pages/composables/use-image-pasting';
+import { useKeyStateTracking } from 'src/code/pages/composables/use-key-state-tracking';
 import { useKeyboardShortcuts } from 'src/code/pages/composables/use-keyboard-shortcuts';
 import { useMiddleClickPastePrevention } from 'src/code/pages/composables/use-middle-click-paste-prevention';
 import { usePageNavigationInterception } from 'src/code/pages/composables/use-page-navigation-interception';
@@ -61,6 +62,7 @@ if (process.env.CLIENT) {
   useMiddleClickPastePrevention();
   useTableContextMenu();
   useWindowResizeListener();
+  useKeyStateTracking();
 }
 </script>
 

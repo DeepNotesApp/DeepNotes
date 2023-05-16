@@ -67,10 +67,10 @@ export async function create({
               'num-free-pages',
             )) + 1;
 
-          if (numFreePages > 10) {
+          if (numFreePages > 50) {
             throw new TRPCError({
               code: 'FORBIDDEN',
-              message: 'You have reached your limit of 10 free pages.',
+              message: 'You have reached your limit of 50 free pages.',
             });
           }
 

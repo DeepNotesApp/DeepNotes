@@ -260,7 +260,7 @@ async function _createPage() {
       message:
         'Page created successfully.' +
         (response.numFreePages != null
-          ? ` (${response.numFreePages + 1}/10)`
+          ? ` (${response.numFreePages + 1}/50)`
           : ''),
       type: 'positive',
     });

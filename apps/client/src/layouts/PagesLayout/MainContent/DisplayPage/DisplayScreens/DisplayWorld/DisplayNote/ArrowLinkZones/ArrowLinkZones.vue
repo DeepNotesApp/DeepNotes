@@ -6,53 +6,44 @@
     height="100%"
     viewBox="0 0 100 100"
     preserveAspectRatio="none"
+    :style="{
+      display: keyDown['Control'] ? 'none' : undefined,
+    }"
   >
-    <polygon
+    <ArrowLinkZone
       points="0,0 100,0 75,25 25,25"
-      class="arrow-link-zone"
-      @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: { x: 0, y: -1 } })
-      "
-    ></polygon>
+      :anchor="{ x: 0, y: -1 }"
+    ></ArrowLinkZone>
 
-    <polygon
+    <ArrowLinkZone
       points="0,0 25,25 25,75 0,100"
-      class="arrow-link-zone"
-      @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: { x: -1, y: 0 } })
-      "
-    ></polygon>
+      :anchor="{ x: -1, y: 0 }"
+    ></ArrowLinkZone>
 
-    <polygon
+    <ArrowLinkZone
       points="0,100 25,75 75,75 100,100"
-      class="arrow-link-zone"
-      @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: { x: 0, y: 1 } })
-      "
-    ></polygon>
+      :anchor="{ x: 0, y: 1 }"
+    ></ArrowLinkZone>
 
-    <polygon
+    <ArrowLinkZone
       points="100,100 75,75 75,25 100,0"
-      class="arrow-link-zone"
-      @pointerup.left="
-        page.arrowCreation.finish({ note, anchor: { x: 1, y: 0 } })
-      "
-    ></polygon>
+      :anchor="{ x: 1, y: 0 }"
+    ></ArrowLinkZone>
 
-    <polygon
+    <ArrowLinkZone
       points="25,25 75,25 75,75 25,75"
-      class="arrow-link-zone"
-      @pointerup.left="page.arrowCreation.finish({ note, anchor: null })"
-    ></polygon>
+      :anchor="null"
+    ></ArrowLinkZone>
   </svg>
 </template>
 
 <script setup lang="ts">
-import type { PageNote } from 'src/code/pages/page/notes/note';
+import { keyDown } from 'src/code/pages/composables/use-key-state-tracking';
 import type { Page } from 'src/code/pages/page/page';
 
+import ArrowLinkZone from './ArrowLinkZone.vue';
+
 const page = inject<Page>('page')!;
-const note = inject<PageNote>('note')!;
 </script>
 
 <style scoped lang="scss">
@@ -62,14 +53,5 @@ const note = inject<PageNote>('note')!;
   inset: 0;
 
   overflow: visible;
-}
-
-.arrow-link-zone {
-  fill: #42a5f5;
-
-  opacity: 0;
-}
-.arrow-link-zone:hover {
-  opacity: 0.3;
 }
 </style>
