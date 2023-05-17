@@ -26,7 +26,7 @@ function createAuthHelper(input: { optional: boolean }) {
       }
 
       throw new TRPCError({
-        message: 'Missing loggedIn cookie.',
+        message: 'Authorization required.',
         code: 'UNAUTHORIZED',
       });
     }
@@ -102,7 +102,7 @@ export const authProcedure = trpc.procedure.use(
 
     if (!modifiedCtx) {
       throw new TRPCError({
-        message: 'Invalid access token.',
+        message: 'Authorization required.',
         code: 'UNAUTHORIZED',
       });
     }
