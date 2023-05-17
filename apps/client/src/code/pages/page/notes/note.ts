@@ -289,7 +289,7 @@ export class PageNote extends PageElem() implements IPageRegion {
             }
           },
         }),
-        locallyCollapsed: false,
+        locallyCollapsed: this.react.collab.collapsing.collapsed,
       },
 
       sizeProp: computed(() =>
