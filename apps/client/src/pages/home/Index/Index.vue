@@ -126,7 +126,7 @@
             <Gap style="height: 12px" />
 
             <div style="font-size: 15px; max-width: 313px">
-              Double-click to create a note and see the possibilities. Move,
+              Double-click to create a note and explore the possibilities. Move,
               resize, expand, collapse, link, colorize. Use containers to create
               note hierarchies.
             </div>
