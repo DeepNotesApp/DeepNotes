@@ -18,7 +18,7 @@ export async function refresh({
 
   if (ctx.req.cookies.loggedIn == null) {
     throw new TRPCError({
-      message: 'Missing loggedIn cookie.',
+      message: 'User not logged in.',
       code: 'UNAUTHORIZED',
     });
   }
