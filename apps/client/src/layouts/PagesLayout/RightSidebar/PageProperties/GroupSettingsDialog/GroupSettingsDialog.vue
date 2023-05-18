@@ -41,7 +41,6 @@
 
           <q-tab
             v-if="
-              groupId !== internals.personalGroupId &&
               (realtimeCtx.hget(
                 'group-member',
                 `${groupId}:${authStore().userId}`,
@@ -115,7 +114,6 @@
 
             <TabBtn
               v-if="
-                groupId !== internals.personalGroupId &&
                 (realtimeCtx.hget(
                   'group-member',
                   `${groupId}:${authStore().userId}`,

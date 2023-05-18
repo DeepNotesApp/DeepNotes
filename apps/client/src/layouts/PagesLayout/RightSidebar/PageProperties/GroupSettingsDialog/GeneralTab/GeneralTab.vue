@@ -98,11 +98,11 @@
       </template>
 
       <Gap style="height: 24px" />
+
+      <q-separator />
+
+      <Gap style="height: 20px" />
     </template>
-
-    <q-separator />
-
-    <Gap style="height: 20px" />
 
     <div>Group infos</div>
 
