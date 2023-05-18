@@ -84,7 +84,7 @@
               `${groupId}:${authStore().userId}`,
               'role',
             )
-          ].permissions.editGroupSettings
+          ]?.permissions.editGroupSettings
         "
         @click="movePages"
       />
@@ -102,7 +102,7 @@
               `${groupId}:${authStore().userId}`,
               'role',
             )
-          ].permissions.editGroupPages
+          ]?.permissions.editGroupPages
         "
         @click="deletePages"
       />
