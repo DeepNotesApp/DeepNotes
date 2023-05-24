@@ -33,6 +33,11 @@ const { configure } = require('quasar/wrappers');
 const path = require('path');
 
 module.exports = configure(function (ctx) {
+  const port =
+    1024 + (Math.abs(hashFNV1a(JSON.stringify(ctx.mode))) % (65536 - 1024));
+
+  console.log(`Port: ${port}`);
+
   return {
     eslint: {
       // fix: true,
@@ -191,8 +196,7 @@ module.exports = configure(function (ctx) {
     devServer: {
       https: false,
       open: false, // opens browser window automatically
-      port:
-        1024 + (Math.abs(hashFNV1a(JSON.stringify(ctx.mode))) % (65536 - 1024)),
+      port: port,
       host: '0.0.0.0',
     },
 

@@ -119,7 +119,7 @@
   "private": true,
   "productName": "DeepNotes",
   "scripts": {
-    "build:android": "quasar build -m capacitor -T android",
+    "build:android": "quasar build -m capacitor -T android --ide",
     "build:electron": "quasar build -m electron",
     "build:ios": "quasar build -m capacitor -T ios",
     "build:spa": "quasar build -m spa",
