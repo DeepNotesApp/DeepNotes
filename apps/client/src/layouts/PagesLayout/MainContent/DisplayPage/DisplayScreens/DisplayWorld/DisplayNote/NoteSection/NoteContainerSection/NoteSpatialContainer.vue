@@ -90,7 +90,7 @@ async function onLeftPointerUp(event: PointerEvent) {
     await page.dropping.perform(note);
   }
 
-  if (page.arrowCreation.react.active) {
+  if (page.arrowCreation.react.active && isCtrlDown(event)) {
     event.stopPropagation();
 
     page.arrowCreation.react.active = false;

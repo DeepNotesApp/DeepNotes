@@ -63,7 +63,7 @@ function getPathDefinition() {
   let sourceDot = arrow.react.normals.source.dot(diff);
   let targetDot = -arrow.react.normals.target.dot(diff);
 
-  const minDot = 75;
+  const minDot = 50;
   const dotMultiplier = 0.6;
 
   const modifiedSourceDot =
