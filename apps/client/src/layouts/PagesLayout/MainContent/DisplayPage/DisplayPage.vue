@@ -29,15 +29,17 @@ import { useRealtimeContext } from 'src/code/realtime/context';
 import DisplayScreens from './DisplayScreens/DisplayScreens.vue';
 import DOMDisplay from './DisplayScreens/DisplayWorld/DOMDisplay.vue';
 
-const componentLogger = mainLogger.sub('DisplayPage');
-
 const props = defineProps<{
   page: Page;
 }>();
 
 provide('page', props.page);
 
+const componentLogger = mainLogger.sub('DisplayPage').sub(props.page.id);
+
 const realtimeCtx = useRealtimeContext();
+
+let notifyPageKeyRotation = false;
 
 watchEffect(() => {
   // Subscribe to required values
@@ -115,21 +117,37 @@ watchEffect(() => {
       ? null
       : pageKeyrings()(`${groupId}:${props.page.id}`).get();
 
+  // Skip on page keyring change
+
+  realtimeCtx.hget('page', props.page.id, 'encrypted-symmetric-keyring');
+
+  componentLogger.info('Changed values: %o', realtimeCtx.changed);
+
   if (
     realtimeCtx.changed.size === 1 &&
     realtimeCtx.changed.has(`page:${props.page.id}>encrypted-symmetric-keyring`)
   ) {
-    $quasar().notify({
-      message: 'Successfully rotated encryption key.',
-      type: 'positive',
+    // Necessary to prevent multiple notifications
+
+    notifyPageKeyRotation = true;
+
+    setTimeout(() => {
+      if (notifyPageKeyRotation) {
+        $quasar().notify({
+          message: 'Successfully rotated page encryption key.',
+          type: 'positive',
+        });
+      }
+
+      notifyPageKeyRotation = false;
     });
+
+    return;
   }
 
   props.page.setStatus(undefined, true);
 
   props.page.collab.websocket.disconnect();
-
-  // Skip on page key change
 
   componentLogger.info('Checking if all required values arrived');
 
