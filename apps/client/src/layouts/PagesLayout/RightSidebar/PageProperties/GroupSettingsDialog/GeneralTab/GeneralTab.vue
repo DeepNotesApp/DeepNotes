@@ -157,7 +157,6 @@
 
     <template
       v-if="
-        groupId !== internals.personalGroupId &&
         rolesMap()[
           realtimeCtx.hget(
             'group-member',
@@ -178,31 +177,46 @@
       <Gap style="height: 10px" />
 
       <div style="max-width: 300px; display: flex; flex-direction: column">
-        <template
-          v-if="
-            internals.realtime.globalCtx.hget(
-              'group',
-              groupId,
-              'is-password-protected',
-            )
-          "
-        >
-          <ChangePasswordBtn />
+        <template v-if="groupId !== internals.personalGroupId">
+          <template
+            v-if="
+              internals.realtime.globalCtx.hget(
+                'group',
+                groupId,
+                'is-password-protected',
+              )
+            "
+          >
+            <ChangePasswordBtn />
+
+            <Gap style="height: 16px" />
+
+            <DisablePasswordProtectionBtn />
+          </template>
+
+          <template v-else>
+            <EnablePasswordProtectionBtn />
+          </template>
 
           <Gap style="height: 16px" />
-
-          <DisablePasswordProtectionBtn />
         </template>
-
-        <template v-else>
-          <EnablePasswordProtectionBtn />
-        </template>
-
-        <Gap style="height: 16px" />
 
         <RotateGroupKeys />
       </div>
+    </template>
 
+    <template
+      v-if="
+        groupId !== internals.personalGroupId &&
+        rolesMap()[
+          realtimeCtx.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'role',
+          )
+        ]?.permissions.editGroupSettings
+      "
+    >
       <Gap style="height: 24px" />
 
       <q-separator />
@@ -221,7 +235,20 @@
         />
         <MakePublicBtn v-else />
       </div>
+    </template>
 
+    <template
+      v-if="
+        groupId !== internals.personalGroupId &&
+        rolesMap()[
+          realtimeCtx.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'role',
+          )
+        ]?.permissions.editGroupSettings
+      "
+    >
       <Gap style="height: 24px" />
 
       <q-separator />
