@@ -403,14 +403,14 @@ export const RealtimeClient = once(
           this.values[fullKey] = value;
 
           this.changed.add(fullKey);
-          void nextTick(() => this.changed.delete(fullKey));
+          setTimeout(() => this.changed.delete(fullKey));
 
           this.pending.get(fullKey)?.resolve(value);
           this.pending.delete(fullKey);
 
           for (const ctx of this.subscriptions[fullKey]) {
             ctx.changed.add(fullKey);
-            void nextTick(() => ctx.changed.delete(fullKey));
+            setTimeout(() => ctx.changed.delete(fullKey));
 
             ctx.pending.delete(fullKey);
           }

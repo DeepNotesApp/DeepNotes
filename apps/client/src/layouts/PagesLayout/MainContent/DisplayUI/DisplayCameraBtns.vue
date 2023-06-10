@@ -1,5 +1,5 @@
 <template>
-  <div class="display-btns">
+  <div class="display-camera-btns">
     <div style="position: absolute; top: 90px; right: 0; color: white">
       {{ Math.round(page.camera.react.zoom * 100) }}%
     </div>
@@ -41,11 +41,11 @@ const page = computed(() => internals.pages.react.page);
 </script>
 
 <style lang="scss" scoped>
-.display-btns {
+.display-camera-btns {
   position: absolute;
 
   right: 8px;
-  top: 60px;
+  top: 58px;
 
   display: flex;
   flex-direction: column;
