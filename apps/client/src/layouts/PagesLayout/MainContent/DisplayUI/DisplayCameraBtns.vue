@@ -1,11 +1,8 @@
 <template>
   <div class="display-camera-btns">
-    <div style="position: absolute; top: 90px; right: 0; color: white">
-      {{ Math.round(page.camera.react.zoom * 100) }}%
-    </div>
-
     <DisplayBtn
       icon="mdi-magnify-remove-outline"
+      :btn-size="34"
       @click="page.camera.resetZoom()"
     >
       <q-tooltip
@@ -18,10 +15,11 @@
       </q-tooltip>
     </DisplayBtn>
 
-    <Gap style="height: 4px" />
+    <Gap style="height: 6px" />
 
     <DisplayBtn
       icon="mdi-image-filter-center-focus-weak"
+      :btn-size="34"
       @click="page.camera.fitToScreen()"
     >
       <q-tooltip
@@ -33,6 +31,12 @@
         Fit to screen
       </q-tooltip>
     </DisplayBtn>
+
+    <Gap style="height: 8px" />
+
+    <div style="color: white">
+      {{ Math.round(page.camera.react.zoom * 100) }}%
+    </div>
   </div>
 </template>
 
@@ -44,17 +48,11 @@ const page = computed(() => internals.pages.react.page);
 .display-camera-btns {
   position: absolute;
 
-  right: 8px;
-  top: 58px;
+  right: 12px;
+  top: 32px;
 
   display: flex;
   flex-direction: column;
-
-  pointer-events: none;
-
-  @media (min-width: 840px) {
-    right: 16px;
-    top: 16px;
-  }
+  align-items: flex-end;
 }
 </style>
