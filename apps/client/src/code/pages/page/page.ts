@@ -349,15 +349,21 @@ export class Page implements IPageRegion {
     const pageRect = pageElem.getBoundingClientRect();
     const worldRect = worldElem.getBoundingClientRect();
 
-    if (worldRect.x === pageRect.x && worldRect.y === pageRect.y) {
-      return;
+    if (worldRect.x !== pageRect.x || worldRect.y !== pageRect.y) {
+      this.camera.react.pos = this.camera.react.pos.add(
+        this.sizes.screenToWorld2D(
+          new Vec2(pageRect.x, pageRect.y).sub(
+            new Vec2(worldRect.x, worldRect.y),
+          ),
+        ),
+      );
+
+      pageElem.style.position = 'static';
+
+      setTimeout(() => {
+        pageElem.style.position = 'absolute';
+      });
     }
-
-    pageElem.style.position = 'static';
-
-    setTimeout(() => {
-      pageElem.style.position = 'absolute';
-    });
   }
 
   destroy() {
