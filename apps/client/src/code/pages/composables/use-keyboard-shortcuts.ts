@@ -18,6 +18,39 @@ export function useKeyboardShortcuts() {
       return;
     }
 
+    if (event.code === 'Escape' && page.findAndReplace.react.active) {
+      page.findAndReplace.react.active = false;
+      return true;
+    }
+
+    if (event.code === 'F3' && page.findAndReplace.react.active) {
+      await page.findAndReplace.findNext();
+      return true;
+    }
+
+    if (
+      event.code === 'F3' &&
+      event.shiftKey &&
+      page.findAndReplace.react.active
+    ) {
+      await page.findAndReplace.findPrev();
+      return true;
+    }
+
+    if (isCtrlDown(event) && event.code === 'KeyF') {
+      page.findAndReplace.react.active =
+        !page.findAndReplace.react.active || page.findAndReplace.react.replace;
+      page.findAndReplace.react.replace = false;
+      return true;
+    }
+
+    if (isCtrlDown(event) && event.code === 'KeyH') {
+      page.findAndReplace.react.active =
+        !page.findAndReplace.react.active || !page.findAndReplace.react.replace;
+      page.findAndReplace.react.replace = true;
+      return true;
+    }
+
     // If currently editing something
 
     const target = event.target as HTMLElement;

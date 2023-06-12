@@ -2,7 +2,8 @@
   <div class="display-navigation-btns">
     <DisplayBtn
       icon="mdi-arrow-up"
-      size="13px"
+      size="12px"
+      :btn-size="30"
       :disable="
         internals.pages.react.pageId === internals.pages.react.pathPageIds[0]
       "
@@ -18,11 +19,12 @@
       </q-tooltip>
     </DisplayBtn>
 
-    <Gap style="height: 4px" />
+    <Gap style="height: 6px" />
 
     <DisplayBtn
       icon="mdi-arrow-down"
-      size="13px"
+      size="12px"
+      :btn-size="30"
       :disable="
         internals.pages.react.pageId ===
         internals.pages.react.pathPageIds.at(-1)
@@ -65,17 +67,10 @@ async function goForward() {
 .display-navigation-btns {
   position: absolute;
 
-  left: 8px;
-  top: 58px;
+  left: 12px;
+  top: 32px;
 
   display: flex;
   flex-direction: column;
-
-  pointer-events: none;
-
-  @media (min-width: 840px) {
-    left: 16px;
-    top: 16px;
-  }
 }
 </style>

@@ -1,16 +1,16 @@
 <template>
   <DeepBtn
-    style="
-      min-width: 36px;
-      min-height: 38px;
+    :style="{
+      'min-width': `${btnSize}px`,
+      'min-height': `${btnSize + 2}px`,
 
-      padding: 0;
-
-      pointer-events: auto;
-    "
+      width: `${btnSize}px`,
+      height: `${btnSize + 2}px`,
+    }"
     :icon="icon"
     color="grey-9"
     dense
+    class="display-btn"
   >
     <slot></slot>
 
@@ -32,7 +32,19 @@ import type { DeepBtnProps } from './DeepBtn.vue';
 interface Props extends DeepBtnProps {
   icon: string;
   tooltip?: string;
+
+  btnSize?: number;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  btnSize: 36,
+});
 </script>
+
+<style scoped lang="scss">
+.display-btn {
+  padding: 0;
+
+  pointer-events: auto;
+}
+</style>

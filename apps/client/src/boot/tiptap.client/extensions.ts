@@ -25,6 +25,8 @@ import { ProsemirrorPasteHandlerPlugin } from 'src/code/tiptap/paste-handler';
 import { TaskItemExtension } from 'src/code/tiptap/task-item';
 import { YoutubeVideoExtension } from 'src/code/tiptap/youtube-video/extension';
 
+import { FindAndReplaceExtension } from './find-and-replace';
+
 export const extensions = once(() => [
   StarterKit.configure({
     history: false,
@@ -87,6 +89,8 @@ export const extensions = once(() => [
   HighlightExtension,
 
   YoutubeVideoExtension,
+
+  FindAndReplaceExtension,
 
   Extension.create({
     addProseMirrorPlugins() {

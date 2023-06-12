@@ -22,6 +22,7 @@ import type { PageDeleting } from './elems/deleting';
 import type { PageEditing } from './elems/editing';
 import type { PageElem } from './elems/elem';
 import type { PageElems } from './elems/elems';
+import type { PageFindAndReplace } from './elems/find-and-replace';
 import type { NoteAligning } from './notes/aligning';
 import type { NoteCloning } from './notes/cloning';
 import type { NoteDragging } from './notes/dragging';
@@ -109,6 +110,7 @@ export class Page implements IPageRegion {
   readonly deleting: PageDeleting;
   readonly clipboard: PageClipboard;
   readonly editing: PageEditing;
+  readonly findAndReplace: PageFindAndReplace;
 
   readonly notes: PageNotes;
   readonly dragging: NoteDragging;
@@ -248,9 +250,10 @@ export class Page implements IPageRegion {
     this.elems = input.factories.PageElems({ page: this });
     this.deleting = input.factories.PageDeleting({ page: this });
     this.clipboard = input.factories.PageClipboard({ page: this });
+    this.editing = input.factories.PageEditing({ page: this });
+    this.findAndReplace = input.factories.PageFindAndReplace({ page: this });
 
     this.notes = input.factories.PageNotes({ page: this });
-    this.editing = input.factories.PageEditing({ page: this });
     this.dragging = input.factories.PageNoteDragging({ page: this });
     this.dropping = input.factories.PageNoteDropping({ page: this });
     this.cloning = input.factories.PageNoteCloning({ page: this });
@@ -349,15 +352,21 @@ export class Page implements IPageRegion {
     const pageRect = pageElem.getBoundingClientRect();
     const worldRect = worldElem.getBoundingClientRect();
 
-    if (worldRect.x === pageRect.x && worldRect.y === pageRect.y) {
-      return;
+    if (worldRect.x !== pageRect.x || worldRect.y !== pageRect.y) {
+      this.camera.react.pos = this.camera.react.pos.add(
+        this.sizes.screenToWorld2D(
+          new Vec2(pageRect.x, pageRect.y).sub(
+            new Vec2(worldRect.x, worldRect.y),
+          ),
+        ),
+      );
+
+      pageElem.style.position = 'static';
+
+      setTimeout(() => {
+        pageElem.style.position = 'absolute';
+      });
     }
-
-    pageElem.style.position = 'static';
-
-    setTimeout(() => {
-      pageElem.style.position = 'absolute';
-    });
   }
 
   destroy() {
