@@ -15,6 +15,7 @@ import { PageClipboard } from './pages/page/elems/clipboard';
 import { PageDeleting } from './pages/page/elems/deleting';
 import { PageEditing } from './pages/page/elems/editing';
 import { PageElems } from './pages/page/elems/elems';
+import { PageFindAndReplace } from './pages/page/elems/find-and-replace';
 import { NoteAligning } from './pages/page/notes/aligning';
 import { NoteCloning } from './pages/page/notes/cloning';
 import { NoteDragging } from './pages/page/notes/dragging';
@@ -81,6 +82,7 @@ export const factories = once(() => ({
   PageDeleting: makeFactory(PageDeleting),
   PageClipboard: makeFactory(PageClipboard),
   PageEditing: makeFactory(PageEditing),
+  PageFindAndReplace: makeFactory(PageFindAndReplace),
 
   PageNotes: makeFactory(PageNotes),
   PageNoteDragging: makeFactory(NoteDragging),

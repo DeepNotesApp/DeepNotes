@@ -570,7 +570,7 @@ export class PageNote extends PageElem() implements IPageRegion {
     });
   }
 
-  getClientRect(part: string) {
+  getClientRect(part = 'note-frame') {
     const elem = this.getElem(part);
 
     if (elem == null) {

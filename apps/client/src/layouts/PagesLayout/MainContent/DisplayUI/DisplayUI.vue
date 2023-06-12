@@ -3,6 +3,8 @@
     <DisplayNavigationBtns />
 
     <DisplayCameraBtns />
+
+    <DisplayFindAndReplace />
   </div>
 
   <DisplayMobileBtns />
@@ -14,6 +16,7 @@
 
 <script setup lang="ts">
 import DisplayCameraBtns from './DisplayCameraBtns.vue';
+import DisplayFindAndReplace from './DisplayFindAndReplace.vue';
 import DisplayMobileAltBtn from './DisplayMobileAltBtn.vue';
 import DisplayMobileBtns from './DisplayMobileBtns.vue';
 import DisplayNavigationBtns from './DisplayNavigationBtns.vue';

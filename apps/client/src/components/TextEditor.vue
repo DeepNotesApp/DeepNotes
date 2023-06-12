@@ -284,6 +284,12 @@ defineProps<Props>();
         background-color: #585800;
       }
 
+      // Find results
+
+      .find-result {
+        background-color: #585800;
+      }
+
       // Cursors
 
       .collaboration-cursor__base {
