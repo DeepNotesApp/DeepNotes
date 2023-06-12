@@ -228,6 +228,8 @@ export class PageFindAndReplace {
   }
 
   async replace(replacement: string) {
+    this.firstInteraction = false;
+
     const elemInfo = this.elemInfos[this.elemIndex];
 
     if (elemInfo == null) {
