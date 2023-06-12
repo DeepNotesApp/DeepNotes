@@ -40,10 +40,30 @@
         Go forward
       </q-tooltip>
     </DisplayBtn>
+
+    <Gap style="height: 24px" />
+
+    <DisplayBtn
+      icon="mdi-camera-outline"
+      size="11px"
+      :btn-size="34"
+      @click="$q.dialog({ component: TakeScreenshotDialog })"
+    >
+      <q-tooltip
+        anchor="center right"
+        self="center left"
+        transition-show="jump-right"
+        transition-hide="jump-left"
+      >
+        Take screenshot
+      </q-tooltip>
+    </DisplayBtn>
   </div>
 </template>
 
 <script setup lang="ts">
+import TakeScreenshotDialog from '../../MainToolbar/TakeScreenshotDialog.vue';
+
 async function goBackward() {
   await internals.pages.goToPage(
     internals.pages.react.pathPageIds[

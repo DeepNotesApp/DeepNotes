@@ -51,6 +51,14 @@
           v-model="imageURL"
           :maxlength="maxUrlLength"
         />
+
+        <Gap style="height: 12px" />
+
+        <q-checkbox
+          label="Embed image"
+          dense
+          v-model="embedImage"
+        />
       </q-card-section>
     </template>
 
@@ -87,28 +95,38 @@ const fileType = ref('local');
 const localFile = ref<File>();
 const imageURL = ref('');
 
+const embedImage = ref(false);
+
 async function insertImage() {
-  let imageBlob;
-
-  if (fileType.value === 'local') {
-    imageBlob = localFile.value!;
-  } else {
-    const response = await fetch(imageURL.value);
-
-    imageBlob = await response.blob();
-  }
-
-  const reader = new FileReader();
-
-  reader.addEventListener('loadend', (event) => {
+  if (fileType.value !== 'local' && !embedImage.value) {
     page.value.selection.format((chain) =>
       chain.setImage({
-        src: event.target!.result as string,
+        src: imageURL.value,
       }),
     );
-  });
+  } else {
+    let imageBlob;
 
-  reader.readAsDataURL(imageBlob);
+    if (fileType.value === 'local') {
+      imageBlob = localFile.value!;
+    } else {
+      const response = await fetch(imageURL.value);
+
+      imageBlob = await response.blob();
+    }
+
+    const reader = new FileReader();
+
+    reader.addEventListener('loadend', (event) => {
+      page.value.selection.format((chain) =>
+        chain.setImage({
+          src: event.target!.result as string,
+        }),
+      );
+    });
+
+    reader.readAsDataURL(imageBlob);
+  }
 
   dialogRef.value.onDialogOK();
 }

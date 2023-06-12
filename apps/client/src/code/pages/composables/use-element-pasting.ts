@@ -3,8 +3,8 @@ import { useEventListener } from '@vueuse/core';
 
 export function useElementPasting() {
   useEventListener(
-    'paste',
-    async (event) => {
+    'paste' as any,
+    async (event: ClipboardEvent) => {
       const target = event.target as HTMLElement;
 
       if (

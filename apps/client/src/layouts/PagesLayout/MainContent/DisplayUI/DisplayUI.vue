@@ -1,13 +1,12 @@
 <template>
   <div class="display-btns">
-    <DisplayNavigationBtns />
-
-    <DisplayCameraBtns />
+    <DisplayLeftBtns />
+    <DisplayRightBtns />
 
     <DisplayFindAndReplace />
   </div>
 
-  <DisplayMobileBtns />
+  <DisplayTopBtns />
 
   <DisplayMobileAltBtn />
 
@@ -15,11 +14,11 @@
 </template>
 
 <script setup lang="ts">
-import DisplayCameraBtns from './DisplayCameraBtns.vue';
 import DisplayFindAndReplace from './DisplayFindAndReplace.vue';
+import DisplayLeftBtns from './DisplayLeftBtns.vue';
 import DisplayMobileAltBtn from './DisplayMobileAltBtn.vue';
-import DisplayMobileBtns from './DisplayMobileBtns.vue';
-import DisplayNavigationBtns from './DisplayNavigationBtns.vue';
+import DisplayRightBtns from './DisplayRightBtns.vue';
+import DisplayTopBtns from './DisplayTopBtns.vue';
 import DisplayUserAvatars from './DisplayUserAvatars.vue';
 </script>
 
