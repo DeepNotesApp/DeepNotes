@@ -49,10 +49,12 @@ export class PageFindAndReplace {
       arrows: PageArrow[],
       spatial: boolean,
     ) => {
-      const elemsWithRects = [...notes, ...arrows].map((elem) => ({
-        elem,
-        clientRect: elem.getClientRect()!,
-      }));
+      const elemsWithRects = [...notes, ...arrows]
+        .map((elem) => ({
+          elem,
+          clientRect: elem.getClientRect()!,
+        }))
+        .filter((item) => item.clientRect != null);
 
       if (spatial) {
         elemsWithRects.sort((a, b) => {
