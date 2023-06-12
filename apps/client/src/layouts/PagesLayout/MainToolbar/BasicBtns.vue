@@ -23,33 +23,10 @@
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.cloning.perform()"
   />
-  <ToolbarBtn
-    :tooltip="`Take screenshot`"
-    icon="mdi-camera-outline"
-    @click="$q.dialog({ component: TakeScreenshotDialog })"
-  />
 
   <q-separator
     vertical
     :class="{ popup }"
-  />
-
-  <ToolbarBtn
-    :tooltip="`Undo\n(${getCtrlKeyName()} + Z)`"
-    icon="mdi-undo"
-    :disable="page.react.readOnly || !page.undoRedo.react.canUndo"
-    @click="page.undoRedo.undo()"
-  />
-  <ToolbarBtn
-    :tooltip="`Redo\n(${getCtrlKeyName()} + Y)`"
-    icon="mdi-redo"
-    :disable="page.react.readOnly || !page.undoRedo.react.canRedo"
-    @click="page.undoRedo.redo()"
-  />
-
-  <q-separator
-    v-if="!popup"
-    vertical
   />
 
   <ToolbarBtn
@@ -69,8 +46,6 @@
 
 <script setup lang="ts">
 import { getCtrlKeyName } from 'src/code/utils/misc';
-
-import TakeScreenshotDialog from './TakeScreenshotDialog.vue';
 
 defineProps<{
   popup?: boolean;

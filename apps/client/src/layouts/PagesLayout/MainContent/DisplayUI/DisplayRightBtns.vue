@@ -37,6 +37,44 @@
     <div style="color: white">
       {{ Math.round(page.camera.react.zoom * 100) }}%
     </div>
+
+    <Gap style="height: 20px" />
+
+    <DisplayBtn
+      icon="mdi-undo"
+      size="11px"
+      :btn-size="32"
+      :disable="page.react.readOnly || !page.undoRedo.react.canUndo"
+      @click="page.undoRedo.undo()"
+    >
+      <q-tooltip
+        anchor="center left"
+        self="center right"
+        transition-show="jump-left"
+        transition-hide="jump-right"
+      >
+        Undo
+      </q-tooltip>
+    </DisplayBtn>
+
+    <Gap style="height: 6px" />
+
+    <DisplayBtn
+      icon="mdi-redo"
+      size="11px"
+      :btn-size="32"
+      :disable="page.react.readOnly || !page.undoRedo.react.canRedo"
+      @click="page.undoRedo.redo()"
+    >
+      <q-tooltip
+        anchor="center left"
+        self="center right"
+        transition-show="jump-left"
+        transition-hide="jump-right"
+      >
+        Redo
+      </q-tooltip>
+    </DisplayBtn>
   </div>
 </template>
 
