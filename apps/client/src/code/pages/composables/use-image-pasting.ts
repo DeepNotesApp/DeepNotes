@@ -2,8 +2,8 @@ import { useEventListener } from '@vueuse/core';
 
 export function useImagePasting() {
   useEventListener(
-    'paste',
-    async (event) => {
+    'paste' as any,
+    async (event: ClipboardEvent) => {
       const target = event.target as HTMLElement;
 
       if (
