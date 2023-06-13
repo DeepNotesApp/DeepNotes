@@ -50,9 +50,7 @@
 
         <q-toolbar-title style="overflow: visible; padding: 0px; flex: none">
           <router-link
-            :to="
-              isIncluded(quasarMode, ['ssr', 'spa']) ? { name: 'home' } : '#'
-            "
+            :to="{ name: 'home' }"
             style="display: flex; align-items: center"
           >
             <img
@@ -136,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_LG_MIN, isIncluded } from '@stdlib/misc';
+import { BREAKPOINT_LG_MIN } from '@stdlib/misc';
 import { useResizeObserver } from 'src/code/utils/misc';
 import AccountItems from 'src/pages/home/Account/AccountItems.vue';
 import PrivacyPolicyItems from 'src/pages/home/PrivacyPolicy/PrivacyPolicyItems.vue';
@@ -146,8 +144,6 @@ import type { ComponentPublicInstance } from 'vue';
 
 import RightButtons from './RightButtons/RightButtons.vue';
 import RightMenu from './RightButtons/RightMenu.vue';
-
-const quasarMode = process.env.MODE;
 
 const headerRef = ref<ComponentPublicInstance>();
 

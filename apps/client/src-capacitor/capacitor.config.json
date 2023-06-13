@@ -7,6 +7,13 @@
   "server": {
     "hostname": "deepnotes.app",
     "iosScheme": "https",
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "url": "http://192.168.1.4:62895"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#181818"
+    }
   }
 }
