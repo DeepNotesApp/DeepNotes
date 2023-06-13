@@ -8,5 +8,11 @@
 		"hostname": "deepnotes.app",
 		"iosScheme": "https",
 		"androidScheme": "https"
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#181818"
+		}
 	}
 }
