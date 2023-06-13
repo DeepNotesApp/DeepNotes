@@ -17,7 +17,7 @@ export const useUIStore = defineStore('ui', () => {
     leftSidebarExpanded: false,
     rightSidebarExpanded: false,
 
-    leftSidebarWidth: 260,
+    leftSidebarWidth: 240,
 
     currentPathExpanded: true,
     recentPagesExpanded: true,
