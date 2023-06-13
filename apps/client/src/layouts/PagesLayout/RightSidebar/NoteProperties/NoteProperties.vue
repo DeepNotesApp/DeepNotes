@@ -262,7 +262,7 @@
             :model-value="note.react.collab.pos.x"
             @update:model-value="
               changeProp(parseFloat($event as any), (selectedNote, value) => {
-                selectedNote.react.collab.pos.x = value;
+                selectedNote.react.collab.pos.x = isNaN(value) ? 0 : value;
               })
             "
             dense
@@ -279,7 +279,7 @@
             :model-value="note.react.collab.pos.y"
             @update:model-value="
               changeProp(parseFloat($event as any), (selectedNote, value) => {
-                selectedNote.react.collab.pos.y = value;
+                selectedNote.react.collab.pos.y = isNaN(value) ? 0 : value;
               })
             "
             dense

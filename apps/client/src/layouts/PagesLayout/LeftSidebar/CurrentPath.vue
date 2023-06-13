@@ -1,5 +1,5 @@
 <template>
-  <q-toolbar style="padding: 0; background-color: #141414">
+  <q-toolbar style="padding: 0; background-color: #141414; min-height: 50px">
     <DeepBtn
       flat
       style="width: 100%; height: 50px; border-radius: 0"
@@ -10,16 +10,16 @@
         <q-avatar style="margin-left: -8px">
           <q-icon
             name="mdi-map-marker-radius"
-            size="32px"
+            size="26px"
           />
         </q-avatar>
 
         <q-toolbar-title
           style="
-            margin-left: 12px;
+            margin-left: -2px;
             text-align: left;
             color: rgba(255, 255, 255, 0.85);
-            font-size: 18px;
+            font-size: 15.2px;
           "
         >
           Current path

@@ -101,8 +101,8 @@ export class NoteDragging {
       for (const selectedNote of this.page.selection.react.notes) {
         const newPos = new Vec2(selectedNote.react.collab.pos).add(worldDelta);
 
-        selectedNote.react.collab.pos.x = newPos.x;
-        selectedNote.react.collab.pos.y = newPos.y;
+        selectedNote.react.collab.pos.x = newPos.x || 0;
+        selectedNote.react.collab.pos.y = newPos.y || 0;
       }
     });
   };

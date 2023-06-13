@@ -20,17 +20,17 @@
       <q-avatar style="margin-left: 9px">
         <q-icon
           name="mdi-chart-box"
-          size="28px"
+          size="26px"
         />
       </q-avatar>
 
       <q-toolbar-title
         v-if="uiStore().rightSidebarExpanded"
         style="
-          margin-left: 12px;
+          margin-left: -2px;
           text-align: left;
           color: rgba(255, 255, 255, 0.85);
-          font-size: 18px;
+          font-size: 15.2px;
         "
       >
         <template v-if="page.activeElem.react.value?.type === 'note'">

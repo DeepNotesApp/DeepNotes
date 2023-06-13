@@ -58,11 +58,36 @@
         Take screenshot
       </q-tooltip>
     </DisplayBtn>
+
+    <Gap style="height: 24px" />
+
+    <DisplayBtn
+      icon="mdi-find-replace"
+      size="11px"
+      :btn-size="34"
+      @click="
+        () => {
+          page.findAndReplace.react.active = !page.findAndReplace.react.active;
+          page.findAndReplace.react.replace = true;
+        }
+      "
+    >
+      <q-tooltip
+        anchor="center right"
+        self="center left"
+        transition-show="jump-right"
+        transition-hide="jump-left"
+      >
+        Find and replace
+      </q-tooltip>
+    </DisplayBtn>
   </div>
 </template>
 
 <script setup lang="ts">
 import TakeScreenshotDialog from '../../MainToolbar/TakeScreenshotDialog.vue';
+
+const page = computed(() => internals.pages.react.page);
 
 async function goBackward() {
   await internals.pages.goToPage(
