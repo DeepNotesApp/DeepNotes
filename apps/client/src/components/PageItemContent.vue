@@ -15,8 +15,8 @@
 
   <q-item-section>
     <q-item-label
+      class="page-group"
       caption
-      style="color: #60b2ff"
     >
       {{ groupNameInfo.text }}
     </q-item-label>
@@ -67,6 +67,14 @@ const isEmpty = computed(
 </script>
 
 <style scoped>
+.page-group {
+  color: #60b2ff;
+}
+
+.page-title {
+  font-size: 13.8px;
+}
+
 .encrypted {
   color: rgba(150, 150, 255, 1);
 }

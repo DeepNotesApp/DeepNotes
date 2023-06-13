@@ -17,8 +17,8 @@
         style="
           border-top-left-radius: 0;
           border-bottom-left-radius: 0;
-          min-height: 50px;
-          min-width: 50px;
+          min-height: 42px;
+          min-width: 42px;
         "
         class="bg-grey-9"
         @click="uiStore().toggleLeftSidebar()"
@@ -137,8 +137,8 @@
         style="
           border-top-right-radius: 0;
           border-bottom-right-radius: 0;
-          min-height: 50px;
-          min-width: 50px;
+          min-height: 42px;
+          min-width: 42px;
         "
         class="bg-grey-9"
         @click="uiStore().toggleRightSidebar()"

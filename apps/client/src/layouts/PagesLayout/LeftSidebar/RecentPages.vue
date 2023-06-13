@@ -10,16 +10,16 @@
         <q-avatar style="margin-left: -8px">
           <q-icon
             name="mdi-history"
-            size="31px"
+            size="26px"
           />
         </q-avatar>
 
         <q-toolbar-title
           style="
-            margin-left: 12px;
+            margin-left: -2px;
             text-align: left;
             color: rgba(255, 255, 255, 0.85);
-            font-size: 18px;
+            font-size: 15.2px;
           "
         >
           Recent pages

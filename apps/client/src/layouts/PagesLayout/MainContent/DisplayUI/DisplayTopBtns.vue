@@ -169,11 +169,11 @@
       style="
         position: absolute;
         left: 0px;
-        top: 0px;
+        top: 6px;
         border-top-left-radius: 0;
         border-bottom-left-radius: 0;
-        min-height: 50px;
-        min-width: 50px;
+        min-height: 42px;
+        min-width: 42px;
         pointer-events: auto;
       "
       class="bg-grey-9"
@@ -196,11 +196,11 @@
       style="
         position: absolute;
         right: 0px;
-        top: 0px;
+        top: 6px;
         border-top-right-radius: 0;
         border-bottom-right-radius: 0;
-        min-height: 50px;
-        min-width: 50px;
+        min-height: 42px;
+        min-width: 42px;
         pointer-events: auto;
       "
       class="bg-grey-9"
