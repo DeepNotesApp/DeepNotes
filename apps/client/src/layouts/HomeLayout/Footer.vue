@@ -47,7 +47,12 @@
             Pricing
           </router-link>
 
-          <div style="margin-top: 6px; color: #808080">Download</div>
+          <div
+            v-if="isIncluded(quasarMode, ['ssr', 'spa'])"
+            style="margin-top: 6px; color: #808080"
+          >
+            Download
+          </div>
 
           <router-link
             :to="{ name: 'whitepaper' }"
@@ -116,6 +121,12 @@
     </ResponsiveContainer>
   </q-footer>
 </template>
+
+<script setup lang="ts">
+import { isIncluded } from '@stdlib/misc';
+
+const quasarMode = process.env.MODE;
+</script>
 
 <style scoped>
 .footer-section {
