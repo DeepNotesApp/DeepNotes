@@ -299,12 +299,41 @@ module.exports = configure(function (ctx) {
         // protocol: 'myapp://path',
         // Windows only
         // win32metadata: { ... }
+
+        prune: false,
       },
 
       builder: {
         // https://www.electron.build/configuration/configuration
 
         appId: '@deepnotes/client',
+
+        publish: {
+          provider: 'github',
+
+          owner: 'DeepNotesApp',
+          repo: 'DeepNotes',
+
+          // vPrefixedTagName: true, // Whether to use `v`-prefixed tag name.
+
+          // protocol: 'https', // The protocol. GitHub Publisher supports only `https`.
+          // host: 'github.com', // The host (including the port if need).
+
+          // private: false, // Whether to use private github auto-update provider if `GH_TOKEN` environment variable is defined.
+          // token: null, // The access token to support auto-update from private github repositories.
+
+          // releaseType: 'draft', // The type of release. By default `draft` release will be created.
+        },
+
+        mac: {
+          target: 'dmg',
+        },
+        linux: {
+          target: 'AppImage',
+        },
+        win: {
+          target: 'nsis',
+        },
       },
     },
 

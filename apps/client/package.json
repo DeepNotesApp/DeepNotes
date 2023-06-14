@@ -121,7 +121,7 @@
   "productName": "DeepNotes",
   "scripts": {
     "build:android": "quasar build -m capacitor -T android --ide",
-    "build:electron": "quasar build -m electron",
+    "build:electron": "quasar build -m electron --publish onTagOrDraft",
     "build:ios": "quasar build -m capacitor -T ios",
     "build:spa": "quasar build -m spa",
     "build:ssr": "NODE_OPTIONS=--max_old_space_size=4096 quasar build -m ssr",
