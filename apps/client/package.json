@@ -46,6 +46,7 @@
     "@zxcvbn-ts/language-en": "^2.1.0",
     "argon2-browser": "^1.18.0",
     "axios": "0.27.2",
+    "browserslist": "^4.21.8",
     "color": "4.2.3",
     "compression": "1.7.4",
     "cookie": "0.5.0",
