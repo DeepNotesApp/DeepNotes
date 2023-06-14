@@ -43,6 +43,7 @@
     "build": "turbo run build",
     "build:android": "pnpm --filter @deepnotes/client run build:android",
     "build:electron": "pnpm --filter @deepnotes/client run build:electron",
+    "build:electron:publish": "pnpm --filter @deepnotes/client run build:electron:publish",
     "build:ios": "pnpm --filter @deepnotes/client run build:ios",
     "build:spa": "pnpm --filter @deepnotes/client run build:spa",
     "build:ssr": "pnpm --filter @deepnotes/client run build:ssr",
