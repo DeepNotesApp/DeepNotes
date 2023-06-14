@@ -7,6 +7,9 @@
     "@stdlib/misc": "workspace:1.0.0",
     "js-base64": "3.7.3"
   },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
@@ -20,8 +23,5 @@
     "preinstall": "npx only-allow pnpm",
     "repo:build": "tsc-alias -p tsconfig.json",
     "repo:build:watch": "tsc-alias -p tsconfig.json --watch"
-  },
-  "devDependencies": {
-    "@types/node": "^18.11.18"
   }
 }

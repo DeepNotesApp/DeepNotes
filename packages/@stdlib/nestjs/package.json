@@ -3,10 +3,22 @@
   "description": "",
   "version": "1.0.0",
   "author": "",
+  "devDependencies": {
+    "@nestjs/common": "9.2.0",
+    "@nestjs/core": "9.2.0",
+    "@nestjs/jwt": "9.0.0",
+    "@nestjs/testing": "9.2.0"
+  },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
   "module": "src/index.ts",
+  "peerDependencies": {
+    "@nestjs/common": "9.2.0",
+    "@nestjs/core": "9.2.0",
+    "@nestjs/jwt": "9.0.0",
+    "@nestjs/testing": "9.2.0"
+  },
   "scripts": {
     "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
     "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
@@ -16,17 +28,5 @@
     "preinstall": "npx only-allow pnpm",
     "repo:build": "tsc-alias -p tsconfig.json",
     "repo:build:watch": "tsc-alias -p tsconfig.json --watch"
-  },
-  "devDependencies": {
-    "@nestjs/common": "9.2.0",
-    "@nestjs/core": "9.2.0",
-    "@nestjs/jwt": "9.0.0",
-    "@nestjs/testing": "9.2.0"
-  },
-  "peerDependencies": {
-    "@nestjs/common": "9.2.0",
-    "@nestjs/core": "9.2.0",
-    "@nestjs/jwt": "9.0.0",
-    "@nestjs/testing": "9.2.0"
   }
 }

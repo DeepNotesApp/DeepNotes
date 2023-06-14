@@ -19,14 +19,14 @@
     "@types/crypto-js": "^4.1.1",
     "@types/lodash": "4.14.189"
   },
-  "peerDependencies": {
-    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
-    "objection": "3.0.1"
-  },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
   "module": "src/index.ts",
+  "peerDependencies": {
+    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
+    "objection": "3.0.1"
+  },
   "scripts": {
     "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
     "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
