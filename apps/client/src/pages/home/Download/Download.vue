@@ -43,6 +43,7 @@
             label="Download for MacOS (DMG)"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
+            disable
           >
             <q-tooltip
               anchor="bottom middle"
@@ -56,7 +57,7 @@
 
           <DeepBtn
             v-if="$q.platform.is.android"
-            label="Go to Play Store"
+            label="Go to the Play Store"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
             href="https://play.google.com/store/apps/details?id=app.deepnotes"
@@ -64,7 +65,7 @@
 
           <DeepBtn
             v-if="$q.platform.is.ios"
-            label="Go to App Store"
+            label="Go to the App Store"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
           >
