@@ -21,10 +21,7 @@ export function useKeyboardShortcuts() {
 
     const target = event.target as HTMLElement;
 
-    const isEditing =
-      target.nodeName === 'INPUT' ||
-      target.nodeName === 'TEXTAREA' ||
-      target.isContentEditable;
+    const isEditing = page.editing.react.active && target.isContentEditable;
 
     if (isEditing && event.code === 'Escape') {
       page.editing.stop();
@@ -57,7 +54,7 @@ export function useKeyboardShortcuts() {
       return true;
     }
 
-    if (isCtrlDown(event) && event.code === 'KeyH' && !isEditing) {
+    if (!isEditing && isCtrlDown(event) && event.code === 'KeyH') {
       page.findAndReplace.react.active =
         !page.findAndReplace.react.active || !page.findAndReplace.react.replace;
       page.findAndReplace.react.replace = true;

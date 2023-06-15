@@ -21,6 +21,7 @@
         z-index: 2147483647;
       "
       @pointerdown="resizeLeftSidebar"
+      @dblclick="() => uiStore().resetLeftSidebarWidth()"
     ></div>
 
     <CurrentPath />

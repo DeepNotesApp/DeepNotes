@@ -1,7 +1,7 @@
 import { negateProp } from '@stdlib/misc';
 import { defineStore } from 'pinia';
 
-function watchProp<State>(state: State, prop: Extract<keyof State, string>) {
+function trackProp<State>(state: State, prop: Extract<keyof State, string>) {
   watch(
     () => state[prop],
     (value) => {
@@ -28,13 +28,13 @@ export const useUIStore = defineStore('ui', () => {
     height: 0,
   });
 
-  watchProp(state, 'leftSidebarExpanded');
-  watchProp(state, 'rightSidebarExpanded');
+  trackProp(state, 'leftSidebarExpanded');
+  trackProp(state, 'rightSidebarExpanded');
 
-  watchProp(state, 'leftSidebarWidth');
+  trackProp(state, 'leftSidebarWidth');
 
-  watchProp(state, 'currentPathExpanded');
-  watchProp(state, 'recentPagesExpanded');
+  trackProp(state, 'currentPathExpanded');
+  trackProp(state, 'recentPagesExpanded');
 
   return {
     ...toRefs(state),
@@ -52,6 +52,10 @@ export const useUIStore = defineStore('ui', () => {
       if (state.rightSidebarExpanded && window.innerWidth < 1065) {
         state.leftSidebarExpanded = false;
       }
+    },
+
+    resetLeftSidebarWidth() {
+      state.leftSidebarWidth = 240;
     },
   };
 });
