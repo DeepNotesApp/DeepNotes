@@ -20,13 +20,13 @@
           class="col-12 col-lg-9"
           style="padding: 0 32px"
         >
-          <Gap style="height: 96px" />
+          <Gap style="height: 130px" />
 
           <div style="font-size: 40px; font-weight: bold; text-align: center">
             Whitepaper
           </div>
 
-          <Gap style="height: 56px" />
+          <Gap style="height: 70px" />
 
           <div
             v-html="html"
