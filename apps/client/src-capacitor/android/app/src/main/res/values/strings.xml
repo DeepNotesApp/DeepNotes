@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">DeepNotes</string>
     <string name="title_activity_main">DeepNotes</string>
-    <string name="package_name">com.deepnotes.app</string>
-    <string name="custom_url_scheme">com.deepnotes.app</string>
+    <string name="package_name">app.deepnotes</string>
+    <string name="custom_url_scheme">app.deepnotes</string>
 </resources>

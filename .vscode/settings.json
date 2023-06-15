@@ -6,5 +6,6 @@
   "editor.codeActionsOnSave": ["source.fixAll.eslint"],
   "eslint.validate": ["javascript", "typescript"],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "vue.features.codeActions.enable": false
+  "vue.features.codeActions.enable": false,
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

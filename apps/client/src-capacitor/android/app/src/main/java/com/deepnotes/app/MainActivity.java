@@ -1,4 +1,4 @@
-package com.deepnotes.app;
+package app.deepnotes;
 
 import com.getcapacitor.BridgeActivity;
 
