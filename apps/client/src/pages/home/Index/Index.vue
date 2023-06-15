@@ -40,9 +40,9 @@
               <Gap style="height: 30px" />
 
               <DeepBtn
-                label="Get started - It's free!"
+                label="Get started for free"
                 color="primary"
-                style="padding: 14px 25px; font-size: 15px"
+                style="padding: 14px 25px; font-size: 15.5px; font-weight: bold"
                 :to="{ name: 'register' }"
               />
             </template>
@@ -149,7 +149,7 @@
         </div>
       </div>
 
-      <Gap style="height: 180px" />
+      <Gap style="height: 170px" />
 
       <PricingSection />
 
@@ -158,15 +158,15 @@
 
         <div style="text-align: center">
           <DeepBtn
-            label="Get started for free"
+            label="Get started - It's free!"
             color="primary"
-            style="padding: 14px 25px; font-size: 15px"
+            style="padding: 15px 25px; font-size: 16.5px; font-weight: bold"
             :to="{ name: 'register' }"
           />
         </div>
       </template>
 
-      <Gap style="height: 180px" />
+      <Gap style="height: 190px" />
     </ResponsiveContainer>
 
     <ViewportLoadingOverlay v-if="loading" />
