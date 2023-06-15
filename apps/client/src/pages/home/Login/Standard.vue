@@ -125,7 +125,7 @@ onMounted(() => {
 
 // Additional options
 
-const additionalOptionsOpen = ref(false);
+const additionalOptionsOpen = ref(true);
 const rememberSession = inject('rememberSession') as Ref<boolean>;
 
 onMounted(() => {
