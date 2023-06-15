@@ -93,7 +93,6 @@
             :to="{ name: 'pricing' }"
           />
 
-          <!--
           <Gap style="width: 12px" />
 
           <DeepBtn
@@ -101,18 +100,7 @@
             flat
             class="toolbar-btn"
             :to="{ name: 'download' }"
-            disable
-          >
-            <q-tooltip
-              anchor="top middle"
-              self="bottom middle"
-              transition-show="jump-down"
-              transition-hide="jump-up"
-            >
-              Coming soon
-            </q-tooltip>
-          </DeepBtn>
-          -->
+          />
 
           <Gap style="width: 12px" />
 

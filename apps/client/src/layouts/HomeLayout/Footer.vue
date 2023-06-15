@@ -47,12 +47,13 @@
             Pricing
           </router-link>
 
-          <div
+          <router-link
             v-if="isIncluded(quasarMode, ['ssr', 'spa'])"
-            style="margin-top: 6px; color: #808080"
+            :to="{ name: 'download' }"
+            class="footer-item"
           >
             Download
-          </div>
+          </router-link>
 
           <router-link
             :to="{ name: 'whitepaper' }"
