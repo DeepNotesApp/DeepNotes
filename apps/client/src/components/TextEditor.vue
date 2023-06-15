@@ -260,10 +260,10 @@ defineProps<Props>();
       // Links
 
       a {
-        color: #6ab7ff !important;
+        color: #60b2ff !important;
       }
       &[contenteditable='false'] a:hover {
-        color: #8cc8ff !important;
+        color: lighten(#60b2ff, 10%) !important;
       }
 
       // Blockquotes
