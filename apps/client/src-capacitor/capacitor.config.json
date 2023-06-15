@@ -1,5 +1,5 @@
 {
-  "appId": "com.deepnotes.app",
+  "appId": "app.deepnotes",
   "appName": "DeepNotes",
   "bundledWebRuntime": false,
   "npmClient": "pnpm",

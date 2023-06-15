@@ -1,13 +1,13 @@
 {
-	"appId": "com.deepnotes.app",
-	"appName": "DeepNotes",
-	"bundledWebRuntime": false,
-	"npmClient": "pnpm",
-	"webDir": "www",
-	"server": {
-		"hostname": "deepnotes.app",
-		"iosScheme": "https",
-		"androidScheme": "https",
-		"url": "http://10.0.2.15:62895"
-	}
+  "appId": "app.deepnotes",
+  "appName": "DeepNotes",
+  "bundledWebRuntime": false,
+  "npmClient": "pnpm",
+  "webDir": "www",
+  "server": {
+    "hostname": "deepnotes.app",
+    "iosScheme": "https",
+    "androidScheme": "https",
+    "url": "http://10.0.2.15:62895"
+  }
 }

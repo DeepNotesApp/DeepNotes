@@ -83,17 +83,21 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
-  // {
-  //   path: '/download',
-  //   component: () => import('src/layouts/HomeLayout/HomeLayout.vue'),
-  //   children: [
-  //     {
-  //       path: '',
-  //       name: 'download',
-  //       component: () => import('src/pages/home/Download/Download.vue'),
-  //     },
-  //   ],
-  // },
+  ...(isIncluded(process.env.MODE, ['ssr', 'spa'])
+    ? [
+        {
+          path: '/download',
+          component: () => import('src/layouts/HomeLayout/HomeLayout.vue'),
+          children: [
+            {
+              path: '',
+              name: 'download',
+              component: () => import('src/pages/home/Download/Download.vue'),
+            },
+          ],
+        },
+      ]
+    : []),
 
   {
     path: '/whitepaper',

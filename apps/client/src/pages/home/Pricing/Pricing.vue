@@ -1,12 +1,12 @@
 <template>
   <q-page>
-    <Gap style="height: 96px" />
+    <Gap style="height: 120px" />
 
     <div style="font-size: 45px; font-weight: bold; text-align: center">
       Pricing Plans
     </div>
 
-    <Gap style="height: 56px" />
+    <Gap style="height: 64px" />
 
     <div
       class="row"
