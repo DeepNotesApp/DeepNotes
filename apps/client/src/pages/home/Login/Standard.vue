@@ -131,15 +131,6 @@ const rememberSession = inject('rememberSession') as Ref<boolean>;
 onMounted(() => {
   rememberSession.value =
     internals.localStorage.getItem('rememberSession') === 'true';
-  additionalOptionsOpen.value =
-    internals.localStorage.getItem('additionalOptionsOpen') === 'true';
-});
-
-watch(additionalOptionsOpen, () => {
-  internals.localStorage.setItem(
-    'additionalOptionsOpen',
-    String(additionalOptionsOpen.value),
-  );
 });
 
 watch(rememberSession, () => {
