@@ -6,7 +6,10 @@ import { pack } from 'msgpackr';
 import { nanoid } from 'nanoid';
 import type { deriveUserValues } from 'src/code/crypto';
 import { generateGroupValues, generateRandomUserKeys } from 'src/code/crypto';
-import type { ISerialObjectInput } from 'src/code/pages/serialization';
+import type {
+  ISerialArrowInput,
+  ISerialObjectInput,
+} from 'src/code/pages/serialization';
 
 export async function getRegistrationValues(input: {
   derivedUserValues: Awaited<ReturnType<typeof deriveUserValues>>;
@@ -69,7 +72,9 @@ export async function getRegistrationValues(input: {
       },
     ),
     userEncryptedDefaultArrow: randomUserKeys.symmetricKeyring.encrypt(
-      pack({}),
+      pack({
+        color: 'sky',
+      } as ISerialArrowInput),
       {
         padding: true,
         associatedData: {
