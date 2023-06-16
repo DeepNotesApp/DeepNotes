@@ -4,6 +4,7 @@
     :style="{
       left: `${arrow.react.centerPos.x}px`,
       top: `${arrow.react.centerPos.y}px`,
+      cursor: arrow.react.editing ? 'auto' : 'grab',
     }"
   >
     <div
@@ -92,8 +93,6 @@ async function onLeftClick(event: MouseEvent) {
   position: absolute;
 
   transform: translate(-50%, -50%);
-
-  cursor: grab;
 }
 
 .arrow-label-background {
