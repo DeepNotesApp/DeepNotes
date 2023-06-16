@@ -34,6 +34,7 @@
 </template>
 
 <script setup lang="ts">
+import { watchUntilTrue } from '@stdlib/vue';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { pageGroupIds } from 'src/code/pages/computed/page-group-id';
 import { getPageTitle } from 'src/code/pages/utils';
@@ -53,16 +54,29 @@ const pageTitleInfo = computed(() =>
   getPageTitle(props.pageId, { prefer: props.prefer }),
 );
 
+const loading = ref(true);
+
+onMounted(() => {
+  void watchUntilTrue(() => {
+    if (!internals.realtime.loading) {
+      loading.value = false;
+    }
+
+    return !internals.realtime.loading;
+  });
+});
+
 const isEmpty = computed(
   () =>
-    !!realtimeCtx.hget('page', props.pageId, 'permanent-deletion-date') ||
-    !!realtimeCtx.hget(
-      'group',
-      pageGroupId.value!,
-      'permanent-deletion-date',
-    ) ||
-    (pageTitleInfo.value.status !== 'success' &&
-      groupNameInfo.value.status !== 'success'),
+    !loading.value &&
+    (!!realtimeCtx.hget('page', props.pageId, 'permanent-deletion-date') ||
+      !!realtimeCtx.hget(
+        'group',
+        pageGroupId.value!,
+        'permanent-deletion-date',
+      ) ||
+      (pageTitleInfo.value.status !== 'success' &&
+        groupNameInfo.value.status !== 'success')),
 );
 </script>
 
