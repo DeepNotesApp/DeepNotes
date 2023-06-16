@@ -297,9 +297,13 @@ defineProps<Props>();
 
         pointer-events: none;
       }
+      .collaboration-cursor__base * {
+        user-select: none;
+      }
       .collaboration-cursor__base:hover {
         opacity: 0.3;
       }
+
       .collaboration-cursor__caret {
         position: absolute;
 
@@ -308,6 +312,7 @@ defineProps<Props>();
         left: -1px;
         right: -1px;
       }
+
       .collaboration-cursor__label {
         position: absolute;
         white-space: nowrap;
@@ -326,7 +331,6 @@ defineProps<Props>();
 
         z-index: 2147483647;
 
-        user-select: none;
         pointer-events: auto;
       }
 
