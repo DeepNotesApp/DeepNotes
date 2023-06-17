@@ -142,7 +142,7 @@ defineProps<Props>();
       ol {
         position: relative;
 
-        margin: 0 !important;
+        margin: 0;
       }
 
       ul:not([data-type]) {
