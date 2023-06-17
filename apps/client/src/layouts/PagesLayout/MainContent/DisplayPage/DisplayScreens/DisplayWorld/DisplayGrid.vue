@@ -3,7 +3,10 @@
     :region="page"
     class="display-grid"
     :style="{
-      inset: `-${insetPct}%`,
+      top: `-${insetPct}%`,
+      right: `-${insetPct}%`,
+      bottom: `-${insetPct}%`,
+      left: `-${insetPct}%`,
     }"
     :width="`${100 + insetPct * 2}%`"
     :height="`${100 + insetPct * 2}%`"
@@ -48,7 +51,10 @@ const page = inject<Page>('page')!;
 <style scoped>
 .display-grid {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 
   isolation: isolate;
 

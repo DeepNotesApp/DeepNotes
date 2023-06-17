@@ -83,7 +83,12 @@ function onLeftPointerDown(event: PointerEvent) {
 
 .note-outer-border {
   position: absolute;
-  inset: -1px;
+
+  top: -1px;
+  right: -1px;
+  bottom: -1px;
+  left: -1px;
+
   border-radius: 8px;
   border: 1px solid #2196f3;
   pointer-events: none;

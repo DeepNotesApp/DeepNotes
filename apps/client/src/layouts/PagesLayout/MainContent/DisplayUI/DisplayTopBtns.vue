@@ -1,7 +1,14 @@
 <template>
   <div
     v-if="uiStore().width < 840"
-    style="position: absolute; inset: 0; pointer-events: none"
+    style="
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+    "
   >
     <template
       v-if="

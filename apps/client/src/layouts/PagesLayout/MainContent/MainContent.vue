@@ -1,5 +1,7 @@
 <template>
-  <q-page-container style="position: fixed; inset: 0">
+  <q-page-container
+    style="position: fixed; top: 0; right: 0; bottom: 0; left: 0"
+  >
     <q-page style="background-color: #181818">
       <DisplayPage
         v-for="page in internals.pages?.pageCache.react.cache"

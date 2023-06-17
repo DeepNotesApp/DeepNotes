@@ -1,6 +1,6 @@
 <template>
   <div
-    style="position: absolute; inset: 0"
+    style="position: absolute; top: 0; right: 0; bottom: 0; left: 0"
     @pointerdown.left="onLeftPointerDown"
     @click.left="onLeftClick"
   >
@@ -12,7 +12,10 @@
       v-if="uiStore().loggedIn && page.react.notes.length === 0"
       style="
         position: absolute;
-        inset: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         pointer-events: none;
         display: grid;
         place-items: center;
@@ -64,7 +67,10 @@ async function onLeftClick(event: MouseEvent) {
 .display-background {
   position: absolute;
 
-  inset: -999999px;
+  top: -999999px;
+  right: -999999px;
+  bottom: -999999px;
+  left: -999999px;
 
   background-color: rgb(24, 24, 24);
 }
