@@ -142,7 +142,7 @@ defineProps<Props>();
       ol {
         position: relative;
 
-        margin: 0 !important;
+        margin: 0;
       }
 
       ul:not([data-type]) {
@@ -182,19 +182,10 @@ defineProps<Props>();
         }
       }
 
-      ul ul::before {
-        position: absolute;
-
-        left: -9px;
-        top: 0;
-        bottom: 0;
-
-        content: '';
-
-        border-left: 1px solid rgba(255, 255, 255, 0.15);
-      }
-
-      ol ol::before {
+      ul ul::before,
+      ul ol::before,
+      ol ol::before,
+      ol ul::before {
         position: absolute;
 
         left: -9px;

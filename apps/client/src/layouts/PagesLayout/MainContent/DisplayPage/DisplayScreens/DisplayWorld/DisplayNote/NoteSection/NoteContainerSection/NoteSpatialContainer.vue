@@ -21,7 +21,10 @@
     <div
       style="
         position: absolute;
-        inset: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         pointer-events: none;
 
         z-index: 2147483646;
@@ -136,7 +139,10 @@ async function onLeftClick(event: MouseEvent) {
 .note-spatial-container {
   position: absolute;
 
-  inset: 9px;
+  top: 9px;
+  right: 9px;
+  bottom: 9px;
+  left: 9px;
 
   border-radius: 5px;
 
@@ -145,7 +151,10 @@ async function onLeftClick(event: MouseEvent) {
 
 .note-spatial-background {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 
   display: flex;
   flex-direction: column;
@@ -159,7 +168,10 @@ async function onLeftClick(event: MouseEvent) {
 .note-spatial-drop-zone {
   position: absolute;
 
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 
   border-radius: 5px;
 

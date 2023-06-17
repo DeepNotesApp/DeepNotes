@@ -97,7 +97,11 @@ async function onLeftClick(event: MouseEvent) {
 
 .arrow-label-background {
   position: absolute;
-  inset: 8px 3px;
+
+  top: 8px;
+  bottom: 8px;
+  left: 3px;
+  right: 3px;
 
   border-radius: 5px;
 

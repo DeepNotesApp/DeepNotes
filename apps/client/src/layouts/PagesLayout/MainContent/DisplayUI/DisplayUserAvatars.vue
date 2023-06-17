@@ -1,5 +1,14 @@
 <template>
-  <div style="position: absolute; inset: 0; pointer-events: none">
+  <div
+    style="
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      pointer-events: none;
+    "
+  >
     <div
       v-for="(userState, index) in page.collab.presence.react.userStates"
       :key="userState[0]"
