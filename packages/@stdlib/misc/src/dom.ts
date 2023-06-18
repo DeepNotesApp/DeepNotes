@@ -87,6 +87,14 @@ export function listenPointerEvents(
 
   let dragStartTimeout: ReturnType<typeof setTimeout> | undefined;
 
+  if (options.dragStartDelay != null) {
+    dragStartTimeout = setTimeout(() => {
+      dragging = true;
+
+      options.dragStart?.(downEvent, downEvent);
+    }, options.dragStartDelay);
+  }
+
   let dragging = false;
 
   function destroy() {
@@ -120,14 +128,6 @@ export function listenPointerEvents(
         const distance = downClientPos.dist(moveClientPos);
 
         if (options.dragStartDelay != null) {
-          if (dragStartTimeout == null) {
-            dragStartTimeout = setTimeout(() => {
-              dragging = true;
-
-              options.dragStart?.(moveEvent, downEvent);
-            }, options.dragStartDelay);
-          }
-
           if (distance > options.dragStartDistance) {
             cancel(false);
           }
