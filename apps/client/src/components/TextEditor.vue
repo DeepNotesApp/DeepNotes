@@ -42,25 +42,7 @@ defineProps<Props>();
         margin-bottom: 0;
       }
 
-      > * + * {
-        margin-top: 10px !important;
-      }
-
-      > * + pre,
-      > pre + * {
-        margin-top: 10px !important;
-      }
-
-      > * + hr,
-      > hr + * {
-        margin-top: 14px !important;
-      }
-
-      > * + .tableWrapper,
-      > .tableWrapper + * {
-        margin-top: 14px !important;
-      }
-
+      &,
       td {
         > * + * {
           margin-top: 10px !important;
@@ -79,6 +61,11 @@ defineProps<Props>();
         > * + .tableWrapper,
         > .tableWrapper + * {
           margin-top: 14px !important;
+        }
+
+        > p + ul,
+        > p + ol {
+          margin-top: 0 !important;
         }
       }
 
