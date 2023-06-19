@@ -5,6 +5,7 @@
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {
     "@_ueberdosis/prosemirror-tables": "1.1.3",
+    "@capacitor/clipboard": "^1.0.8",
     "@deeplib/data": "workspace:1.0.0",
     "@deeplib/misc": "workspace:1.0.0",
     "@deepnotes/app-server": "workspace:1.0.0",

@@ -43,8 +43,8 @@
               color="primary"
               style="width: 38px"
               @click="
-                () => {
-                  setClipboardText(recoveryCodes.join('\n'));
+                async () => {
+                  await setClipboardText(recoveryCodes.join('\n'));
 
                   $q.notify({
                     message: 'Copied to clipboard.',
@@ -147,8 +147,9 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_SM_MIN, setClipboardText } from '@stdlib/misc';
+import { BREAKPOINT_SM_MIN } from '@stdlib/misc';
 import download from 'downloadjs';
+import { setClipboardText } from 'src/code/utils/clipboard';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;

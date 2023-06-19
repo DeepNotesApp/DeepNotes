@@ -5,5 +5,8 @@ project(':capacitor-android').projectDir = new File('../../../../node_modules/.p
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../../../../node_modules/.pnpm/@capacitor+app@1.1.1_@capacitor+core@3.9.0/node_modules/@capacitor/app/android')
 
+include ':capacitor-clipboard'
+project(':capacitor-clipboard').projectDir = new File('../../../../node_modules/.pnpm/@capacitor+clipboard@1.0.8_@capacitor+core@3.9.0/node_modules/@capacitor/clipboard/android')
+
 include ':capacitor-splash-screen'
 project(':capacitor-splash-screen').projectDir = new File('../../../../node_modules/.pnpm/@capacitor+splash-screen@1.2.2_@capacitor+core@3.9.0/node_modules/@capacitor/splash-screen/android')

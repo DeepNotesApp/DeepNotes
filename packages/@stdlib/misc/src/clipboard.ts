@@ -32,15 +32,15 @@ export async function getClipboardText(): Promise<string> {
   return '';
 }
 
-export function setClipboardText(text: string): void {
+export async function setClipboardText(text: string): Promise<boolean> {
   if (navigator.clipboard?.writeText != null) {
-    void navigator.clipboard.writeText(text);
-    return;
+    await navigator.clipboard.writeText(text);
+    return true;
   }
 
   if (window.clipboardData != null) {
     window.clipboardData.setData('Text', text);
-    return;
+    return true;
   }
 
   if (document.queryCommandSupported?.('copy')) {
@@ -65,6 +65,8 @@ export function setClipboardText(text: string): void {
     selection?.removeAllRanges();
     document.body.removeChild(elem);
 
-    return;
+    return (await getClipboardText()) === text;
   }
+
+  return false;
 }
