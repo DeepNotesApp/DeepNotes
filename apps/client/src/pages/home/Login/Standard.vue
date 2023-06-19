@@ -1,5 +1,12 @@
 <template>
-  <div style="display: flex; justify-content: center; align-items: center">
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      white-space: nowrap;
+    "
+  >
     Want a quick taste?
 
     <Gap style="width: 16px" />
