@@ -50,5 +50,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>WKAppBoundDomains</key>
+	<array>
+		<string>deepnotes.app</string>
+		<string>js.stripe.com</string>
+		<string>m.stripe.network</string>
+	</array>
 </dict>
 </plist>
