@@ -1,9 +1,9 @@
 import type { MarkName, NodeName } from '@stdlib/misc';
-import { getClipboardText, setClipboardText } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import type { ChainedCommands, Editor } from '@tiptap/vue-3';
 import { every } from 'lodash';
 import { unsetNode } from 'src/code/tiptap/utils';
+import { getClipboardText, setClipboardText } from 'src/code/utils/clipboard';
 import type { ComputedRef, UnwrapNestedRefs } from 'vue';
 
 import type { PageArrow } from '../arrows/arrow';
@@ -245,24 +245,24 @@ export class PageSelection {
     }
   }
 
-  copy() {
+  async copy() {
     if (this.page.editing.react.editor != null) {
       const state = this.page.editing.react.editor.view.state;
 
-      setClipboardText(
+      await setClipboardText(
         state.doc.cut(state.selection.from, state.selection.to).textContent,
       );
     } else {
-      this.page.clipboard.copy();
+      await this.page.clipboard.copy();
     }
   }
-  cut() {
+  async cut() {
     if (this.page.editing.react.editor != null) {
-      this.copy();
+      await this.copy();
 
       this.page.editing.react.editor.commands.deleteSelection();
     } else {
-      this.page.clipboard.cut();
+      await this.page.clipboard.cut();
     }
   }
   async paste() {

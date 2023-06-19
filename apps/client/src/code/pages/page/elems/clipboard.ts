@@ -1,10 +1,10 @@
 import { base64ToBytes, bytesToBase64 } from '@stdlib/base64';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import type { Vec2 } from '@stdlib/misc';
-import { getClipboardText, setClipboardText } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { every } from 'lodash';
 import { pack, unpack } from 'msgpackr';
+import { getClipboardText, setClipboardText } from 'src/code/utils/clipboard';
 
 import { ISerialObject } from '../../serialization';
 import type { Page } from '../page';
@@ -22,7 +22,7 @@ export class PageClipboard {
     this.page = input.page;
   }
 
-  copy() {
+  async copy() {
     // Serialize selection
 
     const clipboardObj = this.page.app.serialization.serialize(
@@ -62,7 +62,7 @@ export class PageClipboard {
       ),
     );
 
-    setClipboardText(encryptedClipboardText);
+    await setClipboardText(encryptedClipboardText);
   }
 
   async paste(text?: string) {
@@ -172,8 +172,8 @@ export class PageClipboard {
     }
   }
 
-  cut() {
-    this.copy();
+  async cut() {
+    await this.copy();
 
     this.page.deleting.perform();
   }

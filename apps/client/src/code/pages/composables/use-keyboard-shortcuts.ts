@@ -67,11 +67,11 @@ export function useKeyboardShortcuts() {
       // Basic
 
       if (isCtrlDown(event) && event.code === 'KeyX') {
-        page.clipboard.cut();
+        await page.clipboard.cut();
         return true;
       }
       if (isCtrlDown(event) && event.code === 'KeyC') {
-        page.clipboard.copy();
+        await page.clipboard.copy();
         return true;
       }
       if (isCtrlDown(event) && event.code === 'KeyV' && window.clipboardData) {
