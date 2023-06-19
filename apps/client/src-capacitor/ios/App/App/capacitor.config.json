@@ -1,13 +1,22 @@
 {
-  "appId": "app.deepnotes",
-  "appName": "DeepNotes",
-  "bundledWebRuntime": false,
-  "npmClient": "pnpm",
-  "webDir": "www",
-  "server": {
-    "hostname": "deepnotes.app",
-    "iosScheme": "https",
-    "androidScheme": "https",
-    "url": "http://10.0.2.15:62895"
-  }
+	"appId": "app.deepnotes",
+	"appName": "DeepNotes",
+	"bundledWebRuntime": false,
+	"npmClient": "pnpm",
+	"webDir": "www",
+	"server": {
+		"hostname": "deepnotes.app",
+		"iosScheme": "https",
+		"androidScheme": "https",
+		"url": "http://192.168.1.4:62895"
+	},
+	"plugins": {
+		"CapacitorCookies": {
+			"enabled": true
+		},
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#181818"
+		}
+	}
 }
