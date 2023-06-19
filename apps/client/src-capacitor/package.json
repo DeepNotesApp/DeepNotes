@@ -4,13 +4,13 @@
   "version": "0.0.1",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {
-    "@capacitor/android": "^3.9.0",
-    "@capacitor/app": "^1.1.1",
-    "@capacitor/cli": "^3.9.0",
-    "@capacitor/clipboard": "^1.0.8",
-    "@capacitor/core": "^3.9.0",
-    "@capacitor/ios": "^3.9.0",
-    "@capacitor/splash-screen": "^1.2.2"
+    "@capacitor/android": "^4.0.0",
+    "@capacitor/app": "^4.0.0",
+    "@capacitor/cli": "^4.0.0",
+    "@capacitor/clipboard": "^4.0.0",
+    "@capacitor/core": "^4.0.0",
+    "@capacitor/ios": "^4.0.0",
+    "@capacitor/splash-screen": "^4.0.0"
   },
   "private": true
 }
