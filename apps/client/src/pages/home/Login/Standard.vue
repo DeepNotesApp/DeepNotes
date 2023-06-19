@@ -152,6 +152,14 @@ async function onSubmit() {
       return;
     }
 
+    if (!w3cEmailRegex.test(email.value)) {
+      throw new Error('Invalid email.');
+    }
+
+    if (password.value.length === 0) {
+      throw new Error('Empty password.');
+    }
+
     // Compute password hash
 
     const derivedKeys = await deriveUserValues({

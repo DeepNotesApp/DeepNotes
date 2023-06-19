@@ -125,9 +125,9 @@ const html = marked(`
   <br/>
   <br/>
 
-  ## Realtime collaboration
+  ## Live collaboration
 
-  DeepNotes uses [Yjs](https://docs.yjs.dev/) for realtime collaboration.
+  DeepNotes uses [Yjs](https://docs.yjs.dev/) for Live collaboration.
 
   Each page is represented by a Yjs document.
   Document updates are encrypted using the page's encryption key before being sent to the server.
