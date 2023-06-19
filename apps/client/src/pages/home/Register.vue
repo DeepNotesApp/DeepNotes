@@ -3,7 +3,12 @@
     <ResponsiveContainer style="padding: 120px 32px">
       <q-form style="margin: 0px auto; max-width: 270px">
         <div
-          style="display: flex; justify-content: center; align-items: center"
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+          "
         >
           Want a quick taste?
 

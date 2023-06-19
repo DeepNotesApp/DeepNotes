@@ -5,8 +5,8 @@
     class="cursor-pointer"
     style="margin-right: -3px"
     @click="
-      () => {
-        setClipboardText(text);
+      async () => {
+        await setClipboardText(text);
 
         $q.notify({
           message: 'Copied to clipboard.',
@@ -27,8 +27,8 @@
 </template>
 
 <script setup lang="ts">
-import { setClipboardText } from '@stdlib/misc';
 import type { QIconProps } from 'quasar';
+import { setClipboardText } from 'src/code/utils/clipboard';
 
 interface Props extends QIconProps {
   text: string;

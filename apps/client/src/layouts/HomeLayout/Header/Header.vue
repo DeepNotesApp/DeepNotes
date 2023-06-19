@@ -93,14 +93,16 @@
             :to="{ name: 'pricing' }"
           />
 
-          <Gap style="width: 12px" />
+          <template v-if="isIncluded(quasarMode, ['ssr', 'spa'])">
+            <Gap style="width: 12px" />
 
-          <DeepBtn
-            label="Download"
-            flat
-            class="toolbar-btn"
-            :to="{ name: 'download' }"
-          />
+            <DeepBtn
+              label="Download"
+              flat
+              class="toolbar-btn"
+              :to="{ name: 'download' }"
+            />
+          </template>
 
           <Gap style="width: 12px" />
 
@@ -122,7 +124,7 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_LG_MIN } from '@stdlib/misc';
+import { BREAKPOINT_LG_MIN, isIncluded } from '@stdlib/misc';
 import { useResizeObserver } from 'src/code/utils/misc';
 import AccountItems from 'src/pages/home/Account/AccountItems.vue';
 import PrivacyPolicyItems from 'src/pages/home/PrivacyPolicy/PrivacyPolicyItems.vue';
@@ -132,6 +134,8 @@ import type { ComponentPublicInstance } from 'vue';
 
 import RightButtons from './RightButtons/RightButtons.vue';
 import RightMenu from './RightButtons/RightMenu.vue';
+
+const quasarMode = process.env.MODE;
 
 const headerRef = ref<ComponentPublicInstance>();
 

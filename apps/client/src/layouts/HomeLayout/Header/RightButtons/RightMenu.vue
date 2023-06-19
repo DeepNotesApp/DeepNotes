@@ -85,6 +85,7 @@
             </q-item>
 
             <q-item
+              v-if="isIncluded(quasarMode, ['ssr', 'spa'])"
               clickable
               :to="{ name: 'download' }"
             >
@@ -123,8 +124,10 @@
 </template>
 
 <script setup lang="ts">
-import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN } from '@stdlib/misc';
+import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN, isIncluded } from '@stdlib/misc';
 import { logout } from 'src/code/auth/logout';
 import { selfUserName } from 'src/code/self-user-name';
 import { multiModePath } from 'src/code/utils/misc';
+
+const quasarMode = process.env.MODE;
 </script>
