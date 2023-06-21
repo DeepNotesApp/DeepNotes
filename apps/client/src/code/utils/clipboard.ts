@@ -1,4 +1,3 @@
-import { Clipboard } from '@capacitor/clipboard';
 import {
   getClipboardText as _getClipboardText,
   setClipboardText as _setClipboardText,
@@ -7,10 +6,10 @@ import {
 export async function getClipboardText(): Promise<string> {
   let text = await _getClipboardText();
 
-  if (text === '') {
-    const result = await Clipboard.read();
+  if (!text && $quasar().platform.is.capacitor) {
+    const { Clipboard } = await import('@capacitor/clipboard');
 
-    mainLogger.info(`Capacitor clipboard result: ${JSON.stringify(result)}`);
+    const result = await Clipboard.read();
 
     text = result.value;
   }
@@ -19,7 +18,11 @@ export async function getClipboardText(): Promise<string> {
 }
 
 export async function setClipboardText(text: string): Promise<void> {
-  if (!(await _setClipboardText(text))) {
+  const result = await _setClipboardText(text);
+
+  if (!result && $quasar().platform.is.capacitor) {
+    const { Clipboard } = await import('@capacitor/clipboard');
+
     await Clipboard.write({ string: text });
   }
 }
