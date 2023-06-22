@@ -14,13 +14,16 @@ import { asyncDialog } from 'src/code/utils/misc';
 export async function createPage(input: {
   parentPageId: string;
   currentGroupId: string;
-  pageRelativeTitle: string;
 
-  createGroup: boolean;
-  groupName: string;
-  groupMemberName: string;
-  groupIsPublic: boolean;
-  groupPassword?: string;
+  pageRelativeTitle: string;
+  pageAbsoluteTitle?: string;
+
+  createGroup?: {
+    groupName: string;
+    groupMemberName: string;
+    groupIsPublic: boolean;
+    groupPassword?: string;
+  };
 }) {
   let groupContentKeyring: SymmetricKeyring | undefined;
 
@@ -32,16 +35,19 @@ export async function createPage(input: {
     typeof trpcClient.pages.create.mutate
   >[0]['groupCreation'];
 
-  if (input.createGroup) {
-    if (input.groupName === '') {
+  if (input.createGroup != null) {
+    if (input.createGroup.groupName === '') {
       throw new Error('Please enter a group name.');
     }
 
-    if (input.groupMemberName === '') {
+    if (input.createGroup.groupMemberName === '') {
       throw new Error('Please enter an user alias.');
     }
 
-    if (input.groupPassword != null && zxcvbn(input.groupPassword).score <= 2) {
+    if (
+      input.createGroup.groupPassword != null &&
+      zxcvbn(input.createGroup.groupPassword).score <= 2
+    ) {
       await asyncDialog({
         title: 'Weak password',
         html: true,
@@ -58,8 +64,11 @@ export async function createPage(input: {
 
     const groupValues = await generateGroupValues({
       userKeyPair: internals.keyPair,
-      isPublic: input.groupIsPublic,
-      password: input.groupPassword != null ? input.groupPassword : undefined,
+      isPublic: input.createGroup.groupIsPublic,
+      password:
+        input.createGroup.groupPassword != null
+          ? input.createGroup.groupPassword
+          : undefined,
     });
 
     groupId = groupValues.groupId;
@@ -68,7 +77,7 @@ export async function createPage(input: {
 
     groupCreation = {
       groupEncryptedName: groupValues.accessKeyring.encrypt(
-        textToBytes(input.groupName),
+        textToBytes(input.createGroup.groupName),
         {
           padding: true,
           associatedData: {
@@ -80,7 +89,7 @@ export async function createPage(input: {
 
       groupPasswordHash: groupValues.passwordValues?.passwordHash,
 
-      groupIsPublic: input.groupIsPublic,
+      groupIsPublic: input.createGroup.groupIsPublic,
 
       groupAccessKeyring: groupValues.finalAccessKeyring.wrappedValue,
       groupEncryptedInternalKeyring:
@@ -94,7 +103,7 @@ export async function createPage(input: {
         groupValues.encryptedPrivateKeyring.wrappedValue,
 
       groupOwnerEncryptedName: internals.keyPair.encrypt(
-        textToBytes(input.groupMemberName),
+        textToBytes(input.createGroup.groupMemberName),
         groupValues.keyPair.publicKey,
         { padding: true },
       ),
@@ -154,13 +163,16 @@ export async function createPage(input: {
       },
     },
   );
-  const pageEncryptedAbsoluteTitle = pageKeyring.encrypt(textToBytes(''), {
-    padding: true,
-    associatedData: {
-      context: 'PageAbsoluteTitle',
-      pageId,
+  const pageEncryptedAbsoluteTitle = pageKeyring.encrypt(
+    textToBytes(input.pageAbsoluteTitle ?? ''),
+    {
+      padding: true,
+      associatedData: {
+        context: 'PageAbsoluteTitle',
+        pageId,
+      },
     },
-  });
+  );
 
   return await trpcClient.pages.create.mutate({
     parentPageId: input.parentPageId,

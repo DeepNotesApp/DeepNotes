@@ -235,17 +235,21 @@ async function _createPage() {
 
     const response = await createPage({
       parentPageId: page.value.id,
-
       currentGroupId: page.value.react.groupId,
+
       pageRelativeTitle: pageRelativeTitle.value,
 
-      createGroup: destGroupId.value === 'new',
-      groupName: groupName.value,
-      groupMemberName: groupMemberName.value,
-      groupIsPublic: groupIsPublic.value,
-      groupPassword: groupIsPasswordProtected.value
-        ? groupPassword.value
-        : undefined,
+      createGroup:
+        destGroupId.value === 'new'
+          ? {
+              groupName: groupName.value,
+              groupMemberName: groupMemberName.value,
+              groupIsPublic: groupIsPublic.value,
+              groupPassword: groupIsPasswordProtected.value
+                ? groupPassword.value
+                : undefined,
+            }
+          : undefined,
     });
 
     dialogRef.value.onDialogOK(

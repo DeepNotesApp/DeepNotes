@@ -60,7 +60,7 @@
     "lint": "turbo run lint",
     "npkill": "turbo run npkill && rimraf ./node_modules",
     "preinstall": "npx only-allow pnpm",
-    "prepare": "husky install",
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
     "release": "standard-version",
     "repo:build": "tsc --build tsconfig.packages.json && turbo run repo:build --parallel",
     "repo:build:watch": "concurrently \"tsc --build tsconfig.packages.json --watch\" \"turbo run repo:build:watch --parallel\"",
