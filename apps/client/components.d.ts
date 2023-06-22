@@ -14,6 +14,7 @@ declare module '@vue/runtime-core' {
     CopyBtn: typeof import('./src/components/CopyBtn.vue')['default']
     CustomDialog: typeof import('./src/components/CustomDialog.vue')['default']
     DeepBtn: typeof import('./src/components/DeepBtn.vue')['default']
+    DeepBtnDropdown: typeof import('./src/components/DeepBtnDropdown.vue')['default']
     DisplayBtn: typeof import('./src/components/DisplayBtn.vue')['default']
     EvaluatedPasswordField: typeof import('./src/components/EvaluatedPasswordField.vue')['default']
     Gap: typeof import('./src/components/Gap.vue')['default']

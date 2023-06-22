@@ -4,7 +4,7 @@
       tooltip="Create new page"
       icon="mdi-note-plus"
       :disable="page.react.readOnly"
-      @click="createNewPage"
+      @click="showNewPageDialog()"
     />
 
     <q-separator />
@@ -147,12 +147,31 @@
 
       <Gap style="height: 16px" />
 
-      <DeepBtn
+      <DeepBtnDropdown
         label="Create new page"
+        icon="mdi-note-plus"
         color="primary"
+        split
+        :menu-offset="[0, 1]"
         :disable="page.react.readOnly"
-        @click="createNewPage"
-      />
+        @click="createNewPageQuick()"
+      >
+        <q-list class="bg-primary">
+          <q-item
+            clickable
+            v-close-popup
+            @click="showNewPageDialog()"
+          >
+            <q-item-section avatar>
+              <q-icon name="mdi-note-plus" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Create with options</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </DeepBtnDropdown>
     </div>
 
     <q-separator />
@@ -706,6 +725,7 @@
 import { splitStr } from '@stdlib/misc';
 import { pack } from 'msgpackr';
 import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
+import { createPage } from 'src/code/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { handleError } from 'src/code/utils/misc';
@@ -725,14 +745,14 @@ function changeProp(value: any, func: (note: PageNote, value: any) => void) {
   });
 }
 
-function createNewPage() {
+function getInitialPageTitle() {
   let initialPageTitle = splitStr(getSelection()?.toString() ?? '', '\n')[0];
 
   if (initialPageTitle === '') {
     const activeElem = internals.pages.react.page.activeElem.react.value;
 
     if (activeElem?.type !== 'note') {
-      return;
+      return '';
     }
 
     const editorElem = activeElem.getElem('ProseMirror');
@@ -742,12 +762,40 @@ function createNewPage() {
     }
   }
 
+  return initialPageTitle;
+}
+
+async function createNewPageQuick() {
+  const response = await createPage({
+    parentPageId: page.value.id,
+    currentGroupId: page.value.react.groupId,
+
+    pageRelativeTitle: getInitialPageTitle(),
+  });
+
+  changeProp(response.pageId, (selectedNote, url) => {
+    selectedNote.react.collab.link = url;
+  });
+
+  await internals.pages.goToPage(response.pageId, { fromParent: true });
+
+  $quasar().notify({
+    message:
+      'Page created successfully.' +
+      (response.numFreePages != null
+        ? ` (${response.numFreePages + 1}/50)`
+        : ''),
+    type: 'positive',
+  });
+}
+
+function showNewPageDialog() {
   $quasar()
     .dialog({
       component: NewPageDialog,
 
       componentProps: {
-        initialPageTitle,
+        initialPageTitle: getInitialPageTitle(),
       },
     })
     .onOk((url) => {
