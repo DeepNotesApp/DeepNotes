@@ -295,7 +295,7 @@ export class Page implements IPageRegion {
 
         return true;
       });
-      await nextTick();
+      await sleep();
 
       mainLogger.sub('page.finishSetup').info('All notes loaded');
 
