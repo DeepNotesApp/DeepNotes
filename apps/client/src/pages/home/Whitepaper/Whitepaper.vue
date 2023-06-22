@@ -91,7 +91,7 @@ const html = marked(`
   We use keyrings in order to facilitate realtime key rotation.
   A keyring is a list of keys, where the first key is the current key, and the rest are previous keys.
   On a key rotation, we generate a new key that is added to the beginning of the keyring.
-  At this moment, the maximum number of keys in a keyring is set to 3.
+  A rotated key must remain in the keyring for at least 24 hours to allow for a smooth transition to the new key.
 
   <br/>
 
@@ -120,14 +120,14 @@ const html = marked(`
   This key is used to encrypt all page-related data in the group.
   In password-protected groups this key is wrapped with a key derived from the given password.
 
-  Lastly, each page and page snapshot have their own encryption key.
+  Lastly, each page and page snapshot have their own encryption keys.
 
   <br/>
   <br/>
 
   ## Live collaboration
 
-  DeepNotes uses [Yjs](https://docs.yjs.dev/) for Live collaboration.
+  DeepNotes uses [Yjs](https://docs.yjs.dev/) for live collaboration.
 
   Each page is represented by a Yjs document.
   Document updates are encrypted using the page's encryption key before being sent to the server.
@@ -145,7 +145,7 @@ const html = marked(`
   In order to derive the group password key, we use a process similar to login authentication.
   We use the Argon2id key derivation algorithm using the group ID as salt, with the following settings:
   8 iterations, 32 MB memory, 1 thread, and 96 bytes output length.
-  The output is broken into two parts, the first 32 bytes are used as the group password key,
+  The output is broken into two parts, where the first 32 bytes are used as the group password key,
   and the remaining 64 bytes are used as the password hash.
   The password hash is sent to the server to verify on that the password is correct.
 

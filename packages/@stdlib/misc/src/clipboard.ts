@@ -5,68 +5,72 @@ declare global {
 }
 
 export async function getClipboardText(): Promise<string> {
-  if (navigator.clipboard?.readText != null) {
-    return await navigator.clipboard.readText();
-  }
+  try {
+    if (navigator.clipboard?.readText != null) {
+      return await navigator.clipboard.readText();
+    }
 
-  if (window.clipboardData != null) {
-    return window.clipboardData.getData('Text');
-  }
+    if (window.clipboardData != null) {
+      return window.clipboardData.getData('Text');
+    }
 
-  if (document.queryCommandSupported?.('paste')) {
-    const elem = document.createElement('textarea');
+    if (document.queryCommandSupported?.('paste')) {
+      const elem = document.createElement('textarea');
 
-    document.body.appendChild(elem);
+      document.body.appendChild(elem);
 
-    elem.focus();
+      elem.focus();
 
-    document.execCommand('paste');
+      document.execCommand('paste');
 
-    const text = elem.value;
+      const text = elem.value;
 
-    document.body.removeChild(elem);
+      document.body.removeChild(elem);
 
-    return text;
-  }
+      return text;
+    }
+  } catch (error) {}
 
   return '';
 }
 
 export async function setClipboardText(text: string): Promise<boolean> {
-  if (navigator.clipboard?.writeText != null) {
-    await navigator.clipboard.writeText(text);
-    return true;
-  }
+  try {
+    if (navigator.clipboard?.writeText != null) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
 
-  if (window.clipboardData != null) {
-    window.clipboardData.setData('Text', text);
-    return true;
-  }
+    if (window.clipboardData != null) {
+      window.clipboardData.setData('Text', text);
+      return true;
+    }
 
-  if (document.queryCommandSupported?.('copy')) {
-    const elem = document.createElement('span');
+    if (document.queryCommandSupported?.('copy')) {
+      const elem = document.createElement('span');
 
-    elem.textContent = text;
+      elem.textContent = text;
 
-    elem.style.whiteSpace = 'pre';
-    elem.style.webkitUserSelect = 'auto';
-    elem.style.userSelect = 'all';
+      elem.style.whiteSpace = 'pre';
+      elem.style.webkitUserSelect = 'auto';
+      elem.style.userSelect = 'all';
 
-    document.body.appendChild(elem);
+      document.body.appendChild(elem);
 
-    const selection = window.getSelection();
-    const range = document.createRange();
-    selection?.removeAllRanges();
-    range.selectNode(elem);
-    selection?.addRange(range);
+      const selection = window.getSelection();
+      const range = document.createRange();
+      selection?.removeAllRanges();
+      range.selectNode(elem);
+      selection?.addRange(range);
 
-    document.execCommand('copy');
+      document.execCommand('copy');
 
-    selection?.removeAllRanges();
-    document.body.removeChild(elem);
+      selection?.removeAllRanges();
+      document.body.removeChild(elem);
 
-    return (await getClipboardText()) === text;
-  }
+      return (await getClipboardText()) === text;
+    }
+  } catch (error) {}
 
   return false;
 }
