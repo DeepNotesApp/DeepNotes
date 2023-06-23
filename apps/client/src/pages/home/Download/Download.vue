@@ -27,7 +27,7 @@
             label="Download for Linux (AppImage)"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.1/DeepNotes-0.0.1.AppImage"
+            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.AppImage"
           />
 
           <DeepBtn
@@ -35,7 +35,7 @@
             label="Download for Windows (NSIS)"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.1/DeepNotes-Setup-0.0.1.exe"
+            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-Setup-0.0.2.exe"
           />
 
           <DeepBtn
@@ -43,17 +43,8 @@
             label="Download for MacOS (DMG)"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            disable
-          >
-            <q-tooltip
-              anchor="bottom middle"
-              self="top middle"
-              transition-show="jump-down"
-              transition-hide="jump-up"
-            >
-              Coming soon
-            </q-tooltip>
-          </DeepBtn>
+            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.dmg"
+          />
 
           <DeepBtn
             v-if="$q.platform.is.android"
@@ -94,52 +85,30 @@
         style="justify-content: center"
       >
         <PlatformCard
-          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.1/DeepNotes-Setup-0.0.1.exe"
+          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-Setup-0.0.2.exe"
         >
-          <template #image>
-            <img
-              src="~assets/platforms/windows.png"
-              :style="{ width: '88px' }"
-            />
-          </template>
-        </PlatformCard>
-
-        <PlatformCard disable>
-          <template #image>
-            <img
-              src="~assets/platforms/mac.png"
-              style="margin-top: -12px; width: 102px"
-            />
-          </template>
-
-          <template #button>
-            <DeepBtn
-              label="Download"
-              color="primary"
-              style="width: 150px"
-              disable
-            >
-              <q-tooltip
-                anchor="bottom middle"
-                self="top middle"
-                transition-show="jump-down"
-                transition-hide="jump-up"
-              >
-                Coming soon
-              </q-tooltip>
-            </DeepBtn>
-          </template>
+          <img
+            src="~assets/platforms/windows.png"
+            :style="{ width: '88px' }"
+          />
         </PlatformCard>
 
         <PlatformCard
-          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.1/DeepNotes-0.0.1.AppImage"
+          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.dmg"
         >
-          <template #image>
-            <img
-              src="~assets/platforms/linux.png"
-              style="margin-top: 4px; width: 92px"
-            />
-          </template>
+          <img
+            src="~assets/platforms/mac.png"
+            style="margin-top: -12px; width: 102px"
+          />
+        </PlatformCard>
+
+        <PlatformCard
+          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.AppImage"
+        >
+          <img
+            src="~assets/platforms/linux.png"
+            style="margin-top: 4px; width: 92px"
+          />
         </PlatformCard>
       </div>
 
