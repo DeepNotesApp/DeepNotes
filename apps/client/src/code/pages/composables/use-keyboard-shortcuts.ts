@@ -21,9 +21,9 @@ export function useKeyboardShortcuts() {
 
     const target = event.target as HTMLElement;
 
-    const isEditing = page.editing.react.active && target.isContentEditable;
+    const isEditingElem = page.editing.react.active && target.isContentEditable;
 
-    if (isEditing && event.code === 'Escape') {
+    if (isEditingElem && event.code === 'Escape') {
       page.editing.stop();
       return true;
     }
@@ -54,14 +54,19 @@ export function useKeyboardShortcuts() {
       return true;
     }
 
-    if (!isEditing && isCtrlDown(event) && event.code === 'KeyH') {
+    if (!isEditingElem && isCtrlDown(event) && event.code === 'KeyH') {
       page.findAndReplace.react.active =
         !page.findAndReplace.react.active || !page.findAndReplace.react.replace;
       page.findAndReplace.react.replace = true;
       return true;
     }
 
-    if (!isEditing) {
+    const isEditingInput =
+      target.nodeName === 'INPUT' ||
+      target.nodeName === 'TEXTAREA' ||
+      target.isContentEditable;
+
+    if (!isEditingInput) {
       const activeElem = page.activeElem.react.value;
 
       // Basic

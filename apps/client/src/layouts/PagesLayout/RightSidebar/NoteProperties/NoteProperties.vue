@@ -773,7 +773,7 @@ async function createNewPageQuick() {
     pageRelativeTitle: getInitialPageTitle(),
   });
 
-  changeProp(response.pageId, (selectedNote, url) => {
+  changeProp(`/pages/${response.pageId}`, (selectedNote, url) => {
     selectedNote.react.collab.link = url;
   });
 
