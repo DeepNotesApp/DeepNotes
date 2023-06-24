@@ -20,20 +20,18 @@
           align-items: center;
         "
       >
-        <slot name="image"></slot>
+        <slot></slot>
       </div>
 
       <Gap style="height: 24px" />
 
-      <slot name="button">
-        <DeepBtn
-          label="Download"
-          color="primary"
-          style="width: 150px"
-          :href="url"
-          :disable="disable"
-        />
-      </slot>
+      <DeepBtn
+        label="Download"
+        color="primary"
+        style="width: 150px; font-weight: bold"
+        :href="url"
+        :disable="disable"
+      />
     </div>
   </div>
 </template>
