@@ -1,4 +1,6 @@
-platform :ios, '12.0'
+require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+
+platform :ios, '13.0'
 use_frameworks!
 
 # workaround to avoid Xcode caching of Pods that requires
@@ -7,14 +9,18 @@ use_frameworks!
 install! 'cocoapods', :disable_input_output_paths => true
 
 def capacitor_pods
-  pod 'Capacitor', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@3.9.0_@capacitor+core@3.9.0/node_modules/@capacitor/ios'
-  pod 'CapacitorCordova', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@3.9.0_@capacitor+core@3.9.0/node_modules/@capacitor/ios'
-  pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@1.1.1_@capacitor+core@3.9.0/node_modules/@capacitor/app'
-  pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@1.0.8_@capacitor+core@3.9.0/node_modules/@capacitor/clipboard'
-  pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@1.2.2_@capacitor+core@3.9.0/node_modules/@capacitor/splash-screen'
+  pod 'Capacitor', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@4.8.0_@capacitor+core@4.8.0/node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@4.8.0_@capacitor+core@4.8.0/node_modules/@capacitor/ios'
+  pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@4.1.1_@capacitor+core@4.8.0/node_modules/@capacitor/app'
+  pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@4.1.0_@capacitor+core@4.8.0/node_modules/@capacitor/clipboard'
+  pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@4.2.0_@capacitor+core@4.8.0/node_modules/@capacitor/splash-screen'
 end
 
 target 'App' do
   capacitor_pods
   # Add your Pods here
+end
+
+post_install do |installer|
+  assertDeploymentTarget(installer)
 end
