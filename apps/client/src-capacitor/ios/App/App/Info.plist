@@ -56,5 +56,7 @@
 		<string>js.stripe.com</string>
 		<string>m.stripe.network</string>
 	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
