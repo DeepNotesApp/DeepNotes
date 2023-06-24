@@ -59,16 +59,8 @@
             label="Go to the App Store"
             color="primary"
             style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-          >
-            <q-tooltip
-              anchor="bottom middle"
-              self="top middle"
-              transition-show="jump-down"
-              transition-hide="jump-up"
-            >
-              Coming soon
-            </q-tooltip>
-          </DeepBtn>
+            href="https://apps.apple.com/us/app/deepnotes-visual-note-taking/id6450611344"
+          />
         </div>
 
         <Gap style="height: 140px" />
@@ -113,16 +105,22 @@
       </div>
 
       <div style="display: flex; justify-content: center; flex-wrap: wrap">
-        <img
-          src="~assets/badges/app-store.svg"
-          style="
-            margin: 36px;
-            margin-top: 24px;
-            margin-bottom: 0;
-            height: 56px;
-            opacity: 0.5;
-          "
-        />
+        <div>
+          <a
+            href="https://apps.apple.com/us/app/deepnotes-visual-note-taking/id6450611344"
+            target="_blank"
+          >
+            <img
+              src="~assets/badges/app-store.svg"
+              style="
+                margin: 36px;
+                margin-top: 24px;
+                margin-bottom: 0;
+                height: 56px;
+              "
+            />
+          </a>
+        </div>
 
         <div>
           <a
