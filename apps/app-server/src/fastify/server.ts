@@ -52,6 +52,7 @@ export const fastify = once(async () => {
         process.env.DEV ||
         requestOrigin === undefined ||
         requestOrigin === process.env.CLIENT_URL ||
+        requestOrigin === 'capacitor://deepnotes.app' ||
         requestOrigin === 'http://localhost'
       ) {
         callback(null, true);
