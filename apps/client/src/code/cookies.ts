@@ -1,7 +1,7 @@
-import type { Cookies } from 'quasar';
+import { Cookies } from 'quasar';
 
-export function clearCookie(cookies: Cookies, name: string) {
-  cookies.remove(name, {
+export function clearCookie(name: string, cookies?: Cookies) {
+  (cookies ?? Cookies).remove(name, {
     domain: process.env.HOST,
     path: '/',
   });

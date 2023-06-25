@@ -36,6 +36,8 @@ export async function login(input: {
     internals.storage = internals.sessionStorage;
   }
 
+  internals.storage.setItem('loggedIn', 'true');
+
   internals.storage.setItem('userId', input.userId);
   internals.storage.setItem(
     'publicKeyring',

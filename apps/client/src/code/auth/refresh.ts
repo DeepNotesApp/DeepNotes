@@ -24,7 +24,12 @@ import {
 const moduleLogger = mainLogger.sub('auth/refresh.client.ts');
 
 export async function tryRefreshTokens(): Promise<void> {
+  moduleLogger.info('Trying to refresh tokens');
+
   if (!authStore().loggedIn) {
+    moduleLogger.info(
+      'authStore().loggedIn is false, skipping refresh request',
+    );
     return;
   }
 
@@ -35,6 +40,7 @@ export async function tryRefreshTokens(): Promise<void> {
     internals.storage.getItem('encryptedPrivateKeyring') == null ||
     internals.storage.getItem('encryptedSymmetricKeyring') == null
   ) {
+    moduleLogger.info('Requirements not met, logging out');
     await logout();
     return;
   }
@@ -46,6 +52,7 @@ export async function tryRefreshTokens(): Promise<void> {
     internals.symmetricKeyring != null &&
     !areClientTokensExpiring()
   ) {
+    moduleLogger.info('Tokens are not expiring, skipping refresh request');
     return;
   }
 
@@ -57,7 +64,7 @@ export async function tryRefreshTokens(): Promise<void> {
 
     if (authStore().oldSessionKey && authStore().newSessionKey) {
       moduleLogger.info(
-        'Tokens already refreshed on server, skipping refresh request.',
+        'Tokens already refreshed on server, skipping refresh request',
       );
 
       oldSessionKey = wrapSymmetricKey(

@@ -1,3 +1,4 @@
+import { clearCookie } from '../cookies';
 import { trpcClient } from '../trpc';
 import { multiModePath } from '../utils/misc';
 import { clearClientTokenExpirations } from './tokens';
@@ -9,7 +10,7 @@ export async function logout() {
 
   authStore().loggedIn = false;
 
-  // Clear local storage
+  // Clear storage
 
   internals.sessionStorage.removeItem('demo');
 
@@ -25,14 +26,13 @@ export async function logout() {
 
   clearClientTokenExpirations();
 
-  // Clear loggedIn cookie
+  // Clear loggedIn
 
-  Cookies.remove('loggedIn', {
-    domain: process.env.HOST,
-    path: '/',
-  });
+  clearCookie('loggedIn');
 
   await (globalThis as any).electronBridge?.clearLoggedInCookie();
+
+  internals.storage.removeItem('loggedIn');
 
   try {
     await logoutPromise;
