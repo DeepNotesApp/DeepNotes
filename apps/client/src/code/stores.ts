@@ -4,23 +4,17 @@ import { useAuthStore } from 'src/stores/auth';
 import { usePagesStore } from 'src/stores/pages';
 import { useUIStore } from 'src/stores/ui';
 
-const moduleLogger = mainLogger.sub('stores.universal.ts');
-
 function makeStoreFunc<T extends (...args: any[]) => any>(storeDefinition: T) {
   let _store: ReturnType<T>;
 
   return (pinia?: Pinia): ReturnType<T> => {
     if (_store != null) {
-      moduleLogger.debug('Returning saved store');
-
       return _store;
     }
 
     let store: ReturnType<T> | undefined;
 
     if (pinia != null) {
-      moduleLogger.debug('Getting store from pinia');
-
       store = storeDefinition(pinia) as any;
     }
 
@@ -29,18 +23,12 @@ function makeStoreFunc<T extends (...args: any[]) => any>(storeDefinition: T) {
         getCurrentInstance()?.appContext.app.config.globalProperties.$pinia;
 
       if (pinia != null) {
-        moduleLogger.debug('Getting store from vue instance');
-
         store = storeDefinition(pinia) as any;
       }
     }
 
     if (store == null) {
       store = storeDefinition() as any;
-
-      if (store != null) {
-        moduleLogger.debug('Getting store with composition API');
-      }
     }
 
     if (store == null) {
@@ -50,8 +38,6 @@ function makeStoreFunc<T extends (...args: any[]) => any>(storeDefinition: T) {
     }
 
     if (process.env.CLIENT) {
-      moduleLogger.debug('Saving store found on client');
-
       _store = store;
     }
 
