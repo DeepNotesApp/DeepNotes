@@ -2,8 +2,12 @@ import { sleep } from '@stdlib/misc';
 import { boot } from 'quasar/wrappers';
 import { tryRefreshTokens } from 'src/code/auth/refresh';
 
+const _moduleLogger = mainLogger.sub('boot/auth.client.ts');
+
 export default boot(async ({ store }) => {
-  mainLogger.sub('boot/auth.client.ts').info('Booting');
+  _moduleLogger.info('Booting');
+
+  _moduleLogger.info('Initializing authStore().loggedIn');
 
   authStore(store).loggedIn ||= !!(await (
     globalThis as any
