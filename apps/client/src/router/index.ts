@@ -81,9 +81,9 @@ export default route(async function ({ store, ssrContext }) {
       } catch (error) {
         moduleLogger.error('Failed to refresh tokens: %s', error);
 
-        clearCookie(cookies, 'accessToken');
-        clearCookie(cookies, 'refreshToken');
-        clearCookie(cookies, 'loggedIn');
+        clearCookie('accessToken', cookies);
+        clearCookie('refreshToken', cookies);
+        clearCookie('loggedIn', cookies);
       }
     }
   }

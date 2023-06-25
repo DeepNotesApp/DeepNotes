@@ -9,10 +9,10 @@ export default boot(async ({ store }) => {
 
   _moduleLogger.info('Initializing authStore().loggedIn');
 
-  authStore(store).loggedIn ||= !!(await (
-    globalThis as any
-  ).electronBridge?.isLoggedIn());
-  authStore(store).loggedIn ||= Cookies.get('loggedIn') === 'true';
+  authStore(store).loggedIn =
+    !!(await (globalThis as any).electronBridge?.isLoggedIn()) ||
+    Cookies.get('loggedIn') === 'true' ||
+    internals.storage.getItem('loggedIn') === 'true';
 
   if (authStore(store).loggedIn && internals.storage.length === 0) {
     await sleep(500); // Required for cross-tab sessionStorage to work
