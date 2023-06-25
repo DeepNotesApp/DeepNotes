@@ -1,8 +1,5 @@
-import { once } from 'lodash';
 import type { Ref } from 'vue';
 import type { RouteLocationNormalized, Router } from 'vue-router';
-
-const moduleLogger = once(() => mainLogger.sub('helpers.ts'));
 
 function makeHelper<T>(
   name: string,
@@ -18,10 +15,6 @@ function makeHelper<T>(
 
     if (value == null) {
       value = helperFunc();
-
-      if (value != null) {
-        moduleLogger().debug(`Getting ${name} from composable`);
-      }
     }
 
     if (value == null) {
@@ -29,10 +22,6 @@ function makeHelper<T>(
         getCurrentInstance()?.appContext.app.config.globalProperties[
           globalPropKey
         ];
-
-      if (value != null) {
-        moduleLogger().debug(`Getting ${name} from vue instance`);
-      }
     }
 
     if (value == null) {
@@ -63,10 +52,6 @@ export function route(router_?: Router) {
 
   if (route == null) {
     route = router(router_).currentRoute;
-
-    if (route != null) {
-      moduleLogger().debug('Getting route from useRoute()');
-    }
   }
 
   if (route == null) {
