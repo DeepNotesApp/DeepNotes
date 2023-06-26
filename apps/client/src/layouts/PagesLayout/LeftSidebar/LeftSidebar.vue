@@ -52,8 +52,6 @@ function resizeLeftSidebar(event: PointerEvent) {
 <style scoped lang="scss">
 .q-drawer-container :deep() {
   .q-drawer {
-    position: fixed;
-
     border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
   }
 }

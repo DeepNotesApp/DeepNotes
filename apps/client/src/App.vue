@@ -10,7 +10,7 @@ import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
-  title: 'DeepNotes - The next level of note-taking',
+  title: 'DeepNotes - Dive into your note universe',
 
   meta: {
     description: {
@@ -98,6 +98,29 @@ useEventListener(globalThis.window, 'resize', onWindowResize);
 }
 *::after {
   box-shadow: none !important;
+}
+
+html,
+body,
+#q-app {
+  height: 100%;
+}
+
+#q-app {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+.q-layout,
+.q-page {
+  min-height: 100% !important; /* necessary */
+}
+
+.q-header,
+.q-drawer {
+  position: absolute;
 }
 
 body {
