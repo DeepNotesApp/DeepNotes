@@ -100,6 +100,29 @@ useEventListener(globalThis.window, 'resize', onWindowResize);
   box-shadow: none !important;
 }
 
+html,
+body,
+#q-app {
+  height: 100%;
+}
+
+#q-app {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
+
+.q-layout,
+.q-page {
+  min-height: 100% !important; /* necessary */
+}
+
+.q-header,
+.q-drawer {
+  position: absolute;
+}
+
 body {
   color: rgba(255, 255, 255, 0.9) !important;
 }
