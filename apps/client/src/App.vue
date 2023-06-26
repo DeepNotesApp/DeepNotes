@@ -10,7 +10,7 @@ import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
-  title: 'DeepNotes - The next level of note-taking',
+  title: 'DeepNotes - Dive into your note universe',
 
   meta: {
     description: {
