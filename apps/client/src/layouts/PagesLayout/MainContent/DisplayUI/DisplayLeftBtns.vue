@@ -41,7 +41,7 @@
       </q-tooltip>
     </DisplayBtn>
 
-    <Gap style="height: 24px" />
+    <Gap style="height: 16px" />
 
     <DisplayBtn
       icon="mdi-camera-outline"
@@ -59,7 +59,7 @@
       </q-tooltip>
     </DisplayBtn>
 
-    <Gap style="height: 24px" />
+    <Gap style="height: 16px" />
 
     <DisplayBtn
       icon="mdi-find-replace"
@@ -113,7 +113,7 @@ async function goForward() {
   position: absolute;
 
   left: 12px;
-  top: 32px;
+  top: 53px;
 
   display: flex;
   flex-direction: column;

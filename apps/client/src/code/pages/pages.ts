@@ -17,6 +17,7 @@ export interface IAppReact {
 
   page: ShallowRef<Page>;
   pageId: ComputedRef<string | undefined>;
+  pageIndex: ComputedRef<number>;
 
   tableContextMenu: boolean;
   tableContextMenuPos: Vec2;
@@ -49,6 +50,9 @@ export class Pages {
 
       page: shallowRef(null) as any,
       pageId: computed(() => this.react.page?.id),
+      pageIndex: computed(() =>
+        this.react.pathPageIds.indexOf(this.react.pageId ?? ''),
+      ),
 
       tableContextMenu: false,
       tableContextMenuPos: new Vec2(),

@@ -12,8 +12,8 @@
   >
     <template
       v-if="
-        uiStore().width >= 632 ||
-        (uiStore().width < 632 &&
+        uiStore().width >= 570 ||
+        (uiStore().width < 570 &&
           !uiStore().leftSidebarExpanded &&
           !uiStore().rightSidebarExpanded)
       "

@@ -1,5 +1,7 @@
 <template>
   <div class="display-btns">
+    <DisplayHorizontalPath />
+
     <DisplayLeftBtns />
     <DisplayRightBtns />
 
@@ -15,6 +17,7 @@
 
 <script setup lang="ts">
 import DisplayFindAndReplace from './DisplayFindAndReplace.vue';
+import DisplayHorizontalPath from './DisplayHorizontalPath.vue';
 import DisplayLeftBtns from './DisplayLeftBtns.vue';
 import DisplayMobileAltBtn from './DisplayMobileAltBtn.vue';
 import DisplayRightBtns from './DisplayRightBtns.vue';
