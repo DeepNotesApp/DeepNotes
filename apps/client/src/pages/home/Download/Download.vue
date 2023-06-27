@@ -24,33 +24,74 @@
         >
           <DeepBtn
             v-if="$q.platform.is.linux"
-            label="Download for Linux (AppImage)"
             color="primary"
-            style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.AppImage"
-          />
+            style="
+              font-weight: bold;
+              font-size: 21px;
+              padding: 18px 28px;
+              line-height: normal;
+            "
+            :href="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.AppImage`"
+          >
+            <div>
+              <div>Download for Linux (AppImage)</div>
+
+              <Gap style="height: 7px" />
+
+              <div style="font-size: 16px">v{{ version }}</div>
+            </div>
+          </DeepBtn>
 
           <DeepBtn
             v-if="$q.platform.is.win"
-            label="Download for Windows (NSIS)"
             color="primary"
-            style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-Setup-0.0.2.exe"
-          />
+            style="
+              font-weight: bold;
+              font-size: 21px;
+              padding: 18px 28px;
+              line-height: normal;
+            "
+            :href="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-Setup-${version}.exe`"
+          >
+            <div>
+              <div>Download for Windows (NSIS)</div>
+
+              <Gap style="height: 7px" />
+
+              <div style="font-size: 16px">v{{ version }}</div>
+            </div>
+          </DeepBtn>
 
           <DeepBtn
             v-if="$q.platform.is.mac"
-            label="Download for MacOS (DMG)"
             color="primary"
-            style="font-weight: bold; font-size: 21px; padding: 16px 30px"
-            href="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.dmg"
-          />
+            style="
+              font-weight: bold;
+              font-size: 21px;
+              padding: 18px 28px;
+              line-height: normal;
+            "
+            :href="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.dmg`"
+          >
+            <div>
+              <div>Download for MacOS (DMG)</div>
+
+              <Gap style="height: 7px" />
+
+              <div style="font-size: 16px">v{{ version }}</div>
+            </div>
+          </DeepBtn>
 
           <DeepBtn
             v-if="$q.platform.is.android"
             label="Go to the Play Store"
             color="primary"
-            style="font-weight: bold; font-size: 21px; padding: 16px 30px"
+            style="
+              font-weight: bold;
+              font-size: 21px;
+              padding: 18px 28px;
+              line-height: normal;
+            "
             href="https://play.google.com/store/apps/details?id=app.deepnotes"
           />
 
@@ -58,7 +99,12 @@
             v-if="$q.platform.is.ios"
             label="Go to the App Store"
             color="primary"
-            style="font-weight: bold; font-size: 21px; padding: 16px 30px"
+            style="
+              font-weight: bold;
+              font-size: 21px;
+              padding: 18px 28px;
+              line-height: normal;
+            "
             href="https://apps.apple.com/us/app/deepnotes-visual-note-taking/id6450611344"
           />
         </div>
@@ -77,7 +123,7 @@
         style="justify-content: center"
       >
         <PlatformCard
-          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-Setup-0.0.2.exe"
+          :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-Setup-${version}.exe`"
         >
           <img
             src="~assets/platforms/windows.png"
@@ -86,7 +132,7 @@
         </PlatformCard>
 
         <PlatformCard
-          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.dmg"
+          :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.dmg`"
         >
           <img
             src="~assets/platforms/mac.png"
@@ -95,7 +141,7 @@
         </PlatformCard>
 
         <PlatformCard
-          url="https://github.com/DeepNotesApp/DeepNotes/releases/download/v0.0.2/DeepNotes-0.0.2.AppImage"
+          :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.AppImage`"
         >
           <img
             src="~assets/platforms/linux.png"
@@ -162,6 +208,8 @@
 import { multiModePath } from 'src/code/utils/misc';
 
 import PlatformCard from './PlatformCard.vue';
+
+const version = '0.0.2';
 
 const loading = ref(true);
 
