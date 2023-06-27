@@ -1,27 +1,13 @@
 <template>
-  <q-item-section
-    v-if="icon"
-    avatar
+  <div
+    class="horizontal-page"
+    @click="internals.pages.goToPage(pageId)"
   >
-    <q-icon
-      name="mdi-note-text"
-      class="page-icon"
-      :class="{
-        encrypted: pageTitleInfo.status === 'encrypted',
-        empty: isEmpty,
-      }"
-    />
-  </q-item-section>
-
-  <q-item-section>
-    <q-item-label
-      class="group-name"
-      caption
-    >
+    <div class="group-title">
       {{ groupNameInfo.text }}
-    </q-item-label>
+    </div>
 
-    <q-item-label
+    <div
       class="page-title"
       :class="{
         encrypted: pageTitleInfo.status === 'encrypted',
@@ -29,8 +15,8 @@
       }"
     >
       {{ pageTitleInfo.text }}
-    </q-item-label>
-  </q-item-section>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -41,9 +27,7 @@ import { getPageTitle } from 'src/code/pages/utils';
 import { useRealtimeContext } from 'src/code/realtime/context';
 
 const props = defineProps<{
-  icon: boolean;
   pageId: string;
-  prefer: 'relative' | 'absolute';
 }>();
 
 const realtimeCtx = useRealtimeContext();
@@ -51,7 +35,7 @@ const realtimeCtx = useRealtimeContext();
 const pageGroupId = computed(() => pageGroupIds()(props.pageId).get());
 const groupNameInfo = computed(() => groupNames()(pageGroupId.value!).get());
 const pageTitleInfo = computed(() =>
-  getPageTitle(props.pageId, { prefer: props.prefer }),
+  getPageTitle(props.pageId, { prefer: 'relative' }),
 );
 
 const loading = ref(true);
@@ -81,12 +65,34 @@ const isEmpty = computed(
 </script>
 
 <style scoped lang="scss">
-.group-name {
+.horizontal-page {
+  pointer-events: auto;
+  cursor: pointer;
+
+  max-width: calc(100vw / 3.5);
+}
+
+.group-title {
   color: lighten(#006dd2, 23%);
+
+  font-size: 12px;
+  line-height: 0.9;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.horizontal-page:hover > .group-title {
+  color: lighten(lighten(#006dd2, 23%), 10%);
 }
 
 .page-title {
-  font-size: 13.8px;
+  color: #d0d0d0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.horizontal-page:hover > .page-title {
+  color: lighten(#d0d0d0, 10%);
 }
 .page-title.encrypted {
   color: rgba(150, 150, 255, 1);
