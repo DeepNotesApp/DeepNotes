@@ -113,7 +113,7 @@ async function goForward() {
   position: absolute;
 
   left: 12px;
-  top: 53px;
+  top: 55px;
 
   display: flex;
   flex-direction: column;

@@ -5,7 +5,7 @@
       position: absolute;
       left: 12px;
       right: 12px;
-      top: 7px;
+      top: 8px;
       font-size: 13px;
       white-space: nowrap;
 
@@ -16,7 +16,7 @@
     "
   >
     <div style="display: inline-block; pointer-events: auto">
-      <div style="display: flex; gap: 4px; direction: ltr">
+      <div style="display: flex; gap: 5px; direction: ltr">
         <template
           v-for="(pageId, index) in internals.pages.react.pathPageIds.slice(
             0,
