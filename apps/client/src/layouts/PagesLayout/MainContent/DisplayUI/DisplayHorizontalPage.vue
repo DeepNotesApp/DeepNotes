@@ -69,7 +69,7 @@ const isEmpty = computed(
   pointer-events: auto;
   cursor: pointer;
 
-  max-width: calc(100vw / 3.5);
+  max-width: min(120px, 100vw / 4);
 }
 
 .group-title {
