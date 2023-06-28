@@ -127,8 +127,6 @@ defineProps<Props>();
 
       ul,
       ol {
-        position: relative;
-
         margin: 0;
       }
 
@@ -169,19 +167,21 @@ defineProps<Props>();
         }
       }
 
-      ul ul::before,
-      ul ol::before,
-      ol ol::before,
-      ol ul::before {
+      li {
+        position: relative;
+      }
+      li::after {
         position: absolute;
 
         left: -9px;
-        top: 0;
-        bottom: 0;
+        top: 24px;
+        bottom: 4px;
 
         content: '';
 
         border-left: 1px solid rgba(255, 255, 255, 0.15);
+
+        overflow: hidden;
       }
 
       // Inline code
