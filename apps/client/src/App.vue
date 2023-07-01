@@ -144,6 +144,10 @@ html {
   isolation: isolate;
 }
 
+a {
+  text-decoration: none;
+}
+
 h1,
 h2,
 h3 {
