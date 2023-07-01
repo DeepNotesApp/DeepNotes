@@ -1,8 +1,9 @@
 <template>
-  <div
+  <a
     class="horizontal-page"
     :class="{ active }"
-    @click="internals.pages.goToPage(pageId)"
+    :href="`/pages/${pageId}`"
+    @click.prevent.stop="internals.pages.goToPage(pageId)"
   >
     <div class="group-title">
       {{ groupNameInfo.text }}
@@ -17,7 +18,7 @@
     >
       {{ pageTitleInfo.text }}
     </div>
-  </div>
+  </a>
 </template>
 
 <script setup lang="ts">
