@@ -5,7 +5,7 @@
       position: absolute;
       left: 12px;
       right: 12px;
-      top: 8px;
+      top: 7px;
       font-size: 13px;
       white-space: nowrap;
 
@@ -26,7 +26,7 @@
         >
           <span
             v-if="index > 0"
-            style="color: #808080; margin-top: -2px"
+            style="color: #808080; margin-top: -1px"
           >
             >
           </span>

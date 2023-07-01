@@ -74,7 +74,7 @@ const isEmpty = computed(
 
   max-width: min(120px, 100vw / 4);
 
-  padding-top: 6px;
+  padding-top: 2px;
   padding-right: 5px;
   padding-bottom: 2px;
   padding-left: 5px;
@@ -89,7 +89,6 @@ const isEmpty = computed(
   color: lighten(#006dd2, 23%);
 
   font-size: 12px;
-  line-height: 0.9;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,6 +98,8 @@ const isEmpty = computed(
 }
 
 .page-title {
+  margin-top: -3px;
+
   color: #d0d0d0;
 
   overflow: hidden;
