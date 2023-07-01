@@ -1,6 +1,7 @@
 <template>
   <div
     class="horizontal-page"
+    :class="{ active }"
     @click="internals.pages.goToPage(pageId)"
   >
     <div class="group-title">
@@ -28,6 +29,7 @@ import { useRealtimeContext } from 'src/code/realtime/context';
 
 const props = defineProps<{
   pageId: string;
+  active: boolean;
 }>();
 
 const realtimeCtx = useRealtimeContext();
@@ -70,6 +72,16 @@ const isEmpty = computed(
   cursor: pointer;
 
   max-width: min(120px, 100vw / 4);
+
+  padding-top: 6px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  padding-left: 5px;
+}
+.horizontal-page.active {
+  border-radius: 4px;
+
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .group-title {

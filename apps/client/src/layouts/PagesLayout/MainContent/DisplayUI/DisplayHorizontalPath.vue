@@ -16,7 +16,7 @@
     "
   >
     <div style="display: inline-block; pointer-events: auto">
-      <div style="display: flex; gap: 5px; direction: ltr">
+      <div style="display: flex; align-items: center; direction: ltr">
         <template
           v-for="(pageId, index) in internals.pages.react.pathPageIds.slice(
             0,
@@ -26,12 +26,15 @@
         >
           <span
             v-if="index > 0"
-            style="color: #808080"
+            style="color: #808080; margin-top: -2px"
           >
             >
           </span>
 
-          <DisplayHorizontalPage :page-id="pageId" />
+          <DisplayHorizontalPage
+            :page-id="pageId"
+            :active="index === internals.pages.react.pageIndex"
+          />
         </template>
       </div>
     </div>
