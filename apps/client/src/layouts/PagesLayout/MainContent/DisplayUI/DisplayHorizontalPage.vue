@@ -3,7 +3,11 @@
     class="horizontal-page"
     :class="{ active }"
     :href="`/pages/${pageId}`"
-    @click.prevent.stop="internals.pages.goToPage(pageId)"
+    @click.prevent.stop="
+      internals.pages.goToPage(pageId, {
+        openInNewTab: ($event as MouseEvent).ctrlKey,
+      })
+    "
   >
     <div class="group-title">
       {{ groupNameInfo.text }}
