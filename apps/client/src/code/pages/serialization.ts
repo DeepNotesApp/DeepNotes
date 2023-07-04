@@ -135,35 +135,19 @@ export class Serialization {
       arrowMap: new Map(),
     };
 
-    for (const note of input.notes) {
-      for (const arrow of internals.pages.react.page.arrows.fromIds(
-        Array.from(note.incomingArrowIds),
-      )) {
-        input.arrows.push(arrow);
-      }
-
-      for (const arrow of internals.pages.react.page.arrows.fromIds(
-        Array.from(note.outgoingArrowIds),
-      )) {
-        input.arrows.push(arrow);
-      }
-    }
-
-    this._serializeRegion(input, aux.serialObj.root, aux);
+    this._serializeRegionNotes(input, aux.serialObj.root, aux);
+    this._serializeRegionArrows(input, aux.serialObj.root, aux);
 
     return aux.serialObj;
   }
-  private _serializeRegion(
+
+  private _serializeRegionNotes(
     region: IRegionElemsOutput,
     serialRegion: ISerialRegionOutput,
     aux: SerializationAux,
   ) {
     for (const note of region.notes) {
       this._serializeNote(note, serialRegion, aux);
-    }
-
-    for (const arrow of region.arrows) {
-      this._serializeArrow(arrow, serialRegion, aux);
     }
   }
   private _serializeNote(
@@ -203,7 +187,36 @@ export class Serialization {
     serialRegion.noteIdxs.push(noteIndex);
     aux.noteMap.set(note.id, noteIndex);
 
-    this._serializeRegion(note.react, serialNote, aux);
+    this._serializeRegionNotes(note.react, serialNote, aux);
+  }
+
+  private _serializeRegionArrows(
+    region: IRegionElemsOutput,
+    serialRegion: ISerialRegionOutput,
+    aux: SerializationAux,
+    note?: PageNote,
+  ) {
+    for (const arrow of [
+      ...region.arrows,
+
+      ...internals.pages.react.page.arrows.fromIds(
+        Array.from(note?.incomingArrowIds ?? []),
+      ),
+      ...internals.pages.react.page.arrows.fromIds(
+        Array.from(note?.outgoingArrowIds ?? []),
+      ),
+    ]) {
+      this._serializeArrow(arrow, serialRegion, aux);
+    }
+
+    for (const note of region.notes) {
+      this._serializeRegionArrows(
+        note.react,
+        aux.serialObj.notes[aux.noteMap.get(note.id)!],
+        aux,
+        note,
+      );
+    }
   }
   private _serializeArrow(
     arrow: PageArrow,
@@ -256,7 +269,15 @@ export class Serialization {
     });
 
     internals.pages.react.page.collab.doc.transact(() => {
-      this._deserializeRegion(
+      this._deserializeRegionNotes(
+        serialObj.root,
+        serialObj,
+        noteMap,
+        destRegion.id,
+        fakeRegionCollab,
+      );
+
+      this._deserializeRegionArrows(
         serialObj.root,
         serialObj,
         noteMap,
@@ -285,7 +306,7 @@ export class Serialization {
       ),
     };
   }
-  private _deserializeRegion(
+  private _deserializeRegionNotes(
     serialRegion: ISerialRegionOutput,
     serialObj: ISerialObjectOutput,
     noteMap: Map<number, string>,
@@ -302,16 +323,8 @@ export class Serialization {
         destRegionCollab,
       );
     }
-
-    for (const arrowIndex of serialRegion.arrowIdxs) {
-      this._deserializeArrow(
-        serialObj.arrows[arrowIndex],
-        noteMap,
-        destRegionId,
-        destRegionCollab,
-      );
-    }
   }
+
   private _deserializeNote(
     serialNote: ISerialNoteOutput,
     noteIndex: number,
@@ -356,9 +369,45 @@ export class Serialization {
 
     destRegionCollab.noteIds.push(noteId);
 
-    this._deserializeRegion(serialNote, serialObj, noteMap, noteId, noteCollab);
+    this._deserializeRegionNotes(
+      serialNote,
+      serialObj,
+      noteMap,
+      noteId,
+      noteCollab,
+    );
 
     internals.pages.react.page.notes.react.collab[noteId] = noteCollab;
+  }
+
+  private _deserializeRegionArrows(
+    serialRegion: ISerialRegionOutput,
+    serialObj: ISerialObjectOutput,
+    noteMap: Map<number, string>,
+    destRegionId: string,
+    destRegionCollab: IRegionCollabOutput,
+  ) {
+    for (const arrowIndex of serialRegion.arrowIdxs) {
+      this._deserializeArrow(
+        serialObj.arrows[arrowIndex],
+        noteMap,
+        destRegionId,
+        destRegionCollab,
+      );
+    }
+
+    for (const noteIndex of serialRegion.noteIdxs) {
+      const noteId = noteMap.get(noteIndex)!;
+      const noteCollab = internals.pages.react.page.notes.react.collab[noteId];
+
+      this._deserializeRegionArrows(
+        serialObj.notes[noteIndex],
+        serialObj,
+        noteMap,
+        noteId,
+        noteCollab,
+      );
+    }
   }
   private _deserializeArrow(
     serialArrow: ISerialArrowOutput,
