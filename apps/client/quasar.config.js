@@ -327,6 +327,12 @@ module.exports = configure(function (ctx) {
 
         mac: {
           target: 'dmg',
+
+          hardenedRuntime: true,
+          gatekeeperAssess: false,
+          entitlements: 'src-capacitor/ios/App/App/entitlements.mac.plist',
+          entitlementsInherit:
+            'src-capacitor/ios/App/App/entitlements.mac.plist',
         },
         linux: {
           target: 'AppImage',
@@ -334,6 +340,12 @@ module.exports = configure(function (ctx) {
         win: {
           target: 'nsis',
         },
+
+        dmg: {
+          sign: false,
+        },
+
+        afterSign: 'src-electron/notarize.js',
       },
     },
 

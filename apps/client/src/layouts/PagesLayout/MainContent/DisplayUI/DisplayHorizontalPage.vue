@@ -1,7 +1,13 @@
 <template>
-  <div
+  <a
     class="horizontal-page"
-    @click="internals.pages.goToPage(pageId)"
+    :class="{ active }"
+    :href="`/pages/${pageId}`"
+    @click.prevent.stop="
+      internals.pages.goToPage(pageId, {
+        openInNewTab: ($event as MouseEvent).ctrlKey,
+      })
+    "
   >
     <div class="group-title">
       {{ groupNameInfo.text }}
@@ -16,7 +22,7 @@
     >
       {{ pageTitleInfo.text }}
     </div>
-  </div>
+  </a>
 </template>
 
 <script setup lang="ts">
@@ -28,6 +34,7 @@ import { useRealtimeContext } from 'src/code/realtime/context';
 
 const props = defineProps<{
   pageId: string;
+  active: boolean;
 }>();
 
 const realtimeCtx = useRealtimeContext();
@@ -70,13 +77,22 @@ const isEmpty = computed(
   cursor: pointer;
 
   max-width: min(120px, 100vw / 4);
+
+  padding-top: 2px;
+  padding-right: 5px;
+  padding-bottom: 2px;
+  padding-left: 5px;
+}
+.horizontal-page.active {
+  border-radius: 4px;
+
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .group-title {
   color: lighten(#006dd2, 23%);
 
   font-size: 12px;
-  line-height: 0.9;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -86,6 +102,8 @@ const isEmpty = computed(
 }
 
 .page-title {
+  margin-top: -3px;
+
   color: #d0d0d0;
 
   overflow: hidden;

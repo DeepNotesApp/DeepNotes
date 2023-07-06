@@ -3,6 +3,14 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3';
 
 import NodeView from './NodeView.vue';
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    inlineMath: {
+      addInlineMath: () => ReturnType;
+    };
+  }
+}
+
 export const InlineMathExtension = Node.create({
   name: 'inlineMath',
 
@@ -41,14 +49,19 @@ export const InlineMathExtension = Node.create({
     return VueNodeViewRenderer(NodeView);
   },
 
-  addCommands(): any {
+  addCommands() {
     return {
       addInlineMath:
-        (options: any) =>
-        ({ commands }: any) =>
+        () =>
+        ({ commands, state }) =>
           commands.insertContent({
             type: this.name,
-            attrs: options,
+            attrs: {
+              input: state.doc.textBetween(
+                state.selection.from,
+                state.selection.to,
+              ),
+            },
           }),
     };
   },

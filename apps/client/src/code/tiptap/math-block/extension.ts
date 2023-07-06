@@ -3,6 +3,14 @@ import { VueNodeViewRenderer } from '@tiptap/vue-3';
 
 import NodeView from './NodeView.vue';
 
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    mathBlock: {
+      addMathBlock: () => ReturnType;
+    };
+  }
+}
+
 export const MathBlockExtension = Node.create({
   name: 'mathBlock',
 
@@ -40,14 +48,19 @@ export const MathBlockExtension = Node.create({
     return VueNodeViewRenderer(NodeView);
   },
 
-  addCommands(): any {
+  addCommands() {
     return {
       addMathBlock:
-        (options: any) =>
-        ({ commands }: any) =>
+        () =>
+        ({ commands, state }) =>
           commands.insertContent({
             type: this.name,
-            attrs: options,
+            attrs: {
+              input: state.doc.textBetween(
+                state.selection.from,
+                state.selection.to,
+              ),
+            },
           }),
     };
   },
