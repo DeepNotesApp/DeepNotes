@@ -77,14 +77,14 @@ function createWindow() {
 
   mainWindow.loadURL(process.env.APP_URL);
 
-  // if (process.env.DEBUGGING) {
-  //   mainWindow.webContents.openDevTools();
-  // } else {
-  //   // we're on production; no access to devtools pls
-  //   mainWindow.webContents.on('devtools-opened', () => {
-  //     mainWindow?.webContents.closeDevTools();
-  //   });
-  // }
+  if (!process.env.DEBUGGING) {
+    mainWindow.setMenuBarVisibility(false);
+
+    // we're on production; no access to devtools pls
+    mainWindow.webContents.on('devtools-opened', () => {
+      mainWindow?.webContents.closeDevTools();
+    });
+  }
 
   mainWindow.on('closed', () => {
     mainWindow = undefined;
