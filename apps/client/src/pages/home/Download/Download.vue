@@ -193,7 +193,7 @@
           label="Use web version"
           color="secondary"
           :href="multiModePath('/pages')"
-          style="padding: 10px 20px"
+          style="padding: 10px 20px; font-size: 15px"
         />
       </div>
 
