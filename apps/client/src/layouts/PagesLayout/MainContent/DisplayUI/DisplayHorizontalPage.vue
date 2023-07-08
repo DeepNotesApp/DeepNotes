@@ -78,7 +78,7 @@ const isEmpty = computed(
 
   max-width: min(120px, 100vw / 4);
 
-  padding-top: 2px;
+  padding-top: 1.5px;
   padding-right: 5px;
   padding-bottom: 2px;
   padding-left: 5px;
