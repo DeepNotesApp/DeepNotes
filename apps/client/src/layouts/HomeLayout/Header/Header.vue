@@ -8,6 +8,7 @@
         height: 64px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         padding: 0;
+        min-height: 0;
       "
     >
       <ResponsiveContainer style="display: flex; align-items: center">
