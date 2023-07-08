@@ -30,8 +30,6 @@
 
 import { contextBridge, ipcRenderer } from 'electron';
 
-console.log('(electron-preload.ts)');
-
 contextBridge.exposeInMainWorld('electronBridge', {
   isLoggedIn: () => ipcRenderer.invoke('isLoggedIn'),
   clearLoggedInCookie: () => ipcRenderer.invoke('clearLoggedInCookie'),

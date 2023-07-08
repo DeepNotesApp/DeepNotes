@@ -1,6 +1,7 @@
 {
   "name": "@deepnotes/client",
   "description": "DeepNotes",
+  "homepage": "https://deepnotes.app",
   "version": "1.0.0",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {

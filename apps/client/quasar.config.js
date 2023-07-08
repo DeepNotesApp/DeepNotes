@@ -334,15 +334,25 @@ module.exports = configure(function (ctx) {
           entitlementsInherit:
             'src-capacitor/ios/App/App/entitlements.mac.plist',
         },
+        dmg: {
+          sign: false,
+        },
+
         linux: {
           target: 'AppImage',
         },
-        win: {
-          target: 'nsis',
-        },
 
-        dmg: {
-          sign: false,
+        win: {
+          target: 'appx',
+        },
+        appx: {
+          applicationId: 'app.deepnotes',
+
+          displayName: 'DeepNotes',
+          identityName: '62882DeepNotes.DeepNotes-VisualNote-taking',
+
+          publisher: 'CN=07D378F2-6F19-4C16-B6BE-146DA7696C3F',
+          publisherDisplayName: 'DeepNotes',
         },
 
         afterSign: 'src-electron/notarize.js',

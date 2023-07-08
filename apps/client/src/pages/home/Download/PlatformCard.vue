@@ -28,7 +28,7 @@
       <DeepBtn
         label="Download"
         color="primary"
-        style="width: 150px; font-weight: bold"
+        style="width: 150px; font-weight: bold; font-size: 18px"
         :href="url"
         :disable="disable"
       />
