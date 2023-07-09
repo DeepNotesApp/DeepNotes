@@ -91,82 +91,43 @@
         tooltip="Menu"
         style="position: absolute; right: 60px; top: 8px"
       >
-        <q-menu
-          anchor="bottom right"
-          self="top right"
-        >
-          <q-list>
-            <q-item>
-              <q-item-section style="font-weight: bold">
-                <q-item-label>
-                  {{ selfUserName().get() }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
+        <AccountPopup>
+          <q-item
+            v-if="isIncluded(quasarMode, ['ssr', 'spa'])"
+            clickable
+            v-close-popup
+            :href="multiModePath('/')"
+          >
+            <q-item-section avatar>
+              <q-icon name="mdi-home" />
+            </q-item-section>
+            <q-item-section>Home</q-item-section>
+          </q-item>
 
-            <q-separator />
+          <q-item clickable>
+            <q-item-section avatar>
+              <q-icon name="mdi-bell">
+                <NotificationsBadge />
+              </q-icon>
+            </q-item-section>
 
-            <q-item
-              v-if="isIncluded(quasarMode, ['ssr', 'spa'])"
-              clickable
-              v-close-popup
-              :href="multiModePath('/')"
-            >
-              <q-item-section avatar>
-                <q-icon name="mdi-home" />
-              </q-item-section>
-              <q-item-section>Home</q-item-section>
-            </q-item>
+            <q-item-section>Notifications</q-item-section>
 
-            <q-item clickable>
-              <q-item-section avatar>
-                <q-icon name="mdi-bell">
-                  <NotificationsBadge />
-                </q-icon>
-              </q-item-section>
+            <NotificationsPopup />
+          </q-item>
 
-              <q-item-section>Notifications</q-item-section>
+          <q-item
+            clickable
+            v-close-popup
+            @click="$q.dialog({ component: PagesSettingsDialog })"
+          >
+            <q-item-section avatar>
+              <q-icon name="mdi-cog" />
+            </q-item-section>
 
-              <NotificationsPopup />
-            </q-item>
-
-            <q-item
-              clickable
-              v-close-popup
-              @click="$q.dialog({ component: PagesSettingsDialog })"
-            >
-              <q-item-section avatar>
-                <q-icon name="mdi-cog" />
-              </q-item-section>
-
-              <q-item-section>Pages settings</q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-close-popup
-              :href="multiModePath('/account/general')"
-            >
-              <q-item-section avatar>
-                <q-icon name="mdi-account" />
-              </q-item-section>
-
-              <q-item-section>Account settings</q-item-section>
-            </q-item>
-
-            <q-item
-              clickable
-              v-close-popup
-              @click="logout()"
-            >
-              <q-item-section avatar>
-                <q-icon name="mdi-logout" />
-              </q-item-section>
-
-              <q-item-section>Logout</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
+            <q-item-section>Pages settings</q-item-section>
+          </q-item>
+        </AccountPopup>
       </DisplayBtn>
     </template>
 
@@ -227,10 +188,9 @@
 
 <script setup lang="ts">
 import { isIncluded } from '@stdlib/misc';
-import { logout } from 'src/code/auth/logout';
-import { selfUserName } from 'src/code/self-user-name';
 import { multiModePath } from 'src/code/utils/misc';
 
+import AccountPopup from '../../MainToolbar/AccountPopup.vue';
 import AlignmentBtns from '../../MainToolbar/AlignmentBtns.vue';
 import BasicBtns from '../../MainToolbar/BasicBtns.vue';
 import FormattingBtns from '../../MainToolbar/FormattingBtns.vue';
