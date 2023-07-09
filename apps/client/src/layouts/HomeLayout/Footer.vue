@@ -41,6 +41,7 @@
           <div class="footer-header">Product</div>
 
           <router-link
+            v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
             :to="{ name: 'pricing' }"
             class="footer-item"
           >

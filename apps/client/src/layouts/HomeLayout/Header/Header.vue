@@ -8,6 +8,7 @@
         height: 64px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         padding: 0;
+        min-height: 0;
       "
     >
       <ResponsiveContainer style="display: flex; align-items: center">
@@ -87,6 +88,7 @@
           <Gap style="width: 32px" />
 
           <DeepBtn
+            v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
             label="Pricing"
             flat
             class="toolbar-btn"

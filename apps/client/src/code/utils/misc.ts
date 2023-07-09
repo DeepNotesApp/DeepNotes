@@ -80,7 +80,10 @@ export function isCtrlDown(event: KeyboardEvent | MouseEvent) {
   return event.ctrlKey || event.metaKey;
 }
 export function getCtrlKeyName() {
-  return $quasar().platform.is.mac ? '⌘' : 'Ctrl';
+  return $quasar().platform.is.mac ? 'Command' : 'Ctrl';
+}
+export function getAltKeyName() {
+  return $quasar().platform.is.mac ? 'Option' : 'Alt';
 }
 
 export function sizeToCSS(size: string): string {

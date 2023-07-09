@@ -149,9 +149,11 @@
         </div>
       </div>
 
-      <Gap style="height: 170px" />
+      <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
+        <Gap style="height: 170px" />
 
-      <PricingSection />
+        <PricingSection />
+      </template>
 
       <template v-if="!authStore().loggedIn">
         <Gap style="height: 150px" />

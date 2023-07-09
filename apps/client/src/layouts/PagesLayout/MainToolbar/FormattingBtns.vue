@@ -126,21 +126,21 @@
   />
 
   <ToolbarBtn
-    :tooltip="`Heading 1\n(${getCtrlKeyName()} + Alt + 1)`"
+    :tooltip="`Heading 1\n(${getAltKeyName()} + 1)`"
     icon="mdi-format-header-1"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleNode('heading', { level: 1 })"
   />
   <ToolbarBtn
-    :tooltip="`Heading 2\n(${getCtrlKeyName()} + Alt + 2)`"
+    :tooltip="`Heading 2\n(${getAltKeyName()} + 2)`"
     icon="mdi-format-header-2"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.toggleNode('heading', { level: 2 })"
   />
   <ToolbarBtn
-    :tooltip="`Heading 3\n(${getCtrlKeyName()} + Alt + 3)`"
+    :tooltip="`Heading 3\n(${getAltKeyName()} + 3)`"
     icon="mdi-format-header-3"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -161,7 +161,7 @@
 
 <script setup lang="ts">
 import { unsetNode } from 'src/code/tiptap/utils';
-import { getCtrlKeyName } from 'src/code/utils/misc';
+import { getAltKeyName, getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertLinkDialog from './InsertLinkDialog.vue';
 

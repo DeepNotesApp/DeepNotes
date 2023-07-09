@@ -193,7 +193,7 @@ async function register() {
 
     const zxcvbnResult = zxcvbn(password.value);
 
-    if (zxcvbnResult.score <= 1) {
+    if (zxcvbnResult.score <= 0) {
       $quasar().notify({
         html: true,
         message: 'Password is too weak.<br/>Please use a stronger password.',

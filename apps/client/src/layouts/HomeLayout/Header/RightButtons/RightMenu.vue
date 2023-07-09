@@ -75,6 +75,7 @@
 
           <template v-if="uiStore().width < BREAKPOINT_LG_MIN">
             <q-item
+              v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
               clickable
               :to="{ name: 'pricing' }"
             >

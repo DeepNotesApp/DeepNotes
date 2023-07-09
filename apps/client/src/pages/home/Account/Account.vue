@@ -30,6 +30,7 @@
             </q-item>
 
             <q-item
+              v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
               style="height: 60px"
               clickable
               :to="{ name: 'account/billing' }"
