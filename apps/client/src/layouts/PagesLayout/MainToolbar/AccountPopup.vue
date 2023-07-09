@@ -56,6 +56,7 @@
         </template>
 
         <q-item
+          v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
           clickable
           :href="multiModePath('/pricing')"
         >

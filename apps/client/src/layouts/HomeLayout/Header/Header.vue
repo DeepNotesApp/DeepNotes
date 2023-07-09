@@ -88,6 +88,7 @@
           <Gap style="width: 32px" />
 
           <DeepBtn
+            v-if="!($q.platform.is.capacitor && $q.platform.is.ios)"
             label="Pricing"
             flat
             class="toolbar-btn"
