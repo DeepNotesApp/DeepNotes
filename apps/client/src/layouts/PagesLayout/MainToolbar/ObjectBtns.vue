@@ -49,7 +49,7 @@
     @click="page.selection.format((chain) => chain.toggleBlockquote())"
   />
   <ToolbarBtn
-    :tooltip="`Codeblock\n(${getCtrlKeyName()} + Alt + C)`"
+    :tooltip="`Codeblock\n(${getCtrlKeyName()} + ${getAltKeyName()} + C)`"
     icon="mdi-code-braces"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -193,7 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import { getCtrlKeyName } from 'src/code/utils/misc';
+import { getAltKeyName, getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertImageDialog from './InsertImageDialog.vue';
 

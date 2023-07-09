@@ -129,15 +129,15 @@ export function useKeyboardShortcuts() {
         return true;
       }
 
-      if (isCtrlDown(event) && event.altKey && event.code === 'Digit1') {
+      if (event.altKey && event.code === 'Digit1') {
         page.selection.toggleNode('heading', { level: 1 });
         return true;
       }
-      if (isCtrlDown(event) && event.altKey && event.code === 'Digit2') {
+      if (event.altKey && event.code === 'Digit2') {
         page.selection.toggleNode('heading', { level: 2 });
         return true;
       }
-      if (isCtrlDown(event) && event.altKey && event.code === 'Digit3') {
+      if (event.altKey && event.code === 'Digit3') {
         page.selection.toggleNode('heading', { level: 3 });
         return true;
       }
