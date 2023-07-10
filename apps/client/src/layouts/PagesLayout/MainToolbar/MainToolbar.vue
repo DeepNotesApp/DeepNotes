@@ -125,7 +125,14 @@
 
           <Gap style="width: 2px" />
 
-          <AccountPopup />
+          <ToolbarBtn
+            tooltip="Account"
+            icon="mdi-account"
+            icon-size="30px"
+            round
+          >
+            <AccountPopup />
+          </ToolbarBtn>
 
           <Gap style="width: 10px" />
         </div>
