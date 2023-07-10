@@ -342,9 +342,23 @@ module.exports = configure(function (ctx) {
           target: 'AppImage',
         },
 
-        win: {
-          target: 'appx',
-        },
+        ...(true // true for NSIS, false for AppX
+          ? {
+              win: {
+                target: 'nsis',
+
+                certificateSubjectName: 'Open Source Developer, Gustavo Toyota',
+                certificateSha1: 'CB1E09666FC60FB06D09E9FEAD2D41F1B0626B30',
+              },
+            }
+          : {
+              win: {
+                target: 'appx',
+
+                // Don't need to sign the AppX package
+              },
+            }),
+
         appx: {
           applicationId: 'app.deepnotes',
 
