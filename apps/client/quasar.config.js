@@ -333,6 +333,11 @@ module.exports = configure(function (ctx) {
           entitlements: 'src-capacitor/ios/App/App/entitlements.mac.plist',
           entitlementsInherit:
             'src-capacitor/ios/App/App/entitlements.mac.plist',
+
+          notarize: {
+            appBundleId: 'app.deepnotes',
+            teamId: 'NK86B84G2A',
+          },
         },
         dmg: {
           sign: false,
@@ -342,9 +347,23 @@ module.exports = configure(function (ctx) {
           target: 'AppImage',
         },
 
-        win: {
-          target: 'appx',
-        },
+        ...(true // true for NSIS, false for AppX
+          ? {
+              win: {
+                target: 'nsis',
+
+                certificateSubjectName: 'Open Source Developer, Gustavo Toyota',
+                certificateSha1: 'CB1E09666FC60FB06D09E9FEAD2D41F1B0626B30',
+              },
+            }
+          : {
+              win: {
+                target: 'appx',
+
+                // Don't need to sign the AppX package
+              },
+            }),
+
         appx: {
           applicationId: 'app.deepnotes',
 
@@ -354,8 +373,6 @@ module.exports = configure(function (ctx) {
           publisher: 'CN=07D378F2-6F19-4C16-B6BE-146DA7696C3F',
           publisherDisplayName: 'DeepNotes',
         },
-
-        afterSign: 'src-electron/notarize.js',
       },
     },
 

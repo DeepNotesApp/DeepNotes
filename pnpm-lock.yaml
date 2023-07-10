@@ -489,9 +489,6 @@ importers:
         specifier: 3.19.1
         version: 3.19.1
     devDependencies:
-      '@electron/notarize':
-        specifier: ^2.1.0
-        version: 2.1.0
       '@intlify/vite-plugin-vue-i18n':
         specifier: 3.4.0
         version: 3.4.0(vite@2.9.15)(vue-i18n@9.2.2)
@@ -1719,17 +1716,6 @@ packages:
     dependencies:
       debug: 4.3.4
       fs-extra: 9.1.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /@electron/notarize@2.1.0:
-    resolution: {integrity: sha512-Q02xem1D0sg4v437xHgmBLxI2iz/fc0D4K7fiVWHa/AnW8o7D751xyKNXgziA6HrTOme9ul1JfWN5ark8WH1xA==}
-    engines: {node: '>= 10.0.0'}
-    dependencies:
-      debug: 4.3.4
-      fs-extra: 9.1.0
-      promise-retry: 2.0.1
     transitivePeerDependencies:
       - supports-color
     dev: true
