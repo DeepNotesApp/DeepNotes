@@ -24,24 +24,13 @@
       <Gap style="height: 48px" />
 
       Enjoy unlimited pages, collaborative groups, and version history for your
-      notes!
+      notes!<br />
 
-      <Gap style="height: 36px" />
+      <br />
 
-      <div style="display: flex">
-        <DeepBtn
-          label="Go to pages"
-          color="primary"
-          :href="multiModePath('/pages')"
-          style="height: 44px"
-        />
-      </div>
+      You can close this page and go back to the app.
 
       <Gap style="height: 160px" />
     </ResponsiveContainer>
   </q-page>
 </template>
-
-<script setup lang="ts">
-import { multiModePath } from 'src/code/utils/misc';
-</script>
