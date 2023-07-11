@@ -68,6 +68,7 @@ function createWindow() {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+      devTools: !!process.env.DEBUGGING,
     },
     show: false,
   });
@@ -79,12 +80,19 @@ function createWindow() {
 
   if (!process.env.DEBUGGING) {
     mainWindow.setMenuBarVisibility(false);
-
-    // we're on production; no access to devtools pls
-    mainWindow.webContents.on('devtools-opened', () => {
-      mainWindow?.webContents.closeDevTools();
-    });
   }
+
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        autoHideMenuBar: true,
+        webPreferences: {
+          devTools: false,
+        },
+      },
+    };
+  });
 
   mainWindow.on('closed', () => {
     mainWindow = undefined;
@@ -105,7 +113,7 @@ function createWindow() {
     obj[key] = value;
   }
 
-  function getValue(obj: any, key: string) {
+  function getValue(obj: any, key: string): string | undefined {
     const lowerCaseKey = key.toLowerCase();
 
     for (const key of Object.keys(obj)) {
@@ -160,21 +168,23 @@ function createWindow() {
         const cookieName = Object.keys(parsedCookie)[0];
 
         const expires = getValue(parsedCookie, 'Expires');
-        const sameSite = getValue(parsedCookie, 'SameSite');
+        const sameSite = getValue(parsedCookie, 'SameSite')?.toLowerCase();
 
-        const cookieDetails = {
+        const cookieDetails: Electron.CookiesSetDetails = {
           url: 'https://deepnotes.app',
           name: cookieName,
           value: parsedCookie[cookieName],
-          // domain: getValue(parsedCookie, 'Domain'),
-          // path: getValue(parsedCookie, 'Path'),
-          // secure: getValue(parsedCookie, 'Secure'),
-          // httpOnly: getValue(parsedCookie, 'HttpOnly'),
+          domain: getValue(parsedCookie, 'Domain'),
+          path: getValue(parsedCookie, 'Path'),
+          secure: getValue(parsedCookie, 'Secure') != null,
+          httpOnly: getValue(parsedCookie, 'HttpOnly') != null,
           expirationDate: expires ? new Date(expires).getTime() : undefined,
-          // sameSite:
-          //   sameSite?.toLowerCase() !== 'none'
-          //     ? sameSite?.toLowerCase()
-          //     : 'no_restriction',
+          sameSite:
+            sameSite == null
+              ? 'lax'
+              : sameSite === 'none'
+              ? 'no_restriction'
+              : (sameSite as any),
         };
 
         void mainWindow?.webContents.session.cookies

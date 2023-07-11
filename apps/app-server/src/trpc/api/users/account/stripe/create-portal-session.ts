@@ -2,13 +2,8 @@ import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
-import { z } from 'zod';
 
-const baseProcedure = authProcedure.input(
-  z.object({
-    returnUrl: z.string().url(),
-  }),
-);
+const baseProcedure = authProcedure;
 
 export const createPortalSessionProcedure = once(() =>
   baseProcedure.mutation(createPortalSession),
@@ -16,7 +11,6 @@ export const createPortalSessionProcedure = once(() =>
 
 export async function createPortalSession({
   ctx,
-  input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
@@ -39,7 +33,6 @@ export async function createPortalSession({
 
       const portalSession = await ctx.stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: input.returnUrl,
       });
 
       // Return portal session URL
