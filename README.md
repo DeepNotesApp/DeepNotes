@@ -7,7 +7,7 @@ DeepNotes is an open source, end-to-end encrypted visual note-taking app with de
 ## Why DeepNotes?
 
 - **Visual note-taking:** Free yourself from the big wall of text.
-- **Deep page navigation:** Explore concepts in all their complexity. Need more detail? Just go one level deeper.
+- **Deep page navigation:** Explore concepts in all their complexity.
 - **End-to-end encryption:** Keep your notes well protected.
 - **Live collaboration:** Create groups to collaborate with your team.
 - **Flexible note system:** Organize your notes in whatever way you want.
