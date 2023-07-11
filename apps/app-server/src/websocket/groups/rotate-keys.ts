@@ -25,10 +25,10 @@ export function registerGroupsRotateKeys(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/groups.rotateKeys',
 
-    async setup({ ctx, input, run }) {
+    async lockCommunication({ ctx, input, performCommunication }) {
       await ctx.usingLocks(
         [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
-        run,
+        performCommunication,
       );
     },
 

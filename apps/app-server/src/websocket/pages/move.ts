@@ -50,7 +50,7 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/pages.move',
 
-    async setup({ ctx, input, run }) {
+    async lockCommunication({ ctx, input, performCommunication }) {
       (ctx as Context).pageId = input.pageId;
       (ctx as Context).destGroupId = input.destGroupId;
       (ctx as Context).setAsMainPage = input.setAsMainPage;
@@ -81,7 +81,7 @@ export function registerPagesMove(fastify: ReturnType<typeof Fastify>) {
               [`group-lock:${input.destGroupId}`],
             ],
 
-            run,
+            performCommunication,
 
             signals,
           );

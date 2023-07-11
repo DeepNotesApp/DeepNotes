@@ -37,14 +37,14 @@ export function registerGroupsJoinInvitationsSend(
     fastify,
     url: '/trpc/groups.joinInvitations.send',
 
-    async setup({ ctx, input, run }) {
+    async lockCommunication({ ctx, input, performCommunication }) {
       await ctx.usingLocks(
         [
           [`user-lock:${ctx.userId}`],
           [`user-lock:${input.patientId}`],
           [`group-lock:${input.groupId}`],
         ],
-        run,
+        performCommunication,
       );
     },
 
