@@ -148,15 +148,13 @@ async function createCheckoutSession() {
   const { checkoutSessionUrl } =
     await trpcClient.users.account.stripe.createCheckoutSession.mutate();
 
-  location.href = checkoutSessionUrl;
+  window.open(checkoutSessionUrl, '_blank');
 }
 
 async function createPortalSession() {
   const { portalSessionUrl } =
-    await trpcClient.users.account.stripe.createPortalSession.mutate({
-      returnUrl: location.href,
-    });
+    await trpcClient.users.account.stripe.createPortalSession.mutate();
 
-  location.href = portalSessionUrl;
+  window.open(portalSessionUrl, '_blank');
 }
 </script>
