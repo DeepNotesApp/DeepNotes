@@ -1,4 +1,4 @@
-import { isNanoID } from '@stdlib/misc';
+import { addDays, isNanoID } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
@@ -61,7 +61,7 @@ export async function deletePermanently({
             await ctx.dataAbstraction.patch(
               'page',
               input.pageId,
-              { permanent_deletion_date: new Date() },
+              { permanent_deletion_date: addDays(new Date(), -1) },
               { dtrx },
             );
 
