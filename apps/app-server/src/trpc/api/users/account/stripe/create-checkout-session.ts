@@ -109,7 +109,7 @@ export async function createCheckoutSession({
 
         customer: customer.id,
 
-        success_url: `${ctx.req.headers['origin']}/subscribed`,
+        success_url: `${ctx.req.headers['origin']}/subscribed#/subscribed`,
       });
 
       if (session.url == null) {

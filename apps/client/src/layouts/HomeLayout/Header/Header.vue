@@ -70,14 +70,6 @@
               "
             >
               DeepNotes
-
-              <q-badge
-                floating
-                rounded
-                style="top: -2px; right: -20px"
-              >
-                Beta
-              </q-badge>
             </div>
           </router-link>
         </q-toolbar-title>

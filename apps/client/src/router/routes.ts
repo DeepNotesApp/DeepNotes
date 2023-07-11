@@ -139,7 +139,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/subscribed',
     component: () => import('src/layouts/HomeLayout/HomeLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
       {
         path: '',
