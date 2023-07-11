@@ -2,6 +2,6 @@
   "schemaVersion": 2,
   "caproverName": "captain-01",
   "caproverApp": "deepnotes-client",
-  "branch": "main",
+  "branch": "dev",
   "dockerfilePath": "./apps/client/Dockerfile"
 }
