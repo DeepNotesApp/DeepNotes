@@ -68,6 +68,7 @@ function createWindow() {
       contextIsolation: true,
       // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
       preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+      devTools: !!process.env.DEBUGGING,
     },
     show: false,
   });
@@ -79,11 +80,6 @@ function createWindow() {
 
   if (!process.env.DEBUGGING) {
     mainWindow.setMenuBarVisibility(false);
-
-    // we're on production; no access to devtools pls
-    mainWindow.webContents.on('devtools-opened', () => {
-      mainWindow?.webContents.closeDevTools();
-    });
   }
 
   mainWindow.on('closed', () => {
