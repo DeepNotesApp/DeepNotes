@@ -82,6 +82,18 @@ function createWindow() {
     mainWindow.setMenuBarVisibility(false);
   }
 
+  mainWindow.webContents.setWindowOpenHandler((details) => {
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        autoHideMenuBar: true,
+        webPreferences: {
+          devTools: false,
+        },
+      },
+    };
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
