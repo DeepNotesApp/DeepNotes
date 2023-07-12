@@ -49,7 +49,7 @@ function createWebsocketMessageHandler(input: {
 
   const timeout = setTimeout(() => {
     finishPromise.reject('Websocket endpoint request timed out.');
-  }, 10000);
+  }, 30000);
 
   finishPromise.settle(() => {
     clearTimeout(timeout);
