@@ -151,22 +151,25 @@ export async function processGroupKeyRotationValues(
           groupAccessKeyring: newGroupAccessKeyring.wrappedValue,
         }
       : {}),
-    groupEncryptedName: newGroupAccessKeyring.encrypt(
-      oldGroupAccessKeyring.decrypt(input.groupEncryptedName, {
-        padding: true,
-        associatedData: {
-          context: 'GroupName',
-          groupId: input.groupId,
-        },
-      }),
-      {
-        padding: true,
-        associatedData: {
-          context: 'GroupName',
-          groupId: input.groupId,
-        },
-      },
-    ),
+    groupEncryptedName:
+      input.groupEncryptedName.length === 0
+        ? new Uint8Array() // Personal group name is empty
+        : newGroupAccessKeyring.encrypt(
+            oldGroupAccessKeyring.decrypt(input.groupEncryptedName, {
+              padding: true,
+              associatedData: {
+                context: 'GroupName',
+                groupId: input.groupId,
+              },
+            }),
+            {
+              padding: true,
+              associatedData: {
+                context: 'GroupName',
+                groupId: input.groupId,
+              },
+            },
+          ),
     groupEncryptedContentKeyring: (passwordProtected
       ? newGroupContentKeyring.wrapSymmetric(groupPasswordValues!.passwordKey, {
           associatedData: {
@@ -209,14 +212,17 @@ export async function processGroupKeyRotationValues(
             createKeyring(groupMember.publicKeyring),
           ).wrappedValue,
 
-          encryptedName: newGroupPrivateKeyring.encrypt(
-            oldGroupPrivateKeyring.decrypt(groupMember.encryptedName, {
-              padding: true,
-            }),
-            newGroupPublicKeyring,
-            newGroupPublicKeyring,
-            { padding: true },
-          ),
+          encryptedName:
+            groupMember.encryptedName == null
+              ? null
+              : newGroupPrivateKeyring.encrypt(
+                  oldGroupPrivateKeyring.decrypt(groupMember.encryptedName, {
+                    padding: true,
+                  }),
+                  newGroupPublicKeyring,
+                  newGroupPublicKeyring,
+                  { padding: true },
+                ),
         },
       ]),
     ),

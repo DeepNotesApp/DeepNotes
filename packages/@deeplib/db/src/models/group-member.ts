@@ -14,7 +14,7 @@ export class GroupMemberModel extends Model {
   encrypted_access_keyring!: Uint8Array | null;
   encrypted_internal_keyring!: Uint8Array;
 
-  encrypted_name!: Uint8Array;
+  encrypted_name!: Uint8Array | null;
 
   last_activity_date!: Date;
 }

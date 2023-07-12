@@ -19,7 +19,7 @@ export const groupKeyRotationSchema = z.object({
       encryptedAccessKeyring: z.instanceof(Uint8Array).optional(),
       encryptedInternalKeyring: z.instanceof(Uint8Array),
 
-      encryptedName: z.instanceof(Uint8Array),
+      encryptedName: z.instanceof(Uint8Array).nullable(),
     }),
   ),
   groupJoinInvitations: z.record(
