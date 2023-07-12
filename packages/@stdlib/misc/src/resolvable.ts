@@ -14,6 +14,11 @@ export class Resolvable<T = void> implements Promise<T> {
     return this._rejected;
   }
 
+  private _settleListeners: (() => void)[] = [];
+  settle(callback: () => void) {
+    this._settleListeners.push(callback);
+  }
+
   get settled(): boolean {
     return this._resolved || this._rejected;
   }
@@ -23,11 +28,19 @@ export class Resolvable<T = void> implements Promise<T> {
       this._resolved = true;
 
       resolve(value);
+
+      for (const listener of this._settleListeners) {
+        listener();
+      }
     };
     this.reject = (reason) => {
       this._rejected = true;
 
       reject(reason);
+
+      for (const listener of this._settleListeners) {
+        listener();
+      }
     };
   });
 

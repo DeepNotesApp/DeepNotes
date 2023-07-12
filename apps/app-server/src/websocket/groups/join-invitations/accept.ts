@@ -31,10 +31,10 @@ export function registerGroupsJoinInvitationsAccept(
     fastify,
     url: '/trpc/groups.joinInvitations.accept',
 
-    async setup({ ctx, input, run }) {
+    async lockCommunication({ ctx, input, performCommunication }) {
       await ctx.usingLocks(
         [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
-        run,
+        performCommunication,
       );
     },
 

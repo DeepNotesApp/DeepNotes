@@ -51,8 +51,8 @@ export function registerUsersChangeEmailFinish(
     fastify,
     url: '/trpc/users.account.emailChange.finish',
 
-    async setup({ ctx, run }) {
-      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], run);
+    async lockCommunication({ ctx, performCommunication }) {
+      await ctx.usingLocks([[`user-lock:${ctx.userId}`]], performCommunication);
     },
 
     procedures: [

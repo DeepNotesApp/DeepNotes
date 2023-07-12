@@ -36,10 +36,10 @@ export function registerGroupsMakePrivate(fastify: ReturnType<typeof Fastify>) {
     fastify,
     url: '/trpc/groups.privacy.makePrivate',
 
-    async setup({ ctx, input, run }) {
+    async lockCommunication({ ctx, input, performCommunication }) {
       await ctx.usingLocks(
         [[`user-lock:${ctx.userId}`], [`group-lock:${input.groupId}`]],
-        run,
+        performCommunication,
       );
     },
 
