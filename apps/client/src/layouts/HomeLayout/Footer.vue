@@ -129,7 +129,7 @@
       <Gap style="height: 20px" />
 
       <div style="font-size: 13px; text-align: center">
-        @ 2023 DeepNotes |
+        @ {{ new Date().getFullYear() }} DeepNotes |
         <a href="mailto:contact@deepnotes.app">contact@deepnotes.app</a>
       </div>
 
