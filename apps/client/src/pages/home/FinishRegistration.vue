@@ -11,21 +11,47 @@
           Check your email to proceed.
         </div>
 
-        <Gap style="height: 32px" />
-      </template>
+        <Gap style="height: 24px" />
 
-      <DeepBtn
-        label="Go to login"
-        color="primary"
-        style="font-size: 16px; padding: 10px 22px"
-        :to="{ name: 'login' }"
-      />
+        <DeepBtn
+          label="Resend verification email"
+          color="primary"
+          style="font-size: 16px; padding: 10px 22px"
+          @click="resendVerificationEmail()"
+        />
+
+        <Gap style="height: 64px" />
+
+        <DeepBtn
+          label="Go to login"
+          color="primary"
+          style="padding: 10px 22px"
+          :to="{ name: 'login' }"
+        />
+      </template>
     </ResponsiveContainer>
   </q-page>
 </template>
 
 <script setup lang="ts">
+import { handleError } from 'src/code/utils/misc';
+
 useMeta(() => ({
   title: 'Finish registration - DeepNotes',
 }));
+
+async function resendVerificationEmail() {
+  try {
+    await trpcClient.users.account.resendVerificationEmail.mutate({
+      email: internals.sessionStorage?.getItem('email'),
+    });
+
+    $quasar().notify({
+      message: 'Verification email resent.',
+      type: 'positive',
+    });
+  } catch (error) {
+    handleError(error);
+  }
+}
 </script>

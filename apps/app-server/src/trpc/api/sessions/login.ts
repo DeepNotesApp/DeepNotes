@@ -28,6 +28,8 @@ import { getUserDevice } from 'src/utils/devices';
 import { generateSessionValues } from 'src/utils/sessions';
 import { z } from 'zod';
 
+import { sendRegistrationEmail } from '../users/account/register';
+
 const baseProcedure = publicProcedure.input(
   z.object({
     email: z
@@ -90,6 +92,8 @@ export async function login({
         'users.id',
 
         'users.email_verified',
+        'users.email_verification_code',
+
         'users.encrypted_rehashed_login_hash',
 
         'users.public_keyring',
@@ -144,6 +148,20 @@ export async function login({
 
       throw new TRPCError({
         message: 'Incorrect email or password.',
+        code: 'UNAUTHORIZED',
+      });
+    }
+
+    // Check if email is verified
+
+    if (!user.email_verified) {
+      await sendRegistrationEmail({
+        email: input.email,
+        emailVerificationCode: user.email_verification_code,
+      });
+
+      throw new TRPCError({
+        message: 'Email awaiting verification. New email sent.',
         code: 'UNAUTHORIZED',
       });
     }
