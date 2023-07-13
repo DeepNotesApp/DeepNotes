@@ -87,6 +87,20 @@
           >
             Reddit
           </a>
+
+          <a
+            class="footer-item"
+            href="https://www.linkedin.com/company/deepnotes"
+          >
+            LinkedIn
+          </a>
+
+          <a
+            class="footer-item"
+            href="https://github.com/DeepNotesApp/DeepNotes"
+          >
+            GitHub
+          </a>
         </div>
 
         <div class="footer-section col-4 col-md-3">
@@ -115,7 +129,7 @@
       <Gap style="height: 20px" />
 
       <div style="font-size: 13px; text-align: center">
-        @ 2023 DeepNotes |
+        @ {{ new Date().getFullYear() }} DeepNotes |
         <a href="mailto:contact@deepnotes.app">contact@deepnotes.app</a>
       </div>
 
