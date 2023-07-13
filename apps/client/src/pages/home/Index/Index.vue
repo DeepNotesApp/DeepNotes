@@ -33,7 +33,8 @@
                 "
                 >end-to-end encrypted</span
               >
-              visual note-taking tool with deep page navigation.
+              infinite canvas with deep bidirectional page navigation and live
+              collaboration.
             </div>
 
             <template v-if="!authStore().loggedIn">
