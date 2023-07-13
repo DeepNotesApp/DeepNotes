@@ -64,8 +64,9 @@ export const fastify = once(async () => {
   });
 
   await fastify.register(import('@fastify/rate-limit'), {
-    max: 5 * 60,
-    timeWindow: 5 * 1000,
+    // Accept up to 5 requests/second within 5 minutes
+    max: 5 * 60 * 5,
+    timeWindow: 5 * 60 * 1000,
 
     redis: getRedis(),
   });

@@ -38,7 +38,7 @@ export async function register({
           .where('email_verified', true)
           .orWhere('email_verification_expiration_date', '>', new Date()),
       )
-      .select('email_verified')
+      .select('email_verified', 'email_verification_code')
       .first();
 
     // Check if user already exists
@@ -52,9 +52,14 @@ export async function register({
           code: 'CONFLICT',
         });
       } else {
+        await sendRegistrationEmail({
+          email: input.email,
+          emailVerificationCode: user.email_verification_code,
+        });
+
         throw new TRPCError({
-          message: 'Email awaiting verification.',
-          code: 'CONFLICT',
+          message: 'Email awaiting verification. New email sent.',
+          code: 'UNAUTHORIZED',
         });
       }
     }
@@ -74,18 +79,28 @@ export async function register({
 
     // Send email
 
-    await sendMail({
-      from: {
-        name: 'DeepNotes',
-        email: 'account@deepnotes.app',
-      },
-      to: [input.email],
-      subject: 'Complete your registration',
-      html: `
-        Visit the following link to verify your email address:<br/>
-        <a href="https://deepnotes.app/verify-email/${user.email_verification_code}">https://deepnotes.app/verify-email/${user.email_verification_code}</a><br/>
-        The link above will expire in 1 hour.
-      `,
+    await sendRegistrationEmail({
+      email: input.email,
+      emailVerificationCode: user.email_verification_code,
     });
+  });
+}
+
+export async function sendRegistrationEmail(input: {
+  email: string;
+  emailVerificationCode: string | null;
+}) {
+  await sendMail({
+    from: {
+      name: 'DeepNotes',
+      email: 'account@deepnotes.app',
+    },
+    to: [input.email],
+    subject: 'Complete your registration',
+    html: `
+      Visit the following link to verify your email address:<br/>
+      <a href="https://deepnotes.app/verify-email/${input.emailVerificationCode}">https://deepnotes.app/verify-email/${input.emailVerificationCode}</a><br/>
+      The link above expires in 1 hour.
+    `,
   });
 }
