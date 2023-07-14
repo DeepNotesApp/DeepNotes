@@ -6,6 +6,7 @@
     :style="{ cursor: note.react.cursor }"
     tabindex="-1"
     target="_blank"
+    draggable="false"
   >
     <div
       class="note-content"
@@ -53,7 +54,7 @@ function onLeftPointerDown(event: PointerEvent) {
   }
 
   if (
-    (note.react.collab.link || (event.target as Element).closest('a[href]')) &&
+    note.react.collab.link &&
     !event.altKey &&
     !event.shiftKey &&
     !internals.mobileAltKey &&

@@ -393,8 +393,8 @@ importers:
         specifier: 11.6.0
         version: 11.6.0
       html2canvas:
-        specifier: ^1.4.1
-        version: 1.4.1
+        specifier: npm:@deepnotes/html2canvas@^1.4.2
+        version: /@deepnotes/html2canvas@1.4.2
       ioredis:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
@@ -1599,6 +1599,14 @@ packages:
       colorspace: 1.1.4
       enabled: 2.0.0
       kuler: 2.0.0
+    dev: false
+
+  /@deepnotes/html2canvas@1.4.2:
+    resolution: {integrity: sha512-JXDQkAZ8CJs6feHad9tTSyalZVd74MedZFFcgCAkNo227daCtNvE9cv50qUh1zAJaHvF//G7Nmky7h3G3fYFkw==}
+    engines: {node: '>=8.0.0'}
+    dependencies:
+      css-line-break: 2.1.0
+      text-segmentation: 1.0.3
     dev: false
 
   /@deepnotes/ioredis@5.3.1:
@@ -8859,14 +8867,6 @@ packages:
       he: 1.2.0
       htmlparser2: 6.1.0
       minimist: 1.2.8
-    dev: false
-
-  /html2canvas@1.4.1:
-    resolution: {integrity: sha512-fPU6BHNpsyIhr8yyMpTLLxAbkaK8ArIBcmZIRiBLiDhjeqvXolaEmDGmELFuX9I4xDcaKKcJl+TKZLqruBbmWA==}
-    engines: {node: '>=8.0.0'}
-    dependencies:
-      css-line-break: 2.1.0
-      text-segmentation: 1.0.3
     dev: false
 
   /htmlparser2@6.1.0:

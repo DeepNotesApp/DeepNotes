@@ -8,7 +8,7 @@
   >
     <div
       class="note-spatial-background"
-      @click.left="onLeftClick"
+      @click.left.stop.prevent="onLeftClick"
     >
       <!-- Placeholder -->
 
@@ -147,6 +147,8 @@ async function onLeftClick(event: MouseEvent) {
   border-radius: 5px;
 
   background-color: rgba(0, 0, 0, 0.4);
+
+  cursor: default;
 }
 
 .note-spatial-background {
