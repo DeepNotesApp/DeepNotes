@@ -18,6 +18,17 @@
           v-model="margin"
           style="width: 160px"
         />
+
+        <Gap style="height: 16px" />
+
+        <q-input
+          label="Scale (%):"
+          type="number"
+          filled
+          dense
+          v-model="scale"
+          style="width: 160px"
+        />
       </q-card-section>
     </template>
 
@@ -43,6 +54,8 @@
 
 <script lang="ts">
 const margin = ref(100);
+
+const scale = ref(100);
 </script>
 
 <script setup lang="ts">
@@ -87,7 +100,7 @@ async function takeScreenshot() {
       `.display-world[data-page-id="${page.value.id}"]`,
     ) as HTMLElement,
     {
-      scale: 1 / page.value.camera.react.zoom,
+      scale: (1 / page.value.camera.react.zoom) * (scale.value / 100),
 
       x: -finalMargin * page.value.camera.react.zoom + displayRect.topLeft.x,
       y: -finalMargin * page.value.camera.react.zoom + displayRect.topLeft.y,
@@ -110,7 +123,7 @@ async function takeScreenshot() {
 
   const dataUrl = canvas.toDataURL('image/png');
 
-  download(dataUrl, 'screenshot.png', 'image/png');
+  download(dataUrl, 'DeepNotes-screenshot.png', 'image/png');
 
   dialogRef.value.onDialogOK();
 }
