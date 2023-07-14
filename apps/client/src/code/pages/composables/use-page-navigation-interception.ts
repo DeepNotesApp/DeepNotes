@@ -11,9 +11,12 @@ export function usePageNavigationInterception() {
 
       // Ignore if it's not a link
 
-      const anchor = target.closest('a[href]');
+      const closestAnchor = target.closest('a');
 
-      if (anchor == null) {
+      const href = closestAnchor?.getAttribute('href') ?? '';
+
+      if (!href) {
+        event.preventDefault();
         return;
       }
 
@@ -34,8 +37,6 @@ export function usePageNavigationInterception() {
       }
 
       // Allow default action if it's not a page link
-
-      const href = anchor.getAttribute('href') ?? '';
 
       if (
         !(

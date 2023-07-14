@@ -286,5 +286,7 @@ useResizeObserver(
   display: flex;
 
   margin: 3px;
+
+  cursor: default;
 }
 </style>
