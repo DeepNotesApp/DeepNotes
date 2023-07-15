@@ -63,6 +63,7 @@
           icon="mdi-close"
           round
           flat
+          title="Delete page version"
           @click="deleteSnapshot(snapshotInfo.id)"
         />
       </div>
@@ -74,6 +75,7 @@
       label="Save current version"
       color="secondary"
       :disable="page.react.readOnly"
+      title="Backup the current version of the page manually"
       @click="saveVersion"
     />
   </div>

@@ -184,6 +184,7 @@
           label="Head"
           :disable="page.react.readOnly"
           :model-value="note.react.collab.head.enabled"
+          title="Toggle head section"
           @update:model-value="
             changeProp($event, (selectedNote, value) => {
               selectedNote.react.collab.body.enabled ||=
@@ -199,6 +200,7 @@
           label="Body"
           :disable="page.react.readOnly"
           :model-value="note.react.collab.body.enabled"
+          title="Toggle body section"
           @update:model-value="
             changeProp($event, (selectedNote, value) => {
               selectedNote.react.collab.head.enabled ||=
@@ -218,6 +220,7 @@
           :disable="page.react.readOnly"
           dense
           style="flex: 1"
+          title="Swap head and body"
           @click="
             changeProp(null, (note) => {
               internals
@@ -238,6 +241,7 @@
           :disable="page.react.readOnly"
           dense
           style="flex: 1"
+          title="Float body to head if head is empty"
           @click="
             changeProp(note, (note) => {
               if (
@@ -264,6 +268,7 @@
       <DeepBtn
         label="Set as default"
         color="primary"
+        title="Set this note as the default note"
         @click="setAsDefault()"
         :disable="page.react.readOnly"
       />
