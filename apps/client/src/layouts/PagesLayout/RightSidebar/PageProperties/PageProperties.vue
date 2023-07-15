@@ -31,6 +31,7 @@
         :disable="pageRelativeTitles()(page.id).get().status !== 'success'"
         :readonly="page.react.readOnly"
         :maxlength="maxPageTitleLength"
+        title="Title displayed in the page path"
       />
 
       <Gap style="height: 16px" />
@@ -45,6 +46,7 @@
         :disable="pageAbsoluteTitles()(page.id).get().status !== 'success'"
         :readonly="page.react.readOnly"
         :maxlength="maxPageTitleLength"
+        title="Title displayed outside the page path"
       />
 
       <Gap style="height: 16px" />
@@ -85,6 +87,7 @@
         label="Move page"
         color="primary"
         :disable="page.react.readOnly"
+        title="Move page to another group or set as group's main page"
         @click="_movePage"
       />
 

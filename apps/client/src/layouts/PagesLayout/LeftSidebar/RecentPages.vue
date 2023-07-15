@@ -67,6 +67,7 @@
         round
         flat
         class="remove-btn"
+        title="Remove from recent pages"
         @click.stop="removeRecentPage(pageId)"
       />
     </div>

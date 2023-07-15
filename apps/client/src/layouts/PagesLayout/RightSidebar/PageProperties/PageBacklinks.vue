@@ -39,6 +39,7 @@
           round
           flat
           style="min-width: 32px; min-height: 32px; width: 32px; height: 32px"
+          title="Remove backlink"
           @click.stop="deleteBacklink(backlinkPageId)"
         />
       </div>

@@ -9,7 +9,10 @@
       })
     "
   >
-    <div class="group-title">
+    <div
+      class="group-title"
+      :title="groupNameInfo.text"
+    >
       {{ groupNameInfo.text }}
     </div>
 
@@ -19,6 +22,7 @@
         encrypted: pageTitleInfo.status === 'encrypted',
         empty: isEmpty,
       }"
+      :title="pageTitleInfo.text"
     >
       {{ pageTitleInfo.text }}
     </div>
