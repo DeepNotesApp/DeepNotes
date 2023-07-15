@@ -99,7 +99,7 @@
     @click="page.selection.toggleMark('superscript')"
   />
   <ToolbarBtn
-    tooltip="Link"
+    tooltip="Insert link"
     icon="mdi-link"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
