@@ -2,7 +2,7 @@
   "name": "@deepnotes/client",
   "description": "DeepNotes",
   "homepage": "https://deepnotes.app",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {
     "@_ueberdosis/prosemirror-tables": "1.1.3",
