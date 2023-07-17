@@ -2,7 +2,7 @@
   "name": "@deepnotes/client",
   "description": "DeepNotes",
   "homepage": "https://deepnotes.app",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Gustavo Toyota <gustavottoyota@gmail.com>",
   "dependencies": {
     "@_ueberdosis/prosemirror-tables": "1.1.3",
@@ -125,7 +125,7 @@
   "scripts": {
     "build:android": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T android --ide",
     "build:electron": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron",
-    "build:electron:publish": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron --publish onTagOrDraft",
+    "build:electron:publish": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron --publish always",
     "build:ios": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T ios",
     "build:spa": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m spa",
     "build:ssr": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m ssr",
