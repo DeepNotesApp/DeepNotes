@@ -235,7 +235,7 @@ async function _createPage() {
 
     const response = await createPage({
       parentPageId: page.value.id,
-      currentGroupId: page.value.react.groupId,
+      destGroupId: page.value.react.groupId,
 
       pageRelativeTitle: pageRelativeTitle.value,
 
