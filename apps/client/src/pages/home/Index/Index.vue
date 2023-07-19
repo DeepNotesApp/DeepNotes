@@ -156,6 +156,126 @@
         <PricingSection />
       </template>
 
+      <div>
+        <Gap style="height: 160px" />
+
+        <div style="text-align: center; font-size: 42px; font-weight: bold">
+          Use Cases
+        </div>
+
+        <Gap style="height: 40px" />
+
+        <div class="row">
+          <Highlight
+            thumbnail-image="/use-cases/diagram-thumbnail.png"
+            title="Diagram"
+            href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/kanban-board-thumbnail.png"
+            title="Kanban board"
+            href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/family-tree-thumbnail.png"
+            title="Family tree"
+            href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/link-gallery-thumbnail.png"
+            title="Link gallery"
+            href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/flashcards-thumbnail.png"
+            title="Flashcards"
+            href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/database-structure-thumbnail.png"
+            title="Database structure"
+            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/history-study-thumbnail.png"
+            title="History study"
+            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/philosophy-study-thumbnail.png"
+            title="Philosophy study"
+            href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/physics-study-thumbnail.png"
+            title="Physics study"
+            href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/chemistry-study-thumbnail.png"
+            title="Chemistry study"
+            href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
+          />
+
+          <Highlight
+            thumbnail-image="/use-cases/biology-study-thumbnail.png"
+            title="Biology study"
+            href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
+          />
+        </div>
+      </div>
+
+      <div>
+        <Gap style="height: 160px" />
+
+        <div style="text-align: center; font-size: 42px; font-weight: bold">
+          Past Highlights
+        </div>
+
+        <Gap style="height: 40px" />
+
+        <div class="row">
+          <Highlight
+            thumbnail-image="/highlights/reddit-logo.png"
+            :date="new Date('2023-07-18')"
+            title="Our r/sideproject Reddit post"
+            href="https://www.reddit.com/r/SideProject/comments/152zluu/i_developed_an_infinite_canvas_notetaking_tool/"
+          >
+            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
+              <span>49 upvotes</span>
+
+              <div style="display: inline-block; width: 8px"></div>
+
+              <span>19 comments</span>
+            </div>
+          </Highlight>
+
+          <Highlight
+            thumbnail-image="/highlights/reddit-logo.png"
+            :date="new Date('2023-03-11')"
+            title="Our r/webdev Reddit post"
+            href="https://www.reddit.com/r/webdev/comments/11osv87/i_made_my_dream_notetaking_system/"
+          >
+            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
+              <span>3.0k upvotes</span>
+
+              <div style="display: inline-block; width: 8px"></div>
+
+              <span>192 comments</span>
+            </div>
+          </Highlight>
+        </div>
+      </div>
+
       <template v-if="!authStore().loggedIn">
         <Gap style="height: 150px" />
 
@@ -177,6 +297,7 @@
 </template>
 
 <script setup lang="ts">
+import Highlight from './Highlight.vue';
 import PricingSection from './PricingSection.vue';
 
 const loading = ref(true);
