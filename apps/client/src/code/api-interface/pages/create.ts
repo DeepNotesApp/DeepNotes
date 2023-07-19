@@ -13,7 +13,7 @@ import { asyncDialog } from 'src/code/utils/misc';
 
 export async function createPage(input: {
   parentPageId: string;
-  currentGroupId: string;
+  destGroupId: string;
 
   pageRelativeTitle: string;
   pageAbsoluteTitle?: string;
@@ -109,11 +109,9 @@ export async function createPage(input: {
       ),
     };
   } else {
-    groupId = input.currentGroupId;
+    groupId = input.destGroupId;
 
-    groupContentKeyring = await groupContentKeyrings()(
-      input.currentGroupId,
-    ).getAsync();
+    groupContentKeyring = await groupContentKeyrings()(groupId).getAsync();
 
     if (groupContentKeyring?.topLayer === DataLayer.Symmetric) {
       const destGroupPassword = await asyncDialog<string>({
@@ -132,7 +130,7 @@ export async function createPage(input: {
       });
 
       groupContentKeyring = await unlockGroupContentKeyring(
-        input.currentGroupId,
+        groupId,
         destGroupPassword,
       );
     }

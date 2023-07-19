@@ -154,8 +154,8 @@ $note-padding: 9px;
     .ProseMirror {
       padding: $note-padding;
 
-      min-width: MAX(100%, 1px + $note-padding * 2);
-      max-width: 100%;
+      min-width: $note-padding * 2 + 1px;
+      width: 100%;
 
       height: 100%;
 
