@@ -178,7 +178,7 @@ const groupOptions = computed(() => [
     .filter((item) => item != null),
 ]);
 
-const destGroupId = ref<string>();
+const destGroupId = ref('');
 
 // Group creation
 
@@ -235,7 +235,7 @@ async function _createPage() {
 
     const response = await createPage({
       parentPageId: page.value.id,
-      destGroupId: page.value.react.groupId,
+      destGroupId: destGroupId.value,
 
       pageRelativeTitle: pageRelativeTitle.value,
 
