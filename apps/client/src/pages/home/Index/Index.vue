@@ -166,67 +166,67 @@
         <Gap style="height: 40px" />
 
         <div class="row">
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/diagram-thumbnail.png"
             title="Diagram"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/kanban-board-thumbnail.png"
             title="Kanban board"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/family-tree-thumbnail.png"
             title="Family tree"
             href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/link-gallery-thumbnail.png"
             title="Link gallery"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/flashcards-thumbnail.png"
             title="Flashcards"
             href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/database-structure-thumbnail.png"
             title="Database structure"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/history-study-thumbnail.png"
             title="History study"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/philosophy-study-thumbnail.png"
             title="Philosophy study"
             href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/physics-study-thumbnail.png"
             title="Physics study"
             href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/chemistry-study-thumbnail.png"
             title="Chemistry study"
             href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
           />
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/use-cases/biology-study-thumbnail.png"
             title="Biology study"
             href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
@@ -244,7 +244,7 @@
         <Gap style="height: 40px" />
 
         <div class="row">
-          <Highlight
+          <Thumbnail
             thumbnail-image="/highlights/reddit-logo.png"
             :date="new Date('2023-07-18')"
             title="Our r/sideproject Reddit post"
@@ -257,9 +257,9 @@
 
               <span>19 comments</span>
             </div>
-          </Highlight>
+          </Thumbnail>
 
-          <Highlight
+          <Thumbnail
             thumbnail-image="/highlights/reddit-logo.png"
             :date="new Date('2023-03-11')"
             title="Our r/webdev Reddit post"
@@ -272,7 +272,7 @@
 
               <span>192 comments</span>
             </div>
-          </Highlight>
+          </Thumbnail>
         </div>
       </div>
 
@@ -297,8 +297,8 @@
 </template>
 
 <script setup lang="ts">
-import Highlight from './Highlight.vue';
 import PricingSection from './PricingSection.vue';
+import Thumbnail from './Thumbnail.vue';
 
 const loading = ref(true);
 
