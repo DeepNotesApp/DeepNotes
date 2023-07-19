@@ -157,7 +157,7 @@
       </template>
 
       <div>
-        <Gap style="height: 160px" />
+        <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
           Use Cases
@@ -235,7 +235,7 @@
       </div>
 
       <div>
-        <Gap style="height: 160px" />
+        <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
           Past Highlights
