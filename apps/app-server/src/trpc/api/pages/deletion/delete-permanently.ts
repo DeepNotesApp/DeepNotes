@@ -56,14 +56,45 @@ export async function deletePermanently({
               });
             }
 
-            // Delete page permanently
+            // Check if page is free
 
-            await ctx.dataAbstraction.patch(
+            let numFreePages;
+
+            const pageIsFree = await ctx.dataAbstraction.hget(
               'page',
               input.pageId,
-              { permanent_deletion_date: addDays(new Date(), -1) },
-              { dtrx },
+              'free',
             );
+
+            if (pageIsFree) {
+              numFreePages = await ctx.dataAbstraction.hget(
+                'user',
+                ctx.userId,
+                'num-free-pages',
+              );
+            }
+
+            // Delete page permanently
+
+            await Promise.all([
+              ctx.dataAbstraction.patch(
+                'page',
+                input.pageId,
+                { permanent_deletion_date: addDays(new Date(), -1) },
+                { dtrx },
+              ),
+
+              ...(pageIsFree
+                ? [
+                    ctx.dataAbstraction.patch(
+                      'user',
+                      ctx.userId,
+                      { num_free_pages: numFreePages + 1 },
+                      { dtrx },
+                    ),
+                  ]
+                : []),
+            ]);
 
             checkRedlockSignalAborted(signals);
           });
