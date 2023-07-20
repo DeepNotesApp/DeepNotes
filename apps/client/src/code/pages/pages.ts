@@ -109,7 +109,7 @@ export class Pages {
   }
 
   async setupPage(pageId: string) {
-    internals.pages.react.page?.deactivate();
+    this.react.page?.deactivate();
 
     let page;
 
@@ -121,7 +121,7 @@ export class Pages {
       this.pageCache.add(page);
     }
 
-    internals.pages.react.page = page;
+    this.react.page = page;
 
     pagesStore().loading = false;
 
@@ -229,6 +229,22 @@ export class Pages {
 
       await router().push({ name: 'group', params: { groupId } });
     }
+  }
+
+  async goBackward() {
+    await this.goToPage(
+      this.react.pathPageIds[
+        this.react.pathPageIds.indexOf(this.react.pageId!) - 1
+      ],
+    );
+  }
+
+  async goForward() {
+    await this.goToPage(
+      this.react.pathPageIds[
+        this.react.pathPageIds.indexOf(this.react.pageId!) + 1
+      ],
+    );
   }
 
   destroy() {

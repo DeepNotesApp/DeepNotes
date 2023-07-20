@@ -7,7 +7,7 @@
       :disable="
         internals.pages.react.pageId === internals.pages.react.pathPageIds[0]
       "
-      @click="goBackward()"
+      @click="internals.pages.goBackward()"
     >
       <q-tooltip
         anchor="center right"
@@ -29,7 +29,7 @@
         internals.pages.react.pageId ===
         internals.pages.react.pathPageIds.at(-1)
       "
-      @click="goForward()"
+      @click="internals.pages.goForward()"
     >
       <q-tooltip
         anchor="center right"
@@ -88,24 +88,6 @@
 import TakeScreenshotDialog from '../../MainToolbar/TakeScreenshotDialog.vue';
 
 const page = computed(() => internals.pages.react.page);
-
-async function goBackward() {
-  await internals.pages.goToPage(
-    internals.pages.react.pathPageIds[
-      internals.pages.react.pathPageIds.indexOf(internals.pages.react.pageId!) -
-        1
-    ],
-  );
-}
-
-async function goForward() {
-  await internals.pages.goToPage(
-    internals.pages.react.pathPageIds[
-      internals.pages.react.pathPageIds.indexOf(internals.pages.react.pageId!) +
-        1
-    ],
-  );
-}
 </script>
 
 <style lang="scss" scoped>
