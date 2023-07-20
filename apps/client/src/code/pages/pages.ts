@@ -232,19 +232,27 @@ export class Pages {
   }
 
   async goBackward() {
-    await this.goToPage(
-      this.react.pathPageIds[
-        this.react.pathPageIds.indexOf(this.react.pageId!) - 1
-      ],
-    );
+    const pageIndex = this.react.pathPageIds.indexOf(this.react.pageId!);
+
+    if (pageIndex > 0) {
+      await this.goToPage(
+        this.react.pathPageIds[
+          this.react.pathPageIds.indexOf(this.react.pageId!) - 1
+        ],
+      );
+    }
   }
 
   async goForward() {
-    await this.goToPage(
-      this.react.pathPageIds[
-        this.react.pathPageIds.indexOf(this.react.pageId!) + 1
-      ],
-    );
+    const pageIndex = this.react.pathPageIds.indexOf(this.react.pageId!);
+
+    if (pageIndex < this.react.pathPageIds.length - 1) {
+      await this.goToPage(
+        this.react.pathPageIds[
+          this.react.pathPageIds.indexOf(this.react.pageId!) + 1
+        ],
+      );
+    }
   }
 
   destroy() {
