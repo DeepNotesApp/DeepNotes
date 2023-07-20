@@ -42,6 +42,18 @@
             </template>
             <template v-else>(Select a role)</template>
           </template>
+
+          <template #option="scope">
+            <q-item
+              v-bind="scope.itemProps"
+              style="max-width: 220px"
+            >
+              <q-item-section>
+                <q-item-label>{{ scope.opt.name }}</q-item-label>
+                <q-item-label caption>{{ scope.opt.description }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
         </q-select>
       </q-card-section>
     </template>
