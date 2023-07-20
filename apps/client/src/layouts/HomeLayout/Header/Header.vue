@@ -85,6 +85,12 @@
             flat
             class="toolbar-btn"
             :to="{ name: 'pricing' }"
+            :style="{
+              'background-color':
+                $route.name === 'pricing'
+                  ? 'rgba(255,255,255,0.15)'
+                  : undefined,
+            }"
           />
 
           <template v-if="isIncluded(quasarMode, ['ssr', 'spa'])">
@@ -95,6 +101,12 @@
               flat
               class="toolbar-btn"
               :to="{ name: 'download' }"
+              :style="{
+                'background-color':
+                  $route.name === 'download'
+                    ? 'rgba(255,255,255,0.15)'
+                    : undefined,
+              }"
             />
           </template>
 
@@ -105,6 +117,12 @@
             flat
             class="toolbar-btn"
             :to="{ name: 'whitepaper' }"
+            :style="{
+              'background-color':
+                $route.name === 'whitepaper'
+                  ? 'rgba(255,255,255,0.15)'
+                  : undefined,
+            }"
           />
         </template>
 
