@@ -167,27 +167,27 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/applications/diagram-thumbnail.png"
-            title="Diagram"
-            href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
-          />
-
-          <Thumbnail
             thumbnail-image="/applications/kanban-board-thumbnail.png"
             title="Kanban board"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/family-tree-thumbnail.png"
-            title="Family tree"
-            href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
+            thumbnail-image="/applications/diagram-thumbnail.png"
+            title="Diagram"
+            href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
           <Thumbnail
             thumbnail-image="/applications/link-gallery-thumbnail.png"
             title="Link gallery"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/family-tree-thumbnail.png"
+            title="Family tree"
+            href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
           <Thumbnail
