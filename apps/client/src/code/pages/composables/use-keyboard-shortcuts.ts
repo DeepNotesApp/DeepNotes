@@ -149,6 +149,10 @@ export function useKeyboardShortcuts() {
         return true;
       }
 
+      if (event.code === 'Backspace' && activeElem == null) {
+        await internals.pages.goBackward();
+        return true;
+      }
       if (event.code === 'Backspace' && activeElem != null) {
         await page.editing.start(activeElem);
         page.editing.react.editor?.commands.deleteSelection();

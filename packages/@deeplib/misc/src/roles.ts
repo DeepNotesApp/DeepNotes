@@ -58,7 +58,7 @@ export const roles = once((): IGroupRole[] => [
       viewGroupPages: true,
     },
 
-    description: 'Autonomous role. Manages everyone, except the owner(s)',
+    description: 'Manages everyone, except the owner(s)',
   },
   {
     id: 'moderator',

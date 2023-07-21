@@ -41,16 +41,28 @@ export async function restore({
 
             // Check if page is deleted
 
-            if (
-              (await ctx.dataAbstraction.hget(
-                'page',
-                input.pageId,
-                'permanent-deletion-date',
-              )) == null
-            ) {
+            const permanentDeletionDate = await ctx.dataAbstraction.hget(
+              'page',
+              input.pageId,
+              'permanent-deletion-date',
+            );
+
+            if (permanentDeletionDate == null) {
               throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: 'Page is not deleted.',
+              });
+            }
+
+            // Check if page is free and permanently deleted
+
+            if (
+              new Date() > permanentDeletionDate &&
+              (await ctx.dataAbstraction.hget('page', input.pageId, 'free'))
+            ) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Cannot restore a permanently deleted free page.',
               });
             }
 

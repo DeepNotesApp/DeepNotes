@@ -6,24 +6,6 @@
       :href="href"
       target="_blank"
     >
-      <div
-        style="
-          position: absolute;
-          right: 12px;
-          top: 12px;
-
-          padding: 3px 10px;
-
-          background-color: rgba(0, 0, 0, 0.4);
-          border-radius: 9999px;
-
-          font-size: 13px;
-          color: rgba(255, 255, 255, 0.8);
-        "
-      >
-        {{ type ?? 'Link' }}
-      </div>
-
       <div class="highlight-text">
         <div
           v-if="date != null"
@@ -49,7 +31,6 @@
 <script setup lang="ts">
 defineProps<{
   thumbnailImage: string;
-  type?: string;
   date?: Date;
   title: string;
   href?: string;
