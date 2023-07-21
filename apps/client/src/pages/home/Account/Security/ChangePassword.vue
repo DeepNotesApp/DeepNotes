@@ -38,11 +38,11 @@
 </template>
 
 <script setup lang="ts">
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { QForm } from 'quasar';
 import { changePassword } from 'src/code/api-interface/users/change-password';
 import { logout } from 'src/code/auth/logout';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 
 // Change password
 
