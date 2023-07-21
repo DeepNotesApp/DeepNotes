@@ -203,6 +203,12 @@
           />
 
           <Thumbnail
+            thumbnail-image="/use-cases/cheat-sheet-thumbnail.png"
+            title="Cheat sheet"
+            href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
+          />
+
+          <Thumbnail
             thumbnail-image="/use-cases/history-study-thumbnail.png"
             title="History study"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
