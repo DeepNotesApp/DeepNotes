@@ -160,80 +160,80 @@
         <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
-          Use Cases
+          Applications
         </div>
 
         <Gap style="height: 40px" />
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/use-cases/diagram-thumbnail.png"
+            thumbnail-image="/applications/diagram-thumbnail.png"
             title="Diagram"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/kanban-board-thumbnail.png"
+            thumbnail-image="/applications/kanban-board-thumbnail.png"
             title="Kanban board"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/family-tree-thumbnail.png"
+            thumbnail-image="/applications/family-tree-thumbnail.png"
             title="Family tree"
             href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/link-gallery-thumbnail.png"
+            thumbnail-image="/applications/link-gallery-thumbnail.png"
             title="Link gallery"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/flashcards-thumbnail.png"
+            thumbnail-image="/applications/flashcards-thumbnail.png"
             title="Flashcards"
             href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/database-structure-thumbnail.png"
+            thumbnail-image="/applications/database-structure-thumbnail.png"
             title="Database structure"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/cheat-sheet-thumbnail.png"
+            thumbnail-image="/applications/cheat-sheet-thumbnail.png"
             title="Cheat sheet"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/history-study-thumbnail.png"
+            thumbnail-image="/applications/history-study-thumbnail.png"
             title="History study"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/philosophy-study-thumbnail.png"
+            thumbnail-image="/applications/philosophy-study-thumbnail.png"
             title="Philosophy study"
             href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/physics-study-thumbnail.png"
+            thumbnail-image="/applications/physics-study-thumbnail.png"
             title="Physics study"
             href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/chemistry-study-thumbnail.png"
+            thumbnail-image="/applications/chemistry-study-thumbnail.png"
             title="Chemistry study"
             href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/biology-study-thumbnail.png"
+            thumbnail-image="/applications/biology-study-thumbnail.png"
             title="Biology study"
             href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
           />
