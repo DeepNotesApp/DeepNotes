@@ -98,8 +98,8 @@ const html = marked(`
   ## Encryption key hierarchy
 
   <figure>
-    <a href="/whitepaper/key-hierarchy.png" target="_blank">
-        <img src="/whitepaper/key-hierarchy.png" alt="Encryption key hierarchy in DeepNotes"/>
+    <a href="/whitepaper/key-hierarchy.webp" target="_blank">
+        <img src="/whitepaper/key-hierarchy.webp" alt="Encryption key hierarchy in DeepNotes"/>
     </a>
     <figcaption>
       Encryption key hierarchy in DeepNotes
@@ -165,8 +165,8 @@ const html = marked(`
   ## Registering a user
 
   <figure>
-    <a href="/whitepaper/registration.png" target="_blank">
-      <img src="/whitepaper/registration.png" alt="Registration process in DeepNotes"/>
+    <a href="/whitepaper/registration.webp" target="_blank">
+      <img src="/whitepaper/registration.webp" alt="Registration process in DeepNotes"/>
     </a>
     <figcaption>
       Registration process in DeepNotes
@@ -189,8 +189,8 @@ const html = marked(`
   ## Authenticating a user
 
   <figure>
-    <a href="/whitepaper/authentication.png" target="_blank">
-      <img src="/whitepaper/authentication.png" alt="Authentication process in DeepNotes"/>
+    <a href="/whitepaper/authentication.webp" target="_blank">
+      <img src="/whitepaper/authentication.webp" alt="Authentication process in DeepNotes"/>
     </a>
     <figcaption>
       Authentication process in DeepNotes
@@ -213,8 +213,8 @@ const html = marked(`
   ## Refreshing a session
 
   <figure>
-    <a href="/whitepaper/session-refresh.png" target="_blank">
-      <img src="/whitepaper/session-refresh.png" alt="Session refreshing in DeepNotes"/>
+    <a href="/whitepaper/session-refresh.webp" target="_blank">
+      <img src="/whitepaper/session-refresh.webp" alt="Session refreshing in DeepNotes"/>
     </a>
     <figcaption>
       Session refreshing in DeepNotes

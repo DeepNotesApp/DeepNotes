@@ -126,7 +126,7 @@
           :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-Setup-${version}.exe`"
         >
           <img
-            src="~assets/platforms/windows.png"
+            src="~assets/platforms/windows.webp"
             :style="{ width: '88px' }"
           />
         </PlatformCard>
@@ -135,7 +135,7 @@
           :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.dmg`"
         >
           <img
-            src="~assets/platforms/mac.png"
+            src="~assets/platforms/mac.webp"
             style="margin-top: -12px; width: 102px"
           />
         </PlatformCard>
@@ -144,7 +144,7 @@
           :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-${version}.AppImage`"
         >
           <img
-            src="~assets/platforms/linux.png"
+            src="~assets/platforms/linux.webp"
             style="margin-top: 4px; width: 92px"
           />
         </PlatformCard>
@@ -174,7 +174,7 @@
             target="_blank"
           >
             <img
-              src="~assets/badges/google-play.png"
+              src="~assets/badges/google-play.webp"
               style="
                 margin: 36px;
                 margin-top: 24px;

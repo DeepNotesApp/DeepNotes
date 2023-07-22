@@ -19,7 +19,7 @@
               style="display: flex; align-items: center"
             >
               <img
-                src="~assets/white-logo-outline.png"
+                src="~assets/white-logo-outline.webp"
                 style="
                   margin-top: -2px;
                   width: 28px;

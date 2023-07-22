@@ -167,73 +167,73 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/applications/kanban-board-thumbnail.png"
+            thumbnail-image="/applications/kanban-board-thumbnail.webp"
             title="Kanban board"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/diagram-thumbnail.png"
+            thumbnail-image="/applications/diagram-thumbnail.webp"
             title="Diagram"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/link-gallery-thumbnail.png"
+            thumbnail-image="/applications/link-gallery-thumbnail.webp"
             title="Link gallery"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/family-tree-thumbnail.png"
+            thumbnail-image="/applications/family-tree-thumbnail.webp"
             title="Family tree"
             href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/flashcards-thumbnail.png"
+            thumbnail-image="/applications/flashcards-thumbnail.webp"
             title="Flashcards"
             href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/database-structure-thumbnail.png"
+            thumbnail-image="/applications/database-structure-thumbnail.webp"
             title="Database structure"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/cheat-sheet-thumbnail.png"
+            thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
             title="Cheat sheet"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/history-study-thumbnail.png"
+            thumbnail-image="/applications/history-study-thumbnail.webp"
             title="History study"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/philosophy-study-thumbnail.png"
+            thumbnail-image="/applications/philosophy-study-thumbnail.webp"
             title="Philosophy study"
             href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/physics-study-thumbnail.png"
+            thumbnail-image="/applications/physics-study-thumbnail.webp"
             title="Physics study"
             href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/chemistry-study-thumbnail.png"
+            thumbnail-image="/applications/chemistry-study-thumbnail.webp"
             title="Chemistry study"
             href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
           />
 
           <Thumbnail
-            thumbnail-image="/applications/biology-study-thumbnail.png"
+            thumbnail-image="/applications/biology-study-thumbnail.webp"
             title="Biology study"
             href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
           />
@@ -251,7 +251,7 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.png"
+            thumbnail-image="/highlights/reddit-logo.webp"
             :date="new Date('2023-07-18')"
             title="Our r/sideproject Reddit post"
             href="https://www.reddit.com/r/SideProject/comments/152zluu/i_developed_an_infinite_canvas_notetaking_tool/"
@@ -266,7 +266,7 @@
           </Thumbnail>
 
           <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.png"
+            thumbnail-image="/highlights/reddit-logo.webp"
             :date="new Date('2023-03-11')"
             title="Our r/webdev Reddit post"
             href="https://www.reddit.com/r/webdev/comments/11osv87/i_made_my_dream_notetaking_system/"
