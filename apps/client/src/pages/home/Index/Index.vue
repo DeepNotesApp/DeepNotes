@@ -173,6 +173,12 @@
           />
 
           <Thumbnail
+            thumbnail-image="/applications/history-study-thumbnail.webp"
+            title="Study"
+            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
+          />
+
+          <Thumbnail
             thumbnail-image="/applications/diagram-thumbnail.webp"
             title="Diagram"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
@@ -198,7 +204,7 @@
 
           <Thumbnail
             thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database structure"
+            title="Database diagram"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
@@ -206,36 +212,6 @@
             thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
             title="Cheat sheet"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/history-study-thumbnail.webp"
-            title="History study"
-            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/philosophy-study-thumbnail.webp"
-            title="Philosophy study"
-            href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/physics-study-thumbnail.webp"
-            title="Physics study"
-            href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/chemistry-study-thumbnail.webp"
-            title="Chemistry study"
-            href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/biology-study-thumbnail.webp"
-            title="Biology study"
-            href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
           />
         </div>
       </div>
@@ -257,11 +233,11 @@
             href="https://www.reddit.com/r/SideProject/comments/152zluu/i_developed_an_infinite_canvas_notetaking_tool/"
           >
             <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
-              <span>49 upvotes</span>
+              <span>53 upvotes</span>
 
               <div style="display: inline-block; width: 8px"></div>
 
-              <span>19 comments</span>
+              <span>22 comments</span>
             </div>
           </Thumbnail>
 
@@ -276,7 +252,7 @@
 
               <div style="display: inline-block; width: 8px"></div>
 
-              <span>192 comments</span>
+              <span>194 comments</span>
             </div>
           </Thumbnail>
         </div>
