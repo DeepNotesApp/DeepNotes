@@ -5,8 +5,13 @@ import { once } from 'lodash';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { authProcedure } from 'src/trpc/helpers';
 import type Stripe from 'stripe';
+import { z } from 'zod';
 
-const baseProcedure = authProcedure;
+const baseProcedure = authProcedure.input(
+  z.object({
+    billingFrequency: z.enum(['monthly', 'yearly']).optional(),
+  }),
+);
 
 export const createCheckoutSessionProcedure = once(() =>
   baseProcedure.mutation(createCheckoutSession),
@@ -14,6 +19,7 @@ export const createCheckoutSessionProcedure = once(() =>
 
 export async function createCheckoutSession({
   ctx,
+  input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
@@ -102,7 +108,10 @@ export async function createCheckoutSession({
 
         line_items: [
           {
-            price: process.env.STRIPE_PRICE_ID,
+            price:
+              input.billingFrequency === 'yearly'
+                ? process.env.STRIPE_YEARLY_PRICE_ID
+                : process.env.STRIPE_MONTHLY_PRICE_ID,
             quantity: 1,
           },
         ],

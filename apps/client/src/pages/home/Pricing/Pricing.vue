@@ -6,7 +6,13 @@
       Pricing Plans
     </div>
 
-    <Gap style="height: 64px" />
+    <Gap style="height: 52px" />
+
+    <div style="display: flex; justify-content: center">
+      <BillingFrequencyToggle v-model="billingFrequency" />
+    </div>
+
+    <Gap style="height: 62px" />
 
     <div
       class="row"
@@ -14,7 +20,7 @@
     >
       <PlanCard
         title="Basic"
-        :price="0"
+        monthly-price="0"
         :features="[
           {
             icon: 'mdi-note',
@@ -64,7 +70,8 @@
 
       <PlanCard
         title="Pro"
-        :price="5"
+        :monthly-price="billingFrequency === 'monthly' ? '4.99' : '3.99'"
+        :billing-frequency="billingFrequency"
         previous="Basic"
         :features="[
           {
@@ -132,6 +139,8 @@ import { watchUntilTrue } from '@stdlib/vue';
 
 import PlanCard from './PlanCard.vue';
 
+const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
+
 const plan = computed(() =>
   internals.realtime.globalCtx.hget('user', authStore().userId, 'plan'),
 );
@@ -146,7 +155,9 @@ onMounted(async () => {
 
 async function createCheckoutSession() {
   const { checkoutSessionUrl } =
-    await trpcClient.users.account.stripe.createCheckoutSession.mutate();
+    await trpcClient.users.account.stripe.createCheckoutSession.mutate({
+      billingFrequency: billingFrequency.value,
+    });
 
   window.open(checkoutSessionUrl, '_blank');
 }

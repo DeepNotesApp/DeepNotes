@@ -153,7 +153,13 @@
       <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
         <Gap style="height: 170px" />
 
-        <PricingSection />
+        <div style="display: flex; justify-content: center">
+          <BillingFrequencyToggle v-model="billingFrequency" />
+        </div>
+
+        <Gap style="height: 34px" />
+
+        <PricingSection :billing-frequency="billingFrequency" />
       </template>
 
       <div>
@@ -302,6 +308,8 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
 </script>
 
 <style lang="scss">

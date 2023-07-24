@@ -16,17 +16,21 @@
           margin: 16px;
           padding: 28px;
 
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.13);
           border-radius: 12px;
+
+          background-color: #222222;
         "
       >
         <div style="font-size: 30px; font-weight: bold">Basic plan</div>
 
         <Gap style="height: 32px" />
 
-        <div style="text-align: center; font-weight: bold">
+        <div style="text-align: center">
           <span style="font-size: 46px">$0</span>
-          <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+          <span style="font-size: 12px; color: #d0d0d0; font-weight: bold"
+            >/ month</span
+          >
         </div>
 
         <Gap style="height: 32px" />
@@ -79,17 +83,35 @@
           margin: 16px;
           padding: 28px;
 
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.13);
           border-radius: 12px;
+
+          background-color: #222222;
         "
       >
         <div style="font-size: 30px; font-weight: bold">Pro plan</div>
 
         <Gap style="height: 32px" />
 
-        <div style="text-align: center; font-weight: bold">
-          <span style="font-size: 46px">$5</span>
+        <div style="text-align: center; position: relative">
+          <span style="font-size: 46px">
+            ${{ billingFrequency === 'monthly' ? 4.99 : 3.99 }}
+          </span>
           <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+
+          <div
+            v-if="billingFrequency === 'yearly'"
+            style="
+              position: absolute;
+              width: 100%;
+              margin-top: -7px;
+              text-align: center;
+              font-size: 13px;
+              color: #d0d0d0;
+            "
+          >
+            (billed anually)
+          </div>
         </div>
 
         <Gap style="height: 32px" />
@@ -130,6 +152,12 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  billingFrequency: 'monthly' | 'yearly';
+}>();
+</script>
 
 <style scoped lang="scss">
 ul :deep() {

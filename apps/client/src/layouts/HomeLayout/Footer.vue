@@ -2,7 +2,7 @@
   <q-footer
     style="
       background-color: #202020;
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
     "
   >
     <ResponsiveContainer>
