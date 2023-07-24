@@ -45,7 +45,7 @@ defineProps<{
 .highlight {
   flex: 1;
   margin: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
 
   background-size: contain;
