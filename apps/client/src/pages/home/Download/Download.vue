@@ -212,7 +212,7 @@ import { multiModePath } from 'src/code/utils/misc';
 
 import PlatformCard from './PlatformCard.vue';
 
-const version = '1.0.3';
+const version = '1.0.4';
 
 const loading = ref(true);
 
