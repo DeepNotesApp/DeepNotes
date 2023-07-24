@@ -153,83 +153,71 @@
       <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
         <Gap style="height: 170px" />
 
-        <PricingSection />
+        <div style="display: flex; justify-content: center">
+          <BillingFrequencyToggle v-model="billingFrequency" />
+        </div>
+
+        <Gap style="height: 34px" />
+
+        <PricingSection :billing-frequency="billingFrequency" />
       </template>
 
       <div>
         <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
-          Use Cases
+          Applications
         </div>
 
         <Gap style="height: 40px" />
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/use-cases/diagram-thumbnail.png"
-            title="Diagram"
-            href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
-          />
-
-          <Thumbnail
-            thumbnail-image="/use-cases/kanban-board-thumbnail.png"
+            thumbnail-image="/applications/kanban-board-thumbnail.webp"
             title="Kanban board"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/family-tree-thumbnail.png"
-            title="Family tree"
-            href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
+            thumbnail-image="/applications/history-study-thumbnail.webp"
+            title="Study"
+            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/link-gallery-thumbnail.png"
+            thumbnail-image="/applications/diagram-thumbnail.webp"
+            title="Diagram"
+            href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/link-gallery-thumbnail.webp"
             title="Link gallery"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/flashcards-thumbnail.png"
+            thumbnail-image="/applications/family-tree-thumbnail.webp"
+            title="Family tree"
+            href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/flashcards-thumbnail.webp"
             title="Flashcards"
             href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/database-structure-thumbnail.png"
-            title="Database structure"
+            thumbnail-image="/applications/database-structure-thumbnail.webp"
+            title="Database diagram"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
-            thumbnail-image="/use-cases/history-study-thumbnail.png"
-            title="History study"
-            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/use-cases/philosophy-study-thumbnail.png"
-            title="Philosophy study"
-            href="https://deepnotes.app/pages/FfaGpEtEWXo2ZsexWweW5"
-          />
-
-          <Thumbnail
-            thumbnail-image="/use-cases/physics-study-thumbnail.png"
-            title="Physics study"
-            href="https://deepnotes.app/pages/Osh_5Ez9VKCPhJfBRCAiL"
-          />
-
-          <Thumbnail
-            thumbnail-image="/use-cases/chemistry-study-thumbnail.png"
-            title="Chemistry study"
-            href="https://deepnotes.app/pages/T4e3zmWCSXrZHAYX57OPN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/use-cases/biology-study-thumbnail.png"
-            title="Biology study"
-            href="https://deepnotes.app/pages/opGpTsm2RtrOwXWV4GRtg"
+            thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
+            title="Cheat sheet"
+            href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
           />
         </div>
       </div>
@@ -245,22 +233,22 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.png"
+            thumbnail-image="/highlights/reddit-logo.webp"
             :date="new Date('2023-07-18')"
             title="Our r/sideproject Reddit post"
             href="https://www.reddit.com/r/SideProject/comments/152zluu/i_developed_an_infinite_canvas_notetaking_tool/"
           >
             <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
-              <span>49 upvotes</span>
+              <span>53 upvotes</span>
 
               <div style="display: inline-block; width: 8px"></div>
 
-              <span>19 comments</span>
+              <span>22 comments</span>
             </div>
           </Thumbnail>
 
           <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.png"
+            thumbnail-image="/highlights/reddit-logo.webp"
             :date="new Date('2023-03-11')"
             title="Our r/webdev Reddit post"
             href="https://www.reddit.com/r/webdev/comments/11osv87/i_made_my_dream_notetaking_system/"
@@ -270,7 +258,7 @@
 
               <div style="display: inline-block; width: 8px"></div>
 
-              <span>192 comments</span>
+              <span>194 comments</span>
             </div>
           </Thumbnail>
         </div>
@@ -320,6 +308,8 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
 </script>
 
 <style lang="scss">

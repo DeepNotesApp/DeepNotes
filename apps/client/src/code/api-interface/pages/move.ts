@@ -8,7 +8,6 @@ import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
 import { objEntries, objFromEntries, textToBytes } from '@stdlib/misc';
 import { Y } from '@syncedstore/core';
-import { zxcvbn } from '@zxcvbn-ts/core';
 import {
   generateGroupValues,
   unlockGroupContentKeyring,
@@ -18,6 +17,7 @@ import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import { createPageDoc } from 'src/code/pages/utils';
 import { asyncDialog } from 'src/code/utils/misc';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 
 export async function movePage(input: {
   pageId: string;

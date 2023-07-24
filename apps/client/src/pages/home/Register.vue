@@ -152,11 +152,11 @@
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { enterDemo } from 'src/code/auth/demo';
 import { getRegistrationValues } from 'src/code/auth/register';
 import { deriveUserValues } from 'src/code/crypto';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 
 useMeta(() => ({
   title: 'Register - DeepNotes',

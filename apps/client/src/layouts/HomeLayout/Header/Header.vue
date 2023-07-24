@@ -55,7 +55,7 @@
             style="display: flex; align-items: center"
           >
             <img
-              src="~assets/white-logo-outline.png"
+              src="~assets/white-logo-outline.webp"
               style="width: 39px; height: 39px; opacity: 95%"
             />
 

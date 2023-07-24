@@ -60,8 +60,8 @@
 </template>
 
 <script setup lang="ts">
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { useResizeObserver } from 'src/code/utils/misc';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 import type { ComponentPublicInstance } from 'vue';
 
 import type { PasswordFieldProps } from './PasswordField.vue';

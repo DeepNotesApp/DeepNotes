@@ -52,8 +52,8 @@
 </template>
 
 <script setup lang="ts">
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;

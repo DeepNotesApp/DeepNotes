@@ -2,7 +2,7 @@
   <q-footer
     style="
       background-color: #202020;
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
     "
   >
     <ResponsiveContainer>
@@ -19,7 +19,7 @@
               style="display: flex; align-items: center"
             >
               <img
-                src="~assets/white-logo-outline.png"
+                src="~assets/white-logo-outline.webp"
                 style="
                   margin-top: -2px;
                   width: 28px;

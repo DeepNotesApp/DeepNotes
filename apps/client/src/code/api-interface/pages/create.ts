@@ -2,7 +2,6 @@ import type { Keyring, SymmetricKeyring } from '@stdlib/crypto';
 import { createSymmetricKeyring } from '@stdlib/crypto';
 import { DataLayer } from '@stdlib/crypto';
 import { textToBytes } from '@stdlib/misc';
-import { zxcvbn } from '@zxcvbn-ts/core';
 import { nanoid } from 'nanoid';
 import {
   generateGroupValues,
@@ -10,6 +9,7 @@ import {
 } from 'src/code/crypto';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { asyncDialog } from 'src/code/utils/misc';
+import { zxcvbn } from 'src/code/utils/zxcvbn';
 
 export async function createPage(input: {
   parentPageId: string;

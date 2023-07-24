@@ -5,9 +5,11 @@
       margin-bottom: 40px;
       width: 300px;
 
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.13);
       border-radius: 12px;
       padding: 28px;
+
+      background-color: #222222;
 
       display: flex;
       flex-direction: column;
@@ -19,14 +21,28 @@
 
     <Gap style="height: 40px" />
 
-    <div style="text-align: center; font-weight: bold">
-      <span style="font-size: 46px">${{ price }}</span>
+    <div style="text-align: center; position: relative">
+      <span style="font-size: 46px">${{ monthlyPrice }}</span>
       <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+
+      <div
+        v-if="billingFrequency === 'yearly'"
+        style="
+          position: absolute;
+          width: 100%;
+          margin-top: -6px;
+          text-align: center;
+          font-size: 13px;
+          color: #d0d0d0;
+        "
+      >
+        (billed anually)
+      </div>
     </div>
 
-    <Gap style="height: 48px" />
+    <Gap style="height: 47px" />
 
-    <div style="font-weight: bold; color: #4e9cea; font-size: 14px">
+    <div style="font-weight: bold; color: #2d9aff; font-size: 14px">
       <template v-if="previous == null">Features:</template>
       <template v-else>Everything in {{ previous }}, plus:</template>
     </div>
@@ -76,7 +92,8 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
-  price: number;
+  monthlyPrice: string;
+  billingFrequency?: 'monthly' | 'yearly';
   previous?: string;
   features: {
     icon: string;

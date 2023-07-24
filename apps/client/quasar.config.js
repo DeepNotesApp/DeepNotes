@@ -71,7 +71,6 @@ module.exports = configure(function (ctx) {
       { path: 'syncedstore.client', server: false },
       { path: 'tiptap.client', server: false },
       { path: 'stripe.client', server: false },
-      { path: 'zxcvbn.client', server: false },
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
