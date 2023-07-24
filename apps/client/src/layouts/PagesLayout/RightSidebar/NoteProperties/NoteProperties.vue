@@ -635,6 +635,19 @@
         "
       />
 
+      <Gap style="height: 16px" />
+
+      <Checkbox
+        label="Force color inheritance"
+        :model-value="note.react.collab.container.forceColorInheritance"
+        @update:model-value="
+          changeProp($event, (selectedNote, value) => {
+            selectedNote.react.collab.container.forceColorInheritance = value;
+          })
+        "
+        :disable="page.react.readOnly || !note.react.collab.container.enabled"
+      />
+
       <Gap style="height: 24px" />
 
       <DeepBtn

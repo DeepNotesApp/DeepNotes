@@ -58,6 +58,8 @@ export const INoteCollab = once(() =>
 
           wrapChildren: z.boolean().default(false),
           stretchChildren: z.boolean().default(true),
+
+          forceColorInheritance: z.boolean().default(false),
         })
         .default({}),
 
