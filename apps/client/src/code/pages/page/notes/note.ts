@@ -468,7 +468,9 @@ export class PageNote extends PageElem() implements IPageRegion {
       }),
 
       color: computed(() =>
-        this.react.collab.color.inherit && this.react.region.type === 'note'
+        this.react.region.type === 'note' &&
+        (this.react.region.react.collab.container.forceColorInheritance ||
+          this.react.collab.color.inherit)
           ? this.react.region.react.color
           : colorNameToColorHex('notes', this.react.collab.color.value),
       ),

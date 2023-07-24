@@ -157,7 +157,7 @@
           <BillingFrequencyToggle v-model="billingFrequency" />
         </div>
 
-        <Gap style="height: 34px" />
+        <Gap style="height: 48px" />
 
         <PricingSection :billing-frequency="billingFrequency" />
       </template>

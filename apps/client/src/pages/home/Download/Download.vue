@@ -51,10 +51,11 @@
               padding: 18px 28px;
               line-height: normal;
             "
-            :href="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-Setup-${version}.exe`"
+            href="https://apps.microsoft.com/store/detail/deepnotes/9PH76W3HPQZJ"
+            target="_blank"
           >
             <div>
-              <div>Download for Windows (NSIS)</div>
+              <div>Go to Microsoft Store</div>
 
               <Gap style="height: 7px" />
 
@@ -93,6 +94,7 @@
               line-height: normal;
             "
             href="https://play.google.com/store/apps/details?id=app.deepnotes"
+            target="_blank"
           />
 
           <DeepBtn
@@ -106,6 +108,7 @@
               line-height: normal;
             "
             href="https://apps.apple.com/us/app/deepnotes-visual-note-taking/id6450611344"
+            target="_blank"
           />
         </div>
 
@@ -123,7 +126,7 @@
         style="justify-content: center"
       >
         <PlatformCard
-          :url="`https://github.com/DeepNotesApp/DeepNotes/releases/download/v${version}/DeepNotes-Setup-${version}.exe`"
+          url="https://apps.microsoft.com/store/detail/deepnotes/9PH76W3HPQZJ"
         >
           <img
             src="~assets/platforms/windows.webp"

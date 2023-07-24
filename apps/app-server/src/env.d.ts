@@ -52,7 +52,6 @@ declare namespace NodeJS {
     ZOHO_USER: string;
     ZOHO_PASSWORD: string;
 
-    STRIPE_PUBLISHABLE_KEY: string;
     STRIPE_SECRET_KEY: string;
     STRIPE_WEBHOOK_SECRET: string;
     STRIPE_MONTHLY_PRICE_ID: string;
