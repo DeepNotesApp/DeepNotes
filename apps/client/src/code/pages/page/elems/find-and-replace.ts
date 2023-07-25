@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/vue-3';
+import { scrollIntoView } from 'src/code/utils/scroll-into-view';
 import type { UnwrapNestedRefs } from 'vue';
 
 import type { PageArrow } from '../arrows/arrow';
@@ -159,13 +160,11 @@ export class PageFindAndReplace {
 
     const resultElems = editor.options.element.querySelectorAll('.find-result');
 
-    editor.commands.focus();
     editor.commands.setTextSelection(result);
+    editor.commands.focus(undefined, { scrollIntoView: false });
 
-    resultElems[this.resultIndex].scrollIntoView({
-      behavior: 'smooth',
-      block: 'center',
-      inline: 'center',
+    scrollIntoView(resultElems[this.resultIndex] as HTMLElement, {
+      centerCamera: true,
     });
   }
 
