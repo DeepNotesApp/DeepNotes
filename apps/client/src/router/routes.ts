@@ -83,6 +83,30 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
+  {
+    path: '/help',
+    component: () => import('src/layouts/HomeLayout/HomeLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'help',
+        component: () => import('src/pages/home/Help/Help.vue'),
+      },
+      {
+        path: 'how-to-create-a-group',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/how-to-create-a-group',
+            component: () =>
+              import('src/pages/home/Help/HowToCreateAGroup.vue'),
+          },
+        ],
+      },
+    ],
+  },
+
   ...(isIncluded(process.env.MODE, ['ssr', 'spa'])
     ? [
         {

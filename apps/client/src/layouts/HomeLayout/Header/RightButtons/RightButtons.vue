@@ -25,7 +25,15 @@
         style="height: 46px"
       >
         <span style="font-weight: bold">Go to pages</span>
-        <span style="margin-left: 3px; font-weight: bold; font-size: 1.3em">
+        <span
+          style="
+            position: relative;
+            top: -1px;
+            margin-left: 3px;
+            font-weight: bold;
+            font-size: 1.3em;
+          "
+        >
           →
         </span>
       </DeepBtn>
