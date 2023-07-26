@@ -4,6 +4,11 @@ import path from 'path';
 import os from 'os';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
+import contextMenu from 'electron-context-menu';
+
+contextMenu({
+  showSaveImageAs: true,
+});
 
 log.transports.file.level = 'info';
 
