@@ -249,6 +249,28 @@
 
     <q-separator />
 
+    <div style="padding: 20px; display: flex; flex-direction: column">
+      <DeepBtn
+        label="Copy link to this arrow"
+        icon="mdi-content-copy"
+        color="primary"
+        @click="
+          async () => {
+            await setClipboardText(
+              `https://deepnotes.app/pages/${page.id}?elem=${arrow.id}`,
+            );
+
+            $q.notify({
+              message: 'Copied to clipboard.',
+              type: 'positive',
+            });
+          }
+        "
+      />
+    </div>
+
+    <q-separator />
+
     <!-- Default -->
 
     <div style="padding: 20px; display: flex; flex-direction: column">
@@ -269,6 +291,7 @@ import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import type { Page } from 'src/code/pages/page/page';
 import type { ISerialArrowInput } from 'src/code/pages/serialization';
 import { ISerialArrow } from 'src/code/pages/serialization';
+import { setClipboardText } from 'src/code/utils/clipboard';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import { yXmlFragmentToProsemirrorJSON } from 'y-prosemirror';

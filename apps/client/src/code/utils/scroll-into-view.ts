@@ -15,17 +15,17 @@ function easeInOutQuint(x: number): number {
 }
 
 export function scrollIntoView(
-  target: HTMLElement,
+  target: Element,
   params?: { animate?: boolean; centerCamera?: boolean },
 ) {
-  let ancestor: HTMLElement | null = target.parentElement;
+  let ancestor: Element | null = target.parentElement;
 
   const targetRect = domRectScreenToWorld(target.getBoundingClientRect());
 
-  const scrollElems: { elem: HTMLElement; from: IVec2; to: IVec2 }[] = [];
+  const scrollElems: { elem: Element; from: IVec2; to: IVec2 }[] = [];
 
   while (ancestor != null) {
-    if (hasScrollbar(ancestor)) {
+    if (hasScrollbar(ancestor as HTMLElement)) {
       const ancestorRect = domRectScreenToWorld(
         ancestor.getBoundingClientRect(),
       );

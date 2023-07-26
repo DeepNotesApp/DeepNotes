@@ -245,7 +245,7 @@
         @click="
           async () => {
             await setClipboardText(
-              `https://deepnotes.app/pages/${page.id}?note=${note.id}`,
+              `https://deepnotes.app/pages/${page.id}?elem=${note.id}`,
             );
 
             $q.notify({

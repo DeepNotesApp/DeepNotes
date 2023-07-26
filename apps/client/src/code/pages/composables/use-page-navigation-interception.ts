@@ -60,11 +60,12 @@ export function usePageNavigationInterception() {
       event.preventDefault(); // Prevent default
 
       const matches =
-        href.match(/\/(?:pages|groups)\/([\w-]{21})(?:\?note=([\w-]{21}))?/) ??
-        [];
+        href.match(
+          /\/(?:pages|groups)\/([\w-]{21})(?:\?(?:note|elem)=([\w-]{21}))?/,
+        ) ?? [];
 
       const id = matches[1];
-      const noteId = matches[2];
+      const elemId = matches[2];
 
       if (href.includes('/groups/')) {
         await internals.pages.goToGroup(id, {
@@ -75,7 +76,7 @@ export function usePageNavigationInterception() {
         await internals.pages.goToPage(id, {
           fromParent: true,
           openInNewTab: isCtrlDown(event),
-          noteId,
+          elemId,
         });
       }
     } catch (error) {

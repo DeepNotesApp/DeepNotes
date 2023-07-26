@@ -300,18 +300,26 @@ export class Page implements IPageRegion {
 
       mainLogger.sub('page.finishSetup').info('All notes loaded');
 
-      const noteId = (route().value.query.note as string) ?? '';
+      const elemId =
+        ((route().value.query.note ?? route().value.query.elem) as string) ??
+        '';
 
-      if (isNanoID(noteId)) {
-        const note = this.notes.fromId(noteId);
+      if (isNanoID(elemId)) {
+        const elem = this.notes.fromId(elemId) ?? this.arrows.fromId(elemId);
 
-        if (note != null) {
-          this.selection.set(note);
+        if (elem != null) {
+          this.selection.set(elem);
 
-          const noteElem = note.getElem('note-frame');
+          const elemElem =
+            elem.type === 'note'
+              ? elem.getElem('note-frame')
+              : elem.getHitboxElem();
 
-          if (noteElem != null) {
-            scrollIntoView(noteElem, { animate: false, centerCamera: true });
+          if (elemElem != null) {
+            scrollIntoView(elemElem, {
+              animate: false,
+              centerCamera: true,
+            });
           }
         }
       }
