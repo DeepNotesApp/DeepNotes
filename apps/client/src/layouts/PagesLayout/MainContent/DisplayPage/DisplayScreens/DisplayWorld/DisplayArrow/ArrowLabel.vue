@@ -75,6 +75,8 @@ const empty = computed(
 
 function onLeftPointerDown(event: PointerEvent) {
   if (!editor.value?.isEditable) {
+    page.editing.stop();
+
     props.arrow.grab(event);
   }
 }

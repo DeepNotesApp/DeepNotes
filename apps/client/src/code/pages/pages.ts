@@ -1,4 +1,4 @@
-import { Vec2 } from '@stdlib/misc';
+import { isNanoID, Vec2 } from '@stdlib/misc';
 import { unpack } from 'msgpackr';
 import type { ComputedRef, ShallowRef, UnwrapNestedRefs } from 'vue';
 
@@ -6,6 +6,7 @@ import type { Factories } from '../factories';
 import { authStore } from '../stores';
 import { trpcClient } from '../trpc';
 import { multiModePath } from '../utils/misc';
+import { scrollIntoView } from '../utils/scroll-into-view';
 import type { Page } from './page/page';
 import type { PageCache } from './page-cache';
 import type { ISerialArrowInput, ISerialObjectInput } from './serialization';
@@ -200,18 +201,48 @@ export class Pages {
 
   async goToPage(
     pageId: string,
-    params?: { fromParent?: boolean; openInNewTab?: boolean },
+    params?: { fromParent?: boolean; openInNewTab?: boolean; noteId?: string },
   ) {
     mainLogger.sub('Pages.goToPage').info('pageId: %s', pageId);
 
     if (params?.openInNewTab) {
-      window.open(multiModePath(`/pages/${pageId}`), '_blank');
+      window.open(
+        multiModePath(
+          `/pages/${pageId}${params?.noteId ? `?note=${params?.noteId}` : ''}`,
+        ),
+        '_blank',
+      );
     } else {
       if (params?.fromParent) {
         this.parentPageId = this.react.pageId;
       }
 
-      await router().push({ name: 'page', params: { pageId } });
+      await router().push({
+        name: 'page',
+        params: { pageId },
+        query: { note: params?.noteId },
+      });
+
+      const cachedPage = this.pageCache.get(pageId);
+
+      if (
+        cachedPage != null &&
+        cachedPage.react.status === 'success' &&
+        !cachedPage.react.loading &&
+        isNanoID(params?.noteId ?? '')
+      ) {
+        const note = cachedPage.notes.fromId(params?.noteId!);
+
+        if (note != null) {
+          cachedPage.selection.set(note);
+
+          const noteElem = note.getElem('note-frame');
+
+          if (noteElem != null) {
+            scrollIntoView(noteElem, { centerCamera: true });
+          }
+        }
+      }
     }
   }
   async goToGroup(

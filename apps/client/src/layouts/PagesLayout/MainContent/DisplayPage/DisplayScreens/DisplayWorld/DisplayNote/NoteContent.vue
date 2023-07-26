@@ -54,7 +54,8 @@ function onLeftPointerDown(event: PointerEvent) {
   }
 
   if (
-    note.react.collab.link &&
+    ((event.target instanceof HTMLElement && event.target.nodeName === 'A') ||
+      note.react.collab.link) &&
     !event.altKey &&
     !event.shiftKey &&
     !internals.mobileAltKey &&

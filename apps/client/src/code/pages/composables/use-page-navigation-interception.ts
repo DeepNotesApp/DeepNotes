@@ -1,4 +1,3 @@
-import { splitStr } from '@stdlib/misc';
 import { useEventListener } from '@vueuse/core';
 import { imageResizing } from 'src/code/tiptap/image-resize/NodeView.vue';
 import { youtubeResizing } from 'src/code/tiptap/youtube-video/NodeView.vue';
@@ -42,8 +41,8 @@ export function usePageNavigationInterception() {
         !(
           href.startsWith('/pages/') ||
           href.startsWith('/groups/') ||
-          href.startsWith(`${window.location.origin}/pages/`) ||
-          href.startsWith(`${window.location.origin}/groups/`)
+          href.startsWith('https://deepnotes.app/pages/') ||
+          href.startsWith('https://deepnotes.app/groups/')
         )
       ) {
         mainLogger
@@ -58,9 +57,14 @@ export function usePageNavigationInterception() {
         'Link points to a DeepNotes page: prevent default action.',
       );
 
-      event.preventDefault(); // Prevent default action
+      event.preventDefault(); // Prevent default
 
-      const id = splitStr(href, '/').at(-1) ?? '';
+      const matches =
+        href.match(/\/(?:pages|groups)\/([\w-]{21})(?:\?note=([\w-]{21}))?/) ??
+        [];
+
+      const id = matches[1];
+      const noteId = matches[2];
 
       if (href.includes('/groups/')) {
         await internals.pages.goToGroup(id, {
@@ -71,6 +75,7 @@ export function usePageNavigationInterception() {
         await internals.pages.goToPage(id, {
           fromParent: true,
           openInNewTab: isCtrlDown(event),
+          noteId,
         });
       }
     } catch (error) {

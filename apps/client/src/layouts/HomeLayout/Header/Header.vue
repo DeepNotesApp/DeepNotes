@@ -124,6 +124,19 @@
                   : undefined,
             }"
           />
+
+          <Gap style="width: 12px" />
+
+          <DeepBtn
+            label="Help"
+            flat
+            class="toolbar-btn"
+            :to="{ name: 'help' }"
+            :style="{
+              'background-color':
+                $route.name === 'help' ? 'rgba(255,255,255,0.15)' : undefined,
+            }"
+          />
         </template>
 
         <q-space />

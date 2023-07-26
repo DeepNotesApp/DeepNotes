@@ -91,6 +91,17 @@
       </q-item>
 
       <q-item
+        clickable
+        v-close-popup
+        :href="multiModePath('/help')"
+      >
+        <q-item-section avatar>
+          <q-icon name="mdi-help" />
+        </q-item-section>
+        <q-item-section>Help</q-item-section>
+      </q-item>
+
+      <q-item
         v-if="uiStore().loggedIn"
         clickable
         v-close-popup
