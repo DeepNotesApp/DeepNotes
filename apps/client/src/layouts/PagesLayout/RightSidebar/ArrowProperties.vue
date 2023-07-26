@@ -172,6 +172,7 @@
 
       <DeepBtn
         label="Swap arrowheads"
+        icon="mdi-cached"
         color="primary"
         @click="swapArrowheads"
       />
@@ -252,7 +253,8 @@
 
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
-        label="Set as default"
+        label="Set as default arrow style"
+        icon="mdi-content-save"
         color="primary"
         :disable="page.react.readOnly"
         @click="setAsDefault()"

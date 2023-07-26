@@ -20,7 +20,7 @@
   <!-- Expanded sidebar -->
 
   <div v-else>
-    <div style="padding: 20px">
+    <div style="padding: 20px; display: flex; flex-direction: column">
       <!-- Relative title -->
 
       <TextField
@@ -48,9 +48,11 @@
         :maxlength="maxPageTitleLength"
         title="Title displayed outside the page path"
       />
+    </div>
 
-      <Gap style="height: 16px" />
+    <q-separator />
 
+    <div style="padding: 20px; display: flex; flex-direction: column">
       <!-- Page ID -->
 
       <TextField
@@ -60,6 +62,24 @@
         copy-btn
         readonly
       />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
+        label="Copy link to this page"
+        icon="mdi-content-copy"
+        color="primary"
+        @click="
+          async () => {
+            await setClipboardText(`https://deepnotes.app/pages/${page.id}`);
+
+            $q.notify({
+              message: 'Copied to clipboard.',
+              type: 'positive',
+            });
+          }
+        "
+      />
     </div>
 
     <q-separator />
@@ -67,6 +87,7 @@
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Group settings"
+        icon="mdi-account-cog"
         color="primary"
         @click="
           $q.dialog({
@@ -85,6 +106,7 @@
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Move page"
+        icon="mdi-file-move"
         color="primary"
         :disable="page.react.readOnly"
         title="Move page to another group or set as group's main page"
@@ -118,6 +140,7 @@ import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
+import { setClipboardText } from 'src/code/utils/clipboard';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
