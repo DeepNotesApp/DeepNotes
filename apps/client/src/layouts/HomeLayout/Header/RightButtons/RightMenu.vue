@@ -105,6 +105,16 @@
               </q-item-section>
               <q-item-section>Whitepaper</q-item-section>
             </q-item>
+
+            <q-item
+              clickable
+              :to="{ name: 'help' }"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-help" />
+              </q-item-section>
+              <q-item-section>Help</q-item-section>
+            </q-item>
           </template>
 
           <template v-if="uiStore().loggedIn">
