@@ -262,6 +262,27 @@
 
     <q-separator />
 
+    <div style="padding: 20px; display: flex; flex-direction: column">
+      <DeepBtn
+        label="Copy link to this note"
+        color="primary"
+        @click="
+          async () => {
+            await setClipboardText(
+              `https://deepnotes.app/pages/${page.id}?note=${note.id}`,
+            );
+
+            $q.notify({
+              message: 'Copied to clipboard.',
+              type: 'positive',
+            });
+          }
+        "
+      />
+    </div>
+
+    <q-separator />
+
     <!-- Default -->
 
     <div style="padding: 20px; display: flex; flex-direction: column">
@@ -746,6 +767,7 @@ import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/creat
 import { createPage } from 'src/code/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
+import { setClipboardText } from 'src/code/utils/clipboard';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 

@@ -16,7 +16,7 @@ function easeInOutQuint(x: number): number {
 
 export function scrollIntoView(
   target: HTMLElement,
-  params?: { centerCamera?: boolean },
+  params?: { animate?: boolean; centerCamera?: boolean },
 ) {
   let ancestor: HTMLElement | null = target.parentElement;
 
@@ -92,7 +92,7 @@ export function scrollIntoView(
   const cameraStartPos = internals.pages.react.page.camera.react.pos;
   const cameraEndPos = cameraStartPos.add(targetCenter.sub(pageCenter));
 
-  const duration = 400;
+  const duration = params?.animate !== false ? 400 : 0.0001;
   const startTime = Date.now();
   const endTime = startTime + duration;
 
