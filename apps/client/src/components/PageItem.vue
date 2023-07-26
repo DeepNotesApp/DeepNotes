@@ -1,6 +1,6 @@
 <template>
   <a
-    :href="`/pages/${pageId}`"
+    :href="`https://deepnotes.app/pages/${pageId}`"
     @click.prevent.stop
   >
     <q-item

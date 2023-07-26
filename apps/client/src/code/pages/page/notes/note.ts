@@ -109,6 +109,7 @@ export interface INoteReact extends IRegionReact, IElemReact {
   color: ComputedRef<string>;
 
   link: {
+    url: ComputedRef<string>;
     external: ComputedRef<boolean>;
   };
 
@@ -460,7 +461,7 @@ export class PageNote extends PageElem() implements IPageRegion {
           return 'default';
         }
 
-        if (this.react.collab.link) {
+        if (this.react.link.url) {
           return 'pointer';
         }
 
@@ -476,26 +477,24 @@ export class PageNote extends PageElem() implements IPageRegion {
       ),
 
       link: {
-        external: computed(() => {
-          if (this.react.collab.link == null) {
-            return false;
+        url: computed(() => {
+          if (!this.react.collab.link) {
+            return '';
           }
 
-          if (
-            !this.react.collab.link.startsWith('http://') &&
-            !this.react.collab.link.startsWith('https://')
-          ) {
-            return false;
+          if (this.react.collab.link.startsWith('/')) {
+            return `https://deepnotes.app${this.react.collab.link}`;
           }
 
-          if (
-            this.react.collab.link.startsWith('https://deepnotes.app/pages/')
-          ) {
-            return false;
+          if (!this.react.collab.link.includes('://')) {
+            return `https://deepnotes.app/${this.react.collab.link}`;
           }
 
-          return true;
+          return this.react.collab.link;
         }),
+        external: computed(
+          () => !this.react.link.url.startsWith('https://deepnotes.app/pages/'),
+        ),
       },
 
       editors: computed(() => {
