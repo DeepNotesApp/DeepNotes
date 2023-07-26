@@ -2,7 +2,6 @@
   <div
     class="note-frame"
     ref="frameElem"
-    style="position: relative"
     :style="{
       'min-width': note.react.width.minCSS,
       width: note.react.width.finalCSS,
@@ -65,3 +64,9 @@ useResizeObserver(
   },
 );
 </script>
+
+<style scoped lang="scss">
+.note-frame {
+  position: relative; /* relative is needed for the zones and handles */
+}
+</style>

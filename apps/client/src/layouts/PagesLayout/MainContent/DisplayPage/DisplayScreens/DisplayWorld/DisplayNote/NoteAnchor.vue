@@ -9,7 +9,7 @@
       position:
         note.react.floating || note.react.resizing?.active
           ? 'absolute'
-          : 'relative',
+          : 'relative', // relative is needed for the drop zones
 
       left: note.react.resizing?.active
         ? `${note.react.resizing.newWorldRect.topLeft.x}px`

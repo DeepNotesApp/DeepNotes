@@ -1,8 +1,5 @@
 <template>
-  <NoteSection
-    section="container"
-    style="position: relative; z-index: 2147483646"
-  >
+  <NoteSection section="container">
     <NoteSpatialContainer v-if="note.react.collab.container.spatial" />
     <NoteListContainer v-else />
   </NoteSection>
