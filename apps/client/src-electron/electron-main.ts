@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron';
 import cookie from 'cookie';
 import path from 'path';
 import os from 'os';
@@ -88,15 +88,8 @@ function createWindow() {
   }
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        autoHideMenuBar: true,
-        webPreferences: {
-          devTools: false,
-        },
-      },
-    };
+    shell.openExternal(details.url);
+    return { action: 'deny' };
   });
 
   mainWindow.on('closed', () => {
