@@ -72,7 +72,7 @@ async function onLeftPointerUp() {
   background-color: #42a5f5;
   opacity: 0;
 
-  z-index: 2147483645;
+  z-index: 2147483640;
 }
 .note-drop-zone.active {
   opacity: 0.25;

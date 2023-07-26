@@ -1,8 +1,6 @@
 <template>
   <a
-    :href="
-      note.react.selected ? undefined : note.react.collab.link || undefined
-    "
+    :href="note.react.selected ? undefined : note.react.link.url || undefined"
     :style="{ cursor: note.react.cursor }"
     tabindex="-1"
     target="_blank"
@@ -55,7 +53,7 @@ function onLeftPointerDown(event: PointerEvent) {
 
   if (
     ((event.target instanceof HTMLElement && event.target.nodeName === 'A') ||
-      note.react.collab.link) &&
+      note.react.link.url) &&
     !event.altKey &&
     !event.shiftKey &&
     !internals.mobileAltKey &&

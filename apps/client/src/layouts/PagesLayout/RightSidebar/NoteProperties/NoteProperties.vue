@@ -215,12 +215,12 @@
 
       <div style="display: flex">
         <DeepBtn
-          label="Swap"
+          label="Swap head and body"
+          icon="mdi-cached"
           color="primary"
           :disable="page.react.readOnly"
           dense
           style="flex: 1"
-          title="Swap head and body"
           @click="
             changeProp(null, (note) => {
               internals
@@ -232,31 +232,6 @@
             })
           "
         />
-
-        <Gap style="width: 16px" />
-
-        <DeepBtn
-          label="Float"
-          color="primary"
-          :disable="page.react.readOnly"
-          dense
-          style="flex: 1"
-          title="Float body to head if head is empty"
-          @click="
-            changeProp(note, (note) => {
-              if (
-                note.react.collab.head.value.toDOM().textContent!.length === 0
-              ) {
-                internals
-                  .tiptap()
-                  .swapXmlFragments(
-                    note.react.collab.head.value,
-                    note.react.collab.body.value,
-                  );
-              }
-            })
-          "
-        />
       </div>
     </div>
 
@@ -265,11 +240,12 @@
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Copy link to this note"
+        icon="mdi-content-copy"
         color="primary"
         @click="
           async () => {
             await setClipboardText(
-              `https://deepnotes.app/pages/${page.id}?note=${note.id}`,
+              `https://deepnotes.app/pages/${page.id}?elem=${note.id}`,
             );
 
             $q.notify({
@@ -287,7 +263,8 @@
 
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
-        label="Set as default"
+        label="Set as default note style"
+        icon="mdi-content-save"
         color="primary"
         title="Set this note as the default note"
         @click="setAsDefault()"

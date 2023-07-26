@@ -19,6 +19,8 @@
 
         <NoteLinkIcon />
 
+        <ArrowLinkZones />
+
         <NoteContent>
           <NoteTextSection section="head" />
 
@@ -32,8 +34,6 @@
         </NoteContent>
 
         <NoteResizeHandles />
-
-        <ArrowLinkZones />
       </NoteFrame>
     </NoteAnchor>
   </Teleport>

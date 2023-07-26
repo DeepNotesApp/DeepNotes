@@ -1,7 +1,7 @@
 <template>
   <q-icon
     class="note-link-icon"
-    v-if="note.react.collab.link"
+    v-if="note.react.link.url"
     :name="note.react.link.external ? 'mdi-launch' : 'mdi-link-variant'"
     :size="note.react.link.external ? '15px' : '16px'"
   />

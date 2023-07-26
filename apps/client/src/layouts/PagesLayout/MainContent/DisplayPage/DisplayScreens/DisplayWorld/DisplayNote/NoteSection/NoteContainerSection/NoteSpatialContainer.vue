@@ -1,6 +1,9 @@
 <template>
   <div
     class="note-spatial-container note-container-frame"
+    :style="{
+      'z-index': page.arrowCreation.react.active ? undefined : 2147483646,
+    }"
     @pointerover.stop="onPointerOver"
     @pointerout.stop="onPointerOut"
     @pointerdown.left.stop="onLeftPointerDown"
@@ -21,10 +24,12 @@
     <div
       style="
         position: absolute;
+
         top: 0;
         right: 0;
         bottom: 0;
         left: 0;
+
         pointer-events: none;
 
         z-index: 2147483646;
@@ -137,26 +142,24 @@ async function onLeftClick(event: MouseEvent) {
 
 <style scoped>
 .note-spatial-container {
-  position: absolute;
-
-  top: 9px;
-  right: 9px;
-  bottom: 9px;
-  left: 9px;
+  flex: 1;
+  margin: 9px;
 
   border-radius: 5px;
 
   background-color: rgba(0, 0, 0, 0.4);
 
   cursor: default;
+
+  display: flex;
+
+  position: relative;
 }
 
 .note-spatial-background {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  flex: 1;
+
+  position: relative;
 
   display: flex;
   flex-direction: column;

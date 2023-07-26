@@ -201,14 +201,14 @@ export class Pages {
 
   async goToPage(
     pageId: string,
-    params?: { fromParent?: boolean; openInNewTab?: boolean; noteId?: string },
+    params?: { fromParent?: boolean; openInNewTab?: boolean; elemId?: string },
   ) {
     mainLogger.sub('Pages.goToPage').info('pageId: %s', pageId);
 
     if (params?.openInNewTab) {
       window.open(
         multiModePath(
-          `/pages/${pageId}${params?.noteId ? `?note=${params?.noteId}` : ''}`,
+          `/pages/${pageId}${params?.elemId ? `?elem=${params?.elemId}` : ''}`,
         ),
         '_blank',
       );
@@ -220,7 +220,7 @@ export class Pages {
       await router().push({
         name: 'page',
         params: { pageId },
-        query: { note: params?.noteId },
+        query: { elem: params?.elemId },
       });
 
       const cachedPage = this.pageCache.get(pageId);
@@ -229,17 +229,22 @@ export class Pages {
         cachedPage != null &&
         cachedPage.react.status === 'success' &&
         !cachedPage.react.loading &&
-        isNanoID(params?.noteId ?? '')
+        isNanoID(params?.elemId ?? '')
       ) {
-        const note = cachedPage.notes.fromId(params?.noteId!);
+        const elem =
+          cachedPage.notes.fromId(params?.elemId!) ??
+          cachedPage.arrows.fromId(params?.elemId!);
 
-        if (note != null) {
-          cachedPage.selection.set(note);
+        if (elem != null) {
+          cachedPage.selection.set(elem);
 
-          const noteElem = note.getElem('note-frame');
+          const elemElem =
+            elem.type === 'note'
+              ? elem.getElem('note-frame')
+              : elem.getHitboxElem();
 
-          if (noteElem != null) {
-            scrollIntoView(noteElem, { centerCamera: true });
+          if (elemElem != null) {
+            scrollIntoView(elemElem, { centerCamera: true });
           }
         }
       }

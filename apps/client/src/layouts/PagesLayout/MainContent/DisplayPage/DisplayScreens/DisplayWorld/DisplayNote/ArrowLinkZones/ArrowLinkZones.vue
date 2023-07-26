@@ -56,5 +56,7 @@ const page = inject<Page>('page')!;
   left: 0;
 
   overflow: visible;
+
+  z-index: 2147483646;
 }
 </style>

@@ -73,6 +73,7 @@
 
     <DeepBtn
       label="Save current version"
+      icon="mdi-content-save"
       color="secondary"
       :disable="page.react.readOnly"
       title="Backup the current version of the page manually"

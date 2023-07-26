@@ -1,9 +1,14 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron';
 import cookie from 'cookie';
 import path from 'path';
 import os from 'os';
 import log from 'electron-log';
 import { autoUpdater } from 'electron-updater';
+import contextMenu from 'electron-context-menu';
+
+contextMenu({
+  showSaveImageAs: true,
+});
 
 log.transports.file.level = 'info';
 
@@ -83,15 +88,8 @@ function createWindow() {
   }
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: {
-        autoHideMenuBar: true,
-        webPreferences: {
-          devTools: false,
-        },
-      },
-    };
+    shell.openExternal(details.url);
+    return { action: 'deny' };
   });
 
   mainWindow.on('closed', () => {

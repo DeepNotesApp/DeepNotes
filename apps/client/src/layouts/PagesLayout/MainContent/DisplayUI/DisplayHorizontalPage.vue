@@ -2,7 +2,7 @@
   <a
     class="horizontal-page"
     :class="{ active }"
-    :href="`/pages/${pageId}`"
+    :href="`https://deepnotes.app/pages/${pageId}`"
     @click.prevent.stop="
       internals.pages.goToPage(pageId, {
         openInNewTab: ($event as MouseEvent).ctrlKey,

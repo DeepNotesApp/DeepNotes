@@ -163,7 +163,7 @@ export class PageFindAndReplace {
     editor.commands.setTextSelection(result);
     editor.commands.focus(undefined, { scrollIntoView: false });
 
-    scrollIntoView(resultElems[this.resultIndex] as HTMLElement, {
+    scrollIntoView(resultElems[this.resultIndex], {
       centerCamera: true,
     });
   }
