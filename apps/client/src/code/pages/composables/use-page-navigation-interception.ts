@@ -41,8 +41,8 @@ export function usePageNavigationInterception() {
         !(
           href.startsWith('/pages/') ||
           href.startsWith('/groups/') ||
-          href.startsWith(`${window.location.origin}/pages/`) ||
-          href.startsWith(`${window.location.origin}/groups/`)
+          href.startsWith('https://deepnotes.app/pages/') ||
+          href.startsWith('https://deepnotes.app/groups/')
         )
       ) {
         mainLogger

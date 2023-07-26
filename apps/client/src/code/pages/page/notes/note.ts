@@ -489,9 +489,7 @@ export class PageNote extends PageElem() implements IPageRegion {
           }
 
           if (
-            this.react.collab.link.startsWith(
-              `${window.location.origin}/pages/`,
-            )
+            this.react.collab.link.startsWith('http://deepnotes.app/pages/')
           ) {
             return false;
           }
