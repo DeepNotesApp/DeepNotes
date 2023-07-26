@@ -67,6 +67,8 @@ watchEffect(() => {
 });
 
 function onLeftPointerDown(event: PointerEvent) {
+  page.editing.stop();
+
   props.arrow.grab(event);
 }
 
