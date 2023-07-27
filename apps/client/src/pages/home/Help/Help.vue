@@ -35,6 +35,15 @@
         </li>
       </ul>
 
+      <Gap style="height: 80px" />
+
+      <div style="font-size: 16px">
+        Have other questions? Feel free to reach out on our socials.<br />
+        We are most active on
+        <a href="https://discord.gg/UaF2gPTUPh"><b>Discord</b></a
+        >.
+      </div>
+
       <Gap style="height: 160px" />
     </ResponsiveContainer>
   </q-page>
