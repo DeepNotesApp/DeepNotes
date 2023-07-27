@@ -62,6 +62,13 @@
           >
             Whitepaper
           </router-link>
+
+          <router-link
+            :to="{ name: 'help' }"
+            class="footer-item"
+          >
+            Help
+          </router-link>
         </div>
 
         <div class="footer-section col-4 col-md-3">
