@@ -27,6 +27,12 @@
             Can I use DeepNotes while offline?
           </router-link>
         </li>
+
+        <li>
+          <router-link :to="{ name: 'help/multi-page-text-search' }">
+            Can I search text across multiple pages?
+          </router-link>
+        </li>
       </ul>
 
       <Gap style="height: 160px" />

@@ -128,6 +128,18 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'multi-page-text-search',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/multi-page-text-search',
+            component: () =>
+              import('src/pages/home/Help/Pages/MultiPageTextSearch.vue'),
+          },
+        ],
+      },
     ],
   },
 
