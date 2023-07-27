@@ -11,11 +11,16 @@
 
       <ul class="question-list">
         <li>
+          <router-link :to="{ name: 'help/forgot-password' }">
+            I've forgotten my password. What can I do?
+          </router-link>
+        </li>
+
+        <li>
           <router-link :to="{ name: 'help/how-to-create-a-group' }">
             How to create a group?
           </router-link>
         </li>
-        <li>Work in progress...</li>
       </ul>
 
       <Gap style="height: 160px" />

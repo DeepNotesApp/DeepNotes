@@ -100,7 +100,19 @@ const routes: RouteRecordRaw[] = [
             path: '',
             name: 'help/how-to-create-a-group',
             component: () =>
-              import('src/pages/home/Help/HowToCreateAGroup.vue'),
+              import('src/pages/home/Help/Pages/HowToCreateAGroup.vue'),
+          },
+        ],
+      },
+      {
+        path: 'forgot-password',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/forgot-password',
+            component: () =>
+              import('src/pages/home/Help/Pages/ForgotPassword.vue'),
           },
         ],
       },

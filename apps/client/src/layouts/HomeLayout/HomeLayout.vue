@@ -39,6 +39,10 @@ body {
       }
     }
 
+    img {
+      max-width: 100%;
+    }
+
     .toolbar-btn {
       height: 46px;
 

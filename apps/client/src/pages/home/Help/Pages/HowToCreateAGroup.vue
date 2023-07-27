@@ -1,0 +1,93 @@
+<template>
+  <div style="font-size: 28px; font-weight: bold">How to create a group?</div>
+
+  <Gap style="height: 36px" />
+
+  <div style="max-width: 700px">
+    You can create private and public groups if you're
+    <b>subscribed to the pro plan</b>.<br />
+
+    <br />
+
+    In order to create a group you have to:
+
+    <ol>
+      <li>
+        <b>Open the New page dialog</b> by clicking on <b>Create new page</b> or
+        <b>Create with options</b> on the expanded right sidebar.<br />
+
+        <br />
+
+        <div>
+          <img
+            style="
+              vertical-align: top;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+            "
+            src="/help/how-to-create-a-group/create-new-page.png"
+          />
+
+          <InlineGap style="width: 24px" />
+
+          <img
+            style="
+              vertical-align: top;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+            "
+            src="/help/how-to-create-a-group/create-with-options.png"
+          />
+        </div>
+
+        <br />
+      </li>
+
+      <li>
+        Select <b>(New group)</b> as the target group of the new page.<br />
+
+        <br />
+
+        <div>
+          <img
+            style="
+              vertical-align: top;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+            "
+            src="/help/how-to-create-a-group/new-page-dialog.png"
+          />
+
+          <InlineGap style="width: 24px" />
+
+          <img
+            style="
+              vertical-align: top;
+              border: 1px solid rgba(255, 255, 255, 0.3);
+            "
+            src="/help/how-to-create-a-group/new-page-dialog-group.png"
+          />
+        </div>
+
+        <br />
+      </li>
+
+      <li>
+        Fill the group creation fields and click Ok.<br />
+
+        <br />
+
+        <img
+          style="
+            vertical-align: top;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+          "
+          src="/help/how-to-create-a-group/new-group.png"
+        />
+      </li>
+    </ol>
+  </div>
+</template>
+
+<script setup lang="ts">
+useMeta(() => ({
+  title: 'How to create a group? - Help - DeepNotes',
+}));
+</script>

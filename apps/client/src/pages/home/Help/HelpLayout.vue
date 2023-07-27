@@ -22,7 +22,9 @@
 
       <Gap style="height: 64px" />
 
-      <router-view />
+      <div style="font-size: 16px">
+        <router-view />
+      </div>
 
       <Gap style="height: 170px" />
     </ResponsiveContainer>
