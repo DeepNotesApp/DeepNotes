@@ -116,6 +116,18 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'offline-usage',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/offline-usage',
+            component: () =>
+              import('src/pages/home/Help/Pages/OfflineUsage.vue'),
+          },
+        ],
+      },
     ],
   },
 

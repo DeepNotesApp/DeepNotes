@@ -21,6 +21,12 @@
             How to create a group?
           </router-link>
         </li>
+
+        <li>
+          <router-link :to="{ name: 'help/offline-usage' }">
+            Can I use DeepNotes while offline?
+          </router-link>
+        </li>
       </ul>
 
       <Gap style="height: 160px" />
