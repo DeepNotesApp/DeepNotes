@@ -93,6 +93,18 @@ const routes: RouteRecordRaw[] = [
         component: () => import('src/pages/home/Help/Help.vue'),
       },
       {
+        path: 'what-is-deepnotes',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/what-is-deepnotes',
+            component: () =>
+              import('src/pages/home/Help/Pages/WhatIsDeepNotes.vue'),
+          },
+        ],
+      },
+      {
         path: 'how-to-create-a-group',
         component: () => import('src/pages/home/Help/HelpLayout.vue'),
         children: [

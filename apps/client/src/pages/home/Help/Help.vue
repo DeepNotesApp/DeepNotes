@@ -11,6 +11,12 @@
 
       <ul class="question-list">
         <li>
+          <router-link :to="{ name: 'help/what-is-deepnotes' }">
+            What is DeepNotes? Also, why?
+          </router-link>
+        </li>
+
+        <li>
           <router-link :to="{ name: 'help/forgot-password' }">
             I've forgotten my password. What can I do?
           </router-link>
