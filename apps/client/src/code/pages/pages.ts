@@ -205,6 +205,8 @@ export class Pages {
   ) {
     mainLogger.sub('Pages.goToPage').info('pageId: %s', pageId);
 
+    // Open in a new tab
+
     if (params?.openInNewTab) {
       window.open(
         multiModePath(
@@ -212,40 +214,43 @@ export class Pages {
         ),
         '_blank',
       );
-    } else {
-      if (params?.fromParent) {
-        this.parentPageId = this.react.pageId;
-      }
+      return;
+    }
 
-      await router().push({
-        name: 'page',
-        params: { pageId },
-        query: { elem: params?.elemId },
-      });
+    if (params?.fromParent && this.react.pageId !== pageId) {
+      this.parentPageId = this.react.pageId;
+    }
 
-      const cachedPage = this.pageCache.get(pageId);
+    this.react.page.editing.stop();
 
-      if (
-        cachedPage != null &&
-        cachedPage.react.status === 'success' &&
-        !cachedPage.react.loading &&
-        isNanoID(params?.elemId ?? '')
-      ) {
-        const elem =
-          cachedPage.notes.fromId(params?.elemId!) ??
-          cachedPage.arrows.fromId(params?.elemId!);
+    await router().push({
+      name: 'page',
+      params: { pageId },
+      query: { elem: params?.elemId },
+    });
 
-        if (elem != null) {
-          cachedPage.selection.set(elem);
+    const cachedPage = this.pageCache.get(pageId);
 
-          const elemElem =
-            elem.type === 'note'
-              ? elem.getElem('note-frame')
-              : elem.getHitboxElem();
+    if (
+      cachedPage != null &&
+      cachedPage.react.status === 'success' &&
+      !cachedPage.react.loading &&
+      isNanoID(params?.elemId ?? '')
+    ) {
+      const elem =
+        cachedPage.notes.fromId(params?.elemId!) ??
+        cachedPage.arrows.fromId(params?.elemId!);
 
-          if (elemElem != null) {
-            scrollIntoView(elemElem, { centerCamera: true });
-          }
+      if (elem != null) {
+        cachedPage.selection.set(elem);
+
+        const elemElem =
+          elem.type === 'note'
+            ? elem.getElem('note-frame')
+            : elem.getHitboxElem();
+
+        if (elemElem != null) {
+          scrollIntoView(elemElem, { centerCamera: true });
         }
       }
     }
