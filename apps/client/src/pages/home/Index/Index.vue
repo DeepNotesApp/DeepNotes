@@ -222,48 +222,6 @@
         </div>
       </div>
 
-      <div>
-        <Gap style="height: 150px" />
-
-        <div style="text-align: center; font-size: 42px; font-weight: bold">
-          Past Highlights
-        </div>
-
-        <Gap style="height: 40px" />
-
-        <div class="row">
-          <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.webp"
-            :date="new Date('2023-07-18')"
-            title="Our r/sideproject Reddit post"
-            href="https://www.reddit.com/r/SideProject/comments/152zluu/i_developed_an_infinite_canvas_notetaking_tool/"
-          >
-            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
-              <span>53 upvotes</span>
-
-              <div style="display: inline-block; width: 8px"></div>
-
-              <span>22 comments</span>
-            </div>
-          </Thumbnail>
-
-          <Thumbnail
-            thumbnail-image="/highlights/reddit-logo.webp"
-            :date="new Date('2023-03-11')"
-            title="Our r/webdev Reddit post"
-            href="https://www.reddit.com/r/webdev/comments/11osv87/i_made_my_dream_notetaking_system/"
-          >
-            <div style="color: rgba(255, 255, 255, 0.7); font-size: 13px">
-              <span>3.0k upvotes</span>
-
-              <div style="display: inline-block; width: 8px"></div>
-
-              <span>194 comments</span>
-            </div>
-          </Thumbnail>
-        </div>
-      </div>
-
       <template v-if="!authStore().loggedIn">
         <Gap style="height: 150px" />
 

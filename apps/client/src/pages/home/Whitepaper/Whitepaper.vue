@@ -253,10 +253,6 @@ const html = marked(`
 }
 
 .q-page :deep() {
-  img {
-    max-width: 100%;
-  }
-
   figcaption {
     margin-top: 8px;
     margin-bottom: 40px;

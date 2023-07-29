@@ -11,12 +11,44 @@
 
       <ul class="question-list">
         <li>
+          <router-link :to="{ name: 'help/what-is-deepnotes' }">
+            What is DeepNotes? Also, why?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/forgot-password' }">
+            I've forgotten my password. What can I do?
+          </router-link>
+        </li>
+
+        <li>
           <router-link :to="{ name: 'help/how-to-create-a-group' }">
             How to create a group?
           </router-link>
         </li>
-        <li>Work in progress...</li>
+
+        <li>
+          <router-link :to="{ name: 'help/offline-usage' }">
+            Can I use DeepNotes while offline?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/multi-page-text-search' }">
+            Can I search text across multiple pages?
+          </router-link>
+        </li>
       </ul>
+
+      <Gap style="height: 80px" />
+
+      <div style="font-size: 16px">
+        Have other questions? Feel free to reach out on our socials.<br />
+        We are most active on
+        <a href="https://discord.gg/UaF2gPTUPh"><b>Discord</b></a
+        >.
+      </div>
 
       <Gap style="height: 160px" />
     </ResponsiveContainer>
