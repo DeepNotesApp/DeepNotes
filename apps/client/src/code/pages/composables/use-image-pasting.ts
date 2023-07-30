@@ -20,6 +20,14 @@ export function useImagePasting() {
           continue;
         }
 
+        if (file.size > 5 * 1024 * 1024) {
+          $quasar().notify({
+            message: 'Cannot upload images larger than 5MB.',
+            color: 'negative',
+          });
+          continue;
+        }
+
         const reader = new FileReader();
 
         reader.addEventListener('loadend', (event) => {
