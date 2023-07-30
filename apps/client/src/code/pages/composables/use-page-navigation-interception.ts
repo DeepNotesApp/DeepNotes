@@ -25,6 +25,13 @@ export function usePageNavigationInterception() {
         return;
       }
 
+      // Prevent navigation from box selection
+
+      if (target.classList.contains('note-spatial-container')) {
+        event.preventDefault();
+        return;
+      }
+
       if (
         event.altKey ||
         internals.mobileAltKey ||
