@@ -465,7 +465,7 @@ export class PageNote extends PageElem() implements IPageRegion {
           return 'pointer';
         }
 
-        return undefined;
+        return 'default';
       }),
 
       color: computed(() =>
