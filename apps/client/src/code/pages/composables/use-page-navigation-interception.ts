@@ -12,6 +12,12 @@ export function usePageNavigationInterception() {
 
       const closestAnchor = target.closest('a');
 
+      if (closestAnchor == null) {
+        return;
+      }
+
+      // Prevent if it's an empty link
+
       const href = closestAnchor?.getAttribute('href') ?? '';
 
       if (!href) {
