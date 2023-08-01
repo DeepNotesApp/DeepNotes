@@ -34,59 +34,9 @@
       </DeepBtn>
 
       <div style="flex: 1; width: 0; display: flex">
-        <div
-          ref="toolbarRef"
-          style="flex: 1; width: 0; display: flex; align-items: center"
-        >
-          <Gap style="width: 8px" />
+        <Gap style="width: 8px" />
 
-          <ToolbarBtnContainer
-            :expanded="basicExpanded"
-            tooltip="Basic"
-            icon="mdi-hammer-wrench"
-          >
-            <BasicBtns />
-          </ToolbarBtnContainer>
-
-          <q-separator
-            vertical
-            style="margin: 6px 7px"
-          />
-
-          <ToolbarBtnContainer
-            :expanded="formattingExpanded"
-            tooltip="Formatting"
-            icon="mdi-format-color-text"
-          >
-            <FormattingBtns />
-          </ToolbarBtnContainer>
-
-          <q-separator
-            vertical
-            style="margin: 6px 7px"
-          />
-
-          <ToolbarBtnContainer
-            :expanded="objectsExpanded"
-            tooltip="Objects"
-            icon="mdi-format-list-numbered"
-          >
-            <ObjectBtns />
-          </ToolbarBtnContainer>
-
-          <q-separator
-            vertical
-            style="margin: 6px 7px"
-          />
-
-          <ToolbarBtnContainer
-            :expanded="alignmentExpanded"
-            tooltip="Alignment"
-            icon="mdi-align-horizontal-left"
-          >
-            <AlignmentBtns />
-          </ToolbarBtnContainer>
-        </div>
+        <ToolbarContent />
 
         <Gap style="width: 8px" />
 
@@ -165,75 +115,14 @@
 
 <script setup lang="ts">
 import { isIncluded } from '@stdlib/misc';
-import { multiModePath, useResizeObserver } from 'src/code/utils/misc';
+import { multiModePath } from 'src/code/utils/misc';
 
 import AccountPopup from './AccountPopup.vue';
-import AlignmentBtns from './AlignmentBtns.vue';
-import BasicBtns from './BasicBtns.vue';
-import FormattingBtns from './FormattingBtns.vue';
 import NotificationsBtn from './Notifications/NotificationsBtn.vue';
-import ObjectBtns from './ObjectBtns.vue';
 import PagesSettingsDialog from './PagesSettingsDialog/PagesSettingsDialog.vue';
-import ToolbarBtnContainer from './ToolbarBtnContainer.vue';
+import ToolbarContent from './ToolbarContent.vue';
 
 const quasarMode = process.env.MODE;
-
-const toolbarRef = ref<HTMLElement>();
-
-let toolbarWidth = 0;
-
-const basicExpanded = ref(false);
-const formattingExpanded = ref(false);
-const objectsExpanded = ref(false);
-const alignmentExpanded = ref(false);
-
-useResizeObserver(
-  () => toolbarRef.value!,
-  async (entry) => {
-    if (toolbarWidth === entry.contentRect.width) {
-      return;
-    }
-
-    toolbarWidth = entry.contentRect.width;
-
-    basicExpanded.value = true;
-    formattingExpanded.value = true;
-    objectsExpanded.value = true;
-    alignmentExpanded.value = true;
-
-    await nextTick();
-
-    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
-      return;
-    }
-
-    alignmentExpanded.value = false;
-
-    await nextTick();
-
-    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
-      return;
-    }
-
-    objectsExpanded.value = false;
-
-    await nextTick();
-
-    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
-      return;
-    }
-
-    formattingExpanded.value = false;
-
-    await nextTick();
-
-    if (toolbarRef.value!.scrollWidth <= toolbarRef.value!.offsetWidth) {
-      return;
-    }
-
-    basicExpanded.value = false;
-  },
-);
 </script>
 
 <style scoped lang="scss">
