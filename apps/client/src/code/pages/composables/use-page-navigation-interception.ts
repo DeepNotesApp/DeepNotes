@@ -12,9 +12,22 @@ export function usePageNavigationInterception() {
 
       const closestAnchor = target.closest('a');
 
+      if (closestAnchor == null) {
+        return;
+      }
+
+      // Prevent if it's an empty link
+
       const href = closestAnchor?.getAttribute('href') ?? '';
 
       if (!href) {
+        event.preventDefault();
+        return;
+      }
+
+      // Prevent navigation from box selection
+
+      if (target.classList.contains('note-spatial-container')) {
         event.preventDefault();
         return;
       }

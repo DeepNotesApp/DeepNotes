@@ -650,6 +650,7 @@
 
       <DeepBtn
         label="Reverse children"
+        icon="mdi-swap-vertical"
         :disable="page.react.readOnly || !note.react.collab.container.enabled"
         color="primary"
         @click="

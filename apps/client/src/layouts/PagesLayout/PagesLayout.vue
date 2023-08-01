@@ -75,6 +75,8 @@ body {
   overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
 
   overflow: hidden;
+
+  position: fixed;
 }
 </style>
 

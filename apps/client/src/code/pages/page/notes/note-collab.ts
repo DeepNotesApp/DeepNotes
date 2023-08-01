@@ -77,7 +77,7 @@ export const INoteCollab = once(() =>
 
       color: z
         .object({
-          inherit: z.boolean().default(true),
+          inherit: z.boolean().default(false),
           value: z.string().default('grey'),
         })
         .default({}),

@@ -115,6 +115,14 @@ async function insertImage() {
       imageBlob = await response.blob();
     }
 
+    if (imageBlob.size > 5 * 1024 * 1024) {
+      $quasar().notify({
+        message: 'Cannot upload images larger than 5MB.',
+        color: 'negative',
+      });
+      return;
+    }
+
     const reader = new FileReader();
 
     reader.addEventListener('loadend', (event) => {
