@@ -156,7 +156,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
           iconSize: '24px',
           disable: (page: Page) =>
             page.react.readOnly || !page.activeElem.react.exists,
-          click: (page: Page) => page.cloning.perform(),
+          click: (page: Page) => page.deleting.perform(),
         },
       ],
     ],
