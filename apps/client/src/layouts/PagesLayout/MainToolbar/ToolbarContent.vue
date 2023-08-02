@@ -82,8 +82,19 @@
   </div>
 </template>
 
-<script lang="ts">
-export type ToolbarButton = {
+<script setup lang="ts">
+import type { Page } from 'src/code/pages/page/page';
+import { unsetNode } from 'src/code/tiptap/utils';
+import {
+  getAltKeyName,
+  getCtrlKeyName,
+  useResizeObserver,
+} from 'src/code/utils/misc';
+
+import InsertImageDialog from './InsertImageDialog.vue';
+import InsertLinkDialog from './InsertLinkDialog.vue';
+
+type ToolbarButton = {
   tooltip: string;
   icon: string;
   iconSize?: string;
@@ -91,15 +102,15 @@ export type ToolbarButton = {
   disable?: (page: Page) => boolean;
   click: (page: Page) => void;
 };
-export type ToolbarButtonSubgroup = ToolbarButton[];
+type ToolbarButtonSubgroup = ToolbarButton[];
 
-export type ToolbarButtonGroup = {
+type ToolbarButtonGroup = {
   tooltip: string;
   icon: string;
   subgroups: ToolbarButtonSubgroup[];
 };
 
-export const toolbarGroups: ToolbarButtonGroup[] = [
+const toolbarGroups: ToolbarButtonGroup[] = [
   {
     tooltip: 'Basic',
     icon: 'mdi-hammer-wrench',
@@ -614,19 +625,6 @@ export const toolbarGroups: ToolbarButtonGroup[] = [
     ],
   },
 ];
-</script>
-
-<script setup lang="ts">
-import type { Page } from 'src/code/pages/page/page';
-import { unsetNode } from 'src/code/tiptap/utils';
-import {
-  getAltKeyName,
-  getCtrlKeyName,
-  useResizeObserver,
-} from 'src/code/utils/misc';
-
-import InsertImageDialog from './InsertImageDialog.vue';
-import InsertLinkDialog from './InsertLinkDialog.vue';
 
 const page = computed(() => internals.pages.react.page);
 
@@ -679,7 +677,7 @@ function calculateToolbarWidth(structure: ToolbarStructure): number {
 }
 
 const toolbarStructure = computed(() => {
-  const structure = toolbarGroups.map((group) => 0);
+  const structure = toolbarGroups.map(() => 0);
 
   for (let i = 0; i < structure.length; ++i) {
     for (let j = 1; j <= toolbarGroups[i].subgroups.length; ++j) {

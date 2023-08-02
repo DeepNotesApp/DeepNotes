@@ -52,17 +52,6 @@
 
           <template v-if="uiStore().loggedIn">
             <q-item
-              v-if="uiStore().width < BREAKPOINT_MD_MIN"
-              clickable
-              :href="multiModePath('/pages')"
-            >
-              <q-item-section avatar>
-                <q-icon name="mdi-note-multiple" />
-              </q-item-section>
-              <q-item-section>Go to pages</q-item-section>
-            </q-item>
-
-            <q-item
               clickable
               :to="{ name: 'account/general' }"
             >
@@ -138,7 +127,6 @@
 import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN, isIncluded } from '@stdlib/misc';
 import { logout } from 'src/code/auth/logout';
 import { selfUserName } from 'src/code/self-user-name';
-import { multiModePath } from 'src/code/utils/misc';
 
 const quasarMode = process.env.MODE;
 </script>
