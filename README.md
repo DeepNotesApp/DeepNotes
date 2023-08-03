@@ -13,6 +13,22 @@ DeepNotes is an open source, end-to-end encrypted infinite canvas note-taking ap
 - **Flexible note system:** Organize your notes in whatever way you want.
 - **Lifelong storage:** Never lose your notes ever again.
 
+## Development
+
+```console
+git clone https://github.com/DeepNotesApp/DeepNotes && cd DeepNotes && cp template.env .env && pnpm install && pnpm run repo:build && docker-compose up -d
+```
+
+(On Windows, use WSL or Git Bash to run the commands above)
+
+1. Run `pnpm run dev` to start the backend servers.
+2. Run one of these commands to start the frontend server:
+   - `pnpm run dev:spa` to start the Single Page Application app.
+   - `pnpm run dev:ssr` to start the Server Side Rendered app.
+   - `pnpm run dev:electron` to start the Electron app.
+   - `pnpm run dev:android` to start the Android app (requires Android Studio).
+   - `pnpm run dev:ios` to start the iOS app (requires Xcode).
+
 ## Special thanks to these libraries for making DeepNotes possible:
 
 - [Vue.js](https://vuejs.org/): Reactivity, component system, and more

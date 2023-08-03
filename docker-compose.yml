@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15.3
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password_here
+      POSTGRES_DB: deepnotes
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./postgres-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  keydb:
+    image: eqalpha/keydb:alpine_x86_64_v6.3.3
+    container_name: keydb
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./keydb.conf:/etc/keydb/redis.conf
+      - ./keydb_data:/data

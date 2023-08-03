@@ -15,3 +15,6 @@ dist
 .DS_Store
 
 deploy-*.sh
+
+postgres_data
+keydb_data

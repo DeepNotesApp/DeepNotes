@@ -10,6 +10,7 @@ import type { DataTransaction } from '@stdlib/data';
 import { allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type { Cluster } from 'ioredis';
+import type { Redis } from 'ioredis';
 import sodium from 'libsodium-wrappers';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
@@ -242,7 +243,7 @@ export async function login({
 }
 
 async function _checkFailedLoginAttempts(input: {
-  redis: Cluster;
+  redis: Redis | Cluster;
 
   ip: string;
   email: string;
@@ -289,7 +290,7 @@ async function _checkFailedLoginAttempts(input: {
 }
 
 async function _incrementFailedLoginAttempts(input: {
-  redis: Cluster;
+  redis: Redis | Cluster;
 
   email: string;
   ip: string;
