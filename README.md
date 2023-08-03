@@ -29,6 +29,8 @@ git clone https://github.com/DeepNotesApp/DeepNotes && cd DeepNotes && cp templa
    - `pnpm run dev:android` to start the Android app (requires Android Studio).
    - `pnpm run dev:ios` to start the iOS app (requires Xcode).
 
+(If you use SPA or SSR, you must access the app through `http://localhost:60379` by default. Other URLs won't work. You can configure the host and ports in the `.env` file.)
+
 ## Special thanks to these libraries for making DeepNotes possible:
 
 - [Vue.js](https://vuejs.org/): Reactivity, component system, and more
