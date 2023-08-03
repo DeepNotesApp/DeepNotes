@@ -10,6 +10,8 @@ import { derivePasswordValues } from 'src/utils/crypto';
 import { registerUser, userRegistrationSchema } from 'src/utils/users';
 import { z } from 'zod';
 
+import { verifyEmail } from './verify-email';
+
 const baseProcedure = publicProcedure.input(
   z
     .object({
@@ -28,7 +30,9 @@ export async function register({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
-  return await ctx.dataAbstraction.transaction(async (dtrx) => {
+  let emailVerificationCode: string | null;
+
+  await ctx.dataAbstraction.transaction(async (dtrx) => {
     // Get user
 
     let user = await UserModel.query()
@@ -79,11 +83,24 @@ export async function register({
 
     // Send email
 
-    await sendRegistrationEmail({
-      email: input.email,
-      emailVerificationCode: user.email_verification_code,
-    });
+    if (process.env.SEND_EMAILS !== 'false') {
+      await sendRegistrationEmail({
+        email: input.email,
+        emailVerificationCode: user.email_verification_code,
+      });
+    }
+
+    emailVerificationCode = user.email_verification_code;
   });
+
+  if (process.env.SEND_EMAILS === 'false') {
+    await verifyEmail({
+      ctx,
+      input: {
+        emailVerificationCode: emailVerificationCode!,
+      },
+    });
+  }
 }
 
 export async function sendRegistrationEmail(input: {

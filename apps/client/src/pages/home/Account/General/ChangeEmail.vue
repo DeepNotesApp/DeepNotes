@@ -82,37 +82,41 @@ async function _changeEmail() {
       password,
     });
 
-    await trpcClient.users.account.emailChange.request.mutate({
+    const response = await trpcClient.users.account.emailChange.request.mutate({
       oldLoginHash: oldDerivedUserValues.loginHash,
 
       newEmail: newEmail.value,
     });
 
-    $quasar().notify({
-      message: 'A verification code has been sent to the new email address.',
-      color: 'positive',
-    });
+    if (response?.emailVerificationCode == null) {
+      $quasar().notify({
+        message: 'A verification code has been sent to the new email address.',
+        color: 'positive',
+      });
+    }
 
     // Finish email change
 
-    const emailVerificationCode = await asyncDialog<string>({
-      html: true,
-      title: 'Verify the new email',
-      message: `Enter the verification code sent to the new email:<br/>
+    const emailVerificationCode =
+      response?.emailVerificationCode ??
+      (await asyncDialog<string>({
+        html: true,
+        title: 'Verify the new email',
+        message: `Enter the verification code sent to the new email:<br/>
         <span style="color: #a0a0a0">
           <span style="color: red">Note</span>: This action will log you out of all devices.
         </span>`,
 
-      color: 'primary',
-      prompt: {
-        model: '',
-        filled: true,
-      },
-      style: {
-        maxWidth: '350px',
-      },
-      cancel: true,
-    });
+        color: 'primary',
+        prompt: {
+          model: '',
+          filled: true,
+        },
+        style: {
+          maxWidth: '350px',
+        },
+        cancel: true,
+      }));
 
     await changeEmail({
       newEmail: newEmail.value,

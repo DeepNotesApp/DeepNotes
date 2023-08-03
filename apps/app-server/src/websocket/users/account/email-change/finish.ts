@@ -202,8 +202,10 @@ export async function changeEmailStep2({
       invalidateAllSessions(ctx.userId, { dtrx }),
     ]);
 
-    await ctx.stripe.customers.update(user.customer_id!, {
-      email: newEmail,
-    });
+    if (user.customer_id != null) {
+      await ctx.stripe.customers.update(user.customer_id!, {
+        email: newEmail,
+      });
+    }
   });
 }

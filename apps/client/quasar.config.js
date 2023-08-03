@@ -17,13 +17,15 @@ const dotenv = require('dotenv');
 
 const env = Object.assign(
   {},
-  require('dotenv-expand').expand(
-    dotenv.config({ path: '../../.env' }).parsed?.DEV
+  require('dotenv-expand').expand({
+    ...dotenv.config({ path: '../../.env' }),
+
+    ...(dotenv.config({ path: '../../.env' }).parsed?.DEV
       ? dotenv.config({ path: '../../.env' }).parsed?.PRODEV
         ? dotenv.config({ path: '../../.env.prodev' })
         : dotenv.config({ path: '../../.env.dev' })
-      : dotenv.config({ path: '../../.env.prod' }),
-  ).parsed,
+      : dotenv.config({ path: '../../.env.prod' })),
+  }).parsed,
   objFromEntries(
     Object.entries(process.env ?? {}).filter(([key]) => /^\w+$/.test(key)),
   ),

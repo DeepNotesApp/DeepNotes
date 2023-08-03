@@ -3,6 +3,8 @@ declare namespace NodeJS {
     DEV?: string;
     STAGING?: string;
 
+    SEND_EMAILS: string;
+
     HOST: string;
 
     APP_SERVER_PORT: string;
