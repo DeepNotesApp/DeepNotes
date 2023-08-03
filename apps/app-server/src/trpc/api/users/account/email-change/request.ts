@@ -74,18 +74,24 @@ export async function request({
 
         // Send email
 
-        await sendMail({
-          from: {
-            name: 'DeepNotes',
-            email: 'account@deepnotes.app',
-          },
-          to: [input.newEmail],
-          subject: 'Verify your email address',
-          html: `
-            Use the following code to verify your email address: <b>${emailVerificationCode}</b>.<br/>
-            If you did not request this action, you can safely ignore this email.
-          `,
-        });
+        if (process.env.SEND_EMAILS !== 'false') {
+          await sendMail({
+            from: {
+              name: 'DeepNotes',
+              email: 'account@deepnotes.app',
+            },
+            to: [input.newEmail],
+            subject: 'Verify your email address',
+            html: `
+              Use the following code to verify your email address: <b>${emailVerificationCode}</b>.<br/>
+              If you did not request this action, you can safely ignore this email.
+            `,
+          });
+        } else {
+          return {
+            emailVerificationCode,
+          };
+        }
       });
     },
   );

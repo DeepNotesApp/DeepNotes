@@ -243,15 +243,24 @@ async function register() {
 
     internals.sessionStorage.setItem('email', email.value);
 
-    $quasar().notify({
-      message: 'Verification email sent.',
-      type: 'positive',
-    });
+    if (process.env.SEND_EMAILS !== 'false') {
+      $quasar().notify({
+        message: 'Verification email sent.',
+        type: 'positive',
+      });
 
-    await router().push({
-      name: 'finish-registration',
-      query: route().value.query,
-    });
+      await router().push({
+        name: 'finish-registration',
+        query: route().value.query,
+      });
+    } else {
+      $quasar().notify({
+        message: 'User registered successfully.',
+        type: 'positive',
+      });
+
+      await router().push({ name: 'login' });
+    }
   } catch (error: any) {
     handleError(error);
   }
