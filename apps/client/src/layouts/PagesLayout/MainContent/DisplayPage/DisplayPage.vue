@@ -39,8 +39,6 @@ const componentLogger = mainLogger.sub('DisplayPage').sub(props.page.id);
 
 const realtimeCtx = useRealtimeContext();
 
-let notifyPageKeyRotation = false;
-
 watchEffect(() => {
   // Subscribe to required values
 
@@ -127,21 +125,6 @@ watchEffect(() => {
     realtimeCtx.changed.size === 1 &&
     realtimeCtx.changed.has(`page:${props.page.id}>encrypted-symmetric-keyring`)
   ) {
-    // Necessary to prevent multiple notifications
-
-    notifyPageKeyRotation = true;
-
-    setTimeout(() => {
-      if (notifyPageKeyRotation) {
-        $quasar().notify({
-          message: 'Successfully rotated page encryption key.',
-          type: 'positive',
-        });
-      }
-
-      notifyPageKeyRotation = false;
-    });
-
     return;
   }
 
