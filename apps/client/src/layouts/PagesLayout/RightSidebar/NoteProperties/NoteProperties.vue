@@ -735,11 +735,33 @@
 
       <div style="flex: 1"></div>
     </div>
+
+    <q-separator />
+
+    <div style="padding: 20px; display: flex; flex-direction: column">
+      <DeepBtn
+        label="Copy as markdown"
+        icon="mdi-content-copy"
+        color="primary"
+        @click="copyAsMarkdown"
+      />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
+        label="Save as markdown"
+        icon="mdi-content-save"
+        color="primary"
+        @click="downloadAsMarkdown"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
+import type { Editor } from '@tiptap/vue-3';
+import { saveAs } from 'file-saver';
 import { pack } from 'msgpackr';
 import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import { createPage } from 'src/code/api-interface/pages/create';
@@ -747,6 +769,7 @@ import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { setClipboardText } from 'src/code/utils/clipboard';
 import { handleError } from 'src/code/utils/misc';
+import TurndownService from 'turndown';
 import type { Ref } from 'vue';
 
 import NewPageDialog from './NewPageDialog.vue';
@@ -847,6 +870,109 @@ async function setAsDefault() {
       type: 'positive',
     });
   } catch (error: any) {
+    handleError(error);
+  }
+}
+
+function noteToMarkdown(note: PageNote) {
+  let markdown = '';
+
+  if (note.react.head.visible && note.react.head.editor != null) {
+    markdown += editorToMarkdown(note.react.head.editor);
+  }
+
+  if (note.react.body.visible && note.react.body.editor != null) {
+    if (note.react.head.visible && note.react.head.editor != null) {
+      markdown += '\n\n---\n\n';
+    }
+
+    markdown += editorToMarkdown(note.react.body.editor);
+  }
+
+  return markdown;
+}
+
+function editorToMarkdown(editor: Editor) {
+  // Prepare HTML
+
+  const parser = new DOMParser();
+  const parsedDoc = parser.parseFromString(editor.getHTML(), 'text/html');
+
+  const divs = parsedDoc.querySelectorAll('li > div');
+
+  for (let i = divs.length - 1; i >= 0; i--) {
+    divs[i].outerHTML = divs[i].innerHTML;
+  }
+
+  const paragraphs = parsedDoc.querySelectorAll('li > p');
+
+  for (let i = paragraphs.length - 1; i >= 0; i--) {
+    paragraphs[i].outerHTML = paragraphs[i].innerHTML;
+  }
+
+  // Convert to markdown
+
+  const turndownService = new TurndownService({
+    headingStyle: 'atx',
+    codeBlockStyle: 'fenced',
+    hr: '---',
+  });
+
+  turndownService.addRule('strikethrough', {
+    filter: ['s' as any],
+    replacement: (content) => `~~${content}~~`,
+  });
+  turndownService.addRule('math-block', {
+    filter: ['math-block' as any],
+    replacement: (content) => `\n\n$$\n${content}\n$$\n\n`,
+  });
+  turndownService.addRule('inline-block', {
+    filter: ['inline-math' as any],
+    replacement: (content) => `$${content}$`,
+  });
+  turndownService.keep(['u', 'sub', 'sup', 'table', 'iframe']);
+
+  return turndownService.turndown(parsedDoc.body.innerHTML);
+}
+
+async function copyAsMarkdown() {
+  await setClipboardText(noteToMarkdown(note.value));
+
+  $quasar().notify({
+    message: 'Saved as markdown.',
+    type: 'positive',
+  });
+}
+
+async function downloadAsMarkdown() {
+  try {
+    const blob = new Blob([noteToMarkdown(note.value)], {
+      type: 'text/plain;charset=utf-8',
+    });
+
+    if ((window as any).showSaveFilePicker == null) {
+      saveAs(blob, 'DeepNotes-note.md');
+    } else {
+      const fileHandle = await (window as any).showSaveFilePicker({
+        types: [
+          {
+            accept: { 'text/markdown': [] },
+          },
+        ],
+      });
+
+      const writable = await fileHandle.createWritable();
+
+      await writable.write(blob);
+
+      await writable.close();
+    }
+
+    $quasar().notify({
+      message: 'Saved as markdown.',
+      type: 'positive',
+    });
+  } catch (error) {
     handleError(error);
   }
 }
