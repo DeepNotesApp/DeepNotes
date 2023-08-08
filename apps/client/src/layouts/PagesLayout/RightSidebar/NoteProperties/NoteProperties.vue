@@ -939,7 +939,7 @@ async function copyAsMarkdown() {
   await setClipboardText(noteToMarkdown(note.value));
 
   $quasar().notify({
-    message: 'Saved as markdown.',
+    message: 'Copied as markdown.',
     type: 'positive',
   });
 }
