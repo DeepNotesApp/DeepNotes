@@ -956,7 +956,8 @@ async function downloadAsMarkdown() {
       const fileHandle = await (window as any).showSaveFilePicker({
         types: [
           {
-            accept: { 'text/markdown': [] },
+            description: 'Markdown file',
+            accept: { 'text/markdown': ['.md'] },
           },
         ],
       });
