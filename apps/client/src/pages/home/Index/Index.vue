@@ -174,31 +174,31 @@
         <div class="row">
           <Thumbnail
             thumbnail-image="/applications/kanban-board-thumbnail.webp"
-            title="Kanban board"
+            title="Kanban boards"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
             thumbnail-image="/applications/history-study-thumbnail.webp"
-            title="Study"
+            title="Studies"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
 
           <Thumbnail
             thumbnail-image="/applications/diagram-thumbnail.webp"
-            title="Diagram"
+            title="Diagrams"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
           <Thumbnail
             thumbnail-image="/applications/link-gallery-thumbnail.webp"
-            title="Link gallery"
+            title="Link galleries"
             href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
           />
 
           <Thumbnail
             thumbnail-image="/applications/family-tree-thumbnail.webp"
-            title="Family tree"
+            title="Family trees"
             href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
@@ -210,13 +210,13 @@
 
           <Thumbnail
             thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database diagram"
+            title="Database diagrams"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
             thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
-            title="Cheat sheet"
+            title="Cheat sheets"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
           />
         </div>

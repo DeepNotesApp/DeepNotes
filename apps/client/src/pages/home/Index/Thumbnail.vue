@@ -46,7 +46,7 @@ defineProps<{
   flex: 1;
   margin: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+  border-radius: 8px;
 
   background-size: contain;
   background-position: center center;

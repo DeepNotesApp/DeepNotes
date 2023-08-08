@@ -147,7 +147,7 @@ const html = marked(`
   8 iterations, 32 MB memory, 1 thread, and 96 bytes output length.
   The output is broken into two parts, where the first 32 bytes are used as the group password key,
   and the remaining 64 bytes are used as the password hash.
-  The password hash is sent to the server to verify on that the password is correct.
+  The password hash is sent to the server to verify that the password is correct.
 
   <br/>
 
