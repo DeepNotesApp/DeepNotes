@@ -839,6 +839,56 @@
         </q-menu>
       </DeepBtn>
     </div>
+
+    <q-separator />
+
+    <div style="padding: 20px; display: flex; flex-direction: column">
+      <div>
+        <b>Created at:</b>
+      </div>
+      <div>
+        {{
+          page.collab.store.notes[note.id]?.createdAt != null
+            ? new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.createdAt)
+            : 'Unknown'
+        }}
+      </div>
+
+      <Gap style="height: 12px" />
+
+      <div>
+        <b>Last edited at:</b>
+      </div>
+      <div>
+        {{
+          page.collab.store.notes[note.id]?.editedAt != null
+            ? new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.editedAt)
+            : 'Unknown'
+        }}
+      </div>
+
+      <Gap style="height: 12px" />
+
+      <div>
+        <b>Last moved at:</b>
+      </div>
+      <div>
+        {{
+          page.collab.store.notes[note.id]?.movedAt != null
+            ? new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.movedAt)
+            : 'Unknown'
+        }}
+      </div>
+    </div>
   </div>
 </template>
 

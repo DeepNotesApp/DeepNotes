@@ -4,6 +4,7 @@ import { refProp, watchUntilTrue } from '@stdlib/vue';
 import type { UnwrapRef } from 'vue';
 
 import type { Page } from '../page';
+import { roundTimeToMinutes } from './date';
 
 export interface IDraggingReact {
   active: boolean;
@@ -204,6 +205,16 @@ export class NoteDragging {
   }
 
   private _dragFinish = () => {
+    if (this.react.active) {
+      const date = roundTimeToMinutes(Date.now());
+
+      for (const selectedNote of this.page.selection.react.notes) {
+        if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
+          selectedNote.react.collab.movedAt = date;
+        }
+      }
+    }
+
     this.react.active = false;
 
     for (const selectedNote of this.page.selection.react.notes) {
