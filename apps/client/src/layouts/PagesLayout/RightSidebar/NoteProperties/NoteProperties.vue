@@ -152,7 +152,7 @@
         icon="mdi-note-plus"
         color="primary"
         split
-        :menu-offset="[0, 1]"
+        :menu-offset="[0, 2]"
         :disable="page.react.readOnly"
         @click="createNewPageQuick()"
       >
@@ -764,20 +764,76 @@
 
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
-        label="Copy as markdown"
-        icon="mdi-content-copy"
+        label="Export"
+        icon="mdi-export"
         color="primary"
-        @click="copyAsMarkdown"
-      />
+      >
+        <q-menu
+          anchor="top left"
+          self="bottom left"
+          :offset="[0, 2]"
+          max-width="244px"
+          auto-close
+        >
+          <q-list class="bg-primary">
+            <q-item
+              clickable
+              @click="copyAsMarkdown({ includeDescendants: false })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-content-copy" />
+              </q-item-section>
 
-      <Gap style="height: 16px" />
+              <q-item-section>
+                <q-item-label>Copy as markdown</q-item-label>
+              </q-item-section>
+            </q-item>
 
-      <DeepBtn
-        label="Download as markdown"
-        icon="mdi-download"
-        color="primary"
-        @click="downloadAsMarkdown"
-      />
+            <q-item
+              clickable
+              @click="copyAsMarkdown({ includeDescendants: true })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-content-copy" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  Copy as markdown (include descendants)
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              clickable
+              @click="downloadAsMarkdown({ includeDescendants: false })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-download" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Download as markdown</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              clickable
+              @click="downloadAsMarkdown({ includeDescendants: true })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-download" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  Download as markdown (include descendants)
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </DeepBtn>
     </div>
   </div>
 </template>
@@ -901,7 +957,7 @@ async function setAsDefault() {
   }
 }
 
-async function createChildFromFile(file: Blob) {
+async function createChildFromFile(file: File) {
   const fileReader = new FileReader();
 
   fileReader.onload = async (event) => {
@@ -976,17 +1032,21 @@ async function createChildFromFile(file: Blob) {
   fileReader.readAsText(file);
 }
 
+async function importChildrenFromFilesAux(files: File[]) {
+  note.value.react.collab.container.enabled = true;
+  note.value.react.collab.container.spatial = false;
+
+  for (const file of files) {
+    await createChildFromFile(file);
+  }
+}
+
 async function onFileChange() {
   if (fileInput.value?.files == null || fileInput.value.files.length === 0) {
     return;
   }
 
-  note.value.react.collab.container.enabled = true;
-  note.value.react.collab.container.spatial = false;
-
-  for (const file of Array.from(fileInput.value.files)) {
-    await createChildFromFile(file);
-  }
+  await importChildrenFromFilesAux(Array.from(fileInput.value.files));
 
   fileInput.value = undefined;
 }
@@ -1004,15 +1064,20 @@ async function importChildrenFromFiles() {
       ],
     });
 
-    note.value.react.collab.container.enabled = true;
+    const files = await Promise.all(
+      fileHandles.map((fileHandle: any) => fileHandle.getFile()),
+    );
 
-    for (const fileHandle of fileHandles) {
-      await createChildFromFile(await fileHandle.getFile());
-    }
+    await importChildrenFromFilesAux(files);
   }
 }
 
-function noteToMarkdown(note: PageNote) {
+function noteToMarkdown(
+  note: PageNote,
+  params: {
+    includeDescendants: boolean;
+  },
+) {
   let markdown = '';
 
   if (note.react.head.visible && note.react.head.editor != null) {
@@ -1025,6 +1090,12 @@ function noteToMarkdown(note: PageNote) {
     }
 
     markdown += editorToMarkdown(note.react.body.editor);
+  }
+
+  if (params.includeDescendants) {
+    for (const childNote of note.react.notes) {
+      markdown += `\n\n---\n\n${noteToMarkdown(childNote, params)}`;
+    }
   }
 
   return markdown;
@@ -1074,8 +1145,12 @@ function editorToMarkdown(editor: Editor) {
   return turndownService.turndown(parsedDoc.body.innerHTML);
 }
 
-async function copyAsMarkdown() {
-  await setClipboardText(noteToMarkdown(note.value));
+async function copyAsMarkdown(params: { includeDescendants: boolean }) {
+  await setClipboardText(
+    noteToMarkdown(note.value, {
+      includeDescendants: params.includeDescendants,
+    }),
+  );
 
   $quasar().notify({
     message: 'Copied as markdown.',
@@ -1083,11 +1158,18 @@ async function copyAsMarkdown() {
   });
 }
 
-async function downloadAsMarkdown() {
+async function downloadAsMarkdown(params: { includeDescendants: boolean }) {
   try {
-    const blob = new Blob([noteToMarkdown(note.value)], {
-      type: 'text/plain;charset=utf-8',
-    });
+    const blob = new Blob(
+      [
+        noteToMarkdown(note.value, {
+          includeDescendants: params.includeDescendants,
+        }),
+      ],
+      {
+        type: 'text/plain;charset=utf-8',
+      },
+    );
 
     if ((window as any).showSaveFilePicker == null) {
       saveAs(blob, 'DeepNotes-note.md');
