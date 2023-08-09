@@ -107,7 +107,7 @@ const editor = internals.tiptap().useEditor({
       const date = roundTimeToMinutes(Date.now());
 
       if (date !== page.collab.store.notes[note.id]?.editedAt) {
-        note.react.collab.editedAt = date;
+        page.collab.store.notes[note.id].editedAt = date;
       }
     }
   },

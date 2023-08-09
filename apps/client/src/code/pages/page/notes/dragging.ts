@@ -210,7 +210,7 @@ export class NoteDragging {
 
       for (const selectedNote of this.page.selection.react.notes) {
         if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
-          selectedNote.react.collab.movedAt = date;
+          this.page.collab.store.notes[selectedNote.id].movedAt = date;
         }
       }
     }
