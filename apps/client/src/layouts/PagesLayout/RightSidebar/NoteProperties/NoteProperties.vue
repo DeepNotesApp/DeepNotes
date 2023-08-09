@@ -679,7 +679,10 @@
       <DeepBtn
         label="Import children from files"
         icon="mdi-import"
-        :disable="page.react.readOnly"
+        :disable="
+          page.react.readOnly ||
+          (note.react.collab.container.enabled && note.react.container.spatial)
+        "
         color="primary"
         @click="importChildrenFromFiles"
       />
@@ -790,6 +793,10 @@
             </q-item>
 
             <q-item
+              v-if="
+                note.react.collab.container.enabled &&
+                note.react.notes.length > 0
+              "
               clickable
               @click="copyAsMarkdown({ includeDescendants: true })"
             >
@@ -818,6 +825,10 @@
             </q-item>
 
             <q-item
+              v-if="
+                note.react.collab.container.enabled &&
+                note.react.notes.length > 0
+              "
               clickable
               @click="downloadAsMarkdown({ includeDescendants: true })"
             >
@@ -1080,21 +1091,35 @@ function noteToMarkdown(
 ) {
   let markdown = '';
 
+  let hasPrevSection = false;
+
   if (note.react.head.visible && note.react.head.editor != null) {
     markdown += editorToMarkdown(note.react.head.editor);
+
+    hasPrevSection = true;
   }
 
   if (note.react.body.visible && note.react.body.editor != null) {
-    if (note.react.head.visible && note.react.head.editor != null) {
+    if (hasPrevSection) {
       markdown += '\n\n---\n\n';
     }
 
     markdown += editorToMarkdown(note.react.body.editor);
+
+    hasPrevSection = true;
   }
 
   if (params.includeDescendants) {
     for (const childNote of note.react.notes) {
-      markdown += `\n\n---\n\n${noteToMarkdown(childNote, params)}`;
+      if (hasPrevSection) {
+        markdown += '\n\n---\n\n';
+      }
+
+      markdown += noteToMarkdown(childNote, {
+        includeDescendants: params.includeDescendants,
+      });
+
+      hasPrevSection = true;
     }
   }
 
