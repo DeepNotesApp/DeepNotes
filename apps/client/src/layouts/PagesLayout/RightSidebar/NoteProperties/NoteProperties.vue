@@ -653,7 +653,6 @@
         icon="mdi-swap-vertical"
         :disable="
           page.react.readOnly ||
-          !note.react.collab.container.enabled ||
           note.react.collab.container.spatial ||
           note.react.notes.length < 2
         "
@@ -793,10 +792,7 @@
             </q-item>
 
             <q-item
-              v-if="
-                note.react.collab.container.enabled &&
-                note.react.notes.length > 0
-              "
+              v-if="note.react.notes.length > 0"
               clickable
               @click="copyAsMarkdown({ includeDescendants: true })"
             >
@@ -825,10 +821,7 @@
             </q-item>
 
             <q-item
-              v-if="
-                note.react.collab.container.enabled &&
-                note.react.notes.length > 0
-              "
+              v-if="note.react.notes.length > 0"
               clickable
               @click="downloadAsMarkdown({ includeDescendants: true })"
             >
