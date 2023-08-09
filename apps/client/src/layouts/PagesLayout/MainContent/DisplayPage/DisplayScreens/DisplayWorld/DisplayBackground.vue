@@ -56,7 +56,10 @@ async function onLeftClick(event: MouseEvent) {
     const clientPos = page.pos.eventToClient(event);
     const worldPos = page.pos.clientToWorld(clientPos);
 
-    await page.notes.create(page, worldPos);
+    await page.notes.create({
+      region: page,
+      worldPos,
+    });
   }
 }
 </script>

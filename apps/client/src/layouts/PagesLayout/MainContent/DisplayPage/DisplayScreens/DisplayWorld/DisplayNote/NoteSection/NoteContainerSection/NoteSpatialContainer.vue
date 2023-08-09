@@ -109,10 +109,10 @@ async function onLeftPointerUp(event: PointerEvent) {
       return;
     }
 
-    const newNote = await page.notes.create(
-      note,
-      page.pos.eventToWorld(event).sub(containerWorldTopLeft),
-    );
+    const newNote = await page.notes.create({
+      region: note,
+      worldPos: page.pos.eventToWorld(event).sub(containerWorldTopLeft),
+    });
 
     if (newNote != null) {
       page.arrowCreation.finish({ note: newNote, anchor: null });
@@ -132,10 +132,10 @@ async function onLeftClick(event: MouseEvent) {
       return;
     }
 
-    await page.notes.create(
-      note,
-      page.pos.eventToWorld(event).sub(containerWorldTopLeft),
-    );
+    await page.notes.create({
+      region: note,
+      worldPos: page.pos.eventToWorld(event).sub(containerWorldTopLeft),
+    });
   }
 }
 </script>

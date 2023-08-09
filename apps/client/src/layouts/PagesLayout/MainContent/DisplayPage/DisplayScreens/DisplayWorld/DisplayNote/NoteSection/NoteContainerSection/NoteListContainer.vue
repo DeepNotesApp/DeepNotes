@@ -146,7 +146,12 @@ async function onLeftClick(event: MouseEvent, destIndex?: number) {
 
     const worldPos = page.sizes.screenToWorld2D(clientPos.sub(clientTopLeft));
 
-    await page.notes.create(note, worldPos, false, destIndex);
+    await page.notes.create({
+      region: note,
+      worldPos,
+      center: false,
+      destIndex,
+    });
   }
 }
 

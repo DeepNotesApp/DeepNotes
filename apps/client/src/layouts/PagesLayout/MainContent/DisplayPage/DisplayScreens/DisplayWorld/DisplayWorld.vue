@@ -72,7 +72,10 @@ async function onLeftPointerUp(event: PointerEvent) {
     const clientPos = page.pos.eventToClient(event);
     const worldPos = page.pos.clientToWorld(clientPos);
 
-    const note = await page.notes.create(page, worldPos);
+    const note = await page.notes.create({
+      region: page,
+      worldPos,
+    });
 
     if (note != null) {
       page.arrowCreation.finish({ note, anchor: null });

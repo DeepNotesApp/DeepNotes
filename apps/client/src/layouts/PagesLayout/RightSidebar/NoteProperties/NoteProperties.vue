@@ -651,13 +651,37 @@
       <DeepBtn
         label="Reverse children"
         icon="mdi-swap-vertical"
-        :disable="page.react.readOnly || !note.react.collab.container.enabled"
+        :disable="
+          page.react.readOnly ||
+          !note.react.collab.container.enabled ||
+          note.react.collab.container.spatial ||
+          note.react.notes.length < 2
+        "
         color="primary"
         @click="
           changeProp($event, (selectedNote, value) => {
             selectedNote.reverseChildren();
           })
         "
+      />
+
+      <Gap style="height: 16px" />
+
+      <input
+        ref="fileInput"
+        style="display: none"
+        type="file"
+        accept=".txt, .md"
+        multiple
+        @change="onFileChange"
+      />
+
+      <DeepBtn
+        label="Import children from files"
+        icon="mdi-import"
+        :disable="page.react.readOnly"
+        color="primary"
+        @click="importChildrenFromFiles"
       />
     </div>
 
@@ -749,8 +773,8 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
-        label="Save as markdown"
-        icon="mdi-content-save"
+        label="Download as markdown"
+        icon="mdi-download"
         color="primary"
         @click="downloadAsMarkdown"
       />
@@ -763,6 +787,7 @@ import { splitStr } from '@stdlib/misc';
 import type { Editor } from '@tiptap/vue-3';
 import { saveAs } from 'file-saver';
 import { pack } from 'msgpackr';
+import showdown from 'showdown';
 import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import { createPage } from 'src/code/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
@@ -777,6 +802,8 @@ import NewPageDialog from './NewPageDialog.vue';
 const page = inject<Ref<Page>>('page')!;
 
 const note = computed(() => page.value.activeElem.react.value as PageNote);
+
+const fileInput = ref<HTMLInputElement>();
 
 function changeProp(value: any, func: (note: PageNote, value: any) => void) {
   page.value.collab.doc.transact(() => {
@@ -874,6 +901,117 @@ async function setAsDefault() {
   }
 }
 
+async function createChildFromFile(file: Blob) {
+  const fileReader = new FileReader();
+
+  fileReader.onload = async (event) => {
+    const content = String(event.target?.result ?? '');
+
+    const childNote = await page.value.notes.create({
+      region: note.value,
+      center: false,
+      edit: false,
+    });
+
+    if (childNote != null) {
+      childNote.react.collab.head.enabled = true;
+      childNote.react.collab.body.enabled = false;
+      childNote.react.collab.container.enabled = false;
+
+      if (file.name.endsWith('.md')) {
+        const converter = new showdown.Converter({
+          emoji: true,
+          parseImgDimensions: true,
+          strikethrough: true,
+          tables: true,
+          underline: true,
+        });
+
+        converter.addExtension(() => [
+          {
+            type: 'output',
+            regex: /\$(.+?)\$/g,
+            replace: '<inline-math>$1</inline-math>',
+          },
+          {
+            type: 'output',
+            regex: /\$\$((?:.|\n)+?)\$\$/g,
+            replace: '<math-block>$1</math-block>',
+          },
+        ]);
+
+        const initialHTML = converter
+          .makeHtml(content)
+          .replaceAll('\n', '')
+          .replaceAll(/<br \/> +/g, '<br />');
+
+        const parser = new DOMParser();
+        const parsedDoc = parser.parseFromString(initialHTML, 'text/html');
+
+        // Fix math blocks
+
+        for (const mathBlock of Array.from(
+          parsedDoc.querySelectorAll('p > math-block'),
+        )) {
+          mathBlock.parentElement!.outerHTML = mathBlock.outerHTML;
+        }
+
+        // Fix blockquotes
+
+        for (const paragraph of Array.from(
+          parsedDoc.querySelectorAll('blockquote > p'),
+        )) {
+          paragraph.parentElement!.innerHTML = paragraph.outerHTML;
+        }
+
+        const finalHTML = parsedDoc.body.innerHTML;
+
+        childNote.react.editors[0]?.commands.insertContent(finalHTML);
+      } else {
+        childNote.react.editors[0]?.commands.insertContent(content);
+      }
+    }
+  };
+
+  fileReader.readAsText(file);
+}
+
+async function onFileChange() {
+  if (fileInput.value?.files == null || fileInput.value.files.length === 0) {
+    return;
+  }
+
+  note.value.react.collab.container.enabled = true;
+  note.value.react.collab.container.spatial = false;
+
+  for (const file of Array.from(fileInput.value.files)) {
+    await createChildFromFile(file);
+  }
+
+  fileInput.value = undefined;
+}
+
+async function importChildrenFromFiles() {
+  if ((window as any).showOpenFilePicker == null) {
+    fileInput.value?.click();
+  } else {
+    const fileHandles = await (window as any).showOpenFilePicker({
+      types: [
+        {
+          description: 'Markdown file',
+          accept: { 'text/markdown': ['.md'] },
+        },
+      ],
+    });
+
+    note.value.react.collab.container.enabled = true;
+
+    for (const fileHandle of fileHandles) {
+      await createChildFromFile(await fileHandle.getFile());
+    }
+  }
+}
+
 function noteToMarkdown(note: PageNote) {
   let markdown = '';
 
@@ -913,8 +1051,9 @@ function editorToMarkdown(editor: Editor) {
   // Convert to markdown
 
   const turndownService = new TurndownService({
-    headingStyle: 'atx',
     codeBlockStyle: 'fenced',
+    emDelimiter: '*',
+    headingStyle: 'atx',
     hr: '---',
   });
 
@@ -970,7 +1109,7 @@ async function downloadAsMarkdown() {
     }
 
     $quasar().notify({
-      message: 'Saved as markdown.',
+      message: 'Downloaded as markdown.',
       type: 'positive',
     });
   } catch (error) {
