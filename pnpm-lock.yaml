@@ -464,6 +464,9 @@ importers:
       serialize-javascript:
         specifier: 6.0.0
         version: 6.0.0
+      showdown:
+        specifier: ^2.1.0
+        version: 2.1.0
       superjson:
         specifier: npm:@deepnotes/superjson@1.12.4
         version: /@deepnotes/superjson@1.12.4
@@ -537,6 +540,9 @@ importers:
       '@types/qrcode':
         specifier: 1.5.0
         version: 1.5.0
+      '@types/showdown':
+        specifier: ^2.0.1
+        version: 2.0.1
       '@types/turndown':
         specifier: ^5.0.1
         version: 5.0.1
@@ -3904,6 +3910,10 @@ packages:
       '@types/http-errors': 2.0.1
       '@types/mime': 3.0.1
       '@types/node': 18.15.11
+    dev: true
+
+  /@types/showdown@2.0.1:
+    resolution: {integrity: sha512-xdnAw2nFqomkaL0QdtEk0t7yz26UkaVPl4v1pYJvtE1T0fmfQEH3JaxErEhGByEAl3zUZrkNBlneuJp0WJGqEA==}
     dev: true
 
   /@types/slice-ansi@4.0.0:
@@ -12519,6 +12529,13 @@ packages:
   /shell-quote@1.7.4:
     resolution: {integrity: sha512-8o/QEhSSRb1a5i7TFR0iM4G16Z0vYB2OQVs4G3aAFXjn3T6yEx8AZxy1PgDF7I00LZHYA3WxaSYIf5e5sAX8Rw==}
     dev: true
+
+  /showdown@2.1.0:
+    resolution: {integrity: sha512-/6NVYu4U819R2pUIk79n67SYgJHWCce0a5xTP979WbNp0FL9MN1I1QK662IDU1b6JzKTvmhgI7T7JYIxBi3kMQ==}
+    hasBin: true
+    dependencies:
+      commander: 9.4.1
+    dev: false
 
   /sib-api-v3-typescript@2.2.2:
     resolution: {integrity: sha512-GSB/osL9FmGciwUIq6m8+7VtsMD/SsNJMKSw8anScuzYywkM927J0cNZH/gBw9MDECFGripqMgrtXBYThSgFAg==}
