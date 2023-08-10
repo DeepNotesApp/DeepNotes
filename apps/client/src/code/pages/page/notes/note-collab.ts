@@ -83,6 +83,10 @@ export const INoteCollab = once(() =>
         .default({}),
 
       zIndex: z.number().default(-1),
+
+      createdAt: z.number().nullable().default(null),
+      editedAt: z.number().nullable().default(null),
+      movedAt: z.number().nullable().default(null),
     }),
   ),
 );

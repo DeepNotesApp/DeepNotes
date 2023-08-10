@@ -18,6 +18,7 @@
 
 <script setup lang="ts">
 import { Y } from '@syncedstore/core';
+import { roundTimeToMinutes } from 'src/code/pages/page/notes/date';
 import type { NoteTextSection, PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { useResizeObserver } from 'src/code/utils/misc';
@@ -99,8 +100,16 @@ const editor = internals.tiptap().useEditor({
     note.react[props.section].editor = null;
   },
 
-  onUpdate() {
+  onUpdate({ editor, transaction }) {
     void updateOverflow();
+
+    if (editor.isEditable && transaction.docChanged) {
+      const date = roundTimeToMinutes(Date.now());
+
+      if (date !== page.collab.store.notes[note.id]?.editedAt) {
+        page.collab.store.notes[note.id].editedAt = date;
+      }
+    }
   },
 
   onFocus() {

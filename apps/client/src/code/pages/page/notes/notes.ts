@@ -1,4 +1,5 @@
 import { Vec2 } from '@stdlib/misc';
+import { watchUntilTrue } from '@stdlib/vue';
 import type { Y } from '@syncedstore/core';
 import { getYjsValue } from '@syncedstore/core';
 import type { Factories } from 'src/code/factories';
@@ -113,28 +114,34 @@ export class PageNotes {
     );
   }
 
-  async create(
-    region: PageRegion,
-    worldPos: Vec2,
-    center = true,
-    destIndex?: number,
-  ) {
+  async create(params: {
+    region: PageRegion;
+    worldPos?: Vec2;
+    center?: boolean;
+    destIndex?: number;
+    edit?: boolean;
+  }) {
     if (this.page.react.readOnly) {
       return;
     }
 
     const note = this.page.app.serialization.deserialize(
       internals.pages.defaultNote,
-      region,
-      destIndex,
+      params.region,
+      params?.destIndex,
     ).notes[0];
 
-    await this.page.editing.start(note);
+    await nextTick();
+    await watchUntilTrue(() => note.react.loaded);
 
-    note.react.collab.pos.x = worldPos.x;
-    note.react.collab.pos.y = worldPos.y;
+    if (params.edit !== false) {
+      await this.page.editing.start(note);
+    }
 
-    if (center) {
+    note.react.collab.pos.x = params?.worldPos?.x ?? 0;
+    note.react.collab.pos.y = params?.worldPos?.y ?? 0;
+
+    if (params?.center !== false) {
       const worldSize = note.getWorldRect('note-frame')?.size;
 
       if (worldSize != null) {

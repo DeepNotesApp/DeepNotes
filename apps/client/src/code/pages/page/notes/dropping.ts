@@ -1,6 +1,7 @@
 import { Vec2 } from '@stdlib/misc';
 
 import type { Page } from '../page';
+import { roundTimeToMinutes } from './date';
 import type { PageNote } from './note';
 
 export class NoteDropping {
@@ -11,12 +12,16 @@ export class NoteDropping {
   }
 
   async perform(parentNote: PageNote, dropIndex?: number) {
+    this.page.dragging.finalRegionId = parentNote.id;
+
     this.page.collab.doc.transact(() => {
       const containerWorldPos = parentNote.getContainerWorldRect()?.topLeft;
 
       if (containerWorldPos == null) {
         return;
       }
+
+      const date = roundTimeToMinutes(Date.now());
 
       for (const selectedNote of this.page.selection.react.notes) {
         const newPos = new Vec2(selectedNote.react.collab.pos).sub(
@@ -25,6 +30,10 @@ export class NoteDropping {
 
         selectedNote.react.collab.pos.x = newPos.x;
         selectedNote.react.collab.pos.y = newPos.y;
+
+        if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
+          this.page.collab.store.notes[selectedNote.id].movedAt = date;
+        }
       }
     });
 

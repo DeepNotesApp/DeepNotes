@@ -59,6 +59,9 @@ export const IArrowCollab = once(() =>
     color: z.string().default('grey'),
 
     readOnly: z.boolean().default(false),
+
+    createdAt: z.number().nullable().default(null),
+    editedAt: z.number().nullable().default(null),
   }),
 );
 export type IArrowCollabInput = z.input<ReturnType<typeof IArrowCollab>>;

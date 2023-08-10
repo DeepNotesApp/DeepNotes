@@ -152,7 +152,7 @@
         icon="mdi-note-plus"
         color="primary"
         split
-        :menu-offset="[0, 1]"
+        :menu-offset="[0, 2]"
         :disable="page.react.readOnly"
         @click="createNewPageQuick()"
       >
@@ -235,6 +235,57 @@
       </div>
     </div>
 
+    <template
+      v-if="
+        page.collab.store.notes[note.id]?.createdAt != null ||
+        page.collab.store.notes[note.id]?.editedAt != null ||
+        page.collab.store.notes[note.id]?.movedAt != null
+      "
+    >
+      <q-separator />
+
+      <div style="padding: 16px 20px; display: flex; flex-direction: column">
+        <div v-if="page.collab.store.notes[note.id]?.createdAt != null">
+          <b>Created at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id].createdAt!)
+            }}
+          </span>
+        </div>
+
+        <div v-if="page.collab.store.notes[note.id]?.editedAt != null">
+          <b>Edited at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id].editedAt!)
+            }}
+          </span>
+        </div>
+
+        <div
+          v-if="page.collab.store.notes[note.id]?.movedAt != null"
+          title="The last time this note was moved between containers"
+        >
+          <b>Moved at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id].movedAt!)
+            }}
+          </span>
+        </div>
+      </div>
+    </template>
+
     <q-separator />
 
     <div style="padding: 20px; display: flex; flex-direction: column">
@@ -255,13 +306,9 @@
           }
         "
       />
-    </div>
 
-    <q-separator />
+      <Gap style="height: 16px" />
 
-    <!-- Default -->
-
-    <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Set as default note style"
         icon="mdi-content-save"
@@ -651,13 +698,39 @@
       <DeepBtn
         label="Reverse children"
         icon="mdi-swap-vertical"
-        :disable="page.react.readOnly || !note.react.collab.container.enabled"
+        :disable="
+          page.react.readOnly ||
+          note.react.collab.container.spatial ||
+          note.react.notes.length < 2
+        "
         color="primary"
         @click="
           changeProp($event, (selectedNote, value) => {
             selectedNote.reverseChildren();
           })
         "
+      />
+
+      <Gap style="height: 16px" />
+
+      <input
+        ref="fileInput"
+        style="display: none"
+        type="file"
+        accept=".txt, .md"
+        multiple
+        @change="onFileChange"
+      />
+
+      <DeepBtn
+        label="Import children from files"
+        icon="mdi-import"
+        :disable="
+          page.react.readOnly ||
+          (note.react.collab.container.enabled && note.react.container.spatial)
+        "
+        color="primary"
+        @click="importChildrenFromFiles"
       />
     </div>
 
@@ -740,20 +813,78 @@
 
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
-        label="Copy as markdown"
-        icon="mdi-content-copy"
+        label="Export"
+        icon="mdi-export"
         color="primary"
-        @click="copyAsMarkdown"
-      />
+      >
+        <q-menu
+          anchor="top middle"
+          self="bottom middle"
+          :offset="[0, 2]"
+          style="width: 244px"
+          auto-close
+        >
+          <q-list class="bg-primary">
+            <q-item
+              clickable
+              @click="copyAsMarkdown({ includeDescendants: false })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-content-copy" />
+              </q-item-section>
 
-      <Gap style="height: 16px" />
+              <q-item-section>
+                <q-item-label>Copy as markdown</q-item-label>
+              </q-item-section>
+            </q-item>
 
-      <DeepBtn
-        label="Save as markdown"
-        icon="mdi-content-save"
-        color="primary"
-        @click="downloadAsMarkdown"
-      />
+            <q-item
+              v-if="note.react.notes.length > 0"
+              clickable
+              @click="copyAsMarkdown({ includeDescendants: true })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-content-copy" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  Copy as markdown (include descendants)
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              clickable
+              @click="downloadAsMarkdown({ includeDescendants: false })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-download" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>Download as markdown</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item
+              v-if="note.react.notes.length > 0"
+              clickable
+              @click="downloadAsMarkdown({ includeDescendants: true })"
+            >
+              <q-item-section avatar>
+                <q-icon name="mdi-download" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>
+                  Download as markdown (include descendants)
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </DeepBtn>
     </div>
   </div>
 </template>
@@ -763,6 +894,7 @@ import { splitStr } from '@stdlib/misc';
 import type { Editor } from '@tiptap/vue-3';
 import { saveAs } from 'file-saver';
 import { pack } from 'msgpackr';
+import showdown from 'showdown';
 import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import { createPage } from 'src/code/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
@@ -777,6 +909,8 @@ import NewPageDialog from './NewPageDialog.vue';
 const page = inject<Ref<Page>>('page')!;
 
 const note = computed(() => page.value.activeElem.react.value as PageNote);
+
+const fileInput = ref<HTMLInputElement>();
 
 function changeProp(value: any, func: (note: PageNote, value: any) => void) {
   page.value.collab.doc.transact(() => {
@@ -874,19 +1008,161 @@ async function setAsDefault() {
   }
 }
 
-function noteToMarkdown(note: PageNote) {
-  let markdown = '';
+async function createChildFromFile(file: File) {
+  const fileReader = new FileReader();
 
-  if (note.react.head.visible && note.react.head.editor != null) {
-    markdown += editorToMarkdown(note.react.head.editor);
+  fileReader.onload = async (event) => {
+    const content = String(event.target?.result ?? '');
+
+    const childNote = await page.value.notes.create({
+      region: note.value,
+      center: false,
+      edit: false,
+    });
+
+    if (childNote != null) {
+      childNote.react.collab.head.enabled = true;
+      childNote.react.collab.body.enabled = false;
+      childNote.react.collab.container.enabled = false;
+
+      if (file.name.endsWith('.md')) {
+        const converter = new showdown.Converter({
+          emoji: true,
+          parseImgDimensions: true,
+          strikethrough: true,
+          tables: true,
+          underline: true,
+        });
+
+        converter.addExtension(() => [
+          {
+            type: 'output',
+            regex: /\$(.+?)\$/g,
+            replace: '<inline-math>$1</inline-math>',
+          },
+          {
+            type: 'output',
+            regex: /\$\$((?:.|\n)+?)\$\$/g,
+            replace: '<math-block>$1</math-block>',
+          },
+        ]);
+
+        const initialHTML = converter
+          .makeHtml(content)
+          .replaceAll('\n', '')
+          .replaceAll(/<br \/> +/g, '<br />');
+
+        const parser = new DOMParser();
+        const parsedDoc = parser.parseFromString(initialHTML, 'text/html');
+
+        // Fix math blocks
+
+        for (const mathBlock of Array.from(
+          parsedDoc.querySelectorAll('p > math-block'),
+        )) {
+          mathBlock.parentElement!.outerHTML = mathBlock.outerHTML;
+        }
+
+        // Fix blockquotes
+
+        for (const paragraph of Array.from(
+          parsedDoc.querySelectorAll('blockquote > p'),
+        )) {
+          paragraph.parentElement!.innerHTML = paragraph.outerHTML;
+        }
+
+        const finalHTML = parsedDoc.body.innerHTML;
+
+        childNote.react.editors[0]?.commands.insertContent(finalHTML);
+      } else {
+        childNote.react.editors[0]?.commands.insertContent(content);
+      }
+    }
+  };
+
+  fileReader.readAsText(file);
+}
+
+async function importChildrenFromFilesAux(files: File[]) {
+  note.value.react.collab.container.enabled = true;
+  note.value.react.collab.container.spatial = false;
+
+  for (const file of files) {
+    await createChildFromFile(file);
+  }
+}
+
+async function onFileChange() {
+  if (fileInput.value?.files == null || fileInput.value.files.length === 0) {
+    return;
   }
 
-  if (note.react.body.visible && note.react.body.editor != null) {
-    if (note.react.head.visible && note.react.head.editor != null) {
+  await importChildrenFromFilesAux(Array.from(fileInput.value.files));
+
+  fileInput.value = undefined;
+}
+
+async function importChildrenFromFiles() {
+  if ((window as any).showOpenFilePicker == null) {
+    fileInput.value?.click();
+  } else {
+    const fileHandles = await (window as any).showOpenFilePicker({
+      multiple: true,
+
+      types: [
+        {
+          description: 'Markdown file',
+          accept: { 'text/markdown': ['.md'] },
+        },
+      ],
+    });
+
+    const files = await Promise.all(
+      fileHandles.map((fileHandle: any) => fileHandle.getFile()),
+    );
+
+    await importChildrenFromFilesAux(files);
+  }
+}
+
+function noteToMarkdown(
+  note: PageNote,
+  params: {
+    includeDescendants: boolean;
+  },
+) {
+  let markdown = '';
+
+  let hasPrevSection = false;
+
+  if (note.react.collab.head.enabled && note.react.head.editor != null) {
+    markdown += editorToMarkdown(note.react.head.editor);
+
+    hasPrevSection = true;
+  }
+
+  if (note.react.collab.body.enabled && note.react.body.editor != null) {
+    if (hasPrevSection) {
       markdown += '\n\n---\n\n';
     }
 
     markdown += editorToMarkdown(note.react.body.editor);
+
+    hasPrevSection = true;
+  }
+
+  if (params.includeDescendants) {
+    for (const childNote of note.react.notes) {
+      if (hasPrevSection) {
+        markdown += '\n\n---\n\n';
+      }
+
+      markdown += noteToMarkdown(childNote, {
+        includeDescendants: params.includeDescendants,
+      });
+
+      hasPrevSection = true;
+    }
   }
 
   return markdown;
@@ -913,8 +1189,9 @@ function editorToMarkdown(editor: Editor) {
   // Convert to markdown
 
   const turndownService = new TurndownService({
-    headingStyle: 'atx',
     codeBlockStyle: 'fenced',
+    emDelimiter: '*',
+    headingStyle: 'atx',
     hr: '---',
   });
 
@@ -935,20 +1212,31 @@ function editorToMarkdown(editor: Editor) {
   return turndownService.turndown(parsedDoc.body.innerHTML);
 }
 
-async function copyAsMarkdown() {
-  await setClipboardText(noteToMarkdown(note.value));
+async function copyAsMarkdown(params: { includeDescendants: boolean }) {
+  await setClipboardText(
+    noteToMarkdown(note.value, {
+      includeDescendants: params.includeDescendants,
+    }),
+  );
 
   $quasar().notify({
-    message: 'Saved as markdown.',
+    message: 'Copied as markdown.',
     type: 'positive',
   });
 }
 
-async function downloadAsMarkdown() {
+async function downloadAsMarkdown(params: { includeDescendants: boolean }) {
   try {
-    const blob = new Blob([noteToMarkdown(note.value)], {
-      type: 'text/plain;charset=utf-8',
-    });
+    const blob = new Blob(
+      [
+        noteToMarkdown(note.value, {
+          includeDescendants: params.includeDescendants,
+        }),
+      ],
+      {
+        type: 'text/plain;charset=utf-8',
+      },
+    );
 
     if ((window as any).showSaveFilePicker == null) {
       saveAs(blob, 'DeepNotes-note.md');
@@ -956,7 +1244,8 @@ async function downloadAsMarkdown() {
       const fileHandle = await (window as any).showSaveFilePicker({
         types: [
           {
-            accept: { 'text/markdown': [] },
+            description: 'Markdown file',
+            accept: { 'text/markdown': ['.md'] },
           },
         ],
       });
@@ -969,7 +1258,7 @@ async function downloadAsMarkdown() {
     }
 
     $quasar().notify({
-      message: 'Saved as markdown.',
+      message: 'Downloaded as markdown.',
       type: 'positive',
     });
   } catch (error) {

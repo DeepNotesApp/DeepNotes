@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { Y } from '@syncedstore/core';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
+import { roundTimeToMinutes } from 'src/code/pages/page/notes/date';
 import type { Page } from 'src/code/pages/page/page';
 import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
 import { createDoubleClickChecker } from 'src/code/utils/misc';
@@ -66,6 +67,16 @@ const editor = internals.tiptap().useEditor({
   },
   onDestroy() {
     props.arrow!.react.editor = null;
+  },
+
+  onUpdate({ editor, transaction }) {
+    if (editor.isEditable && transaction.docChanged) {
+      const date = roundTimeToMinutes(Date.now());
+
+      if (date !== page.collab.store.arrows[props.arrow.id]?.editedAt) {
+        page.collab.store.arrows[props.arrow.id].editedAt = date;
+      }
+    }
   },
 });
 

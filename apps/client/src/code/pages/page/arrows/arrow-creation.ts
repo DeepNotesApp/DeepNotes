@@ -10,6 +10,7 @@ import {
 
 import { ISerialArrow } from '../../serialization';
 import { makeSlim } from '../../slim';
+import { roundTimeToMinutes } from '../notes/date';
 import type { PageNote } from '../notes/note';
 import type { Page } from '../page';
 import type { IArrowCollabInput, PageArrow } from './arrow';
@@ -125,6 +126,9 @@ export class PageArrowCreation {
       internals.tiptap().schema,
       this.fakeArrow.react.collab.label,
     );
+
+    newCollab.createdAt = roundTimeToMinutes(Date.now());
+    newCollab.editedAt = null;
 
     // Insert arrow into document
 

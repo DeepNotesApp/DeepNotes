@@ -202,10 +202,14 @@ export class PageNote extends PageElem() implements IPageRegion {
       }),
 
       notes: computed(() =>
-        this.page.notes.fromIds(this.react.collab?.noteIds ?? [], this.id),
+        this.react.collab?.container.enabled
+          ? this.page.notes.fromIds(this.react.collab?.noteIds ?? [], this.id)
+          : [],
       ),
       arrows: computed(() =>
-        this.page.arrows.fromIds(this.react.collab?.arrowIds ?? []),
+        this.react.collab?.container.enabled
+          ? this.page.arrows.fromIds(this.react.collab?.arrowIds ?? [])
+          : [],
       ),
       elems: computed(() =>
         (this.react.notes as (PageNote | PageArrow)[]).concat(

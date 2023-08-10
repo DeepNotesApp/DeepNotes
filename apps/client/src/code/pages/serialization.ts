@@ -9,6 +9,7 @@ import { z } from 'zod';
 import type { IArrowCollabInput, PageArrow } from './page/arrows/arrow';
 import { IArrowCollabDefault } from './page/arrows/arrow';
 import { IArrowCollab } from './page/arrows/arrow';
+import { roundTimeToMinutes } from './page/notes/date';
 import type { PageNote } from './page/notes/note';
 import type { INoteCollabPartial } from './page/notes/note-collab';
 import { INoteCollab, INoteCollabDefault } from './page/notes/note-collab';
@@ -363,6 +364,10 @@ export class Serialization {
       INoteCollabDefault(),
     );
 
+    noteCollab.createdAt = roundTimeToMinutes(Date.now());
+    noteCollab.editedAt = null;
+    noteCollab.movedAt = null;
+
     const noteId = nanoid();
 
     noteMap.set(noteIndex, noteId);
@@ -415,24 +420,7 @@ export class Serialization {
     destRegionId: string,
     destRegionCollab: IRegionCollabOutput,
   ) {
-    const arrowCollab = this.parseArrowCollab(
-      serialArrow,
-      destRegionId,
-      noteMap,
-    );
-
-    const arrowId = nanoid();
-
-    destRegionCollab.arrowIds.push(arrowId);
-
-    internals.pages.react.page.arrows.react.collab[arrowId] = arrowCollab;
-  }
-  parseArrowCollab(
-    serialArrow: ISerialArrowOutput,
-    destRegionId: string,
-    noteMap = new Map<number, string>(),
-  ) {
-    return makeSlim(
+    const arrowCollab = makeSlim(
       IArrowCollab().parse({
         ...serialArrow,
 
@@ -448,5 +436,14 @@ export class Serialization {
       } as IArrowCollabInput),
       IArrowCollabDefault(),
     );
+
+    arrowCollab.createdAt = roundTimeToMinutes(Date.now());
+    arrowCollab.editedAt = null;
+
+    const arrowId = nanoid();
+
+    destRegionCollab.arrowIds.push(arrowId);
+
+    internals.pages.react.page.arrows.react.collab[arrowId] = arrowCollab;
   }
 }
