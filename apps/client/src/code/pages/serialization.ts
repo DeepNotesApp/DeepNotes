@@ -9,6 +9,7 @@ import { z } from 'zod';
 import type { IArrowCollabInput, PageArrow } from './page/arrows/arrow';
 import { IArrowCollabDefault } from './page/arrows/arrow';
 import { IArrowCollab } from './page/arrows/arrow';
+import { roundTimeToMinutes } from './page/notes/date';
 import type { PageNote } from './page/notes/note';
 import type { INoteCollabPartial } from './page/notes/note-collab';
 import { INoteCollab, INoteCollabDefault } from './page/notes/note-collab';
@@ -362,6 +363,12 @@ export class Serialization {
       } as INoteCollabPartial),
       INoteCollabDefault(),
     );
+
+    const date = roundTimeToMinutes(Date.now());
+
+    noteCollab.createdAt = date;
+    noteCollab.movedAt = date;
+    noteCollab.editedAt = date;
 
     const noteId = nanoid();
 
