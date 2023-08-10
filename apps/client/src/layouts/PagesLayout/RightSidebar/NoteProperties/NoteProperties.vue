@@ -235,55 +235,56 @@
       </div>
     </div>
 
-    <q-separator />
-
-    <div
+    <template
       v-if="
         page.collab.store.notes[note.id]?.createdAt != null ||
         page.collab.store.notes[note.id]?.editedAt != null ||
         page.collab.store.notes[note.id]?.movedAt != null
       "
-      style="padding: 16px 20px; display: flex; flex-direction: column"
     >
-      <div v-if="page.collab.store.notes[note.id]?.createdAt != null">
-        <b>Created at: </b>
-        <span style="font-size: 13px">
-          {{
-            new Intl.DateTimeFormat('en', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }).format(page.collab.store.notes[note.id]?.createdAt)
-          }}
-        </span>
-      </div>
+      <q-separator />
 
-      <div v-if="page.collab.store.notes[note.id]?.editedAt != null">
-        <b>Edited at: </b>
-        <span style="font-size: 13px">
-          {{
-            new Intl.DateTimeFormat('en', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }).format(page.collab.store.notes[note.id]?.editedAt)
-          }}
-        </span>
-      </div>
+      <div style="padding: 16px 20px; display: flex; flex-direction: column">
+        <div v-if="page.collab.store.notes[note.id]?.createdAt != null">
+          <b>Created at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.createdAt)
+            }}
+          </span>
+        </div>
 
-      <div
-        v-if="page.collab.store.notes[note.id]?.movedAt != null"
-        title="The last time this note was moved between containers"
-      >
-        <b>Moved at: </b>
-        <span style="font-size: 13px">
-          {{
-            new Intl.DateTimeFormat('en', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }).format(page.collab.store.notes[note.id]?.movedAt)
-          }}
-        </span>
+        <div v-if="page.collab.store.notes[note.id]?.editedAt != null">
+          <b>Edited at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.editedAt)
+            }}
+          </span>
+        </div>
+
+        <div
+          v-if="page.collab.store.notes[note.id]?.movedAt != null"
+          title="The last time this note was moved between containers"
+        >
+          <b>Moved at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.notes[note.id]?.movedAt)
+            }}
+          </span>
+        </div>
       </div>
-    </div>
+    </template>
 
     <q-separator />
 
