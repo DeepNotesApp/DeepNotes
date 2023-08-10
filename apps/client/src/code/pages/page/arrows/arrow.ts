@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { colorNameToColorHex } from '../../colors';
 import type { IElemReact } from '../elems/elem';
 import { IElemCollab, PageElem } from '../elems/elem';
+import { roundTimeToMinutes } from '../notes/date';
 import type { PageNote } from '../notes/note';
 import type { Page } from '../page';
 import type { PageRegion } from '../regions/region';
@@ -59,6 +60,9 @@ export const IArrowCollab = once(() =>
     color: z.string().default('grey'),
 
     readOnly: z.boolean().default(false),
+
+    createdAt: z.number().default(() => roundTimeToMinutes(Date.now())),
+    editedAt: z.number().default(() => roundTimeToMinutes(Date.now())),
   }),
 );
 export type IArrowCollabInput = z.input<ReturnType<typeof IArrowCollab>>;

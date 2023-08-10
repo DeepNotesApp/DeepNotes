@@ -267,13 +267,9 @@
           }
         "
       />
-    </div>
 
-    <q-separator />
+      <Gap style="height: 12px" />
 
-    <!-- Default -->
-
-    <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Set as default arrow style"
         icon="mdi-content-save"
@@ -282,6 +278,41 @@
         @click="setAsDefault()"
       />
     </div>
+
+    <template
+      v-if="
+        page.collab.store.arrows[arrow.id]?.createdAt != null ||
+        page.collab.store.arrows[arrow.id]?.editedAt != null
+      "
+    >
+      <q-separator />
+
+      <div style="padding: 16px 20px; display: flex; flex-direction: column">
+        <div v-if="page.collab.store.arrows[arrow.id]?.createdAt != null">
+          <b>Created at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.arrows[arrow.id]?.createdAt)
+            }}
+          </span>
+        </div>
+
+        <div v-if="page.collab.store.arrows[arrow.id]?.editedAt != null">
+          <b>Edited at: </b>
+          <span style="font-size: 13px">
+            {{
+              new Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(page.collab.store.arrows[arrow.id]?.editedAt)
+            }}
+          </span>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 

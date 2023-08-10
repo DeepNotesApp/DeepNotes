@@ -364,11 +364,9 @@ export class Serialization {
       INoteCollabDefault(),
     );
 
-    const date = roundTimeToMinutes(Date.now());
-
-    noteCollab.createdAt = date;
-    noteCollab.movedAt = date;
-    noteCollab.editedAt = date;
+    noteCollab.createdAt = roundTimeToMinutes(Date.now());
+    noteCollab.movedAt = noteCollab.createdAt;
+    noteCollab.editedAt = noteCollab.createdAt;
 
     const noteId = nanoid();
 
@@ -422,24 +420,7 @@ export class Serialization {
     destRegionId: string,
     destRegionCollab: IRegionCollabOutput,
   ) {
-    const arrowCollab = this.parseArrowCollab(
-      serialArrow,
-      destRegionId,
-      noteMap,
-    );
-
-    const arrowId = nanoid();
-
-    destRegionCollab.arrowIds.push(arrowId);
-
-    internals.pages.react.page.arrows.react.collab[arrowId] = arrowCollab;
-  }
-  parseArrowCollab(
-    serialArrow: ISerialArrowOutput,
-    destRegionId: string,
-    noteMap = new Map<number, string>(),
-  ) {
-    return makeSlim(
+    const arrowCollab = makeSlim(
       IArrowCollab().parse({
         ...serialArrow,
 
@@ -455,5 +436,14 @@ export class Serialization {
       } as IArrowCollabInput),
       IArrowCollabDefault(),
     );
+
+    arrowCollab.createdAt = roundTimeToMinutes(Date.now());
+    arrowCollab.editedAt = arrowCollab.createdAt;
+
+    const arrowId = nanoid();
+
+    destRegionCollab.arrowIds.push(arrowId);
+
+    internals.pages.react.page.arrows.react.collab[arrowId] = arrowCollab;
   }
 }
