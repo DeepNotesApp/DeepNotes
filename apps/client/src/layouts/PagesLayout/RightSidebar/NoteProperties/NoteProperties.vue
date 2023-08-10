@@ -237,6 +237,56 @@
 
     <q-separator />
 
+    <div
+      v-if="
+        page.collab.store.notes[note.id]?.createdAt != null ||
+        page.collab.store.notes[note.id]?.editedAt != null ||
+        page.collab.store.notes[note.id]?.movedAt != null
+      "
+      style="padding: 16px 20px; display: flex; flex-direction: column"
+    >
+      <div v-if="page.collab.store.notes[note.id]?.createdAt != null">
+        <b>Created at: </b>
+        <span style="font-size: 13px">
+          {{
+            new Intl.DateTimeFormat('en', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }).format(page.collab.store.notes[note.id]?.createdAt)
+          }}
+        </span>
+      </div>
+
+      <div v-if="page.collab.store.notes[note.id]?.editedAt != null">
+        <b>Edited at: </b>
+        <span style="font-size: 13px">
+          {{
+            new Intl.DateTimeFormat('en', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }).format(page.collab.store.notes[note.id]?.editedAt)
+          }}
+        </span>
+      </div>
+
+      <div
+        v-if="page.collab.store.notes[note.id]?.movedAt != null"
+        title="The last time this note was moved between containers"
+      >
+        <b>Moved at: </b>
+        <span style="font-size: 13px">
+          {{
+            new Intl.DateTimeFormat('en', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }).format(page.collab.store.notes[note.id]?.movedAt)
+          }}
+        </span>
+      </div>
+    </div>
+
+    <q-separator />
+
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Copy link to this note"
@@ -255,13 +305,9 @@
           }
         "
       />
-    </div>
 
-    <q-separator />
+      <Gap style="height: 16px" />
 
-    <!-- Default -->
-
-    <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
         label="Set as default note style"
         icon="mdi-content-save"
@@ -771,10 +817,10 @@
         color="primary"
       >
         <q-menu
-          anchor="top left"
-          self="bottom left"
+          anchor="top middle"
+          self="bottom middle"
           :offset="[0, 2]"
-          max-width="244px"
+          style="width: 244px"
           auto-close
         >
           <q-list class="bg-primary">
@@ -838,56 +884,6 @@
           </q-list>
         </q-menu>
       </DeepBtn>
-    </div>
-
-    <q-separator />
-
-    <div style="padding: 20px; display: flex; flex-direction: column">
-      <div>
-        <b>Created at:</b>
-      </div>
-      <div>
-        {{
-          page.collab.store.notes[note.id]?.createdAt != null
-            ? new Intl.DateTimeFormat('en', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.createdAt)
-            : 'Unknown'
-        }}
-      </div>
-
-      <Gap style="height: 12px" />
-
-      <div>
-        <b>Last edited at:</b>
-      </div>
-      <div>
-        {{
-          page.collab.store.notes[note.id]?.editedAt != null
-            ? new Intl.DateTimeFormat('en', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.editedAt)
-            : 'Unknown'
-        }}
-      </div>
-
-      <Gap style="height: 12px" />
-
-      <div>
-        <b>Last moved at:</b>
-      </div>
-      <div>
-        {{
-          page.collab.store.notes[note.id]?.movedAt != null
-            ? new Intl.DateTimeFormat('en', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.movedAt)
-            : 'Unknown'
-        }}
-      </div>
     </div>
   </div>
 </template>

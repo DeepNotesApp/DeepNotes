@@ -20,6 +20,9 @@ export class NoteDragging {
 
   react: UnwrapRef<IDraggingReact>;
 
+  initialRegionId?: string;
+  finalRegionId?: string;
+
   private _cancelPointerEvents?: () => void;
 
   constructor(input: { page: Page }) {
@@ -67,6 +70,9 @@ export class NoteDragging {
 
   private _dragStart = async (event: PointerEvent) => {
     this.react.active = true;
+
+    this.initialRegionId = this.page.activeRegion.react.value.id;
+    this.finalRegionId = this.page.id;
 
     // Update note dragging states
 
@@ -205,14 +211,16 @@ export class NoteDragging {
   }
 
   private _dragFinish = () => {
-    if (this.react.active) {
+    if (this.react.active && this.finalRegionId !== this.initialRegionId) {
       const date = roundTimeToMinutes(Date.now());
 
-      for (const selectedNote of this.page.selection.react.notes) {
-        if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
-          this.page.collab.store.notes[selectedNote.id].movedAt = date;
+      this.page.collab.doc.transact(() => {
+        for (const selectedNote of this.page.selection.react.notes) {
+          if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
+            this.page.collab.store.notes[selectedNote.id].movedAt = date;
+          }
         }
-      }
+      });
     }
 
     this.react.active = false;
