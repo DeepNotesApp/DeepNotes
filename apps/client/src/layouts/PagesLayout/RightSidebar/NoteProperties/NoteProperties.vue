@@ -1135,13 +1135,13 @@ function noteToMarkdown(
 
   let hasPrevSection = false;
 
-  if (note.react.head.visible && note.react.head.editor != null) {
+  if (note.react.collab.head.enabled && note.react.head.editor != null) {
     markdown += editorToMarkdown(note.react.head.editor);
 
     hasPrevSection = true;
   }
 
-  if (note.react.body.visible && note.react.body.editor != null) {
+  if (note.react.collab.body.enabled && note.react.body.editor != null) {
     if (hasPrevSection) {
       markdown += '\n\n---\n\n';
     }
