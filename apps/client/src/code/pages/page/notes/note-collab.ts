@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { IVec2 } from '../../utils';
 import { IElemCollab } from '../elems/elem';
 import { IRegionCollab } from '../regions/region';
-import { roundTimeToMinutes } from './date';
 
 const INoteCollabSize = once(() =>
   z.object({
@@ -85,9 +84,9 @@ export const INoteCollab = once(() =>
 
       zIndex: z.number().default(-1),
 
-      createdAt: z.number().default(() => roundTimeToMinutes(Date.now())),
-      movedAt: z.number().default(() => roundTimeToMinutes(Date.now())),
-      editedAt: z.number().default(() => roundTimeToMinutes(Date.now())),
+      createdAt: z.number().nullable().default(null),
+      editedAt: z.number().nullable().default(null),
+      movedAt: z.number().nullable().default(null),
     }),
   ),
 );

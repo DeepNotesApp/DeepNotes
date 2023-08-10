@@ -365,8 +365,8 @@ export class Serialization {
     );
 
     noteCollab.createdAt = roundTimeToMinutes(Date.now());
-    noteCollab.movedAt = noteCollab.createdAt;
-    noteCollab.editedAt = noteCollab.createdAt;
+    noteCollab.editedAt = null;
+    noteCollab.movedAt = null;
 
     const noteId = nanoid();
 
@@ -438,7 +438,7 @@ export class Serialization {
     );
 
     arrowCollab.createdAt = roundTimeToMinutes(Date.now());
-    arrowCollab.editedAt = arrowCollab.createdAt;
+    arrowCollab.editedAt = null;
 
     const arrowId = nanoid();
 
