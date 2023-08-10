@@ -1106,6 +1106,8 @@ async function importChildrenFromFiles() {
     fileInput.value?.click();
   } else {
     const fileHandles = await (window as any).showOpenFilePicker({
+      multiple: true,
+
       types: [
         {
           description: 'Markdown file',
