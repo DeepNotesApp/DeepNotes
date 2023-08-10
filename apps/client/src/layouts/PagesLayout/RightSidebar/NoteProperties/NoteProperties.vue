@@ -252,7 +252,7 @@
               new Intl.DateTimeFormat('en', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.createdAt)
+              }).format(page.collab.store.notes[note.id].createdAt!)
             }}
           </span>
         </div>
@@ -264,7 +264,7 @@
               new Intl.DateTimeFormat('en', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.editedAt)
+              }).format(page.collab.store.notes[note.id].editedAt!)
             }}
           </span>
         </div>
@@ -279,7 +279,7 @@
               new Intl.DateTimeFormat('en', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-              }).format(page.collab.store.notes[note.id]?.movedAt)
+              }).format(page.collab.store.notes[note.id].movedAt!)
             }}
           </span>
         </div>

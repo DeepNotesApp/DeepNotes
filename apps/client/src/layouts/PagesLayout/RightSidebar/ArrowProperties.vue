@@ -295,7 +295,7 @@
               new Intl.DateTimeFormat('en', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-              }).format(page.collab.store.arrows[arrow.id]?.createdAt)
+              }).format(page.collab.store.arrows[arrow.id].createdAt!)
             }}
           </span>
         </div>
@@ -307,7 +307,7 @@
               new Intl.DateTimeFormat('en', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-              }).format(page.collab.store.arrows[arrow.id]?.editedAt)
+              }).format(page.collab.store.arrows[arrow.id].editedAt!)
             }}
           </span>
         </div>
