@@ -176,6 +176,18 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'refund-policy',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/refund-policy',
+            component: () =>
+              import('src/pages/home/Help/Pages/RefundPolicy.vue'),
+          },
+        ],
+      },
     ],
   },
 
