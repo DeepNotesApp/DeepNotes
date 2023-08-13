@@ -36,16 +36,18 @@ export const extensions = once(() => [
         ['Alt-3']: () => this.editor.commands.toggleHeading({ level: 3 }),
       };
     },
-  }).configure({
-    history: false,
-    codeBlock: false,
+  })
+    .configure({}) // Needed for some reason to remove duplication warnings
+    .configure({
+      history: false,
+      codeBlock: false,
 
-    horizontalRule: false,
+      horizontalRule: false,
 
-    heading: {
-      levels: [1, 2, 3],
-    },
-  }),
+      heading: {
+        levels: [1, 2, 3],
+      },
+    }),
 
   HorizontalRuleExtension.configure({
     HTMLAttributes: {
