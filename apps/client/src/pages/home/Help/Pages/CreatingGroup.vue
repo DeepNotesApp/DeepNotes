@@ -24,7 +24,7 @@
               vertical-align: top;
               border: 1px solid rgba(255, 255, 255, 0.3);
             "
-            src="/help/how-to-create-a-group/create-new-page.png"
+            src="/help/creating-group/create-new-page.webp"
           />
 
           <InlineGap style="width: 24px" />
@@ -34,7 +34,7 @@
               vertical-align: top;
               border: 1px solid rgba(255, 255, 255, 0.3);
             "
-            src="/help/how-to-create-a-group/create-with-options.png"
+            src="/help/creating-group/create-with-options.webp"
           />
         </div>
 
@@ -52,7 +52,7 @@
               vertical-align: top;
               border: 1px solid rgba(255, 255, 255, 0.3);
             "
-            src="/help/how-to-create-a-group/new-page-dialog.png"
+            src="/help/creating-group/new-page-dialog.webp"
           />
 
           <InlineGap style="width: 24px" />
@@ -62,7 +62,7 @@
               vertical-align: top;
               border: 1px solid rgba(255, 255, 255, 0.3);
             "
-            src="/help/how-to-create-a-group/new-page-dialog-group.png"
+            src="/help/creating-group/new-page-dialog-group.webp"
           />
         </div>
 
@@ -79,7 +79,7 @@
             vertical-align: top;
             border: 1px solid rgba(255, 255, 255, 0.3);
           "
-          src="/help/how-to-create-a-group/new-group.png"
+          src="/help/creating-group/new-group.webp"
         />
       </li>
     </ol>

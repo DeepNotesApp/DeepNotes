@@ -105,14 +105,14 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
-        path: 'how-to-create-a-group',
+        path: 'creating-group',
         component: () => import('src/pages/home/Help/HelpLayout.vue'),
         children: [
           {
             path: '',
-            name: 'help/how-to-create-a-group',
+            name: 'help/creating-group',
             component: () =>
-              import('src/pages/home/Help/Pages/HowToCreateAGroup.vue'),
+              import('src/pages/home/Help/Pages/CreatingGroup.vue'),
           },
         ],
       },

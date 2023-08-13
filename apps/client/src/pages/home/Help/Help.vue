@@ -35,7 +35,7 @@
         </li>
 
         <li>
-          <router-link :to="{ name: 'help/how-to-create-a-group' }">
+          <router-link :to="{ name: 'help/creating-group' }">
             How to create a group?
           </router-link>
         </li>
