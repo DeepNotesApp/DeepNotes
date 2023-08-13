@@ -117,6 +117,30 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
+        path: 'inviting-users',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/inviting-users',
+            component: () =>
+              import('src/pages/home/Help/Pages/InvitingUsers.vue'),
+          },
+        ],
+      },
+      {
+        path: 'joining-group',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/joining-group',
+            component: () =>
+              import('src/pages/home/Help/Pages/JoiningGroup.vue'),
+          },
+        ],
+      },
+      {
         path: 'forgot-password',
         component: () => import('src/pages/home/Help/HelpLayout.vue'),
         children: [
