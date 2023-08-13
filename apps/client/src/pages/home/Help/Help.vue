@@ -23,12 +23,6 @@
         </li>
 
         <li>
-          <router-link :to="{ name: 'help/how-to-create-a-group' }">
-            How to create a group?
-          </router-link>
-        </li>
-
-        <li>
           <router-link :to="{ name: 'help/offline-usage' }">
             Can I use DeepNotes while offline?
           </router-link>
@@ -37,6 +31,24 @@
         <li>
           <router-link :to="{ name: 'help/multi-page-text-search' }">
             Can I search text across multiple pages?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/how-to-create-a-group' }">
+            How to create a group?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/inviting-users' }">
+            How to invite users to a group?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/joining-group' }">
+            How to join a group?
           </router-link>
         </li>
       </ul>
