@@ -1,5 +1,5 @@
 <template>
-  <div style="font-size: 28px; font-weight: bold">How to create a group?</div>
+  <div style="font-size: 28px; font-weight: bold">{{ title }}</div>
 
   <Gap style="height: 36px" />
 
@@ -87,7 +87,9 @@
 </template>
 
 <script setup lang="ts">
+const title = 'How to create a group?';
+
 useMeta(() => ({
-  title: 'How to create a group? - Help - DeepNotes',
+  title: `${title} - Help - DeepNotes`,
 }));
 </script>

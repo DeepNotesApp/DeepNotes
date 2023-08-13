@@ -1,7 +1,5 @@
 <template>
-  <div style="font-size: 28px; font-weight: bold">
-    Can I use DeepNotes while offline?
-  </div>
+  <div style="font-size: 28px; font-weight: bold">{{ title }}</div>
 
   <Gap style="height: 36px" />
 
@@ -21,7 +19,9 @@
 </template>
 
 <script setup lang="ts">
+const title = 'Can I use DeepNotes while offline?';
+
 useMeta(() => ({
-  title: 'How to create a group? - Help - DeepNotes',
+  title: `${title} - Help - DeepNotes`,
 }));
 </script>
