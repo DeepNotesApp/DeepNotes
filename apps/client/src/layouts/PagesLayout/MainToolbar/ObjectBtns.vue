@@ -22,14 +22,14 @@
   />
 
   <ToolbarBtn
-    :tooltip="'Inline math'"
+    :tooltip="`Inline math\n(${getCtrlKeyName()} + M)`"
     icon="mdi-sigma-lower"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.addInlineMath())"
   />
   <ToolbarBtn
-    :tooltip="`Math block`"
+    :tooltip="`Math block\n(${getCtrlKeyName()} + Shift + M)`"
     icon="mdi-sigma"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -49,14 +49,14 @@
     @click="page.selection.format((chain) => chain.toggleBlockquote())"
   />
   <ToolbarBtn
-    :tooltip="`Codeblock\n(${getCtrlKeyName()} + ${getAltKeyName()} + C)`"
+    :tooltip="`Codeblock\n(${getAltKeyName()} + Shift + C)`"
     icon="mdi-code-braces"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="page.selection.format((chain) => chain.toggleCodeBlock())"
   />
   <ToolbarBtn
-    tooltip="Rule"
+    :tooltip="`Rule\n(${getAltKeyName()} + Shift + R)`"
     icon="mdi-minus"
     icon-size="23px"
     :disable="page.react.readOnly || !page.editing.react.active"
@@ -64,7 +64,7 @@
   />
 
   <ToolbarBtn
-    tooltip="Image"
+    :tooltip="`Image\n(${getAltKeyName()} + Shift + I)`"
     icon="mdi-image"
     icon-size="23px"
     :disable="page.react.readOnly || !page.editing.react.active"
@@ -72,7 +72,7 @@
   />
 
   <ToolbarBtn
-    tooltip="YouTube video"
+    :tooltip="`YouTube video\n(${getAltKeyName()} + Shift + Y)`"
     icon="mdi-youtube"
     icon-size="24px"
     :disable="page.react.readOnly || !page.editing.react.active"
@@ -107,7 +107,7 @@
   />
 
   <ToolbarBtn
-    tooltip="Insert table"
+    :tooltip="`Insert table\n(${getAltKeyName()} + Shift + T)`"
     icon="mdi-table-large-plus"
     icon-size="23px"
     :disable="page.react.readOnly || !page.editing.react.active"
