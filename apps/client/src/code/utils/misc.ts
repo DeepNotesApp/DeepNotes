@@ -5,7 +5,7 @@ import {
   splitStr,
   unobserveResize,
 } from '@stdlib/misc';
-import { isString } from 'lodash';
+import { isString, pull } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { Cookies } from 'quasar';
 import type { QDialogOptions } from 'quasar';
@@ -79,8 +79,27 @@ export function wrapStorage(storage: Storage) {
 export function isCtrlDown(event: KeyboardEvent | MouseEvent) {
   return event.ctrlKey || event.metaKey;
 }
+
+const _modifiers = ['Alt', 'Control', 'Meta', 'Shift'] as const;
+export function modsMatch(
+  event: KeyboardEvent | MouseEvent,
+  modifiers: typeof _modifiers[number][],
+) {
+  if (modifiers.includes('Control') && $quasar().platform.is.mac) {
+    pull(modifiers, 'Control');
+    modifiers.push('Meta');
+  }
+
+  for (const modifier of _modifiers) {
+    if (modifiers.includes(modifier) !== event.getModifierState(modifier)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 export function getCtrlKeyName() {
-  return $quasar().platform.is.mac ? 'Command' : 'Ctrl';
+  return $quasar().platform.is.mac ? 'Cmd' : 'Ctrl';
 }
 export function getAltKeyName() {
   return $quasar().platform.is.mac ? 'Option' : 'Alt';

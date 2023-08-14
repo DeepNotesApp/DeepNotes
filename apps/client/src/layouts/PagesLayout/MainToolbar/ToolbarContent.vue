@@ -331,7 +331,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.toggleNode('heading', { level: 3 }),
         },
         {
-          tooltip: 'Remove heading',
+          tooltip: `Remove heading\n(${getAltKeyName()} + 0)`,
           icon: 'mdi-format-header-pound',
           iconSize: '24px',
           disable: (page: Page) =>
@@ -377,7 +377,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.format((chain) => chain.toggleTaskList()),
         },
         {
-          tooltip: 'Inline math',
+          tooltip: `Inline math\n(${getCtrlKeyName()} + M)`,
           icon: 'mdi-sigma-lower',
           iconSize: '24px',
           disable: (page: Page) =>
@@ -386,7 +386,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.format((chain) => chain.addInlineMath()),
         },
         {
-          tooltip: 'Math block',
+          tooltip: `Math block\n(${getCtrlKeyName()} + Shift + M)`,
           icon: 'mdi-sigma',
           iconSize: '24px',
           disable: (page: Page) =>
@@ -406,7 +406,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.format((chain) => chain.toggleBlockquote()),
         },
         {
-          tooltip: `Codeblock\n(${getCtrlKeyName()} + ${getAltKeyName()} + C)`,
+          tooltip: `Codeblock\n(${getAltKeyName()} + Shift + C)`,
           icon: 'mdi-code-braces',
           iconSize: '23px',
           disable: (page: Page) =>
@@ -415,7 +415,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.format((chain) => chain.toggleCodeBlock()),
         },
         {
-          tooltip: 'Rule',
+          tooltip: `Rule\n(${getAltKeyName()} + Shift + R)`,
           icon: 'mdi-minus',
           iconSize: '23px',
           disable: (page: Page) =>
@@ -424,7 +424,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             page.selection.format((chain) => chain.setHorizontalRule()),
         },
         {
-          tooltip: 'Image',
+          tooltip: `Image\n(${getAltKeyName()} + Shift + I)`,
           icon: 'mdi-image',
           iconSize: '23px',
           disable: (page: Page) =>
@@ -433,7 +433,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
             $quasar().dialog({ component: InsertImageDialog }),
         },
         {
-          tooltip: 'YouTube video',
+          tooltip: `YouTube video\n(${getAltKeyName()} + Shift + Y)`,
           icon: 'mdi-youtube',
           iconSize: '24px',
           disable: (page: Page) =>
@@ -466,7 +466,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
       ],
       [
         {
-          tooltip: 'Insert table',
+          tooltip: `Insert table\n(${getAltKeyName()} + Shift + T)`,
           icon: 'mdi-table-large-plus',
           iconSize: '23px',
           disable: (page: Page) =>

@@ -105,14 +105,38 @@ const routes: RouteRecordRaw[] = [
         ],
       },
       {
-        path: 'how-to-create-a-group',
+        path: 'creating-group',
         component: () => import('src/pages/home/Help/HelpLayout.vue'),
         children: [
           {
             path: '',
-            name: 'help/how-to-create-a-group',
+            name: 'help/creating-group',
             component: () =>
-              import('src/pages/home/Help/Pages/HowToCreateAGroup.vue'),
+              import('src/pages/home/Help/Pages/CreatingGroup.vue'),
+          },
+        ],
+      },
+      {
+        path: 'inviting-users',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/inviting-users',
+            component: () =>
+              import('src/pages/home/Help/Pages/InvitingUsers.vue'),
+          },
+        ],
+      },
+      {
+        path: 'joining-group',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/joining-group',
+            component: () =>
+              import('src/pages/home/Help/Pages/JoiningGroup.vue'),
           },
         ],
       },
@@ -149,6 +173,18 @@ const routes: RouteRecordRaw[] = [
             name: 'help/multi-page-text-search',
             component: () =>
               import('src/pages/home/Help/Pages/MultiPageTextSearch.vue'),
+          },
+        ],
+      },
+      {
+        path: 'refund-policy',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/refund-policy',
+            component: () =>
+              import('src/pages/home/Help/Pages/RefundPolicy.vue'),
           },
         ],
       },

@@ -60,7 +60,7 @@ const html = marked(`
   Only you have the key to your information, making it inaccessible to anyone else, including DeepNotes.
   
   Your email is the only piece of information, along with metadata, that is not end-to-end encrypted.
-  This is because we need to know your email in order to identify and performCommunication with you.
+  This is because we need to know your email in order to identify and communicate with you.
   In order to keep your email as protected as possible, we keep your email pepper-encrypted in our database.
 
   For more details on how we protect your data, please refer to our [security whitepaper](https://deepnotes.app/whitepaper).

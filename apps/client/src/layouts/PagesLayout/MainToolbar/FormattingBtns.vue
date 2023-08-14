@@ -28,7 +28,7 @@
     @click="page.selection.toggleMark('underline')"
   />
   <ToolbarBtn
-    tooltip="Clear formatting"
+    :tooltip="`Clear formatting\n(${getCtrlKeyName()} + Space)`"
     icon="mdi-format-clear"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -99,14 +99,14 @@
     @click="page.selection.toggleMark('superscript')"
   />
   <ToolbarBtn
-    tooltip="Insert link"
+    :tooltip="`Insert link\n(${getCtrlKeyName()} + K)`"
     icon="mdi-link"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
     @click="$q.dialog({ component: InsertLinkDialog })"
   />
   <ToolbarBtn
-    tooltip="Remove link"
+    :tooltip="`Remove link\n(${getCtrlKeyName()} + Shift + K)`"
     icon="mdi-link-off"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
@@ -147,7 +147,7 @@
     @click="page.selection.toggleNode('heading', { level: 3 })"
   />
   <ToolbarBtn
-    tooltip="Remove heading"
+    :tooltip="`Remove heading\n(${getAltKeyName()} + 0)`"
     icon="mdi-format-header-pound"
     icon-size="24px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"

@@ -28,15 +28,7 @@ import { YoutubeVideoExtension } from 'src/code/tiptap/youtube-video/extension';
 import { FindAndReplaceExtension } from './find-and-replace';
 
 export const extensions = once(() => [
-  StarterKit.extend({
-    addKeyboardShortcuts() {
-      return {
-        ['Alt-1']: () => this.editor.commands.toggleHeading({ level: 1 }),
-        ['Alt-2']: () => this.editor.commands.toggleHeading({ level: 2 }),
-        ['Alt-3']: () => this.editor.commands.toggleHeading({ level: 3 }),
-      };
-    },
-  }).configure({
+  StarterKit.configure({
     history: false,
     codeBlock: false,
 

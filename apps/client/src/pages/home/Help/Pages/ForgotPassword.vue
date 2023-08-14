@@ -1,7 +1,5 @@
 <template>
-  <div style="font-size: 28px; font-weight: bold">
-    I've forgotten my password. What can I do?
-  </div>
+  <div style="font-size: 28px; font-weight: bold">{{ title }}</div>
 
   <Gap style="height: 36px" />
 
@@ -27,7 +25,9 @@
 </template>
 
 <script setup lang="ts">
+const title = "I've forgotten my password. What can I do?";
+
 useMeta(() => ({
-  title: 'How to create a group? - Help - DeepNotes',
+  title: `${title} - Help - DeepNotes`,
 }));
 </script>
