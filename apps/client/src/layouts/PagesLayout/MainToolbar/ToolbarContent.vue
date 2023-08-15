@@ -397,7 +397,7 @@ const toolbarGroups: ToolbarButtonGroup[] = [
       ],
       [
         {
-          tooltip: `Blockquote\n(${getCtrlKeyName()} + Shift + B)`,
+          tooltip: `Blockquote\n(${getAltKeyName()} + Shift + Q)`,
           icon: 'mdi-format-quote-close',
           iconSize: '23px',
           disable: (page: Page) =>

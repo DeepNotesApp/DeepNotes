@@ -42,7 +42,7 @@
   />
 
   <ToolbarBtn
-    :tooltip="`Blockquote\n(${getCtrlKeyName()} + Shift + B)`"
+    :tooltip="`Blockquote\n(${getAltKeyName()} + Shift + Q)`"
     icon="mdi-format-quote-close"
     icon-size="23px"
     :disable="page.react.readOnly || !page.activeElem.react.exists"
