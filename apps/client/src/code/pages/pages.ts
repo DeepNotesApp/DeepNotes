@@ -23,6 +23,9 @@ export interface IAppReact {
   tableContextMenu: boolean;
   tableContextMenuPos: Vec2;
 
+  isNewUser: boolean;
+  tutorialStep: number;
+
   loaded?: boolean;
 }
 
@@ -57,6 +60,9 @@ export class Pages {
 
       tableContextMenu: false,
       tableContextMenuPos: new Vec2(),
+
+      isNewUser: false,
+      tutorialStep: 1,
     });
   }
 
@@ -76,12 +82,17 @@ export class Pages {
 
     promises.push(
       (async () => {
-        const [encryptedDefaultNote, encryptedDefaultArrow, recentPageIdsJSON] =
-          await internals.realtime.hmget('user', authStore().userId, [
-            'encrypted-default-note',
-            'encrypted-default-arrow',
-            'recent-page-ids',
-          ]);
+        const [
+          encryptedDefaultNote,
+          encryptedDefaultArrow,
+          recentPageIdsJSON,
+          isNewUser,
+        ] = await internals.realtime.hmget('user', authStore().userId, [
+          'encrypted-default-note',
+          'encrypted-default-arrow',
+          'recent-page-ids',
+          'new',
+        ]);
 
         this.defaultNote = unpack(
           internals.symmetricKeyring.decrypt(encryptedDefaultNote, {
@@ -103,6 +114,12 @@ export class Pages {
         );
 
         this.react.recentPageIds = recentPageIdsJSON ?? [];
+
+        this.react.isNewUser = !!isNewUser;
+
+        if (isNewUser) {
+          internals.realtime.hset('user', authStore().userId, 'new', false);
+        }
       })(),
     );
 

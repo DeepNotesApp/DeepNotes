@@ -8,6 +8,7 @@ import { encryptedDefaultArrow } from './encrypted-default-arrow';
 import { encryptedDefaultNote } from './encrypted-default-note';
 import { encryptedName } from './encrypted-name';
 import { lastNotificationRead } from './last-notification-read';
+import { newUser } from './new';
 import { numFreePages } from './num-free-pages';
 import { personalGroupId } from './personal-group-id';
 import { plan } from './plan';
@@ -40,6 +41,7 @@ export const user = validateDataHash({
     'encrypted-name': encryptedName,
     'last-notification-read': lastNotificationRead,
     'personal-group-id': personalGroupId,
+    new: newUser,
     'num-free-pages': numFreePages,
     plan: plan,
     'public-keyring': publicKeyring,

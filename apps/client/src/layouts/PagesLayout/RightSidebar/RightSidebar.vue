@@ -1,7 +1,7 @@
 <template>
   <q-drawer
     :mini="!uiStore().rightSidebarExpanded"
-    :model-value="uiStore().rightSidebarExpanded || uiStore().width > 800"
+    :model-value="true"
     side="right"
     bordered
     no-swipe-open
