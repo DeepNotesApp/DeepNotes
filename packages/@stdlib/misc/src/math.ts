@@ -5,3 +5,7 @@ export function lerp(a: number, b: number, t: number) {
 export function minmax(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
+
+export function posMod(n, m) {
+  return ((n % m) + m) % m;
+}

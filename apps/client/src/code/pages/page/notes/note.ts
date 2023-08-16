@@ -536,9 +536,16 @@ export class PageNote extends PageElem() implements IPageRegion {
 
   getElem(part: string | null): HTMLElement | null {
     if (part == null) {
-      return document.getElementById(`note-${this.id}`);
+      return document.querySelector(`#note-${this.id}`);
     } else {
       return document.querySelector(`#note-${this.id} .${part}`);
+    }
+  }
+  getElems(part: string | null): HTMLElement[] {
+    if (part == null) {
+      return Array.from(document.querySelectorAll(`#note-${this.id}`));
+    } else {
+      return Array.from(document.querySelectorAll(`#note-${this.id} .${part}`));
     }
   }
 

@@ -3,7 +3,9 @@
     class="checkbox"
     :model-value="modelValue"
     @update:model-value="$emit('update:model-value', $event)"
-  />
+  >
+    <slot></slot>
+  </q-checkbox>
 </template>
 
 <script setup lang="ts">

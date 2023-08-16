@@ -8,6 +8,10 @@
     }"
   >
     <slot></slot>
+
+    <template #label>
+      <slot name="label"></slot>
+    </template>
   </q-btn-dropdown>
 </template>
 

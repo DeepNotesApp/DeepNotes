@@ -4,9 +4,18 @@
     :class="{ active }"
     :href="`https://deepnotes.app/pages/${pageId}`"
     @click.prevent.stop="
+    (event) => {
       internals.pages.goToPage(pageId, {
-        openInNewTab: ($event as MouseEvent).ctrlKey,
-      })
+        openInNewTab: (event as MouseEvent).ctrlKey,
+      });
+
+      if (
+        pageId === internals.pages.react.pathPageIds[0] &&
+        internals.pages.react.isNewUser &&
+        internals.pages.react.tutorialStep === 5) {
+        internals.pages.react.tutorialStep++;
+      }
+    }
     "
   >
     <div
@@ -26,6 +35,17 @@
     >
       {{ pageTitleInfo.text }}
     </div>
+
+    <TutorialTooltip
+      v-if="
+        pageId === internals.pages.react.pathPageIds[0] &&
+        internals.pages.react.isNewUser &&
+        internals.pages.react.tutorialStep === 5
+      "
+      pos="bottom"
+    >
+      Click here to go back<br />to the main page.
+    </TutorialTooltip>
   </a>
 </template>
 
