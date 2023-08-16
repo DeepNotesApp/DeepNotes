@@ -2,7 +2,7 @@ import type { GroupModel } from '@deeplib/db';
 import type { DataField } from '@stdlib/data';
 
 export const isPublic: DataField<GroupModel> = {
-  cacheLocally: true, // Reason: Performance (Field is used a lot)
+  cacheLocally: true, // Reason: Performance (Field is used frequently)
   notifyUpdates: true,
 
   userGettable: () => true,
