@@ -1051,20 +1051,14 @@ const bodyTooltip = ref<InstanceType<typeof TutorialTooltip>>();
 const collapsibleTooltip = ref<InstanceType<typeof TutorialTooltip>>();
 const containerTooltip = ref<InstanceType<typeof TutorialTooltip>>();
 
-const interval = useIntervalFn(() => {
-  newPageTooltip.value?.updatePosition();
-  bodyTooltip.value?.updatePosition();
-  collapsibleTooltip.value?.updatePosition();
-  containerTooltip.value?.updatePosition();
-}, 1);
-
-interval.pause();
-
-onMounted(async () => {
-  if (await internals.realtime.hget('user', authStore().userId, 'new')) {
-    interval.resume();
+useIntervalFn(() => {
+  if (internals.pages.react.isNewUser) {
+    newPageTooltip.value?.updatePosition();
+    bodyTooltip.value?.updatePosition();
+    collapsibleTooltip.value?.updatePosition();
+    containerTooltip.value?.updatePosition();
   }
-});
+}, 1);
 
 const fileInput = ref<HTMLInputElement>();
 
