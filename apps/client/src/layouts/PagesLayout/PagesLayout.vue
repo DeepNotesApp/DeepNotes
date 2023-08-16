@@ -93,7 +93,7 @@ watch(
       } else if (internals.pages.react.tutorialStep === 6) {
         $quasar().notify({
           html: true,
-          message: "These are basics of DeepNotes.<br/>You're good to go!",
+          message: "These were the basics of DeepNotes.<br/>You're good to go!",
           color: 'deep-purple-7',
         });
       }
