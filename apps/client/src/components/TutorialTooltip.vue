@@ -7,6 +7,8 @@
     :offset="[basis === 'left' ? 8 : 0, basis === 'top' ? 8 : 0]"
     style="position: relative; overflow: visible"
     persistent
+    no-focus
+    no-refocus
   >
     <div
       style="
