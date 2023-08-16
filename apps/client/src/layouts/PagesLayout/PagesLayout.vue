@@ -74,27 +74,29 @@ watch(
   async () => {
     await sleep();
 
-    if (internals.pages.react.tutorialStep === 2) {
-      document.querySelector('.collapsible-checkbox')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    } else if (internals.pages.react.tutorialStep === 3) {
-      document.querySelector('.container-checkbox')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    } else if (internals.pages.react.tutorialStep === 4) {
-      document.querySelector('.new-page-button')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
-    } else if (internals.pages.react.tutorialStep === 6) {
-      $quasar().notify({
-        html: true,
-        message: "These are basics of DeepNotes.<br/>You're good to go!",
-        color: 'deep-purple-7',
-      });
+    if (internals.pages.react.isNewUser) {
+      if (internals.pages.react.tutorialStep === 2) {
+        document.querySelector('.collapsible-checkbox')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 3) {
+        document.querySelector('.container-checkbox')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 4) {
+        document.querySelector('.new-page-button')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 6) {
+        $quasar().notify({
+          html: true,
+          message: "These are basics of DeepNotes.<br/>You're good to go!",
+          color: 'deep-purple-7',
+        });
+      }
     }
   },
 );
