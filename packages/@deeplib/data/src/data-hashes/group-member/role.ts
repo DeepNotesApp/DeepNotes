@@ -5,7 +5,7 @@ import { splitStr } from '@stdlib/misc';
 import { userHasPermission } from '../../roles';
 
 export const role: DataField<GroupMemberModel> = {
-  cacheLocally: true, // For performance (Used a lot)
+  cacheLocally: true, // Reason: Performance (Field is used a lot)
   notifyUpdates: true,
 
   userGettable: async ({ userId, suffix, dataAbstraction }) => {

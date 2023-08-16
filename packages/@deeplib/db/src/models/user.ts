@@ -49,4 +49,6 @@ export class UserModel extends Model {
   demo!: boolean;
 
   creation_date!: Date;
+
+  new!: boolean;
 }
