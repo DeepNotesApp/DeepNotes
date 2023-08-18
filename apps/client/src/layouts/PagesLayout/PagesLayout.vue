@@ -66,7 +66,7 @@ if (process.env.CLIENT) {
   useKeyStateTracking();
 }
 
-watch(
+const stopWatch = watch(
   [
     () => internals.pages.react.tutorialStep,
     () => uiStore().rightSidebarExpanded,
@@ -96,6 +96,8 @@ watch(
           message: "These were the basics of DeepNotes.<br/>You're good to go!",
           color: 'deep-purple-7',
         });
+
+        stopWatch();
       }
     }
   },
