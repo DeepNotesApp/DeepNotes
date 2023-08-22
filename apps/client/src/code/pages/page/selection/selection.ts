@@ -98,13 +98,13 @@ export class PageSelection {
         elem.react.selected = true;
         this.react[`${elem.type}Set`][elem.id] = true;
 
-        if (!this.page.activeElem.react.exists) {
-          this.page.activeElem.set(elem);
-        }
-
         if (elem.type === 'note') {
           (elem as PageNote).bringToTop();
         }
+      }
+
+      if (this.page.activeElem.react.value !== elems.at(-1)) {
+        this.page.activeElem.set(elems.at(-1)!);
       }
     });
   }

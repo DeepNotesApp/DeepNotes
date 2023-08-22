@@ -1,10 +1,12 @@
 import { listenPointerEvents } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { refProp, watchUntilTrue } from '@stdlib/vue';
+import { isCtrlDown } from 'src/code/utils/misc';
 import type { UnwrapRef } from 'vue';
 
 import type { Page } from '../page';
 import { roundTimeToMinutes } from './date';
+import type { PageNote } from './note';
 
 export interface IDraggingReact {
   active: boolean;
@@ -35,7 +37,7 @@ export class NoteDragging {
     });
   }
 
-  start(event: PointerEvent) {
+  start(params: { note: PageNote; event: PointerEvent }) {
     if (this.page.react.readOnly) {
       return;
     }
@@ -43,11 +45,11 @@ export class NoteDragging {
     // Prevent dragging unmovable notes
 
     if (
-      this.page.activeElem.react.value?.type !== 'note' ||
+      this.page.activeElem.react.value?.type === 'note' &&
       !this.page.activeElem.react.value.react.collab.movable
     ) {
-      if (event.pointerType !== 'mouse') {
-        this.page.panning.start(event);
+      if (params.event.pointerType !== 'mouse') {
+        this.page.panning.start(params.event);
       }
 
       return;
@@ -56,23 +58,32 @@ export class NoteDragging {
     this.react = {
       active: false,
 
-      currentPos: this.page.pos.eventToClient(event),
+      currentPos: this.page.pos.eventToClient(params.event),
     };
 
-    this._cancelPointerEvents = listenPointerEvents(event, {
+    this._cancelPointerEvents = listenPointerEvents(params.event, {
       dragStartDistance: 5,
 
-      dragStart: this._dragStart,
+      dragStart: () => this._dragStart(params),
       dragUpdate: this._dragUpdate,
       dragEnd: this._dragFinish,
     });
   }
 
-  private _dragStart = async (event: PointerEvent) => {
+  private _dragStart = async (params: {
+    note: PageNote;
+    event: PointerEvent;
+  }) => {
     this.react.active = true;
 
     this.initialRegionId = this.page.activeRegion.react.value.id;
     this.finalRegionId = this.page.id;
+
+    if (isCtrlDown(params.event)) {
+      this.page.selection.add(params.note);
+
+      await this.page.cloning.perform({ shiftNotes: false });
+    }
 
     // Update note dragging states
 
@@ -90,7 +101,7 @@ export class NoteDragging {
       await this._dragOut();
     }
 
-    this._dragUpdate(event);
+    this._dragUpdate(params.event);
   };
 
   private _dragUpdate = (event: PointerEvent) => {

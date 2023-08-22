@@ -53,7 +53,7 @@ export class PageClickSelection {
       ) {
         this.page.selection.remove(elem);
       } else {
-        this.page.activeElem.set(elem);
+        this.page.selection.add(elem);
       }
 
       this.page.fixDisplay();
