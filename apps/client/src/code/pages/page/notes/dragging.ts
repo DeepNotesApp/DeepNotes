@@ -11,8 +11,6 @@ import type { PageNote } from './note';
 export interface IDraggingReact {
   active: boolean;
 
-  currentPos: Vec2;
-
   dropRegionId?: string;
   dropIndex?: number;
 }
@@ -25,6 +23,8 @@ export class NoteDragging {
   initialRegionId?: string;
   finalRegionId?: string;
 
+  currentPos: Vec2 = new Vec2();
+
   private _cancelPointerEvents?: () => void;
 
   constructor(input: { page: Page }) {
@@ -32,8 +32,6 @@ export class NoteDragging {
 
     this.react = refProp<IDraggingReact>(this, 'react', {
       active: false,
-
-      currentPos: new Vec2(),
     });
   }
 
@@ -55,11 +53,9 @@ export class NoteDragging {
       return;
     }
 
-    this.react = {
-      active: false,
+    this.react = { active: false };
 
-      currentPos: this.page.pos.eventToClient(params.event),
-    };
+    this.currentPos = this.page.pos.eventToClient(params.event);
 
     this._cancelPointerEvents = listenPointerEvents(params.event, {
       dragStartDistance: 5,
@@ -108,10 +104,10 @@ export class NoteDragging {
     const clientPos = this.page.pos.eventToClient(event);
 
     const worldDelta = this.page.sizes.screenToWorld2D(
-      clientPos.sub(this.react.currentPos),
+      clientPos.sub(this.currentPos),
     );
 
-    this.react.currentPos = clientPos;
+    this.currentPos = clientPos;
 
     // Move selected notes
 
@@ -193,7 +189,7 @@ export class NoteDragging {
 
       this.page.collab.doc.transact(() => {
         for (const selectedNote of this.page.selection.react.notes) {
-          const worldPos = this.page.pos.clientToWorld(this.react.currentPos);
+          const worldPos = this.page.pos.clientToWorld(this.currentPos);
           const mouseOffset = worldPos.sub(prevCenters.get(activeElem.id)!);
 
           const prevCenter = prevCenters.get(selectedNote.id)!;
