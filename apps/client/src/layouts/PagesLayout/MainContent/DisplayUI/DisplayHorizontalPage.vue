@@ -6,7 +6,7 @@
     @click.prevent.stop="
     (event) => {
       internals.pages.goToPage(pageId, {
-        openInNewTab: (event as MouseEvent).ctrlKey,
+        openInNewTab: isCtrlDown(event as MouseEvent),
       });
 
       if (
@@ -55,6 +55,7 @@ import { groupNames } from 'src/code/pages/computed/group-names';
 import { pageGroupIds } from 'src/code/pages/computed/page-group-id';
 import { getPageTitle } from 'src/code/pages/utils';
 import { useRealtimeContext } from 'src/code/realtime/context';
+import { isCtrlDown } from 'src/code/utils/misc';
 
 const props = defineProps<{
   pageId: string;
