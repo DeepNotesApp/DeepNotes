@@ -573,24 +573,24 @@ const toolbarGroups: ToolbarButtonGroup[] = [
       [
         {
           tooltip: 'Align left',
-          icon: 'mdi-format-align-left',
-          iconSize: '21px',
+          icon: 'mdi-align-horizontal-left',
+          iconSize: '25px',
           disable: (page: Page) =>
             page.react.readOnly || !page.activeElem.react.exists,
           click: (page: Page) => page.aligning.alignLeft(),
         },
         {
           tooltip: 'Align center',
-          icon: 'mdi-format-align-center',
-          iconSize: '21px',
+          icon: 'mdi-align-horizontal-center',
+          iconSize: '25px',
           disable: (page: Page) =>
             page.react.readOnly || !page.activeElem.react.exists,
           click: (page: Page) => page.aligning.alignCenterHorizontal(),
         },
         {
           tooltip: 'Align right',
-          icon: 'mdi-format-align-right',
-          iconSize: '21px',
+          icon: 'mdi-align-horizontal-right',
+          iconSize: '25px',
           disable: (page: Page) =>
             page.react.readOnly || !page.activeElem.react.exists,
           click: (page: Page) => page.aligning.alignRight(),
