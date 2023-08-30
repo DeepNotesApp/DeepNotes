@@ -147,6 +147,7 @@
               selectedNote.react.collab.body.enabled ||=
                 selectedNote.react.numEnabledSections === 1 && !value;
               selectedNote.react.collab.container.enabled = value;
+              selectedNote.react.collab.container.spatial = false;
             },
           );
 
@@ -166,6 +167,28 @@
         <div v-html="containerTooltipHTML"></div>
       </TutorialTooltip>
     </MiniSidebarBtn>
+
+    <MiniSidebarBtn
+      tooltip="Spatial"
+      icon="mdi-axis-arrow"
+      :disable="page.react.readOnly"
+      :active="
+        note.react.collab.container.enabled &&
+        note.react.collab.container.spatial
+      "
+      @click="
+        changeProp(
+          !(
+            note.react.collab.container.enabled &&
+            note.react.collab.container.spatial
+          ),
+          (selectedNote, value) => {
+            selectedNote.react.collab.container.enabled = true;
+            selectedNote.react.collab.container.spatial = value;
+          },
+        )
+      "
+    />
 
     <q-separator />
 
