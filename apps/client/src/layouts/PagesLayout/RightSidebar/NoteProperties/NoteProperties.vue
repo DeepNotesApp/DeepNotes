@@ -113,16 +113,20 @@
     </MiniSidebarBtn>
 
     <MiniSidebarBtn
-      :tooltip="note.react.collapsing.collapsed ? 'Expand' : 'Collapse'"
+      :tooltip="note.react.collapsing.collapsed ? 'Collapsed' : 'Expanded'"
       :icon="
         note.react.collapsing.collapsed
-          ? 'mdi-chevron-down-box-outline'
-          : 'mdi-chevron-up-box-outline'
+          ? 'mdi-chevron-up-box-outline'
+          : 'mdi-chevron-down-box-outline'
       "
       :active="note.react.collapsing.collapsed"
-      :disable="page.react.readOnly || !note.react.collab.collapsing.enabled"
+      :disable="page.react.readOnly && !note.react.collab.collapsing.enabled"
       @click="
         changeProp(!note.react.collapsing.collapsed, (selectedNote, value) => {
+          if (!page.react.readOnly) {
+            selectedNote.react.collab.collapsing.enabled = true;
+          }
+
           selectedNote.react.collapsing.collapsed = value;
         })
       "
