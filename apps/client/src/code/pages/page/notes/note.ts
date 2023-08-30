@@ -336,7 +336,8 @@ export class PageNote extends PageElem() implements IPageRegion {
         self: computed(() => {
           if (
             this.react.collapsing.collapsed &&
-            !isNumeric(this.react.collab.width.collapsed)
+            !isNumeric(this.react.collab.width.collapsed) &&
+            this.react.collab.width.collapsed !== 'Minimum'
           ) {
             return this.react.collab.width.expanded;
           }
