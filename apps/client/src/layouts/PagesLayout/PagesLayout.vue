@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { sleep } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { useEditingOnTyping } from 'src/code/pages/composables/use-editing-on-typing';
 import { useElementPasting } from 'src/code/pages/composables/use-element-pasting';
@@ -64,6 +65,43 @@ if (process.env.CLIENT) {
   useWindowResizeListener();
   useKeyStateTracking();
 }
+
+const stopWatch = watch(
+  [
+    () => internals.pages.react.tutorialStep,
+    () => uiStore().rightSidebarExpanded,
+  ],
+  async () => {
+    await sleep();
+
+    if (internals.pages.react.isNewUser) {
+      if (internals.pages.react.tutorialStep === 2) {
+        document.querySelector('.collapsible-checkbox')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 3) {
+        document.querySelector('.container-checkbox')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 4) {
+        document.querySelector('.new-page-button')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } else if (internals.pages.react.tutorialStep === 6) {
+        $quasar().notify({
+          html: true,
+          message: "These were the basics of DeepNotes.<br/>You're good to go!",
+          color: 'deep-purple-7',
+        });
+
+        stopWatch();
+      }
+    }
+  },
+);
 </script>
 
 <style>

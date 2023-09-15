@@ -1,15 +1,15 @@
 import { listenPointerEvents } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import { refProp, watchUntilTrue } from '@stdlib/vue';
+import { isCtrlDown } from 'src/code/utils/misc';
 import type { UnwrapRef } from 'vue';
 
 import type { Page } from '../page';
 import { roundTimeToMinutes } from './date';
+import type { PageNote } from './note';
 
 export interface IDraggingReact {
   active: boolean;
-
-  currentPos: Vec2;
 
   dropRegionId?: string;
   dropIndex?: number;
@@ -23,6 +23,9 @@ export class NoteDragging {
   initialRegionId?: string;
   finalRegionId?: string;
 
+  initialPointerPos: Vec2 = new Vec2();
+  originalNotePositions: Record<string, Vec2> = {};
+
   private _cancelPointerEvents?: () => void;
 
   constructor(input: { page: Page }) {
@@ -30,12 +33,10 @@ export class NoteDragging {
 
     this.react = refProp<IDraggingReact>(this, 'react', {
       active: false,
-
-      currentPos: new Vec2(),
     });
   }
 
-  start(event: PointerEvent) {
+  start(params: { note: PageNote; event: PointerEvent }) {
     if (this.page.react.readOnly) {
       return;
     }
@@ -43,36 +44,43 @@ export class NoteDragging {
     // Prevent dragging unmovable notes
 
     if (
-      this.page.activeElem.react.value?.type !== 'note' ||
+      this.page.activeElem.react.value?.type === 'note' &&
       !this.page.activeElem.react.value.react.collab.movable
     ) {
-      if (event.pointerType !== 'mouse') {
-        this.page.panning.start(event);
+      if (params.event.pointerType !== 'mouse') {
+        this.page.panning.start(params.event);
       }
 
       return;
     }
 
-    this.react = {
-      active: false,
+    this.react = { active: false };
 
-      currentPos: this.page.pos.eventToClient(event),
-    };
+    this.initialPointerPos = this.page.pos.eventToClient(params.event);
 
-    this._cancelPointerEvents = listenPointerEvents(event, {
+    this._cancelPointerEvents = listenPointerEvents(params.event, {
       dragStartDistance: 5,
 
-      dragStart: this._dragStart,
+      dragStart: () => this._dragStart(params),
       dragUpdate: this._dragUpdate,
       dragEnd: this._dragFinish,
     });
   }
 
-  private _dragStart = async (event: PointerEvent) => {
+  private _dragStart = async (params: {
+    note: PageNote;
+    event: PointerEvent;
+  }) => {
     this.react.active = true;
 
     this.initialRegionId = this.page.activeRegion.react.value.id;
     this.finalRegionId = this.page.id;
+
+    if (isCtrlDown(params.event)) {
+      this.page.selection.add(params.note);
+
+      await this.page.cloning.perform({ shiftNotes: false });
+    }
 
     // Update note dragging states
 
@@ -90,23 +98,38 @@ export class NoteDragging {
       await this._dragOut();
     }
 
-    this._dragUpdate(event);
+    // Store original note positions
+
+    this.originalNotePositions = {};
+
+    for (const selectedNote of this.page.selection.react.notes) {
+      this.originalNotePositions[selectedNote.id] = new Vec2(
+        selectedNote.react.collab.pos,
+      );
+    }
   };
 
   private _dragUpdate = (event: PointerEvent) => {
     const clientPos = this.page.pos.eventToClient(event);
 
-    const worldDelta = this.page.sizes.screenToWorld2D(
-      clientPos.sub(this.react.currentPos),
+    const worldDiff = this.page.sizes.screenToWorld2D(
+      clientPos.sub(this.initialPointerPos),
     );
 
-    this.react.currentPos = clientPos;
+    if (event.shiftKey) {
+      if (Math.abs(worldDiff.x) < Math.abs(worldDiff.y)) {
+        worldDiff.x = 0;
+      } else {
+        worldDiff.y = 0;
+      }
+    }
 
     // Move selected notes
 
     this.page.collab.doc.transact(() => {
       for (const selectedNote of this.page.selection.react.notes) {
-        const newPos = new Vec2(selectedNote.react.collab.pos).add(worldDelta);
+        const newPos =
+          this.originalNotePositions[selectedNote.id].add(worldDiff);
 
         selectedNote.react.collab.pos.x = newPos.x || 0;
         selectedNote.react.collab.pos.y = newPos.y || 0;
@@ -182,7 +205,7 @@ export class NoteDragging {
 
       this.page.collab.doc.transact(() => {
         for (const selectedNote of this.page.selection.react.notes) {
-          const worldPos = this.page.pos.clientToWorld(this.react.currentPos);
+          const worldPos = this.page.pos.clientToWorld(this.initialPointerPos);
           const mouseOffset = worldPos.sub(prevCenters.get(activeElem.id)!);
 
           const prevCenter = prevCenters.get(selectedNote.id)!;

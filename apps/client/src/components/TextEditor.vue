@@ -325,3 +325,9 @@ defineProps<Props>();
   }
 }
 </style>
+
+<style>
+.display-page.readonly-page .text-editor * {
+  user-select: text;
+}
+</style>

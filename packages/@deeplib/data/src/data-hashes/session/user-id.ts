@@ -2,7 +2,7 @@ import type { SessionModel } from '@deeplib/db';
 import type { DataField } from '@stdlib/data';
 
 export const userId: DataField<SessionModel> = {
-  cacheLocally: true, // Never changes
+  cacheLocally: true, // Reason: Field never changes
 
   userGettable: () => true,
 

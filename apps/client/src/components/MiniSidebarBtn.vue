@@ -20,6 +20,8 @@
     >
       {{ tooltip }}
     </q-tooltip>
+
+    <slot></slot>
   </q-item>
 </template>
 

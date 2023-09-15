@@ -336,7 +336,8 @@ export class PageNote extends PageElem() implements IPageRegion {
         self: computed(() => {
           if (
             this.react.collapsing.collapsed &&
-            !isNumeric(this.react.collab.width.collapsed)
+            !isNumeric(this.react.collab.width.collapsed) &&
+            this.react.collab.width.collapsed !== 'Minimum'
           ) {
             return this.react.collab.width.expanded;
           }
@@ -457,6 +458,14 @@ export class PageNote extends PageElem() implements IPageRegion {
       }),
 
       cursor: computed(() => {
+        if (this.page.react.readOnly) {
+          if (this.react.link.url) {
+            return 'pointer';
+          } else {
+            return 'auto';
+          }
+        }
+
         if (this.react.editing) {
           return 'auto';
         }
@@ -536,9 +545,16 @@ export class PageNote extends PageElem() implements IPageRegion {
 
   getElem(part: string | null): HTMLElement | null {
     if (part == null) {
-      return document.getElementById(`note-${this.id}`);
+      return document.querySelector(`#note-${this.id}`);
     } else {
       return document.querySelector(`#note-${this.id} .${part}`);
+    }
+  }
+  getElems(part: string | null): HTMLElement[] {
+    if (part == null) {
+      return Array.from(document.querySelectorAll(`#note-${this.id}`));
+    } else {
+      return Array.from(document.querySelectorAll(`#note-${this.id} .${part}`));
     }
   }
 

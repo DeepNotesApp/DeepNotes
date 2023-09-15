@@ -116,7 +116,7 @@ import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncDialog, handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -153,7 +153,7 @@ function deselectAll() {
 }
 
 function select(id: string, event: MouseEvent) {
-  if (!event.ctrlKey) {
+  if (!isCtrlDown(event)) {
     baseSelectedPageIds.value.clear();
   }
 

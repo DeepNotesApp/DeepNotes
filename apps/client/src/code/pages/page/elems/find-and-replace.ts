@@ -1,4 +1,4 @@
-import type { Editor } from '@tiptap/vue-3';
+import type { Editor, Range } from '@tiptap/vue-3';
 import { scrollIntoView } from 'src/code/utils/scroll-into-view';
 import type { UnwrapNestedRefs } from 'vue';
 
@@ -251,7 +251,7 @@ export class PageFindAndReplace {
       return;
     }
 
-    editor.commands.insertContentAt(result, replacement);
+    replaceText(editor, result, replacement);
 
     if (!replacement.includes(this.findTerm)) {
       this.resultIndex--;
@@ -268,9 +268,17 @@ export class PageFindAndReplace {
         for (const result of (editor.state as any).findAndReplace$.results
           .slice()
           .reverse()) {
-          editor.commands.insertContentAt(result, replacement);
+          replaceText(editor, result, replacement);
         }
       }
     }
+  }
+}
+
+function replaceText(editor: Editor, range: Range, replacement: string) {
+  if (replacement !== '') {
+    editor.commands.insertContentAt(range, replacement);
+  } else {
+    editor.commands.deleteRange(range);
   }
 }

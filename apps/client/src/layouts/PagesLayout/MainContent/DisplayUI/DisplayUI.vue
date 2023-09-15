@@ -11,8 +11,8 @@
   <DisplayTopBtns />
 
   <DisplayMobileAltBtn />
-
   <DisplayUserAvatars />
+  <DisplaySelectionCount />
 </template>
 
 <script setup lang="ts">
@@ -21,6 +21,7 @@ import DisplayHorizontalPath from './DisplayHorizontalPath.vue';
 import DisplayLeftBtns from './DisplayLeftBtns.vue';
 import DisplayMobileAltBtn from './DisplayMobileAltBtn.vue';
 import DisplayRightBtns from './DisplayRightBtns.vue';
+import DisplaySelectionCount from './DisplaySelectionCount.vue';
 import DisplayTopBtns from './DisplayTopBtns.vue';
 import DisplayUserAvatars from './DisplayUserAvatars.vue';
 </script>

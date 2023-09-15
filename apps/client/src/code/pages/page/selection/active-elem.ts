@@ -56,8 +56,6 @@ export class PageActiveElem {
       this.react.value.react.active = false;
     }
 
-    const oldElemId = this.react.id;
-
     this.react.id = elem?.id;
     this.react.type = elem?.type;
 
@@ -67,11 +65,9 @@ export class PageActiveElem {
 
     elem.react.active = true;
 
-    if (this.react.id === oldElemId) {
-      return;
+    if (!elem.react.selected) {
+      this.page.selection.add(elem);
     }
-
-    this.page.selection.add(elem);
   }
 
   clear() {

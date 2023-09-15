@@ -19,6 +19,7 @@ declare module '@vue/runtime-core' {
     DisplayBtn: typeof import('./src/components/DisplayBtn.vue')['default']
     EvaluatedPasswordField: typeof import('./src/components/EvaluatedPasswordField.vue')['default']
     Gap: typeof import('./src/components/Gap.vue')['default']
+    Indicator: typeof import('./src/components/Indicator.vue')['default']
     InlineGap: typeof import('./src/components/InlineGap.vue')['default']
     LinkURL: typeof import('./src/components/LinkURL.vue')['default']
     LoadingOverlay: typeof import('./src/components/LoadingOverlay.vue')['default']
@@ -36,6 +37,7 @@ declare module '@vue/runtime-core' {
     TextEditor: typeof import('./src/components/TextEditor.vue')['default']
     TextField: typeof import('./src/components/TextField.vue')['default']
     ToolbarBtn: typeof import('./src/components/ToolbarBtn.vue')['default']
+    TutorialTooltip: typeof import('./src/components/TutorialTooltip.vue')['default']
     ViewportLoadingOverlay: typeof import('./src/components/ViewportLoadingOverlay.vue')['default']
   }
 }

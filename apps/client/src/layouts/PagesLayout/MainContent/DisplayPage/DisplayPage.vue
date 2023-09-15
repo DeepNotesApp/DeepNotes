@@ -1,6 +1,7 @@
 <template>
   <div
     class="display-page"
+    :class="{ 'readonly-page': page.react.readOnly }"
     :data-page-id="page.id"
   >
     <DisplayScreens />

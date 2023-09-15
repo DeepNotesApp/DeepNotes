@@ -4,7 +4,7 @@
     :style="{
       left: `${arrow.react.centerPos.x}px`,
       top: `${arrow.react.centerPos.y}px`,
-      cursor: arrow.react.editing ? 'auto' : 'grab',
+      cursor: arrow.react.editing || page.react.readOnly ? 'auto' : 'grab',
     }"
   >
     <div

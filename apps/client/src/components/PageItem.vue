@@ -11,7 +11,7 @@
       v-ripple
       @click="
         internals.pages.goToPage(pageId, {
-          openInNewTab: ($event as MouseEvent).ctrlKey,
+          openInNewTab: isCtrlDown($event as MouseEvent),
         })
       "
     >
@@ -31,6 +31,8 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { isCtrlDown } from 'src/code/utils/misc';
+
 defineProps<{
   icon: boolean;
   pageId: string;

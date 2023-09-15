@@ -147,7 +147,7 @@
       @click="
         async (event) => {
           await internals.pages.goToGroup(groupId, {
-            openInNewTab: (event as MouseEvent).ctrlKey,
+            openInNewTab: isCtrlDown(event as MouseEvent),
           });
 
           dialog.onDialogOK();
@@ -273,6 +273,7 @@ import { createSymmetricKeyring } from '@stdlib/crypto';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
+import { isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
 import DeleteGroupBtn from './DeleteGroupBtn.vue';

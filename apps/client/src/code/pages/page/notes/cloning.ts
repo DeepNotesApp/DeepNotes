@@ -8,7 +8,7 @@ export class NoteCloning {
     this.page = input.page;
   }
 
-  async perform() {
+  async perform(options?: { shiftNotes?: boolean }) {
     if (this.page.react.readOnly) {
       return;
     }
@@ -21,11 +21,13 @@ export class NoteCloning {
 
     // Shift notes before deserialization
 
-    for (const noteIndex of serialObject.root.noteIdxs) {
-      const serialNote = serialObject.notes[noteIndex];
+    if (options?.shiftNotes ?? true) {
+      for (const noteIndex of serialObject.root.noteIdxs) {
+        const serialNote = serialObject.notes[noteIndex];
 
-      serialNote.pos.x += 8;
-      serialNote.pos.y += 8;
+        serialNote.pos.x += 8;
+        serialNote.pos.y += 8;
+      }
     }
 
     // Deserialize into structure

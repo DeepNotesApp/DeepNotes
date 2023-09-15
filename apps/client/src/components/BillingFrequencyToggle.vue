@@ -75,21 +75,10 @@
       >
         Save 20%
 
-        <div
-          style="
-            position: absolute;
-
-            width: 0;
-            height: 0;
-
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-top: 8px solid #006dd2;
-
-            left: 50%;
-            transform: translateX(-50%);
-          "
-        ></div>
+        <Indicator
+          pos="bottom"
+          color="#006dd2"
+        />
       </div>
     </div>
   </button>

@@ -75,6 +75,10 @@ export function useKeyboardShortcuts() {
         return true;
       }
 
+      if (modsMatch(event, ['Alt', 'Shift']) && event.code === 'KeyQ') {
+        page.selection.format((chain) => chain.toggleBlockquote());
+        return true;
+      }
       if (modsMatch(event, ['Alt', 'Shift']) && event.code === 'KeyC') {
         page.selection.format((chain) => chain.toggleCodeBlock());
         return true;
@@ -306,6 +310,28 @@ export function useKeyboardShortcuts() {
         page.selection.format((chain, editor) =>
           unsetNode(editor, chain, 'heading'),
         );
+        return true;
+      }
+
+      if (modsMatch(event, ['Control', 'Shift']) && event.code === 'Digit7') {
+        page.selection.format((chain) => chain.toggleOrderedList());
+        return true;
+      }
+      if (modsMatch(event, ['Control', 'Shift']) && event.code === 'Digit8') {
+        page.selection.format((chain) => chain.toggleBulletList());
+        return true;
+      }
+      if (modsMatch(event, ['Control', 'Shift']) && event.code === 'Digit9') {
+        page.selection.format((chain) => chain.toggleTaskList());
+        return true;
+      }
+
+      if (modsMatch(event, ['Alt', 'Shift']) && event.code === 'KeyQ') {
+        page.selection.format((chain) => chain.toggleBlockquote());
+        return true;
+      }
+      if (modsMatch(event, ['Alt', 'Shift']) && event.code === 'KeyC') {
+        page.selection.format((chain) => chain.toggleCodeBlock());
         return true;
       }
 

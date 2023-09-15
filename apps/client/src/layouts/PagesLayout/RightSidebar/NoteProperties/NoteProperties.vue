@@ -5,7 +5,17 @@
       icon="mdi-note-plus"
       :disable="page.react.readOnly"
       @click="showNewPageDialog()"
-    />
+    >
+      <TutorialTooltip
+        v-if="
+          internals.pages.react.isNewUser &&
+          internals.pages.react.tutorialStep === 4
+        "
+        pos="left"
+      >
+        <div v-html="newPageTooltipHTML"></div>
+      </TutorialTooltip>
+    </MiniSidebarBtn>
 
     <q-separator />
 
@@ -45,13 +55,29 @@
       :disable="page.react.readOnly"
       :active="note.react.collab.body.enabled"
       @click="
-        changeProp(!note.react.collab.body.enabled, (selectedNote, value) => {
-          selectedNote.react.collab.head.enabled ||=
-            selectedNote.react.numEnabledSections === 1 && !value;
-          selectedNote.react.collab.body.enabled = value;
-        })
+        () => {
+          changeProp(!note.react.collab.body.enabled, (selectedNote, value) => {
+            selectedNote.react.collab.head.enabled ||=
+              selectedNote.react.numEnabledSections === 1 && !value;
+            selectedNote.react.collab.body.enabled = value;
+          });
+
+          if (internals.pages.react.tutorialStep === 1) {
+            internals.pages.react.tutorialStep++;
+          }
+        }
       "
-    />
+    >
+      <TutorialTooltip
+        v-if="
+          internals.pages.react.isNewUser &&
+          internals.pages.react.tutorialStep === 1
+        "
+        pos="left"
+      >
+        <div v-html="bodyTooltipHTML"></div>
+      </TutorialTooltip>
+    </MiniSidebarBtn>
 
     <q-separator />
 
@@ -61,26 +87,46 @@
       :disable="page.react.readOnly"
       :active="note.react.collab.collapsing.enabled"
       @click="
-        changeProp(
-          !note.react.collab.collapsing.enabled,
-          (selectedNote, value) => {
-            selectedNote.react.collab.collapsing.enabled = value;
-          },
-        )
+        () => {
+          changeProp(
+            !note.react.collab.collapsing.enabled,
+            (selectedNote, value) => {
+              selectedNote.react.collab.collapsing.enabled = value;
+            },
+          );
+
+          if (internals.pages.react.tutorialStep === 2) {
+            internals.pages.react.tutorialStep++;
+          }
+        }
       "
-    />
+    >
+      <TutorialTooltip
+        v-if="
+          internals.pages.react.isNewUser &&
+          internals.pages.react.tutorialStep === 2
+        "
+        pos="left"
+      >
+        <div v-html="collapsibleTooltipHTML"></div>
+      </TutorialTooltip>
+    </MiniSidebarBtn>
 
     <MiniSidebarBtn
-      :tooltip="note.react.collapsing.collapsed ? 'Expand' : 'Collapse'"
+      :tooltip="note.react.collapsing.collapsed ? 'Collapsed' : 'Expanded'"
       :icon="
         note.react.collapsing.collapsed
-          ? 'mdi-chevron-down-box-outline'
-          : 'mdi-chevron-up-box-outline'
+          ? 'mdi-chevron-up-box-outline'
+          : 'mdi-chevron-down-box-outline'
       "
       :active="note.react.collapsing.collapsed"
-      :disable="page.react.readOnly || !note.react.collab.collapsing.enabled"
+      :disable="page.react.readOnly && !note.react.collab.collapsing.enabled"
       @click="
         changeProp(!note.react.collapsing.collapsed, (selectedNote, value) => {
+          if (!page.react.readOnly) {
+            selectedNote.react.collab.collapsing.enabled = true;
+          }
+
           selectedNote.react.collapsing.collapsed = value;
         })
       "
@@ -94,12 +140,51 @@
       :disable="page.react.readOnly"
       :active="note.react.collab.container.enabled"
       @click="
+        () => {
+          changeProp(
+            !note.react.collab.container.enabled,
+            (selectedNote, value) => {
+              selectedNote.react.collab.body.enabled ||=
+                selectedNote.react.numEnabledSections === 1 && !value;
+              selectedNote.react.collab.container.enabled = value;
+              selectedNote.react.collab.container.spatial = false;
+            },
+          );
+
+          if (internals.pages.react.tutorialStep === 3) {
+            internals.pages.react.tutorialStep++;
+          }
+        }
+      "
+    >
+      <TutorialTooltip
+        v-if="
+          internals.pages.react.isNewUser &&
+          internals.pages.react.tutorialStep === 3
+        "
+        pos="left"
+      >
+        <div v-html="containerTooltipHTML"></div>
+      </TutorialTooltip>
+    </MiniSidebarBtn>
+
+    <MiniSidebarBtn
+      tooltip="Spatial"
+      icon="mdi-axis-arrow"
+      :disable="page.react.readOnly"
+      :active="
+        note.react.collab.container.enabled &&
+        note.react.collab.container.spatial
+      "
+      @click="
         changeProp(
-          !note.react.collab.container.enabled,
+          !(
+            note.react.collab.container.enabled &&
+            note.react.collab.container.spatial
+          ),
           (selectedNote, value) => {
-            selectedNote.react.collab.body.enabled ||=
-              selectedNote.react.numEnabledSections === 1 && !value;
-            selectedNote.react.collab.container.enabled = value;
+            selectedNote.react.collab.container.enabled = true;
+            selectedNote.react.collab.container.spatial = value;
           },
         )
       "
@@ -150,6 +235,7 @@
       <DeepBtnDropdown
         label="Create new page"
         icon="mdi-note-plus"
+        class="new-page-button"
         color="primary"
         split
         :menu-offset="[0, 2]"
@@ -171,6 +257,19 @@
             </q-item-section>
           </q-item>
         </q-list>
+
+        <template #label>
+          <TutorialTooltip
+            v-if="
+              internals.pages.react.isNewUser &&
+              internals.pages.react.tutorialStep === 4
+            "
+            ref="newPageTooltip"
+            pos="bottom"
+          >
+            <div v-html="newPageTooltipHTML"></div>
+          </TutorialTooltip>
+        </template>
       </DeepBtnDropdown>
     </div>
 
@@ -202,13 +301,30 @@
           :model-value="note.react.collab.body.enabled"
           title="Toggle body section"
           @update:model-value="
-            changeProp($event, (selectedNote, value) => {
-              selectedNote.react.collab.head.enabled ||=
-                selectedNote.react.numEnabledSections === 1 && !value;
-              selectedNote.react.collab.body.enabled = value;
-            })
+            (event) => {
+              changeProp(event, (selectedNote, value) => {
+                selectedNote.react.collab.head.enabled ||=
+                  selectedNote.react.numEnabledSections === 1 && !value;
+                selectedNote.react.collab.body.enabled = value;
+              });
+
+              if (internals.pages.react.tutorialStep === 1) {
+                internals.pages.react.tutorialStep++;
+              }
+            }
           "
-        />
+        >
+          <TutorialTooltip
+            v-if="
+              internals.pages.react.isNewUser &&
+              internals.pages.react.tutorialStep === 1
+            "
+            ref="bodyTooltip"
+            pos="bottom"
+          >
+            <div v-html="bodyTooltipHTML"></div>
+          </TutorialTooltip>
+        </Checkbox>
       </div>
 
       <Gap style="height: 16px" />
@@ -533,14 +649,32 @@
       <div style="display: flex">
         <Checkbox
           label="Collapsible"
+          class="collapsible-checkbox"
           :disable="page.react.readOnly"
           :model-value="note.react.collab.collapsing.enabled"
           @update:model-value="
-            changeProp($event, (selectedNote, value) => {
-              selectedNote.react.collab.collapsing.enabled = value;
-            })
+            (event) => {
+              changeProp(event, (selectedNote, value) => {
+                selectedNote.react.collab.collapsing.enabled = value;
+              });
+
+              if (internals.pages.react.tutorialStep === 2) {
+                internals.pages.react.tutorialStep++;
+              }
+            }
           "
-        />
+        >
+          <TutorialTooltip
+            v-if="
+              internals.pages.react.isNewUser &&
+              internals.pages.react.tutorialStep === 2
+            "
+            ref="collapsibleTooltip"
+            pos="bottom"
+          >
+            <div v-html="collapsibleTooltipHTML"></div>
+          </TutorialTooltip>
+        </Checkbox>
 
         <Gap style="width: 16px" />
 
@@ -601,16 +735,34 @@
       <div style="display: flex">
         <Checkbox
           label="Container"
+          class="container-checkbox"
           :disable="page.react.readOnly"
           :model-value="note.react.collab.container.enabled"
           @update:model-value="
-            changeProp($event, (selectedNote, value) => {
-              selectedNote.react.collab.body.enabled ||=
-                selectedNote.react.numEnabledSections === 1 && !value;
-              selectedNote.react.collab.container.enabled = value;
-            })
+            (event) => {
+              changeProp(event, (selectedNote, value) => {
+                selectedNote.react.collab.body.enabled ||=
+                  selectedNote.react.numEnabledSections === 1 && !value;
+                selectedNote.react.collab.container.enabled = value;
+              });
+
+              if (internals.pages.react.tutorialStep === 3) {
+                internals.pages.react.tutorialStep++;
+              }
+            }
           "
-        />
+        >
+          <TutorialTooltip
+            v-if="
+              internals.pages.react.isNewUser &&
+              internals.pages.react.tutorialStep === 3
+            "
+            ref="containerTooltip"
+            pos="bottom"
+          >
+            <div v-html="containerTooltipHTML"></div>
+          </TutorialTooltip>
+        </Checkbox>
 
         <Gap style="width: 16px" />
 
@@ -892,8 +1044,10 @@
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
 import type { Editor } from '@tiptap/vue-3';
+import { useIntervalFn } from '@vueuse/core';
 import { saveAs } from 'file-saver';
 import { pack } from 'msgpackr';
+import { QMenu } from 'quasar';
 import showdown from 'showdown';
 import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
 import { createPage } from 'src/code/api-interface/pages/create';
@@ -901,6 +1055,7 @@ import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { setClipboardText } from 'src/code/utils/clipboard';
 import { handleError } from 'src/code/utils/misc';
+import TutorialTooltip from 'src/components/TutorialTooltip.vue';
 import TurndownService from 'turndown';
 import type { Ref } from 'vue';
 
@@ -909,6 +1064,28 @@ import NewPageDialog from './NewPageDialog.vue';
 const page = inject<Ref<Page>>('page')!;
 
 const note = computed(() => page.value.activeElem.react.value as PageNote);
+
+const newPageTooltipHTML =
+  'Click here to create<br/>a <b>new page</b> through<br/>this note.<br/>';
+const bodyTooltipHTML = 'Click here to<br/>enable the <b>note body</b>.';
+const collapsibleTooltipHTML =
+  'Click here to make<br/>the note <b>collapsible</b>.';
+const containerTooltipHTML =
+  'Click here to enable<br/> the <b>note container</b>.<br/>This allows to place<br/>notes within eachother.';
+
+const newPageTooltip = ref<InstanceType<typeof TutorialTooltip>>();
+const bodyTooltip = ref<InstanceType<typeof TutorialTooltip>>();
+const collapsibleTooltip = ref<InstanceType<typeof TutorialTooltip>>();
+const containerTooltip = ref<InstanceType<typeof TutorialTooltip>>();
+
+useIntervalFn(() => {
+  if (internals.pages.react.isNewUser) {
+    newPageTooltip.value?.updatePosition();
+    bodyTooltip.value?.updatePosition();
+    collapsibleTooltip.value?.updatePosition();
+    containerTooltip.value?.updatePosition();
+  }
+}, 1);
 
 const fileInput = ref<HTMLInputElement>();
 
@@ -930,10 +1107,14 @@ function getInitialPageTitle() {
       return '';
     }
 
-    const editorElem = activeElem.getElem('ProseMirror');
+    const editorElems = activeElem.getElems('ProseMirror');
 
-    if (editorElem != null) {
+    for (const editorElem of editorElems) {
       initialPageTitle = splitStr(editorElem.innerText, '\n')[0];
+
+      if (initialPageTitle !== '') {
+        break;
+      }
     }
   }
 
@@ -941,11 +1122,23 @@ function getInitialPageTitle() {
 }
 
 async function createNewPageQuick() {
+  const initialPageTitle = getInitialPageTitle();
+
+  if (initialPageTitle === '') {
+    $quasar().notify({
+      html: true,
+      message:
+        'Cannot create a page from an empty note.<br/>Please write something in it first.',
+      color: 'negative',
+    });
+    return;
+  }
+
   const response = await createPage({
     parentPageId: page.value.id,
     destGroupId: page.value.react.groupId,
 
-    pageRelativeTitle: getInitialPageTitle(),
+    pageRelativeTitle: initialPageTitle,
   });
 
   changeProp(`/pages/${response.pageId}`, (selectedNote, url) => {
@@ -962,6 +1155,10 @@ async function createNewPageQuick() {
         : ''),
     type: 'positive',
   });
+
+  if (internals.pages.react.tutorialStep === 4) {
+    internals.pages.react.tutorialStep++;
+  }
 }
 
 function showNewPageDialog() {
@@ -977,6 +1174,10 @@ function showNewPageDialog() {
       changeProp(url, (selectedNote, url) => {
         selectedNote.react.collab.link = url;
       });
+
+      if (internals.pages.react.tutorialStep === 4) {
+        internals.pages.react.tutorialStep++;
+      }
     });
 }
 
