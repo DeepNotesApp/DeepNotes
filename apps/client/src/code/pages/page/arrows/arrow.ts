@@ -523,6 +523,10 @@ export const PageArrow = once(
       grab(event: PointerEvent) {
         this.page.clickSelection.perform(this, event);
 
+        if (this.page.react.readOnly) {
+          return;
+        }
+
         const path = document.querySelector(
           `#arrow-${this.id} .arrow`,
         ) as SVGPathElement;
