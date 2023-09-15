@@ -458,6 +458,14 @@ export class PageNote extends PageElem() implements IPageRegion {
       }),
 
       cursor: computed(() => {
+        if (this.page.react.readOnly) {
+          if (this.react.link.url) {
+            return 'pointer';
+          } else {
+            return 'auto';
+          }
+        }
+
         if (this.react.editing) {
           return 'auto';
         }
