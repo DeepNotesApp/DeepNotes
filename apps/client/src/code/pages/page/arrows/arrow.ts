@@ -363,15 +363,15 @@ export const PageArrow = once(
           }),
           targetHeadPos: computed(() => {
             if (this.react.collab.bodyType === 'line') {
-              return (
-                getLineRectIntersection(
-                  new Line(this.react.sourcePos, this.react.targetPos),
-                  (this.react.interregional
-                    ? this.react.targetNote.react.islandRect
-                    : this.react.targetNote.react.relativeRect
-                  ).grow(new Vec2(ARROW_OFFSET)),
-                ) ?? this.react.targetPos
-              );
+              return this.react.targetNote != null
+                ? getLineRectIntersection(
+                    new Line(this.react.sourcePos, this.react.targetPos),
+                    (this.react.interregional
+                      ? this.react.targetNote.react.islandRect
+                      : this.react.targetNote.react.relativeRect
+                    ).grow(new Vec2(ARROW_OFFSET)),
+                  ) ?? this.react.targetPos
+                : this.react.targetPos;
             } else {
               return this.react.targetPos.add(
                 this.react.halfSizes.target
