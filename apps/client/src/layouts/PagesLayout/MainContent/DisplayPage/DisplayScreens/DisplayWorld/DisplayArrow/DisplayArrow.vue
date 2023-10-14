@@ -9,12 +9,10 @@
     <component
       :is="arrow.react.collab.bodyType === 'curve' ? CurveArrow : LineArrow"
       :style="{
-        'pointer-events':
-          page.arrowCreation.react.active || page.dragging.react.active
-            ? 'none'
-            : undefined,
+        'pointer-events': page.arrowCreation.react.active ? 'none' : undefined,
       }"
       @pointerdown.left.stop="onLeftPointerDown"
+      @pointerup.left="onLeftPointerUp"
       @click.left="onLeftClick"
     ></component>
 
@@ -36,6 +34,7 @@
 
 <script setup lang="ts">
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
+import { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { createDoubleClickChecker } from 'src/code/utils/misc';
 
@@ -70,6 +69,35 @@ function onLeftPointerDown(event: PointerEvent) {
   page.editing.stop();
 
   props.arrow.grab(event);
+}
+
+async function onLeftPointerUp(event: PointerEvent) {
+  if (
+    page.dragging.react.active &&
+    page.selection.react.elems.length === 1 &&
+    page.selection.react.elems[0].type === 'note'
+  ) {
+    if (props.arrow.react.region instanceof PageNote) {
+      await page.dropping.perform(props.arrow.react.region);
+    } else {
+      page.dragging.cancel();
+    }
+
+    const targetNote = props.arrow.react.targetNote;
+
+    const middleNote = page.selection.react.elems[0];
+
+    // eslint-disable-next-line vue/no-mutating-props
+    props.arrow.react.collab.target = middleNote.id;
+
+    page.arrowCreation.create({
+      sourceNote: middleNote,
+      targetNote: targetNote,
+      anchor: null,
+      baseArrow: props.arrow,
+      event,
+    });
+  }
 }
 
 const checkDoubleClick = createDoubleClickChecker();

@@ -30,9 +30,15 @@ export class NoteDropping {
 
         selectedNote.react.collab.pos.x = newPos.x;
         selectedNote.react.collab.pos.y = newPos.y;
+      }
 
-        if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
-          this.page.collab.store.notes[selectedNote.id].movedAt = date;
+      if (
+        this.page.dragging.finalRegionId !== this.page.dragging.initialRegionId
+      ) {
+        for (const selectedNote of this.page.selection.react.notes) {
+          if (date !== this.page.collab.store.notes[selectedNote.id]?.movedAt) {
+            this.page.collab.store.notes[selectedNote.id].movedAt = date;
+          }
         }
       }
     });

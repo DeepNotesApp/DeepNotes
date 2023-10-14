@@ -5,6 +5,7 @@
       left: `${arrow.react.centerPos.x}px`,
       top: `${arrow.react.centerPos.y}px`,
       cursor: arrow.react.editing || page.react.readOnly ? 'auto' : 'grab',
+      display: page.dragging.react.active ? 'none' : undefined,
     }"
   >
     <div
