@@ -148,4 +148,24 @@ export class PageArrowCreation {
 
     return arrow;
   }
+
+  create(input: {
+    sourceNote: PageNote;
+    targetNote: PageNote;
+    event: PointerEvent;
+    baseArrow?: PageArrow;
+    anchor: IVec2 | null;
+  }) {
+    this.start({
+      anchorNote: input.sourceNote,
+      looseEndpoint: 'target',
+      baseArrow: input.baseArrow,
+      event: input.event,
+    });
+
+    this.finish({
+      note: input.targetNote,
+      anchor: null,
+    });
+  }
 }
