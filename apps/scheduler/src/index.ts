@@ -49,7 +49,7 @@ async function cleanDeletedObjects() {
       await Promise.all([
         ...permanentlyDeletedPages.flatMap((page) => [
           dataAbstraction().delete('page-backlinks', page.id, { dtrx }),
-          dataAbstraction().delete('page-snaphots', page.id, { dtrx }),
+          dataAbstraction().delete('page-snapshots', page.id, { dtrx }),
           dataAbstraction().delete('page', page.id, { dtrx }),
         ]),
 

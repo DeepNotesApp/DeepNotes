@@ -391,7 +391,7 @@ export const RealtimeClient = once(
 
                 this._resubscribe('page', pageId, 'permanent-deletion-date');
 
-                this._resubscribe('page-snaphots', pageId, 'infos');
+                this._resubscribe('page-snapshots', pageId, 'infos');
               }
             }
           }

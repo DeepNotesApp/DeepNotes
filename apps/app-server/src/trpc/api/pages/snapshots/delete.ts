@@ -46,7 +46,7 @@ export async function delete_({
 
             const pageSnapshotInfos: PageSnapshotInfo[] =
               await ctx.dataAbstraction.hget(
-                'page-snaphots',
+                'page-snapshots',
                 input.pageId,
                 'infos',
               );
@@ -65,7 +65,7 @@ export async function delete_({
             // Update page snapshot infos
 
             await ctx.dataAbstraction.hmset(
-              'page-snaphots',
+              'page-snapshots',
               input.pageId,
               { infos: pageSnapshotInfos },
               { dtrx },
