@@ -368,6 +368,8 @@ export class Serialization {
     noteCollab.editedAt = null;
     noteCollab.movedAt = null;
 
+    noteCollab.movable = true;
+
     const noteId = nanoid();
 
     noteMap.set(noteIndex, noteId);

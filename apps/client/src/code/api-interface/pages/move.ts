@@ -178,7 +178,7 @@ export async function movePage(input: {
     return {
       pageId: input.pageId,
 
-      destGroupId: input.destGroupId,
+      destGroupId: destGroupId,
       setAsMainPage: input.setAsMainPage,
 
       groupCreation,

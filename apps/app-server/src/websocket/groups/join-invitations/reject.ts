@@ -48,10 +48,6 @@ export async function rejectStep1({
   typeof baseProcedureStep1
 >): Promise<NotificationsResponse> {
   return await ctx.dataAbstraction.transaction(async (dtrx) => {
-    // Assert that user is subscribed
-
-    await ctx.assertUserSubscribed({ userId: ctx.userId });
-
     // Check pending invitation
 
     if (

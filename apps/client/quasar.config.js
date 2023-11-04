@@ -348,7 +348,7 @@ module.exports = configure(function (ctx) {
           target: 'AppImage',
         },
 
-        ...(false // true for NSIS, false for AppX
+        ...(env.NSIS === 'true'
           ? {
               win: {
                 target: 'nsis',
