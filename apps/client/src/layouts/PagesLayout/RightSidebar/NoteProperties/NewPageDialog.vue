@@ -133,6 +133,7 @@ import {
   maxGroupNameLength,
   maxNameLength,
   maxPageTitleLength,
+  rolesMap,
 } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN, sleep } from '@stdlib/misc';
 import { createPage } from 'src/code/api-interface/pages/create';
@@ -158,13 +159,21 @@ const pageRelativeTitleElem = ref<ComponentPublicInstance>();
 const realtimeCtx = useRealtimeContext();
 
 const groupIds = ref<string[]>([]);
+const groupMemberRoles = ref<string[]>([]);
 
 const groupOptions = computed(() => [
   { id: 'new', name: '(New group)' },
   ...groupIds.value
-    .map((groupId) => {
+    .map((groupId, groupIndex) => {
       if (
         realtimeCtx.hget('group', groupId, 'permanent-deletion-date') != null
+      ) {
+        return;
+      }
+
+      if (
+        !rolesMap()[groupMemberRoles.value[groupIndex]]?.permissions
+          .editGroupPages
       ) {
         return;
       }
@@ -196,7 +205,6 @@ onMounted(async () => {
   // Initialize group IDs
 
   groupIds.value = [page.value.react.groupId];
-  destGroupId.value = page.value.react.groupId;
 
   // Focus page title
 
@@ -213,6 +221,16 @@ onMounted(async () => {
         authStore().userId,
         'recent-group-ids',
       )) ?? [page.value.react.groupId];
+
+      groupMemberRoles.value = await Promise.all(
+        groupIds.value.map((groupId) =>
+          internals.realtime.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'role',
+          ),
+        ),
+      );
     })(),
 
     (async () => {
@@ -223,6 +241,8 @@ onMounted(async () => {
       ).text;
     })(),
   ]);
+
+  destGroupId.value = page.value.react.groupId;
 });
 
 async function _createPage() {

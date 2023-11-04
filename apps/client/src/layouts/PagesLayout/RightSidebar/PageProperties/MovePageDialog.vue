@@ -113,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { maxGroupNameLength, maxNameLength } from '@deeplib/misc';
+import { maxGroupNameLength, maxNameLength, rolesMap } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import type { movePage } from 'src/code/api-interface/pages/move';
 import { groupNames } from 'src/code/pages/computed/group-names';
@@ -130,6 +130,7 @@ const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 const horizontal = computed(() => uiStore().width >= BREAKPOINT_MD_MIN);
 
 const groupIds = ref<string[]>([]);
+const groupMemberRoles = ref<string[]>([]);
 const destGroupId = ref<string>();
 
 const setAsMainPage = ref(false);
@@ -151,9 +152,16 @@ const realtimeCtx = useRealtimeContext();
 const groupOptions = computed(() => [
   { id: 'new', name: '(New group)' },
   ...groupIds.value
-    .map((groupId) => {
+    .map((groupId, groupIndex) => {
       if (
         realtimeCtx.hget('group', groupId, 'permanent-deletion-date') != null
+      ) {
+        return;
+      }
+
+      if (
+        !rolesMap()[groupMemberRoles.value[groupIndex]]?.permissions
+          .editGroupPages
       ) {
         return;
       }
@@ -169,7 +177,6 @@ const groupOptions = computed(() => [
 
 onMounted(async () => {
   groupIds.value = [props.groupId];
-  destGroupId.value = props.groupId;
 
   await Promise.all([
     (async () => {
@@ -178,12 +185,24 @@ onMounted(async () => {
         authStore().userId,
         'recent-group-ids',
       )) ?? [props.groupId];
+
+      groupMemberRoles.value = await Promise.all(
+        groupIds.value.map((groupId) =>
+          internals.realtime.hget(
+            'group-member',
+            `${groupId}:${authStore().userId}`,
+            'role',
+          ),
+        ),
+      );
     })(),
 
     (async () => {
       groupMemberName.value = await selfUserName().getAsync();
     })(),
   ]);
+
+  destGroupId.value = props.groupId;
 });
 
 async function _movePage() {
