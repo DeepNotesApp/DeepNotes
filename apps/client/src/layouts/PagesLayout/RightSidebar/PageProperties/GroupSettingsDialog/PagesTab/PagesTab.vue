@@ -130,7 +130,9 @@ const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 const basePageIds = inject<Ref<string[]>>('pageIds')!;
 const finalPageIds = computed(() =>
   basePageIds.value.filter(
-    (pageId) => realtimeCtx.hget('page', pageId, 'group-id') === groupId,
+    (pageId) =>
+      realtimeCtx.hget('page', pageId, 'group-id') === groupId &&
+      realtimeCtx.hget('page', pageId, 'permanent-deletion-date') == null,
   ),
 );
 
