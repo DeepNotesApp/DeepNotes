@@ -18,7 +18,7 @@
     "@stdlib/db": "workspace:1.0.0",
     "@stdlib/misc": "workspace:1.0.0",
     "@stdlib/redlock": "workspace:1.0.0",
-    "@trpc/server": "^10.20.0",
+    "@trpc/server": "^10.43.1",
     "crypto-js": "^4.1.1",
     "dotenv": "16.0.3",
     "dotenv-expand": "9.0.0",
