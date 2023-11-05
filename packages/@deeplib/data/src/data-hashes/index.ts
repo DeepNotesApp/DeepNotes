@@ -22,7 +22,7 @@ export const dataHashes = validateDataHashes({
   'group-member': groupMember,
   page: page,
   'page-backlinks': pageBacklinks,
-  'page-snaphots': pageSnapshots,
+  'page-snapshots': pageSnapshots,
   session: session,
   user: user,
   'user-page': userPage,

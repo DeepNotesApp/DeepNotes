@@ -19,7 +19,7 @@ export async function insertPageSnapshot(input: {
   dtrx: DataTransaction;
 }) {
   const pageSnapshotInfos: PageSnapshotInfo[] =
-    await input.dataAbstraction.hget('page-snaphots', input.pageId, 'infos');
+    await input.dataAbstraction.hget('page-snapshots', input.pageId, 'infos');
 
   const pageSnapshot = await PageSnapshotModel.query(input.dtrx.trx)
     .insert({
@@ -58,7 +58,7 @@ export async function insertPageSnapshot(input: {
   // Update page snapshot infos
 
   await input.dataAbstraction.hmset(
-    'page-snaphots',
+    'page-snapshots',
     input.pageId,
     { infos: pageSnapshotInfos },
     { dtrx: input.dtrx },

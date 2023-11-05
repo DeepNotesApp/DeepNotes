@@ -97,7 +97,7 @@ const page = inject<Ref<Page>>('page')!;
 
 const snapshotInfos = computed(
   (): PageSnapshotInfo[] =>
-    page.value.realtimeCtx.hget('page-snaphots', page.value.id, 'infos') ?? [],
+    page.value.realtimeCtx.hget('page-snapshots', page.value.id, 'infos') ?? [],
 );
 
 async function restoreVersion(snapshotId: string) {
