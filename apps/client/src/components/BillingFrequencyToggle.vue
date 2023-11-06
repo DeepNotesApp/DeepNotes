@@ -36,7 +36,9 @@
         right: 50%;
         bottom: 2px;
 
-        transition: left 0.2s, right 0.2s;
+        transition:
+          left 0.2s,
+          right 0.2s;
       "
       :style="{
         left: modelValue === 'monthly' ? '2px' : '50%',

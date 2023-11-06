@@ -40,9 +40,9 @@ export const RealtimeContext = once(
       async hgetAsync<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, field: DataField) {
         this._subscribe(prefix, suffix, field);
 
@@ -76,18 +76,18 @@ export const RealtimeContext = once(
       hmget<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, fields: DataField[]) {
         return fields.map((field) => this.hget(prefix, suffix, field));
       }
       hget<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, field: DataField) {
         if (process.env.SERVER) {
           return;

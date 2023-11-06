@@ -123,9 +123,9 @@ export const RealtimeClient = once(
       async hmget<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(
         prefix: DataPrefix_,
         suffix: string,
@@ -139,9 +139,9 @@ export const RealtimeClient = once(
       async hget<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(
         prefix: DataPrefix_,
         suffix: string,
@@ -190,9 +190,9 @@ export const RealtimeClient = once(
       hset<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, field: DataField, value: any) {
         const fullKey = getFullKey(prefix, suffix, field);
 
@@ -215,9 +215,9 @@ export const RealtimeClient = once(
       hmset<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, values: Record<DataField, any>) {
         for (const [field, value] of Object.entries<any>(values)) {
           this.hset(prefix, suffix, field as DataField, value);
@@ -257,9 +257,9 @@ export const RealtimeClient = once(
       _resubscribe<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, field: DataField) {
         if (`${prefix}:${suffix}>${field}` in this.subscriptions) {
           this.pushCommand({
@@ -469,9 +469,9 @@ export const RealtimeClient = once(
       isSynced<
         DataPrefix_ extends DataPrefix,
         DataField extends Extract<
-          keyof typeof dataHashes[DataPrefix_]['fields'],
+          keyof (typeof dataHashes)[DataPrefix_]['fields'],
           string
-        > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+        > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
       >(prefix: DataPrefix_, suffix: string, field: DataField) {
         const fullKey = getFullKey(prefix, suffix, field);
 

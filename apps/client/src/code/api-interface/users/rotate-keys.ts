@@ -39,15 +39,15 @@ export async function rotateUserKeys(input: { password: string }) {
     steps: [step1, step2, step3],
   });
 
-  function step1(): typeof rotateKeysProcedureStep1['_def']['_input_in'] {
+  function step1(): (typeof rotateKeysProcedureStep1)['_def']['_input_in'] {
     return {
       loginHash: derivedUserValues.loginHash,
     };
   }
 
   async function step2(
-    input: typeof rotateKeysProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof rotateKeysProcedureStep2['_def']['_input_in']> {
+    input: (typeof rotateKeysProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof rotateKeysProcedureStep2)['_def']['_input_in']> {
     const oldSymmetricKeyring = createSymmetricKeyring(
       input.userEncryptedSymmetricKeyring,
     ).unwrapSymmetric(derivedUserValues.masterKey, {
@@ -210,7 +210,7 @@ export async function rotateUserKeys(input: { password: string }) {
   }
 
   async function step3(
-    _input: typeof rotateKeysProcedureStep2['_def']['_output_out'],
+    _input: (typeof rotateKeysProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

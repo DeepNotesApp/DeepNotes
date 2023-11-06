@@ -169,9 +169,9 @@ export async function moveStep1({
         ))(),
 
       pageEncryptedUpdates: (async () =>
-        (
-          await getAllPageUpdates(input.pageId, getRedis())
-        ).map((pageUpdate) => pageUpdate[1]))(),
+        (await getAllPageUpdates(input.pageId, getRedis())).map(
+          (pageUpdate) => pageUpdate[1],
+        ))(),
       pageEncryptedSnapshots: (async () =>
         objFromEntries(
           (

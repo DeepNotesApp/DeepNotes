@@ -21,7 +21,7 @@ export async function cancelJoinRequest(input: { groupId: string }) {
   });
 
   async function step1(): Promise<
-    typeof cancelProcedureStep1['_def']['_input_in']
+    (typeof cancelProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -29,8 +29,8 @@ export async function cancelJoinRequest(input: { groupId: string }) {
   }
 
   async function step2(
-    input_: typeof cancelProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof cancelProcedureStep2['_def']['_input_in']> {
+    input_: (typeof cancelProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof cancelProcedureStep2)['_def']['_input_in']> {
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
@@ -55,7 +55,7 @@ export async function cancelJoinRequest(input: { groupId: string }) {
   }
 
   async function step3(
-    _input: typeof cancelProcedureStep2['_def']['_output_out'],
+    _input: (typeof cancelProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

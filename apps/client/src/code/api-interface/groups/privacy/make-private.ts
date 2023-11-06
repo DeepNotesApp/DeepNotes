@@ -17,7 +17,7 @@ export async function makeGroupPrivate(input: { groupId: string }) {
   });
 
   async function step1(): Promise<
-    typeof makePrivateProcedureStep1['_def']['_input_in']
+    (typeof makePrivateProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -25,8 +25,8 @@ export async function makeGroupPrivate(input: { groupId: string }) {
   }
 
   async function step2(
-    input_: typeof makePrivateProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof makePrivateProcedureStep2['_def']['_input_in']> {
+    input_: (typeof makePrivateProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof makePrivateProcedureStep2)['_def']['_input_in']> {
     return await processGroupKeyRotationValues({
       ...input_,
 
@@ -37,7 +37,7 @@ export async function makeGroupPrivate(input: { groupId: string }) {
   }
 
   async function step3(
-    _input: typeof makePrivateProcedureStep2['_def']['_output_out'],
+    _input: (typeof makePrivateProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

@@ -3,9 +3,9 @@ import type { dataHashes, DataPrefix } from './data-hashes';
 export function hget<
   DataPrefix_ extends DataPrefix,
   DataField_ extends Extract<
-    keyof typeof dataHashes[DataPrefix_]['fields'],
+    keyof (typeof dataHashes)[DataPrefix_]['fields'],
     string
-  > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+  > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
 >(
   prefix: DataPrefix_,
   suffix: string,
@@ -17,9 +17,9 @@ export function hget<
 export function hset<
   DataPrefix_ extends DataPrefix,
   DataField_ extends Extract<
-    keyof typeof dataHashes[DataPrefix_]['fields'],
+    keyof (typeof dataHashes)[DataPrefix_]['fields'],
     string
-  > = Extract<keyof typeof dataHashes[DataPrefix_]['fields'], string>,
+  > = Extract<keyof (typeof dataHashes)[DataPrefix_]['fields'], string>,
 >(
   prefix: DataPrefix_,
   suffix: string,

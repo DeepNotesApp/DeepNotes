@@ -4,18 +4,19 @@
     :class="{ active }"
     :href="`https://deepnotes.app/pages/${pageId}`"
     @click.prevent.stop="
-    (event) => {
-      internals.pages.goToPage(pageId, {
-        openInNewTab: isCtrlDown(event as MouseEvent),
-      });
+      (event) => {
+        internals.pages.goToPage(pageId, {
+          openInNewTab: isCtrlDown(event as MouseEvent),
+        });
 
-      if (
-        pageId === internals.pages.react.pathPageIds[0] &&
-        internals.pages.react.isNewUser &&
-        internals.pages.react.tutorialStep === 5) {
-        internals.pages.react.tutorialStep++;
+        if (
+          pageId === internals.pages.react.pathPageIds[0] &&
+          internals.pages.react.isNewUser &&
+          internals.pages.react.tutorialStep === 5
+        ) {
+          internals.pages.react.tutorialStep++;
+        }
       }
-    }
     "
   >
     <div

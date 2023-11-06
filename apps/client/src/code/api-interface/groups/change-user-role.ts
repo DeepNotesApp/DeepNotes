@@ -24,7 +24,7 @@ export async function changeUserRole(input: {
   });
 
   async function step1(): Promise<
-    typeof changeUserRoleProcedureStep1['_def']['_input_in']
+    (typeof changeUserRoleProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -34,8 +34,8 @@ export async function changeUserRole(input: {
   }
 
   async function step2(
-    input_: typeof changeUserRoleProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof changeUserRoleProcedureStep2['_def']['_input_in']> {
+    input_: (typeof changeUserRoleProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof changeUserRoleProcedureStep2)['_def']['_input_in']> {
     const agentId = authStore().userId;
     const roleName = rolesMap()[input.role].name;
 
@@ -88,7 +88,7 @@ export async function changeUserRole(input: {
   }
 
   async function step3(
-    _input: typeof changeUserRoleProcedureStep2['_def']['_output_out'],
+    _input: (typeof changeUserRoleProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

@@ -139,7 +139,9 @@ body {
   }
 
   .q-page-container {
-    transition: padding-left 0.2s ease, padding-right 0.2s ease;
+    transition:
+      padding-left 0.2s ease,
+      padding-right 0.2s ease;
   }
 }
 </style>

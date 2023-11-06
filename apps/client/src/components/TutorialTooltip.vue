@@ -2,8 +2,10 @@
   <q-menu
     ref="menu"
     :model-value="true"
-    :anchor="((basis === 'left' ? `center ${flippedPos}` : `${pos} middle`) as any)"
-    :self="((basis === 'left' ? `center ${pos}` : `${flippedPos} middle`) as any)"
+    :anchor="
+      (basis === 'left' ? `center ${flippedPos}` : `${pos} middle`) as any
+    "
+    :self="(basis === 'left' ? `center ${pos}` : `${flippedPos} middle`) as any"
     :offset="[basis === 'left' ? 8 : 0, basis === 'top' ? 8 : 0]"
     style="position: relative; overflow: visible"
     persistent

@@ -120,10 +120,13 @@ export const roles = once((): IGroupRole[] => [
 ]);
 
 export const rolesMap = once(() =>
-  roles().reduce((acc, role) => {
-    acc[role.id] = role;
-    return acc;
-  }, {} as Record<string, IGroupRole>)
+  roles().reduce(
+    (acc, role) => {
+      acc[role.id] = role;
+      return acc;
+    },
+    {} as Record<string, IGroupRole>,
+  ),
 );
 
 export function canManageRole(managerRole: string, targetRole: string) {
@@ -147,7 +150,7 @@ export function canManageRole(managerRole: string, targetRole: string) {
 export function canChangeRole(
   managerRole: string,
   targetOldRole: string,
-  targetNewRole: string
+  targetNewRole: string,
 ) {
   return (
     canManageRole(managerRole, targetOldRole) &&

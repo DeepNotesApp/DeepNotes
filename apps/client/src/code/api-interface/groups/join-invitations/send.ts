@@ -58,7 +58,7 @@ export async function sendJoinInvitation(input: {
   });
 
   async function step1(): Promise<
-    typeof sendProcedureStep1['_def']['_input_in']
+    (typeof sendProcedureStep1)['_def']['_input_in']
   > {
     if (accessKeyring == null || groupInternalKeyring == null) {
       throw new Error('Group keyrings not found.');
@@ -93,8 +93,8 @@ export async function sendJoinInvitation(input: {
   }
 
   async function step2(
-    input_: typeof sendProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof sendProcedureStep2['_def']['_input_in']> {
+    input_: (typeof sendProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof sendProcedureStep2)['_def']['_input_in']> {
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
@@ -135,7 +135,7 @@ export async function sendJoinInvitation(input: {
   }
 
   async function step3(
-    _input: typeof sendProcedureStep2['_def']['_output_out'],
+    _input: (typeof sendProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }
