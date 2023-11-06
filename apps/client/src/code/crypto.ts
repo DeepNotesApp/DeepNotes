@@ -6,7 +6,7 @@ import { DataLayer } from '@stdlib/crypto';
 import { wrapKeyPair } from '@stdlib/crypto';
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import { nanoidToBytes } from '@stdlib/misc';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { nanoid } from 'nanoid';
 import { GROUP_CONTENT_KEYRING } from 'src/stores/pages';
 

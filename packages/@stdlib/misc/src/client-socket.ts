@@ -64,11 +64,15 @@ export const ClientSocket = once(
           if (this.#keepConnected) {
             this.#nextReconnectDelay = Math.min(5000, this.#nextReconnectDelay);
 
-            setTimeout(() => {
-              this.#nextReconnectDelay *= 2;
+            setTimeout(
+              () => {
+                this.#nextReconnectDelay *= 2;
 
-              this.connect();
-            }, this.#nextReconnectDelay + this.#nextReconnectDelay * Math.random());
+                this.connect();
+              },
+              this.#nextReconnectDelay +
+                this.#nextReconnectDelay * Math.random(),
+            );
           }
         });
       }

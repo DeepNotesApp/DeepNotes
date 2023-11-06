@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "lodash": "4.17.21",
-    "unilogr": "0.0.27"
+    "lodash": "^4.17.21",
+    "unilogr": "^0.0.27"
   },
   "devDependencies": {
-    "@types/lodash": "4.14.189"
+    "@types/lodash": "^4.14.200"
   },
   "keywords": [],
   "license": "ISC",

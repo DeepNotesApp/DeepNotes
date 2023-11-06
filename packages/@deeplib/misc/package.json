@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "@stdlib/misc": "workspace:1.0.0"
+    "@stdlib/misc": "workspace:*"
   },
   "keywords": [],
   "license": "ISC",

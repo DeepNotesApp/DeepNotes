@@ -127,6 +127,8 @@ const quasarMode = process.env.MODE;
 
 <style scoped lang="scss">
 .q-header :deep() {
-  transition: left 0.2s ease, right 0.2s ease;
+  transition:
+    left 0.2s ease,
+    right 0.2s ease;
 }
 </style>

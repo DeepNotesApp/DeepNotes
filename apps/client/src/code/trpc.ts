@@ -20,11 +20,25 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
 
       headers({ op }) {
         return {
-          ...(op.context as any).headers,
+          ...(op.context as any)?.headers,
+
+          'X-Trpc-Context': op.context,
         };
       },
 
-      async fetch(url, options, ops) {
+      async fetch(url, options) {
+        // Extract context
+
+        let context;
+
+        if ((options?.headers as any)?.['X-Trpc-Context'] != null) {
+          context = (options?.headers as any)?.['X-Trpc-Context'];
+
+          delete (options?.headers as any)?.['X-Trpc-Context'];
+        }
+
+        // Fetch
+
         let response;
 
         if (process.env.SERVER) {
@@ -39,8 +53,12 @@ export const trpcClient = createTRPCProxyClient<AppRouter>({
 
         // Pass SSR cookies to browser
 
-        if (process.env.SERVER && response.headers.has('set-cookie')) {
-          (ops[0].context as any).ssrContext.res.setHeader(
+        if (
+          process.env.SERVER &&
+          response.headers.has('set-cookie') &&
+          context?.ssrContext != null
+        ) {
+          context.ssrContext.res.setHeader(
             'set-cookie',
             response.headers.get('set-cookie')!.split(/, (?=\w+=)/g),
           );

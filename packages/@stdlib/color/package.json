@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "color": "4.2.3"
+    "color": "^4.2.3"
   },
   "devDependencies": {
-    "@types/color": "3.0.3"
+    "@types/color": "^3.0.5"
   },
   "keywords": [],
   "license": "ISC",

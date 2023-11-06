@@ -34,15 +34,15 @@ export async function changePassword(input: {
     steps: [step1, step2, step3],
   });
 
-  function step1(): typeof changePasswordProcedureStep1['_def']['_input_in'] {
+  function step1(): (typeof changePasswordProcedureStep1)['_def']['_input_in'] {
     return {
       oldLoginHash: oldDerivedUserValues.loginHash,
     };
   }
 
   async function step2(
-    input_: typeof changePasswordProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof changePasswordProcedureStep2['_def']['_input_in']> {
+    input_: (typeof changePasswordProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof changePasswordProcedureStep2)['_def']['_input_in']> {
     const newDerivedUserValues = await deriveUserValues({
       email,
       password: input.newPassword,
@@ -90,7 +90,7 @@ export async function changePassword(input: {
   }
 
   async function step3(
-    _input: typeof changePasswordProcedureStep2['_def']['_output_out'],
+    _input: (typeof changePasswordProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

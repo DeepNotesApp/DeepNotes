@@ -11,7 +11,7 @@ import {
 } from '@stdlib/misc';
 import { mainLogger } from '@stdlib/misc';
 import CryptoJS from 'crypto-js';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { pack, unpack } from 'msgpackr';
 
 export function derivePasswordValues(input: {

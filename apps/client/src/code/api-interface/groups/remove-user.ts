@@ -30,7 +30,7 @@ export async function removeGroupUser(input: {
   });
 
   async function step1(): Promise<
-    typeof removeUserProcedureStep1['_def']['_input_in']
+    (typeof removeUserProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -39,8 +39,8 @@ export async function removeGroupUser(input: {
   }
 
   async function step2(
-    input_: typeof removeUserProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof removeUserProcedureStep2['_def']['_input_in']> {
+    input_: (typeof removeUserProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof removeUserProcedureStep2)['_def']['_input_in']> {
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
@@ -94,7 +94,7 @@ export async function removeGroupUser(input: {
   }
 
   async function step3(
-    _input: typeof removeUserProcedureStep2['_def']['_output_out'],
+    _input: (typeof removeUserProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

@@ -51,11 +51,11 @@ export async function movePage(input: {
   let destGroupContentKeyring: SymmetricKeyring | undefined;
 
   async function step1(): Promise<
-    typeof moveProcedureStep1['_def']['_input_in']
+    (typeof moveProcedureStep1)['_def']['_input_in']
   > {
     let destGroupId: string;
 
-    let groupCreation: typeof moveProcedureStep1['_def']['_input_in']['groupCreation'];
+    let groupCreation: (typeof moveProcedureStep1)['_def']['_input_in']['groupCreation'];
 
     if (input.groupCreation != null) {
       if (input.groupCreation.groupName === '') {
@@ -144,9 +144,8 @@ export async function movePage(input: {
     } else {
       destGroupId = input.destGroupId;
 
-      destGroupContentKeyring = await groupContentKeyrings()(
-        destGroupId,
-      ).getAsync();
+      destGroupContentKeyring =
+        await groupContentKeyrings()(destGroupId).getAsync();
 
       if (destGroupContentKeyring?.topLayer === DataLayer.Symmetric) {
         const destGroupPassword = await asyncDialog<string>({
@@ -186,8 +185,8 @@ export async function movePage(input: {
   }
 
   async function step2(
-    input_: typeof moveProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof moveProcedureStep2['_def']['_input_in']> {
+    input_: (typeof moveProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof moveProcedureStep2)['_def']['_input_in']> {
     const sourceGroupId = await internals.realtime.hget(
       'page',
       input.pageId,
@@ -338,7 +337,7 @@ export async function movePage(input: {
   }
 
   async function step3(
-    _input: typeof moveProcedureStep2['_def']['_output_out'],
+    _input: (typeof moveProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

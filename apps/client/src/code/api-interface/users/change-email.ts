@@ -21,7 +21,7 @@ export async function changeEmail(input: {
     steps: [step1, step2, step3],
   });
 
-  function step1(): typeof finishProcedureStep1['_def']['_input_in'] {
+  function step1(): (typeof finishProcedureStep1)['_def']['_input_in'] {
     return {
       oldLoginHash: input.oldDerivedUserValues.loginHash,
 
@@ -30,8 +30,8 @@ export async function changeEmail(input: {
   }
 
   async function step2(
-    input_: typeof finishProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof finishProcedureStep2['_def']['_input_in']> {
+    input_: (typeof finishProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof finishProcedureStep2)['_def']['_input_in']> {
     const newDerivedUserValues = await deriveUserValues({
       email: input.newEmail,
       password: input.password,
@@ -77,7 +77,7 @@ export async function changeEmail(input: {
   }
 
   async function step3(
-    _input: typeof finishProcedureStep2['_def']['_output_out'],
+    _input: (typeof finishProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

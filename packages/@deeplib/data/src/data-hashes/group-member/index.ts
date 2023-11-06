@@ -19,12 +19,16 @@ export const groupMember = validateDataHash({
   model: GroupMemberModel,
 
   get: async ({ suffix, columns, trx }) =>
-    await (await GroupMemberModel())
+    await (
+      await GroupMemberModel()
+    )
       .query(trx)
       .findById(splitStr(suffix, ':', 2))
       .select(columns),
   set: async ({ suffix, model, trx }) =>
-    await (await GroupMemberModel())
+    await (
+      await GroupMemberModel()
+    )
       .query(trx)
       .findById(splitStr(suffix, ':', 2))
       .patch(model),

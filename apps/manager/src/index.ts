@@ -12,14 +12,18 @@ const readlineInterface = readline.createInterface({
   output: process.stdout,
 });
 
+function showHelp() {
+  console.log('Commands:');
+  console.log('- hget <prefix> <suffix> <field>');
+  console.log('- hset <prefix> <suffix> <field> <value>');
+}
+
 async function handleCommand(command: string) {
   const [commandName, ...args] = command.split(' ');
 
   switch (commandName) {
     case 'help':
-      console.log('Commands:');
-      console.log('- hget <prefix> <suffix> <field>');
-      console.log('- hset <prefix> <suffix> <field> <value>');
+      showHelp();
       break;
     case 'hget':
       console.log(
@@ -46,5 +50,7 @@ function requestCommand() {
     requestCommand();
   });
 }
+
+showHelp();
 
 requestCommand();

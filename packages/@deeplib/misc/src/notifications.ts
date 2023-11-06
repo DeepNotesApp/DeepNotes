@@ -11,7 +11,7 @@ export const notificationTypes = [
   'group-member-removed',
 ] as const;
 
-export type DeepNotesNotificationType = typeof notificationTypes[number];
+export type DeepNotesNotificationType = (typeof notificationTypes)[number];
 
 export interface DeepNotesNotification {
   id: number;

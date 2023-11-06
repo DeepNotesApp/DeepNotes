@@ -65,25 +65,25 @@
               name="General"
               icon="mdi-account"
               :current-tab="tab"
-              @set-tab="(targetTab: string) => tab = targetTab"
+              @set-tab="(targetTab: string) => (tab = targetTab)"
             />
             <TabBtn
               name="Groups"
               icon="mdi-account-group"
               :current-tab="tab"
-              @set-tab="(targetTab: string) => tab = targetTab"
+              @set-tab="(targetTab: string) => (tab = targetTab)"
             />
             <TabBtn
               name="Join invitations"
               icon="mdi-calendar"
               :current-tab="tab"
-              @set-tab="(targetTab: string) => tab = targetTab"
+              @set-tab="(targetTab: string) => (tab = targetTab)"
             />
             <TabBtn
               name="Join requests"
               icon="mdi-account-multiple-plus"
               :current-tab="tab"
-              @set-tab="(targetTab: string) => tab = targetTab"
+              @set-tab="(targetTab: string) => (tab = targetTab)"
             />
           </q-list>
 

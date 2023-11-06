@@ -13,7 +13,9 @@ export const userPage = validateDataHash({
   model: UserPageModel,
 
   get: async ({ suffix, columns, trx }) =>
-    await (await UserPageModel())
+    await (
+      await UserPageModel()
+    )
       .query(trx)
       .findById(splitStr(suffix, ':', 2))
       .select(columns),

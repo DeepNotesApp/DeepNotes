@@ -4,7 +4,7 @@ import { GroupMemberModel, GroupModel } from '@deeplib/db';
 import type { GroupRolePermission } from '@deeplib/misc';
 import type { DataTransaction } from '@stdlib/data';
 import { TRPCError } from '@trpc/server';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { once } from 'lodash';
 import { z } from 'zod';
 

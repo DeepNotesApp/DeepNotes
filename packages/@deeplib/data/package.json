@@ -4,20 +4,20 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "@deeplib/db": "workspace:1.0.0",
-    "@deeplib/misc": "workspace:1.0.0",
-    "@stdlib/base64": "workspace:1.0.0",
-    "@stdlib/crypto": "workspace:1.0.0",
-    "@stdlib/data": "workspace:1.0.0",
-    "@stdlib/misc": "workspace:1.0.0",
-    "crypto-js": "^4.1.1",
-    "lodash": "4.17.21",
-    "msgpackr": "1.8.0",
-    "unilogr": "0.0.27"
+    "@deeplib/db": "workspace:*",
+    "@deeplib/misc": "workspace:*",
+    "@stdlib/base64": "workspace:*",
+    "@stdlib/crypto": "workspace:*",
+    "@stdlib/data": "workspace:*",
+    "@stdlib/misc": "workspace:*",
+    "crypto-js": "^4.2.0",
+    "lodash": "^4.17.21",
+    "msgpackr": "^1.9.9",
+    "unilogr": "^0.0.27"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.1.1",
-    "@types/lodash": "4.14.189"
+    "@types/crypto-js": "^4.2.0",
+    "@types/lodash": "^4.14.200"
   },
   "keywords": [],
   "license": "ISC",

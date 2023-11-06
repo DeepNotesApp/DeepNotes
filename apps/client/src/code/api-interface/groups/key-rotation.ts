@@ -9,7 +9,7 @@ import {
   DataLayer,
 } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { asyncDialog } from 'src/code/utils/misc';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
@@ -25,7 +25,7 @@ export async function rotateGroupKeys(input: { groupId: string }) {
   });
 
   async function step1(): Promise<
-    typeof rotateKeysProcedureStep1['_def']['_input_in']
+    (typeof rotateKeysProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -33,8 +33,8 @@ export async function rotateGroupKeys(input: { groupId: string }) {
   }
 
   async function step2(
-    input_: typeof rotateKeysProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof rotateKeysProcedureStep2['_def']['_input_in']> {
+    input_: (typeof rotateKeysProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof rotateKeysProcedureStep2)['_def']['_input_in']> {
     return await processGroupKeyRotationValues({
       ...input_,
 
@@ -43,7 +43,7 @@ export async function rotateGroupKeys(input: { groupId: string }) {
   }
 
   async function step3(
-    _input: typeof rotateKeysProcedureStep2['_def']['_output_out'],
+    _input: (typeof rotateKeysProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }
@@ -52,12 +52,12 @@ export async function rotateGroupKeys(input: { groupId: string }) {
 }
 
 export async function processGroupKeyRotationValues(
-  input: typeof rotateKeysProcedureStep1['_def']['_output_out'] & {
+  input: (typeof rotateKeysProcedureStep1)['_def']['_output_out'] & {
     groupId: string;
 
     groupIsPublic?: boolean;
   },
-): Promise<typeof rotateKeysProcedureStep2['_def']['_input_in']> {
+): Promise<(typeof rotateKeysProcedureStep2)['_def']['_input_in']> {
   input.groupIsPublic ??= input.groupAccessKeyring != null;
 
   const oldGroupAccessKeyring =

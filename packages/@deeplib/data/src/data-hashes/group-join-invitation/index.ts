@@ -18,12 +18,16 @@ export const groupJoinInvitation = validateDataHash({
   model: GroupJoinInvitationModel,
 
   get: async ({ suffix, columns, trx }) =>
-    await (await GroupJoinInvitationModel())
+    await (
+      await GroupJoinInvitationModel()
+    )
       .query(trx)
       .findById(splitStr(suffix, ':', 2))
       .select(columns),
   set: async ({ suffix, model, trx }) =>
-    await (await GroupJoinInvitationModel())
+    await (
+      await GroupJoinInvitationModel()
+    )
       .query(trx)
       .findById(splitStr(suffix, ':', 2))
       .patch(model),

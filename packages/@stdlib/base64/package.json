@@ -4,11 +4,11 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "@stdlib/misc": "workspace:1.0.0",
-    "js-base64": "3.7.3"
+    "@stdlib/misc": "workspace:*",
+    "js-base64": "^3.7.5"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18"
+    "@types/node": "^20.8.10"
   },
   "keywords": [],
   "license": "ISC",

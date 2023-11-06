@@ -21,7 +21,7 @@ export async function sendJoinRequest(input: {
   });
 
   async function step1(): Promise<
-    typeof sendProcedureStep1['_def']['_input_in']
+    (typeof sendProcedureStep1)['_def']['_input_in']
   > {
     const groupPublicKeyring = createKeyring(
       await internals.realtime.hget('group', input.groupId, 'public-keyring'),
@@ -50,8 +50,8 @@ export async function sendJoinRequest(input: {
   }
 
   async function step2(
-    input_: typeof sendProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof sendProcedureStep2['_def']['_input_in']> {
+    input_: (typeof sendProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof sendProcedureStep2)['_def']['_input_in']> {
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
@@ -77,7 +77,7 @@ export async function sendJoinRequest(input: {
   }
 
   async function step3(
-    _input: typeof sendProcedureStep2['_def']['_output_out'],
+    _input: (typeof sendProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }

@@ -93,11 +93,11 @@ function getPathDefinition() {
 
   return `M ${arrow.react.sourceHeadPos.x}, ${arrow.react.sourceHeadPos.y}
         C ${arrow.react.sourceHeadPos.x + sourceControl.x}, ${
-    arrow.react.sourceHeadPos.y + sourceControl.y
-  },
+          arrow.react.sourceHeadPos.y + sourceControl.y
+        },
         ${arrow.react.targetHeadPos.x + targetControl.x}, ${
-    arrow.react.targetHeadPos.y + targetControl.y
-  },
+          arrow.react.targetHeadPos.y + targetControl.y
+        },
         ${arrow.react.targetHeadPos.x}, ${arrow.react.targetHeadPos.y}`;
 }
 </script>

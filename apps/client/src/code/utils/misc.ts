@@ -83,7 +83,7 @@ export function isCtrlDown(event: KeyboardEvent | MouseEvent) {
 const _modifiers = ['Alt', 'Control', 'Meta', 'Shift'] as const;
 export function modsMatch(
   event: KeyboardEvent | MouseEvent,
-  modifiers: typeof _modifiers[number][],
+  modifiers: (typeof _modifiers)[number][],
 ) {
   if (modifiers.includes('Control') && $quasar().platform.is.mac) {
     pull(modifiers, 'Control');

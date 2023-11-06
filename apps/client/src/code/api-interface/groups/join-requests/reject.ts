@@ -28,7 +28,7 @@ export async function rejectJoinRequest(input: {
   });
 
   async function step1(): Promise<
-    typeof rejectProcedureStep1['_def']['_input_in']
+    (typeof rejectProcedureStep1)['_def']['_input_in']
   > {
     return {
       groupId: input.groupId,
@@ -38,8 +38,8 @@ export async function rejectJoinRequest(input: {
   }
 
   async function step2(
-    input_: typeof rejectProcedureStep1['_def']['_output_out'],
-  ): Promise<typeof rejectProcedureStep2['_def']['_input_in']> {
+    input_: (typeof rejectProcedureStep1)['_def']['_output_out'],
+  ): Promise<(typeof rejectProcedureStep2)['_def']['_input_in']> {
     return {
       notifications: await createNotifications({
         recipients: input_.notificationRecipients,
@@ -79,7 +79,7 @@ export async function rejectJoinRequest(input: {
   }
 
   async function step3(
-    _input: typeof rejectProcedureStep2['_def']['_output_out'],
+    _input: (typeof rejectProcedureStep2)['_def']['_output_out'],
   ) {
     //
   }
