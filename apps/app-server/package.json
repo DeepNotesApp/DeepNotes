@@ -39,7 +39,7 @@
     "otplib": "^12.0.1",
     "redlock": "5.0.0-beta.2",
     "sib-api-v3-typescript": "^2.2.2",
-    "stripe": "^11.18.0",
+    "stripe": "^14.3.0",
     "superjson": "npm:@deepnotes/superjson@1.12.4",
     "unilogr": "^0.0.27",
     "zod": "^3.22.4"

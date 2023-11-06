@@ -75,7 +75,7 @@
     "objection": "3.0.1",
     "pinia": "~2.0.36",
     "process": "^0.11.10",
-    "prom-client": "^14.2.0",
+    "prom-client": "^15.0.0",
     "prosemirror-model": "~1.18.3",
     "prosemirror-state": "~1.4.3",
     "prosemirror-view": "~1.29.2",
