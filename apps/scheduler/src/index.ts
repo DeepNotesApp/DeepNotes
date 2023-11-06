@@ -81,6 +81,8 @@ async function cleanDeletedObjects() {
       ]);
     });
 
+    console.log('Successfully cleaned.');
+
     if (permanentlyDeletedPages.length > 0) {
       console.log(
         `Successfully cleaned ${permanentlyDeletedPages.length} permanently deleted pages.`,
