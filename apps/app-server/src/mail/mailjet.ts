@@ -19,7 +19,7 @@ export async function sendMailjetMail({
   subject,
   html,
 }: MailOptions) {
-  const data: SendEmailV3_1.IBody = {
+  const data: SendEmailV3_1.Body = {
     Messages: [
       {
         From: {
