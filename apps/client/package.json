@@ -117,7 +117,7 @@
     "electron": "25.2.0",
     "electron-builder": "^24.4.0",
     "electron-packager": "^17.1.1",
-    "tsup": "6.5.0",
+    "tsup": "^7.2.0",
     "unplugin-auto-import": "0.11.4",
     "unplugin-vue-components": "0.22.9",
     "vite": "2.9.15"
