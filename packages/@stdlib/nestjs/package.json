@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "author": "",
   "devDependencies": {
-    "@nestjs/common": "^9.2.0",
-    "@nestjs/core": "^9.2.0",
+    "@nestjs/common": "^9.4.3",
+    "@nestjs/core": "^9.4.3",
     "@nestjs/jwt": "^9.0.0",
-    "@nestjs/testing": "^9.2.0"
+    "@nestjs/testing": "^9.4.3"
   },
   "keywords": [],
   "license": "ISC",

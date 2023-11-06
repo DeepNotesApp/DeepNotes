@@ -2,7 +2,7 @@ import { SessionModel } from '@deeplib/db';
 import type { DataTransaction } from '@stdlib/data';
 import { addDays } from '@stdlib/misc';
 import type { FastifyReply } from 'fastify';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { nanoid } from 'nanoid';
 import { dataAbstraction } from 'src/data/data-abstraction';
 

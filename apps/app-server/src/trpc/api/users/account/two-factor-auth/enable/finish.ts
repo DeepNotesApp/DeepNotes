@@ -1,7 +1,7 @@
 import { UserModel } from '@deeplib/db';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { once } from 'lodash';
 import { authenticator } from 'otplib';
 import type { InferProcedureOpts } from 'src/trpc/helpers';

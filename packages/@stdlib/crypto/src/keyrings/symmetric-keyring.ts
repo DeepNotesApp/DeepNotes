@@ -1,4 +1,4 @@
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 
 import type { KeyPair, PrivateKey, PublicKey, SymmetricKey } from '..';
 import type { DataLayer } from '..';

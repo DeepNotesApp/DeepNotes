@@ -8,7 +8,7 @@ import {
   createSymmetricKeyring,
   wrapKeyPair,
 } from '@stdlib/crypto';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { deriveUserValues } from 'src/code/crypto';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';
 

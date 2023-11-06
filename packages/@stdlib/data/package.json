@@ -5,16 +5,16 @@
   "author": "",
   "dependencies": {
     "@deepnotes/simple-lru-cache": "^0.0.2",
-    "@stdlib/base64": "workspace:1.0.0",
-    "@stdlib/misc": "workspace:1.0.0",
+    "@stdlib/base64": "workspace:*",
+    "@stdlib/misc": "workspace:*",
     "lodash": "^4.17.21",
-    "msgpackr": "^1.8.0",
-    "nanoid": "^3.3.4",
+    "msgpackr": "^1.9.9",
+    "nanoid": "^3.3.7",
     "unilogr": "^0.0.27",
-    "winston": "^3.8.2"
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.189"
+    "@types/lodash": "^4.14.200"
   },
   "keywords": [],
   "license": "ISC",
@@ -22,7 +22,7 @@
   "module": "src/index.ts",
   "peerDependencies": {
     "ioredis": "npm:@deepnotes/ioredis@5.3.1",
-    "objection": "^3.0.1"
+    "objection": "3.0.1"
   },
   "scripts": {
     "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",

@@ -1,5 +1,5 @@
 import { concatUint8Arrays } from '@stdlib/misc';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 
 export function wrapSymmetricKey(
   value = sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),

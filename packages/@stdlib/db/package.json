@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "objection": "^3.0.1"
+    "objection": "3.0.1"
   },
   "keywords": [],
   "license": "ISC",

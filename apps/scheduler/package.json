@@ -2,19 +2,19 @@
   "name": "@deepnotes/scheduler",
   "version": "1.0.0",
   "dependencies": {
-    "@deeplib/data": "workspace:1.0.0",
-    "@stdlib/base64": "workspace:1.0.0",
-    "@stdlib/data": "workspace:1.0.0",
-    "@stdlib/misc": "workspace:1.0.0",
-    "dotenv": "^16.0.3",
+    "@deeplib/data": "workspace:*",
+    "@stdlib/base64": "workspace:*",
+    "@stdlib/data": "workspace:*",
+    "@stdlib/misc": "workspace:*",
+    "dotenv": "^16.3.1",
     "dotenv-expand": "^9.0.0",
     "ioredis": "npm:@deepnotes/ioredis@5.3.1",
-    "knex": "~2.3.0",
+    "knex": "2.3.0",
     "lodash": "^4.17.21",
-    "objection": "^3.0.1"
+    "objection": "3.0.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.189",
+    "@types/lodash": "^4.14.200",
     "tsup": "^7.2.0"
   },
   "license": "MIT",

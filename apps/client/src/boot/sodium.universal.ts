@@ -1,4 +1,4 @@
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { boot } from 'quasar/wrappers';
 
 export default boot(async () => {

@@ -1,5 +1,5 @@
 import { concatUint8Arrays } from '@stdlib/misc';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 
 import type { PublicKey } from './public-key';
 

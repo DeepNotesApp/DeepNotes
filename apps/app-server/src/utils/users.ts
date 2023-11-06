@@ -10,7 +10,7 @@ import type { DataTransaction } from '@stdlib/data';
 import { isNanoID } from '@stdlib/misc';
 import { addHours } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import { dataAbstraction } from 'src/data/data-abstraction';

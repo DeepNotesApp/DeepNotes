@@ -9,7 +9,7 @@ import {
   DataLayer,
 } from '@stdlib/crypto';
 import { objEntries, objFromEntries } from '@stdlib/misc';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { computeGroupPasswordValues } from 'src/code/crypto';
 import { asyncDialog } from 'src/code/utils/misc';
 import { createWebsocketRequest } from 'src/code/utils/websocket-requests';

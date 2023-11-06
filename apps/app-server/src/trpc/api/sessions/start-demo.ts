@@ -3,7 +3,7 @@ import {
   createSymmetricKeyring,
   wrapSymmetricKey,
 } from '@stdlib/crypto';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import type { InferProcedureOpts } from 'src/trpc/helpers';

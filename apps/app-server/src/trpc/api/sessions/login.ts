@@ -11,7 +11,7 @@ import { allAsyncProps, w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import type { Cluster } from 'ioredis';
 import type { Redis } from 'ioredis';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 import { once } from 'lodash';
 import { nanoid } from 'nanoid';
 import { authenticator } from 'otplib';
