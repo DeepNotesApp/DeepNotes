@@ -107,13 +107,13 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@deeplib/misc
       '@fastify/cookie':
-        specifier: 8.3.0
+        specifier: ^8.3.0
         version: 8.3.0
       '@fastify/cors':
-        specifier: 8.2.0
+        specifier: ^8.2.0
         version: 8.2.0
       '@fastify/helmet':
-        specifier: 10.0.2
+        specifier: ^10.0.2
         version: 10.0.2
       '@fastify/rate-limit':
         specifier: ^8.0.0
@@ -122,7 +122,7 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0
       '@sendgrid/mail':
-        specifier: 7.7.0
+        specifier: ^7.7.0
         version: 7.7.0
       '@stdlib/base64':
         specifier: workspace:1.0.0
@@ -149,16 +149,16 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       fast-jwt:
         specifier: ^2.2.1
         version: 2.2.1
       fastify:
-        specifier: 4.10.0
+        specifier: ^4.10.0
         version: 4.10.0
       fastify-raw-body:
         specifier: ^4.2.0
@@ -170,62 +170,62 @@ importers:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       libsodium-wrappers:
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       nanoid:
-        specifier: 3.3.4
+        specifier: ^3.3.4
         version: 3.3.4
       node-mailjet:
-        specifier: 5.1.1
+        specifier: ^5.1.1
         version: 5.1.1
       nodemailer:
-        specifier: 6.8.0
+        specifier: ^6.8.0
         version: 6.8.0
       nodemailer-html-to-text:
-        specifier: 3.2.0
+        specifier: ^3.2.0
         version: 3.2.0
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       otplib:
-        specifier: 12.0.1
+        specifier: ^12.0.1
         version: 12.0.1
       redlock:
-        specifier: 5.0.0-beta.2
+        specifier: ^5.0.0-beta.2
         version: 5.0.0-beta.2
       sib-api-v3-typescript:
-        specifier: 2.2.2
+        specifier: ^2.2.2
         version: 2.2.2
       stripe:
-        specifier: 11.5.0
+        specifier: ^11.5.0
         version: 11.5.0
       superjson:
         specifier: npm:@deepnotes/superjson@1.12.4
         version: /@deepnotes/superjson@1.12.4
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
       zod:
-        specifier: 3.19.1
+        specifier: ^3.19.1
         version: 3.19.1
     devDependencies:
       '@types/libsodium-wrappers':
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       '@types/ws':
-        specifier: 8.5.3
+        specifier: ^8.5.3
         version: 8.5.3
       tsup:
         specifier: ^7.2.0
@@ -234,7 +234,7 @@ importers:
   apps/client:
     dependencies:
       '@_ueberdosis/prosemirror-tables':
-        specifier: 1.1.3
+        specifier: ~1.1.3
         version: 1.1.3
       '@deeplib/data':
         specifier: workspace:1.0.0
@@ -246,7 +246,7 @@ importers:
         specifier: workspace:1.0.0
         version: link:../app-server
       '@quasar/extras':
-        specifier: 1.16.4
+        specifier: ^1.16.4
         version: 1.16.4
       '@stdlib/base64':
         specifier: workspace:1.0.0
@@ -267,10 +267,10 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@stdlib/vue
       '@stripe/stripe-js':
-        specifier: 1.46.0
+        specifier: ^1.46.0
         version: 1.46.0
       '@syncedstore/core':
-        specifier: 0.4.2
+        specifier: ^0.4.2
         version: 0.4.2(yjs@13.5.42)
       '@tiptap/core':
         specifier: ^2.1.12
@@ -339,7 +339,7 @@ importers:
         specifier: ^10.43.1
         version: 10.43.1(@trpc/server@10.43.1)
       '@vueuse/core':
-        specifier: 9.5.0
+        specifier: ^9.5.0
         version: 9.5.0(vue@3.2.47)
       '@zxcvbn-ts/core':
         specifier: ^2.1.0
@@ -354,28 +354,28 @@ importers:
         specifier: ^1.18.0
         version: 1.18.0
       axios:
-        specifier: 0.27.2
+        specifier: ^0.27.2
         version: 0.27.2
       browserslist:
         specifier: ^4.21.8
         version: 4.21.8
       color:
-        specifier: 4.2.3
+        specifier: ^4.2.3
         version: 4.2.3
       compression:
-        specifier: 1.7.4
+        specifier: ^1.7.4
         version: 1.7.4
       cookie:
-        specifier: 0.5.0
+        specifier: ^0.5.0
         version: 0.5.0
       crypto-js:
         specifier: ^4.1.1
         version: 4.1.1
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       downloadjs:
         specifier: ^1.4.7
@@ -387,16 +387,16 @@ importers:
         specifier: ^4.4.8
         version: 4.4.8
       electron-updater:
-        specifier: 4.3.1
+        specifier: ^4.3.1
         version: 4.3.1
       express:
-        specifier: 4.18.2
+        specifier: ^4.18.2
         version: 4.18.2
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
       highlight.js:
-        specifier: 11.6.0
+        specifier: ^11.6.0
         version: 11.6.0
       html2canvas:
         specifier: npm:@deepnotes/html2canvas@^1.4.2
@@ -405,64 +405,64 @@ importers:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       js-base64:
-        specifier: 3.7.3
+        specifier: ^3.7.3
         version: 3.7.3
       katex:
         specifier: ^0.16.4
         version: 0.16.4
       lib0:
-        specifier: 0.2.53
+        specifier: ^0.2.53
         version: 0.2.53
       libsodium-wrappers:
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       lowlight:
-        specifier: 2.7.0
+        specifier: ^2.7.0
         version: 2.7.0
       marked:
-        specifier: 4.2.5
+        specifier: ^4.2.5
         version: 4.2.5
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       nanoid:
-        specifier: 3.3.4
+        specifier: ^3.3.4
         version: 3.3.4
       node-fetch:
         specifier: ^2.0.0
         version: 2.6.7
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       pinia:
-        specifier: 2.0.24
+        specifier: ^2.0.24
         version: 2.0.24(typescript@5.2.2)(vue@3.2.47)
       process:
-        specifier: 0.11.10
+        specifier: ^0.11.10
         version: 0.11.10
       prom-client:
         specifier: ^14.2.0
         version: 14.2.0
       prosemirror-model:
-        specifier: 1.18.2
+        specifier: ~1.18.2
         version: 1.18.2
       prosemirror-state:
-        specifier: 1.4.2
+        specifier: ~1.4.2
         version: 1.4.2
       prosemirror-view:
-        specifier: 1.29.1
+        specifier: ~1.29.1
         version: 1.29.1
       qrcode:
-        specifier: 1.5.1
+        specifier: ^1.5.1
         version: 1.5.1
       quasar:
         specifier: npm:@deepnotes/quasar@2.12.0
         version: /@deepnotes/quasar@2.12.0
       serialize-javascript:
-        specifier: 6.0.0
+        specifier: ^6.0.0
         version: 6.0.0
       showdown:
         specifier: ^2.1.0
@@ -474,35 +474,35 @@ importers:
         specifier: ^7.1.2
         version: 7.1.2
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
       unique-names-generator:
-        specifier: 4.7.1
+        specifier: ^4.7.1
         version: 4.7.1
       vue:
-        specifier: 3.2.47
+        specifier: ~3.2.47
         version: 3.2.47
       vue-i18n:
-        specifier: 9.2.2
+        specifier: ^9.2.2
         version: 9.2.2(vue@3.2.47)
       vue-router:
-        specifier: 4.1.6
+        specifier: ^4.1.6
         version: 4.1.6(vue@3.2.47)
       y-prosemirror:
-        specifier: 1.0.20
+        specifier: ^1.0.20
         version: 1.0.20(prosemirror-model@1.18.2)(prosemirror-state@1.4.2)(prosemirror-view@1.29.1)(y-protocols@1.0.5)(yjs@13.5.42)
       y-protocols:
-        specifier: 1.0.5
+        specifier: ^1.0.5
         version: 1.0.5
       yjs:
-        specifier: 13.5.42
+        specifier: ^13.5.42
         version: 13.5.42
       zod:
-        specifier: 3.19.1
+        specifier: ^3.19.1
         version: 3.19.1
     devDependencies:
       '@intlify/vite-plugin-vue-i18n':
-        specifier: 3.4.0
+        specifier: ^3.4.0
         version: 3.4.0(vite@2.9.15)(vue-i18n@9.2.2)
       '@quasar/app-vite':
         specifier: ^1.4.3
@@ -511,10 +511,10 @@ importers:
         specifier: ^1.18.1
         version: 1.18.1
       '@types/color':
-        specifier: 3.0.3
+        specifier: ^3.0.3
         version: 3.0.3
       '@types/cookie':
-        specifier: 0.5.1
+        specifier: ^0.5.1
         version: 0.5.1
       '@types/downloadjs':
         specifier: ^1.4.3
@@ -526,19 +526,19 @@ importers:
         specifier: ^0.16.0
         version: 0.16.0
       '@types/libsodium-wrappers':
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       '@types/marked':
-        specifier: 4.0.8
+        specifier: ^4.0.8
         version: 4.0.8
       '@types/node-fetch':
         specifier: ^2.6.3
         version: 2.6.3
       '@types/qrcode':
-        specifier: 1.5.0
+        specifier: ^1.5.0
         version: 1.5.0
       '@types/showdown':
         specifier: ^2.0.1
@@ -547,16 +547,16 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1
       '@types/zxcvbn':
-        specifier: 4.4.1
+        specifier: ^4.4.1
         version: 4.4.1
       '@vue/devtools':
-        specifier: 6.4.5
+        specifier: ^6.4.5
         version: 6.4.5
       autoprefixer:
-        specifier: 10.4.13
+        specifier: ^10.4.13
         version: 10.4.13(postcss@8.4.31)
       electron:
-        specifier: 25.2.0
+        specifier: ^25.2.0
         version: 25.2.0
       electron-builder:
         specifier: ^24.4.0
@@ -568,13 +568,13 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(postcss@8.4.31)(ts-node@10.9.1)(typescript@5.2.2)
       unplugin-auto-import:
-        specifier: 0.11.4
+        specifier: ^0.11.4
         version: 0.11.4(@vueuse/core@9.5.0)
       unplugin-vue-components:
-        specifier: 0.22.9
+        specifier: ^0.22.9
         version: 0.22.9(vue@3.2.47)
       vite:
-        specifier: 2.9.15
+        specifier: ^2.9.15
         version: 2.9.15(sass@1.32.12)
 
   apps/client/src-capacitor:
@@ -628,65 +628,65 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@stdlib/redlock
       cookie:
-        specifier: 0.5.0
+        specifier: ^0.5.0
         version: 0.5.0
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       jsonwebtoken:
-        specifier: 8.5.1
+        specifier: ^8.5.1
         version: 8.5.1
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       lib0:
-        specifier: 0.2.53
+        specifier: ^0.2.53
         version: 0.2.53
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       prom-client:
         specifier: ^14.2.0
         version: 14.2.0
       redlock:
-        specifier: 5.0.0-beta.2
+        specifier: ^5.0.0-beta.2
         version: 5.0.0-beta.2
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
       ws:
-        specifier: 8.11.0
+        specifier: ^8.11.0
         version: 8.11.0
       y-protocols:
-        specifier: 1.0.5
+        specifier: ^1.0.5
         version: 1.0.5
       yjs:
-        specifier: 13.5.42
+        specifier: ^13.5.42
         version: 13.5.42
     devDependencies:
       '@types/cookie':
-        specifier: 0.5.1
+        specifier: ^0.5.1
         version: 0.5.1
       '@types/jsonwebtoken':
-        specifier: 8.5.9
+        specifier: ^8.5.9
         version: 8.5.9
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       '@types/ws':
-        specifier: 8.5.3
+        specifier: ^8.5.3
         version: 8.5.3
       tsup:
         specifier: ^7.2.0
@@ -710,26 +710,26 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@stdlib/misc
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
     devDependencies:
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       tsup:
         specifier: ^7.2.0
@@ -753,56 +753,56 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@stdlib/misc
       cookie:
-        specifier: 0.5.0
+        specifier: ^0.5.0
         version: 0.5.0
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       jsonwebtoken:
-        specifier: 8.5.1
+        specifier: ^8.5.1
         version: 8.5.1
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       lib0:
-        specifier: 0.2.53
+        specifier: ^0.2.53
         version: 0.2.53
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       prom-client:
         specifier: ^14.2.0
         version: 14.2.0
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
       ws:
-        specifier: 8.11.0
+        specifier: ^8.11.0
         version: 8.11.0
     devDependencies:
       '@types/cookie':
-        specifier: 0.5.1
+        specifier: ^0.5.1
         version: 0.5.1
       '@types/jsonwebtoken':
-        specifier: 8.5.9
+        specifier: ^8.5.9
         version: 8.5.9
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       '@types/ws':
-        specifier: 8.5.3
+        specifier: ^8.5.3
         version: 8.5.3
       tsup:
         specifier: ^7.2.0
@@ -823,26 +823,26 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../packages/@stdlib/misc
       dotenv:
-        specifier: 16.0.3
+        specifier: ^16.0.3
         version: 16.0.3
       dotenv-expand:
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
     devDependencies:
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
       tsup:
         specifier: ^7.2.0
@@ -875,23 +875,23 @@ importers:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
     devDependencies:
       '@types/crypto-js':
         specifier: ^4.1.1
         version: 4.1.1
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
 
   packages/@deeplib/db:
@@ -903,23 +903,23 @@ importers:
         specifier: workspace:1.0.0
         version: link:../../@stdlib/data
       knex:
-        specifier: 2.3.0
+        specifier: ^2.3.0
         version: 2.3.0(pg@8.8.0)
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       pg:
-        specifier: 8.8.0
+        specifier: ^8.8.0
         version: 8.8.0
     devDependencies:
       '@types/libsodium-wrappers':
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
 
   packages/@deeplib/misc:
@@ -934,7 +934,7 @@ importers:
         specifier: workspace:1.0.0
         version: link:../misc
       js-base64:
-        specifier: 3.7.3
+        specifier: ^3.7.3
         version: 3.7.3
     devDependencies:
       '@types/node':
@@ -944,11 +944,11 @@ importers:
   packages/@stdlib/color:
     dependencies:
       color:
-        specifier: 4.2.3
+        specifier: ^4.2.3
         version: 4.2.3
     devDependencies:
       '@types/color':
-        specifier: 3.0.3
+        specifier: ^3.0.3
         version: 3.0.3
 
   packages/@stdlib/crypto:
@@ -963,17 +963,17 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       libsodium-wrappers:
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
     devDependencies:
       '@types/crypto-js':
         specifier: ^4.1.1
         version: 4.1.1
       '@types/libsodium-wrappers':
-        specifier: 0.7.10
+        specifier: ^0.7.10
         version: 0.7.10
       '@types/node':
         specifier: ^18.11.18
@@ -994,66 +994,66 @@ importers:
         specifier: npm:@deepnotes/ioredis@5.3.1
         version: /@deepnotes/ioredis@5.3.1
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       msgpackr:
-        specifier: 1.8.0
+        specifier: ^1.8.0
         version: 1.8.0
       nanoid:
-        specifier: 3.3.4
+        specifier: ^3.3.4
         version: 3.3.4
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
       winston:
-        specifier: 3.8.2
+        specifier: ^3.8.2
         version: 3.8.2
     devDependencies:
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
 
   packages/@stdlib/db:
     dependencies:
       objection:
-        specifier: 3.0.1
+        specifier: ^3.0.1
         version: 3.0.1(knex@2.3.0)
 
   packages/@stdlib/misc:
     dependencies:
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       unilogr:
-        specifier: 0.0.27
+        specifier: ^0.0.27
         version: 0.0.27
     devDependencies:
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
 
   packages/@stdlib/nestjs:
     devDependencies:
       '@nestjs/common':
-        specifier: 9.2.0
+        specifier: ^9.2.0
         version: 9.2.0(reflect-metadata@0.1.13)(rxjs@7.8.1)
       '@nestjs/core':
-        specifier: 9.2.0
+        specifier: ^9.2.0
         version: 9.2.0(@nestjs/common@9.2.0)(reflect-metadata@0.1.13)(rxjs@7.8.1)
       '@nestjs/jwt':
-        specifier: 9.0.0
+        specifier: ^9.0.0
         version: 9.0.0(@nestjs/common@9.2.0)
       '@nestjs/testing':
-        specifier: 9.2.0
+        specifier: ^9.2.0
         version: 9.2.0(@nestjs/common@9.2.0)(@nestjs/core@9.2.0)
 
   packages/@stdlib/redlock:
     dependencies:
       redlock:
-        specifier: 5.0.0-beta.2
+        specifier: ^5.0.0-beta.2
         version: 5.0.0-beta.2
 
   packages/@stdlib/testing: {}
@@ -1064,14 +1064,14 @@ importers:
         specifier: workspace:1.0.0
         version: link:../misc
       lodash:
-        specifier: 4.17.21
+        specifier: ^4.17.21
         version: 4.17.21
       vue:
-        specifier: 3.2.47
+        specifier: ~3.2.47
         version: 3.2.47
     devDependencies:
       '@types/lodash':
-        specifier: 4.14.189
+        specifier: ^4.14.189
         version: 4.14.189
 
   packages/eslint-config-base: {}
@@ -1090,7 +1090,7 @@ packages:
       prosemirror-keymap: 1.2.2
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
-      prosemirror-transform: 1.7.3
+      prosemirror-transform: 1.8.0
       prosemirror-view: 1.29.1
     dev: false
 
@@ -1117,11 +1117,6 @@ packages:
 
   /@babel/helper-validator-identifier@7.22.20:
     resolution: {integrity: sha512-Y4OZ+ytlatR8AI+8KZfKuL5urKp7qey08ha31L8b3BwewJAoJamTzyvxPR/5D+KkdJCGPq/+8TukHBlY10FX9A==}
-    engines: {node: '>=6.9.0'}
-    dev: true
-
-  /@babel/helper-validator-identifier@7.22.5:
-    resolution: {integrity: sha512-aJXu+6lErq8ltp+JhkJUfk1MTGyuA4v7f3pA+BJ5HLfNC6nAQ0Cpi9uOquUj8Hehg0aUiHzWQbOVJGao6ztBAQ==}
     engines: {node: '>=6.9.0'}
 
   /@babel/highlight@7.22.20:
@@ -1152,7 +1147,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-string-parser': 7.22.5
-      '@babel/helper-validator-identifier': 7.22.5
+      '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
   /@capacitor/android@4.8.0(@capacitor/core@4.8.0):
@@ -2008,7 +2003,7 @@ packages:
       '@intlify/shared': 9.2.2
       '@rollup/pluginutils': 4.2.1
       debug: 4.3.4
-      fast-glob: 3.2.12
+      fast-glob: 3.3.2
       source-map: 0.6.1
       vite: 2.9.15(sass@1.32.12)
       vue-i18n: 9.2.2(vue@3.2.47)
@@ -3635,7 +3630,7 @@ packages:
     resolution: {integrity: sha512-hqzmggoxkOubpgTdcOltkfc5N8IftRJqU70d1jbOISjjZVPvjcr+CLi2CI70hx1SUIRkLgpglTy9w28nGe2Hsw==}
     dependencies:
       '@types/estree': 1.0.0
-      '@types/json-schema': 7.0.11
+      '@types/json-schema': 7.0.14
     dev: false
 
   /@types/estree@1.0.0:
@@ -3676,13 +3671,13 @@ packages:
   /@types/fs-extra@8.1.2:
     resolution: {integrity: sha512-SvSrYXfWSc7R4eqnOzbQF4TZmfpNSM9FrSWLU3EUnWBuyZqNBOrv1B1JA3byUDPUl9z4Ab3jeZG2eDdySlgNMg==}
     dependencies:
-      '@types/node': 20.8.10
+      '@types/node': 18.15.11
     dev: false
 
   /@types/fs-extra@9.0.13:
     resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
-      '@types/node': 20.8.10
+      '@types/node': 18.15.11
     dev: true
 
   /@types/har-format@1.2.11:
@@ -3707,13 +3702,8 @@ packages:
     resolution: {integrity: sha512-/K3ds8TRAfBvi5vfjuz8y6+GiAYBZ0x4tXv1Av6CWBWn0IlADc+ZX9pMq7oU0fNQPnBwIZl3rmeLp6SBApbxSQ==}
     dev: true
 
-  /@types/json-schema@7.0.11:
-    resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
-    dev: false
-
   /@types/json-schema@7.0.14:
     resolution: {integrity: sha512-U3PUjAudAdJBeC2pgN8uTIKgxrb4nlDF3SF0++EldXQvQBGkpFZMSnwQiIoDU77tv45VgNkl/L4ouD+rEomujw==}
-    dev: true
 
   /@types/jsonwebtoken@8.5.8:
     resolution: {integrity: sha512-zm6xBQpFDIDM6o9r6HSgDeIcLy82TKWctCXEPbJJcXb5AKmi5BNNdLXneixK4lplX3PqIVcwLBCGE/kAGnlD4A==}
@@ -3724,7 +3714,7 @@ packages:
   /@types/jsonwebtoken@8.5.9:
     resolution: {integrity: sha512-272FMnFGzAVMGtu9tkr29hRL6bZj4Zs1KZNeHLnKqAvp06tAIcarTMwOh8/8bz4FmKRcMxZhZNeUAQsNLoiPhg==}
     dependencies:
-      '@types/node': 18.13.0
+      '@types/node': 18.15.11
     dev: true
 
   /@types/katex@0.16.0:
@@ -3799,6 +3789,7 @@ packages:
     resolution: {integrity: sha512-TlgT8JntpcbmKUFzjhsyhGfP2fsiz1Mv56im6enJ905xG1DAYesxJaeSbGqQmAw8OWPdhyJGhGSQGKRNJ45u9w==}
     dependencies:
       undici-types: 5.26.5
+    dev: true
 
   /@types/normalize-package-data@2.4.3:
     resolution: {integrity: sha512-ehPtgRgaULsFG8x0NeYJvmyH1hmlfsNLujHe9dQEia/7MAJYdzMSi19JtchUHjmBA6XC/75dK55mzZH+RyieSg==}
@@ -3844,16 +3835,11 @@ packages:
   /@types/responselike@1.0.2:
     resolution: {integrity: sha512-/4YQT5Kp6HxUDb4yhRkm0bJ7TbjvTddqX7PZ5hz6qV3pxSo72f/6YPRo+Mu2DU307tm9IioO69l7uAwn5XNcFA==}
     dependencies:
-      '@types/node': 20.8.10
+      '@types/node': 18.15.11
     dev: true
-
-  /@types/semver@7.3.13:
-    resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
-    dev: false
 
   /@types/semver@7.5.4:
     resolution: {integrity: sha512-MMzuxN3GdFwskAnb6fz0orFvhfqi752yjaXylr0Rp4oDg5H0Zn1IuyRhDVvYOwAXoJirx2xuS16I3WjxnAIHiQ==}
-    dev: true
 
   /@types/send@0.17.1:
     resolution: {integrity: sha512-Cwo8LE/0rnvX7kIIa3QHCkcuF21c05Ayb0ZfxPiv0W8VRiZiNW/WuRupHKpqqGVGf7SUA44QSOUKaEd9lIrd/Q==}
@@ -4127,7 +4113,7 @@ packages:
       '@vue/shared': 3.2.47
       estree-walker: 2.0.2
       magic-string: 0.25.9
-      postcss: 8.4.24
+      postcss: 8.4.31
       source-map: 0.6.1
 
   /@vue/compiler-ssr@3.2.47:
@@ -4294,12 +4280,6 @@ packages:
 
   /acorn@8.11.2:
     resolution: {integrity: sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-    dev: true
-
-  /acorn@8.8.2:
-    resolution: {integrity: sha512-xjIYgE8HBrkpd/sJqOGNspf8uHG+NOHGOw6a/Urj8taM2EXfdNAH2oFcPeIFfsv3+kz/mJrS5VuMqbNLjCa2vw==}
     engines: {node: '>=0.4.0'}
     hasBin: true
     dev: true
@@ -4652,7 +4632,7 @@ packages:
     dependencies:
       archy: 1.0.0
       debug: 4.3.4
-      fastq: 1.13.0
+      fastq: 1.15.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5086,7 +5066,7 @@ packages:
     engines: {node: '>=8.2.0'}
     dependencies:
       debug: 4.3.4
-      sax: 1.2.4
+      sax: 1.3.0
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -5236,7 +5216,7 @@ packages:
   /call-bind@1.0.2:
     resolution: {integrity: sha512-7O+FbCihrB5WGbFYesctwmTKae6rOiIzmz1icreWJ+0aA7LJfuqhEso2T9ncpcFtzMQtzXf2QGGueWJGTYsqrA==}
     dependencies:
-      function-bind: 1.1.1
+      function-bind: 1.1.2
       get-intrinsic: 1.1.3
 
   /callsites@3.1.0:
@@ -5581,7 +5561,6 @@ packages:
   /commander@9.5.0:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
     engines: {node: ^12.20.0 || >=14}
-    dev: true
 
   /compare-func@2.0.0:
     resolution: {integrity: sha512-zHig5N+tPWARooBnb0Zx1MFcdfpyJrfTJ3Y5L+IFvUm8rM74hHz66z0gw0x4tijh5CorKkKUCnW82R2vmpeCRA==}
@@ -6718,13 +6697,13 @@ packages:
   /electron-updater@4.3.1:
     resolution: {integrity: sha512-UDC5AHCgeiHJYDYWZG/rsl1vdAFKqI/Lm7whN57LKAk8EfhTewhcEHzheRcncLgikMcQL8gFo1KeX51tf5a5Wg==}
     dependencies:
-      '@types/semver': 7.3.13
+      '@types/semver': 7.5.4
       builder-util-runtime: 8.7.0
       fs-extra: 9.1.0
       js-yaml: 3.14.1
       lazy-val: 1.0.5
       lodash.isequal: 4.5.0
-      semver: 7.5.3
+      semver: 7.5.4
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -6819,7 +6798,7 @@ packages:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.12
-      '@types/node': 20.8.10
+      '@types/node': 18.15.11
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -7657,23 +7636,16 @@ packages:
       proxy-addr: 2.0.7
       rfdc: 1.3.0
       secure-json-parse: 2.5.0
-      semver: 7.3.8
+      semver: 7.5.4
       tiny-lru: 10.0.1
     transitivePeerDependencies:
       - supports-color
-    dev: false
-
-  /fastq@1.13.0:
-    resolution: {integrity: sha512-YpkpUnK8od0o1hmeSc7UUs/eB/vIPWJYjKck2QKIzAf71Vm1AAQ3EbuZB3g2JIy+pg+ERD0vqI79KyZiB2e2Nw==}
-    dependencies:
-      reusify: 1.0.4
     dev: false
 
   /fastq@1.15.0:
     resolution: {integrity: sha512-wBrocU2LCXXa+lWBt8RoIRD89Fi8OdABODa/kEnyeyjS5aZO5/GNvI5sEINADqP/h8M29UHTHUb53sUu5Ihqdw==}
     dependencies:
       reusify: 1.0.4
-    dev: true
 
   /fault@2.0.1:
     resolution: {integrity: sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==}
@@ -8045,7 +8017,6 @@ packages:
 
   /function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
-    dev: true
 
   /galactus@0.2.1:
     resolution: {integrity: sha512-mDc8EQJKtxjp9PMYS3PbpjjbX3oXhBTxoGaPahw620XZBIHJ4+nvw5KN/tRtmmSDR9dypstGNvqQ3C29QGoGHQ==}
@@ -8082,7 +8053,7 @@ packages:
   /get-intrinsic@1.1.3:
     resolution: {integrity: sha512-QJVz1Tj7MS099PevUG5jvnt9tSkXN8K14dxQlikJuPt4uD9hHAHjLyLBiLR5zELelBdD9QNRAXZzsJx0WaDL9A==}
     dependencies:
-      function-bind: 1.1.1
+      function-bind: 1.1.2
       has: 1.0.3
       has-symbols: 1.0.3
 
@@ -8446,7 +8417,7 @@ packages:
       '@sindresorhus/is': 0.14.0
       '@szmarczak/http-timer': 1.1.2
       '@types/keyv': 3.1.4
-      '@types/responselike': 1.0.0
+      '@types/responselike': 1.0.2
       cacheable-request: 6.1.0
       decompress-response: 3.3.0
       duplexer3: 0.1.5
@@ -8559,7 +8530,6 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       function-bind: 1.1.2
-    dev: true
 
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
@@ -8918,12 +8888,12 @@ packages:
     resolution: {integrity: sha512-RRjxlvLDkD1YJwDbroBHMb+cukurkDWNyHx7D3oNB5x9rb5ogcksMC5wHCadcXoo67gVr/+3GFySh3134zi6rw==}
     dependencies:
       has: 1.0.3
+    dev: true
 
   /is-core-module@2.13.1:
     resolution: {integrity: sha512-hHrIjvZsftOsvKSn2TRYl63zvxsgE0K+0mYMoH6gD4omR5IWB2KynivBQczo3+wF1cCkjzvptnI9Q0sPU66ilw==}
     dependencies:
       hasown: 2.0.0
-    dev: true
 
   /is-docker@2.2.1:
     resolution: {integrity: sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==}
@@ -9309,7 +9279,7 @@ packages:
       lodash.isstring: 4.0.1
       lodash.once: 4.1.1
       ms: 2.1.3
-      semver: 5.7.1
+      semver: 5.7.2
 
   /jsprim@1.4.2:
     resolution: {integrity: sha512-P2bSOMAc/ciLz6DzgjVlGJP9+BrJWu5UDGK70C2iweC5QBIeFf0ZXRvGjEj2uYgrY2MkAAhsSWHDWlFtEroZWw==}
@@ -9414,7 +9384,7 @@ packages:
         optional: true
     dependencies:
       colorette: 2.0.19
-      commander: 9.4.1
+      commander: 9.5.0
       debug: 4.3.4
       escalade: 3.1.1
       esm: 3.2.25
@@ -9545,11 +9515,6 @@ packages:
   /load-tsconfig@0.2.5:
     resolution: {integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dev: true
-
-  /local-pkg@0.4.2:
-    resolution: {integrity: sha512-mlERgSPrbxU3BP4qBqAvvwlgW4MTg78iwJdGGnv7kibKjWcJksrG3t6LB5lXI93wXRDvG4NpUgJFmTG4T6rdrg==}
-    engines: {node: '>=14'}
     dev: true
 
   /local-pkg@0.4.3:
@@ -10089,7 +10054,7 @@ packages:
   /mlly@0.5.16:
     resolution: {integrity: sha512-LaJ8yuh4v0zEmge/g3c7jjFlhoCPfQn6RCjXgm9A0Qiuochq4BcuOxVfWmdnCoLTlg2MV+hqhOek+W2OhG0Lwg==}
     dependencies:
-      acorn: 8.8.2
+      acorn: 8.11.2
       pathe: 0.3.9
       pkg-types: 0.3.6
       ufo: 0.8.6
@@ -10172,17 +10137,12 @@ packages:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
-
-  /nanoid@3.3.6:
-    resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
+    dev: false
 
   /nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
-    dev: true
 
   /napi-build-utils@1.0.2:
     resolution: {integrity: sha512-ONmRUqK7zj7DWX0D9ADe03wbwOBZxNAfF20PlGfCWQcD3+/MakShIHrMqx9YwPTfxDdF1zLeL+RGZiR9kGMLdg==}
@@ -11191,23 +11151,6 @@ packages:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
     dev: true
 
-  /postcss@8.4.21:
-    resolution: {integrity: sha512-tP7u/Sn/dVxK2NnruI4H9BG+x+Wxz6oeZ1cJ8P6G/PZY0IKk4k/63TDsQf2kQq3+qoJeLm2kIBUNlZe3zgb4Zg==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.4
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
-    dev: true
-
-  /postcss@8.4.24:
-    resolution: {integrity: sha512-M0RzbcI0sO/XJNucsGjvWU9ERWxb/ytp1w6dKtxTKgixdtQDq4rmx/g8W1hnaheq9jgwL/oyEdH5Bc4WwJKMqg==}
-    engines: {node: ^10 || ^12 || >=14}
-    dependencies:
-      nanoid: 3.3.6
-      picocolors: 1.0.0
-      source-map-js: 1.0.2
-
   /postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
@@ -11215,7 +11158,6 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
-    dev: true
 
   /postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
@@ -11452,7 +11394,7 @@ packages:
     resolution: {integrity: sha512-puuzLD2mz/oTdfgd8msFbe0A42j5eNudKAAPDB0+QJRw8cO1ygjLmhLrg9RvDpf87Dkd6D4t93qdef00KKNacQ==}
     dependencies:
       prosemirror-model: 1.18.2
-      prosemirror-transform: 1.7.3
+      prosemirror-transform: 1.8.0
       prosemirror-view: 1.29.1
     dev: false
 
@@ -11481,12 +11423,6 @@ packages:
       prosemirror-view: 1.29.1
     dev: false
 
-  /prosemirror-transform@1.7.3:
-    resolution: {integrity: sha512-qDapyx5lqYfxVeUWEw0xTGgeP2S8346QtE7DxkalsXlX89lpzkY6GZfulgfHyk1n4tf74sZ7CcXgcaCcGjsUtA==}
-    dependencies:
-      prosemirror-model: 1.18.2
-    dev: false
-
   /prosemirror-transform@1.8.0:
     resolution: {integrity: sha512-BaSBsIMv52F1BVVMvOmp1yzD3u65uC3HTzCBQV1WDPqJRQ2LuHKcyfn0jwqodo8sR9vVzMzZyI+Dal5W9E6a9A==}
     dependencies:
@@ -11498,7 +11434,7 @@ packages:
     dependencies:
       prosemirror-model: 1.18.2
       prosemirror-state: 1.4.2
-      prosemirror-transform: 1.7.3
+      prosemirror-transform: 1.8.0
     dev: false
 
   /prosemirror-view@1.32.3:
@@ -11542,7 +11478,6 @@ packages:
   /punycode@2.3.1:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
-    dev: true
 
   /pupa@2.1.1:
     resolution: {integrity: sha512-l1jNAspIBSFqbT+y+5FosojNpVpF94nlI+wDUpqP9enwOTfHx9f0gh5nB96vl+6yTpsJsypeNrwfzPrKuHB41A==}
@@ -11752,15 +11687,6 @@ packages:
       util-deprecate: 1.0.2
     dev: true
 
-  /readable-stream@3.6.0:
-    resolution: {integrity: sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==}
-    engines: {node: '>= 6'}
-    dependencies:
-      inherits: 2.0.4
-      string_decoder: 1.3.0
-      util-deprecate: 1.0.2
-    dev: false
-
   /readable-stream@3.6.2:
     resolution: {integrity: sha512-9u/sniCrY3D5WdsERHzHE4G2YCXqoG5FTHUiCC4SIbr6XcLZBY05ya9EKjYek9O5xOAwjGq+1JdGBAS7Q9ScoA==}
     engines: {node: '>= 6'}
@@ -11808,7 +11734,7 @@ packages:
     resolution: {integrity: sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ==}
     engines: {node: '>= 10.13.0'}
     dependencies:
-      resolve: 1.22.2
+      resolve: 1.22.8
     dev: false
 
   /redent@3.0.0:
@@ -11955,6 +11881,7 @@ packages:
       is-core-module: 2.11.0
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
+    dev: true
 
   /resolve@1.22.8:
     resolution: {integrity: sha512-oKWePCxqpd6FlLvGV1VU0x7bkPmmCNolxzjMf4NczoDnQcIWrAF+cPtZn5i6n+RfD2d9i0tzpKnG6Yk168yIyw==}
@@ -11963,7 +11890,6 @@ packages:
       is-core-module: 2.13.1
       path-parse: 1.0.7
       supports-preserve-symlinks-flag: 1.0.0
-    dev: true
 
   /responselike@1.0.2:
     resolution: {integrity: sha512-/Fpe5guzJk1gPqdJLJR5u7eG/gNY4nImjbRDaVWVMRhne55TCmj2i9Q+54PBRfatRC8v/rIiv9BN0pMd9OV5EQ==}
@@ -12147,7 +12073,6 @@ packages:
 
   /sax@1.3.0:
     resolution: {integrity: sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==}
-    dev: true
 
   /scule@0.3.2:
     resolution: {integrity: sha512-zIvPdjOH8fv8CgrPT5eqtxHQXmPNnV/vHJYffZhE43KZkvULvpCTvOt1HPlFaCZx287INL9qaqrZg34e8NgI4g==}
@@ -12188,14 +12113,9 @@ packages:
       semver: 5.7.2
     dev: true
 
-  /semver@5.7.1:
-    resolution: {integrity: sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==}
-    hasBin: true
-
   /semver@5.7.2:
     resolution: {integrity: sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==}
     hasBin: true
-    dev: true
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -12213,6 +12133,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /semver@7.5.2:
     resolution: {integrity: sha512-SoftuTROv/cRjCze/scjGyiDtcUyxw1rgYQSZY7XTmtR5hX+dm76iDbTH8TkLPHCQmlbQVSSbNZCPM2hb0knnQ==}
@@ -12227,6 +12148,7 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
+    dev: true
 
   /semver@7.5.4:
     resolution: {integrity: sha512-1bCSESV6Pv+i21Hvpxp3Dx+pSD8lIPt8uVjRrxAUt/nbswYc+tK6Y2btiULjd4+fnq15PX+nqQDC7Oft7WkwcA==}
@@ -12234,7 +12156,6 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
-    dev: true
 
   /send@0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}
@@ -12347,6 +12268,7 @@ packages:
 
   /sib-api-v3-typescript@2.2.2:
     resolution: {integrity: sha512-GSB/osL9FmGciwUIq6m8+7VtsMD/SsNJMKSw8anScuzYywkM927J0cNZH/gBw9MDECFGripqMgrtXBYThSgFAg==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     dependencies:
       bluebird: 3.7.2
       request: 2.88.2
@@ -12823,7 +12745,7 @@ packages:
   /strip-literal@0.4.2:
     resolution: {integrity: sha512-pv48ybn4iE1O9RLgCAN0iU4Xv7RlBTiit6DKmMiErbs9x1wH6vXBs45tWc0H5wUIF6TLTrKweqkmYF/iraQKNw==}
     dependencies:
-      acorn: 8.8.2
+      acorn: 8.11.2
     dev: true
 
   /strip-literal@1.3.0:
@@ -13235,7 +13157,7 @@ packages:
     engines: {node: '>=0.8'}
     dependencies:
       psl: 1.9.0
-      punycode: 2.1.1
+      punycode: 2.3.1
     dev: false
 
   /tr46@0.0.3:
@@ -13655,6 +13577,7 @@ packages:
   /undici-types@5.26.5:
     resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
     requiresBuild: true
+    dev: true
 
   /unilogr@0.0.27:
     resolution: {integrity: sha512-dI6zln0qOeVSLpEe6rXQKHysJTKzGAXnYlmOkGYbICVqJ70x9rGpq0AxdeFQ4W9t/rSMix/5hwUw7GDoBWhrQw==}
@@ -13665,8 +13588,8 @@ packages:
     dependencies:
       '@rollup/pluginutils': 5.0.2
       escape-string-regexp: 5.0.0
-      fast-glob: 3.2.12
-      local-pkg: 0.4.2
+      fast-glob: 3.3.2
+      local-pkg: 0.4.3
       magic-string: 0.26.7
       mlly: 0.5.16
       pathe: 0.3.9
@@ -13733,7 +13656,7 @@ packages:
       '@antfu/utils': 0.6.0
       '@rollup/pluginutils': 5.0.2
       '@vueuse/core': 9.5.0(vue@3.2.47)
-      local-pkg: 0.4.2
+      local-pkg: 0.4.3
       magic-string: 0.26.7
       unimport: 0.7.0
       unplugin: 0.10.2
@@ -13755,11 +13678,11 @@ packages:
       '@rollup/pluginutils': 5.0.2
       chokidar: 3.5.3
       debug: 4.3.4
-      fast-glob: 3.2.12
-      local-pkg: 0.4.2
+      fast-glob: 3.3.2
+      local-pkg: 0.4.3
       magic-string: 0.26.7
       minimatch: 5.1.6
-      resolve: 1.22.2
+      resolve: 1.22.8
       unplugin: 0.10.2
       vue: 3.2.47
     transitivePeerDependencies:
@@ -13770,7 +13693,7 @@ packages:
   /unplugin@0.10.2:
     resolution: {integrity: sha512-6rk7GUa4ICYjae5PrAllvcDeuT8pA9+j5J5EkxbMFaV+SalHhxZ7X2dohMzu6C3XzsMT+6jwR/+pwPNR3uK9MA==}
     dependencies:
-      acorn: 8.8.2
+      acorn: 8.11.2
       chokidar: 3.5.3
       webpack-sources: 3.2.3
       webpack-virtual-modules: 0.4.5
@@ -13965,8 +13888,8 @@ packages:
         optional: true
     dependencies:
       esbuild: 0.14.51
-      postcss: 8.4.21
-      resolve: 1.22.2
+      postcss: 8.4.31
+      resolve: 1.22.8
       rollup: 2.77.3
       sass: 1.32.12
     optionalDependencies:
@@ -14246,7 +14169,7 @@ packages:
       is-stream: 2.0.1
       logform: 2.4.2
       one-time: 1.0.0
-      readable-stream: 3.6.0
+      readable-stream: 3.6.2
       safe-stable-stringify: 2.4.1
       stack-trace: 0.0.10
       triple-beam: 1.3.0

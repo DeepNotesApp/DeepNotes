@@ -4,20 +4,20 @@
   "version": "1.0.0",
   "author": "",
   "devDependencies": {
-    "@nestjs/common": "9.2.0",
-    "@nestjs/core": "9.2.0",
-    "@nestjs/jwt": "9.0.0",
-    "@nestjs/testing": "9.2.0"
+    "@nestjs/common": "^9.2.0",
+    "@nestjs/core": "^9.2.0",
+    "@nestjs/jwt": "^9.0.0",
+    "@nestjs/testing": "^9.2.0"
   },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
   "module": "src/index.ts",
   "peerDependencies": {
-    "@nestjs/common": "9.2.0",
-    "@nestjs/core": "9.2.0",
-    "@nestjs/jwt": "9.0.0",
-    "@nestjs/testing": "9.2.0"
+    "@nestjs/common": "^9.2.0",
+    "@nestjs/core": "^9.2.0",
+    "@nestjs/jwt": "^9.0.0",
+    "@nestjs/testing": "^9.2.0"
   },
   "scripts": {
     "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",

@@ -5,11 +5,11 @@
   "author": "",
   "dependencies": {
     "@stdlib/misc": "workspace:1.0.0",
-    "lodash": "4.17.21",
-    "vue": "3.2.47"
+    "lodash": "^4.17.21",
+    "vue": "~3.2.47"
   },
   "devDependencies": {
-    "@types/lodash": "4.14.189"
+    "@types/lodash": "^4.14.189"
   },
   "keywords": [],
   "license": "ISC",
