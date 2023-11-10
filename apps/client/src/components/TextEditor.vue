@@ -44,8 +44,12 @@ defineProps<Props>();
 
       &,
       td {
-        > * + *:not(.ProseMirror-widget) {
+        > * + * {
           margin-top: 10px !important;
+
+          &.ProseMirror-widget {
+            margin-top: 0 !important;
+          }
         }
 
         > * + pre,
