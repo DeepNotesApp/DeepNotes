@@ -1,21 +1,68 @@
 version: 2.1
 
+orbs:
+  android: circleci/android@2.1.2
+  node: circleci/node@5.0.2
+
 jobs:
-  build:
+  deploy-android:
     docker:
-      - image: node:20-alpine
+      - image: cimg/android:2022.07
+    resource_class: small
     steps:
       - checkout
+      - node/install:
+          install-yarn: false
+          node-version: '20.9.0'
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
-          name: Run Build and Tests
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - run:
+          name: Install node dependencies
           command: |
-            # Build and test commands go here
+            pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build Android app
+          command: pnpm run build:android
+      - run:
+          name: Install Fastlane
+          command: sudo gem install fastlane
+      - run:
+          name: Create Android keystore
+          command: echo $BASE64_KEYSTORE | base64 -d | tee apps/client/src-capacitor/android/app/deepnotes.keystore > /dev/null
+      - run:
+          name: Create keystore.properties
+          command: |
+            printf 'releaseKeyAlias=%s\nreleaseKeyPassword=%s\nreleaseKeyStore=%s\nreleaseStorePassword=%s' \
+            $RELEASE_KEY_ALIAS $RELEASE_KEY_PASSWORD $RELEASE_KEYSTORE $RELEASE_STORE_PASSWORD > tee apps/client/src-capacitor/android/keystore.properties
+      - run:
+          name: Create Google Play key
+          command: echo $GOOGLE_PLAY_KEY > apps/client/src-capacitor/android/fastlane/deepnotes-google-api-secret.json
+      - run: |
+          cd apps/client/src-capacitor/android
+          bundle install
+      - run: |
+          cd apps/client/src-capacitor/android
+          bundle exec fastlane playstore
 
 workflows:
   version: 2
-  build:
+
+  deploy:
     jobs:
-      - build:
+      - deploy-android:
           filters:
             branches:
               only: main

@@ -123,14 +123,15 @@
     "vite": "^2.9.16"
   },
   "engines": {
-    "node": "^18 || ^16 || ^14.19",
+    "node": "^24 || ^22 || ^20 || ^18 || ^16 || ^14.19",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },
   "private": true,
   "productName": "DeepNotes",
   "scripts": {
-    "build:android": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T android --ide",
+    "build:android": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T android --skip-pkg",
+    "build:android:ide": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T android --skip-pkg --ide",
     "build:electron": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron",
     "build:electron:publish": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron --publish always",
     "build:ios": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T ios",
