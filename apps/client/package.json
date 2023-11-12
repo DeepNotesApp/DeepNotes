@@ -136,7 +136,7 @@
     "build:ios": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T ios",
     "build:spa": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m spa",
     "build:ssr": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m ssr",
-    "clean": "rimraf ./dist *.tsbuildinfo",
+    "clean": "rimraf --glob ./dist *.tsbuildinfo",
     "dev:android": "quasar dev -m capacitor -T android",
     "dev:electron": "quasar dev -m electron",
     "dev:ios": "quasar dev -m capacitor -T ios",
@@ -145,7 +145,7 @@
     "fix": "eslint --fix --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "lint": "eslint --ext .js,.ts,.vue ./",
-    "npkill": "rimraf ./node_modules",
+    "npkill": "rimraf --glob ./node_modules",
     "preinstall": "npx only-allow pnpm"
   }
 }
