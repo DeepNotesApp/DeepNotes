@@ -14,7 +14,7 @@
     "cookie": "^0.5.0",
     "dotenv": "^16.3.1",
     "dotenv-expand": "9.0.0",
-    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
+    "ioredis": "npm:@deepnotes/ioredis@^5.3.1",
     "jsonwebtoken": "^9.0.2",
     "knex": "2.3.0",
     "lib0": "^0.2.87",

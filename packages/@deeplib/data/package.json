@@ -24,7 +24,7 @@
   "main": "dist/index.js",
   "module": "src/index.ts",
   "peerDependencies": {
-    "ioredis": "npm:@deepnotes/ioredis@5.3.1",
+    "ioredis": "npm:@deepnotes/ioredis@^5.3.1",
     "objection": "3.0.1"
   },
   "scripts": {
