@@ -72,10 +72,10 @@ importers:
         version: 11.2.1
       ts-node:
         specifier: ^10.9.1
-        version: 10.9.1(@types/node@20.8.10)(typescript@5.2.2)
+        version: 10.9.1(@types/node@20.9.0)(typescript@5.2.2)
       ts-node-dev:
         specifier: ^2.0.0
-        version: 2.0.0(@types/node@20.8.10)(typescript@5.2.2)
+        version: 2.0.0(@types/node@20.9.0)(typescript@5.2.2)
       tsc-alias:
         specifier: ~1.7.1
         version: 1.7.1
@@ -167,7 +167,7 @@ importers:
         specifier: ^2.3.0
         version: 2.3.0
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
         specifier: 2.3.0
@@ -209,7 +209,7 @@ importers:
         specifier: ^14.3.0
         version: 14.3.0
       superjson:
-        specifier: npm:@deepnotes/superjson@1.12.4
+        specifier: npm:@deepnotes/superjson@^1.12.4
         version: /@deepnotes/superjson@1.12.4
       unilogr:
         specifier: ^0.0.27
@@ -282,7 +282,7 @@ importers:
         specifier: ^2.1.12
         version: 2.1.12(@tiptap/core@2.1.12)(@tiptap/pm@2.1.12)(y-prosemirror@1.0.20)
       '@tiptap/extension-collaboration-cursor':
-        specifier: npm:@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202
+        specifier: npm:@deepnotes/tiptap-extension-collaboration-cursor@^2.0.0-beta.202
         version: /@deepnotes/tiptap-extension-collaboration-cursor@2.0.0-beta.202(@tiptap/core@2.1.12)(prosemirror-model@1.18.3)(prosemirror-state@1.4.3)(prosemirror-view@1.29.2)(y-protocols@1.0.6)(yjs@13.6.8)
       '@tiptap/extension-highlight':
         specifier: ^2.1.12
@@ -402,7 +402,7 @@ importers:
         specifier: npm:@deepnotes/html2canvas@^1.4.2
         version: /@deepnotes/html2canvas@1.4.2
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       js-base64:
         specifier: ^3.7.5
@@ -459,8 +459,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       quasar:
-        specifier: npm:@deepnotes/quasar@2.12.0
-        version: /@deepnotes/quasar@2.12.0
+        specifier: npm:@deepnotes/quasar@^2.12.0
+        version: /@deepnotes/quasar@2.13.2
       serialize-javascript:
         specifier: ^6.0.1
         version: 6.0.1
@@ -468,7 +468,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
       superjson:
-        specifier: npm:@deepnotes/superjson@1.12.4
+        specifier: npm:@deepnotes/superjson@^1.12.4
         version: /@deepnotes/superjson@1.12.4
       turndown:
         specifier: ^7.1.2
@@ -506,7 +506,7 @@ importers:
         version: 3.4.0(vite@2.9.16)(vue-i18n@9.6.5)
       '@quasar/app-vite':
         specifier: ^1.6.2
-        version: 1.6.2(@deepnotes/quasar@2.12.0)(electron-builder@24.6.4)(electron-packager@17.1.2)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47)
+        version: 1.6.2(@deepnotes/quasar@2.13.2)(electron-builder@24.6.4)(electron-packager@17.1.2)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47)
       '@types/argon2-browser':
         specifier: ^1.18.3
         version: 1.18.3
@@ -637,7 +637,7 @@ importers:
         specifier: 9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       jsonwebtoken:
         specifier: ^9.0.2
@@ -716,7 +716,7 @@ importers:
         specifier: 9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
         specifier: 2.3.0
@@ -762,7 +762,7 @@ importers:
         specifier: 9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       jsonwebtoken:
         specifier: ^9.0.2
@@ -829,7 +829,7 @@ importers:
         specifier: 9.0.0
         version: 9.0.0(patch_hash=adqtadvolhkco6cfvcsvmd42ua)
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       knex:
         specifier: 2.3.0
@@ -872,7 +872,7 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       lodash:
         specifier: ^4.17.21
@@ -991,7 +991,7 @@ importers:
         specifier: workspace:*
         version: link:../misc
       ioredis:
-        specifier: npm:@deepnotes/ioredis@5.3.1
+        specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
       lodash:
         specifier: ^4.17.21
@@ -1431,8 +1431,8 @@ packages:
       - supports-color
     dev: false
 
-  /@deepnotes/quasar@2.12.0:
-    resolution: {integrity: sha512-KVZJGZKuQ6LlWRaYxpQBnoptseYLhb8ru6PGhxe0UMDWyGNbzKVn/t1hMsIrB3hG5aiMO1vkWG52tRgCiHud0A==}
+  /@deepnotes/quasar@2.13.2:
+    resolution: {integrity: sha512-5WsHR7QcVQ1S5ye8QYNkxbVBYKoUocr4wYmANexmyLXzar2waN3PdTflGLaB8+fKY8ngRBl9jRLnZgAaRalXpg==}
     engines: {node: '>= 10.18.1', npm: '>= 6.13.4', yarn: '>= 1.21.1'}
 
   /@deepnotes/simple-lru-cache@0.0.2:
@@ -2849,7 +2849,7 @@ packages:
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
     dev: false
 
-  /@quasar/app-vite@1.6.2(@deepnotes/quasar@2.12.0)(electron-builder@24.6.4)(electron-packager@17.1.2)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47):
+  /@quasar/app-vite@1.6.2(@deepnotes/quasar@2.13.2)(electron-builder@24.6.4)(electron-packager@17.1.2)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47):
     resolution: {integrity: sha512-keyJ28cqVtzNLDibQESo1c/DD++6+wqf8nQO6oMRqH6WgYcPs+YO1buRsRMXF9w3ghMCV0/9/Lj8Kyb7S55j6A==}
     engines: {node: ^24 || ^22 || ^20 || ^18 || ^16 || ^14.19, npm: '>= 6.14.12', yarn: '>= 1.17.3'}
     hasBin: true
@@ -2878,7 +2878,7 @@ packages:
         optional: true
     dependencies:
       '@quasar/render-ssr-error': 1.0.2
-      '@quasar/vite-plugin': 1.6.0(@deepnotes/quasar@2.12.0)(@vitejs/plugin-vue@2.3.4)(vite@2.9.16)(vue@3.2.47)
+      '@quasar/vite-plugin': 1.6.0(@deepnotes/quasar@2.13.2)(@vitejs/plugin-vue@2.3.4)(vite@2.9.16)(vue@3.2.47)
       '@rollup/pluginutils': 4.2.1
       '@types/chrome': 0.0.208
       '@types/compression': 1.7.4
@@ -2907,7 +2907,7 @@ packages:
       minimist: 1.2.8
       open: 8.4.2
       pinia: 2.0.36(typescript@5.2.2)(vue@3.2.47)
-      quasar: /@deepnotes/quasar@2.12.0
+      quasar: /@deepnotes/quasar@2.13.2
       register-service-worker: 1.7.2
       rollup-plugin-visualizer: 5.9.2
       sass: 1.32.12
@@ -2960,7 +2960,7 @@ packages:
       stack-trace: 1.0.0-pre2
     dev: true
 
-  /@quasar/vite-plugin@1.6.0(@deepnotes/quasar@2.12.0)(@vitejs/plugin-vue@2.3.4)(vite@2.9.16)(vue@3.2.47):
+  /@quasar/vite-plugin@1.6.0(@deepnotes/quasar@2.13.2)(@vitejs/plugin-vue@2.3.4)(vite@2.9.16)(vue@3.2.47):
     resolution: {integrity: sha512-LmbV76G1CwWZbrEQhqyZpkRQTJyO3xpW55aXY1zWN+JhyUeG77CcMCEWteBVnJ6I6ehUPFDC9ONd2+WlwH6rNQ==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -2970,7 +2970,7 @@ packages:
       vue: ^3.0.0
     dependencies:
       '@vitejs/plugin-vue': 2.3.4(vite@2.9.16)(vue@3.2.47)
-      quasar: /@deepnotes/quasar@2.12.0
+      quasar: /@deepnotes/quasar@2.13.2
       vite: 2.9.16(sass@1.32.12)
       vue: 3.2.47
     dev: true
@@ -2988,8 +2988,8 @@ packages:
     dependencies:
       '@remirror/core-constants': 2.0.2
       '@remirror/types': 1.0.1
-      '@types/object.omit': 3.0.2
-      '@types/object.pick': 1.3.3
+      '@types/object.omit': 3.0.3
+      '@types/object.pick': 1.3.4
       '@types/throttle-debounce': 2.1.0
       case-anything: 2.1.13
       dash-get: 1.0.2
@@ -3814,23 +3814,29 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
+  /@types/node@20.9.0:
+    resolution: {integrity: sha512-nekiGu2NDb1BcVofVcEKMIwzlx4NjHlcjhoxxKBNLtz15Y1z7MYf549DFvkHSId02Ax6kGwWntIBPC3l/JZcmw==}
+    dependencies:
+      undici-types: 5.26.5
+    dev: true
+
   /@types/normalize-package-data@2.4.3:
     resolution: {integrity: sha512-ehPtgRgaULsFG8x0NeYJvmyH1hmlfsNLujHe9dQEia/7MAJYdzMSi19JtchUHjmBA6XC/75dK55mzZH+RyieSg==}
     dev: true
 
-  /@types/object.omit@3.0.2:
-    resolution: {integrity: sha512-BxWU36cMP+FKD3OLFluQaj2cBev2sx2LJaHELuphHwnleq+xnEhTmuYYYx4pOT/1U/ZoR6B+RdvxWh2FD6lGGA==}
+  /@types/object.omit@3.0.3:
+    resolution: {integrity: sha512-xrq4bQTBGYY2cw+gV4PzoG2Lv3L0pjZ1uXStRRDQoATOYW1lCsFQHhQ+OkPhIcQoqLjAq7gYif7D14Qaa6Zbew==}
     dev: false
 
-  /@types/object.pick@1.3.3:
-    resolution: {integrity: sha512-qZqHmdGEALeSATMB1djT1S5szv6Wtpb7DKpHrt2XG4iyKlV7C2Xk8GmDXr1KXakOqUfX6ohw7ceruYt4NVmB1Q==}
+  /@types/object.pick@1.3.4:
+    resolution: {integrity: sha512-5PjwB0uP2XDp3nt5u5NJAG2DORHIRClPzWT/TTZhJ2Ekwe8M5bA9tvPdi9NO/n2uvu2/ictat8kgqvLfcIE1SA==}
     dev: false
 
-  /@types/plist@3.0.4:
-    resolution: {integrity: sha512-pTa9xUFQFM9WJGSWHajYNljD+DbVylE1q9IweK1LBhUYJdJ28YNU8j3KZ4Q1Qw+cSl4+QLLLOVmqNjhhvVO8fA==}
+  /@types/plist@3.0.5:
+    resolution: {integrity: sha512-E6OCaRmAe4WDmWNsL/9RMqdkkzDCY1etutkflWk4c+AcjDU07Pcz1fQwTX0TQz+Pxqn9i4L1TU3UFpjnrcDgxA==}
     requiresBuild: true
     dependencies:
-      '@types/node': 20.8.10
+      '@types/node': 20.9.0
       xmlbuilder: 15.1.1
     dev: true
     optional: true
@@ -3905,8 +3911,8 @@ packages:
     resolution: {integrity: sha512-zC0iXxAv1C1ERURduJueYzkzZ2zaGyc+P2c95hgkikHPr3z8EdUZOlgEQ5X0DRmwDZn+hekycQnoeiiRVrmilQ==}
     dev: false
 
-  /@types/verror@1.10.8:
-    resolution: {integrity: sha512-YhUhnxRYs/NiVUbIs3F/EzviDP/NZCEAE2Mx5DUqLdldUmphOhFCVh7Kc+7zlYEExM0P8dzfbJi0yRlNb2Bw5g==}
+  /@types/verror@1.10.9:
+    resolution: {integrity: sha512-MLx9Z+9lGzwEuW16ubGeNkpBDE84RpB/NyGgg6z2BTpWzKkGU451cAY3UkUzZEp72RHF585oJ3V8JVNqIplcAQ==}
     requiresBuild: true
     dev: true
     optional: true
@@ -3920,8 +3926,8 @@ packages:
       '@types/node': 20.8.10
     dev: true
 
-  /@types/yauzl@2.10.2:
-    resolution: {integrity: sha512-Km7XAtUIduROw7QPgvcft0lIupeG8a8rdKL8RiSyKvlE7dYY31fEn41HVuQsRFDuROA8tA4K2UVL+WdfFmErBA==}
+  /@types/yauzl@2.10.3:
+    resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
       '@types/node': 20.8.10
@@ -4964,6 +4970,7 @@ packages:
 
   /boolean@3.2.0:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -6278,6 +6285,7 @@ packages:
   /define-properties@1.2.1:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
+    requiresBuild: true
     dependencies:
       define-data-property: 1.1.1
       has-property-descriptors: 1.0.1
@@ -6326,6 +6334,7 @@ packages:
 
   /detect-node@2.1.0:
     resolution: {integrity: sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -6379,8 +6388,8 @@ packages:
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@types/plist': 3.0.4
-      '@types/verror': 1.10.8
+      '@types/plist': 3.0.5
+      '@types/verror': 1.10.9
       ajv: 6.12.6
       crc: 3.8.0
       iconv-corefoundation: 1.1.7
@@ -6811,6 +6820,7 @@ packages:
 
   /es6-error@4.1.1:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -7662,7 +7672,7 @@ packages:
       get-stream: 5.2.0
       yauzl: 2.10.0
     optionalDependencies:
-      '@types/yauzl': 2.10.2
+      '@types/yauzl': 2.10.3
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -8405,6 +8415,7 @@ packages:
   /globalthis@1.0.3:
     resolution: {integrity: sha512-sFdI5LyBiNTHjRd7cGPWapiHWMOXKyuBNX/cWJ3NfzrZQVa8GI/8cofCl74AOVqq9W5kNmguTIzJ/1s2gyI9wA==}
     engines: {node: '>= 0.4'}
+    requiresBuild: true
     dependencies:
       define-properties: 1.2.1
     dev: true
@@ -9912,6 +9923,7 @@ packages:
   /matcher@3.0.0:
     resolution: {integrity: sha512-OkeDaAZ/bQCxeFAozM55PKcKU0yJMPGifLwV4Qgjitu+5MoAfSQN4lsLJeXZ1b8w0x+/Emda6MZgXS1jvsapng==}
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       escape-string-regexp: 4.0.0
     dev: true
@@ -10267,6 +10279,7 @@ packages:
   /node-gyp-build-optional-packages@5.0.7:
     resolution: {integrity: sha512-YlCCc6Wffkx0kHkmam79GKvDQ6x+QZkMjFGrIMxgFNILFvGSbCp2fCBC55pGTT9gVaz8Na5CLmxt/urtzRv36w==}
     hasBin: true
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -10413,6 +10426,7 @@ packages:
   /object-keys@1.1.1:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -11114,7 +11128,7 @@ packages:
     dependencies:
       lilconfig: 2.1.0
       postcss: 8.4.31
-      ts-node: 10.9.1(@types/node@20.8.10)(typescript@5.2.2)
+      ts-node: 10.9.1(@types/node@20.9.0)(typescript@5.2.2)
       yaml: 2.3.4
     dev: true
 
@@ -11314,7 +11328,7 @@ packages:
     dependencies:
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.8.0
-      prosemirror-view: 1.32.3
+      prosemirror-view: 1.32.4
       rope-sequence: 1.3.4
     dev: false
 
@@ -11421,8 +11435,8 @@ packages:
       prosemirror-transform: 1.8.0
     dev: false
 
-  /prosemirror-view@1.32.3:
-    resolution: {integrity: sha512-tP7AUTxisM0m3PDxs6vDWgTjgcbFo4fnwg2M/5NHlgMqUJgBNOqSUZETBZKmLD7AxGN3GZ5yqEzQv9r9VCZKrg==}
+  /prosemirror-view@1.32.4:
+    resolution: {integrity: sha512-WoT+ZYePp0WQvp5coABAysheZg9WttW3TSEUNgsfDQXmVOJlnjkbFbXicKPvWFLiC0ZjKt1ykbyoVKqhVnCiSQ==}
     dependencies:
       prosemirror-model: 1.18.3
       prosemirror-state: 1.4.3
@@ -11966,6 +11980,7 @@ packages:
   /roarr@2.15.4:
     resolution: {integrity: sha512-CHhPh+UNHD2GTXNYhPWLnU8ONHdI+5DI+4EYIAOaiD63rHeYlZvyh8P+in5999TTSFgUYuKUAjzRI4mdh/p+2A==}
     engines: {node: '>=8.0'}
+    requiresBuild: true
     dependencies:
       boolean: 3.2.0
       detect-node: 2.1.0
@@ -12093,6 +12108,7 @@ packages:
 
   /semver-compare@1.0.0:
     resolution: {integrity: sha512-YM3/ITh2MJ5MtzaM429anh+x2jiLVjqILF4m4oyQB18W7Ggea7BfqdH/wGMK7dDiMghv/6WG7znWMwUDzJiXow==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -12155,6 +12171,7 @@ packages:
   /serialize-error@7.0.1:
     resolution: {integrity: sha512-8I8TjW5KMOKsZQTvoxjuSIa7foAwPWGOts+6o7sgjz41/qMD9VQHEDxi6PBvK2l0MXUmqZyNpUK+T2tQaaElvw==}
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       type-fest: 0.13.1
     dev: true
@@ -12508,6 +12525,7 @@ packages:
 
   /sprintf-js@1.1.3:
     resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -13166,7 +13184,7 @@ packages:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
     dev: true
 
-  /ts-node-dev@2.0.0(@types/node@20.8.10)(typescript@5.2.2):
+  /ts-node-dev@2.0.0(@types/node@20.9.0)(typescript@5.2.2):
     resolution: {integrity: sha512-ywMrhCfH6M75yftYvrvNarLEY+SUXtUvU8/0Z6llrHQVBx12GiFk5sStF8UdfE/yfzk9IAq7O5EEbTQsxlBI8w==}
     engines: {node: '>=0.8.0'}
     hasBin: true
@@ -13185,7 +13203,7 @@ packages:
       rimraf: 2.7.1
       source-map-support: 0.5.21
       tree-kill: 1.2.2
-      ts-node: 10.9.1(@types/node@20.8.10)(typescript@5.2.2)
+      ts-node: 10.9.1(@types/node@20.9.0)(typescript@5.2.2)
       tsconfig: 7.0.0
       typescript: 5.2.2
     transitivePeerDependencies:
@@ -13194,7 +13212,7 @@ packages:
       - '@types/node'
     dev: true
 
-  /ts-node@10.9.1(@types/node@20.8.10)(typescript@5.2.2):
+  /ts-node@10.9.1(@types/node@20.9.0)(typescript@5.2.2):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -13213,7 +13231,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.8.10
+      '@types/node': 20.9.0
       acorn: 8.11.2
       acorn-walk: 8.3.0
       arg: 4.1.3
@@ -13307,6 +13325,7 @@ packages:
   /tunnel@0.0.6:
     resolution: {integrity: sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==}
     engines: {node: '>=0.6.11 <=0.7.0 || >=0.7.3'}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -13400,6 +13419,7 @@ packages:
   /type-fest@0.13.1:
     resolution: {integrity: sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==}
     engines: {node: '>=10'}
+    requiresBuild: true
     dev: true
     optional: true
 
