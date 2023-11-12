@@ -3,21 +3,53 @@ version: 2.1
 orbs:
   android: circleci/android@2.1.2
   node: circleci/node@5.0.2
+  win: circleci/windows@4.1.1
 
 jobs:
+  deploy-win:
+    executor:
+      name: win/default
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          name: Install Node.js 18
+          command: nvm install 18 && nvm use 18
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-win-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build Linux app
+          command: pnpm run build:electron:publish
+
   deploy-linux:
     docker:
       - image: node:18
     resource_class: large
     steps:
       - checkout
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
             - &deploy-linux-pnpm-cache node:18-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Install pnpm package manager
-          command: npm install -g pnpm@latest
       - run:
           name: Install node dependencies
           command: pnpm install
@@ -42,13 +74,13 @@ jobs:
       - node/install:
           install-yarn: false
           node-version: '20.9.0'
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
             - &deploy-android-pnpm-cache cimg/android:2022.07-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
-      - run:
-          name: Install pnpm package manager
-          command: npm install -g pnpm@latest
       - run:
           name: Install node dependencies
           command: pnpm install
@@ -89,7 +121,7 @@ workflows:
 
   deploy:
     jobs:
-      - deploy-linux:
+      - deploy-win:
           filters:
             branches:
               only: main
