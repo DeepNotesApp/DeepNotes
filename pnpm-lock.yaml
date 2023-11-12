@@ -171,7 +171,7 @@ importers:
         version: /@deepnotes/ioredis@5.3.1
       knex:
         specifier: 2.3.0
-        version: 2.3.0
+        version: 2.3.0(pg@8.11.3)
       libsodium-wrappers-sumo:
         specifier: ^0.7.13
         version: 0.7.13
@@ -436,7 +436,7 @@ importers:
         version: 2.7.0
       objection:
         specifier: 3.0.1
-        version: 3.0.1(knex@3.0.1)
+        version: 3.0.1(knex@2.3.0)
       pinia:
         specifier: ~2.0.36
         version: 2.0.36(typescript@5.2.2)(vue@3.2.47)
@@ -644,7 +644,7 @@ importers:
         version: 9.0.2
       knex:
         specifier: 2.3.0
-        version: 2.3.0
+        version: 2.3.0(pg@8.11.3)
       lib0:
         specifier: ^0.2.87
         version: 0.2.87
@@ -769,7 +769,7 @@ importers:
         version: 9.0.2
       knex:
         specifier: 2.3.0
-        version: 2.3.0
+        version: 2.3.0(pg@8.11.3)
       lib0:
         specifier: ^0.2.87
         version: 0.2.87
@@ -1912,7 +1912,7 @@ packages:
     resolution: {integrity: sha512-B4tlHFBKCX7tenEG9aUcQEpksW2e0+dgRTaH/05+cro1Xsq1+kSj+9IB9Gep7a0KbHZGrat+zBsOas6lRs5dFQ==}
     dependencies:
       fastify-plugin: 4.5.1
-      ws: 8.14.2
+      ws: 8.11.0(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3578,7 +3578,7 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.3
       '@types/keyv': 3.1.4
-      '@types/node': 18.18.8
+      '@types/node': 20.8.10
       '@types/responselike': 1.0.2
     dev: true
 
@@ -3748,7 +3748,7 @@ packages:
   /@types/keyv@3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 18.18.8
+      '@types/node': 20.8.10
     dev: true
 
   /@types/libsodium-wrappers-sumo@0.7.7:
@@ -3852,7 +3852,7 @@ packages:
   /@types/responselike@1.0.2:
     resolution: {integrity: sha512-/4YQT5Kp6HxUDb4yhRkm0bJ7TbjvTddqX7PZ5hz6qV3pxSo72f/6YPRo+Mu2DU307tm9IioO69l7uAwn5XNcFA==}
     dependencies:
-      '@types/node': 18.18.8
+      '@types/node': 20.8.10
     dev: true
 
   /@types/semver@7.5.4:
@@ -3924,7 +3924,7 @@ packages:
     resolution: {integrity: sha512-Km7XAtUIduROw7QPgvcft0lIupeG8a8rdKL8RiSyKvlE7dYY31fEn41HVuQsRFDuROA8tA4K2UVL+WdfFmErBA==}
     requiresBuild: true
     dependencies:
-      '@types/node': 18.18.8
+      '@types/node': 20.8.10
     dev: true
     optional: true
 
@@ -5511,11 +5511,6 @@ packages:
     engines: {node: '>= 0.8'}
     dependencies:
       delayed-stream: 1.0.0
-
-  /commander@10.0.1:
-    resolution: {integrity: sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug==}
-    engines: {node: '>=14'}
-    dev: false
 
   /commander@11.0.0:
     resolution: {integrity: sha512-9HMlXtt/BNoYr8ooyjjNRdIilOTkVJXB+GhxMTtOKwk0R4j4lS4NpjuqmRxroBfnfTSHQIHQB7wryHhXarNjmQ==}
@@ -7681,8 +7676,6 @@ packages:
     resolution: {integrity: sha512-Wrk35e8ydCKDj/ArClo1VrPVmN8zph5V4AtHwIuHhvMXsKf73UT3BOD+azBIW+3wOJ4FhEH7zyaJCFvChjYvMA==}
     engines: {'0': node >=0.6.0}
     requiresBuild: true
-    dev: true
-    optional: true
 
   /fast-check@3.13.2:
     resolution: {integrity: sha512-ouTiFyeMoqmNg253xqy4NSacr5sHxH6pZpLOaHgaAdgZxFWdtsfxExwolpveoAE9CJdV+WYjqErNGef6SqA5Mg==}
@@ -9460,52 +9453,6 @@ packages:
     engines: {node: '>=6'}
     dev: false
 
-  /knex@2.3.0:
-    resolution: {integrity: sha512-WMizPaq9wRMkfnwKXKXgBZeZFOSHGdtoSz5SaLAVNs3WRDfawt9O89T4XyH52PETxjV8/kRk0Yf+8WBEP/zbYw==}
-    engines: {node: '>=12'}
-    hasBin: true
-    peerDependencies:
-      better-sqlite3: '*'
-      mysql: '*'
-      mysql2: '*'
-      pg: '*'
-      pg-native: '*'
-      sqlite3: '*'
-      tedious: '*'
-    peerDependenciesMeta:
-      better-sqlite3:
-        optional: true
-      mysql:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      pg-native:
-        optional: true
-      sqlite3:
-        optional: true
-      tedious:
-        optional: true
-    dependencies:
-      colorette: 2.0.19
-      commander: 9.5.0
-      debug: 4.3.4
-      escalade: 3.1.1
-      esm: 3.2.25
-      get-package-type: 0.1.0
-      getopts: 2.3.0
-      interpret: 2.2.0
-      lodash: 4.17.21
-      pg-connection-string: 2.5.0
-      rechoir: 0.8.0
-      resolve-from: 5.0.0
-      tarn: 3.0.2
-      tildify: 2.0.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
   /knex@2.3.0(pg@8.11.3):
     resolution: {integrity: sha512-WMizPaq9wRMkfnwKXKXgBZeZFOSHGdtoSz5SaLAVNs3WRDfawt9O89T4XyH52PETxjV8/kRk0Yf+8WBEP/zbYw==}
     engines: {node: '>=12'}
@@ -9545,52 +9492,6 @@ packages:
       lodash: 4.17.21
       pg: 8.11.3
       pg-connection-string: 2.5.0
-      rechoir: 0.8.0
-      resolve-from: 5.0.0
-      tarn: 3.0.2
-      tildify: 2.0.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
-
-  /knex@3.0.1:
-    resolution: {integrity: sha512-ruASxC6xPyDklRdrcDy6a9iqK+R9cGK214aiQa+D9gX2ZnHZKv6o6JC9ZfgxILxVAul4bZ13c3tgOAHSuQ7/9g==}
-    engines: {node: '>=16'}
-    hasBin: true
-    peerDependencies:
-      better-sqlite3: '*'
-      mysql: '*'
-      mysql2: '*'
-      pg: '*'
-      pg-native: '*'
-      sqlite3: '*'
-      tedious: '*'
-    peerDependenciesMeta:
-      better-sqlite3:
-        optional: true
-      mysql:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      pg-native:
-        optional: true
-      sqlite3:
-        optional: true
-      tedious:
-        optional: true
-    dependencies:
-      colorette: 2.0.19
-      commander: 10.0.1
-      debug: 4.3.4
-      escalade: 3.1.1
-      esm: 3.2.25
-      get-package-type: 0.1.0
-      getopts: 2.3.0
-      interpret: 2.2.0
-      lodash: 4.17.21
-      pg-connection-string: 2.6.1
       rechoir: 0.8.0
       resolve-from: 5.0.0
       tarn: 3.0.2
@@ -10537,18 +10438,7 @@ packages:
     dependencies:
       ajv: 8.12.0
       db-errors: 0.2.3
-      knex: 2.3.0
-    dev: false
-
-  /objection@3.0.1(knex@3.0.1):
-    resolution: {integrity: sha512-rqNnyQE+C55UHjdpTOJEKQHJGZ/BGtBBtgxdUpKG4DQXRUmqxfmgS/MhPWxB9Pw0mLSVLEltr6soD4c0Sddy0Q==}
-    engines: {node: '>=12.0.0'}
-    peerDependencies:
-      knex: '>=0.95.0'
-    dependencies:
-      ajv: 8.12.0
-      db-errors: 0.2.3
-      knex: 3.0.1
+      knex: 2.3.0(pg@8.11.3)
     dev: false
 
   /obliterator@2.0.4:
@@ -11000,10 +10890,6 @@ packages:
 
   /pg-connection-string@2.5.0:
     resolution: {integrity: sha512-r5o/V/ORTA6TmUnyWZR9nCj1klXCO2CEKNRlVuJptZe85QuhFayC7WeMic7ndayT5IRIR0S0xFxFi2ousartlQ==}
-    dev: false
-
-  /pg-connection-string@2.6.1:
-    resolution: {integrity: sha512-w6ZzNu6oMmIzEAYVw+RLK0+nqHPt8K3ZnknKi+g48Ak2pr3dtljJW3o+D/n2zzCG07Zoe9VOX3aiKpj+BN0pjg==}
     dev: false
 
   /pg-connection-string@2.6.2:
@@ -13851,7 +13737,7 @@ packages:
     dependencies:
       assert-plus: 1.0.0
       core-util-is: 1.0.2
-      extsprintf: 1.3.0
+      extsprintf: 1.4.1
     dev: false
 
   /verror@1.10.1:
@@ -14240,19 +14126,6 @@ packages:
         optional: true
     dependencies:
       utf-8-validate: 5.0.10
-
-  /ws@8.14.2:
-    resolution: {integrity: sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-    dev: false
 
   /xdg-basedir@5.1.0:
     resolution: {integrity: sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ==}

@@ -10,9 +10,9 @@
   "scripts": {
     "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
     "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
-    "clean": "rimraf ./dist *.tsbuildinfo",
+    "clean": "rimraf --glob ./dist *.tsbuildinfo",
     "fix": "eslint --fix --ext .js,.ts,.vue ./",
-    "npkill": "rimraf ./node_modules",
+    "npkill": "rimraf --glob ./node_modules",
     "preinstall": "npx only-allow pnpm",
     "repo:build": "tsc-alias -p tsconfig.json",
     "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
