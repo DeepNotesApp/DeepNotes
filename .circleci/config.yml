@@ -36,7 +36,7 @@ jobs:
           name: Build Electron app
           command: pnpm run build:electron:publish
 
-  deploy-win-appx:
+  deploy-win:
     executor:
       name: win/default
       shell: bash.exe
@@ -48,55 +48,18 @@ jobs:
       - run:
           name: Install pnpm package manager
           command: npm install -g pnpm@latest
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-2
       - run:
           name: Install node dependencies
           command: pnpm install
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: *deploy-win-pnpm-cache
-          paths:
-            - node_modules
       - run:
           name: Build packages
           command: pnpm run repo:build
       - run:
           name: Build AppX
-          command: pnpm run build:electron:publish
-
-  deploy-win-nsis:
-    executor:
-      name: win/default
-      shell: bash.exe
-    steps:
-      - checkout
-      - run:
-          name: Install Node.js 18
-          command: nvm install 18 && nvm use 18
-      - run:
-          name: Install pnpm package manager
-          command: npm install -g pnpm@latest
-      - restore_cache:
-          name: Restore pnpm Package Cache
-          keys:
-            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-2
-      - run:
-          name: Install node dependencies
-          command: pnpm install
-      - save_cache:
-          name: Save pnpm Package Cache
-          key: *deploy-win-pnpm-cache
-          paths:
-            - node_modules
-      - run:
-          name: Build packages
-          command: pnpm run repo:build
-      - run:
-          name: Build NSIS
-          command: NSIS=true pnpm run build:electron:publish
+          command: |
+            unset CSC_LINK
+            unset CSC_KEY_PASSWORD
+            pnpm run build:electron:publish
 
   deploy-linux:
     docker:
@@ -161,15 +124,23 @@ jobs:
           command: sudo gem install fastlane
       - run:
           name: Create Android keystore
-          command: echo $BASE64_KEYSTORE | base64 -d | tee apps/client/src-capacitor/android/app/deepnotes.keystore > /dev/null
+          command: |
+            cd apps/client/src-capacitor/android/app
+            echo $BASE64_KEYSTORE | base64 -d > deepnotes.keystore
+            ls
       - run:
           name: Create keystore.properties
           command: |
+            cd apps/client/src-capacitor/android
             printf 'releaseKeyAlias=%s\nreleaseKeyPassword=%s\nreleaseKeyStore=%s\nreleaseStorePassword=%s' \
-            $RELEASE_KEY_ALIAS $RELEASE_KEY_PASSWORD $RELEASE_KEYSTORE $RELEASE_STORE_PASSWORD > tee apps/client/src-capacitor/android/keystore.properties
+            $RELEASE_KEY_ALIAS $RELEASE_KEY_PASSWORD $RELEASE_KEYSTORE $RELEASE_STORE_PASSWORD > keystore.properties
+            ls
       - run:
           name: Create Google Play key
-          command: echo $GOOGLE_PLAY_KEY > apps/client/src-capacitor/android/fastlane/deepnotes-google-api-secret.json
+          command: |
+            cd apps/client/src-capacitor/android/fastlane
+            echo $GOOGLE_PLAY_KEY > deepnotes-google-api-secret.json
+            ls
       - run: |
           cd apps/client/src-capacitor/android
           bundle install
@@ -182,21 +153,7 @@ workflows:
 
   deploy:
     jobs:
-      - deploy-linux:
-          filters:
-            branches:
-              only: main
-              
-      - deploy-win-appx:
-          filters:
-            branches:
-              only: main
-      - deploy-win-nsis:
-          filters:
-            branches:
-              only: main
-
-      - deploy-macos:
+      - deploy-win:
           filters:
             branches:
               only: main
