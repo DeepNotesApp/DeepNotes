@@ -20,13 +20,13 @@ jobs:
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
-            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+            - &deploy-macos-pnpm-cache macos-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
           name: Install node dependencies
           command: pnpm install
       - save_cache:
           name: Save pnpm Package Cache
-          key: *deploy-win-pnpm-cache
+          key: *deploy-macos-pnpm-cache
           paths:
             - node_modules
       - run:
@@ -51,7 +51,7 @@ jobs:
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
-            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-2
       - run:
           name: Install node dependencies
           command: pnpm install
@@ -82,7 +82,7 @@ jobs:
       - restore_cache:
           name: Restore pnpm Package Cache
           keys:
-            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+            - &deploy-win-pnpm-cache win-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}-2
       - run:
           name: Install node dependencies
           command: pnpm install
