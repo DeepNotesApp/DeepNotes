@@ -4,6 +4,14 @@ def keyStorePropertiesFile = rootProject.file("keystore.properties")
 def keyStoreProperties = new Properties()
 keyStoreProperties.load(new FileInputStream(keyStorePropertiesFile))
 
+def jsonFile = file('../../../package.json')
+def parsedJson = new groovy.json.JsonSlurper().parseText(jsonFile.text)
+
+def getVersionCode = { ->
+    def parts = parsedJson.version.split('\\.')
+    return (10000 * (parts[0].toInteger()) + 100 * (parts[1].toInteger()) + parts[2].toInteger())
+}
+
 android {
     signingConfigs {
         release {
@@ -15,38 +23,25 @@ android {
     }
     
     compileSdkVersion rootProject.ext.compileSdkVersion
-
-    def versionPropsFile = file('version.properties')
-
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-
-        versionProps.load(new FileInputStream(versionPropsFile))
-
-        def code = versionProps['VERSION_CODE'].toInteger() + 1
         
-        versionProps['VERSION_CODE']=code.toString()
-        versionProps.store(versionPropsFile.newWriter(), null)
-        
-        defaultConfig {
-            applicationId "app.deepnotes"
-            minSdkVersion rootProject.ext.minSdkVersion
-            targetSdkVersion rootProject.ext.targetSdkVersion
-            versionCode code
-            versionName "1.0"
-            testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-            aaptOptions {
-                // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-                // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
-                ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
-            }
+    defaultConfig {
+        applicationId "app.deepnotes"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode getVersionCode()
+        versionName parsedJson.version
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+            // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+            // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
-        buildTypes {
-            release {
-            signingConfig signingConfigs.release
-                minifyEnabled true
-                proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            }
+    }
+    buildTypes {
+        release {
+        signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
