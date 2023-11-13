@@ -182,7 +182,26 @@ workflows:
 
   deploy:
     jobs:
+      - deploy-linux:
+          filters:
+            branches:
+              only: main
+              
+      - deploy-win-appx:
+          filters:
+            branches:
+              only: main
+      - deploy-win-nsis:
+          filters:
+            branches:
+              only: main
+
       - deploy-macos:
+          filters:
+            branches:
+              only: main
+
+      - deploy-android:
           filters:
             branches:
               only: main
