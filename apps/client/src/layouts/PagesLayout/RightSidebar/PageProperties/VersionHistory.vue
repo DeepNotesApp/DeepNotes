@@ -4,67 +4,58 @@
 
     <Gap style="height: 8px" />
 
-    <q-list
+    <Checklist
       style="
         border-radius: 6px;
         height: 220px;
         background-color: #383838;
         overflow: auto;
       "
+      :item-ids="snapshotInfos.map((snapshotInfo) => snapshotInfo.id)"
+      @select="(snapshotId) => baseSelectedSnapshotIds.add(snapshotId)"
+      @unselect="(snapshotId) => baseSelectedSnapshotIds.delete(snapshotId)"
     >
-      <q-item
-        v-if="snapshotInfos.length === 0"
-        style="color: #b0b0b0"
-      >
-        <q-item-section>
-          <q-item-label>No versions available</q-item-label>
-        </q-item-section>
-      </q-item>
+      <template #empty>
+        <q-item style="color: #b0b0b0">
+          <q-item-section>
+            <q-item-label>No versions available</q-item-label>
+          </q-item-section>
+        </q-item>
+      </template>
 
-      <q-item
-        v-for="snapshotInfo of snapshotInfos"
-        :key="snapshotInfo.id"
-        clickable
-        @click.capture="
-          (event) => selectSnapshot(snapshotInfo.id, event as any)
-        "
-      >
-        <q-item-section
-          avatar
-          style="padding-right: 4px"
+      <template #item="{ itemIndex: snapshotIndex }">
+        <template
+          v-for="snapshotInfo in [snapshotInfos[snapshotIndex]]"
+          :key="snapshotInfo.id"
         >
-          <Checkbox
-            :model-value="finalSelectedSnapshotIds.includes(snapshotInfo.id)"
-          />
-        </q-item-section>
+          <q-item-section>
+            <q-item-label>{{
+              Intl.DateTimeFormat('en', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              }).format(snapshotInfo.creationDate)
+            }}</q-item-label>
 
-        <q-item-section>
-          <q-item-label>{{
-            Intl.DateTimeFormat('en', {
-              dateStyle: 'medium',
-              timeStyle: 'short',
-            }).format(snapshotInfo.creationDate)
-          }}</q-item-label>
+            <q-item-label
+              caption
+              style="display: flex"
+            >
+              <div style="flex: 1">
+                {{
+                  groupMemberNames()(
+                    `${page.react.groupId}:${snapshotInfo.authorId}`,
+                  ).get().text
+                }}
+              </div>
 
-          <q-item-label
-            caption
-            style="display: flex"
-          >
-            <div style="flex: 1">
-              {{
-                groupMemberNames()(
-                  `${page.react.groupId}:${snapshotInfo.authorId}`,
-                ).get().text
-              }}
-            </div>
+              <Gap style="width: 20px" />
 
-            <Gap style="width: 20px" />
-
-            <div>{{ capitalize(snapshotInfo.type) }}</div>
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
+              <div>{{ capitalize(snapshotInfo.type) }}</div>
+            </q-item-label>
+          </q-item-section>
+        </template>
+      </template>
+    </Checklist>
 
     <Gap style="height: 16px" />
 
@@ -121,8 +112,6 @@ const snapshotInfos = computed(
     page.value.realtimeCtx.hget('page-snapshots', page.value.id, 'infos') ?? [],
 );
 
-let lastSelectedSnapshotId: string;
-
 const baseSelectedSnapshotIds = ref(new Set<string>());
 
 const finalSelectedSnapshotIds = computed(() =>
@@ -132,45 +121,6 @@ const finalSelectedSnapshotIds = computed(() =>
     )
     .map((snapshotInfo) => snapshotInfo.id),
 );
-
-function selectSnapshot(snapshotId: string, event: MouseEvent) {
-  if (event.shiftKey || internals.mobileAltKey) {
-    const snapshotIds = snapshotInfos.value.map((snapshot) => snapshot.id);
-
-    const sourceSnapshotIndex = snapshotIds.indexOf(lastSelectedSnapshotId);
-    const targetSnapshotIndex = snapshotIds.indexOf(snapshotId);
-
-    if (
-      sourceSnapshotIndex >= 0 &&
-      targetSnapshotIndex >= 0 &&
-      sourceSnapshotIndex !== targetSnapshotIndex
-    ) {
-      const sign = Math.sign(targetSnapshotIndex - sourceSnapshotIndex);
-
-      const add = !baseSelectedSnapshotIds.value.has(snapshotId);
-
-      for (
-        let i = sourceSnapshotIndex;
-        i !== targetSnapshotIndex + sign;
-        i += sign
-      ) {
-        if (add) {
-          baseSelectedSnapshotIds.value.add(snapshotIds[i]);
-        } else {
-          baseSelectedSnapshotIds.value.delete(snapshotIds[i]);
-        }
-      }
-    }
-  } else {
-    if (baseSelectedSnapshotIds.value.has(snapshotId)) {
-      baseSelectedSnapshotIds.value.delete(snapshotId);
-    } else {
-      baseSelectedSnapshotIds.value.add(snapshotId);
-    }
-  }
-
-  lastSelectedSnapshotId = snapshotId;
-}
 
 async function restoreSnapshot(snapshotId: string) {
   try {

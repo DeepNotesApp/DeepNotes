@@ -9,6 +9,7 @@ declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     BillingFrequencyToggle: typeof import('./src/components/BillingFrequencyToggle.vue')['default']
     Checkbox: typeof import('./src/components/Checkbox.vue')['default']
+    Checklist: typeof import('./src/components/Checklist.vue')['default']
     ColorPalette: typeof import('./src/components/ColorPalette.vue')['default']
     ColorSquare: typeof import('./src/components/ColorSquare.vue')['default']
     Combobox: typeof import('./src/components/Combobox.vue')['default']
