@@ -15,7 +15,6 @@
         :key="itemId"
         clickable
         v-ripple
-        class="text-grey-1"
         :style="{
           'background-color': selectedItemIds.has(itemId) ? '#505050' : '',
         }"
