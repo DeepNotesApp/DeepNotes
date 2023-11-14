@@ -12,6 +12,7 @@
         overflow: auto;
       "
       :item-ids="snapshotInfos.map((snapshotInfo) => snapshotInfo.id)"
+      :selected-item-ids="baseSelectedSnapshotIds"
       @select="(snapshotId) => baseSelectedSnapshotIds.add(snapshotId)"
       @unselect="(snapshotId) => baseSelectedSnapshotIds.delete(snapshotId)"
     >

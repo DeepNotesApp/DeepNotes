@@ -1,54 +1,71 @@
 <template>
   <q-list>
-    <slot
-      v-if="itemIds.length === 0"
-      name="empty"
-    ></slot>
-
-    <q-item
-      v-for="(itemId, itemIndex) of itemIds"
-      :key="itemId"
-      clickable
-      @click.capture="(event) => selectItem(itemId, event as any)"
-      v-bind="props.itemProps"
+    <PassthroughComponent
+      :is="itemsWrapper"
+      v-bind="wrapperProps"
+      v-on="wrapperEvents"
     >
-      <q-item-section
-        avatar
-        style="padding-right: 4px"
-      >
-        <Checkbox :model-value="finalSelectedItemIds.includes(itemId)" />
-      </q-item-section>
-
       <slot
-        name="item"
-        :item-id="itemId"
-        :item-index="itemIndex"
+        v-if="itemIds.length === 0"
+        name="empty"
       ></slot>
-    </q-item>
+
+      <q-item
+        v-for="(itemId, itemIndex) of itemIds"
+        :key="itemId"
+        clickable
+        v-ripple
+        class="text-grey-1"
+        :style="{
+          'background-color': selectedItemIds.has(itemId) ? '#505050' : '',
+        }"
+        @click="(event) => selectItem(itemId, event as any)"
+        v-bind="props.itemProps?.(itemId, itemIndex)"
+      >
+        <q-item-section
+          avatar
+          style="padding-right: 4px"
+        >
+          <Checkbox
+            :model-value="selectedItemIds.has(itemId)"
+            style="pointer-events: none"
+          />
+        </q-item-section>
+
+        <slot
+          name="item"
+          :item-id="itemId"
+          :item-index="itemIndex"
+        ></slot>
+      </q-item>
+    </PassthroughComponent>
   </q-list>
 </template>
 
 <script setup lang="ts">
 import type { QItemProps, QListProps } from 'quasar';
+import type { Component } from 'vue';
 
 const emit = defineEmits(['select', 'unselect']);
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Props extends QListProps {
   itemIds: string[];
+  selectedItemIds: Set<string>;
 
-  itemProps?: QItemProps;
+  itemProps?: (
+    itemId: string,
+    itemIndex: number,
+  ) => QItemProps & Record<string, unknown>;
+
+  itemsWrapper?: string | Component;
+  wrapperProps?: Record<string, unknown>;
+  wrapperEvents?: Record<string, unknown>;
 }
 
 const props = defineProps<Props>();
 
 let lastSelectedItemId: string;
-
-const baseSelectedItemIds = ref(new Set<string>());
-
-const finalSelectedItemIds = computed(() =>
-  props.itemIds.filter((itemId) => baseSelectedItemIds.value.has(itemId)),
-);
 
 function selectItem(itemId: string, event: MouseEvent) {
   if (event.shiftKey || internals.mobileAltKey) {
@@ -62,24 +79,24 @@ function selectItem(itemId: string, event: MouseEvent) {
     ) {
       const sign = Math.sign(targetItemIndex - sourceItemIndex);
 
-      const add = !baseSelectedItemIds.value.has(itemId);
+      const add = !props.selectedItemIds.has(itemId);
 
       for (let i = sourceItemIndex; i !== targetItemIndex + sign; i += sign) {
         if (add) {
-          baseSelectedItemIds.value.add(props.itemIds[i]);
+          props.selectedItemIds.add(props.itemIds[i]);
           emit('select', props.itemIds[i]);
         } else {
-          baseSelectedItemIds.value.delete(props.itemIds[i]);
+          props.selectedItemIds.delete(props.itemIds[i]);
           emit('unselect', props.itemIds[i]);
         }
       }
     }
   } else {
-    if (baseSelectedItemIds.value.has(itemId)) {
-      baseSelectedItemIds.value.delete(itemId);
+    if (props.selectedItemIds.has(itemId)) {
+      props.selectedItemIds.delete(itemId);
       emit('unselect', itemId);
     } else {
-      baseSelectedItemIds.value.add(itemId);
+      props.selectedItemIds.add(itemId);
       emit('select', itemId);
     }
   }
