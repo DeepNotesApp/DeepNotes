@@ -21,42 +21,25 @@
 
   <div style="flex: 1; height: 0; display: flex">
     <div style="flex: 1">
-      <q-list
-        style="max-height: 100%; border-radius: 10px; background-color: #303030"
+      <Checklist
+        :item-ids="finalPageIds"
+        :items-wrapper="CustomInfiniteScroll"
+        :wrapper-events="{ load: onLoad }"
+        :wrapper-props="{ disable: !hasMorePages }"
+        :selected-item-ids="baseSelectedPageIds"
+        @select="(pageId) => baseSelectedPageIds.add(pageId)"
+        @unselect="(pageId) => baseSelectedPageIds.delete(pageId)"
+        style="max-height: 100%; border-radius: 10px; background-color: #383838"
         class="overflow-auto"
       >
-        <q-infinite-scroll
-          @load="onLoad"
-          :disable="!hasMorePages"
-        >
-          <q-item
-            v-for="groupPageId in finalPageIds"
-            :key="groupPageId"
-            class="text-grey-1"
-            style="background-color: #424242"
-            clickable
-            v-ripple
-            active-class="bg-grey-7"
-            :active="baseSelectedPageIds.has(groupPageId)"
-            @click="select(groupPageId, $event as MouseEvent)"
-          >
-            <q-item-section>
-              <q-item-label>
-                {{ getPageTitle(groupPageId, { prefer: 'absolute' }).text }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <template v-slot:loading>
-            <div class="row justify-center q-my-md">
-              <q-circular-progress
-                indeterminate
-                size="md"
-              />
-            </div>
-          </template>
-        </q-infinite-scroll>
-      </q-list>
+        <template #item="{ itemId: groupPageId }">
+          <q-item-section>
+            <q-item-label>
+              {{ getPageTitle(groupPageId, { prefer: 'absolute' }).text }}
+            </q-item-label>
+          </q-item-section>
+        </template>
+      </Checklist>
     </div>
 
     <Gap style="width: 16px" />
@@ -116,7 +99,8 @@ import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
+import CustomInfiniteScroll from 'src/components/CustomInfiniteScroll.vue';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -151,18 +135,6 @@ function selectAll() {
 function deselectAll() {
   for (const pageId of finalPageIds.value) {
     baseSelectedPageIds.value.delete(pageId);
-  }
-}
-
-function select(id: string, event: MouseEvent) {
-  if (!isCtrlDown(event)) {
-    baseSelectedPageIds.value.clear();
-  }
-
-  if (baseSelectedPageIds.value.has(id)) {
-    baseSelectedPageIds.value.delete(id);
-  } else {
-    baseSelectedPageIds.value.add(id);
   }
 }
 
