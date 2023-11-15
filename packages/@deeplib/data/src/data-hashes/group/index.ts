@@ -2,6 +2,7 @@ import { validateDataHash } from '@stdlib/data/src/universal';
 import { once } from 'lodash';
 
 import { accessKeyring } from './access-keyring';
+import { areJoinRequestsAllowed } from './are-join-requests-allowed';
 import { encryptedContentKeyring } from './encrypted-content-keyring';
 import { encryptedName } from './encrypted-name';
 import { encryptedPrivateKeyring } from './encrypted-private-keyring';
@@ -38,5 +39,6 @@ export const group = validateDataHash({
     'permanent-deletion-date': permanentDeletionDate,
     'public-keyring': publicKeyring,
     'user-id': userId,
+    'are-join-requests-allowed': areJoinRequestsAllowed,
   },
 });
