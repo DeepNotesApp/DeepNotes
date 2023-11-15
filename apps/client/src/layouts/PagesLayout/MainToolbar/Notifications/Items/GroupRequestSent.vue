@@ -78,7 +78,7 @@ const canCancelRequest = computed(
 const canAcceptRequest = computed(() => {
   const rejected = realtimeCtx.hget(
     'group-join-request',
-    `${notificationContent.value.groupId}:${authStore().userId}`,
+    `${notificationContent.value.groupId}:${notificationContent.value.agentId}`,
     'rejected',
   );
 
