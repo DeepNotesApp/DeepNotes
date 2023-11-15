@@ -55,7 +55,17 @@ export async function sendStep1({
 
     await ctx.assertUserSubscribed({ userId: ctx.userId });
 
-    const [groupJoinRequestRejected, groupMemberRole] = await Promise.all([
+    const [
+      groupAreJoinRequestsAllowed,
+      groupJoinRequestRejected,
+      groupMemberRole,
+    ] = await Promise.all([
+      ctx.dataAbstraction.hget(
+        'group',
+        input.groupId,
+        'are-join-requests-allowed',
+      ),
+
       ctx.dataAbstraction.hget(
         'group-join-request',
         `${input.groupId}:${ctx.userId}`,
@@ -68,6 +78,15 @@ export async function sendStep1({
         'role',
       ),
     ]);
+
+    // Check if group allows join requests
+
+    if (!groupAreJoinRequestsAllowed) {
+      throw new TRPCError({
+        code: 'FORBIDDEN',
+        message: 'This group does not allow join requests.',
+      });
+    }
 
     // Check if user has been rejected from the group
 

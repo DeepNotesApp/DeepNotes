@@ -97,16 +97,16 @@
         />
       </template>
 
-      <Gap style="height: 24px" />
+      <Gap style="height: 28px" />
 
       <q-separator />
 
       <Gap style="height: 20px" />
     </template>
 
-    <div>Group infos</div>
+    <b>Group infos</b>
 
-    <Gap style="height: 8px" />
+    <Gap style="height: 20px" />
 
     <TextField
       label="Group ID"
@@ -166,15 +166,15 @@
         ]?.permissions.editGroupSettings
       "
     >
-      <Gap style="height: 24px" />
+      <Gap style="height: 28px" />
 
       <q-separator />
 
       <Gap style="height: 20px" />
 
-      <div>Group security</div>
+      <b>Group security</b>
 
-      <Gap style="height: 10px" />
+      <Gap style="height: 20px" />
 
       <div style="max-width: 300px; display: flex; flex-direction: column">
         <template v-if="groupId !== internals.personalGroupId">
@@ -217,17 +217,21 @@
         ]?.permissions.editGroupSettings
       "
     >
-      <Gap style="height: 24px" />
+      <Gap style="height: 28px" />
 
       <q-separator />
 
       <Gap style="height: 20px" />
 
-      <div>Group privacy</div>
+      <b>Group privacy</b>
 
-      <Gap style="height: 10px" />
+      <Gap style="height: 20px" />
 
       <div style="max-width: 300px; display: flex; flex-direction: column">
+        <AllowJoinRequestsCheckbox />
+
+        <Gap style="height: 16px" />
+
         <MakePrivateBtn
           v-if="
             internals.realtime.globalCtx.hget('group', groupId, 'is-public')
@@ -249,15 +253,15 @@
         ]?.permissions.editGroupSettings
       "
     >
-      <Gap style="height: 24px" />
+      <Gap style="height: 28px" />
 
       <q-separator />
 
       <Gap style="height: 20px" />
 
-      <div>Danger zone</div>
+      <b>Danger zone</b>
 
-      <Gap style="height: 10px" />
+      <Gap style="height: 20px" />
 
       <div style="max-width: 300px; display: flex; flex-direction: column">
         <DeleteGroupBtn />
@@ -276,6 +280,7 @@ import type { RealtimeContext } from 'src/code/realtime/context';
 import { isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 
+import AllowJoinRequestsCheckbox from './AllowJoinRequestsCheckbox.vue';
 import DeleteGroupBtn from './DeleteGroupBtn.vue';
 import MakePrivateBtn from './Privacy/MakePrivateBtn.vue';
 import MakePublicBtn from './Privacy/MakePublicBtn.vue';
