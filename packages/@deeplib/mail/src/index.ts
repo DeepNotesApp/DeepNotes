@@ -1,8 +1,12 @@
 import { mainLogger } from '@stdlib/misc';
 
+import { sendBrevoMail } from './brevo';
 import { sendMailjetMail } from './mailjet';
 import { sendSendGridMail } from './send-grid';
-import { sendZohoMail } from './zoho';
+
+export { sendBrevoMail } from './brevo';
+export { sendMailjetMail } from './mailjet';
+export { sendSendGridMail } from './send-grid';
 
 export interface MailOptions {
   from: { name: string; email: string };
@@ -15,8 +19,8 @@ export type MailSendFunc = (opts: MailOptions) => Promise<void>;
 
 const _sendMailFuncs: [string, MailSendFunc][] = [
   ['SendGrid', sendSendGridMail],
+  ['Brevo', sendBrevoMail],
   ['Mailjet', sendMailjetMail],
-  ['Zoho', sendZohoMail],
 ];
 
 export async function sendMail(opts: MailOptions) {

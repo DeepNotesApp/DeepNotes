@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+
+  "extends": "tsconfig/base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "paths": {
+      "src/*": ["src/*"],
+
+      "@deeplib/*": ["../../../packages/@deeplib/*/src"],
+      "@stdlib/*": ["../../../packages/@stdlib/*/src"]
+    }
+  },
+
+  "references": [{ "path": "../../../packages/@stdlib/misc/tsconfig.json" }],
+
+  "include": ["src/**/*.ts"],
+
+  "tsc-alias": {
+    "replacers": {
+      "base-url": {
+        "enabled": false
+      }
+    }
+  }
+}

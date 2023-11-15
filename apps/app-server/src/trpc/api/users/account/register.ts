@@ -1,9 +1,9 @@
 import { hashUserEmail } from '@deeplib/data';
 import { UserModel } from '@deeplib/db';
+import { sendMail } from '@deeplib/mail';
 import { w3cEmailRegex } from '@stdlib/misc';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
-import { sendMail } from 'src/mail';
 import type { InferProcedureOpts } from 'src/trpc/helpers';
 import { publicProcedure } from 'src/trpc/helpers';
 import { derivePasswordValues } from 'src/utils/crypto';

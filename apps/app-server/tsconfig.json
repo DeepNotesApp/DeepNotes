@@ -30,6 +30,7 @@
   "references": [
     { "path": "../../packages/@deeplib/data/tsconfig.json" },
     { "path": "../../packages/@deeplib/db/tsconfig.json" },
+    { "path": "../../packages/@deeplib/mail/tsconfig.json" },
     { "path": "../../packages/@deeplib/misc/tsconfig.json" },
     { "path": "../../packages/@stdlib/base64/tsconfig.json" },
     { "path": "../../packages/@stdlib/crypto/tsconfig.json" },
