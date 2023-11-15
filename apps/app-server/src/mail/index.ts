@@ -2,7 +2,6 @@ import { mainLogger } from '@stdlib/misc';
 
 import { sendMailjetMail } from './mailjet';
 import { sendSendGridMail } from './send-grid';
-import { sendSendinblueMail } from './sendinblue';
 import { sendZohoMail } from './zoho';
 
 export interface MailOptions {
@@ -16,7 +15,6 @@ export type MailSendFunc = (opts: MailOptions) => Promise<void>;
 
 const _sendMailFuncs: [string, MailSendFunc][] = [
   ['SendGrid', sendSendGridMail],
-  ['Sendinblue', sendSendinblueMail],
   ['Mailjet', sendMailjetMail],
   ['Zoho', sendZohoMail],
 ];
