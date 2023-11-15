@@ -62,7 +62,10 @@ module.exports = configure(function (ctx) {
       { path: 'sodium.universal' },
       { path: 'i18n.universal' },
       { path: 'vue.universal' },
-      { path: 'disable-cache.universal' },
+
+      { path: 'http-headers/disable-cache.universal' },
+      { path: 'http-headers/x-frame-options.universal' },
+      { path: 'http-headers/referrer-policy.universal' },
 
       { path: 'array-at-polyfill.client', server: false },
       { path: 'logger.client', server: false },

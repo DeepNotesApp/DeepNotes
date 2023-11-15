@@ -39,7 +39,9 @@ export function registerGroupsChangeUserRole(
       await ctx.usingLocks(
         [
           [`user-lock:${ctx.userId}`],
-          [`user-lock:${input.patientId}`],
+          ...(input.patientId !== ctx.userId
+            ? [[`user-lock:${input.patientId}`]]
+            : []),
           [`group-lock:${input.groupId}`],
         ],
         performCommunication,

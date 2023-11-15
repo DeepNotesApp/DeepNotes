@@ -25,50 +25,38 @@
 
   <div style="flex: 1; height: 0; display: flex">
     <div style="flex: 1">
-      <q-list
+      <Checklist
+        :item-ids="memberGroupsIds"
+        :selected-item-ids="baseSelectedGroupIds"
+        @select="(pageId) => baseSelectedGroupIds.add(pageId)"
+        @unselect="(pageId) => baseSelectedGroupIds.delete(pageId)"
         style="
           border-radius: 10px;
           padding: 0;
           overflow-y: auto;
           max-height: 100%;
+          background-color: #383838;
         "
       >
-        <template
-          v-for="groupId in memberGroupsIds"
-          :key="groupId"
-        >
-          <q-item
-            v-if="
-              realtimeCtx.hget('group', groupId, 'permanent-deletion-date') ==
-              null
-            "
-            class="text-grey-1"
-            style="background-color: #424242"
-            clickable
-            v-ripple
-            active-class="bg-grey-7"
-            :active="baseSelectedGroupIds.has(groupId)"
-            @click="select(groupId, $event as MouseEvent)"
-          >
-            <q-item-section>
-              <q-item-label>
-                {{ groupNames()(groupId).get().text }}
-              </q-item-label>
-              <q-item-label caption>
-                {{
-                  rolesMap()[
-                    realtimeCtx.hget(
-                      'group-member',
-                      `${groupId}:${authStore().userId}`,
-                      'role',
-                    )!
-                  ]?.name
-                }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+        <template #item="{ itemId: groupId }">
+          <q-item-section>
+            <q-item-label>
+              {{ groupNames()(groupId).get().text }}
+            </q-item-label>
+            <q-item-label caption>
+              {{
+                rolesMap()[
+                  realtimeCtx.hget(
+                    'group-member',
+                    `${groupId}:${authStore().userId}`,
+                    'role',
+                  )!
+                ]?.name
+              }}
+            </q-item-label>
+          </q-item-section>
         </template>
-      </q-list>
+      </Checklist>
     </div>
 
     <Gap style="width: 16px" />
@@ -110,12 +98,14 @@ const groupIds = inject<Ref<string[]>>('groupIds')!;
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
 const memberGroupsIds = computed(() =>
-  groupIds.value.filter((groupId) =>
-    realtimeCtx.hget(
-      'group-member',
-      `${groupId}:${authStore().userId}`,
-      'exists',
-    ),
+  groupIds.value.filter(
+    (groupId) =>
+      realtimeCtx.hget('group', groupId, 'permanent-deletion-date') == null &&
+      realtimeCtx.hget(
+        'group-member',
+        `${groupId}:${authStore().userId}`,
+        'exists',
+      ),
   ),
 );
 
@@ -143,18 +133,6 @@ function selectAll() {
 function deselectAll() {
   for (const groupId of memberGroupsIds.value) {
     baseSelectedGroupIds.value.delete(groupId);
-  }
-}
-
-function select(groupId: string, event: MouseEvent) {
-  if (!isCtrlDown(event)) {
-    baseSelectedGroupIds.value.clear();
-  }
-
-  if (baseSelectedGroupIds.value.has(groupId)) {
-    baseSelectedGroupIds.value.delete(groupId);
-  } else {
-    baseSelectedGroupIds.value.add(groupId);
   }
 }
 

@@ -3,7 +3,7 @@
     ref="notificationsMenu"
     anchor="bottom middle"
     self="top middle"
-    style="width: 250px; display: flex; flex-direction: column"
+    style="width: 250px"
     @before-show="onBeforeShow()"
   >
     <template v-if="pagesStore().notifications.items.length === 0">

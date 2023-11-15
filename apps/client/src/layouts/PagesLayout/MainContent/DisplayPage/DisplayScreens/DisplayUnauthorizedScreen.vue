@@ -5,7 +5,8 @@
     v-if="
       uiStore().loggedIn &&
       !realtimeCtx.loading &&
-      !realtimeCtx.hget('group', page.react.groupId, 'is-personal')
+      !realtimeCtx.hget('group', page.react.groupId, 'is-personal') &&
+      realtimeCtx.hget('group', page.react.groupId, 'are-join-requests-allowed')
     "
   >
     <Gap style="height: 12px" />

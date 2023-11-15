@@ -20,4 +20,6 @@ export class GroupModel extends Model {
   encrypted_private_keyring!: Uint8Array;
 
   permanent_deletion_date!: Date | null;
+
+  are_join_requests_allowed!: boolean;
 }

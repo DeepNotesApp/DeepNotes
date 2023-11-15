@@ -4,31 +4,30 @@
 
     <Gap style="height: 8px" />
 
-    <q-list
+    <Checklist
       style="
         border-radius: 6px;
         height: 220px;
         background-color: #383838;
         overflow: auto;
       "
+      :item-ids="snapshotInfos.map((snapshotInfo) => snapshotInfo.id)"
+      :selected-item-ids="baseSelectedSnapshotIds"
+      @select="(snapshotId) => baseSelectedSnapshotIds.add(snapshotId)"
+      @unselect="(snapshotId) => baseSelectedSnapshotIds.delete(snapshotId)"
     >
-      <q-item
-        v-if="snapshotInfos.length === 0"
-        style="color: #b0b0b0"
-      >
-        <q-item-section>
-          <q-item-label>No versions available</q-item-label>
-        </q-item-section>
-      </q-item>
+      <template #empty>
+        <q-item style="color: #b0b0b0">
+          <q-item-section>
+            <q-item-label>No versions available</q-item-label>
+          </q-item-section>
+        </q-item>
+      </template>
 
-      <div
-        v-for="snapshotInfo of snapshotInfos"
-        :key="snapshotInfo.id"
-        class="snapshot"
-      >
-        <q-item
-          clickable
-          @click="restoreVersion(snapshotInfo.id)"
+      <template #item="{ itemIndex: snapshotIndex }">
+        <template
+          v-for="snapshotInfo in [snapshotInfos[snapshotIndex]]"
+          :key="snapshotInfo.id"
         >
           <q-item-section>
             <q-item-label>{{
@@ -55,21 +54,35 @@
               <div>{{ capitalize(snapshotInfo.type) }}</div>
             </q-item-label>
           </q-item-section>
-        </q-item>
-
-        <DeepBtn
-          class="delete-btn"
-          size="12px"
-          icon="mdi-close"
-          round
-          flat
-          title="Delete page version"
-          @click="deleteSnapshot(snapshotInfo.id)"
-        />
-      </div>
-    </q-list>
+        </template>
+      </template>
+    </Checklist>
 
     <Gap style="height: 16px" />
+
+    <DeepBtn
+      label="Restore selected version"
+      icon="mdi-restore"
+      color="secondary"
+      :disable="page.react.readOnly || finalSelectedSnapshotIds.length !== 1"
+      title="Backup the current version of the page manually"
+      @click="() => restoreSnapshot(finalSelectedSnapshotIds[0])"
+    />
+
+    <Gap style="height: 12px" />
+
+    <DeepBtn
+      :label="`Delete selected version${
+        finalSelectedSnapshotIds.length > 1 ? 's' : ''
+      }`"
+      icon="mdi-trash-can"
+      color="negative"
+      :disable="page.react.readOnly || finalSelectedSnapshotIds.length === 0"
+      title="Backup the current version of the page manually"
+      @click="deleteSelectedSnapshots"
+    />
+
+    <Gap style="height: 12px" />
 
     <DeepBtn
       label="Save current version"
@@ -77,7 +90,7 @@
       color="secondary"
       :disable="page.react.readOnly"
       title="Backup the current version of the page manually"
-      @click="saveVersion"
+      @click="saveCurrentSnapshot"
     />
   </div>
 </template>
@@ -100,7 +113,17 @@ const snapshotInfos = computed(
     page.value.realtimeCtx.hget('page-snapshots', page.value.id, 'infos') ?? [],
 );
 
-async function restoreVersion(snapshotId: string) {
+const baseSelectedSnapshotIds = ref(new Set<string>());
+
+const finalSelectedSnapshotIds = computed(() =>
+  snapshotInfos.value
+    .filter((snapshotInfo) =>
+      baseSelectedSnapshotIds.value.has(snapshotInfo.id),
+    )
+    .map((snapshotInfo) => snapshotInfo.id),
+);
+
+async function restoreSnapshot(snapshotId: string) {
   try {
     await asyncDialog({
       title: 'Restore version',
@@ -128,7 +151,7 @@ async function restoreVersion(snapshotId: string) {
   }
 }
 
-async function saveVersion() {
+async function saveCurrentSnapshot() {
   try {
     await asyncDialog({
       title: 'Save version',
@@ -156,23 +179,24 @@ async function saveVersion() {
 }
 
 async function deleteSnapshot(snapshotId: string) {
+  await asyncDialog({
+    title: 'Delete version',
+    message: 'Are you sure you want to delete this version?',
+
+    focus: 'cancel',
+
+    cancel: { label: 'No', flat: true, color: 'primary' },
+    ok: { label: 'Yes', flat: true, color: 'negative' },
+  });
+
+  await deletePageSnapshot(page.value.id, snapshotId);
+}
+
+async function deleteSelectedSnapshots() {
   try {
-    await asyncDialog({
-      title: 'Delete version',
-      message: 'Are you sure you want to delete this version?',
-
-      focus: 'cancel',
-
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
-    });
-
-    await deletePageSnapshot(page.value.id, snapshotId);
-
-    $quasar().notify({
-      message: 'Version deleted successfully.',
-      color: 'positive',
-    });
+    for (const selectedSnapshotId of finalSelectedSnapshotIds.value) {
+      await deleteSnapshot(selectedSnapshotId);
+    }
   } catch (error: any) {
     handleError(error);
   }
@@ -180,26 +204,18 @@ async function deleteSnapshot(snapshotId: string) {
 </script>
 
 <style scoped lang="scss">
-.snapshot {
-  position: relative;
+.delete-btn {
+  position: absolute;
 
-  > .delete-btn {
-    position: absolute;
+  top: 4px;
+  right: 10px;
 
-    top: 4px;
-    right: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
 
-    opacity: 0;
-    transition: opacity 0.2s;
-
-    min-width: 24px;
-    min-height: 24px;
-    width: 24px;
-    height: 24px;
-  }
-}
-
-.snapshot:hover > .delete-btn {
-  opacity: 1;
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
 }
 </style>

@@ -137,7 +137,7 @@ export class DataAbstraction<
   >();
 
   private readonly localCache: SimpleLRUCache = new simpleLRUCache({
-    maxSize: 500000,
+    maxSize: 100000,
   });
 
   constructor(
