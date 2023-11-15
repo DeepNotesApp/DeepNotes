@@ -439,7 +439,7 @@ importers:
         version: 3.0.1(knex@2.3.0)
       pinia:
         specifier: ~2.0.36
-        version: 2.0.36(typescript@5.2.2)(vue@3.2.47)
+        version: 2.0.36(vue@3.2.47)
       process:
         specifier: ^0.11.10
         version: 0.11.10
@@ -506,7 +506,7 @@ importers:
         version: 3.4.0(vite@2.9.16)(vue-i18n@9.6.5)
       '@quasar/app-vite':
         specifier: npm:@deepnotes/quasar-app-vite@^2.0.0-alpha.41
-        version: /@deepnotes/quasar-app-vite@2.0.0-alpha.41(@deepnotes/quasar@2.13.2)(electron-builder@24.4.0)(electron-packager@17.1.1)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47)
+        version: /@deepnotes/quasar-app-vite@2.0.0-alpha.41(@deepnotes/quasar@2.13.2)(electron-builder@24.4.0)(electron-packager@17.1.1)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47)
       '@types/argon2-browser':
         specifier: ^1.18.3
         version: 1.18.3
@@ -531,9 +531,6 @@ importers:
       '@types/lodash':
         specifier: ^4.14.200
         version: 4.14.200
-      '@types/marked':
-        specifier: ^6.0.0
-        version: 6.0.0
       '@types/node-fetch':
         specifier: ^2.6.3
         version: 2.6.8
@@ -566,7 +563,7 @@ importers:
         version: 17.1.1
       tsup:
         specifier: ^7.2.0
-        version: 7.2.0(postcss@8.4.31)(ts-node@10.9.1)(typescript@5.2.2)
+        version: 7.2.0(postcss@8.4.31)
       unplugin-auto-import:
         specifier: ^0.11.5
         version: 0.11.5(@vueuse/core@10.5.0)
@@ -1431,7 +1428,7 @@ packages:
       - supports-color
     dev: false
 
-  /@deepnotes/quasar-app-vite@2.0.0-alpha.41(@deepnotes/quasar@2.13.2)(electron-builder@24.4.0)(electron-packager@17.1.1)(eslint@8.53.0)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47):
+  /@deepnotes/quasar-app-vite@2.0.0-alpha.41(@deepnotes/quasar@2.13.2)(electron-builder@24.4.0)(electron-packager@17.1.1)(pinia@2.0.36)(vue-router@4.2.5)(vue@3.2.47):
     resolution: {integrity: sha512-rKfxNJHjdCRDcLfuigRD9zIcpceYt7JOzNxSHo9H8v6IE5180FBfrNfjKpjM6EwlSa7YUDaeVXf57yYTwHo6AQ==}
     engines: {node: ^24 || ^22 || ^20 || ^18 || ^16 || ^14.19, npm: '>= 6.14.12', yarn: '>= 1.17.3'}
     hasBin: true
@@ -1477,7 +1474,6 @@ packages:
       electron-packager: 17.1.1
       elementtree: 0.1.7
       esbuild: 0.14.51
-      eslint: 8.53.0
       express: 4.18.2
       fast-glob: 3.2.12
       fs-extra: 11.1.1
@@ -1488,7 +1484,7 @@ packages:
       lodash: 4.17.21
       minimist: 1.2.8
       open: 8.4.2
-      pinia: 2.0.36(typescript@5.2.2)(vue@3.2.47)
+      pinia: 2.0.36(vue@3.2.47)
       quasar: /@deepnotes/quasar@2.13.2
       register-service-worker: 1.7.2
       rollup-plugin-visualizer: 5.9.2
@@ -3805,13 +3801,6 @@ packages:
     resolution: {integrity: sha512-YI/M/4HRImtNf3pJgbF+W6FrXovqj+T+/HpENLTooK9PnkacBsDpeP3IpHab40CClUfhNmdM2WTNP2sa2dni5Q==}
     dev: true
 
-  /@types/marked@6.0.0:
-    resolution: {integrity: sha512-jmjpa4BwUsmhxcfsgUit/7A9KbrC48Q0q8KvnY107ogcjGgTFDlIL3RpihNpx2Mu1hM4mdFQjoVc4O6JoGKHsA==}
-    deprecated: This is a stub types definition. marked provides its own type definitions, so you do not need this installed.
-    dependencies:
-      marked: 9.1.5
-    dev: true
-
   /@types/mime@1.3.4:
     resolution: {integrity: sha512-1Gjee59G25MrQGk8bsNvC6fxNiRgUlGn2wlhGf95a59DrprnnHk80FIMMFG9XHMdrfsuA119ht06QPDXA1Z7tw==}
     dev: true
@@ -5739,6 +5728,7 @@ packages:
 
   /config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
+    requiresBuild: true
     dependencies:
       ini: 1.3.8
       proto-list: 1.2.4
@@ -9122,6 +9112,7 @@ packages:
 
   /ini@1.3.8:
     resolution: {integrity: sha512-JV/yugV2uzW5iMRSiZAyDtQd+nxtUnjeLt0acNdw98kKLrvuRVyB80tsREOE7yvGVgalhZ6RNXCmEHkUKBKxew==}
+    requiresBuild: true
     dev: true
 
   /ini@2.0.0:
@@ -9551,6 +9542,7 @@ packages:
 
   /json-stringify-safe@5.0.1:
     resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
+    requiresBuild: true
 
   /json5@0.5.1:
     resolution: {integrity: sha512-4xrs1aW+6N5DalkqSVA8fxh458CXvR99WU8WLKmq4v8eWAL86Xo3BVqyd3SkA9wEVjCMqyvvRRkshAdOnBp5rw==}
@@ -9676,6 +9668,52 @@ packages:
   /kleur@4.1.5:
     resolution: {integrity: sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==}
     engines: {node: '>=6'}
+    dev: false
+
+  /knex@2.3.0:
+    resolution: {integrity: sha512-WMizPaq9wRMkfnwKXKXgBZeZFOSHGdtoSz5SaLAVNs3WRDfawt9O89T4XyH52PETxjV8/kRk0Yf+8WBEP/zbYw==}
+    engines: {node: '>=12'}
+    hasBin: true
+    peerDependencies:
+      better-sqlite3: '*'
+      mysql: '*'
+      mysql2: '*'
+      pg: '*'
+      pg-native: '*'
+      sqlite3: '*'
+      tedious: '*'
+    peerDependenciesMeta:
+      better-sqlite3:
+        optional: true
+      mysql:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      pg-native:
+        optional: true
+      sqlite3:
+        optional: true
+      tedious:
+        optional: true
+    dependencies:
+      colorette: 2.0.19
+      commander: 9.5.0
+      debug: 4.3.4
+      escalade: 3.1.1
+      esm: 3.2.25
+      get-package-type: 0.1.0
+      getopts: 2.3.0
+      interpret: 2.2.0
+      lodash: 4.17.21
+      pg-connection-string: 2.5.0
+      rechoir: 0.8.0
+      resolve-from: 5.0.0
+      tarn: 3.0.2
+      tildify: 2.0.0
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /knex@2.3.0(pg@8.11.3):
@@ -10148,6 +10186,7 @@ packages:
     resolution: {integrity: sha512-14QG3shv8Kg/xc0Yh6TNkMj90wXH9mmldi5941I2OevfJ/FQAFLEwtwU2/FfgSAOMlWHrEukWSGQf8MiVYNG2A==}
     engines: {node: '>= 16'}
     hasBin: true
+    dev: false
 
   /matcher@3.0.0:
     resolution: {integrity: sha512-OkeDaAZ/bQCxeFAozM55PKcKU0yJMPGifLwV4Qgjitu+5MoAfSQN4lsLJeXZ1b8w0x+/Emda6MZgXS1jvsapng==}
@@ -10672,6 +10711,7 @@ packages:
   /npm-conf@1.1.3:
     resolution: {integrity: sha512-Yic4bZHJOt9RCFbRP3GgpqhScOY4HH3V2P8yBj6CeYq118Qr+BLXqT2JvpJ00mryLESpgOxf5XlFv4ZjXxLScw==}
     engines: {node: '>=4'}
+    requiresBuild: true
     dependencies:
       config-chain: 1.1.13
       pify: 3.0.0
@@ -10765,7 +10805,7 @@ packages:
     dependencies:
       ajv: 8.12.0
       db-errors: 0.2.3
-      knex: 2.3.0(pg@8.11.3)
+      knex: 2.3.0
     dev: false
 
   /obliterator@2.0.4:
@@ -11304,6 +11344,7 @@ packages:
   /pify@3.0.0:
     resolution: {integrity: sha512-C3FsVNH1udSEX48gGX1xfvwTWfsYWj5U+8/uK15BGzIGrKoUpghX8hWZwa/OFnakBiiVNmBvemTJR5mcy7iPcg==}
     engines: {node: '>=4'}
+    requiresBuild: true
     dev: true
 
   /pify@4.0.1:
@@ -11316,7 +11357,7 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /pinia@2.0.36(typescript@5.2.2)(vue@3.2.47):
+  /pinia@2.0.36(vue@3.2.47):
     resolution: {integrity: sha512-4UKApwjlmJH+VuHKgA+zQMddcCb3ezYnyewQ9NVrsDqZ/j9dMv5+rh+1r48whKNdpFkZAWVxhBp5ewYaYX9JcQ==}
     peerDependencies:
       '@vue/composition-api': ^1.4.0
@@ -11329,7 +11370,6 @@ packages:
         optional: true
     dependencies:
       '@vue/devtools-api': 6.5.1
-      typescript: 5.2.2
       vue: 3.2.47
       vue-demi: 0.14.6(vue@3.2.47)
 
@@ -11432,6 +11472,23 @@ packages:
       bin-build: 3.0.0
       bin-wrapper: 4.1.0
       execa: 4.1.0
+    dev: true
+
+  /postcss-load-config@4.0.1(postcss@8.4.31):
+    resolution: {integrity: sha512-vEJIc8RdiBRu3oRAI0ymerOn+7rPuMvRXslTvZUKZonDHFIczxztIyJ1urxM1x9JXEikvpWWTUUqal5j/8QgvA==}
+    engines: {node: '>= 14'}
+    peerDependencies:
+      postcss: '>=8.0.9'
+      ts-node: '>=9.0.0'
+    peerDependenciesMeta:
+      postcss:
+        optional: true
+      ts-node:
+        optional: true
+    dependencies:
+      lilconfig: 2.1.0
+      postcss: 8.4.31
+      yaml: 2.3.4
     dev: true
 
   /postcss-load-config@4.0.1(postcss@8.4.31)(ts-node@10.9.1):
@@ -13643,6 +13700,42 @@ packages:
   /tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
+  /tsup@7.2.0(postcss@8.4.31):
+    resolution: {integrity: sha512-vDHlczXbgUvY3rWvqFEbSqmC1L7woozbzngMqTtL2PGBODTtWlRwGDDawhvWzr5c1QjKe4OAKqJGfE1xeXUvtQ==}
+    engines: {node: '>=16.14'}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': ^1
+      postcss: ^8.4.12
+      typescript: '>=4.1.0'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      postcss:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      bundle-require: 4.0.2(esbuild@0.18.20)
+      cac: 6.7.14
+      chokidar: 3.5.3
+      debug: 4.3.4
+      esbuild: 0.18.20
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss: 8.4.31
+      postcss-load-config: 4.0.1(postcss@8.4.31)
+      resolve-from: 5.0.0
+      rollup: 3.29.4
+      source-map: 0.8.0-beta.0
+      sucrase: 3.34.0
+      tree-kill: 1.2.2
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+    dev: true
+
   /tsup@7.2.0(postcss@8.4.31)(ts-node@10.9.1)(typescript@5.2.2):
     resolution: {integrity: sha512-vDHlczXbgUvY3rWvqFEbSqmC1L7woozbzngMqTtL2PGBODTtWlRwGDDawhvWzr5c1QjKe4OAKqJGfE1xeXUvtQ==}
     engines: {node: '>=16.14'}
@@ -13847,6 +13940,7 @@ packages:
     resolution: {integrity: sha512-mI4WrpHsbCIcwT9cF4FZvr80QUeKvsUsUvKDoR+X/7XHQH98xYD8YHZg7ANtz2GtZt/CBq2QJ0thkGJMHfqc1w==}
     engines: {node: '>=14.17'}
     hasBin: true
+    dev: true
 
   /uc.micro@1.0.6:
     resolution: {integrity: sha512-8Y75pvTYkLJW2hWQHXxoqRgV7qb9B+9vFEtidML+7koHUFapnVJAZ6cKs+Qjz5Aw3aZWHMC6u0wJE3At+nSGwA==}

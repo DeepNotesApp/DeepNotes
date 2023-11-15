@@ -106,7 +106,6 @@
     "@types/katex": "^0.16.5",
     "@types/libsodium-wrappers-sumo": "^0.7.7",
     "@types/lodash": "^4.14.200",
-    "@types/marked": "^6.0.0",
     "@types/node-fetch": "^2.6.3",
     "@types/qrcode": "^1.5.4",
     "@types/showdown": "^2.0.3",
