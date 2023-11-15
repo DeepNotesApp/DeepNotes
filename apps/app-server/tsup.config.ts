@@ -9,5 +9,5 @@ export default defineConfig({
   sourcemap: false,
   splitting: false,
   dts: false,
-  noExternal: [/^(?!knex|ws).+$/],
+  noExternal: [/^(?!knex|ws|@getbrevo\/brevo).+$/],
 });

@@ -18,5 +18,5 @@ RUN pnpm add -g pm2
 WORKDIR /app
 COPY --from=builder /build/apps/app-server/dist/ ./
 RUN pnpm init
-RUN pnpm install knex ws pg
+RUN pnpm install knex ws pg @getbrevo/brevo
 CMD pm2 start /app/index.js -i max && pm2 logs
