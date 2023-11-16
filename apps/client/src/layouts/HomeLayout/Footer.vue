@@ -83,23 +83,9 @@
 
           <a
             class="footer-item"
-            href="https://twitter.com/DeepNotesApp"
-          >
-            Twitter
-          </a>
-
-          <a
-            class="footer-item"
             href="https://www.reddit.com/r/DeepNotesApp/"
           >
             Reddit
-          </a>
-
-          <a
-            class="footer-item"
-            href="https://www.linkedin.com/company/deepnotes"
-          >
-            LinkedIn
           </a>
 
           <a
