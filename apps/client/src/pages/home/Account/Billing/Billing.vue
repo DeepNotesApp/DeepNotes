@@ -34,6 +34,8 @@
 </template>
 
 <script setup lang="ts">
+import 'cordova-plugin-purchase';
+
 import { watchUntilTrue } from '@stdlib/vue';
 
 useMeta(() => ({
@@ -48,10 +50,48 @@ onMounted(async () => {
   loading.value = false;
 });
 
-async function createPortalSession() {
-  const { portalSessionUrl } =
-    await trpcClient.users.account.stripe.createPortalSession.mutate();
+if (
+  process.env.CLIENT &&
+  $quasar().platform.is.capacitor &&
+  $quasar().platform.is.ios
+) {
+  document.addEventListener('deviceready', async () => {
+    CdvPurchase.store.applicationUsername = () => authStore().userId;
 
-  location.href = portalSessionUrl;
+    CdvPurchase.store.register([
+      {
+        id: 'ProPlan',
+        platform: CdvPurchase.Platform.APPLE_APPSTORE,
+        type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+      },
+      {
+        id: 'pro_plan_yearly',
+        platform: CdvPurchase.Platform.APPLE_APPSTORE,
+        type: CdvPurchase.ProductType.PAID_SUBSCRIPTION,
+      },
+    ]);
+
+    CdvPurchase.store.when().approved(async (cb) => {
+      mainLogger.info('Purchase approved %o', cb);
+
+      await cb.finish();
+    });
+
+    await CdvPurchase.store.initialize([CdvPurchase.Platform.APPLE_APPSTORE]);
+  });
+}
+
+async function createPortalSession() {
+  if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
+    await CdvPurchase.store.products
+      .find((p) => p.owned)
+      ?.getOffer()
+      ?.order();
+  } else {
+    const { portalSessionUrl } =
+      await trpcClient.users.account.stripe.createPortalSession.mutate();
+
+    location.href = portalSessionUrl;
+  }
 }
 </script>

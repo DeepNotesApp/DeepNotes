@@ -10,7 +10,8 @@
     "@capacitor/clipboard": "^4.1.0",
     "@capacitor/core": "^4.8.1",
     "@capacitor/ios": "^4.8.1",
-    "@capacitor/splash-screen": "^4.2.0"
+    "@capacitor/splash-screen": "^4.2.0",
+    "cordova-plugin-purchase": "^13.6.0"
   },
   "private": true
 }

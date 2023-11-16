@@ -24,11 +24,7 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^16.3.1",
     "dotenv-expand": "9.0.0",
-    "fast-jwt": "^3.3.1",
-    "fastify": "^4.24.3",
-    "fastify-raw-body": "^4.2.2",
-    "http-status-codes": "^2.3.0",
-    "ioredis": "npm:@deepnotes/ioredis@^5.3.1",
+    "jws": "^4.0.0",
     "knex": "2.3.0",
     "libsodium-wrappers-sumo": "^0.7.13",
     "lodash": "^4.17.21",
@@ -48,6 +44,7 @@
   "devDependencies": {
     "@types/libsodium-wrappers-sumo": "^0.7.7",
     "@types/lodash": "^4.14.200",
+    "@types/jws": "^3.2.5",
     "@types/ws": "8.5.3",
     "tsup": "^7.2.0"
   },

@@ -22,11 +22,26 @@
     <Gap style="height: 40px" />
 
     <div style="text-align: center; position: relative">
-      <span style="font-size: 46px">${{ monthlyPrice }}</span>
-      <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+      <template
+        v-if="
+          billingFrequency === 'yearly' &&
+          $q.platform.is.capacitor &&
+          $q.platform.is.ios
+        "
+      >
+        <span style="font-size: 46px">$47.90</span>
+        <span style="font-size: 12px; color: #d0d0d0">/ year</span>
+      </template>
+      <template v-else>
+        <span style="font-size: 46px">${{ monthlyPrice }}</span>
+        <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+      </template>
 
       <div
-        v-if="billingFrequency === 'yearly'"
+        v-if="
+          billingFrequency === 'yearly' &&
+          !($q.platform.is.capacitor && $q.platform.is.ios)
+        "
         style="
           position: absolute;
           width: 100%;

@@ -150,17 +150,15 @@
         </div>
       </div>
 
-      <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
-        <Gap style="height: 170px" />
+      <Gap style="height: 170px" />
 
-        <div style="display: flex; justify-content: center">
-          <BillingFrequencyToggle v-model="billingFrequency" />
-        </div>
+      <div style="display: flex; justify-content: center">
+        <BillingFrequencyToggle v-model="billingFrequency" />
+      </div>
 
-        <Gap style="height: 48px" />
+      <Gap style="height: 48px" />
 
-        <PricingSection :billing-frequency="billingFrequency" />
-      </template>
+      <PricingSection :billing-frequency="billingFrequency" />
 
       <div>
         <Gap style="height: 150px" />

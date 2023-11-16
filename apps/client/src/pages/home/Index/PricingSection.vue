@@ -94,13 +94,24 @@
         <Gap style="height: 32px" />
 
         <div style="text-align: center; position: relative">
-          <span style="font-size: 46px">
-            ${{ billingFrequency === 'monthly' ? 4.99 : 3.99 }}
-          </span>
-          <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+          <template v-if="$q.platform.is.capacitor && $q.platform.is.ios">
+            <span style="font-size: 46px">
+              ${{ billingFrequency === 'monthly' ? '4.99' : '47.90' }}
+            </span>
+            <span style="font-size: 12px; color: #d0d0d0">/ year</span>
+          </template>
+          <template v-else>
+            <span style="font-size: 46px">
+              ${{ billingFrequency === 'monthly' ? '4.99' : '3.99' }}
+            </span>
+            <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+          </template>
 
           <div
-            v-if="billingFrequency === 'yearly'"
+            v-if="
+              billingFrequency === 'yearly' &&
+              !($q.platform.is.capacitor && $q.platform.is.ios)
+            "
             style="
               position: absolute;
               width: 100%;

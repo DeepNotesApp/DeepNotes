@@ -2,7 +2,7 @@
   <div>This page was created with the Pro plan.</div>
   <div>Upgrade your subscription to access this page.</div>
 
-  <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
+  <template>
     <Gap style="height: 16px" />
 
     <DeepBtn

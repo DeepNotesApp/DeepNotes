@@ -14,6 +14,7 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@4.1.1_@capacitor+core@4.8.0/node_modules/@capacitor/app'
   pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@4.1.0_@capacitor+core@4.8.0/node_modules/@capacitor/clipboard'
   pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@4.2.0_@capacitor+core@4.8.0/node_modules/@capacitor/splash-screen'
+  pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 
 target 'App' do
