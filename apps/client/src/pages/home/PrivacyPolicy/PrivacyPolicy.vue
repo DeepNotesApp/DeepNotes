@@ -42,8 +42,11 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
+import { gfmHeadingId } from 'marked-gfm-heading-id';
 
 import PrivacyPolicyItems from './PrivacyPolicyItems.vue';
+
+marked.use(gfmHeadingId());
 
 const html = marked(`
   ## Data collection

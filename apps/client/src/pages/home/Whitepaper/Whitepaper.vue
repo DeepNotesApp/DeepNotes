@@ -42,9 +42,12 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
+import { gfmHeadingId } from 'marked-gfm-heading-id';
 import { multiModePath } from 'src/code/utils/misc';
 
 import WhitepaperItems from './WhitepaperItems.vue';
+
+marked.use(gfmHeadingId());
 
 const html = marked(`
   DeepNotes' [source code](https://github.com/DeepNotesApp/DeepNotes) is available on GitHub.
