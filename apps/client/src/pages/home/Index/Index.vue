@@ -166,7 +166,7 @@
         <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
-          Applications
+          Use cases
         </div>
 
         <Gap style="height: 40px" />
@@ -179,9 +179,9 @@
           />
 
           <Thumbnail
-            thumbnail-image="/applications/history-study-thumbnail.webp"
-            title="Studies"
-            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
+            thumbnail-image="/applications/database-structure-thumbnail.webp"
+            title="Database diagrams"
+            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
@@ -209,15 +209,15 @@
           />
 
           <Thumbnail
-            thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database diagrams"
-            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
-          />
-
-          <Thumbnail
             thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
             title="Cheat sheets"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/history-study-thumbnail.webp"
+            title="Studies"
+            href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
         </div>
       </div>
