@@ -98,7 +98,7 @@
   },
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^3.4.0",
-    "@quasar/app-vite": "npm:@deepnotes/quasar-app-vite@^2.0.0-alpha.41",
+    "@quasar/app-vite": "npm:@deepnotes/quasar-app-vite@^2.0.0-alpha.42",
     "@types/argon2-browser": "^1.18.3",
     "@types/color": "^3.0.5",
     "@types/cookie": "^0.5.3",
