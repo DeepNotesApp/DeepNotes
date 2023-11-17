@@ -92,9 +92,18 @@ jobs:
   deploy-android:
     docker:
       - image: cimg/android:2022.07
+        environment:
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
     resource_class: large
     steps:
       - checkout
+      - run:
+          name: Install OpenJDK 17
+          command: |
+            sudo apt-get update && sudo apt-get install openjdk-17-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+            sudo update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+            java -version
       - node/install:
           install-yarn: false
           node-version: '20.9.0'
@@ -157,7 +166,7 @@ workflows:
           filters:
             branches:
               only: main
-              
+
       - deploy-win:
           filters:
             branches:
