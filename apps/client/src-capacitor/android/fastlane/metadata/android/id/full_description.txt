@@ -1,0 +1,1 @@
+DeepNotes adalah open source, alat pencatat visual terenkripsi end-to-end dengan navigasi halaman dua arah yang mendalam dan kolaborasi langsung.

@@ -1,0 +1,1 @@
+DeepNotes est un outil open source de prise de notes visuelles cryptées de bout en bout avec une navigation de page bidirectionnelle approfondie et une collaboration en direct.

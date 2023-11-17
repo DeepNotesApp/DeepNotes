@@ -1,0 +1,4 @@
+- Fixed page deletion problems
+- Added ability to reject group invitations in free account
+- Notes now become movable when duplicated
+- Group lists now only show groups editable by the user

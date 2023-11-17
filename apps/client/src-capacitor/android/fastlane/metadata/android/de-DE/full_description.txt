@@ -1,0 +1,1 @@
+DeepNotes ist ein quelloffenes, Ende-zu-Ende-verschlüsseltes visuelles Notizentool mit umfassender bidirektionaler Seitennavigation und Live-Zusammenarbeit.
