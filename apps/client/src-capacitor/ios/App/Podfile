@@ -1,4 +1,4 @@
-require_relative '../../node_modules/@capacitor/ios/scripts/pods_helpers'
+require_relative '../../../../../node_modules/.pnpm/@capacitor+ios@5.5.1_@capacitor+core@5.5.1/node_modules/@capacitor/ios/scripts/pods_helpers'
 
 platform :ios, '13.0'
 use_frameworks!
@@ -9,11 +9,11 @@ use_frameworks!
 install! 'cocoapods', :disable_input_output_paths => true
 
 def capacitor_pods
-  pod 'Capacitor', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@4.8.0_@capacitor+core@4.8.0/node_modules/@capacitor/ios'
-  pod 'CapacitorCordova', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@4.8.0_@capacitor+core@4.8.0/node_modules/@capacitor/ios'
-  pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@4.1.1_@capacitor+core@4.8.0/node_modules/@capacitor/app'
-  pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@4.1.0_@capacitor+core@4.8.0/node_modules/@capacitor/clipboard'
-  pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@4.2.0_@capacitor+core@4.8.0/node_modules/@capacitor/splash-screen'
+  pod 'Capacitor', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@5.5.1_@capacitor+core@5.5.1/node_modules/@capacitor/ios'
+  pod 'CapacitorCordova', :path => '../../../../../node_modules/.pnpm/@capacitor+ios@5.5.1_@capacitor+core@5.5.1/node_modules/@capacitor/ios'
+  pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/app'
+  pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/clipboard'
+  pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/splash-screen'
 end
 
 target 'App' do

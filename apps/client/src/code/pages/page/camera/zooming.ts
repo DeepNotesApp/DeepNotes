@@ -44,9 +44,10 @@ export class PageZooming {
       }
 
       this.page.camera.react.pos = this.page.camera.react.pos.add(
-        new Vec2(event.deltaX, event.deltaY).divScalar(
-          Math.pow(this.page.camera.react.zoom, 0.8) * 2,
-        ),
+        (event.shiftKey
+          ? new Vec2(event.deltaY, event.deltaX)
+          : new Vec2(event.deltaX, event.deltaY)
+        ).divScalar(Math.pow(this.page.camera.react.zoom, 0.8) * 2),
       );
     }
   }

@@ -1,0 +1,30 @@
+{
+  "name": "@deeplib/mail",
+  "description": "",
+  "version": "1.0.0",
+  "author": "",
+  "dependencies": {
+    "@getbrevo/brevo": "^1.0.1",
+    "@sendgrid/mail": "^7.7.0",
+    "@stdlib/misc": "workspace:*",
+    "node-mailjet": "^6.0.4",
+    "nodemailer": "^6.9.7",
+    "nodemailer-html-to-text": "^3.2.0"
+  },
+  "devDependencies": {},
+  "keywords": [],
+  "license": "ISC",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "peerDependencies": {},
+  "scripts": {
+    "build": "tsc --build ./tsconfig.json && tsc-alias -p tsconfig.json",
+    "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
+    "clean": "rimraf --glob ./dist *.tsbuildinfo",
+    "fix": "eslint --fix --ext .js,.ts,.vue ./",
+    "npkill": "rimraf --glob ./node_modules",
+    "preinstall": "npx only-allow pnpm",
+    "repo:build": "tsc-alias -p tsconfig.json",
+    "repo:build:watch": "tsc-alias -p tsconfig.json --watch"
+  }
+}

@@ -31,7 +31,7 @@
   <q-item
     clickable
     dense
-    @click="scrollToAnchor('realtime-collaboration')"
+    @click="scrollToAnchor('live-collaboration')"
   >
     <q-item-section style="padding-left: 24px">
       Live collaboration

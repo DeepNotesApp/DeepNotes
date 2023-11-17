@@ -57,14 +57,9 @@ declare namespace NodeJS {
     MAILJET_API_KEY: string;
     MAILJET_API_SECRET: string;
 
-    SENDINBLUE_API_KEY: string;
+    BREVO_API_KEY: string;
 
     SENDGRID_API_KEY: string;
-
-    ZOHO_HOST: string;
-    ZOHO_PORT: string;
-    ZOHO_USER: string;
-    ZOHO_PASSWORD: string;
 
     STRIPE_SECRET_KEY: string;
     STRIPE_WEBHOOK_SECRET: string;

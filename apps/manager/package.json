@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@deeplib/data": "workspace:*",
-    "@deeplib/db": "workspace:*",
+    "@deeplib/mail": "workspace:*",
     "@stdlib/base64": "workspace:*",
     "@stdlib/data": "workspace:*",
     "@stdlib/misc": "workspace:*",

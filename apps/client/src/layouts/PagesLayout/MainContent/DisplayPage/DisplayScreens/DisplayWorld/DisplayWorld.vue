@@ -26,6 +26,8 @@
     <ArrowCreation :region="page" />
 
     <DisplayBoxSelection />
+
+    <DisplayPanningBoard />
   </div>
 </template>
 
@@ -39,6 +41,7 @@ import DisplayArrows from './DisplayArrows.vue';
 import DisplayBackground from './DisplayBackground.vue';
 import DisplayBoxSelection from './DisplayBoxSelection.vue';
 import DisplayNote from './DisplayNote/DisplayNote.vue';
+import DisplayPanningBoard from './DisplayPanningBoard.vue';
 import DOMDisplay from './DOMDisplay.vue';
 import InterregionalArrows from './InterregionalArrows.vue';
 

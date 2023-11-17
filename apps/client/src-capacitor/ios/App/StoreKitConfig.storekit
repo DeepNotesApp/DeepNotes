@@ -1,0 +1,79 @@
+{
+  "identifier" : "40BB9F32",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6450611344",
+    "_developerTeamID" : "NK86B84G2A",
+    "_lastSynchronizedDate" : 714328042.94737804
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21360347",
+      "localizations" : [
+
+      ],
+      "name" : "Subscription Plans",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6451053619",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited pages and Collaborative groups",
+              "displayName" : "Pro Plan",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "ProPlan",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Pro Plan Monthly",
+          "subscriptionGroupID" : "21360347",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "47.9",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "6462874130",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlimited pages and Collaborative groups",
+              "displayName" : "Pro Plan",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "pro_plan_yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Pro Plan Yearly",
+          "subscriptionGroupID" : "21360347",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

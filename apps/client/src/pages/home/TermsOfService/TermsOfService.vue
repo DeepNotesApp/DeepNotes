@@ -42,8 +42,11 @@
 
 <script setup lang="ts">
 import { marked } from 'marked';
+import { gfmHeadingId } from 'marked-gfm-heading-id';
 
 import TermsOfServiceItems from './TermsOfServiceItems.vue';
+
+marked.use(gfmHeadingId());
 
 const html = marked(`
   ## Legal Entity Status
