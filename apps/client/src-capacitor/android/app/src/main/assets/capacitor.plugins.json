@@ -10,5 +10,9 @@
 	{
 		"pkg": "@capacitor/splash-screen",
 		"classpath": "com.capacitorjs.plugins.splashscreen.SplashScreenPlugin"
+	},
+	{
+		"pkg": "@revenuecat/purchases-capacitor",
+		"classpath": "com.revenuecat.purchases.capacitor.PurchasesPlugin"
 	}
 ]
