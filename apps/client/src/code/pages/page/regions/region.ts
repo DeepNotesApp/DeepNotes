@@ -69,13 +69,21 @@ export interface IPageRegion {
 }
 
 export function getIslandRoot(region: PageRegion): PageRegion {
-  if (
-    region.type === 'page' ||
-    (!region.react.container.spatial && region.react.container.overflow)
-  ) {
+  if (region.type === 'page') {
     return region;
   } else {
-    return region.react.region.react.islandRoot;
+    const parentRegion =
+      region?.type === 'note' ? region.react.region : undefined;
+
+    if (
+      parentRegion?.type === 'note' &&
+      !parentRegion.react.container.spatial &&
+      parentRegion.react.container.overflow
+    ) {
+      return parentRegion;
+    } else {
+      return region.react.region.react.islandRoot;
+    }
   }
 }
 
