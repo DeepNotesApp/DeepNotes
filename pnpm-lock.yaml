@@ -175,6 +175,9 @@ importers:
       ioredis:
         specifier: npm:@deepnotes/ioredis@^5.3.1
         version: /@deepnotes/ioredis@5.3.1
+      jws:
+        specifier: ^4.0.0
+        version: 4.0.0
       knex:
         specifier: 2.3.0
         version: 2.3.0(pg@8.11.3)
@@ -221,6 +224,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@types/jws':
+        specifier: ^3.2.8
+        version: 3.2.8
       '@types/libsodium-wrappers-sumo':
         specifier: ^0.7.7
         version: 0.7.7
@@ -603,6 +609,9 @@ importers:
       '@capacitor/splash-screen':
         specifier: ^5.0.6
         version: 5.0.6(@capacitor/core@5.5.1)
+      '@revenuecat/purchases-capacitor':
+        specifier: ^7.1.1
+        version: 7.1.1(@capacitor/core@5.5.1)
 
   apps/collab-server:
     dependencies:
@@ -3080,6 +3089,19 @@ packages:
       type-fest: 2.19.0
     dev: false
 
+  /@revenuecat/purchases-capacitor@7.1.1(@capacitor/core@5.5.1):
+    resolution: {integrity: sha512-m7fTzFtGq0YaK2M3U0ygkzk53uHeY/JLoy6+gpJtgmrctQPWOkRTEQhCJ74l0LmWpai6j72XFTPPt6GMkV0bBw==}
+    peerDependencies:
+      '@capacitor/core': ^5.0.0
+    dependencies:
+      '@capacitor/core': 5.5.1
+      '@revenuecat/purchases-typescript-internal-esm': 7.3.3
+    dev: false
+
+  /@revenuecat/purchases-typescript-internal-esm@7.3.3:
+    resolution: {integrity: sha512-Vfwj49iQunqxiuy/EDMVdDfqR2LM5BKfAOfFyzV3oDCHpXIsBjSUZT2/zdsoPVreeylVwf4alHf0U2ivA9OHPQ==}
+    dev: false
+
   /@rollup/pluginutils@4.2.1:
     resolution: {integrity: sha512-iKnFXr7NkdZAIHiIWE+BX5ULi/ucVFYWD6TbAV+rZctiRTY2PL6tsIKhoIOaoskiWAkgu+VsbXgUVDNLHf+InQ==}
     engines: {node: '>= 8.0.0'}
@@ -3651,7 +3673,7 @@ packages:
     dependencies:
       '@types/http-cache-semantics': 4.0.3
       '@types/keyv': 3.1.4
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
       '@types/responselike': 1.0.2
     dev: true
 
@@ -3715,7 +3737,7 @@ packages:
   /@types/cors@2.8.15:
     resolution: {integrity: sha512-n91JxbNLD8eQIuXDIChAN1tCKNWCEgpceU9b7ZMbFA+P+Q4yIeh80jizFLEvolRPc1ES0VdwFlGv+kJTSirogw==}
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
     dev: true
 
   /@types/crypto-js@4.2.0:
@@ -3777,7 +3799,7 @@ packages:
   /@types/fs-extra@9.0.13:
     resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
     dev: true
 
   /@types/har-format@1.2.14:
@@ -3811,7 +3833,13 @@ packages:
   /@types/jsonwebtoken@9.0.5:
     resolution: {integrity: sha512-VRLSGzik+Unrup6BsouBeHsf4d1hOEgYWTm/7Nmw1sXoN1+tRly/Gy/po3yeahnP4jfnQWWAhQAqcNfH7ngOkA==}
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
+    dev: true
+
+  /@types/jws@3.2.8:
+    resolution: {integrity: sha512-xDIvCuI7hEicqUa+dSc2TnrC92yvJtzbLghMrMcwroWzU9RWlF64cqrWW8QGikq4f7fN0V7edDIWuMLeICk+2A==}
+    dependencies:
+      '@types/node': 20.9.1
     dev: true
 
   /@types/katex@0.16.5:
@@ -3821,7 +3849,7 @@ packages:
   /@types/keyv@3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
     dev: true
 
   /@types/libsodium-wrappers-sumo@0.7.7:
@@ -3880,12 +3908,6 @@ packages:
     dependencies:
       undici-types: 5.26.5
 
-  /@types/node@20.9.0:
-    resolution: {integrity: sha512-nekiGu2NDb1BcVofVcEKMIwzlx4NjHlcjhoxxKBNLtz15Y1z7MYf549DFvkHSId02Ax6kGwWntIBPC3l/JZcmw==}
-    dependencies:
-      undici-types: 5.26.5
-    dev: true
-
   /@types/node@20.9.1:
     resolution: {integrity: sha512-HhmzZh5LSJNS5O8jQKpJ/3ZcrrlG6L70hpGqMIAoM9YVD0YBRNWYsfwcXq8VnSjlNpCpgLzMXdiPo+dxcvSmiA==}
     dependencies:
@@ -3929,7 +3951,7 @@ packages:
   /@types/responselike@1.0.2:
     resolution: {integrity: sha512-/4YQT5Kp6HxUDb4yhRkm0bJ7TbjvTddqX7PZ5hz6qV3pxSo72f/6YPRo+Mu2DU307tm9IioO69l7uAwn5XNcFA==}
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
     dev: true
 
   /@types/semver@7.5.4:
@@ -4001,7 +4023,7 @@ packages:
     resolution: {integrity: sha512-oJoftv0LSuaDZE3Le4DbKX+KS9G36NzOeSap90UIK0yMA/NhKJhqlSGtNDORNRaIbQfzjXDrQa0ytJ6mNRGz/Q==}
     requiresBuild: true
     dependencies:
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
     dev: true
     optional: true
 
@@ -6756,7 +6778,7 @@ packages:
     dependencies:
       '@types/cookie': 0.4.1
       '@types/cors': 2.8.15
-      '@types/node': 20.9.0
+      '@types/node': 20.9.1
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.4.2
@@ -9401,11 +9423,26 @@ packages:
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
 
+  /jwa@2.0.0:
+    resolution: {integrity: sha512-jrZ2Qx916EA+fq9cEAeCROWPTfCwi1IVHqT2tapuqLEVVDKFDENFw1oL+MwrTvH6msKxsd1YTDVw6uKEcsrLEA==}
+    dependencies:
+      buffer-equal-constant-time: 1.0.1
+      ecdsa-sig-formatter: 1.0.11
+      safe-buffer: 5.2.1
+    dev: false
+
   /jws@3.2.2:
     resolution: {integrity: sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==}
     dependencies:
       jwa: 1.4.1
       safe-buffer: 5.2.1
+
+  /jws@4.0.0:
+    resolution: {integrity: sha512-KDncfTmOZoOMTFG4mBlG0qUIOlc03fmzH+ru6RgYVZhPkyiy/92Owlt/8UEN+a4TXR1FQetfIpJE8ApdvdVxTg==}
+    dependencies:
+      jwa: 2.0.0
+      safe-buffer: 5.2.1
+    dev: false
 
   /katex@0.16.9:
     resolution: {integrity: sha512-fsSYjWS0EEOwvy81j3vRA8TEAhQhKiqO+FQaKWp0m39qwOzHVBgAUBIXWj1pB+O2W3fIpNa6Y9KSKCVbfPhyAQ==}
