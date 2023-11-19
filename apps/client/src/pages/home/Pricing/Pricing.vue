@@ -238,10 +238,17 @@ async function buyPackage() {
 
 async function manageSubscription() {
   if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
-    await buyPackage();
+    await manageIOSSubscription();
   } else {
     await createPortalSession();
   }
+}
+
+async function manageIOSSubscription() {
+  const managementURL = (await Purchases.getCustomerInfo()).customerInfo
+    .managementURL!;
+
+  window.open(managementURL, '_blank');
 }
 
 async function createPortalSession() {

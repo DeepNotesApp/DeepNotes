@@ -26,7 +26,7 @@
       label="Manage subscription"
       color="secondary"
       type="submit"
-      @click="createPortalSession()"
+      @click="manageSubscription()"
     />
 
     <template v-if="$q.platform.is.capacitor && $q.platform.is.ios">
@@ -91,10 +91,25 @@ onMounted(async () => {
   loading.value = false;
 });
 
+async function manageSubscription() {
+  if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
+    await manageIOSSubscription();
+  } else {
+    await createPortalSession();
+  }
+}
+
+async function manageIOSSubscription() {
+  const managementURL = (await Purchases.getCustomerInfo()).customerInfo
+    .managementURL!;
+
+  window.open(managementURL, '_blank');
+}
+
 async function createPortalSession() {
   const { portalSessionUrl } =
     await trpcClient.users.account.stripe.createPortalSession.mutate();
 
-  location.href = portalSessionUrl;
+  window.open(portalSessionUrl, '_blank');
 }
 </script>
