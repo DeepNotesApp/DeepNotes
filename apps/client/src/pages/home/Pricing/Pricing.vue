@@ -21,6 +21,7 @@
       <PlanCard
         title="Basic"
         monthly-price="0"
+        :billing-frequency="billingFrequency"
         :features="[
           {
             icon: 'mdi-note',

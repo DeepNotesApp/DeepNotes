@@ -21,12 +21,23 @@
 
     <Gap style="height: 40px" />
 
-    <div style="text-align: center; position: relative">
-      <span style="font-size: 46px">${{ monthlyPrice }}</span>
-      <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+    <div
+      v-if="$q.platform.is.capacitor && $q.platform.is.ios"
+      style="text-align: center; position: relative"
+    >
+      <span style="font-size: 46px">
+        ${{
+          billingFrequency === 'monthly'
+            ? monthlyPrice
+            : parseFloat(monthlyPrice) * 12
+        }}
+      </span>
+      <span style="font-size: 12px; color: #d0d0d0">
+        / {{ billingFrequency === 'monthly' ? 'month' : 'year' }}</span
+      >
 
       <div
-        v-if="billingFrequency === 'yearly'"
+        v-if="billingFrequency === 'yearly' && parseFloat(monthlyPrice) > 0"
         style="
           position: absolute;
           width: 100%;
@@ -36,7 +47,28 @@
           color: #d0d0d0;
         "
       >
-        (billed anually)
+        (${{ monthlyPrice }} / month)
+      </div>
+    </div>
+    <div
+      v-else
+      style="text-align: center; position: relative"
+    >
+      <span style="font-size: 46px">${{ monthlyPrice }}</span>
+      <span style="font-size: 12px; color: #d0d0d0">/ month</span>
+
+      <div
+        v-if="billingFrequency === 'yearly' && parseFloat(monthlyPrice) > 0"
+        style="
+          position: absolute;
+          width: 100%;
+          margin-top: -6px;
+          text-align: center;
+          font-size: 13px;
+          color: #d0d0d0;
+        "
+      >
+        (${{ parseFloat(monthlyPrice) * 12 }} / year)
       </div>
     </div>
 
