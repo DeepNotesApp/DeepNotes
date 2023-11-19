@@ -2,15 +2,13 @@
   <div>This page was created with the Pro plan.</div>
   <div>Upgrade your subscription to access this page.</div>
 
-  <template v-if="!($q.platform.is.capacitor && $q.platform.is.ios)">
-    <Gap style="height: 16px" />
+  <Gap style="height: 16px" />
 
-    <DeepBtn
-      label="See subscription plans"
-      color="primary"
-      :href="multiModePath('/pricing')"
-    />
-  </template>
+  <DeepBtn
+    label="See subscription plans"
+    color="primary"
+    :href="multiModePath('/pricing')"
+  />
 </template>
 
 <script setup lang="ts">

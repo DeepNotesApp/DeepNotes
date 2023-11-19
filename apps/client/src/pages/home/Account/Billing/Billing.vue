@@ -26,19 +26,62 @@
       label="Manage subscription"
       color="secondary"
       type="submit"
-      @click="createPortalSession()"
+      @click="manageSubscription()"
     />
+
+    <template v-if="$q.platform.is.capacitor && $q.platform.is.ios">
+      <Gap style="height: 16px" />
+
+      <DeepBtn
+        label="Restore Apple purchases"
+        color="secondary"
+        @click="
+          async () => {
+            try {
+              const customerInfo = await Purchases.restorePurchases();
+
+              $q.notify({
+                message: 'Apple purchases restored successfully.',
+                color: 'positive',
+              });
+            } catch (error) {
+              handleError(error);
+            }
+          }
+        "
+      />
+    </template>
   </div>
 
   <LoadingOverlay v-if="loading" />
 </template>
 
 <script setup lang="ts">
+import { LOG_LEVEL, Purchases } from '@revenuecat/purchases-capacitor';
 import { watchUntilTrue } from '@stdlib/vue';
+import { handleError } from 'src/code/utils/misc';
 
 useMeta(() => ({
   title: 'Billing - Account - DeepNotes',
 }));
+
+if (
+  process.env.CLIENT &&
+  $quasar().platform.is.capacitor &&
+  $quasar().platform.is.ios
+) {
+  document.addEventListener(
+    'deviceready',
+    async () => {
+      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG }); // Enable to get debug logs
+      await Purchases.configure({
+        apiKey: process.env.REVENUECAT_PUBLIC_APPLE_API_KEY,
+        appUserID: authStore().userId,
+      });
+    },
+    false,
+  );
+}
 
 const loading = ref(true);
 
@@ -48,10 +91,25 @@ onMounted(async () => {
   loading.value = false;
 });
 
+async function manageSubscription() {
+  if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
+    await manageIOSSubscription();
+  } else {
+    await createPortalSession();
+  }
+}
+
+async function manageIOSSubscription() {
+  const managementURL = (await Purchases.getCustomerInfo()).customerInfo
+    .managementURL!;
+
+  window.open(managementURL, '_blank');
+}
+
 async function createPortalSession() {
   const { portalSessionUrl } =
     await trpcClient.users.account.stripe.createPortalSession.mutate();
 
-  location.href = portalSessionUrl;
+  window.open(portalSessionUrl, '_blank');
 }
 </script>

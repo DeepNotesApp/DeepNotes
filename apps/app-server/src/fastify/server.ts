@@ -21,6 +21,7 @@ import { registerUsersChangePassword } from 'src/websocket/users/account/change-
 import { registerUsersChangeEmailFinish } from 'src/websocket/users/account/email-change/finish';
 import { registerUsersRotateKeys } from 'src/websocket/users/account/rotate-keys';
 
+import { registerRevenueCatWebhook } from './revenuecat-webhook';
 import { registerStripeWebhook } from './stripe-webhook';
 
 export const fastify = once(async () => {
@@ -86,6 +87,7 @@ export const fastify = once(async () => {
   // Fastify endpoints
 
   registerStripeWebhook(fastify);
+  registerRevenueCatWebhook(fastify);
 
   // Websocket endpoints
 
