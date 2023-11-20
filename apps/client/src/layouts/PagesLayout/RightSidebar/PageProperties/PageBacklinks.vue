@@ -30,7 +30,9 @@
           :icon="false"
           :page-id="backlinkPageId"
           prefer="absolute"
-          @click="internals.pages.goToPage(backlinkPageId)"
+          @click="
+            internals.pages.goToPage(backlinkPageId, { fromParent: true })
+          "
         />
 
         <DeepBtn
