@@ -45,8 +45,6 @@ watchEffect(() => {
 
   componentLogger.info('Subscribing to required values');
 
-  const userPlan = realtimeCtx.hget('user', authStore().userId, 'plan');
-
   const pageIsDeleted = !!realtimeCtx.hget(
     'page',
     props.page.id,
@@ -57,8 +55,6 @@ watchEffect(() => {
     ? false
     : new Date() >
       realtimeCtx.hget('page', props.page.id, 'permanent-deletion-date');
-
-  const pageIsFree = !!realtimeCtx.hget('page', props.page.id, 'free');
 
   const groupId = pageGroupIds()(props.page.id).get();
 
@@ -72,11 +68,6 @@ watchEffect(() => {
       ? false
       : new Date() >
         realtimeCtx.hget('group', groupId, 'permanent-deletion-date');
-
-  const groupIsPersonal =
-    groupId == null
-      ? false
-      : !!realtimeCtx.hget('group', groupId, 'is-personal');
 
   const groupIsPublic =
     groupId == null ? false : realtimeCtx.hget('group', groupId, 'is-public');
@@ -183,25 +174,6 @@ watchEffect(() => {
 
   if (!groupIsPublic && groupMemberRole == null) {
     props.page.setStatus('unauthorized');
-    return;
-  }
-
-  componentLogger.info('Checking if user has a Pro plan');
-
-  if (
-    !groupIsPersonal &&
-    !groupIsPublic &&
-    userPlan !== 'pro' &&
-    groupId !== internals.personalGroupId
-  ) {
-    props.page.setStatus('pro-plan-required');
-    return;
-  }
-
-  componentLogger.info('Checking if page is non-free');
-
-  if (!groupIsPublic && userPlan !== 'pro' && !pageIsFree) {
-    props.page.setStatus('non-free-page');
     return;
   }
 

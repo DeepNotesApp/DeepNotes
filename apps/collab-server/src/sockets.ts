@@ -130,23 +130,11 @@ export class SocketAuxObject {
         }
 
         if (!groupIsPublic) {
-          const [[userPlan, personalGroupId], groupMemberRole] =
-            await Promise.all([
-              dataAbstraction().hmget('user', this.userId, [
-                'plan',
-                'personal-group-id',
-              ]),
-
-              dataAbstraction().hget(
-                'group-member',
-                `${groupId}:${this.userId}`,
-                'role',
-              ),
-            ]);
-
-          if (userPlan !== 'pro' && groupId !== personalGroupId) {
-            throw new Error('This requires a Pro plan subscription.');
-          }
+          const groupMemberRole = await dataAbstraction().hget(
+            'group-member',
+            `${groupId}:${this.userId}`,
+            'role',
+          );
 
           if (groupMemberRole == null) {
             throw new Error('User is not a member of the group.');
@@ -399,13 +387,13 @@ export class SocketAuxObject {
   }
 
   private async _handleMessage(messageBuffer: ArrayBuffer) {
-    const [groupId, sessionInvalidated] = await Promise.all([
-      dataAbstraction().hget('page', this.room.pageId, 'group-id'),
-
-      ...(this.sessionId != null
-        ? [dataAbstraction().hget('session', this.sessionId, 'invalidated')]
-        : []),
-    ]);
+    const [sessionInvalidated, userPlan, pageGroupId, pageIsFree] =
+      await Promise.all([
+        dataAbstraction().hget('session', this.sessionId!, 'invalidated'),
+        dataAbstraction().hget('user', this.userId!, 'plan'),
+        dataAbstraction().hget('page', this.room.pageId, 'group-id'),
+        dataAbstraction().hget('page', this.room.pageId, 'free'),
+      ]);
 
     // Check if session is invalidated
 
@@ -417,16 +405,16 @@ export class SocketAuxObject {
 
     // Check if has permission to edit
 
-    const role =
-      groupId != null && this.userId != null
-        ? await dataAbstraction().hget(
-            'group-member',
-            `${groupId}:${this.userId}`,
-            'role',
-          )
-        : null;
+    const role = await dataAbstraction().hget(
+      'group-member',
+      `${pageGroupId}:${this.userId}`,
+      'role',
+    );
 
-    if (!rolesMap()[role]?.permissions.editGroupPages) {
+    if (
+      !rolesMap()[role]?.permissions.editGroupPages ||
+      (userPlan !== 'pro' && !pageIsFree)
+    ) {
       moduleLogger.info('Ignored message from unauthorized user');
       return;
     }

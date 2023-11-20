@@ -158,8 +158,10 @@ export const RealtimeClient = once(
 
         // Try to get subscribed value
 
+        const fullKey = getFullKey(prefix, suffix, field);
+
         if (this.isSynced(prefix, suffix, field)) {
-          return this.values[getFullKey(prefix, suffix, field)];
+          return this.values[fullKey];
         }
 
         // Add request to buffer
@@ -178,9 +180,7 @@ export const RealtimeClient = once(
         );
         const response = await resolvable;
 
-        this._logger
-          .sub('hget response')
-          .info(`${getFullKey(prefix, suffix, field)} (${response})`);
+        this._logger.sub('hget response').info(`${fullKey} (${response})`);
 
         return response;
       }
