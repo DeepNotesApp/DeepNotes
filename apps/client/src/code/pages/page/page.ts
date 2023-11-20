@@ -214,14 +214,22 @@ export class Page implements IPageRegion {
           return true;
         }
 
+        const userPlan = this.realtimeCtx.hget(
+          'user',
+          authStore().userId,
+          'plan',
+        );
+        const pageIsFree = this.realtimeCtx.hget('page', this.id, 'free');
+
         const groupMemberRole = this.realtimeCtx.hget(
           'group-member',
           `${this.react.groupId}:${authStore().userId}`,
           'role',
         );
 
-        return !(
-          rolesMap()[groupMemberRole]?.permissions.editGroupPages ?? false
+        return (
+          !rolesMap()[groupMemberRole]?.permissions.editGroupPages ||
+          (userPlan !== 'pro' && !pageIsFree)
         );
       }),
 

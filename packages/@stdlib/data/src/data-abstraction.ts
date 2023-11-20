@@ -311,27 +311,37 @@ export class DataAbstraction<
     return fieldInfos.map((fieldInfo) => fieldInfo.value);
   }
   private async _hmgetLocal(params: HMGetInternalParams) {
-    const { remainingFields, dtrx } = params;
+    const { remainingFields, suffix, dtrx } = params;
 
     // Check local cache
 
     const missedFields: FieldInfo[] = [];
 
-    for (const field of remainingFields) {
-      if (
-        !field.infos?.dontCache &&
-        field.infos?.cacheLocally &&
-        this.localCache.cache[field.fullKey] != null
-      ) {
-        field.value = this.localCache.get(field.fullKey);
+    await Promise.allSettled(
+      remainingFields.map(async (field) => {
+        if (field.fullKey.includes('undefined')) {
+          field.value = await field.infos?.get?.({
+            model: undefined,
+            suffix,
+            dataAbstraction: this,
+          });
 
-        classLogger
-          .sub('hmget')
-          .info(`${field.fullKey}: Found on local cache (%o)`, field.value);
-      } else {
-        missedFields.push(field);
-      }
-    }
+          classLogger.sub('hmget').info(`${field.fullKey}: Invalid key`);
+        } else if (
+          !field.infos?.dontCache &&
+          field.infos?.cacheLocally &&
+          this.localCache.cache[field.fullKey] != null
+        ) {
+          field.value = this.localCache.get(field.fullKey);
+
+          classLogger
+            .sub('hmget')
+            .info(`${field.fullKey}: Found on local cache (%o)`, field.value);
+        } else {
+          missedFields.push(field);
+        }
+      }),
+    );
 
     if (missedFields.length > 0) {
       // Load missed values from remote cache

@@ -7,12 +7,6 @@
     <DisplayNonExistentScreen
       v-else-if="page.react.status === 'page-nonexistent'"
     />
-    <DisplayProPlanRequiredScreen
-      v-else-if="page.react.status === 'pro-plan-required'"
-    />
-    <DisplayNonFreePageScreen
-      v-else-if="page.react.status === 'non-free-page'"
-    />
     <DisplayPageDeletedScreen
       v-else-if="page.react.status === 'page-deleted'"
     />
@@ -36,10 +30,8 @@ import DisplayErrorScreen from './DisplayErrorScreen.vue';
 import DisplayGroupDeletedScreen from './DisplayGroupDeletedScreen.vue';
 import DisplayInvitedScreen from './DisplayInvitedScreen.vue';
 import DisplayNonExistentScreen from './DisplayNonExistentScreen.vue';
-import DisplayNonFreePageScreen from './DisplayNonFreePageScreen.vue';
 import DisplayPageDeletedScreen from './DisplayPageDeletedScreen.vue';
 import DisplayPasswordScreen from './DisplayPasswordScreen.vue';
-import DisplayProPlanRequiredScreen from './DisplayProPlanRequiredScreen.vue';
 import DisplayRejectedScreen from './DisplayRejectedScreen.vue';
 import DisplayUnauthorizedScreen from './DisplayUnauthorizedScreen.vue';
 import DisplayWorld from './DisplayWorld/DisplayWorld.vue';
