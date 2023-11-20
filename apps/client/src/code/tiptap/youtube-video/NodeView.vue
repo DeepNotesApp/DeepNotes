@@ -13,6 +13,7 @@
     ></iframe>
 
     <div
+      v-if="!internals.pages.react.page.react.readOnly"
       class="resize-handle"
       @pointerdown.left.stop.prevent="onResizeHandleLeftPointerDown"
       :style="{
