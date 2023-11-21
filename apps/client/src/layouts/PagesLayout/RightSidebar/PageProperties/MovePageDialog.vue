@@ -160,6 +160,7 @@ const groupOptions = computed(() => [
       }
 
       if (
+        groupId !== internals.pages.react.page.react.groupId &&
         !rolesMap()[groupMemberRoles.value[groupIndex]]?.permissions
           .editGroupPages
       ) {
@@ -176,6 +177,7 @@ const groupOptions = computed(() => [
 ]);
 
 onMounted(async () => {
+  destGroupId.value = props.groupId;
   groupIds.value = [props.groupId];
 
   await Promise.all([
@@ -201,8 +203,6 @@ onMounted(async () => {
       groupMemberName.value = await selfUserName().getAsync();
     })(),
   ]);
-
-  destGroupId.value = props.groupId;
 });
 
 async function _movePage() {

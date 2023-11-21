@@ -172,6 +172,7 @@ const groupOptions = computed(() => [
       }
 
       if (
+        groupId !== page.value.react.groupId &&
         !rolesMap()[groupMemberRoles.value[groupIndex]]?.permissions
           .editGroupPages
       ) {
@@ -204,6 +205,7 @@ const groupMemberName = ref('');
 onMounted(async () => {
   // Initialize group IDs
 
+  destGroupId.value = page.value.react.groupId;
   groupIds.value = [page.value.react.groupId];
 
   // Focus page title
@@ -241,8 +243,6 @@ onMounted(async () => {
       ).text;
     })(),
   ]);
-
-  destGroupId.value = page.value.react.groupId;
 });
 
 async function _createPage() {
