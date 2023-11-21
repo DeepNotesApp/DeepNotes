@@ -1,0 +1,228 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@2.1.2
+  node: circleci/node@5.0.2
+  win: circleci/windows@4.1.1
+
+jobs:
+  deploy-macos:
+    macos:
+      xcode: 14.2.0
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: false
+          node-version: '20.9.0'
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-macos-pnpm-cache macos-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-macos-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build Electron app
+          command: pnpm run build:electron:publish
+
+  deploy-win:
+    executor:
+      name: win/default
+      shell: bash.exe
+    steps:
+      - checkout
+      - run:
+          name: Install Node.js 18
+          command: nvm install 18 && nvm use 18
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build AppX
+          command: |
+            unset CSC_LINK
+            unset CSC_KEY_PASSWORD
+            pnpm run build:electron:publish
+
+  deploy-linux:
+    docker:
+      - image: node:18
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-linux-pnpm-cache node:18-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-linux-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build Linux app
+          command: pnpm run build:electron:publish
+
+  deploy-android:
+    docker:
+      - image: cimg/android:2022.07
+        environment:
+          JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Install OpenJDK 17
+          command: |
+            sudo apt-get update && sudo apt-get install openjdk-17-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+            sudo update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+            java -version
+      - node/install:
+          install-yarn: false
+          node-version: '20.9.0'
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-android-pnpm-cache cimg/android:2022.07-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-android-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build Android app
+          command: pnpm run build:android
+      - run:
+          name: Install Fastlane
+          command: sudo gem install fastlane
+      - run:
+          name: Create Android keystore
+          command: |
+            cd apps/client/src-capacitor/android/app
+            echo $BASE64_KEYSTORE | base64 -d > deepnotes.keystore
+            ls
+      - run:
+          name: Create keystore.properties
+          command: |
+            cd apps/client/src-capacitor/android
+            printf 'releaseKeyAlias=%s\nreleaseKeyPassword=%s\nreleaseKeyStore=%s\nreleaseStorePassword=%s' \
+            $RELEASE_KEY_ALIAS $RELEASE_KEY_PASSWORD $RELEASE_KEYSTORE $RELEASE_STORE_PASSWORD > keystore.properties
+            ls
+      - run:
+          name: Create Google Play key
+          command: |
+            cd apps/client/src-capacitor/android/fastlane
+            echo $GOOGLE_PLAY_KEY > deepnotes-google-api-secret.json
+            ls
+      - run: |
+          cd apps/client/src-capacitor/android
+          bundle install
+      - run: |
+          cd apps/client/src-capacitor/android
+          bundle exec fastlane playstore
+
+  deploy-ios:
+    macos:
+      xcode: 14.2.0
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: false
+          node-version: '20.9.0'
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-macos-pnpm-cache macos-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-macos-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build iOS app
+          command: pnpm run build:ios
+      - run:
+          name: Install Ruby bundle
+          command: |
+            cd apps/client/src-capacitor/ios/App
+            bundle install
+      - run:
+          name: Run Fastlane
+          command: |
+            cd apps/client/src-capacitor/ios/App
+            bundle exec fastlane upload_release
+
+workflows:
+  version: 2
+
+  deploy:
+    jobs:
+      - deploy-linux:
+          filters:
+            branches:
+              only: main
+
+      - deploy-win:
+          filters:
+            branches:
+              only: main
+
+      - deploy-macos:
+          filters:
+            branches:
+              only: main
+
+      - deploy-android:
+          filters:
+            branches:
+              only: main
+
+      - deploy-ios:
+          filters:
+            branches:
+              only: main
