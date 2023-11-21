@@ -187,6 +187,12 @@ jobs:
           name: Build iOS app
           command: pnpm run build:ios
       - run:
+          name: Create review demo metadata files
+          command: |
+            cd apps/client/src-capacitor/ios/App/fastlane/metadata/review_information
+            echo $FASTLANE_REVIEW_DEMO_USER > demo_user.txt
+            echo $FASTLANE_REVIEW_DEMO_PASSWORD > demo_password.txt
+      - run:
           name: Install Ruby bundle
           command: |
             cd apps/client/src-capacitor/ios/App
