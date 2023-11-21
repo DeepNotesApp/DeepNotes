@@ -1,0 +1,6 @@
+- Improved toolbar buttons
+- Added help section
+- Fixed delete button in toolbar
+- Added panning with Space + Left click
+- Added horizontal scrolling with Shift + Mouse wheel
+- Many other bug fixes
