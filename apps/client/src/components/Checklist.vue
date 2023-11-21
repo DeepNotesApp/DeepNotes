@@ -3,7 +3,7 @@
     <PassthroughComponent
       :is="itemsWrapper"
       v-bind="wrapperProps"
-      v-on="wrapperEvents"
+      v-on="wrapperEvents ?? {}"
     >
       <slot
         v-if="itemIds.length === 0"
