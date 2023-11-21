@@ -157,6 +157,46 @@ jobs:
           cd apps/client/src-capacitor/android
           bundle exec fastlane playstore
 
+  deploy-ios:
+    macos:
+      xcode: 14.2.0
+    steps:
+      - checkout
+      - node/install:
+          install-yarn: false
+          node-version: '20.9.0'
+      - run:
+          name: Install pnpm package manager
+          command: npm install -g pnpm@latest
+      - restore_cache:
+          name: Restore pnpm Package Cache
+          keys:
+            - &deploy-macos-pnpm-cache macos-pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install node dependencies
+          command: pnpm install
+      - save_cache:
+          name: Save pnpm Package Cache
+          key: *deploy-macos-pnpm-cache
+          paths:
+            - node_modules
+      - run:
+          name: Build packages
+          command: pnpm run repo:build
+      - run:
+          name: Build iOS app
+          command: pnpm run build:ios
+      - run:
+          name: Install Ruby bundle
+          command: |
+            cd apps/client/src-capacitor/ios/App
+            bundle install
+      - run:
+          name: Run Fastlane
+          command: |
+            cd apps/client/src-capacitor/ios/App
+            bundle exec fastlane upload_release
+
 workflows:
   version: 2
 
@@ -178,6 +218,11 @@ workflows:
               only: main
 
       - deploy-android:
+          filters:
+            branches:
+              only: main
+
+      - deploy-ios:
           filters:
             branches:
               only: main
