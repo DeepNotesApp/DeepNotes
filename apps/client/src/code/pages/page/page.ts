@@ -358,8 +358,12 @@ export class Page implements IPageRegion {
 
     // Bump on recent pages
 
-    pull(this.app.react.recentPageIds, this.id);
-    this.app.react.recentPageIds.unshift(this.id);
+    internals.pages.recentPageIdsKeepOverride = true;
+    internals.pages.react.recentPageIdsOverride = [
+      ...internals.pages.react.recentPageIds,
+    ];
+    pull(this.app.react.recentPageIdsOverride!, this.id);
+    this.app.react.recentPageIdsOverride!.unshift(this.id);
 
     // Bump on server
 

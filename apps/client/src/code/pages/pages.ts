@@ -14,7 +14,9 @@ import type { Serialization } from './serialization';
 
 export interface IAppReact {
   pathPageIds: string[];
-  recentPageIds: string[];
+
+  recentPageIdsOverride?: string[];
+  recentPageIds: ComputedRef<string[]>;
 
   page: ShallowRef<Page>;
   pageId: ComputedRef<string | undefined>;
@@ -42,6 +44,8 @@ export class Pages {
 
   parentPageId?: string;
 
+  recentPageIdsKeepOverride?: boolean;
+
   constructor(input: { factories: Factories }) {
     this.factories = input.factories;
 
@@ -50,7 +54,21 @@ export class Pages {
 
     this.react = reactive({
       pathPageIds: [],
-      recentPageIds: [],
+      recentPageIds: computed(() => {
+        if (this.recentPageIdsKeepOverride) {
+          this.recentPageIdsKeepOverride = undefined;
+        } else {
+          this.react.recentPageIdsOverride = undefined;
+        }
+
+        const recentPageIds = internals.realtime.globalCtx.hget(
+          'user',
+          authStore().userId,
+          'recent-page-ids',
+        );
+
+        return this.react.recentPageIdsOverride ?? recentPageIds ?? [];
+      }),
 
       page: shallowRef(null) as any,
       pageId: computed(() => this.react.page?.id),
@@ -82,17 +100,12 @@ export class Pages {
 
     promises.push(
       (async () => {
-        const [
-          encryptedDefaultNote,
-          encryptedDefaultArrow,
-          recentPageIdsJSON,
-          isNewUser,
-        ] = await internals.realtime.hmget('user', authStore().userId, [
-          'encrypted-default-note',
-          'encrypted-default-arrow',
-          'recent-page-ids',
-          'new',
-        ]);
+        const [encryptedDefaultNote, encryptedDefaultArrow, isNewUser] =
+          await internals.realtime.hmget('user', authStore().userId, [
+            'encrypted-default-note',
+            'encrypted-default-arrow',
+            'new',
+          ]);
 
         this.defaultNote = unpack(
           internals.symmetricKeyring.decrypt(encryptedDefaultNote, {
@@ -112,8 +125,6 @@ export class Pages {
             },
           }),
         );
-
-        this.react.recentPageIds = recentPageIdsJSON ?? [];
 
         this.react.isNewUser = !!isNewUser;
 
