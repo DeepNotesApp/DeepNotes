@@ -134,7 +134,7 @@
     "build:android:ide": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T android --skip-pkg --ide",
     "build:electron": "cross-env CI=1 NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron",
     "build:electron:publish": "cross-env CI=1 NODE_OPTIONS=--max_old_space_size=4096 quasar build -m electron --publish always",
-    "build:ios": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T ios",
+    "build:ios": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m capacitor -T ios --skip-pkg",
     "build:spa": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m spa",
     "build:ssr": "cross-env NODE_OPTIONS=--max_old_space_size=4096 quasar build -m ssr",
     "clean": "rimraf --glob ./dist *.tsbuildinfo",
