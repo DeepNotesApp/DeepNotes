@@ -115,6 +115,8 @@ export class PageFindAndReplace {
           editor.commands.setFindTerm('');
         }
       }
+
+      this.react.resultCount = 0;
     }
   }
 
@@ -135,6 +137,22 @@ export class PageFindAndReplace {
 
     if (elemInfo == null) {
       return;
+    }
+
+    let parent = elemInfo.elem.react.region;
+
+    while (parent?.type === 'note') {
+      if (parent.react.collapsing.collapsed) {
+        parent.react.collapsing.collapsed = false;
+      }
+
+      parent = parent.react.region;
+    }
+
+    if (elemInfo.elem?.type === 'note' && this.editorIndex > 0) {
+      if (elemInfo.elem.react.collapsing.collapsed) {
+        elemInfo.elem.react.collapsing.collapsed = false;
+      }
     }
 
     const editor = elemInfo.editors[this.editorIndex];
@@ -272,6 +290,8 @@ export class PageFindAndReplace {
         }
       }
     }
+
+    this.updateResultCount();
   }
 }
 
