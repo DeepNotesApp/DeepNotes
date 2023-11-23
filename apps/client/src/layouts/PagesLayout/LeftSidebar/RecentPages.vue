@@ -83,7 +83,11 @@ async function removeRecentPage(pageId: string) {
   try {
     await trpcClient.users.pages.removeRecentPage.mutate({ pageId });
 
-    pull(internals.pages.react.recentPageIds, pageId);
+    internals.pages.recentPageIdsKeepOverride = true;
+    internals.pages.react.recentPageIdsOverride = [
+      ...internals.pages.react.recentPageIds,
+    ];
+    pull(internals.pages.react.recentPageIdsOverride, pageId);
   } catch (error) {
     handleError(error);
   }
