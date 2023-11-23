@@ -1,5 +1,5 @@
 {
-  "extends": "tsconfig/base.json",
+  "extends": "@deeplib/tsconfig/base.json",
 
   "include": ["*.ts", "src/**/*.ts"],
 
