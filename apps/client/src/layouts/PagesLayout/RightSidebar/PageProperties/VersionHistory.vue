@@ -178,25 +178,34 @@ async function saveCurrentSnapshot() {
   }
 }
 
-async function deleteSnapshot(snapshotId: string) {
-  await asyncDialog({
-    title: 'Delete version',
-    message: 'Are you sure you want to delete this version?',
-
-    focus: 'cancel',
-
-    cancel: { label: 'No', flat: true, color: 'primary' },
-    ok: { label: 'Yes', flat: true, color: 'negative' },
-  });
-
-  await deletePageSnapshot(page.value.id, snapshotId);
-}
-
 async function deleteSelectedSnapshots() {
   try {
+    const multiple = finalSelectedSnapshotIds.value.length > 1;
+
+    await asyncDialog({
+      title: `Delete page version${multiple ? 's' : ''}`,
+      message: `Are you sure you want to delete the selected page version${
+        multiple ? 's' : ''
+      }?`,
+
+      style: {
+        maxWidth: '300px',
+      },
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
     for (const selectedSnapshotId of finalSelectedSnapshotIds.value) {
-      await deleteSnapshot(selectedSnapshotId);
+      await deletePageSnapshot(page.value.id, selectedSnapshotId);
     }
+
+    $quasar().notify({
+      message: `Page version${multiple ? 's' : ''} deleted successfully.`,
+      color: 'positive',
+    });
   } catch (error: any) {
     handleError(error);
   }
