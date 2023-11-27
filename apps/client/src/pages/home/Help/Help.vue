@@ -35,6 +35,12 @@
         </li>
 
         <li>
+          <router-link :to="{ name: 'help/roadmap' }">
+            Is there a roadmap?
+          </router-link>
+        </li>
+
+        <li>
           <router-link :to="{ name: 'help/creating-group' }">
             How to create a group?
           </router-link>

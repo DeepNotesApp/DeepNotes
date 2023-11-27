@@ -200,6 +200,17 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'roadmap',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/roadmap',
+            component: () => import('src/pages/home/Help/Pages/Roadmap.vue'),
+          },
+        ],
+      },
     ],
   },
 
