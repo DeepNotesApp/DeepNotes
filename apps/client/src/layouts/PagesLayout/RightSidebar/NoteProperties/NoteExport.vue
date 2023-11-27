@@ -27,7 +27,6 @@
           </q-item>
 
           <q-item
-            v-if="note.react.notes.length > 0"
             clickable
             @click="copyAsMarkdown({ includeDescendants: true })"
           >
@@ -56,7 +55,6 @@
           </q-item>
 
           <q-item
-            v-if="note.react.notes.length > 0"
             clickable
             @click="downloadAsMarkdown({ includeDescendants: true })"
           >
@@ -88,7 +86,24 @@ import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
 
-const note = computed(() => page.value.activeElem.react.value as PageNote);
+function notesToMarkdown(
+  notes: PageNote[],
+  params: {
+    includeDescendants: boolean;
+  },
+) {
+  let markdown = '';
+
+  for (const [noteIndex, note] of notes.entries()) {
+    if (noteIndex > 0) {
+      markdown += '\n\n---\n\n';
+    }
+
+    markdown += noteToMarkdown(note, params);
+  }
+
+  return markdown;
+}
 
 function noteToMarkdown(
   note: PageNote,
@@ -179,7 +194,7 @@ function editorToMarkdown(editor: Editor) {
 
 async function copyAsMarkdown(params: { includeDescendants: boolean }) {
   await setClipboardText(
-    noteToMarkdown(note.value, {
+    notesToMarkdown(page.value.selection.react.notes, {
       includeDescendants: params.includeDescendants,
     }),
   );
@@ -194,7 +209,7 @@ async function downloadAsMarkdown(params: { includeDescendants: boolean }) {
   try {
     const blob = new Blob(
       [
-        noteToMarkdown(note.value, {
+        notesToMarkdown(page.value.selection.react.notes, {
           includeDescendants: params.includeDescendants,
         }),
       ],
