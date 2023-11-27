@@ -188,6 +188,18 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'subscription-expiration',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/subscription-expiration',
+            component: () =>
+              import('src/pages/home/Help/Pages/SubscriptionExpiration.vue'),
+          },
+        ],
+      },
     ],
   },
 
