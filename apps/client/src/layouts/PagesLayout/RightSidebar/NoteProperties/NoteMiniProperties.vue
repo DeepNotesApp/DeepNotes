@@ -169,7 +169,7 @@
     </MiniSidebarBtn>
 
     <MiniSidebarBtn
-      tooltip="Spatial"
+      tooltip="Spatial container"
       icon="mdi-axis-arrow"
       :disable="page.react.readOnly"
       :active="
