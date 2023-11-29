@@ -4,7 +4,7 @@
       tooltip="Create new page"
       icon="mdi-note-plus"
       :disable="page.react.readOnly"
-      @click="showNewPageDialog()"
+      @click="createNewPageQuick()"
     >
       <TutorialTooltip
         v-if="
@@ -214,12 +214,11 @@
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
 import { useIntervalFn } from '@vueuse/core';
+import { createPage } from 'src/code/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import TutorialTooltip from 'src/components/TutorialTooltip.vue';
 import type { Ref } from 'vue';
-
-import NewPageDialog from './NewPageDialog.vue';
 
 const page = inject<Ref<Page>>('page')!;
 
@@ -279,23 +278,43 @@ function getInitialPageTitle() {
   return initialPageTitle;
 }
 
-function showNewPageDialog() {
-  $quasar()
-    .dialog({
-      component: NewPageDialog,
+async function createNewPageQuick() {
+  const initialPageTitle = getInitialPageTitle();
 
-      componentProps: {
-        initialPageTitle: getInitialPageTitle(),
-      },
-    })
-    .onOk((url) => {
-      changeProp(url, (selectedNote, url) => {
-        selectedNote.react.collab.link = url;
-      });
-
-      if (internals.pages.react.tutorialStep === 4) {
-        internals.pages.react.tutorialStep++;
-      }
+  if (initialPageTitle === '') {
+    $quasar().notify({
+      html: true,
+      message:
+        'Cannot create a page from an empty note.<br/>Please write something in it first.',
+      color: 'negative',
     });
+    return;
+  }
+
+  const response = await createPage({
+    parentPageId: page.value.id,
+    destGroupId: page.value.react.groupId,
+
+    pageRelativeTitle: initialPageTitle,
+  });
+
+  changeProp(`/pages/${response.pageId}`, (selectedNote, url) => {
+    selectedNote.react.collab.link = url;
+  });
+
+  await internals.pages.goToPage(response.pageId, { fromParent: true });
+
+  $quasar().notify({
+    message:
+      'Page created successfully.' +
+      (response.numFreePages != null
+        ? ` (${response.numFreePages + 1}/50)`
+        : ''),
+    type: 'positive',
+  });
+
+  if (internals.pages.react.tutorialStep === 4) {
+    internals.pages.react.tutorialStep++;
+  }
 }
 </script>
