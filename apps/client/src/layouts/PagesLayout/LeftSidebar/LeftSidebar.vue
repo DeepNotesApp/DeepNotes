@@ -36,8 +36,8 @@
 
 <script setup lang="ts">
 import { listenPointerEvents } from '@stdlib/misc';
-import CurrentPath from 'src/layouts/PagesLayout/LeftSidebar/CurrentPath.vue';
 
+import CurrentPath from './CurrentPath.vue';
 import RecentPages from './RecentPages.vue';
 
 function resizeLeftSidebar(event: PointerEvent) {
