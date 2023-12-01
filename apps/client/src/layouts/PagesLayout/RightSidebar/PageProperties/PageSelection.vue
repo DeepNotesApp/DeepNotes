@@ -52,7 +52,7 @@ function selectLinkedPages() {
 
     for (const match of matches) {
       for (let i = 1; i < match.length; i++) {
-        if (match[i] !== page.value.id) {
+        if (match[i] != null && match[i] !== page.value.id) {
           pageSelectionStore().selectedPages.add(match[i]);
         }
       }
