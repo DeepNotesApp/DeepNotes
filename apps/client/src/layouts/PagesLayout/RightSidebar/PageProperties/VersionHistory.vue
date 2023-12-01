@@ -72,9 +72,9 @@
     <Gap style="height: 12px" />
 
     <DeepBtn
-      :label="`Delete selected version${
-        finalSelectedSnapshotIds.length > 1 ? 's' : ''
-      }`"
+      :label="`Delete selected version${pluralS(
+        finalSelectedSnapshotIds.length,
+      )}`"
       icon="mdi-trash-can"
       color="negative"
       :disable="page.react.readOnly || finalSelectedSnapshotIds.length === 0"
@@ -97,6 +97,7 @@
 
 <script setup lang="ts">
 import type { PageSnapshotInfo } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
 import { capitalize } from 'lodash';
 import { deletePageSnapshot } from 'src/code/api-interface/pages/snapshots/delete';
 import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/restore';

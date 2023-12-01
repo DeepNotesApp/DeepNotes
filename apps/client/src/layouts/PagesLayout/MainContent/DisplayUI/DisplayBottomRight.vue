@@ -18,7 +18,7 @@
       class="selection-count"
     >
       {{ page.selection.react.elems.length }}
-      item{{ page.selection.react.elems.length > 1 ? 's' : '' }} selected
+      item{{ pluralS(page.selection.react.elems.length) }} selected
     </div>
 
     <div
@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
 import { useRealtimeContext } from 'src/code/realtime/context';
 
 const page = computed(() => internals.pages.react.page);

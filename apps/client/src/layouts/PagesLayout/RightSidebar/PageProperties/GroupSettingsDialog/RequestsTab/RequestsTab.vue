@@ -110,6 +110,8 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
@@ -190,14 +192,61 @@ async function rejectSelectedRequests() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const userId of finalSelectedUserIds.value) {
-      await rejectJoinRequest({
-        groupId,
-        patientId: userId,
-      });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Rejecting join requests...',
+    });
+
+    const numTotal = finalSelectedUserIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, userId] of finalSelectedUserIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await rejectJoinRequest({
+          groupId,
+          patientId: userId,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
     baseSelectedUserIds.value.clear();
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Join request${pluralS(numSuccess)} rejected successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} join request${
+          numSuccess === 1 ? ' was' : 's were'
+        } rejected successfully.<br/>Failed to reject ${numFailed} join request${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error: any) {
     handleError(error);
   }

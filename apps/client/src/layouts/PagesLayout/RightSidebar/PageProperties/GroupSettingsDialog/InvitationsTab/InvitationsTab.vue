@@ -127,6 +127,8 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitations/cancel';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
@@ -193,15 +195,62 @@ async function cancelSelectedInvitations() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const userId of finalSelectedUserIds.value) {
-      await cancelJoinInvitation({
-        groupId,
-        patientId: userId,
-      });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Canceling join invitations...',
+    });
+
+    const numTotal = finalSelectedUserIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, userId] of finalSelectedUserIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await cancelJoinInvitation({
+          groupId,
+          patientId: userId,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
     baseSelectedUserIds.value.clear();
-  } catch (error: any) {
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Join invitation${pluralS(numSuccess)} canceled successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} join invitation${
+          numSuccess === 1 ? ' was' : 's were'
+        } canceled successfully.<br/>Failed to cancel ${numFailed} join invitations${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
+  } catch (error) {
     handleError(error);
   }
 }

@@ -138,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import { negateProp } from '@stdlib/misc';
+import { negateProp, pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
@@ -162,6 +162,8 @@ async function movePages() {
     message: 'Moving pages...',
   });
 
+  const numTotal = pageSelectionStore().selectedPages.size;
+
   let numSuccess = 0;
   let numFailed = 0;
 
@@ -170,7 +172,7 @@ async function movePages() {
   ).entries()) {
     try {
       notif({
-        caption: `${index + 1} of ${pageSelectionStore().selectedPages.size}`,
+        caption: `${index} of ${numTotal}`,
       });
 
       await movePage({
@@ -187,23 +189,23 @@ async function movePages() {
 
   let notifUpdateOptions: QNotifyUpdateOptions = {
     timeout: undefined,
+    caption: undefined,
   };
 
   if (numFailed === 0) {
     notifUpdateOptions = {
       ...notifUpdateOptions,
-      message: 'Pages moved successfully.',
+      message: `Page${pluralS(numSuccess)} moved successfully.`,
       color: 'positive',
     };
   } else {
     notifUpdateOptions = {
       ...notifUpdateOptions,
-      message: `${
-        numSuccess > 0 ? numSuccess : 'No'
-      } pages were moved successfully.<br/>Failed to move ${numFailed} page${
-        numFailed === 1 ? '' : 's'
-      }.`,
-      caption: undefined,
+      message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+        numSuccess === 1 ? ' was' : 's were'
+      } moved successfully.<br/>Failed to move ${numFailed} page${pluralS(
+        numFailed,
+      )}.`,
       color: 'negative',
       html: true,
     };
@@ -228,6 +230,8 @@ async function deletePages() {
     message: 'Deleting pages...',
   });
 
+  const numTotal = pageSelectionStore().selectedPages.size;
+
   let numSuccess = 0;
   let numFailed = 0;
 
@@ -236,7 +240,7 @@ async function deletePages() {
   ).entries()) {
     try {
       notif({
-        caption: `${index + 1} of ${pageSelectionStore().selectedPages.size}`,
+        caption: `${index} of ${numTotal}`,
       });
 
       await deletePage(pageId);
@@ -249,23 +253,23 @@ async function deletePages() {
 
   let notifUpdateOptions: QNotifyUpdateOptions = {
     timeout: undefined,
+    caption: undefined,
   };
 
   if (numFailed === 0) {
     notifUpdateOptions = {
       ...notifUpdateOptions,
-      message: 'Pages deleted successfully.',
+      message: `Page${pluralS(numSuccess)} deleted successfully.`,
       color: 'positive',
     };
   } else {
     notifUpdateOptions = {
       ...notifUpdateOptions,
-      message: `${
-        numSuccess > 0 ? numSuccess : 'No'
-      } pages were deleted successfully.<br/>Failed to delete ${numFailed} page${
-        numFailed === 1 ? '' : 's'
-      }.`,
-      caption: undefined,
+      message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+        numSuccess === 1 ? ' was' : 's were'
+      } deleted successfully.<br/>Failed to delete ${numFailed} page${pluralS(
+        numFailed,
+      )}.`,
       color: 'negative',
       html: true,
     };

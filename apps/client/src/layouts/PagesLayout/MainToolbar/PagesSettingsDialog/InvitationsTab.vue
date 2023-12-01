@@ -101,6 +101,8 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
@@ -186,11 +188,58 @@ async function rejectSelectedInvitations() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const groupId of finalSelectedGroupIds.value) {
-      await rejectJoinInvitation({ groupId });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Rejecting join invitations...',
+    });
+
+    const numTotal = finalSelectedGroupIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, groupId] of finalSelectedGroupIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await rejectJoinInvitation({ groupId });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
     baseSelectedGroupIds.value.clear();
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Join invitation${pluralS(numSuccess)} rejected successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} join invitation${
+          numSuccess === 1 ? ' was' : 's were'
+        } rejected successfully.<br/>Failed to reject ${numFailed} join invitation${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error: any) {
     handleError(error);
   }
