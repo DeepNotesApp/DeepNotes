@@ -31,14 +31,21 @@
     />
 
     <RecentPages />
+
+    <q-separator
+      style="background-color: rgba(255, 255, 255, 0.15) !important"
+    />
+
+    <SelectedPages />
   </q-drawer>
 </template>
 
 <script setup lang="ts">
 import { listenPointerEvents } from '@stdlib/misc';
-import CurrentPath from 'src/layouts/PagesLayout/LeftSidebar/CurrentPath.vue';
 
+import CurrentPath from './CurrentPath.vue';
 import RecentPages from './RecentPages.vue';
+import SelectedPages from './SelectedPages.vue';
 
 function resizeLeftSidebar(event: PointerEvent) {
   listenPointerEvents(event, {

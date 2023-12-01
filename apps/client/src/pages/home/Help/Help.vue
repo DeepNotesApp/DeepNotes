@@ -35,6 +35,12 @@
         </li>
 
         <li>
+          <router-link :to="{ name: 'help/roadmap' }">
+            Is there a roadmap?
+          </router-link>
+        </li>
+
+        <li>
           <router-link :to="{ name: 'help/creating-group' }">
             How to create a group?
           </router-link>
@@ -55,6 +61,12 @@
         <li>
           <router-link :to="{ name: 'help/refund-policy' }">
             What is the refund policy on DeepNotes?
+          </router-link>
+        </li>
+
+        <li>
+          <router-link :to="{ name: 'help/subscription-expiration' }">
+            What happens when my subscription expires?
           </router-link>
         </li>
       </ul>

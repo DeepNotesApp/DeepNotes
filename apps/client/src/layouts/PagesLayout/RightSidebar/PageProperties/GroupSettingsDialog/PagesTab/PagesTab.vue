@@ -75,6 +75,24 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
+        label="Add to selection"
+        color="primary"
+        :disable="
+          finalSelectedPageIds.length === 0 ||
+          !rolesMap()[
+            realtimeCtx.hget(
+              'group-member',
+              `${groupId}:${authStore().userId}`,
+              'role',
+            )
+          ]?.permissions.editGroupSettings
+        "
+        @click="addToSelection"
+      />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
         label="Delete"
         color="negative"
         :disable="
@@ -95,12 +113,15 @@
 
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import CustomInfiniteScroll from 'src/components/CustomInfiniteScroll.vue';
+import { pageSelectionStore } from 'src/stores/page-selection';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -173,18 +194,60 @@ async function movePages() {
       },
     });
 
-    for (const pageId of finalSelectedPageIds.value) {
-      await movePage({
-        ...movePageParams,
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Moving pages...',
+    });
 
-        pageId,
-      });
+    const numTotal = finalSelectedPageIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, pageId] of finalSelectedPageIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await movePage({
+          ...movePageParams,
+
+          pageId,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
-    $quasar().notify({
-      message: 'Pages moved successfully.',
-      color: 'positive',
-    });
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Page${pluralS(numSuccess)} moved successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+          numSuccess === 1 ? ' was' : 's were'
+        } moved successfully.<br/>Failed to move ${numFailed} page${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error) {
     handleError(error);
   }
@@ -201,16 +264,69 @@ async function deletePages() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const pageId of finalSelectedPageIds.value) {
-      await deletePage(pageId);
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Deleting pages...',
+    });
+
+    const numTotal = finalSelectedPageIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, pageId] of finalSelectedPageIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await deletePage(pageId);
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
-    $quasar().notify({
-      message: 'Pages deleted successfully.',
-      color: 'positive',
-    });
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Page${pluralS(numSuccess)} deleted successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+          numSuccess === 1 ? ' was' : 's were'
+        } deleted successfully.<br/>Failed to delete ${numFailed} page${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error) {
     handleError(error);
   }
+}
+
+function addToSelection() {
+  for (const selectedPageId of finalSelectedPageIds.value) {
+    pageSelectionStore().selectedPages.add(selectedPageId);
+  }
+
+  $quasar().notify({
+    message: 'Pages added to selection.',
+    color: 'positive',
+  });
 }
 </script>

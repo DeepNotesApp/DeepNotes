@@ -4,6 +4,7 @@
   "devDependencies": {
     "@commitlint/cli": "^18.2.0",
     "@commitlint/config-conventional": "^18.1.0",
+    "@deeplib/tsconfig": "workspace:*",
     "@quasar/icongenie": "^3.1.1",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -24,7 +25,6 @@
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "~1.7.1",
-    "tsconfig": "workspace:*",
     "tsconfig-paths": "^4.2.0",
     "turbo": "^1.10.16",
     "typescript": "^5.2.2",

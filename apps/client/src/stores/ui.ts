@@ -21,6 +21,7 @@ export const useUIStore = defineStore('ui', () => {
 
     currentPathExpanded: true,
     recentPagesExpanded: true,
+    selectedPagesExpanded: false,
 
     headerHeight: 0,
 
@@ -35,6 +36,7 @@ export const useUIStore = defineStore('ui', () => {
 
   trackProp(state, 'currentPathExpanded');
   trackProp(state, 'recentPagesExpanded');
+  trackProp(state, 'selectedPagesExpanded');
 
   return {
     ...toRefs(state),

@@ -67,6 +67,8 @@
 import type { GroupRoleID } from '@deeplib/misc';
 import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { changeUserRole } from 'src/code/api-interface/groups/change-user-role';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils/misc';
@@ -107,13 +109,60 @@ async function changeRole() {
       throw new Error('Please select a role.');
     }
 
-    for (const userId of props.userIds) {
-      await changeUserRole({
-        groupId: props.groupId,
-        patientId: userId,
-        role: role.value,
-      });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Changing user roles...',
+    });
+
+    const numTotal = props.userIds.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, userId] of props.userIds.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await changeUserRole({
+          groupId: props.groupId,
+          patientId: userId,
+          role: role.value,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `User role${pluralS(numSuccess)} changed successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} user role${
+          numSuccess === 1 ? ' was' : 's were'
+        } changed successfully.<br/>Failed to change ${numFailed} user role${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
 
     dialogRef.value.onDialogOK();
   } catch (error: any) {

@@ -20,6 +20,7 @@
     { "path": "packages/@stdlib/db/tsconfig.json" },
     { "path": "packages/@stdlib/misc/tsconfig.json" },
     { "path": "packages/@stdlib/nestjs/tsconfig.json" },
+    { "path": "packages/@stdlib/redlock/tsconfig.json" },
     { "path": "packages/@stdlib/testing/tsconfig.json" },
     { "path": "packages/@stdlib/vue/tsconfig.json" }
   ]

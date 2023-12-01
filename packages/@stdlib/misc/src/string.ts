@@ -23,3 +23,7 @@ export function bytesToText(bytes: Uint8Array): string {
 export function padZeroes(num: number | string, length: number): string {
   return ('0'.repeat(length) + num).slice(-length);
 }
+
+export function pluralS(num: number): string {
+  return num === 1 ? '' : 's';
+}

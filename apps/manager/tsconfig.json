@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
 
-  "extends": "tsconfig/base.json",
+  "extends": "@deeplib/tsconfig/base.json",
 
   // Necessary for ts-node-dev to work
   "ts-node": {

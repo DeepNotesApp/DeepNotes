@@ -188,6 +188,29 @@ const routes: RouteRecordRaw[] = [
           },
         ],
       },
+      {
+        path: 'subscription-expiration',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/subscription-expiration',
+            component: () =>
+              import('src/pages/home/Help/Pages/SubscriptionExpiration.vue'),
+          },
+        ],
+      },
+      {
+        path: 'roadmap',
+        component: () => import('src/pages/home/Help/HelpLayout.vue'),
+        children: [
+          {
+            path: '',
+            name: 'help/roadmap',
+            component: () => import('src/pages/home/Help/Pages/Roadmap.vue'),
+          },
+        ],
+      },
     ],
   },
 

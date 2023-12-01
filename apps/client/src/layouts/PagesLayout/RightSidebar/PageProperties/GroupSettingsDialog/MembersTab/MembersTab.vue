@@ -121,6 +121,8 @@
 
 <script setup lang="ts">
 import { canManageRole, rolesMap } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
@@ -225,9 +227,7 @@ async function removeSelectedUsers() {
       title: 'Remove users',
       message: `Are you sure you want to remove ${
         finalSelectedUserIds.value.length
-      } user${
-        finalSelectedUserIds.value.length === 1 ? '' : 's'
-      } from the group?`,
+      } user${pluralS(finalSelectedUserIds.value.length)} from the group?`,
 
       focus: 'cancel',
 
@@ -235,13 +235,34 @@ async function removeSelectedUsers() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const userId of finalSelectedUserIds.value.filter(
-      (userId) => userId !== authStore().userId,
-    )) {
-      await removeGroupUser({
-        groupId,
-        patientId: userId,
-      });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Removing users...',
+    });
+
+    const numTotal = finalSelectedUserIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, userId] of finalSelectedUserIds.value
+      .filter((userId) => userId !== authStore().userId)
+      .entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await removeGroupUser({
+          groupId,
+          patientId: userId,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
     if (canManageSelected.value) {
@@ -253,9 +274,37 @@ async function removeSelectedUsers() {
         groupId,
         patientId: authStore().userId,
       });
+
+      numSuccess++;
     }
 
     baseSelectedUserIds.value.clear();
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `User${pluralS(numSuccess)} removed successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} user${
+          numSuccess === 1 ? ' was' : 's were'
+        } removed successfully.<br/>Failed to remove ${numFailed} user${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error: any) {
     handleError(error);
   }

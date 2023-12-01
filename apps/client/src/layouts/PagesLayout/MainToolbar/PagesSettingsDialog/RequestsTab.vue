@@ -78,6 +78,8 @@
 </template>
 
 <script setup lang="ts">
+import { pluralS } from '@stdlib/misc';
+import type { QNotifyUpdateOptions } from 'quasar';
 import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
@@ -152,13 +154,60 @@ async function cancelSelectedRequests() {
       ok: { label: 'Yes', flat: true, color: 'negative' },
     });
 
-    for (const groupId of finalSelectedGroupIds.value) {
-      await cancelJoinRequest({
-        groupId,
-      });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Canceling join requests...',
+    });
+
+    const numTotal = finalSelectedGroupIds.value.length;
+
+    let numSuccess = 0;
+    let numFailed = 0;
+
+    for (const [index, groupId] of finalSelectedGroupIds.value.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${numTotal}`,
+        });
+
+        await cancelJoinRequest({
+          groupId,
+        });
+
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
 
     baseSelectedGroupIds.value.clear();
+
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
+    };
+
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Join request${pluralS(numSuccess)} canceled successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} join request${
+          numSuccess === 1 ? ' was' : 's were'
+        } canceled successfully.<br/>Failed to cancel ${numFailed} join request${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
   } catch (error: any) {
     handleError(error);
   }

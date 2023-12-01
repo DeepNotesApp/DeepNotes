@@ -16,11 +16,20 @@
       max-width: 299px;
     "
   >
-    <q-toolbar style="padding: 0; flex: none; background-color: #141414">
+    <q-toolbar
+      style="
+        padding: 0;
+        flex: none;
+        background-color: #141414;
+        height: 32px;
+        min-height: 0;
+        overflow: hidden;
+      "
+    >
       <q-avatar style="margin-left: 9px">
         <q-icon
           name="mdi-chart-box"
-          size="26px"
+          size="20px"
         />
       </q-avatar>
 
@@ -30,7 +39,7 @@
           margin-left: -2px;
           text-align: left;
           color: rgba(255, 255, 255, 0.85);
-          font-size: 15.2px;
+          font-size: 13.5px;
         "
       >
         <template v-if="page.activeElem.react.value?.type === 'note'">
