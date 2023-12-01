@@ -26,5 +26,5 @@ export default boot(({ store }) => {
   uiStore(store).recentPagesExpanded =
     internals.localStorage.getItem('recentPagesExpanded') !== 'false';
   uiStore(store).selectedPagesExpanded =
-    internals.localStorage.getItem('recentPagesExpanded') === 'true';
+    internals.localStorage.getItem('selectedPagesExpanded') === 'true';
 });
