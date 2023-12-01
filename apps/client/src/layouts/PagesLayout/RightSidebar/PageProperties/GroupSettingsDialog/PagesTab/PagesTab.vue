@@ -75,6 +75,24 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
+        label="Add to selection"
+        color="primary"
+        :disable="
+          finalSelectedPageIds.length === 0 ||
+          !rolesMap()[
+            realtimeCtx.hget(
+              'group-member',
+              `${groupId}:${authStore().userId}`,
+              'role',
+            )
+          ]?.permissions.editGroupSettings
+        "
+        @click="addToSelection"
+      />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
         label="Delete"
         color="negative"
         :disable="
@@ -101,6 +119,7 @@ import { getPageTitle } from 'src/code/pages/utils';
 import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import CustomInfiniteScroll from 'src/components/CustomInfiniteScroll.vue';
+import { pageSelectionStore } from 'src/stores/page-selection';
 import type { Ref } from 'vue';
 
 import MovePageDialog from '../../MovePageDialog.vue';
@@ -212,5 +231,16 @@ async function deletePages() {
   } catch (error) {
     handleError(error);
   }
+}
+
+function addToSelection() {
+  for (const selectedPageId of finalSelectedPageIds.value) {
+    pageSelectionStore().selectedPages.add(selectedPageId);
+  }
+
+  $quasar().notify({
+    message: 'Pages added to selection.',
+    color: 'positive',
+  });
 }
 </script>
