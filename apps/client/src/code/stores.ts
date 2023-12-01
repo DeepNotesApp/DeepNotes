@@ -4,7 +4,9 @@ import { useAuthStore } from 'src/stores/auth';
 import { usePagesStore } from 'src/stores/pages';
 import { useUIStore } from 'src/stores/ui';
 
-function makeStoreFunc<T extends (...args: any[]) => any>(storeDefinition: T) {
+export function makeStoreFunc<T extends (...args: any[]) => any>(
+  storeDefinition: T,
+) {
   let _store: ReturnType<T>;
 
   return (pinia?: Pinia): ReturnType<T> => {

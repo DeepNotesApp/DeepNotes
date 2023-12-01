@@ -125,6 +125,10 @@
 
     <q-separator />
 
+    <PageSelection />
+
+    <q-separator />
+
     <VersionHistory />
 
     <q-separator />
@@ -147,6 +151,7 @@ import type { Ref } from 'vue';
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
 import MovePageDialog from './MovePageDialog.vue';
 import PageBacklinks from './PageBacklinks.vue';
+import PageSelection from './PageSelection.vue';
 import VersionHistory from './VersionHistory.vue';
 
 const page = inject<Ref<Page>>('page')!;
