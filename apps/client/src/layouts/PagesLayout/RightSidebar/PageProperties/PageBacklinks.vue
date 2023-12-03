@@ -36,14 +36,43 @@
         />
 
         <DeepBtn
-          class="delete-btn"
-          icon="mdi-close"
+          class="menu-btn"
+          icon="mdi-dots-vertical"
           round
           flat
-          style="min-width: 32px; min-height: 32px; width: 32px; height: 32px"
-          title="Remove backlink"
-          @click.stop="deleteBacklink(backlinkPageId)"
-        />
+          style="min-width: 0; min-height: 0; width: 32px; height: 32px"
+        >
+          <q-menu>
+            <q-list>
+              <q-item
+                clickable
+                v-ripple
+                @click="addToSelection(backlinkPageId)"
+              >
+                <q-item-section avatar>
+                  <q-icon name="mdi-selection-multiple" />
+                </q-item-section>
+
+                <q-item-section>
+                  <q-item-label>Add to selection</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item
+                clickable
+                v-ripple
+                @click="deleteBacklink(backlinkPageId)"
+              >
+                <q-item-section avatar>
+                  <q-icon name="mdi-trash-can" />
+                </q-item-section>
+
+                <q-item-section>
+                  <q-item-label>Delete backlink</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </DeepBtn>
       </div>
     </q-list>
   </div>
@@ -52,6 +81,7 @@
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
 import { handleError } from 'src/code/utils/misc';
+import { pageSelectionStore } from 'src/stores/page-selection';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
@@ -60,6 +90,16 @@ const backlinks = computed(
   (): string[] =>
     page.value.realtimeCtx.hget('page-backlinks', page.value.id, 'list') ?? [],
 );
+
+function addToSelection(pageId: string) {
+  pageSelectionStore().selectedPages.add(pageId);
+
+  $quasar().notify({
+    message: 'Page added to selection.',
+    color: 'positive',
+    timeout: 1000,
+  });
+}
 
 async function deleteBacklink(backlinkPageId: string) {
   try {
@@ -86,7 +126,7 @@ async function deleteBacklink(backlinkPageId: string) {
 .backlink {
   position: relative;
 
-  > .delete-btn {
+  > .menu-btn {
     position: absolute;
 
     top: 50%;
@@ -98,13 +138,6 @@ async function deleteBacklink(backlinkPageId: string) {
     min-height: 30px;
     width: 30px;
     height: 30px;
-
-    opacity: 0;
-    transition: opacity 0.2s;
   }
-}
-
-.backlink:hover > .delete-btn {
-  opacity: 1;
 }
 </style>
