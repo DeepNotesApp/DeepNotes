@@ -27,7 +27,7 @@
         >
           <Checkbox
             :model-value="selectedItemIds.has(itemId)"
-            style="pointer-events: none"
+            style="pointer-events: none; max-height: 100%"
           />
         </q-item-section>
 
