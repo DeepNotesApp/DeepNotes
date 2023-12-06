@@ -26,15 +26,7 @@
 
     <CurrentPath />
 
-    <q-separator
-      style="background-color: rgba(255, 255, 255, 0.15) !important"
-    />
-
     <RecentPages />
-
-    <q-separator
-      style="background-color: rgba(255, 255, 255, 0.15) !important"
-    />
 
     <SelectedPages />
   </q-drawer>

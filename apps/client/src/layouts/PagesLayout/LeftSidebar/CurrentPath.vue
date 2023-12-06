@@ -36,13 +36,11 @@
   </q-toolbar>
 
   <q-list
-    style="
-      height: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      transition: all 0.2s;
-    "
-    :style="{ flex: uiStore().currentPathExpanded ? '1' : '0' }"
+    ref="listRef"
+    style="height: 0; overflow-x: hidden; overflow-y: auto"
+    :style="{
+      flex: uiStore().currentPathExpanded ? uiStore().currentPathWeight : '0',
+    }"
   >
     <PageItem
       v-for="pageId in internals.pages.react.pathPageIds"
@@ -54,8 +52,57 @@
       class="current-path"
     />
   </q-list>
+
+  <div
+    v-if="
+      uiStore().currentPathExpanded &&
+      (uiStore().recentPagesExpanded || uiStore().selectedPagesExpanded)
+    "
+    style="position: relative"
+  >
+    <div
+      style="
+        position: absolute;
+        left: 0;
+        top: -12px;
+        right: 0;
+        bottom: -12px;
+        cursor: ns-resize;
+        z-index: 2147483647;
+      "
+      @pointerdown="resizeSection"
+    ></div>
+  </div>
+
+  <q-separator style="background-color: rgba(255, 255, 255, 0.15) !important" />
 </template>
 
 <script setup lang="ts">
-import { negateProp } from '@stdlib/misc';
+import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
+import type { ComponentPublicInstance } from 'vue';
+
+const listRef = ref<ComponentPublicInstance>();
+
+function resizeSection(downEvent: PointerEvent) {
+  listenPointerEvents(downEvent, {
+    move(moveEvent) {
+      const clientRect = listRef.value!.$el.getBoundingClientRect();
+
+      const othersHeight = uiStore().height - clientRect.height - 32 * 3 - 2;
+
+      const othersWeight =
+        (uiStore().recentPagesExpanded ? uiStore().recentPagesWeight : 0) +
+        (uiStore().selectedPagesExpanded ? uiStore().selectedPagesWeight : 0);
+
+      const myNewHeight = moveEvent.clientY - clientRect.y;
+
+      const myNewWeight = map(myNewHeight, 0, othersHeight, 0, othersWeight);
+
+      uiStore().recentPagesWeight -= myNewWeight - uiStore().currentPathWeight;
+      uiStore().currentPathWeight = myNewWeight;
+
+      uiStore().normalizeWeights();
+    },
+  });
+}
 </script>

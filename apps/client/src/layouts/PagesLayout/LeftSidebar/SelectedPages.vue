@@ -93,13 +93,12 @@
   </q-toolbar>
 
   <q-list
-    style="
-      height: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      transition: all 0.2s;
-    "
-    :style="{ flex: uiStore().selectedPagesExpanded ? '1' : '0' }"
+    style="height: 0; overflow-x: hidden; overflow-y: auto"
+    :style="{
+      flex: uiStore().selectedPagesExpanded
+        ? uiStore().selectedPagesWeight
+        : '0',
+    }"
   >
     <q-item v-if="pageSelectionStore().selectedPages.size === 0">
       <q-item-section>

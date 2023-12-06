@@ -36,13 +36,11 @@
   </q-toolbar>
 
   <q-list
-    style="
-      height: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      transition: all 0.2s;
-    "
-    :style="{ flex: uiStore().recentPagesExpanded ? '1' : '0' }"
+    ref="listRef"
+    style="height: 0; overflow-x: hidden; overflow-y: auto"
+    :style="{
+      flex: uiStore().recentPagesExpanded ? uiStore().recentPagesWeight : '0',
+    }"
   >
     <div
       v-for="pageId in internals.pages.react.recentPageIds"
@@ -68,12 +66,59 @@
       />
     </div>
   </q-list>
+
+  <div
+    style="position: relative"
+    v-if="uiStore().recentPagesExpanded && uiStore().selectedPagesExpanded"
+  >
+    <div
+      style="
+        position: absolute;
+        left: 0;
+        top: -12px;
+        right: 0;
+        bottom: -12px;
+        cursor: ns-resize;
+        z-index: 2147483647;
+      "
+      @pointerdown="resizeSection"
+    ></div>
+  </div>
+
+  <q-separator style="background-color: rgba(255, 255, 255, 0.15) !important" />
 </template>
 
 <script setup lang="ts">
-import { negateProp } from '@stdlib/misc';
+import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
 import { pull } from 'lodash';
 import { handleError } from 'src/code/utils/misc';
+import type { ComponentPublicInstance } from 'vue';
+
+const listRef = ref<ComponentPublicInstance>();
+
+function resizeSection(downEvent: PointerEvent) {
+  listenPointerEvents(downEvent, {
+    move(moveEvent) {
+      const clientRect = listRef.value!.$el.getBoundingClientRect();
+
+      const othersHeight = uiStore().height - clientRect.height - 32 * 3 - 2;
+
+      const othersWeight =
+        (uiStore().currentPathExpanded ? uiStore().currentPathWeight : 0) +
+        (uiStore().selectedPagesExpanded ? uiStore().selectedPagesWeight : 0);
+
+      const myNewHeight = moveEvent.clientY - clientRect.y;
+
+      const myNewWeight = map(myNewHeight, 0, othersHeight, 0, othersWeight);
+
+      uiStore().selectedPagesWeight -=
+        myNewWeight - uiStore().recentPagesWeight;
+      uiStore().recentPagesWeight = myNewWeight;
+
+      uiStore().normalizeWeights();
+    },
+  });
+}
 
 async function removeRecentPage(pageId: string) {
   try {
