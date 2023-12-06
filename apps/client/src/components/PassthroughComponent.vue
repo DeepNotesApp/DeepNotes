@@ -13,6 +13,6 @@
 import type { Component } from 'vue';
 
 defineProps<{
-  is?: string | Component;
+  is?: string | Component | object;
 }>();
 </script>

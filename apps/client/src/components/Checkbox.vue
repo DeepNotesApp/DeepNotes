@@ -12,7 +12,7 @@
 import type { QCheckboxProps } from 'quasar';
 
 interface Props extends QCheckboxProps {
-  modelValue: boolean;
+  modelValue: any;
 }
 
 defineProps<Props>();

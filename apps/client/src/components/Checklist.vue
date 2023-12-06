@@ -57,7 +57,7 @@ interface Props extends QListProps {
     itemIndex: number,
   ) => QItemProps & Record<string, unknown>;
 
-  itemsWrapper?: string | Component;
+  itemsWrapper?: string | Component | object;
   wrapperProps?: Record<string, unknown>;
   wrapperEvents?: Record<string, unknown>;
 }
