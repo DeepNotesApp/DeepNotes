@@ -11,15 +11,7 @@
     style="display: flex; flex-direction: column; background-color: #212121"
   >
     <div
-      style="
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: -12px;
-        width: 12px;
-        cursor: ew-resize;
-        z-index: 2147483647;
-      "
+      class="resize-handle"
       @pointerdown="resizeLeftSidebar"
       @dblclick="() => uiStore().resetLeftSidebarWidth()"
     ></div>
@@ -53,5 +45,23 @@ function resizeLeftSidebar(event: PointerEvent) {
   .q-drawer {
     border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
   }
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -10px;
+  left: calc(100% + 1px);
+  cursor: ew-resize;
+  z-index: 2147483647;
+
+  opacity: 0;
+  background-color: white;
+
+  transition: opacity 0.2s;
+}
+.resize-handle:hover {
+  opacity: 0.4;
 }
 </style>

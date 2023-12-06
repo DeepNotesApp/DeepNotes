@@ -72,16 +72,9 @@
     v-if="uiStore().recentPagesExpanded && uiStore().selectedPagesExpanded"
   >
     <div
-      style="
-        position: absolute;
-        left: 0;
-        top: -12px;
-        right: 0;
-        bottom: -12px;
-        cursor: ns-resize;
-        z-index: 2147483647;
-      "
-      @pointerdown="resizeSection"
+      class="resize-handle"
+      @pointerdown="resizeHandlePointerDown"
+      @dblclick="resizeHandleDoubleClick"
     ></div>
   </div>
 
@@ -96,7 +89,7 @@ import type { ComponentPublicInstance } from 'vue';
 
 const listRef = ref<ComponentPublicInstance>();
 
-function resizeSection(downEvent: PointerEvent) {
+function resizeHandlePointerDown(downEvent: PointerEvent) {
   listenPointerEvents(downEvent, {
     move(moveEvent) {
       const clientRect = listRef.value!.$el.getBoundingClientRect();
@@ -133,6 +126,14 @@ async function removeRecentPage(pageId: string) {
     handleError(error);
   }
 }
+
+function resizeHandleDoubleClick() {
+  const avgWeight =
+    (uiStore().recentPagesWeight + uiStore().selectedPagesWeight) / 2;
+
+  uiStore().recentPagesWeight = avgWeight;
+  uiStore().selectedPagesWeight = avgWeight;
+}
 </script>
 
 <style scoped lang="scss">
@@ -159,5 +160,23 @@ async function removeRecentPage(pageId: string) {
 
 .recent-page:hover > .remove-btn {
   opacity: 1;
+}
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  right: 0;
+  bottom: -6px;
+  cursor: ns-resize;
+  z-index: 2147483647;
+
+  opacity: 0;
+  background-color: white;
+
+  transition: opacity 0.2s;
+}
+.resize-handle:hover {
+  opacity: 0.4;
 }
 </style>

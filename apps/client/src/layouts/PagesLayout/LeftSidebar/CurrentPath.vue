@@ -61,16 +61,9 @@
     style="position: relative"
   >
     <div
-      style="
-        position: absolute;
-        left: 0;
-        top: -12px;
-        right: 0;
-        bottom: -12px;
-        cursor: ns-resize;
-        z-index: 2147483647;
-      "
-      @pointerdown="resizeSection"
+      class="resize-handle"
+      @pointerdown="resizeHandlePointerDown"
+      @dblclick="resizeHandleDoubleClick"
     ></div>
   </div>
 
@@ -83,7 +76,7 @@ import type { ComponentPublicInstance } from 'vue';
 
 const listRef = ref<ComponentPublicInstance>();
 
-function resizeSection(downEvent: PointerEvent) {
+function resizeHandlePointerDown(downEvent: PointerEvent) {
   listenPointerEvents(downEvent, {
     move(moveEvent) {
       const clientRect = listRef.value!.$el.getBoundingClientRect();
@@ -105,4 +98,32 @@ function resizeSection(downEvent: PointerEvent) {
     },
   });
 }
+
+function resizeHandleDoubleClick() {
+  const avgWeight =
+    (uiStore().currentPathWeight + uiStore().recentPagesWeight) / 2;
+
+  uiStore().currentPathWeight = avgWeight;
+  uiStore().recentPagesWeight = avgWeight;
+}
 </script>
+
+<style scoped lang="scss">
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  right: 0;
+  bottom: -6px;
+  cursor: ns-resize;
+  z-index: 2147483647;
+
+  opacity: 0;
+  background-color: white;
+
+  transition: opacity 0.2s;
+}
+.resize-handle:hover {
+  opacity: 0.4;
+}
+</style>
