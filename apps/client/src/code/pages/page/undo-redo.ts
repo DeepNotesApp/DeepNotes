@@ -3,6 +3,8 @@ import { ySyncPluginKey } from 'y-prosemirror';
 
 import type { Page } from './page';
 
+const _moduleLogger = mainLogger.sub('UndoRedo');
+
 export class PageUndoRedo {
   readonly page: Page;
 
@@ -37,10 +39,51 @@ export class PageUndoRedo {
       },
     );
 
-    this.undoManager.on('stack-cleared', this.updateReactiveData);
-    this.undoManager.on('stack-item-added', this.updateReactiveData);
-    this.undoManager.on('stack-item-popped', this.updateReactiveData);
-    this.undoManager.on('stack-item-updated', this.updateReactiveData);
+    this.undoManager.on('stack-cleared', (event: any) => {
+      _moduleLogger.debug('stack-cleared: %o', event);
+
+      this.updateReactiveData();
+    });
+    this.undoManager.on('stack-item-added', (event: any) => {
+      _moduleLogger.debug('stack-item-added: %o', event);
+
+      this.updateReactiveData();
+
+      event.stackItem.meta.set(
+        'selectedNoteIds',
+        this.page.selection.react.noteIds.slice(),
+      );
+      event.stackItem.meta.set(
+        'selectedArrowIds',
+        this.page.selection.react.arrowIds.slice(),
+      );
+    });
+    this.undoManager.on('stack-item-updated', (event: any) => {
+      // _moduleLogger.debug('stack-item-updated: %o', event);
+
+      this.updateReactiveData();
+
+      event.stackItem.meta.set(
+        'selectedNoteIds',
+        this.page.selection.react.noteIds.slice(),
+      );
+      event.stackItem.meta.set(
+        'selectedArrowIds',
+        this.page.selection.react.arrowIds.slice(),
+      );
+    });
+    this.undoManager.on('stack-item-popped', (event: any) => {
+      _moduleLogger.debug('stack-item-popped: %o', event);
+
+      this.updateReactiveData();
+
+      this.page.selection.set(
+        ...this.page.notes.fromIds(event.stackItem.meta.get('selectedNoteIds')),
+        ...this.page.arrows.fromIds(
+          event.stackItem.meta.get('selectedArrowIds'),
+        ),
+      );
+    });
   }
 
   resetCapturing() {
@@ -48,15 +91,11 @@ export class PageUndoRedo {
   }
 
   undo() {
-    this.page.selection.clear();
-
     this.undoManager.undo();
 
     this.updateReactiveData();
   }
   redo() {
-    this.page.selection.clear();
-
     this.undoManager.redo();
 
     this.updateReactiveData();
