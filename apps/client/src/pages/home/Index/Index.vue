@@ -171,15 +171,9 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/applications/kanban-board-thumbnail.webp"
-            title="Kanban boards"
-            href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database diagrams"
-            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
+            thumbnail-image="/applications/mind-map.webp"
+            title="Mind maps"
+            href="https://deepnotes.app/pages/cMwNNxpa2jZKuP_0zzrMP"
           />
 
           <Thumbnail
@@ -189,9 +183,15 @@
           />
 
           <Thumbnail
-            thumbnail-image="/applications/link-gallery-thumbnail.webp"
-            title="Link galleries"
-            href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
+            thumbnail-image="/applications/kanban-board-thumbnail.webp"
+            title="Kanban boards"
+            href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/database-structure-thumbnail.webp"
+            title="Database diagrams"
+            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
