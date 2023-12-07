@@ -34,7 +34,7 @@
     @click="scrollToAnchor('live-collaboration')"
   >
     <q-item-section style="padding-left: 24px">
-      Live collaboration
+      Realtime collaboration
     </q-item-section>
   </q-item>
 

@@ -33,8 +33,7 @@
                 "
                 >end-to-end encrypted</span
               >
-              infinite canvas with deep bidirectional page navigation and live
-              collaboration.
+              infinite canvas tool with deep nesting and realtime collaboration.
             </div>
 
             <template v-if="!authStore().loggedIn">
@@ -126,10 +125,9 @@
 
             <Gap style="height: 12px" />
 
-            <div style="font-size: 15px; max-width: 313px">
+            <div style="font-size: 15px; max-width: 300px">
               Double-click to create a note and explore the possibilities. Move,
-              resize, expand, collapse, link, colorize. Use containers to create
-              note hierarchies.
+              expand, colorize. Use containers to create nested notes.
             </div>
           </div>
         </div>
