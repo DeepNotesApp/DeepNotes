@@ -224,17 +224,17 @@ async function removeSelectedUsers() {
       message: 'Removing users...',
     });
 
-    const numTotal = finalSelectedUserIds.value.length;
+    const selectedUserIds = finalSelectedUserIds.value.filter(
+      (userId) => userId !== authStore().userId,
+    );
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, userId] of finalSelectedUserIds.value
-      .filter((userId) => userId !== authStore().userId)
-      .entries()) {
+    for (const [index, userId] of selectedUserIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedUserIds.length}`,
         });
 
         await removeGroupUser({

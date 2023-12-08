@@ -49,7 +49,7 @@
           <q-item
             clickable
             @click="clearRecentPages"
-            :disable="internals.pages.react.recentPageIds.length === 0"
+            :disable="recentPageIds.length === 0"
           >
             <q-item-section avatar>
               <q-icon name="mdi-close" />
@@ -71,7 +71,7 @@
       flex: uiStore().recentPagesExpanded ? uiStore().recentPagesWeight : '0',
     }"
   >
-    <q-item v-if="internals.pages.react.recentPageIds.length === 0">
+    <q-item v-if="recentPageIds.length === 0">
       <q-item-section>
         <q-item-label
           style="color: rgba(255, 255, 255, 0.7); font-size: 13.5px"
@@ -82,7 +82,7 @@
     </q-item>
 
     <div
-      v-for="pageId in internals.pages.react.recentPageIds"
+      v-for="pageId in recentPageIds"
       :key="pageId"
       class="recent-page"
     >
@@ -123,8 +123,17 @@
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
 import { pull } from 'lodash';
+import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { ComponentPublicInstance } from 'vue';
+
+const realtimeCtx = useRealtimeContext();
+
+const recentPageIds = computed(() =>
+  internals.pages.react.recentPageIds.filter((pageId) =>
+    realtimeCtx.hget('page', pageId, 'exists'),
+  ),
+);
 
 const listRef = ref<ComponentPublicInstance>();
 
@@ -178,9 +187,7 @@ async function removeRecentPage(pageId: string) {
     await trpcClient.users.pages.removeRecentPage.mutate({ pageId });
 
     internals.pages.recentPageIdsKeepOverride = true;
-    internals.pages.react.recentPageIdsOverride = [
-      ...internals.pages.react.recentPageIds,
-    ];
+    internals.pages.react.recentPageIdsOverride = recentPageIds.value.slice();
     pull(internals.pages.react.recentPageIdsOverride, pageId);
   } catch (error) {
     handleError(error);

@@ -359,9 +359,8 @@ export class Page implements IPageRegion {
     // Bump on recent pages
 
     internals.pages.recentPageIdsKeepOverride = true;
-    internals.pages.react.recentPageIdsOverride = [
-      ...internals.pages.react.recentPageIds,
-    ];
+    internals.pages.react.recentPageIdsOverride =
+      internals.pages.react.recentPageIds.slice();
     pull(this.app.react.recentPageIdsOverride!, this.id);
     this.app.react.recentPageIdsOverride!.unshift(this.id);
 

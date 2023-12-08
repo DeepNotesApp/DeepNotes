@@ -100,7 +100,7 @@
         : '0',
     }"
   >
-    <q-item v-if="pageSelectionStore().selectedPages.size === 0">
+    <q-item v-if="selectedPageIds.length === 0">
       <q-item-section>
         <q-item-label
           style="color: rgba(255, 255, 255, 0.7); font-size: 13.5px"
@@ -111,7 +111,7 @@
     </q-item>
 
     <div
-      v-for="pageId in pageSelectionStore().selectedPages"
+      v-for="pageId in selectedPageIds"
       :key="pageId"
       class="selected-page"
     >
@@ -141,10 +141,19 @@ import { negateProp, pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
+import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import { pageSelectionStore } from 'src/stores/page-selection';
 
 import MovePageDialog from '../RightSidebar/PageProperties/MovePageDialog.vue';
+
+const realtimeCtx = useRealtimeContext();
+
+const selectedPageIds = computed(() =>
+  Array.from(pageSelectionStore().selectedPages).filter((pageId) =>
+    realtimeCtx.hget('page', pageId, 'exists'),
+  ),
+);
 
 async function movePages() {
   try {
@@ -162,17 +171,15 @@ async function movePages() {
       message: 'Moving pages...',
     });
 
-    const numTotal = pageSelectionStore().selectedPages.size;
+    const _selectedPageIds = selectedPageIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, pageId] of Array.from(
-      pageSelectionStore().selectedPages,
-    ).entries()) {
+    for (const [index, pageId] of _selectedPageIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${_selectedPageIds.length}`,
         });
 
         await movePage({
@@ -234,17 +241,17 @@ async function deletePages() {
       message: 'Deleting pages...',
     });
 
-    const numTotal = pageSelectionStore().selectedPages.size;
+    const selectedPageIds = Array.from(
+      pageSelectionStore().selectedPages,
+    ).filter((pageId) => realtimeCtx.hget('page', pageId, 'exists'));
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, pageId] of Array.from(
-      pageSelectionStore().selectedPages,
-    ).entries()) {
+    for (const [index, pageId] of selectedPageIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedPageIds.length}`,
         });
 
         await deletePage(pageId);

@@ -90,6 +90,7 @@ const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 const requestGroupsIds = computed(() =>
   groupIds.value.filter(
     (groupId) =>
+      realtimeCtx.hget('group', groupId, 'permanent-deletion-date') == null &&
       realtimeCtx.hget(
         'group-join-request',
         `${groupId}:${authStore().userId}`,
@@ -143,15 +144,15 @@ async function cancelSelectedRequests() {
       message: 'Canceling join requests...',
     });
 
-    const numTotal = finalSelectedGroupIds.value.length;
+    const selectedGroupIds = finalSelectedGroupIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, groupId] of finalSelectedGroupIds.value.entries()) {
+    for (const [index, groupId] of selectedGroupIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedGroupIds.length}`,
         });
 
         await cancelJoinRequest({

@@ -6,6 +6,7 @@ import { areJoinRequestsAllowed } from './are-join-requests-allowed';
 import { encryptedContentKeyring } from './encrypted-content-keyring';
 import { encryptedName } from './encrypted-name';
 import { encryptedPrivateKeyring } from './encrypted-private-keyring';
+import { exists } from './exists';
 import { isPasswordProtected } from './is-password-protected';
 import { isPersonal } from './is-personal';
 import { isPublic } from './is-public';
@@ -32,6 +33,7 @@ export const group = validateDataHash({
     'encrypted-content-keyring': encryptedContentKeyring,
     'encrypted-name': encryptedName,
     'encrypted-private-keyring': encryptedPrivateKeyring,
+    exists: exists,
     'is-password-protected': isPasswordProtected,
     'is-personal': isPersonal,
     'is-public': isPublic,

@@ -181,15 +181,15 @@ async function rejectSelectedRequests() {
       message: 'Rejecting join requests...',
     });
 
-    const numTotal = finalSelectedUserIds.value.length;
+    const selectedUserIds = finalSelectedUserIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, userId] of finalSelectedUserIds.value.entries()) {
+    for (const [index, userId] of selectedUserIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedUserIds.length}`,
         });
 
         await rejectJoinRequest({

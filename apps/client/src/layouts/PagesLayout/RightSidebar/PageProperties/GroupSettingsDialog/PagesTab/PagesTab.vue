@@ -57,7 +57,7 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
-        label="Move"
+        :label="`Move page${pluralS(finalSelectedPageIds.length)}`"
         color="primary"
         :disable="
           finalSelectedPageIds.length === 0 ||
@@ -136,7 +136,7 @@ const basePageIds = inject<Ref<string[]>>('pageIds')!;
 const finalPageIds = computed(() =>
   basePageIds.value.filter(
     (pageId) =>
-      realtimeCtx.hget('page', pageId, 'group-id') === groupId &&
+      realtimeCtx.hget('page', pageId, 'exists') &&
       realtimeCtx.hget('page', pageId, 'permanent-deletion-date') == null,
   ),
 );
@@ -200,15 +200,15 @@ async function movePages() {
       message: 'Moving pages...',
     });
 
-    const numTotal = finalSelectedPageIds.value.length;
+    const selectedPageIds = finalSelectedPageIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, pageId] of finalSelectedPageIds.value.entries()) {
+    for (const [index, pageId] of selectedPageIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedPageIds.length}`,
         });
 
         await movePage({
@@ -270,15 +270,15 @@ async function deletePages() {
       message: 'Deleting pages...',
     });
 
-    const numTotal = finalSelectedPageIds.value.length;
+    const selectedPageIds = finalSelectedPageIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, pageId] of finalSelectedPageIds.value.entries()) {
+    for (const [index, pageId] of selectedPageIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedPageIds.length}`,
         });
 
         await deletePage(pageId);
