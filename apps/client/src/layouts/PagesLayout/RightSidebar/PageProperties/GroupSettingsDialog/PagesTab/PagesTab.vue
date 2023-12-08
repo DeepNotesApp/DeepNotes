@@ -15,6 +15,13 @@
       :disable="finalSelectedPageIds.length === 0"
       @click="deselectAll()"
     />
+
+    <Gap style="width: 26px" />
+
+    <Checkbox
+      label="Show deleted pages"
+      v-model="showDeletedPages"
+    />
   </div>
 
   <Gap style="height: 16px" />
@@ -31,6 +38,17 @@
         @unselect="(pageId) => baseSelectedPageIds.delete(pageId)"
         style="max-height: 100%; border-radius: 10px; background-color: #383838"
         class="overflow-auto"
+        :item-props="
+          (pageId) => ({
+            style: {
+              color:
+                realtimeCtx.hget('page', pageId, 'permanent-deletion-date') !=
+                null
+                  ? '#ff9696'
+                  : undefined,
+            },
+          })
+        "
       >
         <template #item="{ itemId: groupPageId }">
           <q-item-section>
@@ -132,12 +150,15 @@ const groupId = inject<string>('groupId')!;
 
 const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 
-const basePageIds = inject<Ref<string[]>>('pageIds')!;
+const basePageIds = inject<Ref<Set<string>>>('pageIds')!;
+
 const finalPageIds = computed(() =>
-  basePageIds.value.filter(
+  Array.from(basePageIds.value).filter(
     (pageId) =>
       realtimeCtx.hget('page', pageId, 'exists') &&
-      realtimeCtx.hget('page', pageId, 'permanent-deletion-date') == null,
+      (realtimeCtx.hget('page', pageId, 'permanent-deletion-date') == null ||
+        (showDeletedPages.value &&
+          realtimeCtx.hget('page', pageId, 'permanent-deletion-date') != null)),
   ),
 );
 
@@ -147,6 +168,8 @@ const baseSelectedPageIds = ref(new Set<string>());
 const finalSelectedPageIds = computed(() =>
   finalPageIds.value.filter((pageId) => baseSelectedPageIds.value.has(pageId)),
 );
+
+const showDeletedPages = ref(false);
 
 function selectAll() {
   for (const pageId of finalPageIds.value) {
@@ -164,10 +187,10 @@ async function onLoad(index: number, done: (stop?: boolean) => void) {
     const response = await trpcClient.groups.getPages.query({
       groupId,
 
-      lastPageId: basePageIds.value.at(-1),
+      lastPageId: Array.from(basePageIds.value).at(-1),
     });
 
-    basePageIds.value.push(...response.pageIds);
+    response.pageIds.forEach((pageId) => basePageIds.value.add(pageId));
     hasMorePages.value = response.hasMore;
   } catch (error) {
     handleError(error);
