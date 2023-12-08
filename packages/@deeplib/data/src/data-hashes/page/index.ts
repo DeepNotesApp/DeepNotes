@@ -4,6 +4,7 @@ import { once } from 'lodash';
 import { encryptedAbsoluteTitle } from './encrypted-absolute-title';
 import { encryptedRelativeTitle } from './encrypted-relative-title';
 import { encryptedSymmetricKeyring } from './encrypted-symmetric-keyring';
+import { exists } from './exists';
 import { free } from './free';
 import { groupId } from './group-id';
 import { nextKeyRotationDate } from './next-key-rotation-date';
@@ -28,6 +29,7 @@ export const page = validateDataHash({
     'encrypted-absolute-title': encryptedAbsoluteTitle,
     'encrypted-symmetric-keyring': encryptedSymmetricKeyring,
     'encrypted-relative-title': encryptedRelativeTitle,
+    exists: exists,
     'group-id': groupId,
     free: free,
     'next-key-rotation-date': nextKeyRotationDate,

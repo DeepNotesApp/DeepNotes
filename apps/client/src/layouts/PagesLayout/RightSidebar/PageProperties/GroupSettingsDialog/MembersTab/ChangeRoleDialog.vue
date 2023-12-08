@@ -115,15 +115,15 @@ async function changeRole() {
       message: 'Changing user roles...',
     });
 
-    const numTotal = props.userIds.length;
+    const selectedUserIds = props.userIds.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, userId] of props.userIds.entries()) {
+    for (const [index, userId] of selectedUserIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedUserIds.length}`,
         });
 
         await changeUserRole({

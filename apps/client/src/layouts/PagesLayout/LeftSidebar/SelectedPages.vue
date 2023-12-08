@@ -93,15 +93,14 @@
   </q-toolbar>
 
   <q-list
-    style="
-      height: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-      transition: all 0.2s;
-    "
-    :style="{ flex: uiStore().selectedPagesExpanded ? '1' : '0' }"
+    style="height: 0; overflow-x: hidden; overflow-y: auto"
+    :style="{
+      flex: uiStore().selectedPagesExpanded
+        ? uiStore().selectedPagesWeight
+        : '0',
+    }"
   >
-    <q-item v-if="pageSelectionStore().selectedPages.size === 0">
+    <q-item v-if="selectedPageIds.length === 0">
       <q-item-section>
         <q-item-label
           style="color: rgba(255, 255, 255, 0.7); font-size: 13.5px"
@@ -112,7 +111,7 @@
     </q-item>
 
     <div
-      v-for="pageId in pageSelectionStore().selectedPages"
+      v-for="pageId in selectedPageIds"
       :key="pageId"
       class="selected-page"
     >
@@ -142,140 +141,155 @@ import { negateProp, pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { movePage } from 'src/code/api-interface/pages/move';
-import { asyncDialog } from 'src/code/utils/misc';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import { pageSelectionStore } from 'src/stores/page-selection';
 
 import MovePageDialog from '../RightSidebar/PageProperties/MovePageDialog.vue';
 
+const realtimeCtx = useRealtimeContext();
+
+const selectedPageIds = computed(() =>
+  Array.from(pageSelectionStore().selectedPages).filter((pageId) =>
+    realtimeCtx.hget('page', pageId, 'exists'),
+  ),
+);
+
 async function movePages() {
-  const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
-    component: MovePageDialog,
+  try {
+    const movePageParams: Parameters<typeof movePage>[0] = await asyncDialog({
+      component: MovePageDialog,
 
-    componentProps: {
-      groupId: internals.pages.react.page.react.groupId,
-    },
-  });
+      componentProps: {
+        groupId: internals.pages.react.page.react.groupId,
+      },
+    });
 
-  const notif = $quasar().notify({
-    group: false,
-    timeout: 0,
-    message: 'Moving pages...',
-  });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Moving pages...',
+    });
 
-  const numTotal = pageSelectionStore().selectedPages.size;
+    const _selectedPageIds = selectedPageIds.value.slice();
 
-  let numSuccess = 0;
-  let numFailed = 0;
+    let numSuccess = 0;
+    let numFailed = 0;
 
-  for (const [index, pageId] of Array.from(
-    pageSelectionStore().selectedPages,
-  ).entries()) {
-    try {
-      notif({
-        caption: `${index} of ${numTotal}`,
-      });
+    for (const [index, pageId] of _selectedPageIds.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${_selectedPageIds.length}`,
+        });
 
-      await movePage({
-        ...movePageParams,
+        await movePage({
+          ...movePageParams,
 
-        pageId,
-      });
+          pageId,
+        });
 
-      numSuccess++;
-    } catch (error) {
-      numFailed++;
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
-  }
 
-  let notifUpdateOptions: QNotifyUpdateOptions = {
-    timeout: undefined,
-    caption: undefined,
-  };
-
-  if (numFailed === 0) {
-    notifUpdateOptions = {
-      ...notifUpdateOptions,
-      message: `Page${pluralS(numSuccess)} moved successfully.`,
-      color: 'positive',
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
     };
-  } else {
-    notifUpdateOptions = {
-      ...notifUpdateOptions,
-      message: `${numSuccess > 0 ? numSuccess : 'No'} page${
-        numSuccess === 1 ? ' was' : 's were'
-      } moved successfully.<br/>Failed to move ${numFailed} page${pluralS(
-        numFailed,
-      )}.`,
-      color: 'negative',
-      html: true,
-    };
-  }
 
-  notif(notifUpdateOptions);
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Page${pluralS(numSuccess)} moved successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+          numSuccess === 1 ? ' was' : 's were'
+        } moved successfully.<br/>Failed to move ${numFailed} page${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
+  } catch (error) {
+    handleError(error);
+  }
 }
 
 async function deletePages() {
-  await asyncDialog({
-    title: 'Delete pages',
-    message: 'Are you sure you want to delete these pages?',
+  try {
+    await asyncDialog({
+      title: 'Delete pages',
+      message: 'Are you sure you want to delete these pages?',
 
-    focus: 'cancel',
-    cancel: { label: 'No', flat: true, color: 'primary' },
-    ok: { label: 'Yes', flat: true, color: 'negative' },
-  });
+      focus: 'cancel',
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
 
-  const notif = $quasar().notify({
-    group: false,
-    timeout: 0,
-    message: 'Deleting pages...',
-  });
+    const notif = $quasar().notify({
+      group: false,
+      timeout: 0,
+      message: 'Deleting pages...',
+    });
 
-  const numTotal = pageSelectionStore().selectedPages.size;
+    const selectedPageIds = Array.from(
+      pageSelectionStore().selectedPages,
+    ).filter((pageId) => realtimeCtx.hget('page', pageId, 'exists'));
 
-  let numSuccess = 0;
-  let numFailed = 0;
+    let numSuccess = 0;
+    let numFailed = 0;
 
-  for (const [index, pageId] of Array.from(
-    pageSelectionStore().selectedPages,
-  ).entries()) {
-    try {
-      notif({
-        caption: `${index} of ${numTotal}`,
-      });
+    for (const [index, pageId] of selectedPageIds.entries()) {
+      try {
+        notif({
+          caption: `${index} of ${selectedPageIds.length}`,
+        });
 
-      await deletePage(pageId);
+        await deletePage(pageId);
 
-      numSuccess++;
-    } catch (error) {
-      numFailed++;
+        numSuccess++;
+      } catch (error) {
+        numFailed++;
+      }
     }
-  }
 
-  let notifUpdateOptions: QNotifyUpdateOptions = {
-    timeout: undefined,
-    caption: undefined,
-  };
-
-  if (numFailed === 0) {
-    notifUpdateOptions = {
-      ...notifUpdateOptions,
-      message: `Page${pluralS(numSuccess)} deleted successfully.`,
-      color: 'positive',
+    let notifUpdateOptions: QNotifyUpdateOptions = {
+      timeout: undefined,
+      caption: undefined,
     };
-  } else {
-    notifUpdateOptions = {
-      ...notifUpdateOptions,
-      message: `${numSuccess > 0 ? numSuccess : 'No'} page${
-        numSuccess === 1 ? ' was' : 's were'
-      } deleted successfully.<br/>Failed to delete ${numFailed} page${pluralS(
-        numFailed,
-      )}.`,
-      color: 'negative',
-      html: true,
-    };
-  }
 
-  notif(notifUpdateOptions);
+    if (numFailed === 0) {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `Page${pluralS(numSuccess)} deleted successfully.`,
+        color: 'positive',
+      };
+    } else {
+      notifUpdateOptions = {
+        ...notifUpdateOptions,
+        message: `${numSuccess > 0 ? numSuccess : 'No'} page${
+          numSuccess === 1 ? ' was' : 's were'
+        } deleted successfully.<br/>Failed to delete ${numFailed} page${pluralS(
+          numFailed,
+        )}.`,
+        color: 'negative',
+        html: true,
+      };
+    }
+
+    notif(notifUpdateOptions);
+  } catch (error) {
+    handleError(error);
+  }
 }
 </script>
 

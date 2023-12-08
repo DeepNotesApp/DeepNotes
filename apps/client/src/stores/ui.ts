@@ -1,4 +1,4 @@
-import { negateProp } from '@stdlib/misc';
+import { minmax, negateProp } from '@stdlib/misc';
 import { defineStore } from 'pinia';
 
 function trackProp<State>(state: State, prop: Extract<keyof State, string>) {
@@ -23,6 +23,10 @@ export const useUIStore = defineStore('ui', () => {
     recentPagesExpanded: true,
     selectedPagesExpanded: false,
 
+    currentPathWeight: 1,
+    recentPagesWeight: 1,
+    selectedPagesWeight: 1,
+
     headerHeight: 0,
 
     width: 0,
@@ -37,6 +41,10 @@ export const useUIStore = defineStore('ui', () => {
   trackProp(state, 'currentPathExpanded');
   trackProp(state, 'recentPagesExpanded');
   trackProp(state, 'selectedPagesExpanded');
+
+  trackProp(state, 'currentPathWeight');
+  trackProp(state, 'recentPagesWeight');
+  trackProp(state, 'selectedPagesWeight');
 
   return {
     ...toRefs(state),
@@ -58,6 +66,25 @@ export const useUIStore = defineStore('ui', () => {
 
     resetLeftSidebarWidth() {
       state.leftSidebarWidth = 240;
+    },
+
+    normalizeWeights() {
+      const min = minmax(
+        Math.min(
+          state.currentPathWeight,
+          state.recentPagesWeight,
+          state.selectedPagesWeight,
+        ),
+        1e-10,
+        1e10,
+      );
+
+      state.currentPathWeight =
+        minmax(state.currentPathWeight / min, 1e-10, 1e10) || 1;
+      state.recentPagesWeight =
+        minmax(state.recentPagesWeight / min, 1e-10, 1e10) || 1;
+      state.selectedPagesWeight =
+        minmax(state.selectedPagesWeight / min, 1e-10, 1e10) || 1;
     },
   };
 });

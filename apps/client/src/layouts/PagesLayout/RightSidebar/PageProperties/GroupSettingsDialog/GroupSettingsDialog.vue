@@ -237,7 +237,7 @@ provide('groupId', props.groupId);
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;
 provide('dialog', dialogRef);
 
-const pageIds = ref<string[]>([]);
+const pageIds = ref<Set<string>>(new Set());
 const hasMorePages = ref(true);
 provide('pageIds', pageIds);
 provide('hasMorePages', hasMorePages);

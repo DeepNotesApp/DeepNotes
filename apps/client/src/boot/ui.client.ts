@@ -27,4 +27,11 @@ export default boot(({ store }) => {
     internals.localStorage.getItem('recentPagesExpanded') !== 'false';
   uiStore(store).selectedPagesExpanded =
     internals.localStorage.getItem('selectedPagesExpanded') === 'true';
+
+  uiStore(store).currentPathWeight =
+    parseFloat(internals.localStorage.getItem('currentPathWeight')!) || 1;
+  uiStore(store).recentPagesWeight =
+    parseFloat(internals.localStorage.getItem('recentPagesWeight')!) || 1;
+  uiStore(store).selectedPagesWeight =
+    parseFloat(internals.localStorage.getItem('selectedPagesWeight')!) || 1;
 });

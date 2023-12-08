@@ -554,18 +554,57 @@ export class DataAbstraction<
       dtrx?: DataTransaction;
     },
   ) {
-    let result;
+    // Collect the extra columns of all fields affected
+
+    const extraColumns = new Set<string>();
+
+    await Promise.allSettled(
+      Object.entries(this.dataHashes[prefix].fields).map(
+        async ([_fieldName, fieldInfos]) => {
+          let modelHasSomeFieldColumns = false;
+
+          for (const column of fieldInfos.columns ?? []) {
+            if (column in model) {
+              modelHasSomeFieldColumns = true;
+              break;
+            }
+          }
+
+          if (modelHasSomeFieldColumns) {
+            for (const column of fieldInfos.columns ?? []) {
+              if (!(column in model)) {
+                extraColumns.add(column);
+              }
+            }
+          }
+        },
+      ),
+    );
 
     if (!params?.cacheOnly) {
-      result = await (
-        await this.dataHashes[prefix].model()
-      )
+      let patchQuery: any = (await this.dataHashes[prefix].model())
         .query(params?.dtrx?.trx ?? params?.trx)
         .findById(splitStr(suffix, ':'))
         .patch(model);
+
+      if (extraColumns.size > 0) {
+        patchQuery = patchQuery.returning(Array.from(extraColumns));
+      }
+
+      model = { ...model, ...(await patchQuery) };
+    } else if (extraColumns.size > 0) {
+      model = {
+        ...model,
+        ...(await this.dataHashes[prefix].model())
+          .query(params?.dtrx?.trx ?? params?.trx)
+          .findById(splitStr(suffix, ':'))
+          .select(Array.from(extraColumns)),
+      };
     }
 
-    const values: Record<string, any> = {};
+    // Collect the new values of all fields affected
+
+    const newValues: Record<string, any> = {};
 
     await Promise.allSettled(
       Object.entries(this.dataHashes[prefix].fields).map(
@@ -580,7 +619,7 @@ export class DataAbstraction<
           }
 
           if (modelHasAllFieldColumns) {
-            values[fieldName] =
+            newValues[fieldName] =
               (await fieldInfos.get?.({
                 model,
                 suffix,
@@ -591,13 +630,11 @@ export class DataAbstraction<
       ),
     );
 
-    await this.hmset(prefix, suffix, values, {
+    await this.hmset(prefix, suffix, newValues, {
       ...params,
 
       cacheOnly: true,
     });
-
-    return result;
   }
 
   async delete(

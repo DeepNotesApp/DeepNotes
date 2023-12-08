@@ -26,32 +26,27 @@
 
     <div style="flex: 1; height: 0; display: flex">
       <div style="flex: 1">
-        <q-list
+        <Checklist
+          :item-ids="groupIds"
+          :selected-item-ids="baseSelectedGroupIds"
+          @select="(pageId) => baseSelectedGroupIds.add(pageId)"
+          @unselect="(pageId) => baseSelectedGroupIds.delete(pageId)"
           style="
             border-radius: 10px;
             padding: 0;
             overflow-y: auto;
             max-height: 100%;
+            background-color: #383838;
           "
         >
-          <q-item
-            v-for="groupId in requestGroupsIds"
-            :key="groupId"
-            class="text-grey-1"
-            style="background-color: #424242"
-            clickable
-            v-ripple
-            active-class="bg-grey-7"
-            :active="baseSelectedGroupIds.has(groupId)"
-            @click="select(groupId, $event as MouseEvent)"
-          >
+          <template #item="{ itemId: groupId }">
             <q-item-section>
               <q-item-label>
                 {{ groupNames()(groupId).get().text }}
               </q-item-label>
             </q-item-section>
-          </q-item>
-        </q-list>
+          </template>
+        </Checklist>
       </div>
 
       <Gap style="width: 16px" />
@@ -95,6 +90,7 @@ const realtimeCtx = inject<RealtimeContext>('realtimeCtx')!;
 const requestGroupsIds = computed(() =>
   groupIds.value.filter(
     (groupId) =>
+      realtimeCtx.hget('group', groupId, 'permanent-deletion-date') == null &&
       realtimeCtx.hget(
         'group-join-request',
         `${groupId}:${authStore().userId}`,
@@ -130,18 +126,6 @@ function deselectAll() {
   }
 }
 
-function select(groupId: string, event: MouseEvent) {
-  if (!isCtrlDown(event)) {
-    baseSelectedGroupIds.value.clear();
-  }
-
-  if (baseSelectedGroupIds.value.has(groupId)) {
-    baseSelectedGroupIds.value.delete(groupId);
-  } else {
-    baseSelectedGroupIds.value.add(groupId);
-  }
-}
-
 async function cancelSelectedRequests() {
   try {
     await asyncDialog({
@@ -160,15 +144,15 @@ async function cancelSelectedRequests() {
       message: 'Canceling join requests...',
     });
 
-    const numTotal = finalSelectedGroupIds.value.length;
+    const selectedGroupIds = finalSelectedGroupIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, groupId] of finalSelectedGroupIds.value.entries()) {
+    for (const [index, groupId] of selectedGroupIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedGroupIds.length}`,
         });
 
         await cancelJoinRequest({

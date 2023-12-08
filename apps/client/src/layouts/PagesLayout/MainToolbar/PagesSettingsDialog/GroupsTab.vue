@@ -156,15 +156,15 @@ async function leaveSelectedGroups() {
       message: 'Leaving groups...',
     });
 
-    const numTotal = finalSelectedGroupIds.value.length;
+    const selectedGroupIds = finalSelectedGroupIds.value.slice();
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, groupId] of finalSelectedGroupIds.value.entries()) {
+    for (const [index, groupId] of selectedGroupIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedGroupIds.length}`,
         });
 
         await removeGroupUser({

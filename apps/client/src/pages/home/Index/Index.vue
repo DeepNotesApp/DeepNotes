@@ -33,8 +33,7 @@
                 "
                 >end-to-end encrypted</span
               >
-              infinite canvas with deep bidirectional page navigation and live
-              collaboration.
+              infinite canvas tool with deep nesting and realtime collaboration.
             </div>
 
             <template v-if="!authStore().loggedIn">
@@ -126,10 +125,9 @@
 
             <Gap style="height: 12px" />
 
-            <div style="font-size: 15px; max-width: 313px">
+            <div style="font-size: 15px; max-width: 300px">
               Double-click to create a note and explore the possibilities. Move,
-              resize, expand, collapse, link, colorize. Use containers to create
-              note hierarchies.
+              expand, colorize. Use containers to create nested notes.
             </div>
           </div>
         </div>
@@ -171,15 +169,9 @@
 
         <div class="row">
           <Thumbnail
-            thumbnail-image="/applications/kanban-board-thumbnail.webp"
-            title="Kanban boards"
-            href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
-          />
-
-          <Thumbnail
-            thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database diagrams"
-            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
+            thumbnail-image="/applications/mind-map.webp"
+            title="Mind maps"
+            href="https://deepnotes.app/pages/cMwNNxpa2jZKuP_0zzrMP"
           />
 
           <Thumbnail
@@ -189,9 +181,15 @@
           />
 
           <Thumbnail
-            thumbnail-image="/applications/link-gallery-thumbnail.webp"
-            title="Link galleries"
-            href="https://deepnotes.app/pages/KzH-9hRoZufmBUVwoRZ4u"
+            thumbnail-image="/applications/kanban-board-thumbnail.webp"
+            title="Kanban boards"
+            href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
+          />
+
+          <Thumbnail
+            thumbnail-image="/applications/database-structure-thumbnail.webp"
+            title="Database diagrams"
+            href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail

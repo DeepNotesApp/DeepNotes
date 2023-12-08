@@ -31,6 +31,7 @@ function selectPage() {
   $quasar().notify({
     message: 'Page added to selection.',
     color: 'positive',
+    timeout: 1000,
   });
 }
 
@@ -62,6 +63,7 @@ function selectLinkedPages() {
   $quasar().notify({
     message: 'Linked pages added to selection.',
     color: 'positive',
+    timeout: 1000,
   });
 }
 </script>

@@ -71,8 +71,6 @@ export class NoteDragging {
     note: PageNote;
     event: PointerEvent;
   }) => {
-    this.react.active = true;
-
     this.initialRegionId = this.page.activeRegion.react.value.id;
     this.finalRegionId = this.page.id;
 
@@ -107,9 +105,15 @@ export class NoteDragging {
         selectedNote.react.collab.pos,
       );
     }
+
+    this.react.active = true;
   };
 
   private _dragUpdate = (event: PointerEvent) => {
+    if (!this.react.active) {
+      return;
+    }
+
     const clientPos = this.page.pos.eventToClient(event);
 
     const worldDiff = this.page.sizes.screenToWorld2D(

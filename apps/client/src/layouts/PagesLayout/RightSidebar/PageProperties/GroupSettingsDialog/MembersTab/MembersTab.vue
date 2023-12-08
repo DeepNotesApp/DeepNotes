@@ -21,25 +21,20 @@
 
   <div style="flex: 1; height: 0; display: flex">
     <div style="flex: 1">
-      <q-list
+      <Checklist
+        :item-ids="membersUserIds"
+        :selected-item-ids="baseSelectedUserIds"
+        @select="(pageId) => baseSelectedUserIds.add(pageId)"
+        @unselect="(pageId) => baseSelectedUserIds.delete(pageId)"
         style="
           border-radius: 10px;
-          max-height: 100%;
           padding: 0;
           overflow-y: auto;
+          max-height: 100%;
+          background-color: #383838;
         "
       >
-        <q-item
-          v-for="userId in membersUserIds"
-          :key="userId"
-          class="text-grey-1"
-          style="background-color: #424242"
-          clickable
-          v-ripple
-          active-class="bg-grey-7"
-          :active="baseSelectedUserIds.has(userId)"
-          @click="select(userId, $event as MouseEvent)"
-        >
+        <template #item="{ itemId: userId }">
           <q-item-section>
             <q-item-label>
               {{ groupMemberNames()(`${groupId}:${userId}`).get().text }}
@@ -62,8 +57,8 @@
               }}
             </q-item-label>
           </q-item-section>
-        </q-item>
-      </q-list>
+        </template>
+      </Checklist>
     </div>
 
     <Gap style="width: 16px" />
@@ -127,7 +122,7 @@ import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { RealtimeContext } from 'src/code/realtime/context';
-import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';
 import ChangeRoleDialog from './ChangeRoleDialog.vue';
@@ -209,18 +204,6 @@ function deselectAll() {
   }
 }
 
-function select(id: string, event: MouseEvent) {
-  if (!isCtrlDown(event)) {
-    baseSelectedUserIds.value.clear();
-  }
-
-  if (baseSelectedUserIds.value.has(id)) {
-    baseSelectedUserIds.value.delete(id);
-  } else {
-    baseSelectedUserIds.value.add(id);
-  }
-}
-
 async function removeSelectedUsers() {
   try {
     await asyncDialog({
@@ -241,17 +224,17 @@ async function removeSelectedUsers() {
       message: 'Removing users...',
     });
 
-    const numTotal = finalSelectedUserIds.value.length;
+    const selectedUserIds = finalSelectedUserIds.value.filter(
+      (userId) => userId !== authStore().userId,
+    );
 
     let numSuccess = 0;
     let numFailed = 0;
 
-    for (const [index, userId] of finalSelectedUserIds.value
-      .filter((userId) => userId !== authStore().userId)
-      .entries()) {
+    for (const [index, userId] of selectedUserIds.entries()) {
       try {
         notif({
-          caption: `${index} of ${numTotal}`,
+          caption: `${index} of ${selectedUserIds.length}`,
         });
 
         await removeGroupUser({

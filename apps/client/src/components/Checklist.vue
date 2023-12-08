@@ -27,7 +27,7 @@
         >
           <Checkbox
             :model-value="selectedItemIds.has(itemId)"
-            style="pointer-events: none"
+            style="pointer-events: none; max-height: 100%"
           />
         </q-item-section>
 
@@ -57,7 +57,7 @@ interface Props extends QListProps {
     itemIndex: number,
   ) => QItemProps & Record<string, unknown>;
 
-  itemsWrapper?: string | Component;
+  itemsWrapper?: string | Component | object;
   wrapperProps?: Record<string, unknown>;
   wrapperEvents?: Record<string, unknown>;
 }

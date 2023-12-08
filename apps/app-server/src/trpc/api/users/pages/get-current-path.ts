@@ -24,8 +24,7 @@ export async function getCurrentPath({
   // Check if page exists
 
   if (
-    (await ctx.dataAbstraction.hget('page', input.initialPageId, 'group-id')) ==
-    null
+    !(await ctx.dataAbstraction.hget('page', input.initialPageId, 'exists'))
   ) {
     throw new TRPCError({
       message: 'This page does not exist.',
