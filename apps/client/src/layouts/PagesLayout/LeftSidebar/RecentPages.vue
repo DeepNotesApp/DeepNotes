@@ -33,6 +33,35 @@
         </q-toolbar-title>
       </div>
     </DeepBtn>
+
+    <q-btn
+      icon="mdi-menu"
+      style="
+        position: absolute;
+        right: 4px;
+        width: 32px;
+        height: 32px;
+        min-height: 0;
+      "
+    >
+      <q-menu auto-close>
+        <q-list>
+          <q-item
+            clickable
+            @click="clearRecentPages"
+            :disable="internals.pages.react.recentPageIds.length === 0"
+          >
+            <q-item-section avatar>
+              <q-icon name="mdi-close" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Clear recent pages</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
   </q-toolbar>
 
   <q-list
@@ -42,6 +71,16 @@
       flex: uiStore().recentPagesExpanded ? uiStore().recentPagesWeight : '0',
     }"
   >
+    <q-item v-if="internals.pages.react.recentPageIds.length === 0">
+      <q-item-section>
+        <q-item-label
+          style="color: rgba(255, 255, 255, 0.7); font-size: 13.5px"
+        >
+          No recent pages.
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+
     <div
       v-for="pageId in internals.pages.react.recentPageIds"
       :key="pageId"
@@ -84,7 +123,7 @@
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
 import { pull } from 'lodash';
-import { handleError } from 'src/code/utils/misc';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { ComponentPublicInstance } from 'vue';
 
 const listRef = ref<ComponentPublicInstance>();
@@ -111,6 +150,27 @@ function resizeHandlePointerDown(downEvent: PointerEvent) {
       uiStore().normalizeWeights();
     },
   });
+}
+
+async function clearRecentPages() {
+  try {
+    await asyncDialog({
+      title: 'Clear recent pages',
+      message: 'Are you sure you want to clear recent pages?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    await trpcClient.users.pages.clearRecentPages.mutate();
+
+    internals.pages.recentPageIdsKeepOverride = true;
+    internals.pages.react.recentPageIdsOverride = [];
+  } catch (error) {
+    handleError(error);
+  }
 }
 
 async function removeRecentPage(pageId: string) {

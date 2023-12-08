@@ -1,5 +1,6 @@
 import { trpc } from 'src/trpc/server';
 
+import { clearRecentPagesProcedure } from './clear-recent-pages';
 import { getCurrentPathProcedure } from './get-current-path';
 import { getGroupIdsProcedure } from './get-group-ids';
 import { getStartingPageIdProcedure } from './get-starting-page-id';
@@ -13,6 +14,8 @@ export const pagesRouter = trpc.router({
 
   getStartingPageId: getStartingPageIdProcedure(),
   getCurrentPath: getCurrentPathProcedure(),
+
+  clearRecentPages: clearRecentPagesProcedure(),
   removeRecentPage: removeRecentPageProcedure(),
 
   setEncryptedDefaultNote: setEncryptedDefaultNoteProcedure(),
