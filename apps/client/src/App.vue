@@ -10,7 +10,7 @@ import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
-  title: 'DeepNotes - Deeply Nested Infinite Canvases',
+  title: 'DeepNotes - Deeply-Nested Infinite Canvases',
 }));
 
 onMounted(() => {
