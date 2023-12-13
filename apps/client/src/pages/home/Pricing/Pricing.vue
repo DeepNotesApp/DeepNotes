@@ -3,7 +3,7 @@
     <Gap style="height: 120px" />
 
     <div style="font-size: 45px; font-weight: bold; text-align: center">
-      Pricing Plans
+      {{ $t('pricingPlans') }}
     </div>
 
     <Gap style="height: 52px" />

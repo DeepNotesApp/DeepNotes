@@ -86,7 +86,7 @@
 
     <div style="padding: 20px; display: flex; flex-direction: column">
       <DeepBtn
-        label="Group settings"
+        :label="$t('groupSettings')"
         icon="mdi-account-cog"
         color="primary"
         @click="

@@ -22,7 +22,9 @@
           background-color: #222222;
         "
       >
-        <div style="font-size: 30px; font-weight: bold">Basic plan</div>
+        <div style="font-size: 30px; font-weight: bold">
+          {{ $t('basicPlan') }}
+        </div>
 
         <Gap style="height: 32px" />
 
@@ -43,7 +45,7 @@
               class="feature-icon"
             />
 
-            Create up to <b>50 pages</b>
+            <span v-html="$t('createUpTo50Pages')"></span>
           </li>
 
           <Gap style="height: 8px" />
@@ -55,14 +57,14 @@
               class="feature-icon"
             />
 
-            <b>Personal</b> use only
+            <span v-html="$t('personalUseOnly')"></span>
           </li>
         </ul>
 
         <Gap style="height: 32px" />
 
         <DeepBtn
-          label="See more details"
+          :label="$t('seeMoreDetails')"
           color="primary"
           style="width: 100%"
           :to="{ name: 'pricing' }"
@@ -89,7 +91,9 @@
           background-color: #222222;
         "
       >
-        <div style="font-size: 30px; font-weight: bold">Pro plan</div>
+        <div style="font-size: 30px; font-weight: bold">
+          {{ $t('proPlan') }}
+        </div>
 
         <Gap style="height: 32px" />
 
@@ -124,7 +128,7 @@
               class="feature-icon"
             />
 
-            Create <b>unlimited pages</b>
+            <span v-html="$t('createUnlimitedPages')"></span>
           </li>
 
           <Gap style="height: 8px" />
@@ -136,14 +140,14 @@
               class="feature-icon"
             />
 
-            Create <b>collaborative groups</b>
+            <span v-html="$t('createCollaborativeGroups')"></span>
           </li>
         </ul>
 
         <Gap style="height: 32px" />
 
         <DeepBtn
-          label="See more details"
+          :label="$t('seeMoreDetails')"
           color="primary"
           style="width: 100%"
           :to="{ name: 'pricing' }"

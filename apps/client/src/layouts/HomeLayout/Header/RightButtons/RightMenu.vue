@@ -36,7 +36,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-login" />
               </q-item-section>
-              <q-item-section>Login</q-item-section>
+              <q-item-section>{{ $t('login') }}</q-item-section>
             </q-item>
 
             <q-item
@@ -46,7 +46,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-account-plus" />
               </q-item-section>
-              <q-item-section>Sign Up</q-item-section>
+              <q-item-section>{{ $t('signUp') }}</q-item-section>
             </q-item>
           </template>
 
@@ -58,7 +58,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-account" />
               </q-item-section>
-              <q-item-section>Account settings</q-item-section>
+              <q-item-section>{{ $t('accountSettings') }}</q-item-section>
             </q-item>
           </template>
 
@@ -70,7 +70,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-currency-usd" />
               </q-item-section>
-              <q-item-section>Pricing</q-item-section>
+              <q-item-section>{{ $t('pricing') }}</q-item-section>
             </q-item>
 
             <q-item
@@ -81,7 +81,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-download" />
               </q-item-section>
-              <q-item-section>Download</q-item-section>
+              <q-item-section>{{ $t('download') }}</q-item-section>
             </q-item>
 
             <q-item
@@ -91,7 +91,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-file-document" />
               </q-item-section>
-              <q-item-section>Whitepaper</q-item-section>
+              <q-item-section>{{ $t('whitepaper') }}</q-item-section>
             </q-item>
 
             <q-item
@@ -101,7 +101,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-help" />
               </q-item-section>
-              <q-item-section>Help</q-item-section>
+              <q-item-section>{{ $t('help') }}</q-item-section>
             </q-item>
           </template>
 
@@ -113,7 +113,7 @@
               <q-item-section avatar>
                 <q-icon name="mdi-logout" />
               </q-item-section>
-              <q-item-section>Logout</q-item-section>
+              <q-item-section>{{ $t('logout') }}</q-item-section>
             </q-item>
           </template>
         </q-list>

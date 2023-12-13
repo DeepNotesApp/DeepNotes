@@ -38,13 +38,13 @@
         </div>
 
         <div class="footer-section col-4 col-md-3">
-          <div class="footer-header">Product</div>
+          <div class="footer-header">{{ $t('product') }}</div>
 
           <router-link
             :to="{ name: 'pricing' }"
             class="footer-item"
           >
-            Pricing
+            {{ $t('pricing') }}
           </router-link>
 
           <router-link
@@ -52,26 +52,28 @@
             :to="{ name: 'download' }"
             class="footer-item"
           >
-            Download
+            {{ $t('download') }}
           </router-link>
 
           <router-link
             :to="{ name: 'whitepaper' }"
             class="footer-item"
           >
-            Whitepaper
+            {{ $t('whitepaper') }}
           </router-link>
 
           <router-link
             :to="{ name: 'help' }"
             class="footer-item"
           >
-            Help
+            {{ $t('help') }}
           </router-link>
         </div>
 
         <div class="footer-section col-4 col-md-3">
-          <div class="footer-header">Socials</div>
+          <div class="footer-header">
+            {{ $t('socials') }}
+          </div>
 
           <a
             class="footer-item"
@@ -96,20 +98,20 @@
         </div>
 
         <div class="footer-section col-4 col-md-3">
-          <div class="footer-header">Legal</div>
+          <div class="footer-header">{{ $t('legal') }}</div>
 
           <router-link
             :to="{ name: 'privacy-policy' }"
             class="footer-item"
           >
-            Privacy policy
+            {{ $t('privacyPolicy') }}
           </router-link>
 
           <router-link
             :to="{ name: 'terms-of-service' }"
             class="footer-item"
           >
-            Terms of service
+            {{ $t('termsOfService') }}
           </router-link>
         </div>
       </div>

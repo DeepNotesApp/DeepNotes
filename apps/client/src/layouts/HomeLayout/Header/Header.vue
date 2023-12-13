@@ -80,7 +80,7 @@
           <Gap style="width: 32px" />
 
           <DeepBtn
-            label="Pricing"
+            :label="$t('pricing')"
             flat
             class="toolbar-btn"
             :to="{ name: 'pricing' }"
@@ -96,7 +96,7 @@
             <Gap style="width: 12px" />
 
             <DeepBtn
-              label="Download"
+              :label="$t('download')"
               flat
               class="toolbar-btn"
               :to="{ name: 'download' }"
@@ -112,7 +112,7 @@
           <Gap style="width: 12px" />
 
           <DeepBtn
-            label="Whitepaper"
+            :label="$t('whitepaper')"
             flat
             class="toolbar-btn"
             :to="{ name: 'whitepaper' }"
@@ -127,7 +127,7 @@
           <Gap style="width: 12px" />
 
           <DeepBtn
-            label="Help"
+            :label="$t('help')"
             flat
             class="toolbar-btn"
             :to="{ name: 'help' }"

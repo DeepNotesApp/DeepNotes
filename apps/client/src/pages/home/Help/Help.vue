@@ -4,7 +4,7 @@
       <Gap style="height: 130px" />
 
       <div style="font-size: 45px; font-weight: bold; text-align: center">
-        Help
+        {{ $t('help') }}
       </div>
 
       <Gap style="height: 56px" />
@@ -86,8 +86,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
+
 useMeta(() => ({
-  title: 'Help - DeepNotes',
+  title: `${t('help')} - DeepNotes`,
 }));
 </script>
 

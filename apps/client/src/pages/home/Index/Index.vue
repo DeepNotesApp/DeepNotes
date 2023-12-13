@@ -13,28 +13,15 @@
                 line-height: 1.2em;
                 text-align: center;
               "
-            >
-              Dive into your<br />note universe
-            </div>
+              v-html="$t('homeSection1Title')"
+            ></div>
 
             <Gap style="height: 12px" />
 
-            <div style="font-size: 15px; max-width: 283px">
-              An open source,
-              <span
-                style="
-                  text-transform: uppercase;
-                  background-color: #309cff;
-                  color: #101010;
-                  font-weight: bold;
-                  font-size: 11.3px;
-                  border-radius: 8px;
-                  padding: 1px 5px;
-                "
-                >end-to-end encrypted</span
-              >
-              infinite canvas tool with deep nesting and realtime collaboration.
-            </div>
+            <div
+              style="font-size: 15px; max-width: 283px"
+              v-html="$t('homeSection1Body')"
+            ></div>
 
             <template v-if="!authStore().loggedIn">
               <Gap style="height: 30px" />
@@ -92,17 +79,15 @@
                 line-height: 1.2em;
                 text-align: center;
               "
-            >
-              Collaborate in<br />real-time
-            </div>
+              v-html="$t('homeSection2Title')"
+            ></div>
 
             <Gap style="height: 12px" />
 
-            <div style="font-size: 15px; max-width: 369px">
-              Collaborate with your team or work simultaneously from multiple
-              devices. Password-protect your groups for an extra level of
-              protection.
-            </div>
+            <div
+              style="font-size: 15px; max-width: 369px"
+              v-html="$t('homeSection2Body')"
+            ></div>
           </div>
         </div>
       </div>
@@ -119,16 +104,15 @@
                 line-height: 1.2em;
                 text-align: center;
               "
-            >
-              Simple, yet<br />powerful notes
-            </div>
+              v-html="$t('homeSection3Title')"
+            ></div>
 
             <Gap style="height: 12px" />
 
-            <div style="font-size: 15px; max-width: 300px">
-              Double-click to create a note and explore the possibilities. Move,
-              expand, colorize. Use containers to create nested notes.
-            </div>
+            <div
+              style="font-size: 15px; max-width: 300px"
+              v-html="$t('homeSection3Body')"
+            ></div>
           </div>
         </div>
 
@@ -162,7 +146,7 @@
         <Gap style="height: 150px" />
 
         <div style="text-align: center; font-size: 42px; font-weight: bold">
-          Use cases
+          {{ $t('useCases') }}
         </div>
 
         <Gap style="height: 40px" />
@@ -170,49 +154,49 @@
         <div class="row">
           <Thumbnail
             thumbnail-image="/applications/mind-map.webp"
-            title="Mind maps"
+            :title="$t('mindMaps')"
             href="https://deepnotes.app/pages/cMwNNxpa2jZKuP_0zzrMP"
           />
 
           <Thumbnail
             thumbnail-image="/applications/diagram-thumbnail.webp"
-            title="Diagrams"
+            :title="$t('diagrams')"
             href="https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY"
           />
 
           <Thumbnail
             thumbnail-image="/applications/kanban-board-thumbnail.webp"
-            title="Kanban boards"
+            :title="$t('kanbanBoards')"
             href="https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN"
           />
 
           <Thumbnail
             thumbnail-image="/applications/database-structure-thumbnail.webp"
-            title="Database diagrams"
+            :title="$t('databaseDiagrams')"
             href="https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V"
           />
 
           <Thumbnail
             thumbnail-image="/applications/family-tree-thumbnail.webp"
-            title="Family trees"
+            :title="$t('familyTrees')"
             href="https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux"
           />
 
           <Thumbnail
             thumbnail-image="/applications/flashcards-thumbnail.webp"
-            title="Flashcards"
+            :title="$t('flashcards')"
             href="https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY"
           />
 
           <Thumbnail
             thumbnail-image="/applications/cheat-sheet-thumbnail.webp"
-            title="Cheat sheets"
+            :title="$t('cheatSheets')"
             href="https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN"
           />
 
           <Thumbnail
             thumbnail-image="/applications/history-study-thumbnail.webp"
-            title="Studies"
+            :title="$t('studies')"
             href="https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN"
           />
         </div>
@@ -223,7 +207,7 @@
 
         <div style="text-align: center">
           <DeepBtn
-            label="Get started - It's free!"
+            :label="$t('getStartedItsFree')"
             color="primary"
             style="padding: 15px 25px; font-size: 16.5px; font-weight: bold"
             :to="{ name: 'register' }"
@@ -318,5 +302,15 @@ const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
     grid-template-rows: auto;
     gap: 32px;
   }
+}
+
+.pill {
+  text-transform: uppercase;
+  background-color: #309cff;
+  color: #101010;
+  font-weight: bold;
+  font-size: 11.3px;
+  border-radius: 8px;
+  padding: 1px 5px;
 }
 </style>

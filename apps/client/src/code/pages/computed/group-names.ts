@@ -1,6 +1,7 @@
 import { bytesToText, textToBytes } from '@stdlib/misc';
 import { createSmartComputedDict } from '@stdlib/vue';
 import { once } from 'lodash';
+import { i18n } from 'src/boot/i18n.universal';
 
 import { groupAccessKeyrings } from './group-access-keyrings';
 
@@ -23,7 +24,7 @@ export const groupNames = once(() =>
       }
 
       if (groupId === internals.personalGroupId) {
-        return { status: 'success', text: 'Personal group' };
+        return { status: 'success', text: i18n.global.t('personalGroup') };
       }
 
       const [accessKeyring, groupEncryptedName] = await Promise.all([

@@ -6,11 +6,14 @@
 
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core';
+import { useI18n } from 'vue-i18n';
 
 import { isCtrlDown } from './code/utils/misc';
 
+const { t } = useI18n();
+
 useMeta(() => ({
-  title: 'DeepNotes - Deeply-Nested Infinite Canvases',
+  title: `DeepNotes - ${t('appSlogan')}`,
 }));
 
 onMounted(() => {
