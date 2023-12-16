@@ -162,13 +162,14 @@ module.exports = configure(function (ctx) {
               ],
               'src/code/helpers': ['router', 'route', '$quasar'],
 
+              'src/code/utils/use-meta': ['useMeta'],
+
               'src/components/CustomDialog.vue': [['default', 'CustomDialog']],
 
               quasar: [
                 'useQuasar',
                 'Notify',
                 'Cookies',
-                'useMeta',
                 'Dialog',
                 'useDialogPluginComponent',
               ],
