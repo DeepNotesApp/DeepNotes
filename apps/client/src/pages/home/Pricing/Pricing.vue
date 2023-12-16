@@ -150,6 +150,10 @@ import { handleError } from 'src/code/utils/misc';
 
 import PlanCard from './PlanCard.vue';
 
+useMeta(() => ({
+  title: 'Pricing - DeepNotes',
+}));
+
 const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
 
 const plan = computed(() =>

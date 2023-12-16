@@ -47,6 +47,10 @@ import { multiModePath } from 'src/code/utils/misc';
 
 import WhitepaperItems from './WhitepaperItems.vue';
 
+useMeta(() => ({
+  title: 'Whitepaper - DeepNotes',
+}));
+
 marked.use(gfmHeadingId());
 
 const html = marked(`
