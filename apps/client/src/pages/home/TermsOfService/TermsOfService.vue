@@ -46,6 +46,10 @@ import { gfmHeadingId } from 'marked-gfm-heading-id';
 
 import TermsOfServiceItems from './TermsOfServiceItems.vue';
 
+useMeta(() => ({
+  title: 'Terms of Service - DeepNotes',
+}));
+
 marked.use(gfmHeadingId());
 
 const html = marked(`

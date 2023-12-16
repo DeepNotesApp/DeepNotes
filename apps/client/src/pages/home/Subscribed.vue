@@ -34,3 +34,9 @@
     </ResponsiveContainer>
   </q-page>
 </template>
+
+<script setup lang="ts">
+useMeta(() => ({
+  title: 'Thanks for choosing the Pro Plan! - DeepNotes',
+}));
+</script>

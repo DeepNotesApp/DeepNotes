@@ -212,6 +212,10 @@ import { multiModePath } from 'src/code/utils/misc';
 
 import PlatformCard from './PlatformCard.vue';
 
+useMeta(() => ({
+  title: 'Downloads - DeepNotes',
+}));
+
 const version = process.env.npm_package_version;
 
 const loading = ref(true);

@@ -66,7 +66,7 @@ declare global {
   const useCssVars: typeof import('vue')['useCssVars']
   const useDialogPluginComponent: typeof import('quasar')['useDialogPluginComponent']
   const useLink: typeof import('vue-router')['useLink']
-  const useMeta: typeof import('quasar')['useMeta']
+  const useMeta: typeof import('src/code/utils/use-meta')['useMeta']
   const useQuasar: typeof import('quasar')['useQuasar']
   const useRoute: typeof import('vue-router')['useRoute']
   const useRouter: typeof import('vue-router')['useRouter']
