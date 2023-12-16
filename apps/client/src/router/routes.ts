@@ -214,6 +214,19 @@ const routes: RouteRecordRaw[] = [
     ],
   },
 
+  {
+    path: '/articles',
+    component: () => import('src/layouts/HomeLayout/HomeLayout.vue'),
+    children: [
+      {
+        path: 'comparing-obsidian',
+        component: () =>
+          import('src/pages/home/Articles/ComparingObsidian.vue'),
+        name: 'articles/comparing-obsidian',
+      },
+    ],
+  },
+
   ...(isIncluded(process.env.MODE, ['ssr', 'spa'])
     ? [
         {
