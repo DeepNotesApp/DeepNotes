@@ -1,11 +1,17 @@
 <template>
   <q-page style="font-size: 16px; margin-top: 150px; margin-bottom: 150px">
     <ResponsiveContainer style="max-width: 1000px">
-      <h1 style="font-size: 32px; font-weight: bold">
+      <h1 style="font-size: 32px; font-weight: bold; margin: 0">
         Comparing Obsidian and DeepNotes
       </h1>
 
-      <Gap style="height: 52px" />
+      <Gap style="height: 4px" />
+
+      <div style="color: rgba(255, 255, 255, 0.7); font-size: 14px">
+        Dec 17, 2023
+      </div>
+
+      <Gap style="height: 56px" />
 
       <div style="max-width: 600px">
         <p>
@@ -17,8 +23,8 @@
 
         <p>
           Both are designed for deep interlinking and nesting of notes. But,
-          while Obsidian focuses on customizability, DeepNotes is more
-          opinionated in its approach.
+          while Obsidian focuses on adaptability, DeepNotes is more opinionated
+          in its approach.
         </p>
 
         <p>Here is a detailed comparison of their features:</p>
@@ -206,10 +212,8 @@
         <Gap style="height: 42px" />
 
         <p>
-          If you'd like to see it in action, you can
-          <router-link :to="{ name: 'register' }"
-            >try DeepNotes for free</router-link
-          >.
+          If you're interested in exploring DeepNotes, you can
+          <router-link :to="{ name: 'register' }">try it for free</router-link>.
         </p>
       </div>
     </ResponsiveContainer>
