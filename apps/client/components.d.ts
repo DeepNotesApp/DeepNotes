@@ -18,6 +18,7 @@ declare module '@vue/runtime-core' {
     CustomInfiniteScroll: typeof import('./src/components/CustomInfiniteScroll.vue')['default']
     DeepBtn: typeof import('./src/components/DeepBtn.vue')['default']
     DeepBtnDropdown: typeof import('./src/components/DeepBtnDropdown.vue')['default']
+    DeletionDialog: typeof import('./src/components/DeletionDialog.vue')['default']
     DisplayBtn: typeof import('./src/components/DisplayBtn.vue')['default']
     EvaluatedPasswordField: typeof import('./src/components/EvaluatedPasswordField.vue')['default']
     Gap: typeof import('./src/components/Gap.vue')['default']

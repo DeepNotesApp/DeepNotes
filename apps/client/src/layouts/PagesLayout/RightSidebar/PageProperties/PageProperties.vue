@@ -140,12 +140,14 @@
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
+import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
 import { setClipboardText } from 'src/code/utils/clipboard';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import DeletionDialog from 'src/components/DeletionDialog.vue';
 import type { Ref } from 'vue';
 
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
@@ -183,16 +185,16 @@ async function _movePage() {
 
 async function _deletePage() {
   try {
-    await asyncDialog({
-      title: 'Delete page',
-      message: 'Are you sure you want to delete this page?',
-
-      focus: 'cancel',
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
+    const { deletePermanently } = await asyncDialog({
+      component: DeletionDialog,
+      componentProps: { subject: 'page' },
     });
 
-    await deletePage(page.value.id);
+    if (deletePermanently) {
+      await deletePagePermanently(page.value.id);
+    } else {
+      await deletePage(page.value.id);
+    }
 
     $quasar().notify({
       message: 'Page deleted successfully.',

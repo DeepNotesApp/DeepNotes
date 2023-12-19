@@ -8,7 +8,9 @@
 
 <script setup lang="ts">
 import { deleteGroup } from 'src/code/api-interface/groups/deletion/delete';
+import { deleteGroupPermanently } from 'src/code/api-interface/groups/deletion/delete-permanently';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import DeletionDialog from 'src/components/DeletionDialog.vue';
 import type { Ref } from 'vue';
 
 const groupId = inject<string>('groupId')!;
@@ -17,17 +19,16 @@ const dialog = inject<Ref<InstanceType<typeof CustomDialog>>>('dialog')!;
 
 async function _deleteGroup() {
   try {
-    await asyncDialog({
-      title: 'Delete group',
-      message: 'Are you sure you want to delete this group?',
-
-      focus: 'cancel',
-
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
+    const { deletePermanently } = await asyncDialog({
+      component: DeletionDialog,
+      componentProps: { subject: 'group' },
     });
 
-    await deleteGroup({ groupId });
+    if (deletePermanently) {
+      await deleteGroupPermanently({ groupId });
+    } else {
+      await deleteGroup({ groupId });
+    }
 
     $quasar().notify({
       message: 'Group deleted successfully.',
