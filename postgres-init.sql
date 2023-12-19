@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 15.3
+-- Dumped from database version 15.5
 -- Dumped by pg_dump version 15.3
 
 SET statement_timeout = 0;
@@ -135,7 +135,8 @@ CREATE TABLE public.group_members (
     role text NOT NULL,
     encrypted_internal_keyring bytea NOT NULL,
     last_activity_date timestamp with time zone DEFAULT now() NOT NULL,
-    encrypted_name bytea
+    encrypted_name bytea,
+    encrypted_name_for_user bytea
 );
 
 
@@ -156,7 +157,8 @@ CREATE TABLE public.groups (
     access_keyring bytea,
     encrypted_content_keyring bytea NOT NULL,
     permanent_deletion_date timestamp with time zone,
-    encrypted_rehashed_password_hash bytea
+    encrypted_rehashed_password_hash bytea,
+    are_join_requests_allowed boolean DEFAULT true NOT NULL
 );
 
 
@@ -306,7 +308,8 @@ CREATE TABLE public.users (
     encrypted_recovery_codes bytea,
     demo boolean,
     email_hash bytea NOT NULL,
-    encrypted_rehashed_login_hash bytea NOT NULL
+    encrypted_rehashed_login_hash bytea NOT NULL,
+    new boolean DEFAULT true NOT NULL
 );
 
 
