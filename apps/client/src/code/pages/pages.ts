@@ -18,6 +18,9 @@ export interface IAppReact {
   recentPageIdsOverride?: string[];
   recentPageIds: ComputedRef<string[]>;
 
+  favoritePageIdsOverride?: string[];
+  favoritePageIds: ComputedRef<string[]>;
+
   page: ShallowRef<Page>;
   pageId: ComputedRef<string | undefined>;
   pageIndex: ComputedRef<number>;
@@ -45,6 +48,7 @@ export class Pages {
   parentPageId?: string;
 
   recentPageIdsKeepOverride?: boolean;
+  favoritePageIdsKeepOverride?: boolean;
 
   constructor(input: { factories: Factories }) {
     this.factories = input.factories;
@@ -54,6 +58,7 @@ export class Pages {
 
     this.react = reactive({
       pathPageIds: [],
+
       recentPageIds: computed(() => {
         if (this.recentPageIdsKeepOverride) {
           this.recentPageIdsKeepOverride = undefined;
@@ -68,6 +73,22 @@ export class Pages {
         );
 
         return this.react.recentPageIdsOverride ?? recentPageIds ?? [];
+      }),
+
+      favoritePageIds: computed(() => {
+        if (this.favoritePageIdsKeepOverride) {
+          this.favoritePageIdsKeepOverride = undefined;
+        } else {
+          this.react.favoritePageIdsOverride = undefined;
+        }
+
+        const favoritePageIds = internals.realtime.globalCtx.hget(
+          'user',
+          authStore().userId,
+          'favorite-page-ids',
+        );
+
+        return this.react.favoritePageIdsOverride ?? favoritePageIds ?? [];
       }),
 
       page: shallowRef(null) as any,

@@ -10,6 +10,19 @@ function trackProp<State>(state: State, prop: Extract<keyof State, string>) {
   );
 }
 
+export const leftSidebarSectionNames = [
+  'currentPath',
+  'recentPages',
+  'favoritePages',
+  'selectedPages',
+] as const;
+
+export type LeftSidebarSectionName = (typeof leftSidebarSectionNames)[number];
+
+export const leftSidebarSectionIndexes = Object.fromEntries(
+  leftSidebarSectionNames.map((section, index) => [section, index]),
+);
+
 export const useUIStore = defineStore('ui', () => {
   const state = reactive({
     loggedIn: false,
@@ -21,10 +34,12 @@ export const useUIStore = defineStore('ui', () => {
 
     currentPathExpanded: true,
     recentPagesExpanded: true,
+    favoritePagesExpanded: false,
     selectedPagesExpanded: false,
 
     currentPathWeight: 1,
     recentPagesWeight: 1,
+    favoritePagesWeight: 1,
     selectedPagesWeight: 1,
 
     headerHeight: 0,
@@ -38,13 +53,10 @@ export const useUIStore = defineStore('ui', () => {
 
   trackProp(state, 'leftSidebarWidth');
 
-  trackProp(state, 'currentPathExpanded');
-  trackProp(state, 'recentPagesExpanded');
-  trackProp(state, 'selectedPagesExpanded');
-
-  trackProp(state, 'currentPathWeight');
-  trackProp(state, 'recentPagesWeight');
-  trackProp(state, 'selectedPagesWeight');
+  for (const section of leftSidebarSectionNames) {
+    trackProp(state, `${section}Expanded`);
+    trackProp(state, `${section}Weight`);
+  }
 
   return {
     ...toRefs(state),
@@ -71,20 +83,18 @@ export const useUIStore = defineStore('ui', () => {
     normalizeWeights() {
       const min = minmax(
         Math.min(
-          state.currentPathWeight,
-          state.recentPagesWeight,
-          state.selectedPagesWeight,
+          ...leftSidebarSectionNames.map(
+            (section) => state[`${section}Weight`],
+          ),
         ),
         1e-10,
         1e10,
       );
 
-      state.currentPathWeight =
-        minmax(state.currentPathWeight / min, 1e-10, 1e10) || 1;
-      state.recentPagesWeight =
-        minmax(state.recentPagesWeight / min, 1e-10, 1e10) || 1;
-      state.selectedPagesWeight =
-        minmax(state.selectedPagesWeight / min, 1e-10, 1e10) || 1;
+      for (const section of leftSidebarSectionNames) {
+        state[`${section}Weight`] =
+          minmax(state[`${section}Weight`] / min, 1e-10, 1e10) || 1;
+      }
     },
   };
 });
