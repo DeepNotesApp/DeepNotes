@@ -33,7 +33,9 @@ export async function removeRecentPage({
 
       // Remove page ID from recent page IDs
 
-      if (pull(recentPageIds, input.pageId).length === 0) {
+      const originalLength = recentPageIds.length;
+
+      if (pull(recentPageIds, input.pageId).length === originalLength) {
         throw new TRPCError({
           message: 'Recent page not found.',
           code: 'NOT_FOUND',
