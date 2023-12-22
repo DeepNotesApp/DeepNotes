@@ -116,6 +116,16 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
+        label="Add page to favorites"
+        icon="mdi-star"
+        color="primary"
+        :disable="page.react.readOnly"
+        @click="addPageToFavorites"
+      />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
         label="Delete page"
         color="negative"
         :disable="page.react.readOnly"
@@ -176,6 +186,21 @@ async function _movePage() {
 
     $quasar().notify({
       message: 'Page moved successfully.',
+      color: 'positive',
+    });
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function addPageToFavorites() {
+  try {
+    await trpcClient.users.pages.addFavoritePages.mutate({
+      pageIds: [page.value.id],
+    });
+
+    $quasar().notify({
+      message: 'Page added to favorites successfully.',
       color: 'positive',
     });
   } catch (error) {

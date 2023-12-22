@@ -11,12 +11,12 @@
       flat
       style="width: 100%; height: 32px; min-height: 0; border-radius: 0"
       no-caps
-      @click="negateProp(uiStore(), 'currentPathExpanded')"
+      @click="negateProp(uiStore(), 'favoritePagesExpanded')"
     >
       <div style="width: 100%; height: 0; display: flex; align-items: center">
         <q-avatar style="margin-top: -1px; margin-left: -8px">
           <q-icon
-            name="mdi-map-marker-radius"
+            name="mdi-star"
             size="20px"
           />
         </q-avatar>
@@ -29,10 +29,39 @@
             font-size: 13.5px;
           "
         >
-          Current path
+          Favorite pages
         </q-toolbar-title>
       </div>
     </DeepBtn>
+
+    <q-btn
+      icon="mdi-menu"
+      style="
+        position: absolute;
+        right: 4px;
+        width: 32px;
+        height: 32px;
+        min-height: 0;
+      "
+    >
+      <q-menu auto-close>
+        <q-list>
+          <q-item
+            clickable
+            @click="clearfavoritePages"
+            :disable="favoritePageIds.length === 0"
+          >
+            <q-item-section avatar>
+              <q-icon name="mdi-close" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>Clear favorite pages</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </q-btn>
   </q-toolbar>
 
   <q-list
@@ -40,21 +69,48 @@
     ref="listRef"
     style="height: 0; overflow-x: hidden; overflow-y: auto"
     :style="{
-      flex: uiStore().currentPathExpanded ? uiStore().currentPathWeight : '0',
+      flex: uiStore().favoritePagesExpanded
+        ? uiStore().favoritePagesWeight
+        : '0',
     }"
   >
-    <PageItem
-      v-for="pageId in internals.pages.react.pathPageIds"
+    <q-item v-if="favoritePageIds.length === 0">
+      <q-item-section>
+        <q-item-label
+          style="color: rgba(255, 255, 255, 0.7); font-size: 13.5px"
+        >
+          No favorite pages.
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+
+    <div
+      v-for="pageId in favoritePageIds"
       :key="pageId"
-      icon
-      :page-id="pageId"
-      :active="pageId === internals.pages.react.pageId"
-      prefer="relative"
-      class="current-path"
-    />
+      class="favorite-page"
+    >
+      <PageItem
+        icon
+        :page-id="pageId"
+        :active="pageId === internals.pages.react.pageId"
+        prefer="absolute"
+        class="favorite-pages"
+      />
+
+      <DeepBtn
+        icon="mdi-close"
+        size="14px"
+        round
+        flat
+        class="remove-btn"
+        title="Remove from favorite pages"
+        @click.stop="removeFavoritePage(pageId)"
+      />
+    </div>
   </q-list>
 
   <div
+    style="position: relative"
     v-if="
       uiStore()[`${sectionName}Expanded`] &&
       leftSidebarSectionNames.reduce((acc, section, index) => {
@@ -65,7 +121,6 @@
         return acc;
       }, false)
     "
-    style="position: relative"
   >
     <div
       class="resize-handle"
@@ -79,6 +134,9 @@
 
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
+import { pull } from 'lodash';
+import { useRealtimeContext } from 'src/code/realtime/context';
+import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { LeftSidebarSectionName } from 'src/stores/ui';
 import {
   leftSidebarSectionIndexes,
@@ -86,9 +144,17 @@ import {
 } from 'src/stores/ui';
 import type { ComponentPublicInstance } from 'vue';
 
+const realtimeCtx = useRealtimeContext();
+
+const favoritePageIds = computed(() =>
+  internals.pages.react.favoritePageIds.filter((pageId) =>
+    realtimeCtx.hget('page', pageId, 'exists'),
+  ),
+);
+
 const listRef = ref<ComponentPublicInstance>();
 
-const sectionName = 'currentPath';
+const sectionName = 'favoritePages';
 const sectionIndex = leftSidebarSectionIndexes[sectionName];
 
 function resizeHandlePointerDown(downEvent: PointerEvent) {
@@ -138,6 +204,40 @@ function resizeHandlePointerDown(downEvent: PointerEvent) {
   });
 }
 
+async function clearfavoritePages() {
+  try {
+    await asyncDialog({
+      title: 'Clear favorite pages',
+      message: 'Are you sure you want to clear favorite pages?',
+
+      focus: 'cancel',
+
+      cancel: { label: 'No', flat: true, color: 'primary' },
+      ok: { label: 'Yes', flat: true, color: 'negative' },
+    });
+
+    await trpcClient.users.pages.clearFavoritePages.mutate();
+
+    internals.pages.favoritePageIdsKeepOverride = true;
+    internals.pages.react.favoritePageIdsOverride = [];
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function removeFavoritePage(pageId: string) {
+  try {
+    await trpcClient.users.pages.removeFavoritePage.mutate({ pageId });
+
+    internals.pages.favoritePageIdsKeepOverride = true;
+    internals.pages.react.favoritePageIdsOverride =
+      favoritePageIds.value.slice();
+    pull(internals.pages.react.favoritePageIdsOverride, pageId);
+  } catch (error) {
+    handleError(error);
+  }
+}
+
 function resizeHandleDoubleClick() {
   const avgWeight =
     (uiStore()[`${sectionName}Weight`] +
@@ -150,6 +250,31 @@ function resizeHandleDoubleClick() {
 </script>
 
 <style scoped lang="scss">
+.favorite-page {
+  position: relative;
+
+  > .remove-btn {
+    position: absolute;
+
+    top: 50%;
+    right: -6px;
+
+    transform: translate(-50%, -50%);
+
+    min-width: 30px;
+    min-height: 30px;
+    width: 30px;
+    height: 30px;
+
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+}
+
+.favorite-page:hover > .remove-btn {
+  opacity: 1;
+}
+
 .resize-handle {
   position: absolute;
   left: 0;

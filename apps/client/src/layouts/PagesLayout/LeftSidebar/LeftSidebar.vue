@@ -20,6 +20,8 @@
 
     <RecentPages />
 
+    <FavoritePages />
+
     <SelectedPages />
   </q-drawer>
 </template>
@@ -28,6 +30,7 @@
 import { listenPointerEvents } from '@stdlib/misc';
 
 import CurrentPath from './CurrentPath.vue';
+import FavoritePages from './FavoritePages.vue';
 import RecentPages from './RecentPages.vue';
 import SelectedPages from './SelectedPages.vue';
 

@@ -93,6 +93,7 @@
   </q-toolbar>
 
   <q-list
+    :id="`${'selectedPages'}List`"
     style="height: 0; overflow-x: hidden; overflow-y: auto"
     :style="{
       flex: uiStore().selectedPagesExpanded
