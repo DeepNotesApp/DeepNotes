@@ -26,6 +26,21 @@ export const groupNames = once(() =>
         return { status: 'success', text: 'Personal group' };
       }
 
+      const groupPermanentDeletionDate = internals.realtime.globalCtx.hget(
+        'group',
+        groupId,
+        'permanent-deletion-date',
+      );
+
+      if (
+        groupPermanentDeletionDate != null &&
+        groupPermanentDeletionDate < new Date()
+      ) {
+        _getLogger.info(`${groupId}: Group is permanently deleted`);
+
+        return { status: 'unknown', text: `[Group ${groupId}]` };
+      }
+
       const [accessKeyring, groupEncryptedName] = await Promise.all([
         groupAccessKeyrings()(groupId!).getAsync(),
 

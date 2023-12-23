@@ -41,18 +41,21 @@ export async function deletePermanently({
               permission: 'editGroupPages',
             });
 
-            // Check if page is deleted
+            // Check if page is permanently deleted
+
+            const permanentlyDeletionDate = await ctx.dataAbstraction.hget(
+              'page',
+              input.pageId,
+              'permanent-deletion-date',
+            );
 
             if (
-              (await ctx.dataAbstraction.hget(
-                'page',
-                input.pageId,
-                'permanent-deletion-date',
-              )) == null
+              permanentlyDeletionDate != null &&
+              permanentlyDeletionDate < new Date()
             ) {
               throw new TRPCError({
                 code: 'BAD_REQUEST',
-                message: 'Page is not deleted.',
+                message: 'Page is already permanently deleted.',
               });
             }
 

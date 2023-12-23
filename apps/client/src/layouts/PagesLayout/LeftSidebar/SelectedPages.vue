@@ -93,6 +93,7 @@
   </q-toolbar>
 
   <q-list
+    :id="`${'selectedPages'}List`"
     style="height: 0; overflow-x: hidden; overflow-y: auto"
     :style="{
       flex: uiStore().selectedPagesExpanded
@@ -140,9 +141,11 @@
 import { negateProp, pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
+import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import DeletionDialog from 'src/components/DeletionDialog.vue';
 import { pageSelectionStore } from 'src/stores/page-selection';
 
 import MovePageDialog from '../RightSidebar/PageProperties/MovePageDialog.vue';
@@ -226,13 +229,9 @@ async function movePages() {
 
 async function deletePages() {
   try {
-    await asyncDialog({
-      title: 'Delete pages',
-      message: 'Are you sure you want to delete these pages?',
-
-      focus: 'cancel',
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
+    const { deletePermanently } = await asyncDialog({
+      component: DeletionDialog,
+      componentProps: { subject: 'pages' },
     });
 
     const notif = $quasar().notify({
@@ -254,7 +253,11 @@ async function deletePages() {
           caption: `${index} of ${selectedPageIds.length}`,
         });
 
-        await deletePage(pageId);
+        if (deletePermanently) {
+          await deletePagePermanently(pageId);
+        } else {
+          await deletePage(pageId);
+        }
 
         numSuccess++;
       } catch (error) {

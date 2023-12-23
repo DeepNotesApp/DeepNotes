@@ -46,6 +46,10 @@ import { gfmHeadingId } from 'marked-gfm-heading-id';
 
 import PrivacyPolicyItems from './PrivacyPolicyItems.vue';
 
+useMeta(() => ({
+  title: 'Privacy Policy - DeepNotes',
+}));
+
 marked.use(gfmHeadingId());
 
 const html = marked(`

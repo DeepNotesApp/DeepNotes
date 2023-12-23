@@ -95,7 +95,7 @@
         {{ feature.text }}
 
         <q-icon
-          v-if="feature.help != null"
+          v-if="feature.tooltip != null"
           name="mdi-help-circle"
           size="16px"
           style="margin-left: 4px; margin-top: -1px; pointer-events: auto"
@@ -105,9 +105,9 @@
             self="bottom middle"
             transition-show="jump-up"
             transition-hide="jump-down"
-            max-width="190px"
+            :max-width="feature.tooltipMaxWidth"
           >
-            {{ feature.help }}
+            {{ feature.tooltip }}
           </q-tooltip>
         </q-icon>
       </li>
@@ -130,7 +130,8 @@ defineProps<{
   features: {
     icon: string;
     text: string;
-    help?: string;
+    tooltip?: string;
+    tooltipMaxWidth?: string;
   }[];
 }>();
 </script>

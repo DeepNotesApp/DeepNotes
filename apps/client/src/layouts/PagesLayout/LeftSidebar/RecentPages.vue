@@ -65,7 +65,7 @@
   </q-toolbar>
 
   <q-list
-    ref="listRef"
+    :id="`${sectionName}List`"
     style="height: 0; overflow-x: hidden; overflow-y: auto"
     :style="{
       flex: uiStore().recentPagesExpanded ? uiStore().recentPagesWeight : '0',
@@ -108,7 +108,16 @@
 
   <div
     style="position: relative"
-    v-if="uiStore().recentPagesExpanded && uiStore().selectedPagesExpanded"
+    v-if="
+      uiStore()[`${sectionName}Expanded`] &&
+      leftSidebarSectionNames.reduce((acc, section, index) => {
+        if (index > sectionIndex) {
+          acc ||= uiStore()[`${section}Expanded`] ? true : false;
+        }
+
+        return acc;
+      }, false)
+    "
   >
     <div
       class="resize-handle"
@@ -125,7 +134,11 @@ import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
 import { pull } from 'lodash';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
-import type { ComponentPublicInstance } from 'vue';
+import type { LeftSidebarSectionName } from 'src/stores/ui';
+import {
+  leftSidebarSectionIndexes,
+  leftSidebarSectionNames,
+} from 'src/stores/ui';
 
 const realtimeCtx = useRealtimeContext();
 
@@ -135,26 +148,50 @@ const recentPageIds = computed(() =>
   ),
 );
 
-const listRef = ref<ComponentPublicInstance>();
+const sectionName = 'recentPages';
+const sectionIndex = leftSidebarSectionIndexes[sectionName];
 
 function resizeHandlePointerDown(downEvent: PointerEvent) {
   listenPointerEvents(downEvent, {
     move(moveEvent) {
-      const clientRect = listRef.value!.$el.getBoundingClientRect();
+      const clientRect = document
+        .querySelector(`#${sectionName}List`)!
+        .getBoundingClientRect();
 
-      const othersHeight = uiStore().height - clientRect.height - 32 * 3 - 2;
+      const othersHeight =
+        uiStore().height -
+        clientRect.height -
+        32 * leftSidebarSectionNames.length -
+        2;
 
-      const othersWeight =
-        (uiStore().currentPathExpanded ? uiStore().currentPathWeight : 0) +
-        (uiStore().selectedPagesExpanded ? uiStore().selectedPagesWeight : 0);
+      const othersWeight = leftSidebarSectionNames.reduce((acc, section) => {
+        if (section !== sectionName) {
+          acc += uiStore()[`${section}Expanded`]
+            ? uiStore()[`${section}Weight`]
+            : 0;
+        }
+
+        return acc;
+      }, 0);
 
       const myNewHeight = moveEvent.clientY - clientRect.y;
 
       const myNewWeight = map(myNewHeight, 0, othersHeight, 0, othersWeight);
 
-      uiStore().selectedPagesWeight -=
-        myNewWeight - uiStore().recentPagesWeight;
-      uiStore().recentPagesWeight = myNewWeight;
+      const nextExpandedSection = leftSidebarSectionNames.reduce(
+        (acc, section, index) => {
+          if (index > sectionIndex) {
+            acc ||= uiStore()[`${section}Expanded`] ? section : null;
+          }
+
+          return acc;
+        },
+        null as LeftSidebarSectionName | null,
+      )!;
+
+      uiStore()[`${nextExpandedSection}Weight`] -=
+        myNewWeight - uiStore()[`${sectionName}Weight`];
+      uiStore()[`${sectionName}Weight`] = myNewWeight;
 
       uiStore().normalizeWeights();
     },
@@ -196,10 +233,12 @@ async function removeRecentPage(pageId: string) {
 
 function resizeHandleDoubleClick() {
   const avgWeight =
-    (uiStore().recentPagesWeight + uiStore().selectedPagesWeight) / 2;
+    (uiStore()[`${sectionName}Weight`] +
+      uiStore()[`${leftSidebarSectionNames[sectionIndex + 1]}Weight`]) /
+    2;
 
-  uiStore().recentPagesWeight = avgWeight;
-  uiStore().selectedPagesWeight = avgWeight;
+  uiStore()[`${sectionName}Weight`] = avgWeight;
+  uiStore()[`${leftSidebarSectionNames[sectionIndex + 1]}Weight`] = avgWeight;
 }
 </script>
 

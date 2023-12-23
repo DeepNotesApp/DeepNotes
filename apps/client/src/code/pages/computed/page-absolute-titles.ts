@@ -30,7 +30,19 @@ export const pageAbsoluteTitles = once(() =>
         'encrypted-absolute-title',
       );
 
+      const pagePermanentDeletionDate = internals.realtime.globalCtx.hget(
+        'page',
+        pageId,
+        'permanent-deletion-date',
+      );
+
       const groupId = pageGroupIds()(pageId).get();
+
+      const groupPermanentDeletionDate = internals.realtime.globalCtx.hget(
+        'group',
+        groupId,
+        'permanent-deletion-date',
+      );
 
       if (pageEncryptedAbsoluteTitle == null) {
         _getLogger.info(`${pageId}: No encrypted page title found`);
@@ -38,8 +50,26 @@ export const pageAbsoluteTitles = once(() =>
         return { text: `[Page ${pageId}]`, status: 'unknown' };
       }
 
+      if (
+        pagePermanentDeletionDate != null &&
+        pagePermanentDeletionDate < new Date()
+      ) {
+        _getLogger.info(`${pageId}: Page is permanently deleted`);
+
+        return { text: `[Page ${pageId}]`, status: 'unknown' };
+      }
+
       if (groupId == null) {
         mainLogger.info(`${pageId}: No group ID found`);
+
+        return { text: `[Page ${pageId}]`, status: 'unknown' };
+      }
+
+      if (
+        groupPermanentDeletionDate != null &&
+        groupPermanentDeletionDate < new Date()
+      ) {
+        _getLogger.info(`${pageId}: Group is permanently deleted`);
 
         return { text: `[Page ${pageId}]`, status: 'unknown' };
       }

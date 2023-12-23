@@ -116,6 +116,16 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
+        label="Add page to favorites"
+        icon="mdi-star"
+        color="primary"
+        :disable="page.react.readOnly"
+        @click="addPageToFavorites"
+      />
+
+      <Gap style="height: 16px" />
+
+      <DeepBtn
         label="Delete page"
         color="negative"
         :disable="page.react.readOnly"
@@ -140,12 +150,14 @@
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
+import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
 import { movePage } from 'src/code/api-interface/pages/move';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
 import { setClipboardText } from 'src/code/utils/clipboard';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import DeletionDialog from 'src/components/DeletionDialog.vue';
 import type { Ref } from 'vue';
 
 import GroupSettingsDialog from './GroupSettingsDialog/GroupSettingsDialog.vue';
@@ -181,18 +193,33 @@ async function _movePage() {
   }
 }
 
-async function _deletePage() {
+async function addPageToFavorites() {
   try {
-    await asyncDialog({
-      title: 'Delete page',
-      message: 'Are you sure you want to delete this page?',
-
-      focus: 'cancel',
-      cancel: { label: 'No', flat: true, color: 'primary' },
-      ok: { label: 'Yes', flat: true, color: 'negative' },
+    await trpcClient.users.pages.addFavoritePages.mutate({
+      pageIds: [page.value.id],
     });
 
-    await deletePage(page.value.id);
+    $quasar().notify({
+      message: 'Page added to favorites successfully.',
+      color: 'positive',
+    });
+  } catch (error) {
+    handleError(error);
+  }
+}
+
+async function _deletePage() {
+  try {
+    const { deletePermanently } = await asyncDialog({
+      component: DeletionDialog,
+      componentProps: { subject: 'page' },
+    });
+
+    if (deletePermanently) {
+      await deletePagePermanently(page.value.id);
+    } else {
+      await deletePage(page.value.id);
+    }
 
     $quasar().notify({
       message: 'Page deleted successfully.',

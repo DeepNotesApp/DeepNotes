@@ -10,7 +10,15 @@ import { useEventListener } from '@vueuse/core';
 import { isCtrlDown } from './code/utils/misc';
 
 useMeta(() => ({
-  title: 'DeepNotes - Deeply Nested Infinite Canvases',
+  title: 'DeepNotes - Deeply-Nested Infinite Canvases',
+
+  meta: {
+    description: {
+      name: 'description',
+      content:
+        'DeepNotes is an open source, end-to-end encrypted infinite canvas tool with deep page nesting and realtime collaboration. Create mind maps, diagrams, kanban boards, and more.',
+    },
+  },
 }));
 
 onMounted(() => {

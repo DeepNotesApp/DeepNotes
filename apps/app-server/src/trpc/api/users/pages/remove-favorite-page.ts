@@ -12,42 +12,42 @@ const baseProcedure = authProcedure.input(
   }),
 );
 
-export const removeRecentPageProcedure = once(() =>
-  baseProcedure.mutation(removeRecentPage),
+export const removeFavoritePageProcedure = once(() =>
+  baseProcedure.mutation(removeFavoritePage),
 );
 
-export async function removeRecentPage({
+export async function removeFavoritePage({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
   return await ctx.usingLocks(
     [[`user-lock:${ctx.userId}`]],
     async (signals) => {
-      // Get recent page IDs
+      // Get favorite page IDs
 
-      const recentPageIds: string[] = await ctx.dataAbstraction.hget(
+      const favoritePageIds: string[] = await ctx.dataAbstraction.hget(
         'user',
         ctx.userId,
-        'recent-page-ids',
+        'favorite-page-ids',
       );
 
-      // Remove page ID from recent page IDs
+      // Remove page ID from favorite page IDs
 
-      const originalLength = recentPageIds.length;
+      const originalLength = favoritePageIds.length;
 
-      if (pull(recentPageIds, input.pageId).length === originalLength) {
+      if (pull(favoritePageIds, input.pageId).length === originalLength) {
         throw new TRPCError({
-          message: 'Recent page not found.',
+          message: 'Favorite page not found.',
           code: 'NOT_FOUND',
         });
       }
 
       checkRedlockSignalAborted(signals);
 
-      // Update recent page IDs
+      // Update favorite page IDs
 
       await ctx.dataAbstraction.patch('user', ctx.userId, {
-        recent_page_ids: recentPageIds,
+        favorite_page_ids: favoritePageIds,
       });
     },
   );

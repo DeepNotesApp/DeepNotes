@@ -38,6 +38,8 @@ export class UserModel extends Model {
   recent_page_ids!: string[];
   recent_group_ids!: string[];
 
+  favorite_page_ids!: string[];
+
   customer_id!: string | null;
   plan!: Plan;
   subscription_id!: string | null;

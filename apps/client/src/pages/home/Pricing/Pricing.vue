@@ -82,11 +82,15 @@
           {
             icon: 'mdi-account-group',
             text: 'Collaborative groups',
+            tooltip: 'Collaborate with other subscribed members.',
+            tooltipMaxWidth: '150px',
           },
           {
             icon: 'mdi-earth',
             text: 'Private and public groups',
-            help: 'Public groups are viewable by anyone, but only editable by the group members.',
+            tooltip:
+              'Public groups are viewable by anyone with a link to one of its pages, but only editable by its members.',
+            tooltipMaxWidth: '180px',
           },
           {
             icon: 'mdi-lock',
@@ -145,6 +149,10 @@ import { createSmartComputed, watchUntilTrue } from '@stdlib/vue';
 import { handleError } from 'src/code/utils/misc';
 
 import PlanCard from './PlanCard.vue';
+
+useMeta(() => ({
+  title: 'Pricing - DeepNotes',
+}));
 
 const billingFrequency = ref<'monthly' | 'yearly'>('monthly');
 

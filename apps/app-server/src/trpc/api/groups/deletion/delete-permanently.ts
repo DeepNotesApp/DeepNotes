@@ -32,18 +32,21 @@ export async function deletePermanently({
           permission: 'editGroupSettings',
         });
 
-        // Check if group is deleted
+        // Check if group is permanently deleted
+
+        const permanentlyDeletionDate = await ctx.dataAbstraction.hget(
+          'group',
+          input.groupId,
+          'permanent-deletion-date',
+        );
 
         if (
-          (await ctx.dataAbstraction.hget(
-            'group',
-            input.groupId,
-            'permanent-deletion-date',
-          )) == null
+          permanentlyDeletionDate != null &&
+          permanentlyDeletionDate < new Date()
         ) {
           throw new TRPCError({
             code: 'BAD_REQUEST',
-            message: 'Group is not deleted.',
+            message: 'Group is already permanently deleted.',
           });
         }
 
