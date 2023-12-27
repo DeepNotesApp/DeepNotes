@@ -61,13 +61,25 @@ export async function getGroupInvitationSentNotificationInfo({
           color: 'green',
 
           handler: () =>
-            $quasar().dialog({
-              component: AcceptInvitationDialog,
+            $quasar()
+              .dialog({
+                component: AcceptInvitationDialog,
 
-              componentProps: {
-                groupIds: [groupId],
-              },
-            }),
+                componentProps: {
+                  groupIds: [groupId],
+                },
+              })
+              .onOk(async () => {
+                const mainPageId = await internals.realtime.hget(
+                  'group',
+                  groupId,
+                  'main-page-id',
+                );
+
+                await internals.pages.goToPage(mainPageId, {
+                  fromParent: true,
+                });
+              }),
         },
       ],
     };

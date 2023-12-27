@@ -180,6 +180,15 @@ async function _acceptJoinInvitation() {
         groupIds: [notificationContent.value.groupId],
       },
     })
+    .onOk(async () => {
+      const mainPageId = await internals.realtime.hget(
+        'group',
+        notificationContent.value.groupId,
+        'main-page-id',
+      );
+
+      await internals.pages.goToPage(mainPageId, { fromParent: true });
+    })
     .onDismiss(() => {
       notificationsMenu.value.hide();
     });
