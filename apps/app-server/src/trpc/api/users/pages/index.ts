@@ -7,8 +7,8 @@ import { getCurrentPathProcedure } from './get-current-path';
 import { getGroupIdsProcedure } from './get-group-ids';
 import { getStartingPageIdProcedure } from './get-starting-page-id';
 import { notificationsRouter } from './notifications';
-import { removeFavoritePageProcedure } from './remove-favorite-page';
-import { removeRecentPageProcedure } from './remove-recent-page';
+import { removeFavoritePagesProcedure } from './remove-favorite-pages';
+import { removeRecentPagesProcedure } from './remove-recent-pages';
 import { setEncryptedDefaultArrowProcedure } from './set-encrypted-default-arrow';
 import { setEncryptedDefaultNoteProcedure } from './set-encrypted-default-note';
 
@@ -18,11 +18,11 @@ export const pagesRouter = trpc.router({
   getStartingPageId: getStartingPageIdProcedure(),
   getCurrentPath: getCurrentPathProcedure(),
 
-  removeRecentPage: removeRecentPageProcedure(),
+  removeRecentPages: removeRecentPagesProcedure(),
   clearRecentPages: clearRecentPagesProcedure(),
 
   addFavoritePages: addFavoritePagesProcedure(),
-  removeFavoritePage: removeFavoritePageProcedure(),
+  removeFavoritePages: removeFavoritePagesProcedure(),
   clearFavoritePages: clearFavoritePagesProcedure(),
 
   setEncryptedDefaultNote: setEncryptedDefaultNoteProcedure(),

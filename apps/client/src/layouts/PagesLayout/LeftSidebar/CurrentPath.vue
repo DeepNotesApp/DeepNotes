@@ -50,8 +50,12 @@
       :page-id="pageId"
       :active="pageId === internals.pages.react.pageId"
       prefer="relative"
-      class="current-path"
-    />
+      style="padding-right: 8px"
+    >
+      <q-item-section side>
+        <PagePopupOptions :page-id="pageId" />
+      </q-item-section>
+    </PageItem>
   </q-list>
 
   <div
@@ -79,6 +83,7 @@
 
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
+import PagePopupOptions from 'src/components/PagePopupOptions.vue';
 import type { LeftSidebarSectionName } from 'src/stores/ui';
 import {
   leftSidebarSectionIndexes,

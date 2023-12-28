@@ -91,18 +91,12 @@
         :page-id="pageId"
         :active="pageId === internals.pages.react.pageId"
         prefer="absolute"
-        class="recent-pages"
-      />
-
-      <DeepBtn
-        icon="mdi-close"
-        size="14px"
-        round
-        flat
-        class="remove-btn"
-        title="Remove from recent pages"
-        @click.stop="removeRecentPage(pageId)"
-      />
+        style="padding-right: 8px"
+      >
+        <q-item-section side>
+          <PagePopupOptions :page-id="pageId" />
+        </q-item-section>
+      </PageItem>
     </div>
   </q-list>
 
@@ -131,9 +125,9 @@
 
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
-import { pull } from 'lodash';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
+import PagePopupOptions from 'src/components/PagePopupOptions.vue';
 import type { LeftSidebarSectionName } from 'src/stores/ui';
 import {
   leftSidebarSectionIndexes,
@@ -219,18 +213,6 @@ async function clearRecentPages() {
   }
 }
 
-async function removeRecentPage(pageId: string) {
-  try {
-    await trpcClient.users.pages.removeRecentPage.mutate({ pageId });
-
-    internals.pages.recentPageIdsKeepOverride = true;
-    internals.pages.react.recentPageIdsOverride = recentPageIds.value.slice();
-    pull(internals.pages.react.recentPageIdsOverride, pageId);
-  } catch (error) {
-    handleError(error);
-  }
-}
-
 function resizeHandleDoubleClick() {
   const avgWeight =
     (uiStore()[`${sectionName}Weight`] +
@@ -243,31 +225,6 @@ function resizeHandleDoubleClick() {
 </script>
 
 <style scoped lang="scss">
-.recent-page {
-  position: relative;
-
-  > .remove-btn {
-    position: absolute;
-
-    top: 50%;
-    right: -6px;
-
-    transform: translate(-50%, -50%);
-
-    min-width: 30px;
-    min-height: 30px;
-    width: 30px;
-    height: 30px;
-
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-}
-
-.recent-page:hover > .remove-btn {
-  opacity: 1;
-}
-
 .resize-handle {
   position: absolute;
   left: 0;
