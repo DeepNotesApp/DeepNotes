@@ -8,11 +8,11 @@ import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
   z.object({
-    pageId: z.string().refine(isNanoID),
+    pageIds: z.string().refine(isNanoID).array(),
   }),
 );
 
-export const removeFavoritePageProcedure = once(() =>
+export const removeFavoritePagesProcedure = once(() =>
   baseProcedure.mutation(removeFavoritePage),
 );
 
@@ -35,7 +35,7 @@ export async function removeFavoritePage({
 
       const originalLength = favoritePageIds.length;
 
-      if (pull(favoritePageIds, input.pageId).length === originalLength) {
+      if (pull(favoritePageIds, ...input.pageIds).length === originalLength) {
         throw new TRPCError({
           message: 'Favorite page not found.',
           code: 'NOT_FOUND',

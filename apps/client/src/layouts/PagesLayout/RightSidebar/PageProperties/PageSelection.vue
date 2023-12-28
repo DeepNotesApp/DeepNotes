@@ -1,6 +1,14 @@
 <template>
   <div style="padding: 20px; display: flex; flex-direction: column">
     <DeepBtn
+      v-if="pageSelectionStore().selectedPages.has(page.id)"
+      label="Deselect this page"
+      icon="mdi-selection-multiple"
+      color="negative"
+      @click="deselectPage"
+    />
+    <DeepBtn
+      v-else
       label="Select this page"
       icon="mdi-selection-multiple"
       color="primary"
@@ -31,6 +39,16 @@ function selectPage() {
   $quasar().notify({
     message: 'Page added to selection.',
     color: 'positive',
+    timeout: 1000,
+  });
+}
+
+function deselectPage() {
+  pageSelectionStore().selectedPages.delete(page.value.id);
+
+  $quasar().notify({
+    message: 'Page removed from selection.',
+    color: 'negative',
     timeout: 1000,
   });
 }

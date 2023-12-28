@@ -114,25 +114,18 @@
     <div
       v-for="pageId in selectedPageIds"
       :key="pageId"
-      class="selected-page"
     >
       <PageItem
         icon
         :page-id="pageId"
         :active="pageId === internals.pages.react.pageId"
         prefer="absolute"
-        class="selected-pages"
-      />
-
-      <DeepBtn
-        icon="mdi-close"
-        size="14px"
-        round
-        flat
-        class="remove-btn"
-        title="Remove from selected pages"
-        @click.stop="pageSelectionStore().selectedPages.delete(pageId)"
-      />
+        style="padding-right: 8px"
+      >
+        <q-item-section side>
+          <PagePopupOptions :page-id="pageId" />
+        </q-item-section>
+      </PageItem>
     </div>
   </q-list>
 </template>

@@ -8,15 +8,15 @@ import { z } from 'zod';
 
 const baseProcedure = authProcedure.input(
   z.object({
-    pageId: z.string().refine(isNanoID),
+    pageIds: z.string().refine(isNanoID).array(),
   }),
 );
 
-export const removeRecentPageProcedure = once(() =>
-  baseProcedure.mutation(removeRecentPage),
+export const removeRecentPagesProcedure = once(() =>
+  baseProcedure.mutation(removeRecentPages),
 );
 
-export async function removeRecentPage({
+export async function removeRecentPages({
   ctx,
   input,
 }: InferProcedureOpts<typeof baseProcedure>) {
@@ -35,7 +35,7 @@ export async function removeRecentPage({
 
       const originalLength = recentPageIds.length;
 
-      if (pull(recentPageIds, input.pageId).length === originalLength) {
+      if (pull(recentPageIds, ...input.pageIds).length === originalLength) {
         throw new TRPCError({
           message: 'Recent page not found.',
           code: 'NOT_FOUND',

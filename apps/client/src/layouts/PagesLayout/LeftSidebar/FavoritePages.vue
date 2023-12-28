@@ -87,25 +87,18 @@
     <div
       v-for="pageId in favoritePageIds"
       :key="pageId"
-      class="favorite-page"
     >
       <PageItem
         icon
         :page-id="pageId"
         :active="pageId === internals.pages.react.pageId"
         prefer="absolute"
-        class="favorite-pages"
-      />
-
-      <DeepBtn
-        icon="mdi-close"
-        size="14px"
-        round
-        flat
-        class="remove-btn"
-        title="Remove from favorite pages"
-        @click.stop="removeFavoritePage(pageId)"
-      />
+        style="padding-right: 8px"
+      >
+        <q-item-section side>
+          <PagePopupOptions :page-id="pageId" />
+        </q-item-section>
+      </PageItem>
     </div>
   </q-list>
 
@@ -134,7 +127,6 @@
 
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
-import { pull } from 'lodash';
 import { useRealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import type { LeftSidebarSectionName } from 'src/stores/ui';
@@ -225,19 +217,6 @@ async function clearfavoritePages() {
   }
 }
 
-async function removeFavoritePage(pageId: string) {
-  try {
-    await trpcClient.users.pages.removeFavoritePage.mutate({ pageId });
-
-    internals.pages.favoritePageIdsKeepOverride = true;
-    internals.pages.react.favoritePageIdsOverride =
-      favoritePageIds.value.slice();
-    pull(internals.pages.react.favoritePageIdsOverride, pageId);
-  } catch (error) {
-    handleError(error);
-  }
-}
-
 function resizeHandleDoubleClick() {
   const avgWeight =
     (uiStore()[`${sectionName}Weight`] +
@@ -250,31 +229,6 @@ function resizeHandleDoubleClick() {
 </script>
 
 <style scoped lang="scss">
-.favorite-page {
-  position: relative;
-
-  > .remove-btn {
-    position: absolute;
-
-    top: 50%;
-    right: -6px;
-
-    transform: translate(-50%, -50%);
-
-    min-width: 30px;
-    min-height: 30px;
-    width: 30px;
-    height: 30px;
-
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-}
-
-.favorite-page:hover > .remove-btn {
-  opacity: 1;
-}
-
 .resize-handle {
   position: absolute;
   left: 0;

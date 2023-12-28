@@ -20,6 +20,8 @@
         :page-id="pageId"
         :prefer="prefer"
       />
+
+      <slot></slot>
     </q-item>
   </a>
 </template>

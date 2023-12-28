@@ -5,7 +5,9 @@
   >
     <template #header>
       <q-card-section style="padding: 12px 20px">
-        <div class="text-h6">Accept invitation</div>
+        <div class="text-h6">
+          Accept invitation{{ pluralS(groupIds.length) }}
+        </div>
       </q-card-section>
     </template>
 
@@ -55,6 +57,7 @@
 
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
+import { pluralS } from '@stdlib/misc';
 import { acceptJoinInvitation } from 'src/code/api-interface/groups/join-invitations/accept';
 import { selfUserName } from 'src/code/self-user-name';
 import { handleError } from 'src/code/utils/misc';

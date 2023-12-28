@@ -24,7 +24,6 @@
       <div
         v-for="backlinkPageId in backlinks"
         :key="backlinkPageId"
-        class="backlink"
       >
         <PageItem
           :icon="false"
@@ -33,30 +32,13 @@
           @click="
             internals.pages.goToPage(backlinkPageId, { fromParent: true })
           "
-        />
-
-        <DeepBtn
-          class="menu-btn"
-          icon="mdi-dots-vertical"
-          round
-          flat
-          style="min-width: 0; min-height: 0; width: 32px; height: 32px"
+          style="padding-right: 8px"
         >
-          <q-menu>
-            <q-list>
-              <q-item
-                clickable
-                v-ripple
-                @click="addToSelection(backlinkPageId)"
-              >
-                <q-item-section avatar>
-                  <q-icon name="mdi-selection-multiple" />
-                </q-item-section>
-
-                <q-item-section>
-                  <q-item-label>Add to selection</q-item-label>
-                </q-item-section>
-              </q-item>
+          <q-item-section side>
+            <PagePopupOptions
+              :page-id="backlinkPageId"
+              :menu-props="{ anchor: 'bottom right', self: 'top right' }"
+            >
               <q-item
                 clickable
                 v-ripple
@@ -70,9 +52,9 @@
                   <q-item-label>Delete backlink</q-item-label>
                 </q-item-section>
               </q-item>
-            </q-list>
-          </q-menu>
-        </DeepBtn>
+            </PagePopupOptions>
+          </q-item-section>
+        </PageItem>
       </div>
     </q-list>
   </div>
@@ -81,7 +63,6 @@
 <script setup lang="ts">
 import type { Page } from 'src/code/pages/page/page';
 import { handleError } from 'src/code/utils/misc';
-import { pageSelectionStore } from 'src/stores/page-selection';
 import type { Ref } from 'vue';
 
 const page = inject<Ref<Page>>('page')!;
@@ -90,16 +71,6 @@ const backlinks = computed(
   (): string[] =>
     page.value.realtimeCtx.hget('page-backlinks', page.value.id, 'list') ?? [],
 );
-
-function addToSelection(pageId: string) {
-  pageSelectionStore().selectedPages.add(pageId);
-
-  $quasar().notify({
-    message: 'Page added to selection.',
-    color: 'positive',
-    timeout: 1000,
-  });
-}
 
 async function deleteBacklink(backlinkPageId: string) {
   try {

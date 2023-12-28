@@ -116,11 +116,20 @@
       <Gap style="height: 16px" />
 
       <DeepBtn
-        label="Add page to favorites"
+        v-if="internals.pages.react.favoritePageIds.includes(page.id)"
+        label="Remove from favorites"
+        icon="mdi-star"
+        color="negative"
+        :disable="page.react.readOnly"
+        @click="removeFavoritePages([page.id])"
+      />
+      <DeepBtn
+        v-else
+        label="Add to favorites"
         icon="mdi-star"
         color="primary"
         :disable="page.react.readOnly"
-        @click="addPageToFavorites"
+        @click="addFavoritePages([page.id])"
       />
 
       <Gap style="height: 16px" />
@@ -152,6 +161,8 @@ import { maxPageTitleLength } from '@deeplib/misc';
 import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
 import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
 import { movePage } from 'src/code/api-interface/pages/move';
+import { addFavoritePages } from 'src/code/api-interface/users/add-favorite-pages';
+import { removeFavoritePages } from 'src/code/api-interface/users/remove-favorite-pages';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';
@@ -186,21 +197,6 @@ async function _movePage() {
 
     $quasar().notify({
       message: 'Page moved successfully.',
-      color: 'positive',
-    });
-  } catch (error) {
-    handleError(error);
-  }
-}
-
-async function addPageToFavorites() {
-  try {
-    await trpcClient.users.pages.addFavoritePages.mutate({
-      pageIds: [page.value.id],
-    });
-
-    $quasar().notify({
-      message: 'Page added to favorites successfully.',
       color: 'positive',
     });
   } catch (error) {
