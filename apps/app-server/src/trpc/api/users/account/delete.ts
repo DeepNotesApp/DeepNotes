@@ -8,6 +8,7 @@ import {
   UserModel,
   UserPageModel,
 } from '@deeplib/db';
+import { mainLogger } from '@stdlib/misc';
 import { checkRedlockSignalAborted } from '@stdlib/redlock';
 import { TRPCError } from '@trpc/server';
 import { once } from 'lodash';
@@ -213,7 +214,11 @@ export async function delete_({
         // Delete Stripe customer
 
         if (user?.customer_id != null) {
-          await ctx.stripe.customers.del(user.customer_id);
+          try {
+            await ctx.stripe.customers.del(user.customer_id);
+          } catch (error) {
+            mainLogger.error(error);
+          }
         }
 
         // Clear cookies
