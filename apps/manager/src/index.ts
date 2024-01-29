@@ -62,7 +62,7 @@ async function handleCommand(command: string) {
         break;
       case 'hset':
         await dataAbstraction().hmset(args[0] as any, args[1], {
-          [args[2]]: args[3],
+          [args[2]]: eval(args[3]),
         });
         break;
 
