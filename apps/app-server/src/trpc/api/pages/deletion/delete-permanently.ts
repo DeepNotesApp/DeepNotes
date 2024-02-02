@@ -59,6 +59,22 @@ export async function deletePermanently({
               });
             }
 
+            // Check if page is main page
+
+            const mainPageId = await ctx.dataAbstraction.hget(
+              'group',
+              groupId,
+              'main-page-id',
+            );
+
+            if (input.pageId === mainPageId) {
+              throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message:
+                  "Cannot delete a group's main page, either replace the main page first or delete the whole group.",
+              });
+            }
+
             // Check if page is free
 
             let numFreePages;

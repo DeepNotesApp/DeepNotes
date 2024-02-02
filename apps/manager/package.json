@@ -12,7 +12,8 @@
     "ioredis": "npm:@deepnotes/ioredis@^5.3.1",
     "knex": "2.3.0",
     "lodash": "^4.17.21",
-    "objection": "3.0.1"
+    "objection": "3.0.1",
+    "stripe": "^14.3.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.200",
