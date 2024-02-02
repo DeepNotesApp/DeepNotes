@@ -27,7 +27,7 @@ export async function savePageSnapshot(input: {
     encryptedData: symmetricKey.encrypt(Y.encodeStateAsUpdateV2(input.doc), {
       padding: true,
       associatedData: {
-        context: 'PageDocUpdate',
+        context: 'PageSnapshotData',
         pageId: input.pageId,
       },
     }),
