@@ -2,7 +2,7 @@ import type { MarkName, NodeName } from '@stdlib/misc';
 import { Vec2 } from '@stdlib/misc';
 import type { ChainedCommands, Editor } from '@tiptap/vue-3';
 import { every } from 'lodash';
-import { unsetNode } from 'src/code/tiptap/utils';
+import { unsetNode } from 'src/code/areas/tiptap/utils';
 import { getClipboardText, setClipboardText } from 'src/code/utils/clipboard';
 import type { ComputedRef, UnwrapNestedRefs } from 'vue';
 

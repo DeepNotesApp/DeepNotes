@@ -1,6 +1,6 @@
 import { Vec2 } from '@stdlib/misc';
 import { useEventListener } from '@vueuse/core';
-import { unsetNode } from 'src/code/tiptap/utils';
+import { unsetNode } from 'src/code/areas/tiptap/utils';
 import { modsMatch } from 'src/code/utils/misc';
 import InsertImageDialog from 'src/layouts/PagesLayout/MainToolbar/InsertImageDialog.vue';
 import InsertLinkDialog from 'src/layouts/PagesLayout/MainToolbar/InsertLinkDialog.vue';

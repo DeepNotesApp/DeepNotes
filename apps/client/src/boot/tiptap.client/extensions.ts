@@ -18,12 +18,12 @@ import StarterKit from '@tiptap/starter-kit';
 import { Extension } from '@tiptap/vue-3';
 import { once } from 'lodash';
 import { lowlight } from 'lowlight/lib/common';
-import { ImageResizeExtension } from 'src/code/tiptap/image-resize/extension';
-import { InlineMathExtension } from 'src/code/tiptap/inline-math/extension';
-import { MathBlockExtension } from 'src/code/tiptap/math-block/extension';
-import { ProsemirrorPasteHandlerPlugin } from 'src/code/tiptap/paste-handler';
-import { TaskItemExtension } from 'src/code/tiptap/task-item';
-import { YoutubeVideoExtension } from 'src/code/tiptap/youtube-video/extension';
+import { ImageResizeExtension } from 'src/code/areas/tiptap/image-resize/extension';
+import { InlineMathExtension } from 'src/code/areas/tiptap/inline-math/extension';
+import { MathBlockExtension } from 'src/code/areas/tiptap/math-block/extension';
+import { ProsemirrorPasteHandlerPlugin } from 'src/code/areas/tiptap/paste-handler';
+import { TaskItemExtension } from 'src/code/areas/tiptap/task-item';
+import { YoutubeVideoExtension } from 'src/code/areas/tiptap/youtube-video/extension';
 
 import { FindAndReplaceExtension } from './find-and-replace';
 
