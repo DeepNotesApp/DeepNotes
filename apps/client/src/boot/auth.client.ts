@@ -1,6 +1,6 @@
 import { sleep } from '@stdlib/misc';
 import { boot } from 'quasar/wrappers';
-import { tryRefreshTokens } from 'src/code/auth/refresh';
+import { tryRefreshTokens } from 'src/code/areas/auth/refresh';
 
 const _moduleLogger = mainLogger.sub('boot/auth.client.ts');
 

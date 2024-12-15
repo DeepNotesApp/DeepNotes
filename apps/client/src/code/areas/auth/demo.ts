@@ -1,8 +1,8 @@
 import { wrapSymmetricKey } from '@stdlib/crypto';
 import sodium from 'libsodium-wrappers-sumo';
 
-import type { deriveUserValues } from '../crypto';
-import { trpcClient } from '../trpc';
+import type { deriveUserValues } from '../../crypto';
+import { trpcClient } from '../../trpc';
 import { login } from './login';
 import { getRegistrationValues } from './register';
 

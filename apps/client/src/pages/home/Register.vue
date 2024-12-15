@@ -152,8 +152,8 @@
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
-import { enterDemo } from 'src/code/auth/demo';
-import { getRegistrationValues } from 'src/code/auth/register';
+import { enterDemo } from 'src/code/areas/auth/demo';
+import { getRegistrationValues } from 'src/code/areas/auth/register';
 import { deriveUserValues } from 'src/code/crypto';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import { zxcvbn } from 'src/code/utils/zxcvbn';

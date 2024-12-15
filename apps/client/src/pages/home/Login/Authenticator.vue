@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { login } from 'src/code/auth/login';
+import { login } from 'src/code/areas/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
 import { handleError } from 'src/code/utils/misc';
 import DeepBtn from 'src/components/DeepBtn.vue';

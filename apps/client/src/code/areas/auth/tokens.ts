@@ -3,7 +3,7 @@ import {
   getRefreshTokenExpiration,
 } from '@deeplib/misc';
 
-import { shouldRememberSession } from '../utils/misc';
+import { shouldRememberSession } from '../../utils/misc';
 
 export function getClientTokenExpirationDate(
   token: 'access' | 'refresh',
