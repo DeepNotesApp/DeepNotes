@@ -3,12 +3,6 @@
 
   "extends": "@deeplib/tsconfig/base.json",
 
-  // Necessary for ts-node-dev to work
-  "ts-node": {
-    "files": true
-  },
-  "files": ["src/types/env.d.ts"],
-
   "compilerOptions": {
     "baseUrl": ".",
 
