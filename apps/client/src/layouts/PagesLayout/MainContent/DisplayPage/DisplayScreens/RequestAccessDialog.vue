@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { maxNameLength } from '@deeplib/misc';
-import { sendJoinRequest } from 'src/code/api-interface/groups/join-requests/send';
+import { sendJoinRequest } from 'src/code/areas/api-interface/groups/join-requests/send';
 import { selfUserName } from 'src/code/self-user-name';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';

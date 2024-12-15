@@ -1,4 +1,4 @@
-import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
+import { rejectJoinRequest } from 'src/code/areas/api-interface/groups/join-requests/reject';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import GroupSettingsDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/GroupSettingsDialog.vue';
 import AcceptRequestDialog from 'src/layouts/PagesLayout/RightSidebar/PageProperties/GroupSettingsDialog/RequestsTab/AcceptRequestDialog.vue';

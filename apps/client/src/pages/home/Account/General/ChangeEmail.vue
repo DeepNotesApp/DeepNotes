@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { maxEmailLength, sleep, w3cEmailRegex } from '@stdlib/misc';
-import { changeEmail } from 'src/code/api-interface/users/change-email';
+import { changeEmail } from 'src/code/areas/api-interface/users/change-email';
 import { logout } from 'src/code/areas/auth/logout';
 import { deriveUserValues } from 'src/code/crypto';
 import { asyncDialog, handleError } from 'src/code/utils/misc';

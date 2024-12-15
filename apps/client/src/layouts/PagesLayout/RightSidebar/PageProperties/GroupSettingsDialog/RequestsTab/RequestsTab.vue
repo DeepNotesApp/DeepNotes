@@ -107,7 +107,7 @@
 import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
-import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
+import { rejectJoinRequest } from 'src/code/areas/api-interface/groups/join-requests/reject';
 import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
 import { asyncDialog, handleError } from 'src/code/utils/misc';

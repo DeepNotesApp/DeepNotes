@@ -214,7 +214,7 @@
 <script setup lang="ts">
 import { splitStr } from '@stdlib/misc';
 import { useIntervalFn } from '@vueuse/core';
-import { createPage } from 'src/code/api-interface/pages/create';
+import { createPage } from 'src/code/areas/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import TutorialTooltip from 'src/components/TutorialTooltip.vue';

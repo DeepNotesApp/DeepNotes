@@ -1,4 +1,4 @@
-import { rejectJoinInvitation } from 'src/code/api-interface/groups/join-invitations/reject';
+import { rejectJoinInvitation } from 'src/code/areas/api-interface/groups/join-invitations/reject';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import AcceptInvitationDialog from 'src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/AcceptInvitationDialog.vue';
 

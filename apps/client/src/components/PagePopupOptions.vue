@@ -93,9 +93,9 @@
 
 <script setup lang="ts">
 import type { QMenuProps } from 'quasar';
-import { addFavoritePages } from 'src/code/api-interface/users/add-favorite-pages';
-import { removeFavoritePages } from 'src/code/api-interface/users/remove-favorite-pages';
-import { removeRecentPages } from 'src/code/api-interface/users/remove-recent-pages';
+import { addFavoritePages } from 'src/code/areas/api-interface/users/add-favorite-pages';
+import { removeFavoritePages } from 'src/code/areas/api-interface/users/remove-favorite-pages';
+import { removeRecentPages } from 'src/code/areas/api-interface/users/remove-recent-pages';
 import { pageSelectionStore } from 'src/stores/page-selection';
 
 import type { DeepBtnProps } from './DeepBtn.vue';

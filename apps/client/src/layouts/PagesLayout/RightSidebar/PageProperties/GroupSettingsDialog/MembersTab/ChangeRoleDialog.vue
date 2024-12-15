@@ -69,7 +69,7 @@ import { canManageRole } from '@deeplib/misc';
 import { roles, rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
-import { changeUserRole } from 'src/code/api-interface/groups/change-user-role';
+import { changeUserRole } from 'src/code/areas/api-interface/groups/change-user-role';
 import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';

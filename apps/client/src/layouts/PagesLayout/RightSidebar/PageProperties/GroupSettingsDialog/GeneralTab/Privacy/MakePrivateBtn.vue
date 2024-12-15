@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { makeGroupPrivate } from 'src/code/api-interface/groups/privacy/make-private';
+import { makeGroupPrivate } from 'src/code/areas/api-interface/groups/privacy/make-private';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;

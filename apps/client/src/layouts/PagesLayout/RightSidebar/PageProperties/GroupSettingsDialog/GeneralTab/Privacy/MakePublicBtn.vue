@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { makeGroupPublic } from 'src/code/api-interface/groups/privacy/make-public';
+import { makeGroupPublic } from 'src/code/areas/api-interface/groups/privacy/make-public';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;
