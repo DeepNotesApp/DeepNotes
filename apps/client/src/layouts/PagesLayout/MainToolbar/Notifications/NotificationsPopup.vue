@@ -92,7 +92,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 
 import GroupInvitationAccepted from './Items/GroupInvitationAccepted.vue';

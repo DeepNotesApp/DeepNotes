@@ -21,11 +21,11 @@
 /* eslint-disable vue/no-mutating-props */
 
 import { DataLayer } from '@stdlib/crypto';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupContentKeyrings } from 'src/code/pages/computed/group-content-keyrings';
 import { pageGroupIds } from 'src/code/pages/computed/page-group-id';
 import { pageKeyrings } from 'src/code/pages/computed/page-keyrings';
 import type { Page } from 'src/code/pages/page/page';
-import { useRealtimeContext } from 'src/code/realtime/context';
 
 import DisplayScreens from './DisplayScreens/DisplayScreens.vue';
 import DOMDisplay from './DisplayScreens/DisplayWorld/DOMDisplay.vue';

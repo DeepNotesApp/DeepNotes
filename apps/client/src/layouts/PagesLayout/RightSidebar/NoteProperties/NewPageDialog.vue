@@ -137,9 +137,9 @@ import {
 } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN, sleep } from '@stdlib/misc';
 import { createPage } from 'src/code/api-interface/pages/create';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { useRealtimeContext } from 'src/code/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 import type { ComponentPublicInstance, Ref } from 'vue';
 

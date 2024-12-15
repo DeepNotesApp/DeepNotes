@@ -274,9 +274,9 @@
 import { maxGroupNameLength, maxNameLength, rolesMap } from '@deeplib/misc';
 import { bytesToBase64 } from '@stdlib/base64';
 import { createSymmetricKeyring } from '@stdlib/crypto';
+import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import type { RealtimeContext } from 'src/code/realtime/context';
 import { isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 

@@ -120,8 +120,8 @@ import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { rotateGroupKeys } from 'src/code/api-interface/groups/key-rotation';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
+import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
-import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';

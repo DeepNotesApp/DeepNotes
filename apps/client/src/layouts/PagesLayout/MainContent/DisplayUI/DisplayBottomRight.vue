@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 
 const page = computed(() => internals.pages.react.page);
 

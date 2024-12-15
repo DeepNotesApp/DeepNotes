@@ -116,8 +116,8 @@
 import { maxGroupNameLength, maxNameLength, rolesMap } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
 import type { movePage } from 'src/code/api-interface/pages/move';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import { useRealtimeContext } from 'src/code/realtime/context';
 import { selfUserName } from 'src/code/self-user-name';
 import type { ComponentPublicInstance, Ref } from 'vue';
 

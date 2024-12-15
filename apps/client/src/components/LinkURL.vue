@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 
 import type { ComboboxProps } from './Combobox.vue';
 

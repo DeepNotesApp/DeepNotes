@@ -85,7 +85,7 @@ import { canManageRole } from '@deeplib/misc';
 import { maxNameLength, roles, rolesMap } from '@deeplib/misc';
 import { isNanoID, maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
 import { sendJoinInvitation } from 'src/code/api-interface/groups/join-invitations/send';
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import { z } from 'zod';

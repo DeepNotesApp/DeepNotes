@@ -125,7 +125,7 @@
 
 <script setup lang="ts">
 import { listenPointerEvents, map, negateProp } from '@stdlib/misc';
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import PagePopupOptions from 'src/components/PagePopupOptions.vue';
 import type { LeftSidebarSectionName } from 'src/stores/ui';
