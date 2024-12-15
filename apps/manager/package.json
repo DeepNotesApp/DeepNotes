@@ -25,12 +25,12 @@
     "build:watch": "concurrently \"tsc --build ./tsconfig.json --watch\" \"tsc-alias -p tsconfig.json --watch\"",
     "bundle": "tsup",
     "clean": "rimraf --glob ./dist *.tsbuildinfo",
-    "dev": "ts-node-dev -r tsconfig-paths/register ./src/index.ts",
+    "dev": "tsx --inspect-brk ./src/index.ts",
     "fix": "eslint --fix --ext .js,.ts,.vue ./",
     "npkill": "rimraf --glob ./node_modules",
     "preinstall": "npx only-allow pnpm",
     "repo:build": "tsc-alias -p tsconfig.json",
     "repo:build:watch": "tsc-alias -p tsconfig.json --watch",
-    "start": "ts-node -r tsconfig-paths/register ./src/index.ts"
+    "start": "tsx ./src/index.ts"
   }
 }
