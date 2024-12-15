@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { unsetNode } from 'src/code/tiptap/utils';
+import { unsetNode } from 'src/code/areas/tiptap/utils';
 import { getAltKeyName, getCtrlKeyName } from 'src/code/utils/misc';
 
 import InsertLinkDialog from './InsertLinkDialog.vue';

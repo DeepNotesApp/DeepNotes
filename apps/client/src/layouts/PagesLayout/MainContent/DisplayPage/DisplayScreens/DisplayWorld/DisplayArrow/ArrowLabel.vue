@@ -25,10 +25,10 @@
 
 <script setup lang="ts">
 import { Y } from '@syncedstore/core';
+import { isTiptapEditorEmpty } from 'src/code/areas/tiptap/utils';
 import type { PageArrow } from 'src/code/pages/page/arrows/arrow';
 import { roundTimeToMinutes } from 'src/code/pages/page/notes/date';
 import type { Page } from 'src/code/pages/page/page';
-import { isTiptapEditorEmpty } from 'src/code/tiptap/utils';
 import { createDoubleClickChecker } from 'src/code/utils/misc';
 
 const props = defineProps<{

@@ -1,6 +1,6 @@
 import { useEventListener } from '@vueuse/core';
-import { imageResizing } from 'src/code/tiptap/image-resize/NodeView.vue';
-import { youtubeResizing } from 'src/code/tiptap/youtube-video/NodeView.vue';
+import { imageResizing } from 'src/code/areas/tiptap/image-resize/NodeView.vue';
+import { youtubeResizing } from 'src/code/areas/tiptap/youtube-video/NodeView.vue';
 import { handleError, isCtrlDown } from 'src/code/utils/misc';
 
 export function usePageNavigationInterception() {

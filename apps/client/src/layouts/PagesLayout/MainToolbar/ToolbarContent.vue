@@ -83,8 +83,8 @@
 </template>
 
 <script setup lang="ts">
+import { unsetNode } from 'src/code/areas/tiptap/utils';
 import type { Page } from 'src/code/pages/page/page';
-import { unsetNode } from 'src/code/tiptap/utils';
 import {
   getAltKeyName,
   getCtrlKeyName,
