@@ -2,7 +2,7 @@ import { rolesMap } from '@deeplib/misc';
 import { isNanoID, sleep, Vec2 } from '@stdlib/misc';
 import { watchUntilTrue } from '@stdlib/vue';
 import { once, pull } from 'lodash';
-import { bumpPage } from 'src/code/api-interface/pages/bump';
+import { bumpPage } from 'src/code/areas/api-interface/pages/bump';
 import { RealtimeContext } from 'src/code/areas/realtime/context';
 import type { Factories } from 'src/code/factories';
 import type { Pages } from 'src/code/pages/pages';

@@ -136,7 +136,7 @@ import {
   rolesMap,
 } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN, sleep } from '@stdlib/misc';
-import { createPage } from 'src/code/api-interface/pages/create';
+import { createPage } from 'src/code/areas/api-interface/pages/create';
 import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import { groupNames } from 'src/code/pages/computed/group-names';

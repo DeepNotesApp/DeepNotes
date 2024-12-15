@@ -158,11 +158,11 @@
 
 <script setup lang="ts">
 import { maxPageTitleLength } from '@deeplib/misc';
-import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
-import { movePage } from 'src/code/api-interface/pages/move';
-import { addFavoritePages } from 'src/code/api-interface/users/add-favorite-pages';
-import { removeFavoritePages } from 'src/code/api-interface/users/remove-favorite-pages';
+import { deletePage } from 'src/code/areas/api-interface/pages/deletion/delete';
+import { deletePagePermanently } from 'src/code/areas/api-interface/pages/deletion/delete-permanently';
+import { movePage } from 'src/code/areas/api-interface/pages/move';
+import { addFavoritePages } from 'src/code/areas/api-interface/users/add-favorite-pages';
+import { removeFavoritePages } from 'src/code/areas/api-interface/users/remove-favorite-pages';
 import { pageAbsoluteTitles } from 'src/code/pages/computed/page-absolute-titles';
 import { pageRelativeTitles } from 'src/code/pages/computed/page-relative-titles';
 import type { Page } from 'src/code/pages/page/page';

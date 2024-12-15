@@ -99,9 +99,9 @@
 import type { PageSnapshotInfo } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import { capitalize } from 'lodash';
-import { deletePageSnapshot } from 'src/code/api-interface/pages/snapshots/delete';
-import { restorePageSnapshot } from 'src/code/api-interface/pages/snapshots/restore';
-import { savePageSnapshot } from 'src/code/api-interface/pages/snapshots/save';
+import { deletePageSnapshot } from 'src/code/areas/api-interface/pages/snapshots/delete';
+import { restorePageSnapshot } from 'src/code/areas/api-interface/pages/snapshots/restore';
+import { savePageSnapshot } from 'src/code/areas/api-interface/pages/snapshots/save';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
 import type { Page } from 'src/code/pages/page/page';
 import { asyncDialog, handleError } from 'src/code/utils/misc';

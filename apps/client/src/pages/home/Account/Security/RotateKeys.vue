@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { rotateUserKeys } from 'src/code/api-interface/users/rotate-keys';
+import { rotateUserKeys } from 'src/code/areas/api-interface/users/rotate-keys';
 import { logout } from 'src/code/areas/auth/logout';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 

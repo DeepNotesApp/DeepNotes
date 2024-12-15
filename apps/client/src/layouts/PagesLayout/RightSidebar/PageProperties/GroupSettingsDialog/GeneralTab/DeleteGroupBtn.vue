@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import { deleteGroup } from 'src/code/api-interface/groups/deletion/delete';
-import { deleteGroupPermanently } from 'src/code/api-interface/groups/deletion/delete-permanently';
+import { deleteGroup } from 'src/code/areas/api-interface/groups/deletion/delete';
+import { deleteGroupPermanently } from 'src/code/areas/api-interface/groups/deletion/delete-permanently';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import DeletionDialog from 'src/components/DeletionDialog.vue';
 import type { Ref } from 'vue';

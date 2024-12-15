@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
-import { cancelJoinRequest } from 'src/code/api-interface/groups/join-requests/cancel';
+import { cancelJoinRequest } from 'src/code/areas/api-interface/groups/join-requests/cancel';
 import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';

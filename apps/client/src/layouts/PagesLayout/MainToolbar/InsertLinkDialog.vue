@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { sleep, splitStr } from '@stdlib/misc';
-import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
+import { createPageBacklink } from 'src/code/areas/api-interface/pages/backlinks/create';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 import NewPageDialog from '../RightSidebar/NoteProperties/NewPageDialog.vue';

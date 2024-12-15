@@ -607,8 +607,8 @@
 import { splitStr } from '@stdlib/misc';
 import { useIntervalFn } from '@vueuse/core';
 import { pack } from 'msgpackr';
-import { createPageBacklink } from 'src/code/api-interface/pages/backlinks/create';
-import { createPage } from 'src/code/api-interface/pages/create';
+import { createPageBacklink } from 'src/code/areas/api-interface/pages/backlinks/create';
+import { createPage } from 'src/code/areas/api-interface/pages/create';
 import type { PageNote } from 'src/code/pages/page/notes/note';
 import type { Page } from 'src/code/pages/page/page';
 import { setClipboardText } from 'src/code/utils/clipboard';

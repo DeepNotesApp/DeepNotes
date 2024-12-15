@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { disableGroupPasswordProtection } from 'src/code/api-interface/groups/password/disable';
+import { disableGroupPasswordProtection } from 'src/code/areas/api-interface/groups/password/disable';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;

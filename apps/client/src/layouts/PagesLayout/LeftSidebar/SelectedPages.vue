@@ -133,9 +133,9 @@
 <script setup lang="ts">
 import { negateProp, pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
-import { deletePage } from 'src/code/api-interface/pages/deletion/delete';
-import { deletePagePermanently } from 'src/code/api-interface/pages/deletion/delete-permanently';
-import { movePage } from 'src/code/api-interface/pages/move';
+import { deletePage } from 'src/code/areas/api-interface/pages/deletion/delete';
+import { deletePagePermanently } from 'src/code/areas/api-interface/pages/deletion/delete-permanently';
+import { movePage } from 'src/code/areas/api-interface/pages/move';
 import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 import DeletionDialog from 'src/components/DeletionDialog.vue';

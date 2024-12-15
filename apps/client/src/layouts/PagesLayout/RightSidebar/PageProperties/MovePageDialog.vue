@@ -115,7 +115,7 @@
 <script setup lang="ts">
 import { maxGroupNameLength, maxNameLength, rolesMap } from '@deeplib/misc';
 import { BREAKPOINT_MD_MIN } from '@stdlib/misc';
-import type { movePage } from 'src/code/api-interface/pages/move';
+import type { movePage } from 'src/code/areas/api-interface/pages/move';
 import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupNames } from 'src/code/pages/computed/group-names';
 import { selfUserName } from 'src/code/self-user-name';

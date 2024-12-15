@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { changeGroupPasswordProtection } from 'src/code/api-interface/groups/password/change';
+import { changeGroupPasswordProtection } from 'src/code/areas/api-interface/groups/password/change';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 const groupId = inject<string>('groupId')!;

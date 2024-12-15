@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { enableGroupPasswordProtection } from 'src/code/api-interface/groups/password/enable';
+import { enableGroupPasswordProtection } from 'src/code/areas/api-interface/groups/password/enable';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import EnablePasswordDialog from './EnablePasswordDialog.vue';

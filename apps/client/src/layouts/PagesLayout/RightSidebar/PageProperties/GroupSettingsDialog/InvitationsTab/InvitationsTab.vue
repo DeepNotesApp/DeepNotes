@@ -124,7 +124,7 @@
 import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
-import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitations/cancel';
+import { cancelJoinInvitation } from 'src/code/areas/api-interface/groups/join-invitations/cancel';
 import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
