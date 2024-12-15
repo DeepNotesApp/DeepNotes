@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { sleep } from '@stdlib/misc';
 import { deleteAccount } from 'src/code/api-interface/users/delete-account';
-import { logout } from 'src/code/auth/logout';
+import { logout } from 'src/code/areas/auth/logout';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 async function _deleteAccount() {

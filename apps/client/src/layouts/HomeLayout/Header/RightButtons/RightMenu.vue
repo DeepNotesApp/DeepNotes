@@ -124,7 +124,7 @@
 
 <script setup lang="ts">
 import { BREAKPOINT_LG_MIN, BREAKPOINT_MD_MIN, isIncluded } from '@stdlib/misc';
-import { logout } from 'src/code/auth/logout';
+import { logout } from 'src/code/areas/auth/logout';
 import { selfUserName } from 'src/code/self-user-name';
 
 const quasarMode = process.env.MODE;

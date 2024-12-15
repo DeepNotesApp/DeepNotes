@@ -103,8 +103,8 @@
 
 <script setup lang="ts">
 import { maxEmailLength, w3cEmailRegex } from '@stdlib/misc';
-import { enterDemo } from 'src/code/auth/demo';
-import { login } from 'src/code/auth/login';
+import { enterDemo } from 'src/code/areas/auth/demo';
+import { login } from 'src/code/areas/auth/login';
 import { deriveUserValues } from 'src/code/crypto';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';

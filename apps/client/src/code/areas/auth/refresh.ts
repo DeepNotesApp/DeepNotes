@@ -12,8 +12,8 @@ import {
   wrapSymmetricKey,
 } from '@stdlib/crypto';
 
-import { redirectIfNecessary } from '../routing';
-import { trpcClient } from '../trpc';
+import { redirectIfNecessary } from '../../routing';
+import { trpcClient } from '../../trpc';
 import { logout } from './logout';
 import {
   areClientTokensExpiring,
