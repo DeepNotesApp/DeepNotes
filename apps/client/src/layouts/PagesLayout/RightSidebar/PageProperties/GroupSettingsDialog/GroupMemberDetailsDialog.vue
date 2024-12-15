@@ -63,8 +63,8 @@
 <script setup lang="ts">
 import { bytesToBase64 } from '@stdlib/base64';
 import { createKeyring } from '@stdlib/crypto';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { groupMemberNames } from 'src/code/pages/computed/group-member-names';
-import { useRealtimeContext } from 'src/code/realtime/context';
 import type { Ref } from 'vue';
 
 const dialogRef = ref() as Ref<InstanceType<typeof CustomDialog>>;

@@ -88,8 +88,8 @@ import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { removeGroupUser } from 'src/code/api-interface/groups/remove-user';
+import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupNames } from 'src/code/pages/computed/group-names';
-import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError, isCtrlDown } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 

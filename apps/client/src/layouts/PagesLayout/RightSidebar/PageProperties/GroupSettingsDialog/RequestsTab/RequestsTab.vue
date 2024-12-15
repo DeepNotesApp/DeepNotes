@@ -108,8 +108,8 @@ import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { rejectJoinRequest } from 'src/code/api-interface/groups/join-requests/reject';
+import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupRequestNames } from 'src/code/pages/computed/group-request-names';
-import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';

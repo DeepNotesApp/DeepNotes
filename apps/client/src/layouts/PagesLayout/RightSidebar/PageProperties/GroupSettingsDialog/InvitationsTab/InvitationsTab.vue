@@ -125,8 +125,8 @@ import { rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { cancelJoinInvitation } from 'src/code/api-interface/groups/join-invitations/cancel';
+import type { RealtimeContext } from 'src/code/areas/realtime/context';
 import { groupInvitationNames } from 'src/code/pages/computed/group-invitation-names';
-import type { RealtimeContext } from 'src/code/realtime/context';
 import { asyncDialog, handleError } from 'src/code/utils/misc';
 
 import GroupMemberDetailsDialog from '../GroupMemberDetailsDialog.vue';

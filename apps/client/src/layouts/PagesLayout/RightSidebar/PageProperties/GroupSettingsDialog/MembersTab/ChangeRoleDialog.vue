@@ -70,7 +70,7 @@ import { roles, rolesMap } from '@deeplib/misc';
 import { pluralS } from '@stdlib/misc';
 import type { QNotifyUpdateOptions } from 'quasar';
 import { changeUserRole } from 'src/code/api-interface/groups/change-user-role';
-import { useRealtimeContext } from 'src/code/realtime/context';
+import { useRealtimeContext } from 'src/code/areas/realtime/context';
 import { handleError } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 

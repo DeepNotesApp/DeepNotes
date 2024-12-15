@@ -1,8 +1,8 @@
 import type { KeyPair, SymmetricKeyring } from '@stdlib/crypto';
 import { boot } from 'quasar/wrappers';
+import { RealtimeClient } from 'src/code/areas/realtime/client';
 import { factories } from 'src/code/factories';
 import type { Pages } from 'src/code/pages/pages';
-import { RealtimeClient } from 'src/code/realtime/client';
 import { shouldRememberSession, wrapStorage } from 'src/code/utils/misc';
 import type { Ref } from 'vue';
 import type { RouteLocationNormalized, Router } from 'vue-router';

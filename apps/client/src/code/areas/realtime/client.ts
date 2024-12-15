@@ -13,7 +13,7 @@ import * as encoding from 'lib0/encoding';
 import { once, throttle } from 'lodash';
 import { pack, unpack } from 'msgpackr';
 
-import { getNotificationInfo } from '../pages/notifications/notifications';
+import { getNotificationInfo } from '../../pages/notifications/notifications';
 import { RealtimeContext } from './context';
 
 export interface RealtimeCommand {
