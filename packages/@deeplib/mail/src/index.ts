@@ -2,7 +2,6 @@ import { mainLogger } from '@stdlib/misc';
 
 import { sendBrevoMail } from './brevo';
 import { sendMailjetMail } from './mailjet';
-import { sendSendGridMail } from './send-grid';
 
 export { sendBrevoMail } from './brevo';
 export { sendMailjetMail } from './mailjet';
@@ -18,7 +17,6 @@ export interface MailOptions {
 export type MailSendFunc = (opts: MailOptions) => Promise<void>;
 
 const _sendMailFuncs: [string, MailSendFunc][] = [
-  ['SendGrid', sendSendGridMail],
   ['Brevo', sendBrevoMail],
   ['Mailjet', sendMailjetMail],
 ];
@@ -26,7 +24,11 @@ const _sendMailFuncs: [string, MailSendFunc][] = [
 export async function sendMail(opts: MailOptions) {
   const funcLogger = mainLogger.sub('sendMail');
 
-  for (const [serviceName, sendFunc] of _sendMailFuncs) {
+  const randomizedSendMailFuncs = _sendMailFuncs
+    .slice()
+    .sort(() => Math.random() - 0.5);
+
+  for (const [serviceName, sendFunc] of randomizedSendMailFuncs) {
     try {
       await sendFunc(opts);
 
