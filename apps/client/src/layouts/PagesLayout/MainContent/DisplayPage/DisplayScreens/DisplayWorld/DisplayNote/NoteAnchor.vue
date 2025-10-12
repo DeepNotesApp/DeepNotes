@@ -14,13 +14,13 @@
       left: note.react.resizing?.active
         ? `${note.react.resizing.newWorldRect.topLeft.x}px`
         : note.react.floating
-        ? `${note.react.collab?.pos?.x}px`
-        : undefined,
+          ? `${note.react.collab?.pos?.x}px`
+          : undefined,
       top: note.react.resizing?.active
         ? `${note.react.resizing.newWorldRect.topLeft.y}px`
         : note.react.floating
-        ? `${note.react.collab?.pos?.y}px`
-        : undefined,
+          ? `${note.react.collab?.pos?.y}px`
+          : undefined,
 
       width:
         note.react.floating || note.react.resizing?.active ? '0' : undefined,

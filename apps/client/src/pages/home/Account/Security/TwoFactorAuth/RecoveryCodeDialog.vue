@@ -183,7 +183,8 @@ function printRecoveryCodes() {
 
 <style scoped>
 .recovery-codes :deep(*) {
-  font-family: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Ubuntu Mono',
+  font-family:
+    ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', 'Ubuntu Mono',
     'Roboto Mono', Menlo, Monaco, Consolas, monospace;
 
   font-size: 17px;

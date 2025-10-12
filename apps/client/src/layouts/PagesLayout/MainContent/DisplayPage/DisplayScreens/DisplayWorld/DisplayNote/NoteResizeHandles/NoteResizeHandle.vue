@@ -11,13 +11,13 @@
       left: props.side.includes('w')
         ? '0%'
         : props.side.includes('e')
-        ? '100%'
-        : '50%',
+          ? '100%'
+          : '50%',
       top: props.side.includes('n')
         ? '0%'
         : props.side.includes('s')
-        ? '100%'
-        : '50%',
+          ? '100%'
+          : '50%',
 
       cursor: `${side}-resize`,
 
@@ -51,8 +51,8 @@ const section = computed(
     (props.side.includes('n')
       ? note.react.topSection
       : props.side.includes('s')
-      ? note.react.bottomSection
-      : undefined),
+        ? note.react.bottomSection
+        : undefined),
 );
 
 async function onLeftPointerDown(event: PointerEvent) {

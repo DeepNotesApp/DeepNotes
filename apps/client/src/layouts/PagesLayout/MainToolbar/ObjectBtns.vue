@@ -77,27 +77,29 @@
     icon-size="24px"
     :disable="page.react.readOnly || !page.editing.react.active"
     @click="
-      $q.dialog({
-        title: 'Insert YouTube video',
-        message: 'Enter the video URL:',
+      $q
+        .dialog({
+          title: 'Insert YouTube video',
+          message: 'Enter the video URL:',
 
-        prompt: {
-          type: 'url',
-          model: '',
-          filled: true,
-        },
-        color: 'primary',
+          prompt: {
+            type: 'url',
+            model: '',
+            filled: true,
+          },
+          color: 'primary',
 
-        cancel: { flat: true, color: 'negative' },
+          cancel: { flat: true, color: 'negative' },
 
-        focus: 'cancel',
-      }).onOk((url: string) =>
-        page.selection.format((chain) =>
-          chain.setYoutubeVideo({
-            src: url,
-          }),
-        ),
-      )
+          focus: 'cancel',
+        })
+        .onOk((url: string) =>
+          page.selection.format((chain) =>
+            chain.setYoutubeVideo({
+              src: url,
+            }),
+          ),
+        )
     "
   />
 

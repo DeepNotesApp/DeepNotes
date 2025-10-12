@@ -60,8 +60,8 @@ const section = computed(
     (props.side.includes('n')
       ? note.react.topSection
       : props.side.includes('s')
-      ? note.react.bottomSection
-      : undefined),
+        ? note.react.bottomSection
+        : undefined),
 );
 
 async function onLeftPointerDown(event: PointerEvent) {

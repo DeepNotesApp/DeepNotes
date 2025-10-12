@@ -23,12 +23,12 @@
           passwordStrength === 0
             ? '#f95e68'
             : passwordStrength === 1
-            ? '#fb964d'
-            : passwordStrength === 2
-            ? '#fdd244'
-            : passwordStrength === 3
-            ? '#b0dc53'
-            : '#35cc62',
+              ? '#fb964d'
+              : passwordStrength === 2
+                ? '#fdd244'
+                : passwordStrength === 3
+                  ? '#b0dc53'
+                  : '#35cc62',
       }"
     ></div>
   </PasswordField>
