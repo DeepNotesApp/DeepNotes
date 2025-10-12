@@ -1,15 +1,15 @@
-FROM node:16 AS builder
+FROM node:18 AS builder
 
-RUN npm install -g pnpm@^8.0.0
+RUN npm install -g pnpm@8.15.9
 
 WORKDIR /build
 COPY ./ ./
-RUN pnpm install --filter deepnotes --filter @deepnotes/app-server...
+RUN pnpm install --frozen-lockfile --filter deepnotes --filter @deepnotes/app-server...
 RUN pnpm --filter @deepnotes/app-server run bundle
 
-FROM node:16-alpine AS runner
+FROM node:18-alpine AS runner
 
-RUN npm install -g pnpm@^8.0.0
+RUN npm install -g pnpm@8.15.9
 RUN mkdir /usr/local/pnpm
 ENV PNPM_HOME="/usr/local/pnpm"
 ENV PATH="${PATH}:/usr/local/pnpm"
@@ -19,4 +19,4 @@ WORKDIR /app
 COPY --from=builder /build/apps/app-server/dist/ ./
 RUN pnpm init
 RUN pnpm install knex ws pg @getbrevo/brevo
-CMD pm2 start /app/index.js -i max && pm2 logs
+CMD ["pm2-runtime", "start", "/app/index.js", "-i", "max"]
