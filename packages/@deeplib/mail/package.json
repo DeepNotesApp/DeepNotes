@@ -7,11 +7,15 @@
     "@getbrevo/brevo": "^1.0.1",
     "@sendgrid/mail": "^7.7.0",
     "@stdlib/misc": "workspace:*",
+    "lodash": "^4.17.21",
     "node-mailjet": "^6.0.4",
     "nodemailer": "^6.9.7",
     "nodemailer-html-to-text": "^3.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.10.6"
+  },
   "keywords": [],
   "license": "ISC",
   "main": "dist/index.js",
