@@ -23,7 +23,7 @@ export async function startDemo({
   // Generate random password values
 
   const passwordValues = {
-    hash: sodium.randombytes_buf(64),
+    hash: new Uint8Array(sodium.randombytes_buf(64)),
     key: wrapSymmetricKey(sodium.randombytes_buf(32)),
     salt: new Uint8Array(sodium.randombytes_buf(16)),
   };

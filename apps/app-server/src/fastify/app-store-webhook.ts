@@ -67,10 +67,10 @@ interface JWSTransactionDecodedPayload {
   productId: string;
 
   type:
-    | 'Auto-Renewable Subscription'
-    | 'Non-Consumable'
-    | 'Consumable'
-    | 'Non-Renewing Subscription';
+  | 'Auto-Renewable Subscription'
+  | 'Non-Consumable'
+  | 'Consumable'
+  | 'Non-Renewing Subscription';
 
   transactionReason: 'PURCHASE' | 'RENEWAL';
 }
@@ -99,6 +99,11 @@ export async function webhook({
   _webhookLogger.info('Signed payload: %o', input);
 
   const decodedPayloadSignature = jws.decode(input.signedPayload);
+
+  if (!decodedPayloadSignature) {
+    throw new Error('Failed to decode payload signature');
+  }
+
   const decodedPayload =
     decodedPayloadSignature.payload as responseBodyV2DecodedPayload;
 
@@ -107,6 +112,11 @@ export async function webhook({
   const decodedTransactionSignature = jws.decode(
     decodedPayload.data.signedTransactionInfo,
   );
+
+  if (!decodedTransactionSignature) {
+    throw new Error('Failed to decode transaction signature');
+  }
+
   const decodedTransaction =
     decodedTransactionSignature.payload as JWSTransactionDecodedPayload;
 
