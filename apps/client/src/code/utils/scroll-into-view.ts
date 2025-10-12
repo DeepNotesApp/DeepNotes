@@ -37,14 +37,14 @@ export function scrollIntoView(
         targetRect.x < ancestorRect.x
           ? targetRect.x - ancestorRect.x
           : targetRect.right > ancestorClientRight
-          ? targetRect.right - ancestorClientRight
-          : 0;
+            ? targetRect.right - ancestorClientRight
+            : 0;
       let offsetY =
         targetRect.y < ancestorRect.y
           ? targetRect.y - ancestorRect.y
           : targetRect.bottom > ancestorClientBottom
-          ? targetRect.bottom - ancestorClientBottom
-          : 0;
+            ? targetRect.bottom - ancestorClientBottom
+            : 0;
 
       // Clamp offset
 

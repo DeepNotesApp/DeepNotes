@@ -18,17 +18,15 @@ export async function getAllPageUpdates(
 
   const cachePageUpdates = updateCacheItems
     .map<[number, string]>((msgpackPageUpdate) => unpack(msgpackPageUpdate))
-    .map<[number, Uint8Array]>((redisPageUpdate) => [
-      redisPageUpdate[0],
-      base64ToBytes(redisPageUpdate[1]),
-    ]);
+    .map<
+      [number, Uint8Array]
+    >((redisPageUpdate) => [redisPageUpdate[0], base64ToBytes(redisPageUpdate[1])]);
 
   const bufferPageUpdates = updateBufferItems
     .map<[number, string]>((msgpackPageUpdate) => unpack(msgpackPageUpdate))
-    .map<[number, Uint8Array]>((redisPageUpdate) => [
-      redisPageUpdate[0],
-      base64ToBytes(redisPageUpdate[1]),
-    ]);
+    .map<
+      [number, Uint8Array]
+    >((redisPageUpdate) => [redisPageUpdate[0], base64ToBytes(redisPageUpdate[1])]);
 
   if (updateCacheItems.length > 0) {
     return cachePageUpdates

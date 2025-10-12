@@ -31,10 +31,10 @@ export function handleError(error: any, logger = mainLogger) {
   $quasar().notify({
     message: isString(error)
       ? error
-      : error.response?.data?.errors?.[0]?.message ??
+      : (error.response?.data?.errors?.[0]?.message ??
         error.response?.data?.message ??
         error.message ??
-        'An error has occurred.',
+        'An error has occurred.'),
     type: 'negative',
   });
 

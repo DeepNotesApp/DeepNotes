@@ -264,16 +264,16 @@ export const PageArrow = once(
               this.react.looseEndpoint === 'source' &&
               this.react.sourceNote == null
                 ? new Vec2(1)
-                : this.react.sourceNote.react.relativeRect.halfSize ??
-                  new Vec2(1);
+                : (this.react.sourceNote.react.relativeRect.halfSize ??
+                  new Vec2(1));
 
             const targetSize =
               this.react.fakePos != null &&
               this.react.looseEndpoint === 'target' &&
               this.react.targetNote == null
                 ? new Vec2(1)
-                : this.react.targetNote.react.relativeRect.halfSize ??
-                  new Vec2(1);
+                : (this.react.targetNote.react.relativeRect.halfSize ??
+                  new Vec2(1));
 
             return { source: sourceSize, target: targetSize };
           }),
@@ -364,13 +364,13 @@ export const PageArrow = once(
           targetHeadPos: computed(() => {
             if (this.react.collab.bodyType === 'line') {
               return this.react.targetNote != null
-                ? getLineRectIntersection(
+                ? (getLineRectIntersection(
                     new Line(this.react.sourcePos, this.react.targetPos),
                     (this.react.interregional
                       ? this.react.targetNote.react.islandRect
                       : this.react.targetNote.react.relativeRect
                     ).grow(new Vec2(ARROW_OFFSET)),
-                  ) ?? this.react.targetPos
+                  ) ?? this.react.targetPos)
                 : this.react.targetPos;
             } else {
               return this.react.targetPos.add(

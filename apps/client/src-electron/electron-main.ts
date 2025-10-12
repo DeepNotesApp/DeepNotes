@@ -181,8 +181,8 @@ function createWindow() {
             sameSite == null
               ? 'lax'
               : sameSite === 'none'
-              ? 'no_restriction'
-              : (sameSite as any),
+                ? 'no_restriction'
+                : (sameSite as any),
         };
 
         void mainWindow?.webContents.session.cookies
