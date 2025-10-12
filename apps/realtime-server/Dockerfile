@@ -1,6 +1,6 @@
 FROM node:16 AS builder
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@^8.0.0
 
 WORKDIR /build
 COPY ./ ./
@@ -9,7 +9,7 @@ RUN pnpm --filter @deepnotes/realtime-server run bundle
 
 FROM node:16-alpine AS runner
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@^8.0.0
 RUN mkdir /usr/local/pnpm
 ENV PNPM_HOME="/usr/local/pnpm"
 ENV PATH="${PATH}:/usr/local/pnpm"

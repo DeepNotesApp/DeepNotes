@@ -7,7 +7,7 @@ ARG CLIENT_PORT=${CLIENT_PORT}
 ARG REALTIME_SERVER_URL=${REALTIME_SERVER_URL}
 ARG COLLAB_SERVER_URL=${COLLAB_SERVER_URL}
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@^8.0.0
 
 WORKDIR /build
 COPY ./ ./
@@ -19,7 +19,7 @@ RUN pnpm tsup
 
 FROM node:16-alpine AS runner
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@^8.0.0
 RUN mkdir /usr/local/pnpm
 ENV PNPM_HOME="/usr/local/pnpm"
 ENV PATH="${PATH}:/usr/local/pnpm"
