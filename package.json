@@ -58,7 +58,7 @@
     "dev:spa": "pnpm --filter @deepnotes/client run dev:spa",
     "dev:ssr": "pnpm --filter @deepnotes/client run dev:ssr",
     "fix": "turbo run fix --parallel",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,vue,md}\"",
     "lint": "turbo run lint",
     "npkill": "turbo run npkill && rimraf ./node_modules",
     "preinstall": "npx only-allow pnpm",
