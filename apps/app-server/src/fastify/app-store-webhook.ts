@@ -67,10 +67,10 @@ interface JWSTransactionDecodedPayload {
   productId: string;
 
   type:
-  | 'Auto-Renewable Subscription'
-  | 'Non-Consumable'
-  | 'Consumable'
-  | 'Non-Renewing Subscription';
+    | 'Auto-Renewable Subscription'
+    | 'Non-Consumable'
+    | 'Consumable'
+    | 'Non-Renewing Subscription';
 
   transactionReason: 'PURCHASE' | 'RENEWAL';
 }
