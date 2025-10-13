@@ -118,7 +118,31 @@ module.exports = configure(function (ctx) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        // Externalize Capacitor plugins that shouldn't be bundled in non-Capacitor builds
+        if (!viteConf.build) {
+          viteConf.build = {};
+        }
+        if (!viteConf.build.rollupOptions) {
+          viteConf.build.rollupOptions = {};
+        }
+        if (!viteConf.build.rollupOptions.external) {
+          viteConf.build.rollupOptions.external = [];
+        }
+        if (Array.isArray(viteConf.build.rollupOptions.external)) {
+          // Add all Capacitor-related packages
+          const capacitorPackages = [
+            '@capacitor/android',
+            '@capacitor/app',
+            '@capacitor/clipboard',
+            '@capacitor/core',
+            '@capacitor/ios',
+            '@capacitor/splash-screen',
+            '@revenuecat/purchases-capacitor',
+          ];
+          viteConf.build.rollupOptions.external.push(...capacitorPackages);
+        }
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
