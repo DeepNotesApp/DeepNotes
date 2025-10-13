@@ -13,4 +13,13 @@ export default defineConfig({
   splitting: false,
   dts: false,
   noExternal: [/^(@deeplib|@stdlib)\/.+$/],
+  external: [
+    '@capacitor/android',
+    '@capacitor/app',
+    '@capacitor/clipboard',
+    '@capacitor/core',
+    '@capacitor/ios',
+    '@capacitor/splash-screen',
+    '@revenuecat/purchases-capacitor',
+  ],
 });
