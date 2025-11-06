@@ -85,7 +85,7 @@ importers:
       '@stdlib/misc': workspace:*
       '@stdlib/redlock': workspace:*
       '@trpc/server': ^10.43.1
-      '@types/jws': ^3.2.8
+      '@types/jws': 3.2.8
       '@types/libsodium-wrappers-sumo': ^0.7.7
       '@types/lodash': ^4.14.200
       '@types/ws': 8.5.3
@@ -158,7 +158,7 @@ importers:
       unilogr: 0.0.27
       zod: 3.25.76
     devDependencies:
-      '@types/jws': 3.2.11
+      '@types/jws': 3.2.8
       '@types/libsodium-wrappers-sumo': 0.7.8
       '@types/lodash': 4.17.20
       '@types/ws': 8.5.3
@@ -4126,8 +4126,8 @@ packages:
       '@types/node': 24.10.0
     dev: true
 
-  /@types/jws/3.2.11:
-    resolution: {integrity: sha512-OOaTrLV6XdF1XvBgMeH1MjNuOaGCrRZWNSIds1AQaRgLdOWlAk2yMsfrJn+ekLgUow3xksWIM231lyFab7mHHw==}
+  /@types/jws/3.2.8:
+    resolution: {integrity: sha512-xDIvCuI7hEicqUa+dSc2TnrC92yvJtzbLghMrMcwroWzU9RWlF64cqrWW8QGikq4f7fN0V7edDIWuMLeICk+2A==}
     dependencies:
       '@types/node': 24.10.0
     dev: true
@@ -4139,7 +4139,7 @@ packages:
   /@types/keyv/3.1.4:
     resolution: {integrity: sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==}
     dependencies:
-      '@types/node': 16.18.126
+      '@types/node': 24.10.0
     dev: true
 
   /@types/libsodium-wrappers-sumo/0.7.8:
@@ -4470,7 +4470,7 @@ packages:
       vite: ^2.5.10
       vue: ^3.2.25
     dependencies:
-      vite: 2.9.18_sass@1.32.12
+      vite: 2.9.18
       vue: 3.2.47
     dev: true
 
