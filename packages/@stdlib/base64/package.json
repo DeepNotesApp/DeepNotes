@@ -5,10 +5,10 @@
   "author": "",
   "dependencies": {
     "@stdlib/misc": "workspace:*",
-    "js-base64": "^3.7.5"
+    "js-base64": "3.7.5"
   },
   "devDependencies": {
-    "@types/node": "^20.8.10"
+    "@types/node": "20.8.10"
   },
   "keywords": [],
   "license": "ISC",

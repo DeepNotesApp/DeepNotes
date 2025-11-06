@@ -6,14 +6,14 @@
   "dependencies": {
     "@stdlib/base64": "workspace:*",
     "@stdlib/misc": "workspace:*",
-    "crypto-js": "^4.2.0",
-    "libsodium-wrappers-sumo": "^0.7.13",
-    "msgpackr": "^1.9.9"
+    "crypto-js": "4.2.0",
+    "libsodium-wrappers-sumo": "0.7.13",
+    "msgpackr": "1.9.9"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.0",
-    "@types/libsodium-wrappers-sumo": "^0.7.7",
-    "@types/node": "^20.8.10"
+    "@types/crypto-js": "4.2.0",
+    "@types/libsodium-wrappers-sumo": "0.7.7",
+    "@types/node": "20.8.10"
   },
   "keywords": [],
   "license": "ISC",

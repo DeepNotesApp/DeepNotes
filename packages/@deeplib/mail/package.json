@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "author": "",
   "dependencies": {
-    "@getbrevo/brevo": "^1.0.1",
-    "@sendgrid/mail": "^7.7.0",
+    "@getbrevo/brevo": "1.0.1",
+    "@sendgrid/mail": "7.7.0",
     "@stdlib/misc": "workspace:*",
-    "node-mailjet": "^6.0.4",
-    "nodemailer": "^6.9.7",
-    "nodemailer-html-to-text": "^3.2.0"
+    "node-mailjet": "6.0.4",
+    "nodemailer": "6.9.7",
+    "nodemailer-html-to-text": "3.2.0"
   },
   "devDependencies": {},
   "keywords": [],
