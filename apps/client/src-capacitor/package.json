@@ -10,8 +10,7 @@
     "@capacitor/clipboard": "^5.0.6",
     "@capacitor/core": "^5.5.1",
     "@capacitor/ios": "^5.5.1",
-    "@capacitor/splash-screen": "^5.0.6",
-    "@revenuecat/purchases-capacitor": "^7.1.1"
+    "@capacitor/splash-screen": "^5.0.6"
   },
   "private": true
 }

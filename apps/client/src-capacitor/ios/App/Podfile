@@ -14,7 +14,6 @@ def capacitor_pods
   pod 'CapacitorApp', :path => '../../../../../node_modules/.pnpm/@capacitor+app@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/app'
   pod 'CapacitorClipboard', :path => '../../../../../node_modules/.pnpm/@capacitor+clipboard@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/clipboard'
   pod 'CapacitorSplashScreen', :path => '../../../../../node_modules/.pnpm/@capacitor+splash-screen@5.0.6_@capacitor+core@5.5.1/node_modules/@capacitor/splash-screen'
-  pod 'RevenuecatPurchasesCapacitor', :path => '../../../../../node_modules/.pnpm/@revenuecat+purchases-capacitor@7.1.1_@capacitor+core@5.5.1/node_modules/@revenuecat/purchases-capacitor'
 end
 
 target 'App' do

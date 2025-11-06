@@ -140,13 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-  LOG_LEVEL,
-  Purchases,
-  PURCHASES_ERROR_CODE,
-} from '@revenuecat/purchases-capacitor';
-import { createSmartComputed, watchUntilTrue } from '@stdlib/vue';
-import { handleError } from 'src/code/utils/misc';
+import { watchUntilTrue } from '@stdlib/vue';
 
 import PlanCard from './PlanCard.vue';
 
@@ -162,39 +156,6 @@ const plan = computed(() =>
 
 const loading = ref(true);
 
-if (
-  process.env.CLIENT &&
-  $quasar().platform.is.capacitor &&
-  $quasar().platform.is.ios &&
-  authStore().loggedIn
-) {
-  document.addEventListener(
-    'deviceready',
-    async () => {
-      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG }); // Enable to get debug logs
-      await Purchases.configure({
-        apiKey: process.env.REVENUECAT_PUBLIC_APPLE_API_KEY,
-        appUserID: authStore().userId,
-      });
-    },
-    false,
-  );
-}
-
-const offerings = createSmartComputed({
-  get: async () => {
-    try {
-      const offerings = await Purchases.getOfferings();
-
-      mainLogger.info('Offerings: %o', offerings);
-
-      return offerings;
-    } catch (error) {
-      handleError(error);
-    }
-  },
-});
-
 onMounted(async () => {
   await watchUntilTrue(() => !internals.realtime.globalCtx.loading);
 
@@ -202,11 +163,7 @@ onMounted(async () => {
 });
 
 async function choosePlan() {
-  if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
-    await buyPackage();
-  } else {
-    await createCheckoutSession();
-  }
+  await createCheckoutSession();
 }
 
 async function createCheckoutSession() {
@@ -218,45 +175,8 @@ async function createCheckoutSession() {
   window.open(checkoutSessionUrl, '_blank');
 }
 
-async function buyPackage() {
-  try {
-    const packages = (await offerings?.getAsync())?.current?.availablePackages;
-
-    let pkg;
-
-    if (billingFrequency.value === 'monthly') {
-      pkg = packages?.find((pkg) => pkg.identifier === '$rc_monthly')!;
-    } else {
-      pkg = packages?.find((pkg) => pkg.identifier === '$rc_annual')!;
-    }
-
-    await Purchases.purchasePackage({
-      aPackage: pkg,
-    });
-  } catch (error: any) {
-    if (error.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
-      // Purchase cancelled
-    } else {
-      // Error making purchase
-
-      handleError(error);
-    }
-  }
-}
-
 async function manageSubscription() {
-  if ($quasar().platform.is.capacitor && $quasar().platform.is.ios) {
-    await manageIOSSubscription();
-  } else {
-    await createPortalSession();
-  }
-}
-
-async function manageIOSSubscription() {
-  const managementURL = (await Purchases.getCustomerInfo()).customerInfo
-    .managementURL!;
-
-  window.open(managementURL, '_blank');
+  await createPortalSession();
 }
 
 async function createPortalSession() {
