@@ -1,4 +1,3 @@
-import { base64ToText } from '@stdlib/base64';
 import Knex from 'knex';
 import { Model } from 'objection';
 
@@ -6,14 +5,10 @@ export const knex = Knex({
   client: 'pg',
   useNullAsDefault: true,
   connection: {
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT ?? ''),
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DATABASE,
-    ssl: process.env.POSTGRES_CA_CERTIFICATE
-      ? { ca: base64ToText(process.env.POSTGRES_CA_CERTIFICATE) }
-      : undefined,
+    connectionString: `postgres://${process.env.POSTGRES_USER}:${process.env.POSTGRES_PASSWORD}@${process.env.POSTGRES_HOST}:${process.env.POSTGRES_PORT}/${process.env.POSTGRES_DATABASE}?ssl=true`,
+    ssl: {
+      rejectUnauthorized: false, // Required for Render's self-signed certificates
+    },
   },
   pool: {
     min: 0,
