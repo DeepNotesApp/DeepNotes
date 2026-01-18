@@ -31,10 +31,10 @@ export function handleError(error: any, logger = mainLogger) {
   $quasar().notify({
     message: isString(error)
       ? error
-      : error.response?.data?.errors?.[0]?.message ??
+      : (error.response?.data?.errors?.[0]?.message ??
         error.response?.data?.message ??
         error.message ??
-        'An error has occurred.',
+        'An error has occurred.'),
     type: 'negative',
   });
 
@@ -177,12 +177,12 @@ export function isWithinTimeout() {
 export function getRequestConfig(cookies: Cookies | undefined) {
   return process.env.SERVER
     ? {
-        headers: {
-          cookie: Object.entries(cookies?.getAll())
-            .map(([name, value]) => `${name}=${value}`)
-            .join(';'),
-        },
-      }
+      headers: {
+        cookie: Object.entries(cookies?.getAll())
+          .map(([name, value]) => `${name}=${value}`)
+          .join(';'),
+      },
+    }
     : undefined;
 }
 
@@ -237,7 +237,7 @@ export function createDoubleClickChecker() {
       if (
         Math.sqrt(
           Math.pow(event.clientX - pos.x, 2) +
-            Math.pow(event.clientY - pos.y, 2),
+          Math.pow(event.clientY - pos.y, 2),
         ) <= 24
       ) {
         return true;

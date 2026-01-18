@@ -55,10 +55,12 @@ function liangBarsky(l0: Vec2, l1: Vec2, r0: Vec2, r1: Vec2): Vec2[] | null {
     if (p === 0 && q < 0) return null; // Don't draw line at all. (parallel line outside)
 
     if (p < 0) {
-      if (r > t1) return null; // Don't draw line at all.
+      if (r > t1)
+        return null; // Don't draw line at all.
       else if (r > t0) t0 = r; // Line is clipped!
     } else if (p > 0) {
-      if (r < t0) return null; // Don't draw line at all.
+      if (r < t0)
+        return null; // Don't draw line at all.
       else if (r < t1) t1 = r; // Line is clipped!
     }
   }
