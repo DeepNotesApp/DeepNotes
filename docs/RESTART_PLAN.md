@@ -136,9 +136,11 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
    Single **Redis 7+** (or LTS) in `docker-compose` and prod; no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** repositories (cache-aside or simple keys + pub/sub if still needed for multi-instance cache coherence).
 
 5. **New client application**  
-   - **Vite 6+** + **Vue 3.5+** (or chosen framework) with `fetch` + **openapi-typescript** (or **hey-api** client) generated from the spec—**no** `trpc` client, **no** `superjson`.  
+   - **Vite 6+** + **Vue 3.5+** as a standard SPA (using `vite-ssg` for marketing page SEO). **Nuxt SSR is explicitly rejected** because DeepNotes is end-to-end encrypted; the server cannot decrypt user content to render it for SEO anyway. 
+   - **Feature-based folder structure** (e.g., `src/features/auth`, `src/features/editor`) to co-locate components, API clients, and tests for better maintainability.
+   - `fetch` + **openapi-typescript** (or **hey-api** client) generated from the spec—**no** `trpc` client, **no** `superjson`, **no** Quasar.  
    - **Tiptap + Yjs** for the editor if you want to cap risk; **collab-server** either forked to strip rotation or rewritten against the same Yjs wire.  
-   - **Electron** / **Capacitor** after the web app is solid.
+   - **Capacitor** for mobile and **Tauri v2** (or Electron) for desktop after the web app is solid. Decoupling the UI from the native wrappers avoids the heavy Quasar build matrix.
 
 6. **CI/CD and observability**  
    As before: one CI, Node LTS matrix, E2E smoke, **Prometheus** `/metrics` on services that need SLOs.
@@ -198,7 +200,7 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 | Dropping **key rotation** in collab with **live** old servers | **Cut over collab and app together** so no mixed fleet runs incompatible rotation expectations. |
 | **2FA** and group **password** flows | Still re-test hard; rotation removal does not remove all crypto edge cases. |
 | Migration mistakes on live Postgres | Staged env + backup + runbook; Drizzle migrations reviewed like production DDL. |
-| Quasar + mobile matrix | Defer **Capacitor/Electron**; **web** first. |
+| Mobile and desktop matrices | Defer **Capacitor/Tauri** matrix; get **web** SPA (with `vite-ssg` for SEO) solid first. |
 
 ---
 
