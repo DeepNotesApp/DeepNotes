@@ -20,8 +20,27 @@ The following are **set decisions** for the new implementation (they override ea
 | **Key rotation** | **Removed** from the product and codebase to reduce complexity. No user/group “rotate keys” WebSocket flows; no **scheduled page key re-encryption** in **collab** (`next_key_rotation_date` and related logic in the current app are dropped, not reimplemented). Existing ciphertext in Postgres that was encrypted with the **current** keys **remains valid**; you simply stop the rotation machinery. Revisit only if a future security incident **requires** forced re-keying. |
 | **Mobile / IAP billing** | **RevenueCat** is **out of scope** for the new stack (no webhook, no client integration). **Stripe** remains the web subscription source of truth where billing applies. |
 | **Legacy wire compatibility** | The **tRPC** (`/trpc/...`) wire protocol and **`superjson`**-shaped payloads are **not** a compatibility target. **Backward compatibility** for this plan means **data** (Postgres + decryptable page blobs with existing keys) and, where you choose to keep them, **WebSocket** protocols for **realtime** and **collab**—**not** HTTP API parity with the old app. Migration = **one coordinated cutover** to the new client and API (or a **temporary** legacy API gateway, which you are **not** committing to by default). |
+| **Hosting** | **Cloudflare** as the primary production surface: **Workers** for the HTTP API (and Worker-backed WebSocket entrypoints where appropriate), **Cloudflare Pages** (or Workers **static assets**) for the built **SPA** and **`vite-ssg`** marketing output. **PostgreSQL** stays a **separate** managed database (not D1 for the main app DB unless you later commit to a full Postgres→D1 migration—**out of scope** for this plan); connect from Workers via **[Hyperdrive](https://developers.cloudflare.com/hyperdrive/)** so each request uses a pooled connection instead of paying full TCP/TLS/auth cost on every isolate. **Redis** has no first-party Cloudflare equivalent—use **Upstash Redis**, **Redis Cloud**, or another **Redis-compatible** TCP or HTTP service reachable from Workers, with credentials in **Wrangler secrets** / dashboard. |
 
 **Redis vs KeyDB caveat:** the current `DataAbstraction` layer in `@stdlib/data` defines Redis commands such as **`expiremember`**, which is a **KeyDB / Redis Stack–style** extension, not part of standard Redis. A migration to “normal Redis” must **reimplement** TTL and cache invalidation using **standard** commands (e.g. per-key `EXPIRE`, key naming, or hashes without field-level `EXPIRE` unless you accept `HEXPIRE` only on **Redis 8+** or similar—decide in implementation).
+
+### Cloudflare hosting — what to take into account
+
+Workers are **not full Node** by default: prefer frameworks that fit the **Workers** model (**Hono** is a strong default on Workers). If you standardize on **Fastify**, validate **Wrangler** `compatibility_flags` (e.g. **`nodejs_compat`**) and dependency support early—some npm packages assume long-lived processes or Node APIs Workers do not provide.
+
+| Topic | Implication |
+|--------|-------------|
+| **Postgres + Drizzle** | Point Drizzle/`pg` / **Postgres.js** at the **Hyperdrive** connection string (create a **new client per request**; Hyperdrive pools upstream). Avoid opening a raw remote Postgres connection from every Worker invocation without Hyperdrive—latency and connection limits will hurt. |
+| **Redis** | Use an external **Redis-compatible** service (e.g. **Upstash**). Wire **`REDIS_URL`** (or vendor-specific HTTP APIs) via env bindings/secrets; document any **TCP vs HTTP** client choice for Workers. |
+| **Realtime / collab WebSockets** | Stateful rooms (Yjs, presence, fan-out) map naturally to **Durable Objects** (WebSocket **hibernation** APIs where you need many idle connections). A plain Worker fetch upgrade can work for thin proxies, but **collab**-scale state belongs in **DOs** or a dedicated service—decide per protocol and load-test. |
+| **Static SPA + SSG** | **Pages** (linked to the repo build) or Workers static assets for `dist/`; keep **API** on a **Workers** route or subdomain (`api.…`) so cookies, **CORS**, and **Stripe** webhooks have a clear origin story. |
+| **Scheduler / cron** | Replace long-running **scheduler** processes with **Cron Triggers** on Workers where the job is idempotent and short; heavier work can enqueue to a queue (**Queues**) or stay on a small VM if you outgrow Worker CPU limits. |
+| **Observability** | **Workers Logs**, **Tail Workers**, and tracing integrations replace “SSH and Prometheus on a box” for the edge tier; keep **`/metrics`** on any **non-Worker** services you retain, or adopt CF-compatible metrics. |
+| **Limits and cost** | CPU time, concurrent requests, **Durable Object** billing, and Hyperdrive **query** limits are product inputs—set SLOs and load-test **collab** early. |
+| **Secrets** | **Wrangler secrets** / dashboard for production; never ship DB or signing keys in the client bundle. |
+| **AGPL** | Hosting on Cloudflare does **not** change **AGPL-3.0** obligations; source remains available per license. |
+
+**Local dev:** keep **Docker Compose** (**Postgres + Redis**) for laptops and CI; use **`wrangler dev`** with Hyperdrive **local** configuration to approximate production DB behavior.
 
 ---
 
@@ -130,10 +149,10 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
    **One migration chain:** `drizzle-kit` (or equivalent) applied to Postgres; devs never rely on a single frozen `postgres-init.sql` for drift long term—use it only as the **import** source for the first `schema.ts`.
 
 3. **HTTP server**  
-   **Fastify** or **Hono** (team choice) on Node: REST routes, **no** tRPC plugin. **Cookie** + **JWT** **middleware** shared with any WebSocket upgrade. **@fastify/rate-limit** (or Hono rate limit) backed by **ioredis** to **vanilla Redis**.
+   **Hono** on **Cloudflare Workers** is the default alignment with the **Cloudflare** hosting decision (same codebase path for REST, middleware, and fetch-handler tests). **Fastify** remains viable for **Node-only** targets (e.g. local scripts, a secondary deployment) if the team splits stacks—avoid assuming **Fastify** plugins work unchanged on Workers without verification. REST routes, **no** tRPC plugin. **Cookie** + **JWT** middleware shared with WebSocket upgrade paths. Rate limiting backed by **Redis** (see hosting table).
 
 4. **Redis**  
-   Single **Redis 7+** (or LTS) in `docker-compose` and prod; no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** repositories (cache-aside or simple keys + pub/sub if still needed for multi-instance cache coherence).
+   **Local / CI:** **Redis 7+** (or LTS) in `docker-compose`. **Production (Cloudflare):** managed **Redis-compatible** service (see *Hosting* row)—no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** repositories (cache-aside or simple keys + pub/sub if still needed for multi-instance cache coherence).
 
 5. **New client application**  
    - **Vite 6+** + **Vue 3.5+** as a standard SPA (using `vite-ssg` for marketing page SEO). **Nuxt SSR is explicitly rejected** because DeepNotes is end-to-end encrypted; the server cannot decrypt user content to render it for SEO anyway. 
@@ -143,7 +162,7 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
    - **Capacitor** for mobile and **Tauri v2** (or Electron) for desktop after the web app is solid. Decoupling the UI from the native wrappers avoids the heavy Quasar build matrix.
 
 6. **CI/CD and observability**  
-   As before: one CI, Node LTS matrix, E2E smoke, **Prometheus** `/metrics` on services that need SLOs.
+   One CI, Node LTS matrix, E2E smoke. **Production deploy:** **Wrangler** (or Pages Git integration) to Cloudflare; preview deployments per PR where useful. **Prometheus** `/metrics` on any long-lived **non-Worker** services; for Workers, use **Cloudflare** logging/metrics (and **Tail** / observability products) as the primary edge story.
 
 ---
 
@@ -168,7 +187,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 
 - New repo: **pnpm** + **Turborepo 2** (or Nx)—**Node 22/24** LTS.  
 - **Docker compose:** **Postgres** + **Redis** (not KeyDB). New env file with **`REDIS_URL`**-style settings.  
-- **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke.
+- **Cloudflare:** `wrangler.toml` (or Wrangler JSON), **Hyperdrive** config pointing at the same Postgres URL used locally (or a branch DB), **Pages** project for the client build output; document preview vs production env vars.  
+- **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke; optional **deploy** job to a **Cloudflare preview** environment.
 
 ### Phase 3 — backend features on REST + Drizzle
 
@@ -201,6 +221,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 | **2FA** and group **password** flows | Still re-test hard; rotation removal does not remove all crypto edge cases. |
 | Migration mistakes on live Postgres | Staged env + backup + runbook; Drizzle migrations reviewed like production DDL. |
 | Mobile and desktop matrices | Defer **Capacitor/Tauri** matrix; get **web** SPA (with `vite-ssg` for SEO) solid first. |
+| **Worker** CPU time and **DO** costs under collab load | Load-test **Durable Object** fan-out and Hyperdrive early; model worst-case concurrent pages and websocket churn. |
+| **Framework** assumes full **Node** | Prefer **Hono** on Workers; gate **Fastify** (or heavy native deps) behind a verified Workers profile or a non-CF deployment path. |
 
 ---
 
@@ -212,6 +234,7 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - [ ] **Collab** + **realtime** each have at least one **integration** test against **Redis** + in-memory or dockerized deps.  
 - [ ] **No tRPC** and **no** `superjson` in the new default stack. **No** RevenueCat. **Key rotation** code paths are **absent** and the team signed off on **IAP** / **Stripe** user handling.  
 - [ ] **Zero** undocumented framework forks in the new default client, or a short exception list with an owner.  
+- [ ] **Cloudflare:** API + static/SSG deploy documented; **Hyperdrive** + external **Postgres** + **Redis** proven in staging; **collab/realtime** path chosen (**DO** vs separate service) and load-tested.
 
 ---
 
@@ -229,4 +252,4 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 
 ## 10. Summary
 
-This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors, then retire it when parity and data checks are proven.
+This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors, then retire it when parity and data checks are proven.
