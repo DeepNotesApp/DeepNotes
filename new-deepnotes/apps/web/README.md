@@ -16,6 +16,7 @@ Vue 3 SPA for the greenfield stack. The bundle talks to the API only through [`s
 - `src/api/` — `createDeepnotesApiClient`, generated types (`pnpm run generate:api-types` when `packages/api` changes).
 - `src/features/auth/` — session bootstrap (`/api/sessions/refresh` + `GET /api/users/me` when the `loggedIn` cookie is set), demo login, email/password + 2FA step, shared helpers.
 - `src/features/home/` — first shell screen after auth.
+- `src/features/groups/` — `GET /api/users/me/groups` plus per-group `main-page`, `members`, and `pages` (first window) for a read-only [Groups](src/features/groups/GroupsView.vue) screen (`/groups`, signed-in only).
 - `src/router.ts` — `vue-router` history routes.
 
 ## Local dev

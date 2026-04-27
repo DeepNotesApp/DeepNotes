@@ -21,6 +21,11 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: "/groups",
+      name: "groups",
+      component: () => import("./features/groups/GroupsView.vue"),
+    },
+    {
       path: "/page/:pageId",
       name: "page",
       component: () => import("./features/pages/PageEditorView.vue"),
