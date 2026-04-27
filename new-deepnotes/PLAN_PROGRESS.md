@@ -38,7 +38,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
 - [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change byte fields (`schemas/users.test.ts`).
 - [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
-- [ ] **DB integration:** register → email-change request/confirm (or password change) against **template DB** with real `perform*` + minimal fixtures.
+- [x] **DB integration:** `email-change.integration.test.ts` — `performUserRegister` → `performUserEmailChangeRequest` → `performUserEmailChangeConfirm` on a **clone** of migrated Postgres (template `dn_test_tpl_session_email`, distinct from `@deepnotes/db`’s `dn_test_tpl_deepnotes` for parallel Turbo); asserts decrypted email, `email_hash`, cleared pending fields; wrong-password request → **400**. Skips when `DATABASE_URL` / admin URL unavailable (`describe.skipIf`).
 
 ### Sessions + account (current)
 
@@ -116,7 +116,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 | Package / app | Role | What runs today | Gaps (highest value next) |
 |---------------|------|------------------|---------------------------|
 | **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts`: clone template DB, smoke SQL | More assertions on FKs / critical columns after schema grows |
-| **`@deepnotes/session`** | Auth, account, crypto orchestration | `login-rate-limit.test.ts` (Redis port in memory); **`encrypt-user-email.test.ts`** (round-trip, case exceptions, tamper); **`email-hash.test.ts`** (stability, secret sensitivity, exceptions); **`send-email-change-code.test.ts`** (SEND_EMAILS=false no fetch, missing key **503**, Resend **502**/OK) | **Integration:** `performUserRegister`, login, password/email change against **template DB** + mocked Redis; JWT cookie helpers |
+| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `email-change.integration.test.ts` (template `dn_test_tpl_session_email`, `performUserRegister` → email-change request/confirm, JWT). Uses **`@deepnotes/db/testing/template-db`** + **`db-url`**. | Login + password-change template tests; Redis-backed rate limit with real `performSessionLogin` |
 | **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + route registry); **`schemas/users.test.ts`** (email/password change bodies, 6-digit code) | Schemas for sessions + remaining routes; optional **snapshot** of OpenAPI fragment for drift |
 | **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: health, OpenAPI JSON, **503** when secrets/DB not bound (incl. email-change paths) | **200-path tests** with test `SessionEnv` + Hyperdrive stub + template DB (heavier CI job) |
 | **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
@@ -159,6 +159,7 @@ Use this when resuming: **(done)** account HTTP surface through email change inc
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | **Integration tests:** `@deepnotes/db` exports `@deepnotes/db/testing/template-db` + `db-url`; `@deepnotes/session` — `email-change.integration.test.ts` (Postgres template clone, register + email change + wrong password). PLAN_PROGRESS matrix + Phase 3 checklist updated. |
 | 2026-04-26 | **Tests:** `@deepnotes/session` — `encrypt-user-email.test.ts`, `email-hash.test.ts`, `send-email-change-code.test.ts`; `@deepnotes/api` — `schemas/users.test.ts`; api-worker — email-change routes in `503` matrix; PLAN_PROGRESS — package test matrix + Phase 3 test checklist. |
 | 2026-04-26 | Phase 3: **email change** — `POST /api/users/me/email-change` + `…/confirm` (`change-user-email.ts`, `decryptUserEmail`, `send-email-change-code`); `userEmailChange*Request` schemas, OpenAPI, Hono; TRPC_REST_MAP; PLAN_PROGRESS detail + suggested Phase 3 order. |
 | 2026-04-26 | Phase 3: **`POST /api/users/me/password`** — `performUserPasswordChange` (`change-user-password.ts`): old password verify, demo **403**, new keyrings + PHC, invalidate all `sessions`, clear cookies **204**; `userPasswordChangeRequestSchema`, OpenAPI + worker; export **`byteB64`** from `@deepnotes/api`; TRPC_REST_MAP rows for change-password; PLAN_PROGRESS Phase 3 account section expanded. |

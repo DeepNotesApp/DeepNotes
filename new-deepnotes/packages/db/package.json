@@ -11,6 +11,14 @@
     "./client": {
       "types": "./src/client.ts",
       "default": "./src/client.ts"
+    },
+    "./testing/template-db": {
+      "types": "./src/test/template-db.ts",
+      "default": "./src/test/template-db.ts"
+    },
+    "./testing/db-url": {
+      "types": "./src/test/db-url.ts",
+      "default": "./src/test/db-url.ts"
     }
   },
   "scripts": {

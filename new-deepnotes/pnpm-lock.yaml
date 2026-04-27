@@ -163,6 +163,12 @@ importers:
       '@types/node':
         specifier: ^22.14.1
         version: 22.19.17
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.6.1
+      postgres:
+        specifier: ^3.4.5
+        version: 3.4.9
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

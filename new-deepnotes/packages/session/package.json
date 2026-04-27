@@ -27,6 +27,8 @@
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
+    "dotenv": "^16.5.0",
+    "postgres": "^3.4.5",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
