@@ -1,6 +1,7 @@
 name = "deepnotes-api"
 main = "src/index.ts"
 compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Replace `id` with a real Hyperdrive config in Cloudflare before production deploy.
 # Local dev uses `localConnectionString` (see RESTART_PLAN.md §Hosting).

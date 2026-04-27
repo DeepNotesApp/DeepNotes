@@ -51,6 +51,12 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Build linked @stdlib/crypto (parent monorepo)
+        working-directory: ${{ github.workspace }}
+        run: |
+          pnpm install --frozen-lockfile --filter @stdlib/crypto...
+          pnpm --filter @stdlib/crypto run build
+
       - name: Lint
         run: pnpm lint
 

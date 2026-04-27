@@ -1,0 +1,50 @@
+import type { SessionEnv } from "@deepnotes/session";
+
+export type WorkerSessionBindings = {
+  ACCESS_SECRET?: string;
+  REFRESH_SECRET?: string;
+  USER_EMAIL_SECRET?: string;
+  USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY?: string;
+  USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY?: string;
+  USER_RECOVERY_CODES_ENCRYPTION_KEY?: string;
+  DEV?: string;
+  COOKIE_DOMAIN?: string;
+  EMAIL_CASE_SENSITIVITY_EXCEPTIONS?: string;
+};
+
+export function getSessionEnv(
+  env: WorkerSessionBindings | undefined,
+): SessionEnv | null {
+  if (env == null) {
+    return null;
+  }
+  const {
+    ACCESS_SECRET,
+    REFRESH_SECRET,
+    USER_EMAIL_SECRET,
+    USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY,
+    USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY,
+    USER_RECOVERY_CODES_ENCRYPTION_KEY,
+  } = env;
+  if (
+    !ACCESS_SECRET ||
+    !REFRESH_SECRET ||
+    !USER_EMAIL_SECRET ||
+    !USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY ||
+    !USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY ||
+    !USER_RECOVERY_CODES_ENCRYPTION_KEY
+  ) {
+    return null;
+  }
+  return {
+    ACCESS_SECRET,
+    REFRESH_SECRET,
+    USER_EMAIL_SECRET,
+    USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY,
+    USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY,
+    USER_RECOVERY_CODES_ENCRYPTION_KEY,
+    DEV: env.DEV,
+    COOKIE_DOMAIN: env.COOKIE_DOMAIN,
+    EMAIL_CASE_SENSITIVITY_EXCEPTIONS: env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS,
+  };
+}

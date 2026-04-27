@@ -7,6 +7,12 @@ import type { OpenAPIObject } from "openapi3-ts/oas30";
 import { notImplementedResponseSchema } from "./schemas/errors.js";
 import { healthResponseSchema } from "./schemas/health.js";
 import {
+  serviceUnavailableResponseSchema,
+  sessionErrorResponseSchema,
+  sessionLoginSuccessSchema,
+  sessionRefreshSuccessSchema,
+} from "./schemas/session-responses.js";
+import {
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
 } from "./schemas/sessions.js";
@@ -15,10 +21,29 @@ const registry = new OpenAPIRegistry();
 
 const sessionNotImplemented501 = {
   description:
-    "Not implemented yet; path and schemas are stable for codegen (Phase 3).",
+    "Demo registration is not implemented on this route yet (Phase 3+).",
   content: {
     "application/json": {
       schema: notImplementedResponseSchema,
+    },
+  },
+} as const;
+
+const sessionServiceUnavailable503 = {
+  description:
+    "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+  content: {
+    "application/json": {
+      schema: serviceUnavailableResponseSchema,
+    },
+  },
+} as const;
+
+const sessionUnauthorized401 = {
+  description: "Invalid credentials, token, or session state.",
+  content: {
+    "application/json": {
+      schema: sessionErrorResponseSchema,
     },
   },
 } as const;
@@ -55,7 +80,16 @@ registry.registerPath({
     },
   },
   responses: {
-    501: sessionNotImplemented501,
+    200: {
+      description: "Login succeeded; cookies set.",
+      content: {
+        "application/json": {
+          schema: sessionLoginSuccessSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
   },
 });
 
@@ -65,7 +99,16 @@ registry.registerPath({
   summary: "Rotate access token using refresh cookie",
   description: "Replaces legacy `sessions.refresh`.",
   responses: {
-    501: sessionNotImplemented501,
+    200: {
+      description: "New session key and cookies.",
+      content: {
+        "application/json": {
+          schema: sessionRefreshSuccessSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
   },
 });
 
@@ -75,7 +118,10 @@ registry.registerPath({
   summary: "Invalidate session and clear cookies",
   description: "Replaces legacy `sessions.logout`.",
   responses: {
-    501: sessionNotImplemented501,
+    204: {
+      description: "Logged out (cookies cleared).",
+    },
+    503: sessionServiceUnavailable503,
   },
 });
 

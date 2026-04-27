@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Mostly done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **In progress** | Session contract in OpenAPI + `501` stubs on worker (`/api/sessions/*`). Next: wire login/refresh/logout/demo with crypto, Redis, Drizzle + cookies per [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md). |
+| **3** — REST + Drizzle features | **In progress** | `POST /api/sessions/login|refresh|logout` wired via `@deepnotes/session` (Drizzle + legacy crypto + `jose` JWT + cookies). `POST /api/sessions/demo` still `501`. Next: Redis-backed login rate limits, `start-demo` / registration, `GET /api/users/me`. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -32,8 +32,9 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 ## Phase 3 checklist (REST + Drizzle)
 
 - [x] Document **sessions** REST paths + request schemas in OpenAPI; worker returns **501** until handlers exist.
-- [ ] Implement **sessions.login** / refresh / logout / start-demo against Drizzle + Redis + legacy crypto semantics.
-- [ ] **JWT + httpOnly cookies** (`accessToken`, `refreshToken`, `loggedIn`) matching [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md).
+- [x] Implement **sessions.login** / refresh / logout against Drizzle + legacy crypto semantics (JWT via `jose`; **Redis** rate limits not wired yet—parity with legacy `login` lockouts).
+- [ ] Implement **sessions.start-demo** (registration path) + **Redis** for failed-login / optional session cache.
+- [x] **JWT + httpOnly cookies** (`accessToken`, `refreshToken`, `loggedIn`) matching [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md).
 - [ ] **Users** registration + `GET /api/users/me` (and remaining TRPC_REST_MAP slices as needed).
 - [ ] Pages/groups CRUD, realtime/collab, Stripe webhook (no RevenueCat).
 
@@ -68,6 +69,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | Phase 3: `@deepnotes/session` (login/refresh/logout + 2FA TOTP/recovery), api-worker Hyperdrive + dynamic import for Workers bundle; OpenAPI 200/401/503 for session routes; demo remains `501`; CI builds parent `@stdlib/crypto`; `libsodium-wrappers-sumo@^0.8` override for Wrangler. |
 | 2026-04-26 | Phase 3 start: OpenAPI + Zod for `POST /api/sessions/login|refresh|logout|demo`; api-worker `501` stubs; Phase 0 marked done in snapshot. |
 | 2026-04-26 | Phase 0 docs (TRPC_REST_MAP, AUTH_AND_CORS, CLIENT_FORKS); Phase 2 deploy doc; Drizzle legacy baseline from `postgres-init.sql`; Vitest template-DB integration test + CI `DATABASE_ADMIN_URL`. |
 | 2026-04-26 | Initial `new-deepnotes` monorepo: `@deepnotes/api`, `@deepnotes/db`, `@deepnotes/api-worker`, `@deepnotes/web`, CI workflow. |

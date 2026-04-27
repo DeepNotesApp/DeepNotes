@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@deepnotes/api": "workspace:*",
+    "@deepnotes/db": "workspace:*",
+    "@deepnotes/session": "workspace:*",
     "hono": "^4.7.7"
   },
   "devDependencies": {

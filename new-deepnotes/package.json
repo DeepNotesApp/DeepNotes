@@ -17,6 +17,13 @@
     "db:studio": "pnpm --filter @deepnotes/db exec drizzle-kit studio",
     "db:check": "pnpm --filter @deepnotes/db exec drizzle-kit check"
   },
+  "pnpm": {
+    "overrides": {
+      "@stdlib/base64": "link:../packages/@stdlib/base64",
+      "@stdlib/misc": "link:../packages/@stdlib/misc",
+      "libsodium-wrappers-sumo": "^0.8.0"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "eslint": "^9.25.0",

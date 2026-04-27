@@ -8,6 +8,12 @@ export {
   type HealthResponse,
 } from "./schemas/health.js";
 export {
+  serviceUnavailableResponseSchema,
+  sessionErrorResponseSchema,
+  sessionLoginSuccessSchema,
+  sessionRefreshSuccessSchema,
+} from "./schemas/session-responses.js";
+export {
   sessionDemoRequestSchema,
   sessionLoginEmailSchema,
   sessionLoginRequestSchema,

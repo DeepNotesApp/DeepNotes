@@ -1,0 +1,36 @@
+{
+  "name": "@deepnotes/session",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@deepnotes/db": "workspace:*",
+    "@stdlib/base64": "link:../../../packages/@stdlib/base64",
+    "@stdlib/crypto": "link:../../../packages/@stdlib/crypto",
+    "@stdlib/misc": "link:../../../packages/@stdlib/misc",
+    "crypto-js": "^4.2.0",
+    "drizzle-orm": "^0.41.0",
+    "jose": "^5.10.0",
+    "libsodium-wrappers-sumo": "^0.8.0",
+    "msgpackr": "^1.11.2",
+    "nanoid": "^5.1.5",
+    "otplib": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^22.14.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
