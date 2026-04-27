@@ -68,6 +68,11 @@ export {
   userStartingPageResponseSchema,
 } from "./schemas/user-pages.js";
 export {
+  stripeCheckoutSessionRequestSchema,
+  stripeCheckoutSessionResponseSchema,
+  stripePortalSessionResponseSchema,
+} from "./schemas/billing.js";
+export {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,

@@ -157,6 +157,9 @@ describe("api-worker", () => {
     ["POST", "/api/users/me/2fa/recovery-codes"],
     ["POST", "/api/users/me/2fa/devices/forget"],
     ["POST", "/api/users/me/2fa/disable"],
+    ["POST", "/api/billing/stripe/checkout-session"],
+    ["POST", "/api/billing/stripe/portal-session"],
+    ["POST", "/api/webhooks/stripe"],
   ] as const)("returns 503 for %s %s when auth env is not configured", async (method, path) => {
     const res = await app.request(`http://test${path}`, { method });
     expect(res.status).toBe(503);

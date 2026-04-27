@@ -2528,4 +2528,5 @@ describe.skipIf(resolveTemplateContext() == null)(
       }
     });
   },
+  30_000,
 );

@@ -58,6 +58,11 @@ import {
   userStartingPageResponseSchema,
 } from "./schemas/user-pages.js";
 import {
+  stripeCheckoutSessionRequestSchema,
+  stripeCheckoutSessionResponseSchema,
+  stripePortalSessionResponseSchema,
+} from "./schemas/billing.js";
+import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   user2faEnableFinishRequestSchema,
@@ -1865,6 +1870,83 @@ registry.registerPath({
           schema: sessionErrorResponseSchema,
         },
       },
+    },
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/billing/stripe/checkout-session",
+  summary: "Create Stripe Checkout (subscription) session",
+  description:
+    "Replaces legacy `users.account.stripe.createCheckoutSession`. Resolves or creates a Stripe customer from `users.customer_id` and decrypted account email, then returns a hosted Checkout URL. Requires verified email. Demo accounts receive **403**.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: stripeCheckoutSessionRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Checkout session URL (hosted Stripe page).",
+      content: {
+        "application/json": {
+          schema: stripeCheckoutSessionResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Already subscribed, or validation error.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/billing/stripe/portal-session",
+  summary: "Create Stripe Customer Portal session",
+  description:
+    "Replaces legacy `users.account.stripe.createPortalSession`. Requires a `users.customer_id` (create checkout first or migrate from legacy).",
+  responses: {
+    200: {
+      description: "Portal session URL.",
+      content: {
+        "application/json": {
+          schema: stripePortalSessionResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "No Stripe customer on file.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/webhooks/stripe",
+  summary: "Stripe webhooks (signed raw body)",
+  description:
+    "Replaces the legacy Fastify `POST /stripe/webhook` handler. Send the **raw** request body; verification uses the `Stripe-Signature` header and `STRIPE_WEBHOOK_SECRET`. Handles `customer.subscription.updated` and `customer.subscription.deleted` by updating `users.plan` and `users.subscription_id` via `users.customer_id`.",
+  responses: {
+    200: { description: "Event acknowledged." },
+    400: {
+      description: "Missing or invalid signature.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
     },
     503: sessionServiceUnavailable503,
   },

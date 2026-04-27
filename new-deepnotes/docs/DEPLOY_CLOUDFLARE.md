@@ -21,7 +21,7 @@ Set via **Wrangler secrets** or dashboard (never commit):
 
 - Database: Hyperdrive handles pooling; app reads Hyperdrive binding, not raw remote URL in Worker code paths that should use the binding.
 - `JWT_SECRET` (or `ACCESS_SECRET` / `REFRESH_SECRET` if split to match legacy semantics)
-- `STRIPE_WEBHOOK_SECRET` when billing is wired
+- **Stripe (subscriptions):** `STRIPE_SECRET_KEY`, `STRIPE_MONTHLY_PRICE_ID`, `STRIPE_YEARLY_PRICE_ID` for `POST /api/billing/stripe/checkout-session` and `…/portal-session`; `STRIPE_WEBHOOK_SECRET` for `POST /api/webhooks/stripe` (raw body + `Stripe-Signature`). Optional: same `STRIPE_SECRET_KEY` powers `customers.del` / `customers.update` after account delete and email change when wired in the Worker.
 - `REDIS_URL` or vendor-specific vars for rate limits / sessions
 
 ### Preview (per PR / branch)

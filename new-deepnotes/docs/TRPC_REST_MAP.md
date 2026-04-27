@@ -25,8 +25,8 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.account.twoFactorAuth.generateRecoveryCodes` | `POST /api/users/me/2fa/recovery-codes` |
 | `users.account.twoFactorAuth.forgetTrustedDevices` | `POST /api/users/me/2fa/devices/forget` |
 | `users.account.twoFactorAuth.disable` | `POST /api/users/me/2fa/disable` |
-| `users.account.stripe.createCheckoutSession` | `POST /api/billing/stripe/checkout-session` |
-| `users.account.stripe.createPortalSession` | `POST /api/billing/stripe/portal-session` |
+| `users.account.stripe.createCheckoutSession` | `POST /api/billing/stripe/checkout-session` (**implemented** — optional body `{ "billingFrequency"?: "monthly" \| "yearly" }`; **200** `{ "checkoutSessionUrl" }`; requires verified email; `STRIPE_*` + Hyperdrive in worker) |
+| `users.account.stripe.createPortalSession` | `POST /api/billing/stripe/portal-session` (**implemented** — **200** `{ "portalSessionUrl" }`; requires `users.customer_id`) |
 | `users.account.delete` | `DELETE /api/users/me` (JSON body `{ "loginHash" }` base64; clears cookies on 204; optional `deleteStripeCustomer` in worker when billing is wired) |
 | (WS) `users.account.changePassword` step 1+2 | `POST /api/users/me/password` (JSON: `oldLoginHash`, `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` as base64; same keyring semantics as `POST /api/users`; 204 + clears cookies + invalidates all sessions) |
 
@@ -104,7 +104,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy | New |
 |--------|-----|
-| Stripe webhook (Fastify) | `POST /api/webhooks/stripe` |
+| Stripe webhook (Fastify) | `POST /api/webhooks/stripe` (**implemented** — raw body + `Stripe-Signature`; `customer.subscription.updated` / `customer.subscription.deleted`; maps user by `users.customer_id`) |
 | RevenueCat webhook | **not implemented** |
 
 Reference routers: `apps/app-server/src/trpc/router.ts`, `apps/app-server/src/trpc/api/**`, `apps/app-server/src/websocket/**`.

@@ -1,4 +1,4 @@
-import type { SessionEnv } from "@deepnotes/session";
+import type { SessionEnv, StripeBillingEnv } from "@deepnotes/session";
 
 export type WorkerSessionBindings = {
   ACCESS_SECRET?: string;
@@ -22,7 +22,43 @@ export type WorkerSessionBindings = {
   /** Optional; when set with token, failed-login rate limits use Upstash REST Redis. */
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
+  /** Stripe (`stripe` package); checkout, portal, customer hooks when set. */
+  STRIPE_SECRET_KEY?: string;
+  /** Webhook signing secret for `POST /api/webhooks/stripe`. */
+  STRIPE_WEBHOOK_SECRET?: string;
+  STRIPE_MONTHLY_PRICE_ID?: string;
+  STRIPE_YEARLY_PRICE_ID?: string;
 };
+
+export function getStripeBillingEnv(
+  env: WorkerSessionBindings | undefined,
+): StripeBillingEnv | null {
+  if (
+    env?.STRIPE_SECRET_KEY == null ||
+    env.STRIPE_SECRET_KEY === "" ||
+    env.STRIPE_MONTHLY_PRICE_ID == null ||
+    env.STRIPE_MONTHLY_PRICE_ID === "" ||
+    env.STRIPE_YEARLY_PRICE_ID == null ||
+    env.STRIPE_YEARLY_PRICE_ID === ""
+  ) {
+    return null;
+  }
+  return {
+    STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY,
+    STRIPE_MONTHLY_PRICE_ID: env.STRIPE_MONTHLY_PRICE_ID,
+    STRIPE_YEARLY_PRICE_ID: env.STRIPE_YEARLY_PRICE_ID,
+  };
+}
+
+export function getStripeWebhookSecret(
+  env: WorkerSessionBindings | undefined,
+): string | null {
+  const s = env?.STRIPE_WEBHOOK_SECRET;
+  if (s == null || s === "") {
+    return null;
+  }
+  return s;
+}
 
 export function getSessionEnv(
   env: WorkerSessionBindings | undefined,

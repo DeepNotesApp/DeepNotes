@@ -22,7 +22,8 @@
     "libsodium-wrappers-sumo": "^0.8.0",
     "msgpackr": "^1.11.2",
     "nanoid": "^5.1.5",
-    "otplib": "^12.0.1"
+    "otplib": "^12.0.1",
+    "stripe": "17.7.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",

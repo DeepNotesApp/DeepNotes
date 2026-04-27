@@ -123,5 +123,12 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/pages/{pageId}"]?.delete).toBeDefined();
     expect(doc.paths?.["/api/pages/{pageId}/restore"]?.post).toBeDefined();
     expect(doc.paths?.["/api/pages/{pageId}/purge"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/billing/stripe/checkout-session"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/billing/stripe/portal-session"]?.post,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/webhooks/stripe"]?.post).toBeDefined();
   });
 });
