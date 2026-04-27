@@ -20,6 +20,7 @@
     "clsx": "^2.1.1",
     "libsodium-wrappers-sumo": "^0.8.0",
     "lucide-vue-next": "^1.0.0",
+    "msgpackr": "^1.11.2",
     "nanoid": "^5.1.5",
     "openapi-fetch": "^0.17.0",
     "reka-ui": "^2.9.6",

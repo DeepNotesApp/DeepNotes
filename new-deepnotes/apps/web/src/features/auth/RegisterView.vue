@@ -67,8 +67,8 @@ async function onSubmit() {
       <CardHeader>
         <CardTitle>Create account</CardTitle>
         <CardDescription>
-          Registration uses the same random ciphertext fields as a demo user for now;
-          sign in after with this email and password.
+          Creates a password-backed account with real end-to-end key material (personal
+          group + main page). Sign in afterward with this email and password.
         </CardDescription>
       </CardHeader>
       <CardContent>

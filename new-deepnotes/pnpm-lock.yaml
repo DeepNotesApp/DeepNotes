@@ -84,6 +84,9 @@ importers:
       lucide-vue-next:
         specifier: ^1.0.0
         version: 1.0.0(vue@3.5.33(typescript@5.9.3))
+      msgpackr:
+        specifier: ^1.11.2
+        version: 1.11.10
       nanoid:
         specifier: ^5.1.5
         version: 5.1.9

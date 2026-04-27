@@ -2,6 +2,7 @@ import {
   base64ToBytes,
   createPrivateKeyring,
   createSymmetricKeyring,
+  DataLayer,
   derivePasswordValues,
   ensureSodiumReady,
   wrapSymmetricKey,
@@ -46,36 +47,48 @@ export async function persistSessionKeyringsFromLogin(input: {
   }).key;
   const sessionKey = wrapSymmetricKey(base64ToBytes(login.sessionKey));
 
+  let privateKeyring = createPrivateKeyring(
+    base64ToBytes(login.encryptedPrivateKeyring),
+  );
+  let symmetricKeyring = createSymmetricKeyring(
+    base64ToBytes(login.encryptedSymmetricKeyring),
+  );
+
+  // Legacy accounts: extra `UserPrivateKeyring` / `UserSymmetricKeyring` layer under
+  // `UserEncrypted*`. Greenfield register sends raw inner keyrings; server unwraps once.
+  if (privateKeyring.topLayer !== DataLayer.Raw) {
+    privateKeyring = privateKeyring.unwrapSymmetric(masterKey, {
+      associatedData: {
+        context: "UserPrivateKeyring",
+        userId: login.userId,
+      },
+    });
+  }
+  if (symmetricKeyring.topLayer !== DataLayer.Raw) {
+    symmetricKeyring = symmetricKeyring.unwrapSymmetric(masterKey, {
+      associatedData: {
+        context: "UserSymmetricKeyring",
+        userId: login.userId,
+      },
+    });
+  }
+
   const encPrivB64 = uint8ToBase64(
-    createPrivateKeyring(base64ToBytes(login.encryptedPrivateKeyring))
-      .unwrapSymmetric(masterKey, {
-        associatedData: {
-          context: "UserPrivateKeyring",
-          userId: login.userId,
-        },
-      })
-      .wrapSymmetric(sessionKey, {
-        associatedData: {
-          context: "SessionUserPrivateKeyring",
-          userId: login.userId,
-        },
-      }).wrappedValue,
+    privateKeyring.wrapSymmetric(sessionKey, {
+      associatedData: {
+        context: "SessionUserPrivateKeyring",
+        userId: login.userId,
+      },
+    }).wrappedValue,
   );
 
   const encSymB64 = uint8ToBase64(
-    createSymmetricKeyring(base64ToBytes(login.encryptedSymmetricKeyring))
-      .unwrapSymmetric(masterKey, {
-        associatedData: {
-          context: "UserSymmetricKeyring",
-          userId: login.userId,
-        },
-      })
-      .wrapSymmetric(sessionKey, {
-        associatedData: {
-          context: "SessionUserSymmetricKeyring",
-          userId: login.userId,
-        },
-      }).wrappedValue,
+    symmetricKeyring.wrapSymmetric(sessionKey, {
+      associatedData: {
+        context: "SessionUserSymmetricKeyring",
+        userId: login.userId,
+      },
+    }).wrappedValue,
   );
 
   writeSessionCrypto({
