@@ -33,6 +33,8 @@ jobs:
           --health-retries 10
     env:
       DATABASE_URL: postgresql://deepnotes:deepnotes@127.0.0.1:5433/deepnotes
+      # CREATEDB-capable catalog connection for @deepnotes/db template-clone tests (RESTART_PLAN §5.7)
+      DATABASE_ADMIN_URL: postgresql://deepnotes:deepnotes@127.0.0.1:5433/postgres
     steps:
       - uses: actions/checkout@v4
 

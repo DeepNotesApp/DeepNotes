@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "db:check": "drizzle-kit check",
-    "test": "node -e \"process.exit(0)\""
+    "test": "vitest run"
   },
   "dependencies": {
     "drizzle-orm": "^0.41.0",
@@ -28,6 +28,7 @@
     "@types/node": "^22.14.1",
     "dotenv": "^16.5.0",
     "drizzle-kit": "^0.31.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }
