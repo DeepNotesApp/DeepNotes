@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
+import { authenticator } from "otplib";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -27,6 +28,10 @@ import {
 } from "./change-user-email.js";
 import { performSessionLogin } from "./login.js";
 import { performSessionRefresh } from "./refresh.js";
+import {
+  performUserTwoFactorEnableFinish,
+  performUserTwoFactorEnableRequest,
+} from "./user-two-factor-settings.js";
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
@@ -747,6 +752,266 @@ describe.skipIf(resolveTemplateContext() == null)(
             newEncryptedSymmetricKeyring: rand32(),
           }),
         ).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("2FA enable/finish persists flags; login succeeds with TOTP", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const clientIp = "203.0.113.51";
+      const userAgent = "integration-test/2fa";
+      try {
+        const email = `2fa-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const { secret } = await performUserTwoFactorEnableRequest({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+        });
+        const finishToken = authenticator.generate(secret);
+        const { recoveryCodes } = await performUserTwoFactorEnableFinish({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+          authenticatorToken: finishToken,
+        });
+        expect(recoveryCodes).toHaveLength(6);
+        expect(recoveryCodes.every((c) => /^[0-9a-f]{32}$/.test(c))).toBe(true);
+
+        const [u2fa] = await db
+          .select({
+            enabled: users.twoFactorAuthEnabled,
+            encAuth: users.encryptedAuthenticatorSecret,
+            encRec: users.encryptedRecoveryCodes,
+          })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(u2fa?.enabled).toBe(true);
+        expect(u2fa?.encAuth).not.toBeNull();
+        expect(u2fa?.encRec).not.toBeNull();
+
+        const totp = authenticator.generate(secret);
+        const loginOut = await performSessionLogin({
+          db,
+          env,
+          body: {
+            email,
+            loginHash,
+            rememberSession: false,
+            authenticatorToken: totp,
+          },
+          clientIp,
+          userAgent,
+        });
+        expect(typeof loginOut.json.sessionId).toBe("string");
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("2FA enable/finish rejects wrong authenticator token", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `2fb-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        await performUserTwoFactorEnableRequest({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+        });
+        await expect(
+          performUserTwoFactorEnableFinish({
+            db,
+            env,
+            accessCookie: access,
+            loginHash,
+            authenticatorToken: "000000",
+          }),
+        ).rejects.toMatchObject({
+          status: 400,
+          code: "BAD_REQUEST",
+          message: "Authenticator token is incorrect.",
+        });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("login with 2FA enabled requires TOTP when device is not trusted", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `2fc-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        const { secret } = await performUserTwoFactorEnableRequest({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+        });
+        await performUserTwoFactorEnableFinish({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+          authenticatorToken: authenticator.generate(secret),
+        });
+
+        await expect(
+          performSessionLogin({
+            db,
+            env,
+            body: { email, loginHash, rememberSession: false },
+            clientIp: "198.51.100.20",
+            userAgent: "integration-test/2fa-missing",
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          code: "UNAUTHORIZED",
+          message: "Requires two-factor authentication.",
+        });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("login with 2FA rejects invalid TOTP", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `2fd-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        const { secret } = await performUserTwoFactorEnableRequest({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+        });
+        await performUserTwoFactorEnableFinish({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+          authenticatorToken: authenticator.generate(secret),
+        });
+
+        await expect(
+          performSessionLogin({
+            db,
+            env,
+            body: {
+              email,
+              loginHash,
+              rememberSession: false,
+              authenticatorToken: "111111",
+            },
+            clientIp: "198.51.100.21",
+            userAgent: "integration-test/2fa-bad",
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          code: "UNAUTHORIZED",
+          message: "Invalid authenticator token.",
+        });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

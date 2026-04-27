@@ -8,7 +8,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import * as schema from "./schema.js";
-import { sessions, users } from "./schema.js";
+import { devices, pages, sessions, users } from "./schema.js";
 import { withDatabaseName } from "./test/db-url.js";
 import {
   createDatabaseFromTemplate,
@@ -116,15 +116,81 @@ if (ctx == null) {
           invalidated: false,
         }),
       ).rejects.toThrow();
-    } finally {
-      await client.end({ timeout: 5 });
-      const admin2 = postgres(adminUrl, { max: 1 });
-      try {
-        await dropDatabaseIfExists(admin2, cloneName);
       } finally {
-        await admin2.end({ timeout: 5 });
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
       }
-    }
+    });
+
+    it("rejects orphan device row (FK to users)", async () => {
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        await expect(
+          db.insert(devices).values({
+            id: "dvc012345678901234567",
+            userId: "usr012345678901234567",
+            hash: randomBytes(32),
+            trusted: false,
+          }),
+        ).rejects.toThrow();
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("rejects page row with unknown group_id (FK to groups)", async () => {
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const bogusGroupId = "grp000000000000000000";
+      try {
+        await expect(
+          db.insert(pages).values({
+            id: "pg0000000000000000000",
+            groupId: bogusGroupId,
+            encryptedRelativeTitle: Buffer.alloc(1),
+            encryptedSymmetricKeyring: Buffer.alloc(1),
+            encryptedAbsoluteTitle: Buffer.alloc(1),
+          }),
+        ).rejects.toThrow();
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
   });
-});
 }
