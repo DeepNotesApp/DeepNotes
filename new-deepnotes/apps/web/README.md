@@ -31,3 +31,8 @@ Vue 3 SPA for the greenfield stack. The bundle talks to the API only through [`s
 - **Demo** uses `POST /api/sessions/demo` with random ciphertext-shaped payloads (see `build-demo-session.ts`).
 
 See also [../docs/AUTH_AND_CORS.md](../docs/AUTH_AND_CORS.md).
+
+## Testing
+
+- **Vitest** (`pnpm test`): feature unit tests, [client.test.ts](./src/api/client.test.ts) (mocked `fetch`), and [client.contract.test.ts](./src/api/client.contract.test.ts) with **MSW** ([src/test/msw/](./src/test/msw/) handlers for OpenAPI-shaped `GET /api/health` and `GET /api/users/me`).
+- **ESLint** (`pnpm lint`): `src/**/*.ts` + `no-restricted-imports` so the app does not import `@deepnotes/api-worker`, `@deepnotes/db`, `@deepnotes/api`, `@deepnotes/session`, or `drizzle-orm` (see [eslint.config.js](./eslint.config.js)).
