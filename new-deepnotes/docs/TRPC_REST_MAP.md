@@ -89,7 +89,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `websocket/groups/remove-user` | `DELETE /api/groups/:groupId/members/:userId` | |
 | `websocket/groups/privacy/make-private` | `POST /api/groups/:groupId/privacy/private` | **implemented** — see `groups.privacy.makePrivate` row above |
 | `websocket/groups/rotate-keys` | — | **removed** per RESTART_PLAN |
-| `websocket/pages/move` | `POST /api/pages/:pageId/move` | |
+| `websocket/pages/move` | `POST /api/pages/:pageId/move` (**implemented** — `pageMoveRequestSchema`; `performPageMove`: Pro, optional `groupCreation`, `reencrypt` when changing group) | |
 | `websocket/users/account/change-password` | `POST /api/users/me/password` | **implemented** in `@deepnotes/session` (`performUserPasswordChange`) |
 | `websocket/users/account/email-change/finish` | `POST /api/users/me/email-change/confirm` | **implemented** — one call: `oldLoginHash`, `emailVerificationCode` (6 digits), `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` (b64; same as register/password); 204, clears cookies; optional Stripe in worker |
 | `websocket/users/account/rotate-keys` | — | **removed** |

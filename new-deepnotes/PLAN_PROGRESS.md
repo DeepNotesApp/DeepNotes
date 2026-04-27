@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped:** slices [1](#pagesgroups-rest--slice-1)–[5](#pagesgroups-rest--slice-5-privacy-private-re-key); **[pages — bump / backlinks / snapshots / deletion (slice 6)](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)**. **Still ahead:** [`POST /api/pages/:pageId/move`](./docs/TRPC_REST_MAP.md) (legacy two-step WS + Yjs/updates; collab data), optional **`groupCreation`** on `POST /api/groups/:id/pages`, WS or REST for **join invitations / requests / member role** ([TRPC map](./docs/TRPC_REST_MAP.md)), **realtime / collab**, **Stripe**. |
+| **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped:** slices [1](#pagesgroups-rest--slice-1)–[5](#pagesgroups-rest--slice-5-privacy-private-re-key); [slice 6 (page router)](#pages-rest--slice-6-bump-backlinks-snapshots-deletion); **[slice 7 — page move](#pages-rest--slice-7-move--group-creation)** (`POST /api/pages/:pageId/move`). **Still ahead:** optional **`groupCreation`** on `POST /api/groups/:id/pages` (standalone create, not only via move), WS or REST for **join invitations / requests / member role** ([TRPC map](./docs/TRPC_REST_MAP.md)), **realtime / collab**, **Stripe**. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -38,7 +38,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
 - [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change, **2FA** bodies + finish TOTP (`schemas/users.test.ts`).
 - [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
-- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — **21** cases when DB env set — register / email / password / **login + refresh** / **2FA** / **groups + pages** / **user page prefs** / **[slice 4–5 group admin](#pagesgroups-rest--slice-4-group-password-privacy-deletion)** / **[slice 6 page ops](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)** (`bump` + `users` recents/starting, backlinks create/delete, Pro snapshots save/load/delete, page soft delete → restore → purge). `@deepnotes/db` `template-db.test.ts` — clone + FK matrix. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
+- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — **22** cases when DB env set — register / email / password / **login + refresh** / **2FA** / **groups + pages** / **user page prefs** / **[slice 4–5 group admin](#pagesgroups-rest--slice-4-group-password-privacy-deletion)** / **[slice 6 page ops](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)** / **[slice 7 page move](#pages-rest--slice-7-move--group-creation)**. `@deepnotes/db` `template-db.test.ts` — clone + FK matrix. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
 
 ### Phase 3 test coverage (detail)
 
@@ -46,7 +46,7 @@ Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `
 
 **How to run locally:** ensure `.env` at `new-deepnotes/.env` has `DATABASE_URL` and (for template create/drop) `DATABASE_ADMIN_URL` with a role that can `CREATE DATABASE`. Then:
 
-- `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts` (**21** cases when DB env set — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion))
+- `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts` (**22** cases when DB env set — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + [slice 7](#pages-rest--slice-7-move--group-creation))
 - `pnpm --filter @deepnotes/db exec vitest run src/template-db.test.ts`
 
 CI should set the same vars against the workflow Postgres service (role with `CREATEDB`).
@@ -78,6 +78,7 @@ CI should set the same vars against the workflow Postgres service (role with `CR
 | **Group password, privacy, deletion (slice 4)** | `UPDATE users` → `plan = pro` on registered user; `performGroupPasswordEnable` / `Change` / `Disable` on **personal** group; `performGroupPrivacyMakePublic` after `accessKeyring` cleared; `performGroupPrivacySetJoinRequestsAllowed` **false**; `performGroupSoftDelete` (future `permanent_deletion_date`) → `Restore` (null) → `SoftDelete` + `Purge` (past date); `Restore` after purge **400** | PHC + server-side encrypt via `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY`; `group-permissions` includes **`editGroupSettings`** (owner/admin only). |
 | **Privacy make-private (slice 5)** | Register with **public** personal group (`access_keyring` set); Pro; `performGroupPrivacyMakePrivate` with full re-key payload (single member, empty invites/requests, one page); assert `access_keyring` **null** + page `encrypted_symmetric_keyring` updated; second call **400** “already private”; re-public in DB then payload with **extra** page id → **400** keyset mismatch | Mirrors legacy `groupKeyRotationSchema` key sets; **no** `next_key_rotation_date` writes (RESTART_PLAN). |
 | **Page bump / backlinks / snapshots / deletion (slice 6)** | Pro; `performCreatePage` (second + third child); `performPageBump` (child, parent = main’s child chain); `users.starting_page_id` + recent; `performPageBacklinkCreate`+`Delete` (scoped query — bump may add separate `page_links` row); `performPageSnapshotSave`+`Load`+`Delete`; `performPageSoftDelete`+`Restore`+`SoftDelete`+`Purge` | Postgres-only links; Pro for snapshot save/load; not main page for delete. |
+| **Page move (slice 7)** | Pro; no-op same dest + `!setAsMainPage` **400**; main page **400**; `setAsMainPage` in personal group (no `reencrypt`); `groupCreation` + cross-group reencrypt, `page_updates` index 0 | [performPageMove](packages/session/src/page-move.ts); no Redis collab key delete (RESTART_PLAN). |
 
 **`@deepnotes/db` real Postgres (`template-db.test.ts`):**
 
@@ -194,23 +195,37 @@ CI should set the same vars against the workflow Postgres service (role with `CR
 
 ### Pages REST — slice 6 (bump, backlinks, snapshots, deletion)
 
-**Goal:** legacy `pagesRouter` **except** `pages.move` and optional **`groupCreation`** on create. No KeyDB mirrors for links/snapshots — only **`page_links`** / **`page_snapshots`**.
+**Goal:** legacy `pagesRouter` **except** `pages.move` (handled in [slice 7](#pages-rest--slice-7-move--group-creation)) and optional **`groupCreation`** on `POST` create only. No KeyDB mirrors for links/snapshots — only **`page_links`** / **`page_snapshots`**.
 
 | Layer | What shipped |
 |-------|----------------|
 | **`@deepnotes/session`** | `page-operations.ts` — `performPageBump` (personal-main breadcrumb validation, `users.*` recents, optional `page_links` on bump, activity timestamps), `performPageBacklinkCreate` / `performPageBacklinkDelete`, `performPageSnapshotSave` (Pro, legacy trim: >10 and oldest >14d), `performPageSnapshotLoad` (Pro), `performPageSnapshotDelete`, `performPageSoftDelete` / `performPageRestore` / `performPagePurge` (not group **main** page). |
 | **`@deepnotes/api`** | `pageIdPathSchema`, `pageTargetPagePathSchema`, `pageSnapshotPathSchema`, `pageBumpRequestSchema`, `pageBacklinkCreateRequestSchema`, `pageSnapshot*`, OpenAPI paths under `/api/pages/...`. |
-| **`@deepnotes/api-worker`** | Routes listed in [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) **Pages** table; `503` matrix **54** session routes. |
+| **`@deepnotes/api-worker`** | Routes listed in [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) **Pages** table; with [slice 7](#pages-rest--slice-7-move--group-creation) move route, `503` matrix **55** session routes. |
 | **Tests** | [Phase 3 detail table](#phase-3-test-coverage-detail) **slice 6** row; integration case **pages: bump, backlinks, …** |
 
 **Path semantics:** `POST /api/pages/:pageId/backlinks` — `pageId` = **target**; `DELETE /api/pages/:sourcePageId/backlinks/:targetPageId` — **source** first (legacy `sourcePageId` / `targetPageId`).
+
+### Pages REST — slice 7 (move + group creation)
+
+**Goal:** legacy `websocket/pages/move` (tRPC `moveProcedureStep1` + `moveProcedureStep2`) in **one** `POST`, as in [TRPC map](./docs/TRPC_REST_MAP.md) — `editGroupSettings` on source, optional **new** shared group + owner row (`groupCreation` when `destGroupId` is unused), `setAsMainPage` with personal-group `users_pages` swap, cross-group page + `page_snapshots` + replace `page_updates` with a single Yjs payload at index 0, bump `users.recent_group_ids` for the destination. **Intentional omission:** KeyDB/Redis `page-update-*` deletes (RESTART_PLAN: collab on a new path).
+
+| Layer | What shipped |
+|-------|----------------|
+| **`@deepnotes/session`** | `page-move.ts` — `performPageMove` (Pro, `user-plan.assertUserProPlan`); `SessionEnv` + optional Argon2 group password for `groupCreation` (same as register/demo) via `computeGroupPasswordPhc` / `encryptGroupRehashedPasswordHash` |
+| **`@deepnotes/api`** | `pageMoveRequestSchema` (+ nested reencrypt + `pageMoveGroupCreationRequestSchema`); `GET` OpenAPI **not** used for a separate “read step” — client must supply prepared ciphertext in one `POST` (or call existing read APIs first) |
+| **`@deepnotes/api-worker`** | `POST /api/pages/:pageId/move` — `503` matrix **+1** (**55** total session routes) |
+| **Tests** | Integration: [slice 7 row](#phase-3-test-coverage-detail) — `pages: move (set main, groupCreation, validation)`; `openapi.test.ts` + worker 503 list |
+
+**Client contract:** `reencrypt` is **required** when the page’s `group_id` changes (after optional `groupCreation` insert, the page still has the old `group_id` until the same transaction’s update block). Omit `reencrypt` when only `setAsMainPage` in the **same** group. Snapshots: `pageEncryptedSnapshots` is a map by snapshot id (empty `{}` if none).
 
 ### Not started (Phase 3 — pages, groups, infra)
 
 - [x] **Groups (REST, slice 4):** [password, privacy, soft delete, restore, purge](#pagesgroups-rest--slice-4-group-password-privacy-deletion) — `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY` on `SessionEnv` / worker bindings.
 - [x] **Groups (REST, slice 5):** [make-private / re-key](#pagesgroups-rest--slice-5-privacy-private-re-key) — `POST /api/groups/:groupId/privacy/private`; OpenAPI + [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md).
-- [x] **Pages (REST, slice 6):** [bump / backlinks / snapshots / page deletion](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) — **`pages.move` not** implemented.
-- [ ] **`POST /api/pages/:pageId/move`** — legacy [websocket/pages/move](../apps/app-server/src/websocket/pages/move.ts) (two steps, Yjs `page_updates`, reencrypt snapshots, Redis cache bust); optional **`groupCreation`** in step 1.
+- [x] **Pages (REST, slice 6):** [bump / backlinks / snapshots / page deletion](#pages-rest--slice-6-bump-backlinks-snapshots-deletion).
+- [x] **Pages (REST, slice 7):** [move + optional `groupCreation`](#pages-rest--slice-7-move--group-creation) — `POST /api/pages/:pageId/move` (`page-move.ts`).
+- [ ] **Optional** **`groupCreation`** on **`POST /api/groups/:id/pages`** without move (if product wants “create group + first page” without moving an existing page).
 - [ ] **WS / REST:** group join/invite, member role, etc. (see [TRPC_REST_MAP](docs/TRPC_REST_MAP.md) WebSocket table).
 - [ ] **Realtime / collab** (new or adapted protocols; no key rotation).
 - [ ] **Stripe:** `POST /api/webhooks/stripe`, checkout/portal (no RevenueCat); wire **`deleteStripeCustomer`** from account delete when keys exist.
@@ -262,9 +277,9 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 | Package / app | Role | What runs today | Gaps (highest value next) |
 |---------------|------|------------------|---------------------------|
 | **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts` (6 cases): clone template, empty `users`, **FK** rejects for orphan `sessions`, **`devices`→`users`**, **`pages`→`groups`**, **`group_members`→`users`**, **`group_members`→`groups`** | More paths when groups CRUD lands (join invites/requests, cascades from `groups` delete) |
-| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**21** cases when DB env set) — … + [slice 6 page ops](#pages-rest--slice-6-bump-backlinks-snapshots-deletion); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; **`POST /api/pages/:pageId/move`**; optional `groupCreation` on create |
-| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (session routes + [slice 6 `/api/pages/...` paths](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)); **`schemas/users.test.ts`**; **`schemas/pages-groups.ts`**, **`schemas/user-pages.ts`** | Optional OpenAPI **snapshot**; more Zod edge cases for new page schemas |
-| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: **54** tests (503 matrix when env/Hyperdrive missing) — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) page routes | **200** tests with stub `SessionEnv` + template DB (heavier) |
+| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**22** cases when DB env set) — … + [slice 6 page ops](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + [slice 7 move](#pages-rest--slice-7-move--group-creation); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; optional `groupCreation` on create-only `POST` |
+| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (session routes + [slice 6/7 `/api/pages/...` paths](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)); **`schemas/users.test.ts`**; **`schemas/pages-groups.ts`**, **`schemas/user-pages.ts`** | Optional OpenAPI **snapshot**; more Zod edge cases for new page schemas |
+| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: **55** tests (503 matrix when env/Hyperdrive missing) — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + `/api/pages/{pageId}/move` | **200** tests with stub `SessionEnv` + template DB (heavier) |
 | **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
 
 **Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
@@ -285,8 +300,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [ ] Drizzle migrations from empty DB documented for production upgrades.
 - [ ] Cold API dev start under **2 s** (no `inspect-brk` by default) — validate on a typical laptop.
 - [ ] Collab + realtime: at least one integration test each (Redis + deps).
-- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` `template-db.test.ts` (clone + **sessions / devices / pages / `group_members`** FK rejects); `@deepnotes/session` `account-flows.integration.test.ts` (account + **2FA** + **groups/pages** + prefs + [slice 4–5](#pagesgroups-rest--slice-4-group-password-privacy-deletion) + [slice 6 page router](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)).
-- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) — **21** `account-flows` + **6** `@deepnotes/db` when DB set; [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) page router. **Next:** **Redis** failed-login against real Redis; move route; **Stripe** when billing exists.
+- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` `template-db.test.ts` (clone + **sessions / devices / pages / `group_members`** FK rejects); `@deepnotes/session` `account-flows.integration.test.ts` (account + **2FA** + **groups/pages** + prefs + [slice 4–5](#pagesgroups-rest--slice-4-group-password-privacy-deletion) + [slice 6 page router](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + [slice 7 page move](#pages-rest--slice-7-move--group-creation)).
+- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) — **22** `account-flows` + **6** `@deepnotes/db` when DB set; [slice 6 + 7](#pages-rest--slice-6-bump-backlinks-snapshots-deletion). **Next:** **Redis** failed-login against real Redis; **Stripe** when billing exists.
 - [x] No tRPC / superjson / RevenueCat / key-rotation in **this** tree (keep absent); product sign-off for IAP/Stripe when billing ships.
 - [x] Client: zero undocumented forks, or a short owned exception list — see [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
 - [ ] Cloudflare: deploy runbook; Hyperdrive + Postgres + Redis proven in staging; collab/realtime topology chosen and load-tested.
@@ -297,7 +312,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ## Phase 3 working order (suggested)
 
-Use this when resuming: **(done)** through [slice 6 — page bump / backlinks / snapshots / deletion](#pages-rest--slice-6-bump-backlinks-snapshots-deletion). **(next)** **`POST /api/pages/:pageId/move`** (two-step collab/updates parity, see legacy `websocket/pages/move`); optional **`groupCreation`** on page create. **(then)** WS or REST for **join invitations**, **join requests**, **member role** / remove. **(then)** **realtime + collab** and **Stripe** + **`deleteStripeCustomer`**.
+Use this when resuming: **(done)** through [slice 7 — page move](#pages-rest--slice-7-move--group-creation). **(next)** optional **`groupCreation`** on `POST /api/groups/:id/pages` only (if desired); **(then)** WS or REST for **join invitations**, **join requests**, **member role** / remove. **(then)** **realtime + collab** and **Stripe** + **`deleteStripeCustomer`**.
 
 ---
 
@@ -305,6 +320,7 @@ Use this when resuming: **(done)** through [slice 6 — page bump / backlinks / 
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **Phase 3 — pages slice 7 (move):** `page-move.ts` `performPageMove` (Pro; optional `groupCreation` + reencrypt; `setAsMainPage` + `users_pages` swap for personal; `page_updates` + `page_snapshots` on cross-group); `pageMoveRequestSchema` in `@deepnotes/api`; `POST /api/pages/:pageId/move` + OpenAPI; worker **503** **55** tests; `account-flows` **22** cases; [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) `websocket/pages/move` row; [slice 7 section](#pages-rest--slice-7-move--group-creation). **Next:** group invites / requests REST or join routes; **realtime + collab**; **Stripe**. |
 | 2026-04-27 | **Phase 3 — pages router slice 6 (bump, backlinks, snapshots, page deletion):** `page-operations.ts` (`performPageBump` … `performPagePurge`); `page_links` / `page_snapshots` + Postgres-only (no `page-backlinks` KeyDB); OpenAPI + Hono; worker **503** matrix **54** tests; `account-flows` **21** integration cases; [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) `pages.*` rows; [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion). **Next:** `POST /api/pages/:pageId/move` (WS parity + `page_updates` / collab cache). |
 | 2026-04-27 | **Phase 3 — groups slice 5 (`POST …/privacy/private`):** `performGroupPrivacyMakePrivate` + `groupPrivacyPrivateRequestSchema` (legacy `groupKeyRotationSchema` shape, base64 JSON); Hono + OpenAPI; worker **503** **45** tests; `account-flows` **20** integration cases (make private, already-private **400**, bad page keyset **400**); **TRPC_REST_MAP** Groups + WS `make-private` rows; [slice 5 section](#pagesgroups-rest--slice-5-privacy-private-re-key); [working order](#phase-3-working-order-suggested) now leads with **`pagesRouter`**. |
 | 2026-04-27 | **Phase 3 — groups slice 4 (password, privacy, deletion):** `editGroupSettings` in `group-permissions.ts`; `SESSION` `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY`; `user-plan.ts` (`assertUserProPlan`); `group-password.ts` / `group-privacy.ts` / `group-deletion.ts`; Hono + OpenAPI + Zod; worker **503** **44** tests; `account-flows` **19** integration cases; **TRPC_REST_MAP** updated; [slice 4 section](#pagesgroups-rest--slice-4-group-password-privacy-deletion) + not-started `privacy/private`. |

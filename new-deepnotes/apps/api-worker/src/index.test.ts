@@ -88,6 +88,7 @@ describe("api-worker", () => {
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/restore",
     ],
     ["POST", "/api/groups/aaaaaaaaaaaaaaaaaaaaa/purge"],
+    ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/move"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/bump"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/backlinks"],
     [

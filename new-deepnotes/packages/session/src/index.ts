@@ -85,3 +85,11 @@ export {
   performPageSnapshotSave,
   performPageSoftDelete,
 } from "./page-operations.js";
+export {
+  performPageMove,
+} from "./page-move.js";
+export type {
+  PageMoveBody,
+  PageMoveGroupCreation,
+  PageMoveReencrypt,
+} from "./page-move.js";

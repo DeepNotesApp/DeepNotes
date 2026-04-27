@@ -32,6 +32,7 @@ import {
   groupPrivacyPublicRequestSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
+  pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
   pageSnapshotLoadResponseSchema,
@@ -878,6 +879,35 @@ registry.registerPath({
       content: {
         "application/json": { schema: sessionErrorResponseSchema },
       },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/move",
+  summary: "Move page (optionally create group, re-key, set main)",
+  description:
+    "Replaces `websocket/pages/move` — Pro-only; `editGroupSettings` on the page's current group, `editGroupPages` on destination unless `groupCreation` creates it. `reencrypt` is required when the page changes group (Yjs `page_updates` replaced with a single index-0 row; snapshots updated by id).",
+  request: {
+    params: pageIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: pageMoveRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Move completed." },
+    400: {
+      description: "No-op move, or invalid payload.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
     },
     401: sessionUnauthorized401,
     403: sessionForbidden403,

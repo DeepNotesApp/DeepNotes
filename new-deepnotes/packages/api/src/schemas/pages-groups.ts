@@ -211,6 +211,56 @@ export const pageBumpRequestSchema = z
   })
   .openapi("PageBumpRequest");
 
+/** Ciphertext to persist after a cross-group move (legacy `pageKeyRotationSchema` + Yjs update). */
+export const pageMoveReencryptRequestSchema = z
+  .object({
+    pageEncryptedSymmetricKeyring: byteB64,
+    pageEncryptedRelativeTitle: byteB64,
+    pageEncryptedAbsoluteTitle: byteB64,
+    pageEncryptedUpdate: byteB64,
+    pageEncryptedSnapshots: z
+      .record(
+        nanoidRecordKeySchema,
+        z.object({
+          encryptedSymmetricKey: byteB64,
+          encryptedData: byteB64,
+        }),
+      )
+      .default({}),
+  })
+  .openapi("PageMoveReencryptRequest");
+
+/** Create a new shared group in the same call as a move (legacy WS step 1 `groupCreation`). */
+export const pageMoveGroupCreationRequestSchema = z
+  .object({
+    groupEncryptedName: byteB64,
+    groupPasswordHash: byteB64.optional(),
+    groupIsPublic: z.boolean(),
+    groupAccessKeyring: byteB64,
+    groupEncryptedInternalKeyring: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+    groupPublicKeyring: byteB64,
+    groupEncryptedPrivateKeyring: byteB64,
+    groupOwnerEncryptedName: byteB64,
+  })
+  .openapi("PageMoveGroupCreationRequest");
+
+/**
+ * Replaces `websocket/pages/move` (two tRPC steps) with one `POST` (optional `reencrypt` when
+ * `sourceGroupId !== destGroupId`).
+ */
+export const pageMoveRequestSchema = z
+  .object({
+    destGroupId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{21}$/)
+      .openapi(nanoidIdOpenapi),
+    setAsMainPage: z.boolean(),
+    groupCreation: pageMoveGroupCreationRequestSchema.optional(),
+    reencrypt: pageMoveReencryptRequestSchema.optional(),
+  })
+  .openapi("PageMoveRequest");
+
 export const pageBacklinkCreateRequestSchema = z
   .object({
     sourcePageId: z

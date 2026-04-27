@@ -39,6 +39,7 @@ export {
   groupPrivacyPublicRequestSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
+  pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
   pageSnapshotLoadResponseSchema,

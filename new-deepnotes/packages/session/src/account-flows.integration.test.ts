@@ -25,6 +25,7 @@ import {
   groups,
   notifications,
   pageLinks,
+  pageUpdates,
   pages,
   sessions,
   users,
@@ -71,6 +72,7 @@ import {
   performPageBacklinkCreate,
   performPageBacklinkDelete,
   performPageBump,
+  performPageMove,
   performPagePurge,
   performPageRestore,
   performPageSnapshotDelete,
@@ -2064,6 +2066,162 @@ describe.skipIf(resolveTemplateContext() == null)(
           .from(pages)
           .where(eq(pages.id, page2));
         expect(new Date(rowP!.d!).getTime()).toBeLessThan(Date.now());
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("pages: move (set main, groupCreation, validation)", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `pmove-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const childId = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: childId,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+
+        await expect(
+          performPageMove({
+            db,
+            env,
+            accessCookie: access,
+            pageId: childId,
+            body: {
+              destGroupId: reg.groupId,
+              setAsMainPage: false,
+            },
+          }),
+        ).rejects.toMatchObject({
+          message: "No changes were requested on page move.",
+        });
+
+        await expect(
+          performPageMove({
+            db,
+            env,
+            accessCookie: access,
+            pageId: reg.pageId,
+            body: {
+              destGroupId: reg.groupId,
+              setAsMainPage: true,
+            },
+          }),
+        ).rejects.toMatchObject({
+          message:
+            "Cannot move main page of a group. Please set another page as main page first.",
+        });
+
+        await performPageMove({
+          db,
+          env,
+          accessCookie: access,
+          pageId: childId,
+          body: {
+            destGroupId: reg.groupId,
+            setAsMainPage: true,
+          },
+        });
+        const [mPersonal] = await db
+          .select({ mainPageId: groups.mainPageId, userId: groups.userId })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(mPersonal?.mainPageId).toBe(childId);
+        expect(mPersonal?.userId).toBe(reg.userId);
+
+        const child2 = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: childId,
+            pageId: child2,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+        const gc = {
+          groupEncryptedName: rand32(),
+          groupIsPublic: true,
+          groupAccessKeyring: rand32(),
+          groupEncryptedInternalKeyring: rand32(),
+          groupEncryptedContentKeyring: rand32(),
+          groupPublicKeyring: rand32(),
+          groupEncryptedPrivateKeyring: rand32(),
+          groupOwnerEncryptedName: rand32(),
+        };
+        const newGid = nanoid();
+        const up = rand32();
+        await performPageMove({
+          db,
+          env,
+          accessCookie: access,
+          pageId: child2,
+          body: {
+            destGroupId: newGid,
+            setAsMainPage: false,
+            groupCreation: gc,
+            reencrypt: {
+              pageEncryptedSymmetricKeyring: rand32(),
+              pageEncryptedRelativeTitle: rand32(),
+              pageEncryptedAbsoluteTitle: rand32(),
+              pageEncryptedUpdate: up,
+              pageEncryptedSnapshots: {},
+            },
+          },
+        });
+        const [prow] = await db
+          .select({ groupId: pages.groupId })
+          .from(pages)
+          .where(eq(pages.id, child2));
+        expect(prow?.groupId).toBe(newGid);
+        const [upRow] = await db
+          .select()
+          .from(pageUpdates)
+          .where(eq(pageUpdates.pageId, child2));
+        expect(upRow?.index).toBe(0);
+        expect(upRow?.encryptedData.equals(Buffer.from(up))).toBe(true);
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });
