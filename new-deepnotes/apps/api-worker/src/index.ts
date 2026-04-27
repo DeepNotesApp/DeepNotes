@@ -4,6 +4,11 @@ import {
   getOpenApiDocument,
   groupPageCreateRequestSchema,
   groupPagesListQuerySchema,
+  groupPasswordChangeRequestSchema,
+  groupPasswordDisableRequestSchema,
+  groupPasswordEnableRequestSchema,
+  groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPublicRequestSchema,
   healthResponseSchema,
   userDefaultArrowPatchSchema,
   userDefaultNotePatchSchema,
@@ -38,7 +43,7 @@ const app = new Hono<{ Bindings: Bindings }>();
 const serviceUnavailableBody = {
   code: "SERVICE_UNAVAILABLE" as const,
   message:
-    "Session routes require ACCESS_SECRET, REFRESH_SECRET, USER_EMAIL_SECRET, USER_EMAIL_ENCRYPTION_KEY, USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY, USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY, and USER_RECOVERY_CODES_ENCRYPTION_KEY (e.g. Wrangler secrets / .dev.vars).",
+    "Session routes require ACCESS_SECRET, REFRESH_SECRET, USER_EMAIL_SECRET, USER_EMAIL_ENCRYPTION_KEY, USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY, USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY, USER_RECOVERY_CODES_ENCRYPTION_KEY, and GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY (e.g. Wrangler secrets / .dev.vars).",
 };
 
 function appendSetCookies(res: Response, lines: string[]): void {
@@ -1348,6 +1353,437 @@ app.post("/api/groups/:groupId/pages", async (c) => {
       body: parsed.data,
     });
     return c.json(out, 201);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/groups/:groupId/password", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPasswordEnableRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPasswordEnable } = await import("@deepnotes/session");
+    await performGroupPasswordEnable({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      groupPasswordHash: parsed.data.groupPasswordHash,
+      groupEncryptedContentKeyring: parsed.data.groupEncryptedContentKeyring,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.patch("/api/groups/:groupId/password", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPasswordChangeRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPasswordChange } = await import("@deepnotes/session");
+    await performGroupPasswordChange({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      groupCurrentPasswordHash: parsed.data.groupCurrentPasswordHash,
+      groupNewPasswordHash: parsed.data.groupNewPasswordHash,
+      groupEncryptedContentKeyring: parsed.data.groupEncryptedContentKeyring,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/groups/:groupId/password", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPasswordDisableRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPasswordDisable } = await import("@deepnotes/session");
+    await performGroupPasswordDisable({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      groupPasswordHash: parsed.data.groupPasswordHash,
+      groupEncryptedContentKeyring: parsed.data.groupEncryptedContentKeyring,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/groups/:groupId/privacy/public", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPrivacyPublicRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPrivacyMakePublic } = await import(
+      "@deepnotes/session"
+    );
+    await performGroupPrivacyMakePublic({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      accessKeyring: parsed.data.accessKeyring,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.patch("/api/groups/:groupId/privacy/join-requests", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPrivacyJoinRequestsPatchSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPrivacySetJoinRequestsAllowed } = await import(
+      "@deepnotes/session"
+    );
+    await performGroupPrivacySetJoinRequestsAllowed({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      areJoinRequestsAllowed: parsed.data.areJoinRequestsAllowed,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/groups/:groupId", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupSoftDelete } = await import("@deepnotes/session");
+    await performGroupSoftDelete({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/groups/:groupId/restore", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupRestore } = await import("@deepnotes/session");
+    await performGroupRestore({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/groups/:groupId/purge", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGroupPurge } = await import("@deepnotes/session");
+    await performGroupPurge({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.body(null, 204);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

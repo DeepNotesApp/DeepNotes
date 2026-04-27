@@ -10,6 +10,8 @@ export type SessionEnv = {
   USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY: string;
   USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY: string;
   USER_RECOVERY_CODES_ENCRYPTION_KEY: string;
+  /** Base64 symmetric key for `groups.encrypted_rehashed_password_hash` PHC plaintext. */
+  GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY: string;
   /** When `"true"`, cookies omit `Secure` (local HTTP). */
   DEV?: string;
   /** Optional `Domain=` attribute (legacy `HOST`). */

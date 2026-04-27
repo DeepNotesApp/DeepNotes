@@ -54,14 +54,14 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `groups.getMainPageId` | `GET /api/groups/:groupId/main-page` (**implemented** — `performGetGroupMainPageId`; `groups.main_page_id`; requires `viewGroupPages`) |
 | `groups.getUserIds` | `GET /api/groups/:groupId/members` (**implemented** — `performGetGroupMemberUserIds`; members ∪ join requests ∪ invitations; requires `viewGroupMembers`, not public-only read) |
 | `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; query `lastPageId`; soft-deleted pages excluded) |
-| `groups.password.enable` | `POST /api/groups/:groupId/password` |
-| `groups.password.change` | `PATCH /api/groups/:groupId/password` |
-| `groups.password.disable` | `DELETE /api/groups/:groupId/password` |
-| `groups.privacy.makePublic` | `POST /api/groups/:groupId/privacy/public` |
-| `groups.privacy.setJoinRequestsAllowed` | `PATCH /api/groups/:groupId/privacy/join-requests` |
-| `groups.deletion.delete` | `DELETE /api/groups/:groupId` (soft) |
-| `groups.deletion.restore` | `POST /api/groups/:groupId/restore` |
-| `groups.deletion.deletePermanently` | `POST /api/groups/:groupId/purge` |
+| `groups.password.enable` | `POST /api/groups/:groupId/password` (**implemented** — `performGroupPasswordEnable`; Pro + `editGroupSettings`; `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY`) |
+| `groups.password.change` | `PATCH /api/groups/:groupId/password` (**implemented** — `performGroupPasswordChange`) |
+| `groups.password.disable` | `DELETE /api/groups/:groupId/password` (JSON body; **implemented** — `performGroupPasswordDisable`; not Pro-gated, legacy match) |
+| `groups.privacy.makePublic` | `POST /api/groups/:groupId/privacy/public` (**implemented** — `performGroupPrivacyMakePublic`; clears `group_members` / `group_join_invitations` `encrypted_access_keyring`) |
+| `groups.privacy.setJoinRequestsAllowed` | `PATCH /api/groups/:groupId/privacy/join-requests` (**implemented** — `performGroupPrivacySetJoinRequestsAllowed`) |
+| `groups.deletion.delete` | `DELETE /api/groups/:groupId` (soft) (**implemented** — `performGroupSoftDelete`) |
+| `groups.deletion.restore` | `POST /api/groups/:groupId/restore` (**implemented** — `performGroupRestore`; grace only; not after purge) |
+| `groups.deletion.deletePermanently` | `POST /api/groups/:groupId/purge` (**implemented** — `performGroupPurge`) |
 
 ## Pages (`pagesRouter`)
 

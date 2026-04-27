@@ -18,6 +18,9 @@ function minimalEnv(
       "base64",
     ),
     USER_RECOVERY_CODES_ENCRYPTION_KEY: Buffer.alloc(32, 4).toString("base64"),
+    GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY: Buffer.alloc(32, 5).toString(
+      "base64",
+    ),
     ...overrides,
   };
 }

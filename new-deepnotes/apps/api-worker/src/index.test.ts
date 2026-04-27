@@ -58,6 +58,32 @@ describe("api-worker", () => {
       "POST",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
     ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/password",
+    ],
+    [
+      "PATCH",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/password",
+    ],
+    [
+      "DELETE",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/password",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/privacy/public",
+    ],
+    [
+      "PATCH",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/privacy/join-requests",
+    ],
+    ["DELETE", "/api/groups/aaaaaaaaaaaaaaaaaaaaa"],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/restore",
+    ],
+    ["POST", "/api/groups/aaaaaaaaaaaaaaaaaaaaa/purge"],
     ["GET", "/api/users/me"],
     ["POST", "/api/users/me/password"],
     ["DELETE", "/api/users/me"],

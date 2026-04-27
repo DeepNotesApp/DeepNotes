@@ -21,6 +21,7 @@ import {
 import * as schema from "@deepnotes/db/schema";
 import {
   devices,
+  groups,
   notifications,
   pages,
   sessions,
@@ -55,6 +56,16 @@ import {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
 } from "./group-main-and-members.js";
+import {
+  performGroupPasswordChange,
+  performGroupPasswordDisable,
+  performGroupPasswordEnable,
+  performGroupPrivacyMakePublic,
+  performGroupPrivacySetJoinRequestsAllowed,
+  performGroupPurge,
+  performGroupRestore,
+  performGroupSoftDelete,
+} from "./index.js";
 import {
   performCreatePage,
   performListGroupPages,
@@ -93,6 +104,7 @@ function testSessionEnv(): SessionEnv {
     USER_REHASHED_LOGIN_HASH_ENCRYPTION_KEY: b32(2),
     USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY: b32(3),
     USER_RECOVERY_CODES_ENCRYPTION_KEY: b32(4),
+    GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY: b32(5),
     SEND_EMAILS: "false",
     DEV: "true",
   };
@@ -1534,6 +1546,166 @@ describe.skipIf(resolveTemplateContext() == null)(
           .from(users)
           .where(eq(users.id, reg.userId));
         expect(readRow?.lastNotificationRead).toBe(n!.id);
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("group password, privacy, soft delete, purge, restore failure after purge", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `gadm-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        const gpass = new TextEncoder().encode("gpass-1");
+        const gpass2 = new TextEncoder().encode("gpass-2");
+        const kr = rand32();
+
+        await performGroupPasswordEnable({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          groupPasswordHash: gpass,
+          groupEncryptedContentKeyring: kr,
+        });
+        const [h1] = await db
+          .select({ h: groups.encryptedRehashedPasswordHash })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(h1?.h).toBeDefined();
+
+        await performGroupPasswordChange({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          groupCurrentPasswordHash: gpass,
+          groupNewPasswordHash: gpass2,
+          groupEncryptedContentKeyring: rand32(),
+        });
+
+        await performGroupPasswordDisable({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          groupPasswordHash: gpass2,
+          groupEncryptedContentKeyring: rand32(),
+        });
+        const [h2] = await db
+          .select({ h: groups.encryptedRehashedPasswordHash })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(h2?.h).toBeNull();
+
+        await db
+          .update(groups)
+          .set({ accessKeyring: null })
+          .where(eq(groups.id, reg.groupId));
+        await performGroupPrivacyMakePublic({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          accessKeyring: rand32(),
+        });
+        const [pbl] = await db
+          .select({ a: groups.accessKeyring, j: groups.areJoinRequestsAllowed })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(pbl?.a).not.toBeNull();
+
+        await performGroupPrivacySetJoinRequestsAllowed({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          areJoinRequestsAllowed: false,
+        });
+        const [jr] = await db
+          .select({ j: groups.areJoinRequestsAllowed })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(jr?.j).toBe(false);
+
+        await performGroupSoftDelete({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        const [sd] = await db
+          .select({ d: groups.permanentDeletionDate })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(sd?.d).toBeDefined();
+        expect(new Date(sd!.d!).getTime()).toBeGreaterThan(Date.now());
+
+        await performGroupRestore({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        const [rs] = await db
+          .select({ d: groups.permanentDeletionDate })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(rs?.d).toBeNull();
+
+        await performGroupSoftDelete({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        await performGroupPurge({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        const [pg] = await db
+          .select({ d: groups.permanentDeletionDate })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(new Date(pg!.d!).getTime()).toBeLessThan(Date.now());
+
+        await expect(
+          performGroupRestore({
+            db,
+            env,
+            accessCookie: access,
+            groupId: reg.groupId,
+          }),
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

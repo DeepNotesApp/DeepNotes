@@ -135,3 +135,34 @@ export function verifyRecoveryCode(
     hashRecoveryCode(recoveryCode, salt).slice(16),
   );
 }
+
+/** PHC string for a group password (Argon2id, libsodium). Call after `ensureSodiumReady()`. */
+export function computeGroupPasswordPhc(groupPasswordPrehash: Uint8Array): string {
+  return sodium.crypto_pwhash_str(
+    groupPasswordPrehash,
+    2,
+    32 * 1024 * 1024,
+  ) as string;
+}
+
+export function encryptGroupRehashedPasswordHash(
+  groupRehashedPasswordHashPhc: string,
+  encryptionKeyB64: string,
+): Uint8Array {
+  const key = wrapSymmetricKey(base64ToBytes(encryptionKeyB64));
+  return key.encrypt(textToBytes(groupRehashedPasswordHashPhc), {
+    associatedData: { context: "GroupRehashedPasswordHash" },
+  });
+}
+
+export function decryptGroupRehashedPasswordHash(
+  groupEncryptedRehashedPasswordHash: Uint8Array,
+  encryptionKeyB64: string,
+): string {
+  const key = wrapSymmetricKey(base64ToBytes(encryptionKeyB64));
+  return bytesToText(
+    key.decrypt(groupEncryptedRehashedPasswordHash, {
+      associatedData: { context: "GroupRehashedPasswordHash" },
+    }),
+  );
+}

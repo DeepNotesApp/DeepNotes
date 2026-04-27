@@ -9,27 +9,46 @@ const ROLE_PERMISSIONS: Record<
     viewGroupPages: boolean;
     editGroupPages: boolean;
     viewGroupMembers: boolean;
+    editGroupSettings: boolean;
   }
 > = {
-  owner: { viewGroupPages: true, editGroupPages: true, viewGroupMembers: true },
-  admin: { viewGroupPages: true, editGroupPages: true, viewGroupMembers: true },
+  owner: {
+    viewGroupPages: true,
+    editGroupPages: true,
+    viewGroupMembers: true,
+    editGroupSettings: true,
+  },
+  admin: {
+    viewGroupPages: true,
+    editGroupPages: true,
+    viewGroupMembers: true,
+    editGroupSettings: true,
+  },
   moderator: {
     viewGroupPages: true,
     editGroupPages: true,
     viewGroupMembers: true,
+    editGroupSettings: false,
   },
-  member: { viewGroupPages: true, editGroupPages: true, viewGroupMembers: true },
+  member: {
+    viewGroupPages: true,
+    editGroupPages: true,
+    viewGroupMembers: true,
+    editGroupSettings: false,
+  },
   viewer: {
     viewGroupPages: true,
     editGroupPages: false,
     viewGroupMembers: true,
+    editGroupSettings: false,
   },
 };
 
 export type GroupPermission =
   | "viewGroupPages"
   | "editGroupPages"
-  | "viewGroupMembers";
+  | "viewGroupMembers"
+  | "editGroupSettings";
 
 export async function userHasGroupPermission(input: {
   db: DeepnotesDb;

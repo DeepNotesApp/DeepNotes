@@ -31,6 +31,11 @@ export {
   groupPageCreateResponseSchema,
   groupPagesListQuerySchema,
   groupPagesListResponseSchema,
+  groupPasswordChangeRequestSchema,
+  groupPasswordDisableRequestSchema,
+  groupPasswordEnableRequestSchema,
+  groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPublicRequestSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 export {

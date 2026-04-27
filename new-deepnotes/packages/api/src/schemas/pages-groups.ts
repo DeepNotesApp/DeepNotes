@@ -76,3 +76,38 @@ export const groupMemberUserIdsResponseSchema = z
     userIds: z.array(z.string()),
   })
   .openapi("GroupMemberUserIdsResponse");
+
+/** Same material as legacy `groupPasswordHash` (Argon2id pre-hash input on the client), base64. */
+export const groupPasswordEnableRequestSchema = z
+  .object({
+    groupPasswordHash: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+  })
+  .openapi("GroupPasswordEnableRequest");
+
+export const groupPasswordChangeRequestSchema = z
+  .object({
+    groupCurrentPasswordHash: byteB64,
+    groupNewPasswordHash: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+  })
+  .openapi("GroupPasswordChangeRequest");
+
+export const groupPasswordDisableRequestSchema = z
+  .object({
+    groupPasswordHash: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+  })
+  .openapi("GroupPasswordDisableRequest");
+
+export const groupPrivacyPublicRequestSchema = z
+  .object({
+    accessKeyring: byteB64,
+  })
+  .openapi("GroupPrivacyPublicRequest");
+
+export const groupPrivacyJoinRequestsPatchSchema = z
+  .object({
+    areJoinRequestsAllowed: z.boolean(),
+  })
+  .openapi("GroupPrivacyJoinRequestsPatch");

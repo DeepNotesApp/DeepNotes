@@ -58,3 +58,17 @@ export {
   performUserTwoFactorGenerateRecoveryCodes,
   performUserTwoFactorLoad,
 } from "./user-two-factor-settings.js";
+export {
+  performGroupPasswordChange,
+  performGroupPasswordDisable,
+  performGroupPasswordEnable,
+} from "./group-password.js";
+export {
+  performGroupPurge,
+  performGroupRestore,
+  performGroupSoftDelete,
+} from "./group-deletion.js";
+export {
+  performGroupPrivacyMakePublic,
+  performGroupPrivacySetJoinRequestsAllowed,
+} from "./group-privacy.js";

@@ -24,6 +24,11 @@ import {
   groupPageCreateResponseSchema,
   groupPagesListQuerySchema,
   groupPagesListResponseSchema,
+  groupPasswordChangeRequestSchema,
+  groupPasswordDisableRequestSchema,
+  groupPasswordEnableRequestSchema,
+  groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPublicRequestSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 import {
@@ -619,6 +624,219 @@ registry.registerPath({
         "application/json": {
           schema: sessionErrorResponseSchema,
         },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/password",
+  summary: "Enable group password (Pro)",
+  description:
+    "Replaces `groups.password.enable`. Argon2id is applied on the server to the provided `groupPasswordHash` material (base64) and stored encrypted. Requires `editGroupSettings` and a Pro plan.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPasswordEnableRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Password protection enabled." },
+    400: {
+      description: "Already protected or bad password material.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/groups/{groupId}/password",
+  summary: "Change group password (Pro)",
+  description: "Replaces `groups.password.change`. Verifies the current group password, then re-wraps the content keyring.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPasswordChangeRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Password updated." },
+    400: {
+      description: "Wrong password, or group not protected.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/groups/{groupId}/password",
+  summary: "Disable group password (not Pro check in legacy for disable-only)",
+  description:
+    "Replaces `groups.password.disable`. Verifies the current group password, removes server-side group password, updates `groupEncryptedContentKeyring`.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPasswordDisableRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Password protection disabled." },
+    400: {
+      description: "Wrong password, or not protected.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/privacy/public",
+  summary: "Make group public (Pro)",
+  description:
+    "Replaces `groups.privacy.makePublic`. Sets `access_keyring` and clears member/invite `encrypted_access_keyring`.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPrivacyPublicRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Group is public." },
+    400: {
+      description: "Already public.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/groups/{groupId}/privacy/join-requests",
+  summary: "Allow or reject join requests (Pro)",
+  description: "Replaces `groups.privacy.setJoinRequestsAllowed`.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPrivacyJoinRequestsPatchSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Setting updated." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/groups/{groupId}",
+  summary: "Soft-delete group (grace period)",
+  description:
+    "Replaces `groups.deletion.delete`. Sets `permanent_deletion_date` ~1 month ahead.",
+  request: { params: groupIdPathSchema },
+  responses: {
+    204: { description: "Deletion scheduled." },
+    400: {
+      description: "Already soft-deleted.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/restore",
+  summary: "Restore a soft-deleted group",
+  description:
+    "Replaces `groups.deletion.restore` during the grace period (`permanent_deletion_date` in the future).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    204: { description: "Group removed from scheduled deletion." },
+    400: {
+      description: "Not soft-deleted, or no longer in grace period.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/purge",
+  summary: "Permanently mark group deleted (purge active or grace state)",
+  description:
+    "Replaces `groups.deletion.deletePermanently` — `permanent_deletion_date` set in the past (legacy).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    204: { description: "Purge recorded." },
+    400: {
+      description: "Already purged.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
       },
     },
     401: sessionUnauthorized401,

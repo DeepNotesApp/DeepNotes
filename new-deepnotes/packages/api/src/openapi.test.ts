@@ -60,5 +60,17 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/groups/{groupId}/members"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/password"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/password"]?.patch).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/password"]?.delete).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/privacy/public"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/privacy/join-requests"]?.patch,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}"]?.delete).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/restore"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/purge"]?.post).toBeDefined();
   });
 });
