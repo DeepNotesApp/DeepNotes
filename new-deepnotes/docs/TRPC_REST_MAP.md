@@ -16,8 +16,8 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
 | `users.account.register` | `POST /api/users` |
-| `users.account.resendVerificationEmail` | `POST /api/users/me/email-verification/resend` |
-| `users.account.verifyEmail` | `POST /api/users/me/email-verification/confirm` |
+| `users.account.resendVerificationEmail` | `POST /api/users/email-verification/resend` (public; body `{ "email" }` — matches legacy, not an authenticated “me” call) |
+| `users.account.verifyEmail` | `POST /api/users/email-verification/confirm` (public; body `{ "emailVerificationCode" }`, nanoid) |
 | `users.account.emailChange.request` | `POST /api/users/me/email-change` |
 | `users.account.twoFactorAuth.enable.request` | `POST /api/users/me/2fa/enable/request` |
 | `users.account.twoFactorAuth.enable.finish` | `POST /api/users/me/2fa/enable/finish` |

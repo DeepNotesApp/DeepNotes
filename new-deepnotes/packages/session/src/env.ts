@@ -21,6 +21,12 @@ export type SessionEnv = {
    * immediately after insert (legacy `SEND_EMAILS=false` / local dev).
    */
   SEND_EMAILS?: string;
+  /**
+   * When `SEND_EMAILS` is not `"false"`, used to send registration / resend email (Resend HTTP API).
+   */
+  RESEND_API_KEY?: string;
+  /** Origin for the verification link in the email; defaults to `https://deepnotes.app`. */
+  PUBLIC_APP_URL?: string;
 };
 
 export function isDev(env: Pick<SessionEnv, "DEV">): boolean {

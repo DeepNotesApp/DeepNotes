@@ -26,6 +26,10 @@ import type { SessionEnv } from "./env.js";
 import { encryptUserEmail } from "./encrypt-user-email.js";
 import { hashUserEmail } from "./email-hash.js";
 import { SessionError } from "./errors.js";
+import {
+  assertOutboundEmailConfiguredForRegistration,
+  sendRegistrationEmail,
+} from "./send-registration-email.js";
 
 export type UserRegisterInput = SessionStartDemoInput & {
   email: string;
@@ -109,6 +113,10 @@ export async function performUserRegister(input: {
 }): Promise<{ userId: string; emailVerified: boolean }> {
   await ensureSodiumReady();
 
+  if (sendEmailsEnabled(input.env)) {
+    assertOutboundEmailConfiguredForRegistration(input.env);
+  }
+
   const gc = input.body.groupCreation;
   if (
     gc.groupPasswordHash != null &&
@@ -176,6 +184,7 @@ export async function performUserRegister(input: {
   const existing = await input.db
     .select({
       emailVerified: users.emailVerified,
+      emailVerificationCode: users.emailVerificationCode,
     })
     .from(users)
     .where(
@@ -198,6 +207,16 @@ export async function performUserRegister(input: {
         "Email already registered.",
       );
     }
+    if (
+      hit.emailVerificationCode != null &&
+      hit.emailVerificationCode.length > 0
+    ) {
+      await sendRegistrationEmail({
+        env: input.env,
+        toEmail: email,
+        emailVerificationCode: hit.emailVerificationCode,
+      });
+    }
     throw new SessionError(
       401,
       "UNAUTHORIZED",
@@ -205,7 +224,7 @@ export async function performUserRegister(input: {
     );
   }
 
-  return await input.db.transaction(async (tx) => {
+  const result = await input.db.transaction(async (tx) => {
     await tx.delete(users).where(eq(users.emailHash, emailHash));
 
     await tx.insert(users).values({
@@ -278,4 +297,14 @@ export async function performUserRegister(input: {
 
     return { userId: input.body.userId, emailVerified };
   });
+
+  if (sendEmailsEnabled(input.env) && !result.emailVerified) {
+    await sendRegistrationEmail({
+      env: input.env,
+      toEmail: email,
+      emailVerificationCode,
+    });
+  }
+
+  return result;
 }

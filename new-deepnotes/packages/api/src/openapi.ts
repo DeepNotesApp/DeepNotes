@@ -17,6 +17,8 @@ import {
   userRegisterRequestSchema,
 } from "./schemas/sessions.js";
 import {
+  emailVerificationConfirmRequestSchema,
+  emailVerificationResendRequestSchema,
   userMeResponseSchema,
   userRegisterResponseSchema,
 } from "./schemas/users.js";
@@ -53,6 +55,15 @@ const sessionTooManyRequests429 = {
 
 const sessionConflict409 = {
   description: "Resource already exists (e.g. email already registered).",
+  content: {
+    "application/json": {
+      schema: sessionErrorResponseSchema,
+    },
+  },
+} as const;
+
+const sessionNotFound404 = {
+  description: "Resource not found.",
   content: {
     "application/json": {
       schema: sessionErrorResponseSchema,
@@ -141,6 +152,14 @@ registry.registerPath({
     },
     401: sessionUnauthorized401,
     409: sessionConflict409,
+    502: {
+      description: "Email send failed (e.g. Resend API error after user row was created; rare).",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
     503: sessionServiceUnavailable503,
   },
 });
@@ -162,6 +181,76 @@ registry.registerPath({
     },
     401: sessionUnauthorized401,
     503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/email-verification/resend",
+  summary: "Resend email verification (public, by email)",
+  description:
+    "Replaces legacy `users.account.resendVerificationEmail`. Uses Resend when `SEND_EMAILS` is not `false`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: emailVerificationResendRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Email sent (or accepted by provider).",
+    },
+    400: {
+      description: "Validation error or outbound email disabled for this environment.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    404: sessionNotFound404,
+    409: sessionConflict409,
+    502: {
+      description: "Email provider (Resend) request failed.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/email-verification/confirm",
+  summary: "Confirm email with nanoid code",
+  description: "Replaces legacy `users.account.verifyEmail` (public).",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: emailVerificationConfirmRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Email verified; account updated.",
+    },
+    400: {
+      description: "Invalid or expired code.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
   },
 });
 

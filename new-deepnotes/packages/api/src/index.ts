@@ -23,6 +23,8 @@ export {
   type UserRegisterRequest,
 } from "./schemas/sessions.js";
 export {
+  emailVerificationConfirmRequestSchema,
+  emailVerificationResendRequestSchema,
   userMeResponseSchema,
   userRegisterResponseSchema,
   type UserMeResponse,

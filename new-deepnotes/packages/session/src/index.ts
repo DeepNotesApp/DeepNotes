@@ -14,5 +14,9 @@ export type {
 } from "./start-demo.js";
 export { performUserRegister } from "./register-user.js";
 export type { UserRegisterInput } from "./register-user.js";
+export {
+  performConfirmEmailVerification,
+  performResendEmailVerification,
+} from "./email-verification.js";
 export { getAuthenticatedUserSummary } from "./user-me.js";
 export type { AuthenticatedUserSummary } from "./user-me.js";

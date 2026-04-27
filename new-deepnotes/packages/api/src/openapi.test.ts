@@ -16,5 +16,11 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/sessions/demo"]?.post).toBeDefined();
     expect(doc.paths?.["/api/users/me"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/email-verification/resend"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/email-verification/confirm"]?.post,
+    ).toBeDefined();
   });
 });

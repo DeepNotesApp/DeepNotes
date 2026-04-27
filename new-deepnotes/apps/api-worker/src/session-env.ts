@@ -13,6 +13,10 @@ export type WorkerSessionBindings = {
   EMAIL_CASE_SENSITIVITY_EXCEPTIONS?: string;
   /** When `"false"`, new registrations are email-verified without sending mail (local/CI). */
   SEND_EMAILS?: string;
+  /** Resend.com API key; required when `SEND_EMAILS` is not `false` and email is sent. */
+  RESEND_API_KEY?: string;
+  /** Optional; default `https://deepnotes.app` for verification links. */
+  PUBLIC_APP_URL?: string;
   /** Optional; when set with token, failed-login rate limits use Upstash REST Redis. */
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
@@ -56,5 +60,7 @@ export function getSessionEnv(
     COOKIE_DOMAIN: env.COOKIE_DOMAIN,
     EMAIL_CASE_SENSITIVITY_EXCEPTIONS: env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS,
     SEND_EMAILS: env.SEND_EMAILS,
+    RESEND_API_KEY: env.RESEND_API_KEY,
+    PUBLIC_APP_URL: env.PUBLIC_APP_URL,
   };
 }
