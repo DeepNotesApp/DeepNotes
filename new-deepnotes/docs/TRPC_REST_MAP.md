@@ -27,7 +27,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.account.twoFactorAuth.disable` | `POST /api/users/me/2fa/disable` |
 | `users.account.stripe.createCheckoutSession` | `POST /api/billing/stripe/checkout-session` |
 | `users.account.stripe.createPortalSession` | `POST /api/billing/stripe/portal-session` |
-| `users.account.delete` | `DELETE /api/users/me` |
+| `users.account.delete` | `DELETE /api/users/me` (JSON body `{ "loginHash" }` base64; clears cookies on 204; optional `deleteStripeCustomer` in worker when billing is wired) |
 
 ## Users — pages (`users.pages`)
 

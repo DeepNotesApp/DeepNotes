@@ -19,6 +19,7 @@ import {
 import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
+  userAccountDeleteRequestSchema,
   userMeResponseSchema,
   userRegisterResponseSchema,
 } from "./schemas/users.js";
@@ -180,6 +181,40 @@ registry.registerPath({
       },
     },
     401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/users/me",
+  summary: "Delete current account (password confirmation)",
+  description:
+    "Replaces legacy `users.account.delete`. Requires `accessToken` cookie and correct `loginHash` in the JSON body. Clears session cookies on success. Optional Stripe customer deletion is handled by the deployment (not part of OpenAPI).",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userAccountDeleteRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description:
+        "Account removed; session cookies cleared (same names as login).",
+    },
+    400: {
+      description: "Wrong password, ownership constraint, or validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },
 });

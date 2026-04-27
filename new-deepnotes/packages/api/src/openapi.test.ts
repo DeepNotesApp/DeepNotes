@@ -22,5 +22,6 @@ describe("getOpenApiDocument", () => {
     expect(
       doc.paths?.["/api/users/email-verification/confirm"]?.post,
     ).toBeDefined();
+    expect(doc.paths?.["/api/users/me"]?.delete).toBeDefined();
   });
 });

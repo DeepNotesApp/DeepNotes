@@ -39,3 +39,21 @@ export const emailVerificationConfirmRequestSchema = z
     emailVerificationCode: nanoidVerificationCode,
   })
   .openapi("EmailVerificationConfirmRequest");
+
+/** Body for `DELETE /api/users/me` (replaces legacy `users.account.delete` input). */
+export const userAccountDeleteRequestSchema = z
+  .object({
+    loginHash: z
+      .string()
+      .min(1)
+      .openapi({
+        format: "byte",
+        description:
+          "Base64-encoded login hash (same semantics as `POST /api/sessions/login`).",
+      }),
+  })
+  .openapi("UserAccountDeleteRequest");
+
+export type UserAccountDeleteRequest = z.infer<
+  typeof userAccountDeleteRequestSchema
+>;

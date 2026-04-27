@@ -12,9 +12,9 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 |-------|--------|--------|
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
-| **2** — Repo bootstrap | **Mostly done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). Optional: Wrangler deploy job. **Gap:** `apps/web` tests still no-op—see Phase 2 checklist + [Frontend / UI track](#frontend--ui-track). |
-| **3** — REST + Drizzle features | **In progress** | Auth + registration + **email resend/confirm** (Resend) below; optional **Upstash** for login rate limits. **Next (Phase 3):** pages/groups CRUD, realtime/collab, **Stripe** webhook, then Phase 2 gap (**real `apps/web` tests** in parallel is OK). |
-| **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, Vitest+DOM in CI, small E2E smoke—see [Frontend / UI track](#frontend--ui-track) (not deferred to “when MVP is done”). |
+| **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
+| **3** — REST + Drizzle features | **In progress** | Sessions, register, email verify/resend/confirm, **`DELETE /api/users/me`** (`performUserAccountDelete`: password + sole-owner guard, Drizzle tx; Stripe customer hook optional on worker). **Next:** `POST /api/users/me/password`, email-change + confirm, 2FA routes, pages/groups CRUD, realtime/collab, Stripe webhook. |
+| **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
 ---
@@ -43,19 +43,23 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
   - [x] `POST /api/users/email-verification/resend` — public, `{ "email" }` (legacy `resendVerificationEmail`); 204 / 400 / 404 / 409 / 502 / 503; [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) updated (paths are **not** under `/me/`; legacy was never cookie-based).
   - [x] `POST /api/users/email-verification/confirm` — public, `{ "emailVerificationCode" }` (nanoid, legacy `verifyEmail`); 204 / 400; DB update copies `encrypted_new_email` → `encrypted_email`.
   - [x] `sendRegistrationEmail` + optional **`RESEND_API_KEY`**, optional **`PUBLIC_APP_URL`** in `SessionEnv` / [template.env](./template.env); duplicate unverified registration re-sends via same helper (401 “New email sent”).
+- [x] **`DELETE /api/users/me`** — replaces legacy `users.account.delete`: JSON `{ "loginHash" }` (base64); verifies access JWT + password (`encrypted_rehashed_login_hash`); blocks when any membership has `member_count > 1` and `owner_count <= 1`; deletes join invites/requests, solo-member groups (cascade pages), remaining `group_members`, then user row; clears session cookies; optional `deleteStripeCustomer(customerId)` hook (worker can wire Stripe later; failures swallowed like legacy).
 
 ### Not started (Phase 3 remainder)
 
-- [ ] **Account (remaining tRPC):** `POST /api/users/me/email-change` (+ confirm), 2FA enable/load/disable/recovery routes from [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md), `DELETE /api/users/me`, password change (see map + legacy WS).
+- [ ] **Account (remaining tRPC / WS parity):**
+  - [ ] `POST /api/users/me/email-change` + `POST /api/users/me/email-change/confirm` (WS finish → REST).
+  - [ ] 2FA: `POST …/2fa/enable/request|finish`, `GET …/2fa`, `POST …/2fa/recovery-codes`, `POST …/2fa/devices/forget`, `POST …/2fa/disable` (see [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md)).
+  - [ ] `POST /api/users/me/password` (legacy WS `change-password` → REST).
 - [ ] **Pages** (user prefs + CRUD) and **groups** CRUD / privacy / passwords per map.
 - [ ] **Realtime / collab** (new or adapted protocols; no key rotation).
-- [ ] **Stripe:** `POST /api/webhooks/stripe`, checkout/portal (no RevenueCat).
+- [ ] **Stripe:** `POST /api/webhooks/stripe`, checkout/portal (no RevenueCat); wire **`deleteStripeCustomer`** from account delete when keys exist.
 
 ---
 
 ## Phase 4 checklist (client MVP)
 
-- [ ] **Tooling:** Vitest + `jsdom` or `happy-dom` + `@vue/test-utils`; `@vitejs/plugin-vue` in Vitest config (same as [Frontend / UI track](#frontend--ui-track)).
+- [x] **Tooling (bootstrap):** Vitest + **happy-dom** + `@vue/test-utils` in `@deepnotes/web` (minimal `App` test); same Vite 6 pipeline via `vitest/config` `defineConfig` (RESTART_PLAN §5.8).
 - [ ] **API client:** consume **OpenAPI** (generated types + `fetch`, or hey-api) from `@deepnotes/api` / published spec—**no** workspace dependency on Worker or DB packages from web source.
 - [ ] **Routing + auth UI:** login / refresh / logout / 2FA flows aligned with [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md); composable or component tests + **E2E smoke** for cookie session.
 - [ ] **Pages:** list → open editor shell → integrate **Yjs** / collab when API is ready.
@@ -72,7 +76,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] Document **Pages** / preview vs production env vars; optional deploy job to CF preview → [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md).
 - [x] CI: lint, typecheck, tests, `drizzle-kit check`, build (Postgres service present for future migrate/tests).
 - [x] CI: Postgres role with **CREATEDB** + **template DB** integration tests (RESTART_PLAN §5.7) — `DATABASE_ADMIN_URL` + `src/template-db.test.ts`.
-- [ ] **Web package tests are real:** `apps/web` currently uses a **no-op** `test` script; replace with **Vitest** + `jsdom` or `happy-dom` + `@vue/test-utils` and wire into root `pnpm test` / CI (RESTART_PLAN §5.8).
+- [x] **Web package tests are real:** `@deepnotes/web` runs `vitest run` with happy-dom; `src/app.test.ts` mounts `App.vue` (RESTART_PLAN §5.8).
 
 ---
 
@@ -88,7 +92,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ### Testing (see RESTART_PLAN §5.8)
 
-- [ ] **Vitest** in `apps/web` with DOM environment and `@vitejs/plugin-vue` aligned with Vite 6.
+- [x] **Vitest** in `apps/web` with DOM environment (`happy-dom`) and `@vue/test-utils` aligned with Vite 6.
 - [ ] **Component or composable tests** for the first **auth** / session flows (forms, validation, error mapping from API).
 - [ ] **Contract tests** for the fetch wrapper (MSW or recorded OpenAPI fixtures)—optional until multiple features consume the API.
 - [ ] **E2E smoke** (Playwright recommended): login or session refresh with **httpOnly cookies** against **local compose** or **Cloudflare preview**—add CI job when stable enough (can start `manual`/`workflow_dispatch` if cost is a concern).
@@ -97,9 +101,9 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Legacy (`apps/client`) | New (`new-deepnotes/apps/web`) |
 |------------------------|--------------------------------|
-| Quasar + Vite 2, 4GB heap builds | Vite 6 + Vue 3.5, minimal app shell today |
+| Quasar + Vite 2, 4GB heap builds | Vite 6 + Vue 3.5, Vitest + happy-dom in CI |
 | Imports `AppRouter`, server websocket paths | Must use **OpenAPI** + documented WS only |
-| No automated UI tests | **To do:** real `test` script + CI |
+| No automated UI tests | **Done:** real `test` script + one component test |
 
 ---
 
@@ -114,7 +118,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [x] No tRPC / superjson / RevenueCat / key-rotation in **this** tree (keep absent); product sign-off for IAP/Stripe when billing ships.
 - [x] Client: zero undocumented forks, or a short owned exception list — see [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
 - [ ] Cloudflare: deploy runbook; Hyperdrive + Postgres + Redis proven in staging; collab/realtime topology chosen and load-tested.
-- [ ] Web: Vitest + DOM env in CI; no server/db imports from web source; E2E smoke for session cookies (RESTART_PLAN §8 extended items).
+- [x] Web: Vitest + DOM env in CI (happy-dom + `@vue/test-utils` on `App.vue`).
+- [ ] Web: enforce **no** server/db imports from web source (ESLint `import/no-restricted-paths` or README when features land); **E2E** smoke for session cookies (RESTART_PLAN §8).
 
 ---
 
@@ -122,6 +127,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | Phase 2 + §5.8: `@deepnotes/web` — Vitest + happy-dom + `@vue/test-utils`, `vite.config` from `vitest/config`, `src/app.test.ts`; Phase 3: `DELETE /api/users/me` + `performUserAccountDelete` (ownership guard, Drizzle tx, clear cookies); `userAccountDeleteRequestSchema` + OpenAPI; api-worker route; TRPC_REST_MAP note on delete body / Stripe hook. |
 | 2026-04-26 | Phase 3: email verification `POST /api/users/email-verification/resend` and `…/confirm`; `performResendEmailVerification` / `performConfirmEmailVerification`; Resend in `sendRegistrationEmail`; `RESEND_API_KEY` + `PUBLIC_APP_URL`; first mail on register + re-send on duplicate unverified; OpenAPI 502 on register if provider fails; `c.env?.HYPERDRIVE` on confirm for Vitest. |
 | 2026-04-26 | Phase 3: **`POST /api/users`** (`performUserRegister`), `encryptUserRehashedLoginHash`, `addHours`, OpenAPI 201/400/401/409; optional **`SEND_EMAILS`** on session env (auto-verify when `false`); group password on register still rejected (same as demo). |
 | 2026-04-26 | Phase 3: `POST /api/sessions/demo` (`performSessionStartDemo`), `GET /api/users/me`, Redis failed-login limits (`SessionRedisPort` + optional Upstash), `USER_EMAIL_ENCRYPTION_KEY` on `SessionEnv`; OpenAPI 200/400 for demo, 429 for login, `userMeResponseSchema`; Vitest `login-rate-limit.test.ts`. |

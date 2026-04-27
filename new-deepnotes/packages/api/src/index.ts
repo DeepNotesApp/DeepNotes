@@ -25,8 +25,10 @@ export {
 export {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
+  userAccountDeleteRequestSchema,
   userMeResponseSchema,
   userRegisterResponseSchema,
+  type UserAccountDeleteRequest,
   type UserMeResponse,
   type UserRegisterResponse,
 } from "./schemas/users.js";
