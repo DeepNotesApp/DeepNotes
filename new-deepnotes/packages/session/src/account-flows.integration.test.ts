@@ -21,6 +21,7 @@ import {
 import * as schema from "@deepnotes/db/schema";
 import {
   devices,
+  groupJoinInvitations,
   groupMembers,
   groups,
   notifications,
@@ -59,6 +60,14 @@ import {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
 } from "./group-main-and-members.js";
+import {
+  performGroupJoinInvitationSend,
+  performGroupJoinInvitationAccept,
+  performGroupJoinRequestAccept,
+  performGroupJoinRequestSend,
+  performGroupMemberRemove,
+  performGroupMemberRoleChange,
+} from "./group-membership.js";
 import {
   performGroupPasswordChange,
   performGroupPasswordDisable,
@@ -1462,6 +1471,195 @@ describe.skipIf(resolveTemplateContext() == null)(
           accessCookie: access,
         });
         expect(groupIds.sort()).toEqual([reg.groupId, newGroupId].sort());
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("groups: join invitation, role change, remove; join request accept", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const loginA = rand32();
+        const loginB = rand32();
+        const regA = await buildRegisterBody(`a-${nanoid()}@example.com`, loginA);
+        const regB = await buildRegisterBody(`b-${nanoid()}@example.com`, loginB);
+        await performUserRegister({ db, env, body: regA });
+        await performUserRegister({ db, env, body: regB });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, regA.userId));
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, regB.userId));
+
+        const accessA = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: regA.userId,
+          sessionId: nanoid(),
+        });
+        const accessB = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: regB.userId,
+          sessionId: nanoid(),
+        });
+
+        const sharedGroupId = nanoid();
+        const sharedPageId = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+          body: {
+            parentPageId: regA.pageId,
+            pageId: sharedPageId,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+            groupCreation: {
+              groupEncryptedName: rand32(),
+              groupIsPublic: true,
+              groupAccessKeyring: rand32(),
+              groupEncryptedInternalKeyring: rand32(),
+              groupEncryptedContentKeyring: rand32(),
+              groupPublicKeyring: rand32(),
+              groupEncryptedPrivateKeyring: rand32(),
+              groupOwnerEncryptedName: rand32(),
+            },
+          },
+        });
+
+        const encInt = rand32();
+        const nm = rand32();
+        const nmUser = rand32();
+        await performGroupJoinInvitationSend({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+          inviteeUserId: regB.userId,
+          invitationRole: "member",
+          encryptedInternalKeyring: encInt,
+          userEncryptedName: nm,
+          userEncryptedNameForUser: nmUser,
+        });
+
+        const [invRow] = await db
+          .select({ role: groupJoinInvitations.role })
+          .from(groupJoinInvitations)
+          .where(
+            and(
+              eq(groupJoinInvitations.groupId, sharedGroupId),
+              eq(groupJoinInvitations.userId, regB.userId),
+            ),
+          );
+        expect(invRow?.role).toBe("member");
+
+        const acceptName = rand32();
+        await performGroupJoinInvitationAccept({
+          db,
+          env,
+          accessCookie: accessB,
+          groupId: sharedGroupId,
+          userEncryptedName: acceptName,
+        });
+
+        const [memAfter] = await db
+          .select({ role: groupMembers.role })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, sharedGroupId),
+              eq(groupMembers.userId, regB.userId),
+            ),
+          );
+        expect(memAfter?.role).toBe("member");
+
+        await performGroupMemberRoleChange({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+          targetUserId: regB.userId,
+          requestedRole: "moderator",
+        });
+        const [memMod] = await db
+          .select({ role: groupMembers.role })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, sharedGroupId),
+              eq(groupMembers.userId, regB.userId),
+            ),
+          );
+        expect(memMod?.role).toBe("moderator");
+
+        await performGroupMemberRemove({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+          targetUserId: regB.userId,
+        });
+        const [gone] = await db
+          .select({ userId: groupMembers.userId })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, sharedGroupId),
+              eq(groupMembers.userId, regB.userId),
+            ),
+          );
+        expect(gone).toBeUndefined();
+
+        await performGroupJoinRequestSend({
+          db,
+          env,
+          accessCookie: accessB,
+          groupId: sharedGroupId,
+          encryptedUserName: rand32(),
+          encryptedUserNameForUser: rand32(),
+        });
+
+        await performGroupJoinRequestAccept({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+          requesterUserId: regB.userId,
+          targetRole: "viewer",
+          encryptedInternalKeyring: rand32(),
+        });
+
+        const [memJr] = await db
+          .select({ role: groupMembers.role })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, sharedGroupId),
+              eq(groupMembers.userId, regB.userId),
+            ),
+          );
+        expect(memJr?.role).toBe("viewer");
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

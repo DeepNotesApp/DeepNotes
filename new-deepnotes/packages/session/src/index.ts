@@ -93,3 +93,15 @@ export type {
   PageMoveGroupCreation,
   PageMoveReencrypt,
 } from "./page-move.js";
+export {
+  performGroupJoinInvitationAccept,
+  performGroupJoinInvitationCancel,
+  performGroupJoinInvitationReject,
+  performGroupJoinInvitationSend,
+  performGroupJoinRequestAccept,
+  performGroupJoinRequestCancel,
+  performGroupJoinRequestReject,
+  performGroupJoinRequestSend,
+  performGroupMemberRemove,
+  performGroupMemberRoleChange,
+} from "./group-membership.js";

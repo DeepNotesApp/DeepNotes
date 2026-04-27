@@ -88,6 +88,43 @@ describe("api-worker", () => {
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/restore",
     ],
     ["POST", "/api/groups/aaaaaaaaaaaaaaaaaaaaa/purge"],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-invitations",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-invitations/me/accept",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-invitations/me/reject",
+    ],
+    [
+      "DELETE",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-invitations/bbbbbbbbbbbbbbbbbbbbb",
+    ],
+    ["POST", "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-requests"],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-requests/me/cancel",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-requests/bbbbbbbbbbbbbbbbbbbbb/accept",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/join-requests/bbbbbbbbbbbbbbbbbbbbb/reject",
+    ],
+    [
+      "PATCH",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/members/bbbbbbbbbbbbbbbbbbbbb",
+    ],
+    [
+      "DELETE",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/members/bbbbbbbbbbbbbbbbbbbbb",
+    ],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/move"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/bump"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/backlinks"],

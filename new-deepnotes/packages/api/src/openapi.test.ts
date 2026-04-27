@@ -75,6 +75,34 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/groups/{groupId}"]?.delete).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/restore"]?.post).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/purge"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-invitations"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-invitations/me/accept"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-invitations/me/reject"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-invitations/{userId}"]?.delete,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/join-requests"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-requests/me/cancel"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-requests/{userId}/accept"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/join-requests/{userId}/reject"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/members/{userId}"]?.patch,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/members/{userId}"]?.delete,
+    ).toBeDefined();
     expect(doc.paths?.["/api/pages/{pageId}/move"]?.post).toBeDefined();
     expect(doc.paths?.["/api/pages/{pageId}/bump"]?.post).toBeDefined();
     expect(

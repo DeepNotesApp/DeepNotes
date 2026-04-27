@@ -27,9 +27,15 @@ import {
   groupPasswordChangeRequestSchema,
   groupPasswordDisableRequestSchema,
   groupPasswordEnableRequestSchema,
+  groupJoinInvitationAcceptRequestSchema,
+  groupJoinInvitationSendRequestSchema,
+  groupJoinRequestAcceptRequestSchema,
+  groupJoinRequestSendRequestSchema,
+  groupMemberRolePatchRequestSchema,
   groupPrivacyJoinRequestsPatchSchema,
   groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
+  groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
   pageMoveRequestSchema,
@@ -876,6 +882,253 @@ registry.registerPath({
     204: { description: "Purge recorded." },
     400: {
       description: "Already purged.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-invitations",
+  summary: "Send a group join invitation (Pro)",
+  description:
+    "Replaces legacy WS `groups.joinInvitations.send` step 1. Deletes a conflicting join request for the invitee. For private groups, `encryptedAccessKeyring` is required; for public groups it is stored as null.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupJoinInvitationSendRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Invitation created." },
+    400: {
+      description: "Already invited, already a member, or missing keyring for private group.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-invitations/me/accept",
+  summary: "Accept a pending join invitation (Pro)",
+  description: "Replaces legacy WS `groups.joinInvitations.accept` step 1.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupJoinInvitationAcceptRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Invitation consumed; user added to `group_members`." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-invitations/me/reject",
+  summary: "Reject a pending join invitation",
+  description: "Replaces legacy WS `groups.joinInvitations.reject` step 1 (no Pro check in legacy).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    204: { description: "Invitation removed." },
+    400: {
+      description: "No pending invitation.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/groups/{groupId}/join-invitations/{userId}",
+  summary: "Cancel a join invitation (Pro)",
+  description:
+    "Replaces legacy WS `groups.joinInvitations.cancel` step 1. Path `userId` is the invitee. Requires permission to manage the invited role.",
+  request: { params: groupUserIdPathSchema },
+  responses: {
+    204: { description: "Invitation removed." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-requests",
+  summary: "Send a join request (Pro)",
+  description:
+    "Replaces legacy WS `groups.joinRequests.send` step 1. Requires `are_join_requests_allowed` on the group.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupJoinRequestSendRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Join request created." },
+    400: {
+      description: "Already pending.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-requests/{userId}/accept",
+  summary: "Accept a join request (Pro)",
+  description: "Replaces legacy WS `groups.joinRequests.accept` step 1. Path `userId` is the requester.",
+  request: {
+    params: groupUserIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupJoinRequestAcceptRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Requester added to `group_members`." },
+    400: {
+      description: "No pending request or missing access keyring for private group.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-requests/{userId}/reject",
+  summary: "Reject a join request (Pro)",
+  description:
+    "Replaces legacy WS `groups.joinRequests.reject` step 1. Sets `rejected` on the request (legacy does not delete the row).",
+  request: { params: groupUserIdPathSchema },
+  responses: {
+    204: { description: "Request marked rejected." },
+    400: {
+      description: "No pending request.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/join-requests/me/cancel",
+  summary: "Cancel own join request (Pro)",
+  description: "Replaces legacy WS `groups.joinRequests.cancel` step 1.",
+  request: { params: groupIdPathSchema },
+  responses: {
+    204: { description: "Join request row deleted." },
+    400: {
+      description: "No pending request.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/groups/{groupId}/members/{userId}",
+  summary: "Change a member's role (Pro)",
+  description: "Replaces legacy WS `groups.changeUserRole` step 1.",
+  request: {
+    params: groupUserIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupMemberRolePatchRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "`group_members.role` updated." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/groups/{groupId}/members/{userId}",
+  summary: "Remove a member (or leave)",
+  description:
+    "Replaces legacy WS `groups.removeUser` step 1. Callers may remove themselves without `canManageRole` on others.",
+  request: { params: groupUserIdPathSchema },
+  responses: {
+    204: { description: "Membership removed." },
+    400: {
+      description: "Cannot remove the last owner.",
       content: {
         "application/json": { schema: sessionErrorResponseSchema },
       },

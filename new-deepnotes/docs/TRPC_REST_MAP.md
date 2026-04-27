@@ -83,10 +83,16 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy handler | New surface | Notes |
 |----------------|-------------|--------|
-| `websocket/groups/join-invitations/*` | `WS /api/ws/groups/...` or REST for low-frequency | send / accept / reject / cancel |
-| `websocket/groups/join-requests/*` | same | send / accept / reject / cancel |
-| `websocket/groups/change-user-role` | `PATCH /api/groups/:groupId/members/:userId` | prefer REST if acceptable |
-| `websocket/groups/remove-user` | `DELETE /api/groups/:groupId/members/:userId` | |
+| `websocket/groups/join-invitations/send` | `POST /api/groups/:groupId/join-invitations` (**implemented** — `performGroupJoinInvitationSend`; Pro; public groups omit `encryptedAccessKeyring`) | |
+| `websocket/groups/join-invitations/accept` | `POST /api/groups/:groupId/join-invitations/me/accept` (**implemented** — `performGroupJoinInvitationAccept`) | |
+| `websocket/groups/join-invitations/reject` | `POST /api/groups/:groupId/join-invitations/me/reject` (**implemented** — `performGroupJoinInvitationReject`; no Pro in legacy) | |
+| `websocket/groups/join-invitations/cancel` | `DELETE /api/groups/:groupId/join-invitations/:userId` (**implemented** — `performGroupJoinInvitationCancel`; path `userId` = invitee) | |
+| `websocket/groups/join-requests/send` | `POST /api/groups/:groupId/join-requests` (**implemented** — `performGroupJoinRequestSend`; requires `are_join_requests_allowed`) | |
+| `websocket/groups/join-requests/accept` | `POST /api/groups/:groupId/join-requests/:userId/accept` (**implemented** — `performGroupJoinRequestAccept`) | |
+| `websocket/groups/join-requests/reject` | `POST /api/groups/:groupId/join-requests/:userId/reject` (**implemented** — `performGroupJoinRequestReject`; sets `rejected`) | |
+| `websocket/groups/join-requests/cancel` | `POST /api/groups/:groupId/join-requests/me/cancel` (**implemented** — `performGroupJoinRequestCancel`) | |
+| `websocket/groups/change-user-role` | `PATCH /api/groups/:groupId/members/:userId` (**implemented** — `performGroupMemberRoleChange`) | |
+| `websocket/groups/remove-user` | `DELETE /api/groups/:groupId/members/:userId` (**implemented** — `performGroupMemberRemove`; self-remove allowed) | |
 | `websocket/groups/privacy/make-private` | `POST /api/groups/:groupId/privacy/private` | **implemented** — see `groups.privacy.makePrivate` row above |
 | `websocket/groups/rotate-keys` | — | **removed** per RESTART_PLAN |
 | `websocket/pages/move` | `POST /api/pages/:pageId/move` (**implemented** — `pageMoveRequestSchema`; `performPageMove`: Pro, optional `groupCreation`, `reencrypt` when changing group) | |

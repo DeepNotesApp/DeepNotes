@@ -188,6 +188,63 @@ export type GroupPrivacyPrivateRequest = z.infer<
   typeof groupPrivacyPrivateRequestSchema
 >;
 
+export const groupMemberRoleSchema = z
+  .enum(["owner", "admin", "moderator", "member", "viewer"])
+  .openapi("GroupMemberRole");
+
+export const groupJoinInvitationSendRequestSchema = z
+  .object({
+    inviteeUserId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{21}$/)
+      .openapi(nanoidIdOpenapi),
+    invitationRole: groupMemberRoleSchema,
+    /** Required when the group is private (`access_keyring` is null). Omitted / ignored for public groups. */
+    encryptedAccessKeyring: byteB64.optional(),
+    encryptedInternalKeyring: byteB64,
+    userEncryptedName: byteB64,
+    userEncryptedNameForUser: byteB64,
+  })
+  .openapi("GroupJoinInvitationSendRequest");
+
+export const groupJoinInvitationAcceptRequestSchema = z
+  .object({
+    userEncryptedName: byteB64,
+  })
+  .openapi("GroupJoinInvitationAcceptRequest");
+
+export const groupJoinRequestSendRequestSchema = z
+  .object({
+    encryptedUserName: byteB64,
+    encryptedUserNameForUser: byteB64,
+  })
+  .openapi("GroupJoinRequestSendRequest");
+
+export const groupJoinRequestAcceptRequestSchema = z
+  .object({
+    targetRole: groupMemberRoleSchema,
+    encryptedAccessKeyring: byteB64.optional(),
+    encryptedInternalKeyring: byteB64,
+  })
+  .openapi("GroupJoinRequestAcceptRequest");
+
+export const groupMemberRolePatchRequestSchema = z
+  .object({
+    role: groupMemberRoleSchema,
+  })
+  .openapi("GroupMemberRolePatchRequest");
+
+export const groupUserIdPathSchema = z.object({
+  groupId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "groupId", in: "path" } }),
+  userId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "userId", in: "path" } }),
+});
+
 export const pageIdPathSchema = z.object({
   pageId: z
     .string()
