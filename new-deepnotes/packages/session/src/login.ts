@@ -3,7 +3,7 @@ import { and, eq, gt, or } from "drizzle-orm";
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
-} from "@stdlib/crypto";
+} from "./crypto/index.js";
 import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 

@@ -19,8 +19,6 @@
   },
   "pnpm": {
     "overrides": {
-      "@stdlib/base64": "link:../packages/@stdlib/base64",
-      "@stdlib/misc": "link:../packages/@stdlib/misc",
       "libsodium-wrappers-sumo": "^0.8.0"
     }
   },

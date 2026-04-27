@@ -1,13 +1,13 @@
-import { base64ToBytes } from "@stdlib/base64";
-import {
-  cryptoJsWordArrayToUint8Array,
-  getPasswordHashValues,
-  wrapSymmetricKey,
-} from "@stdlib/crypto";
-import { bytesToText, concatUint8Arrays } from "@stdlib/misc";
 import CryptoJS from "crypto-js";
 import sodium from "libsodium-wrappers-sumo";
 import { pack, unpack } from "msgpackr";
+import {
+  base64ToBytes,
+  bytesToText,
+  concatUint8Arrays,
+} from "./crypto/bytes.js";
+import { cryptoJsWordArrayToUint8Array } from "./crypto/crypto-js-wordarray.js";
+import { wrapSymmetricKey } from "./crypto/symmetric-key.js";
 
 export async function ensureSodiumReady(): Promise<void> {
   await sodium.ready;
@@ -49,7 +49,7 @@ export function decryptUserRehashedLoginHash(
   );
 }
 
-export { getPasswordHashValues };
+export { getPasswordHashValues } from "./crypto/password-hashing.js";
 
 export function decryptUserAuthenticatorSecret(
   userEncryptedAuthenticatorSecret: Uint8Array,

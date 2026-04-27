@@ -16,9 +16,6 @@
   },
   "dependencies": {
     "@deepnotes/db": "workspace:*",
-    "@stdlib/base64": "link:../../../packages/@stdlib/base64",
-    "@stdlib/crypto": "link:../../../packages/@stdlib/crypto",
-    "@stdlib/misc": "link:../../../packages/@stdlib/misc",
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.41.0",
     "jose": "^5.10.0",

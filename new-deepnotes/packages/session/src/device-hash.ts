@@ -1,4 +1,4 @@
-import { nanoidToBytes } from "@stdlib/misc";
+import { nanoidToBytes } from "./crypto/nanoid-bytes.js";
 import sodium from "libsodium-wrappers-sumo";
 
 export function getDeviceHash(input: {
