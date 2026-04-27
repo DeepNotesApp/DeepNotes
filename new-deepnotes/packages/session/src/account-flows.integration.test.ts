@@ -25,6 +25,8 @@ import {
   performUserEmailChangeConfirm,
   performUserEmailChangeRequest,
 } from "./change-user-email.js";
+import { performSessionLogin } from "./login.js";
+import { performSessionRefresh } from "./refresh.js";
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
@@ -67,6 +69,22 @@ function rand32(): Uint8Array {
   return sodium.randombytes_buf(32);
 }
 
+/** First `name=value` segment from `Set-Cookie` lines (values are URI-encoded). */
+function cookieValueFromSetCookieLines(
+  lines: string[],
+  name: string,
+): string | undefined {
+  const prefix = `${name}=`;
+  for (const line of lines) {
+    if (!line.startsWith(prefix)) continue;
+    const rest = line.slice(prefix.length);
+    const semi = rest.indexOf(";");
+    const raw = (semi === -1 ? rest : rest.slice(0, semi)).trim();
+    return decodeURIComponent(raw);
+  }
+  return undefined;
+}
+
 async function buildRegisterBody(
   email: string,
   loginHash: Uint8Array,
@@ -106,7 +124,7 @@ async function buildRegisterBody(
 }
 
 describe.skipIf(resolveTemplateContext() == null)(
-  "account flows: email + password (Postgres template DB)",
+  "account flows + sessions: Postgres template DB",
   () => {
     const baseCtx = resolveTemplateContext()!;
     const ctx: TemplateDbContext = {
@@ -520,6 +538,215 @@ describe.skipIf(resolveTemplateContext() == null)(
             newEncryptedSymmetricKeyring: rand32(),
           }),
         ).rejects.toMatchObject({ status: 400, code: "BAD_REQUEST" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("login creates session row; refresh rotates encryption key and refresh code", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const clientIp = "203.0.113.50";
+      const userAgent = "integration-test/1";
+      try {
+        const email = `l-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+
+        const loginOut = await performSessionLogin({
+          db,
+          env,
+          body: {
+            email,
+            loginHash,
+            rememberSession: false,
+          },
+          clientIp,
+          userAgent,
+        });
+        const sessionId = loginOut.json.sessionId;
+        expect(typeof sessionId).toBe("string");
+
+        const [before] = await db
+          .select({
+            refreshCode: sessions.refreshCode,
+            encryptionKey: sessions.encryptionKey,
+          })
+          .from(sessions)
+          .where(eq(sessions.id, sessionId as string));
+        expect(before).toBeDefined();
+
+        const refresh1 = cookieValueFromSetCookieLines(
+          loginOut.cookieLines,
+          "refreshToken",
+        );
+        const loggedIn1 = cookieValueFromSetCookieLines(
+          loginOut.cookieLines,
+          "loggedIn",
+        );
+        expect(refresh1).toBeDefined();
+        expect(loggedIn1).toBe("true");
+
+        const refreshOut = await performSessionRefresh({
+          db,
+          env,
+          refreshCookie: refresh1,
+          loggedInCookie: loggedIn1,
+        });
+
+        const oldKeyB64 = refreshOut.json.oldSessionKey;
+        const newKeyB64 = refreshOut.json.newSessionKey;
+        expect(typeof oldKeyB64).toBe("string");
+        expect(typeof newKeyB64).toBe("string");
+        expect(
+          Buffer.from(oldKeyB64 as string, "base64").equals(
+            new Uint8Array(before!.encryptionKey),
+          ),
+        ).toBe(true);
+
+        const [after] = await db
+          .select({
+            refreshCode: sessions.refreshCode,
+            encryptionKey: sessions.encryptionKey,
+          })
+          .from(sessions)
+          .where(eq(sessions.id, sessionId as string));
+        expect(after!.refreshCode).not.toBe(before!.refreshCode);
+        expect(
+          Buffer.from(newKeyB64 as string, "base64").equals(
+            new Uint8Array(after!.encryptionKey),
+          ),
+        ).toBe(true);
+
+        const refresh2 = cookieValueFromSetCookieLines(
+          refreshOut.cookieLines,
+          "refreshToken",
+        );
+        const loggedIn2 = cookieValueFromSetCookieLines(
+          refreshOut.cookieLines,
+          "loggedIn",
+        );
+        const refreshOut2 = await performSessionRefresh({
+          db,
+          env,
+          refreshCookie: refresh2,
+          loggedInCookie: loggedIn2,
+        });
+        expect(typeof refreshOut2.json.newSessionKey).toBe("string");
+        const [after2] = await db
+          .select({ encryptionKey: sessions.encryptionKey })
+          .from(sessions)
+          .where(eq(sessions.id, sessionId as string));
+        expect(
+          Buffer.from(refreshOut2.json.newSessionKey as string, "base64").equals(
+            new Uint8Array(after2!.encryptionKey),
+          ),
+        ).toBe(true);
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("login rejects wrong password", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `m-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await expect(
+          performSessionLogin({
+            db,
+            env,
+            body: {
+              email,
+              loginHash: rand32(),
+              rememberSession: false,
+            },
+            clientIp: "198.51.100.1",
+            userAgent: "integration-test/2",
+          }),
+        ).rejects.toMatchObject({ status: 401, code: "UNAUTHORIZED" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("password change rejects demo-flagged user", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `d-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db.update(users).set({ demo: true }).where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        await expect(
+          performUserPasswordChange({
+            db,
+            env,
+            accessCookie: access,
+            oldLoginHash: loginHash,
+            newLoginHash: rand32(),
+            newEncryptedPrivateKeyring: rand32(),
+            newEncryptedSymmetricKeyring: rand32(),
+          }),
+        ).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });
