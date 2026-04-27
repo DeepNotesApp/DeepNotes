@@ -37,6 +37,14 @@ export {
   groupPrivacyJoinRequestsPatchSchema,
   groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
+  pageBacklinkCreateRequestSchema,
+  pageBumpRequestSchema,
+  pageIdPathSchema,
+  pageSnapshotCreateResponseSchema,
+  pageSnapshotLoadResponseSchema,
+  pageSnapshotPathSchema,
+  pageSnapshotSaveRequestSchema,
+  pageTargetPagePathSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 export type { GroupPrivacyPrivateRequest } from "./schemas/pages-groups.js";

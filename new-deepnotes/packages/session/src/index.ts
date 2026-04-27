@@ -74,3 +74,14 @@ export {
   performGroupPrivacySetJoinRequestsAllowed,
 } from "./group-privacy.js";
 export type { GroupPrivacyPrivatePayload } from "./group-privacy.js";
+export {
+  performPageBacklinkCreate,
+  performPageBacklinkDelete,
+  performPageBump,
+  performPagePurge,
+  performPageRestore,
+  performPageSnapshotDelete,
+  performPageSnapshotLoad,
+  performPageSnapshotSave,
+  performPageSoftDelete,
+} from "./page-operations.js";

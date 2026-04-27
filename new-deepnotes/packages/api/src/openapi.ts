@@ -30,6 +30,14 @@ import {
   groupPrivacyJoinRequestsPatchSchema,
   groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
+  pageBacklinkCreateRequestSchema,
+  pageBumpRequestSchema,
+  pageIdPathSchema,
+  pageSnapshotCreateResponseSchema,
+  pageSnapshotLoadResponseSchema,
+  pageSnapshotPathSchema,
+  pageSnapshotSaveRequestSchema,
+  pageTargetPagePathSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 import {
@@ -870,6 +878,195 @@ registry.registerPath({
       content: {
         "application/json": { schema: sessionErrorResponseSchema },
       },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/bump",
+  summary: "Bump page (recents, activity, optional breadcrumb parent)",
+  description: "Replaces `pages.bump` — `users` starting + recents, optional `users_pages.last_parent_id` when the parent chain ends at the personal main page (`lastParentId` walk).",
+  request: {
+    params: pageIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: pageBumpRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Bumped (best-effort; loop in chain exits without updating parent)." },
+    400: {
+      description: "Invalid parent (chain does not resolve to main page).",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/backlinks",
+  summary: "Create page backlink (source → this page as target)",
+  description:
+    "Replaces `pages.backlinks.create`. Path `pageId` is the **target**; body has `sourcePageId`.",
+  request: {
+    params: pageIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: pageBacklinkCreateRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Backlink created or activity updated (upsert)." },
+    400: {
+      description: "Source and target identical.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/pages/{pageId}/backlinks/{targetPageId}",
+  summary: "Delete backlink from source page to target page",
+  description:
+    "Replaces `pages.backlinks.delete`. Path `pageId` is **source**; `targetPageId` is the link target (legacy input names).",
+  request: { params: pageTargetPagePathSchema },
+  responses: {
+    204: { description: "Backlink removed." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/snapshots",
+  summary: "Save encrypted page snapshot (Pro)",
+  description: "Replaces `pages.snapshots.save` — asserts Pro plan (legacy `assertUserSubscribed`).",
+  request: {
+    params: pageIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: pageSnapshotSaveRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Snapshot id",
+      content: {
+        "application/json": { schema: pageSnapshotCreateResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/pages/{pageId}/snapshots/{snapshotId}",
+  summary: "Load page snapshot ciphertext (Pro)",
+  request: { params: pageSnapshotPathSchema },
+  responses: {
+    200: {
+      description: "Ciphertext (base64 fields).",
+      content: {
+        "application/json": { schema: pageSnapshotLoadResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/pages/{pageId}/snapshots/{snapshotId}",
+  summary: "Delete a page snapshot",
+  request: { params: pageSnapshotPathSchema },
+  responses: {
+    204: { description: "Snapshot removed." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "delete",
+  path: "/api/pages/{pageId}",
+  summary: "Soft-delete page (grace period)",
+  request: { params: pageIdPathSchema },
+  responses: {
+    204: { description: "Deletion scheduled (not main page)." },
+    400: {
+      description: "Already deleted, or is group main page.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/restore",
+  summary: "Restore a soft-deleted page",
+  request: { params: pageIdPathSchema },
+  responses: {
+    204: { description: "Page restored in grace." },
+    400: {
+      description: "Not deleted, or free page past purge date.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/purge",
+  summary: "Permanently mark page deleted; refunds free page when applicable",
+  request: { params: pageIdPathSchema },
+  responses: {
+    204: { description: "Purge recorded." },
+    400: {
+      description: "Is main page, or already purged.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
     },
     401: sessionUnauthorized401,
     403: sessionForbidden403,

@@ -4,6 +4,11 @@ import {
   getOpenApiDocument,
   groupPageCreateRequestSchema,
   groupPagesListQuerySchema,
+  pageBacklinkCreateRequestSchema,
+  pageBumpRequestSchema,
+  pageIdPathSchema,
+  pageSnapshotCreateResponseSchema,
+  pageSnapshotSaveRequestSchema,
   groupPasswordChangeRequestSchema,
   groupPasswordDisableRequestSchema,
   groupPasswordEnableRequestSchema,
@@ -1354,6 +1359,524 @@ app.post("/api/groups/:groupId/pages", async (c) => {
       body: parsed.data,
     });
     return c.json(out, 201);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/bump", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown = {};
+  try {
+    const txt = await c.req.text();
+    if (txt.length > 0) {
+      bodyJson = JSON.parse(txt) as unknown;
+    }
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON object." }, 400);
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+  const parsed = pageBumpRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageBump } = await import("@deepnotes/session");
+    await performPageBump({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+      parentPageId: parsed.data.parentPageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/backlinks", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+  const parsed = pageBacklinkCreateRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageBacklinkCreate } = await import("@deepnotes/session");
+    await performPageBacklinkCreate({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      targetPageId: pParams.data.pageId,
+      sourcePageId: parsed.data.sourcePageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/pages/:pageId/backlinks/:targetPageId", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema
+    .extend({ targetPageId: pageIdPathSchema.shape.pageId })
+    .safeParse({
+      pageId: c.req.param("pageId"),
+      targetPageId: c.req.param("targetPageId"),
+    });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageBacklinkDelete } = await import("@deepnotes/session");
+    await performPageBacklinkDelete({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      sourcePageId: pParams.data.pageId,
+      targetPageId: pParams.data.targetPageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/snapshots", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+  const parsed = pageSnapshotSaveRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageSnapshotSave } = await import("@deepnotes/session");
+    const out = await performPageSnapshotSave({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+      encryptedSymmetricKey: parsed.data.encryptedSymmetricKey,
+      encryptedData: parsed.data.encryptedData,
+      preRestore: parsed.data.preRestore,
+    });
+    const body = pageSnapshotCreateResponseSchema.parse(out);
+    return c.json(body, 201);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/pages/:pageId/snapshots/:snapshotId", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema
+    .extend({ snapshotId: pageIdPathSchema.shape.pageId })
+    .safeParse({
+      pageId: c.req.param("pageId"),
+      snapshotId: c.req.param("snapshotId"),
+    });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageSnapshotLoad } = await import("@deepnotes/session");
+    const out = await performPageSnapshotLoad({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+      snapshotId: pParams.data.snapshotId,
+    });
+    return c.json(
+      {
+        encryptedSymmetricKey: out.encryptedSymmetricKey
+          ? out.encryptedSymmetricKey.toString("base64")
+          : null,
+        encryptedData: out.encryptedData.toString("base64"),
+      },
+      200,
+    );
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/pages/:pageId/snapshots/:snapshotId", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema
+    .extend({ snapshotId: pageIdPathSchema.shape.pageId })
+    .safeParse({
+      pageId: c.req.param("pageId"),
+      snapshotId: c.req.param("snapshotId"),
+    });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageSnapshotDelete } = await import("@deepnotes/session");
+    await performPageSnapshotDelete({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+      snapshotId: pParams.data.snapshotId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.delete("/api/pages/:pageId", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageSoftDelete } = await import("@deepnotes/session");
+    await performPageSoftDelete({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/restore", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageRestore } = await import("@deepnotes/session");
+    await performPageRestore({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/purge", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPagePurge } = await import("@deepnotes/session");
+    await performPagePurge({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+    });
+    return c.body(null, 204);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

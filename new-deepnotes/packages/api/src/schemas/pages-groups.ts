@@ -171,3 +171,74 @@ export const groupPrivacyPrivateRequestSchema = z
 export type GroupPrivacyPrivateRequest = z.infer<
   typeof groupPrivacyPrivateRequestSchema
 >;
+
+export const pageIdPathSchema = z.object({
+  pageId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "pageId", in: "path" } }),
+});
+
+export const pageTargetPagePathSchema = z.object({
+  pageId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "pageId", in: "path" } }),
+  targetPageId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "targetPageId", in: "path" } }),
+});
+
+export const pageSnapshotPathSchema = z.object({
+  pageId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "pageId", in: "path" } }),
+  snapshotId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({ ...nanoidIdOpenapi, param: { name: "snapshotId", in: "path" } }),
+});
+
+/** Optional breadcrumb parent for `pages.bump` (must chain to personal main page). */
+export const pageBumpRequestSchema = z
+  .object({
+    parentPageId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{21}$/)
+      .optional(),
+  })
+  .openapi("PageBumpRequest");
+
+export const pageBacklinkCreateRequestSchema = z
+  .object({
+    sourcePageId: z
+      .string()
+      .regex(/^[A-Za-z0-9_-]{21}$/)
+      .openapi(nanoidIdOpenapi),
+  })
+  .openapi("PageBacklinkCreateRequest");
+
+export const pageSnapshotSaveRequestSchema = z
+  .object({
+    encryptedSymmetricKey: byteB64,
+    encryptedData: byteB64,
+    preRestore: z.boolean().optional(),
+  })
+  .openapi("PageSnapshotSaveRequest");
+
+export const pageSnapshotCreateResponseSchema = z
+  .object({
+    snapshotId: z.string(),
+  })
+  .openapi("PageSnapshotCreateResponse");
+
+export const pageSnapshotLoadResponseSchema = z
+  .object({
+    encryptedSymmetricKey: z.string().nullable(),
+    encryptedData: z
+      .string()
+      .openapi({ format: "byte", description: "Base64 ciphertext." }),
+  })
+  .openapi("PageSnapshotLoadResponse");

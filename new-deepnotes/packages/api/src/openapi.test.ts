@@ -75,5 +75,24 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/groups/{groupId}"]?.delete).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/restore"]?.post).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/purge"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/pages/{pageId}/bump"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/backlinks"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/backlinks/{targetPageId}"]?.delete,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/snapshots"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/snapshots/{snapshotId}"]?.get,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/snapshots/{snapshotId}"]?.delete,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/pages/{pageId}"]?.delete).toBeDefined();
+    expect(doc.paths?.["/api/pages/{pageId}/restore"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/pages/{pageId}/purge"]?.post).toBeDefined();
   });
 });

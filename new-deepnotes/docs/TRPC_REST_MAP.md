@@ -69,15 +69,15 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
 | `pages.create` | `POST /api/groups/:groupId/pages` (**implemented** — `performCreatePage`; optional `groupCreation` not yet exposed; Pro + free-page rules per legacy) |
-| `pages.bump` | `POST /api/pages/:pageId/bump` |
-| `pages.backlinks.create` | `POST /api/pages/:pageId/backlinks` |
-| `pages.backlinks.delete` | `DELETE /api/pages/:pageId/backlinks/:targetPageId` |
-| `pages.snapshots.save` | `POST /api/pages/:pageId/snapshots` |
-| `pages.snapshots.load` | `GET /api/pages/:pageId/snapshots/:snapshotId` |
-| `pages.snapshots.delete` | `DELETE /api/pages/:pageId/snapshots/:snapshotId` |
-| `pages.deletion.delete` | `DELETE /api/pages/:pageId` (soft) |
-| `pages.deletion.restore` | `POST /api/pages/:pageId/restore` |
-| `pages.deletion.deletePermanently` | `POST /api/pages/:pageId/purge` |
+| `pages.bump` | `POST /api/pages/:pageId/bump` (**implemented** — `performPageBump`; path `pageId`, optional body `{ "parentPageId" }` must chain to personal main page) |
+| `pages.backlinks.create` | `POST /api/pages/:pageId/backlinks` (**implemented** — `performPageBacklinkCreate`; path `pageId` = **target**; body `{ "sourcePageId" }`) |
+| `pages.backlinks.delete` | `DELETE /api/pages/:pageId/backlinks/:targetPageId` (**implemented** — `performPageBacklinkDelete`; path `pageId` = **source**; `targetPageId` = link target) |
+| `pages.snapshots.save` | `POST /api/pages/:pageId/snapshots` (**implemented** — `performPageSnapshotSave`; Pro; trim >10 + age rule like legacy `insertPageSnapshot`) |
+| `pages.snapshots.load` | `GET /api/pages/:pageId/snapshots/:snapshotId` (**implemented** — `performPageSnapshotLoad`; Pro) |
+| `pages.snapshots.delete` | `DELETE /api/pages/:pageId/snapshots/:snapshotId` (**implemented** — `performPageSnapshotDelete`) |
+| `pages.deletion.delete` | `DELETE /api/pages/:pageId` (soft) (**implemented** — `performPageSoftDelete`) |
+| `pages.deletion.restore` | `POST /api/pages/:pageId/restore` (**implemented** — `performPageRestore`) |
+| `pages.deletion.deletePermanently` | `POST /api/pages/:pageId/purge` (**implemented** — `performPagePurge`; `num_free_pages` +1 when `pages.free` and user not Pro) |
 
 ## Legacy app-server WebSocket → target
 

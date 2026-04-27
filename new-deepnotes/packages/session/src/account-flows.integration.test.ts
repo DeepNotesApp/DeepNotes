@@ -24,6 +24,7 @@ import {
   groupMembers,
   groups,
   notifications,
+  pageLinks,
   pages,
   sessions,
   users,
@@ -67,6 +68,15 @@ import {
   performGroupPurge,
   performGroupRestore,
   performGroupSoftDelete,
+  performPageBacklinkCreate,
+  performPageBacklinkDelete,
+  performPageBump,
+  performPagePurge,
+  performPageRestore,
+  performPageSnapshotDelete,
+  performPageSnapshotLoad,
+  performPageSnapshotSave,
+  performPageSoftDelete,
 } from "./index.js";
 import {
   performCreatePage,
@@ -1862,6 +1872,198 @@ describe.skipIf(resolveTemplateContext() == null)(
             groupId: reg.groupId,
           }),
         ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("pages: bump, backlinks, snapshots, soft delete, restore, purge", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `pgops-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const page2 = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: page2,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+
+        await performPageBump({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+          parentPageId: reg.pageId,
+        });
+        const [u1] = await db
+          .select({
+            starting: users.startingPageId,
+            recent: users.recentPageIds,
+          })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(u1?.starting).toBe(page2);
+        expect(u1?.recent[0]).toBe(page2);
+
+        const page3 = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: page3,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+
+        await performPageBacklinkCreate({
+          db,
+          env,
+          accessCookie: access,
+          targetPageId: page2,
+          sourcePageId: page3,
+        });
+        const [bl] = await db
+          .select()
+          .from(pageLinks)
+          .where(
+            and(
+              eq(pageLinks.targetPageId, page2),
+              eq(pageLinks.sourcePageId, page3),
+            ),
+          );
+        expect(bl?.sourcePageId).toBe(page3);
+
+        await performPageBacklinkDelete({
+          db,
+          env,
+          accessCookie: access,
+          sourcePageId: page3,
+          targetPageId: page2,
+        });
+        const blAfter = await db
+          .select()
+          .from(pageLinks)
+          .where(
+            and(
+              eq(pageLinks.targetPageId, page2),
+              eq(pageLinks.sourcePageId, page3),
+            ),
+          );
+        expect(blAfter.length).toBe(0);
+
+        const kSym = rand32();
+        const kData = rand32();
+        const { snapshotId } = await performPageSnapshotSave({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+          encryptedSymmetricKey: kSym,
+          encryptedData: kData,
+        });
+        const loaded = await performPageSnapshotLoad({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+          snapshotId,
+        });
+        expect(loaded.encryptedData.equals(Buffer.from(kData))).toBe(true);
+        expect(loaded.encryptedSymmetricKey?.equals(Buffer.from(kSym))).toBe(
+          true,
+        );
+
+        await performPageSnapshotDelete({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+          snapshotId,
+        });
+
+        await performPageSoftDelete({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+        });
+        const [rowDel] = await db
+          .select({ d: pages.permanentDeletionDate })
+          .from(pages)
+          .where(eq(pages.id, page2));
+        expect(rowDel?.d).toBeDefined();
+
+        await performPageRestore({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+        });
+        const [rowOk] = await db
+          .select({ d: pages.permanentDeletionDate })
+          .from(pages)
+          .where(eq(pages.id, page2));
+        expect(rowOk?.d).toBeNull();
+
+        await performPageSoftDelete({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+        });
+        await performPagePurge({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+        });
+        const [rowP] = await db
+          .select({ d: pages.permanentDeletionDate })
+          .from(pages)
+          .where(eq(pages.id, page2));
+        expect(new Date(rowP!.d!).getTime()).toBeLessThan(Date.now());
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });
