@@ -38,6 +38,7 @@ import {
   getPasswordHashValues,
 } from "./crypto/index.js";
 import {
+  decryptRecoveryCodes,
   derivePasswordValues,
   decryptUserRehashedLoginHash,
   ensureSodiumReady,
@@ -664,6 +665,106 @@ describe.skipIf(resolveTemplateContext() == null)(
             new Uint8Array(after2!.encryptionKey),
           ),
         ).toBe(true);
+
+        await expect(
+          performSessionRefresh({
+            db,
+            env,
+            refreshCookie: refresh1,
+            loggedInCookie: loggedIn1,
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          code: "UNAUTHORIZED",
+          message: "Session was invalidated.",
+        });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("refresh rejects when loggedIn cookie is not true", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `rf-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const loginOut = await performSessionLogin({
+          db,
+          env,
+          body: { email, loginHash, rememberSession: false },
+          clientIp: "203.0.113.60",
+          userAgent: "integration-test/refresh-cookie",
+        });
+        const refresh = cookieValueFromSetCookieLines(
+          loginOut.cookieLines,
+          "refreshToken",
+        );
+        await expect(
+          performSessionRefresh({
+            db,
+            env,
+            refreshCookie: refresh,
+            loggedInCookie: "false",
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          message: "User not logged in.",
+        });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("refresh rejects missing refresh token", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        await expect(
+          performSessionRefresh({
+            db,
+            env,
+            refreshCookie: undefined,
+            loggedInCookie: "true",
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          message: "No refresh token received.",
+        });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });
@@ -1011,6 +1112,99 @@ describe.skipIf(resolveTemplateContext() == null)(
           status: 401,
           code: "UNAUTHORIZED",
           message: "Invalid authenticator token.",
+        });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("2FA login succeeds with recovery code; same code cannot be reused", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const clientIp = "203.0.113.70";
+      const userAgent = "integration-test/2fa-recovery";
+      try {
+        const email = `2fr-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+        const { secret } = await performUserTwoFactorEnableRequest({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+        });
+        const { recoveryCodes } = await performUserTwoFactorEnableFinish({
+          db,
+          env,
+          accessCookie: access,
+          loginHash,
+          authenticatorToken: authenticator.generate(secret),
+        });
+        const firstCode = recoveryCodes[0]!;
+        expect(firstCode).toMatch(/^[0-9a-f]{32}$/);
+
+        const loginOut = await performSessionLogin({
+          db,
+          env,
+          body: {
+            email,
+            loginHash,
+            rememberSession: false,
+            recoveryCode: firstCode,
+          },
+          clientIp,
+          userAgent,
+        });
+        expect(typeof loginOut.json.sessionId).toBe("string");
+
+        const [uAfter] = await db
+          .select({ encRec: users.encryptedRecoveryCodes })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        const remaining = decryptRecoveryCodes(
+          new Uint8Array(uAfter!.encRec!),
+          env.USER_RECOVERY_CODES_ENCRYPTION_KEY,
+        );
+        expect(remaining).toHaveLength(5);
+
+        await expect(
+          performSessionLogin({
+            db,
+            env,
+            body: {
+              email,
+              loginHash,
+              rememberSession: false,
+              recoveryCode: firstCode,
+            },
+            clientIp: "198.51.100.71",
+            userAgent: `${userAgent}-replay`,
+          }),
+        ).rejects.toMatchObject({
+          status: 401,
+          message: "Invalid recovery code.",
         });
       } finally {
         await client.end({ timeout: 5 });

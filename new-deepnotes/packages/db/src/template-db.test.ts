@@ -8,7 +8,7 @@ import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import * as schema from "./schema.js";
-import { devices, pages, sessions, users } from "./schema.js";
+import { devices, groupMembers, pages, sessions, users } from "./schema.js";
 import { withDatabaseName } from "./test/db-url.js";
 import {
   createDatabaseFromTemplate,
@@ -146,6 +146,87 @@ if (ctx == null) {
             userId: "usr012345678901234567",
             hash: randomBytes(32),
             trusted: false,
+          }),
+        ).rejects.toThrow();
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("rejects group_members row with unknown user_id (FK to users)", async () => {
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const bogusUser = "usr000000000000000000";
+      const bogusGroup = "grp000000000000000000";
+      try {
+        await expect(
+          db.insert(groupMembers).values({
+            userId: bogusUser,
+            groupId: bogusGroup,
+            role: "member",
+            encryptedInternalKeyring: Buffer.alloc(1),
+          }),
+        ).rejects.toThrow();
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("rejects group_members row with unknown group_id (FK to groups)", async () => {
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      const uid = "012345678901234567890";
+      try {
+        await db.insert(users).values({
+          id: uid,
+          startingPageId: uid,
+          personalGroupId: uid,
+          publicKeyring: Buffer.alloc(1),
+          encryptedPrivateKeyring: Buffer.alloc(1),
+          encryptedSymmetricKeyring: Buffer.alloc(1),
+          encryptedDefaultArrow: Buffer.alloc(1),
+          encryptedDefaultNote: Buffer.alloc(1),
+          encryptedEmail: Buffer.alloc(1),
+          emailHash: Buffer.alloc(1),
+          encryptedRehashedLoginHash: Buffer.alloc(1),
+        });
+        const unknownGroup = "grp999999999999999999";
+        await expect(
+          db.insert(groupMembers).values({
+            userId: uid,
+            groupId: unknownGroup,
+            role: "member",
+            encryptedInternalKeyring: Buffer.alloc(1),
           }),
         ).rejects.toThrow();
       } finally {

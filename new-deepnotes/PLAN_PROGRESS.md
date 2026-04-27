@@ -38,11 +38,18 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
 - [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change, **2FA** bodies + finish TOTP (`schemas/users.test.ts`).
 - [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
-- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — register / email change / password change / **login + refresh** / demo **403** / **2FA** (enable → finish → login with TOTP; wrong finish token; missing MFA; bad TOTP). `@deepnotes/db` `template-db.test.ts` — clone smoke + **sessions / devices / pages→groups FK** rejects. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
+- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — register / email change / password change / **login + refresh** (including **replay of pre-rotation refresh JWT** → 401) / **refresh cookie guards** (`loggedIn` not `true`, missing refresh) / demo **403** / **2FA** (enable → finish → TOTP login; **recovery-code login** + DB-backed **one-time consumption** via `decryptRecoveryCodes` length 5; wrong finish token; missing MFA; bad TOTP). `@deepnotes/db` `template-db.test.ts` — clone smoke + **sessions / devices / pages→groups / group_members→users+groups FK** rejects. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
 
 ### Phase 3 test coverage (detail)
 
 Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `CREATE DATABASE`) are unset; they clone template `dn_test_tpl_session_email` (isolated from `@deepnotes/db`’s `dn_test_tpl_deepnotes` so **Turbo** can run both packages in parallel).
+
+**How to run locally:** ensure `.env` at `new-deepnotes/.env` has `DATABASE_URL` and (for template create/drop) `DATABASE_ADMIN_URL` with a role that can `CREATE DATABASE`. Then:
+
+- `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts`
+- `pnpm --filter @deepnotes/db exec vitest run src/template-db.test.ts`
+
+CI should set the same vars against the workflow Postgres service (role with `CREATEDB`).
 
 **Session package file:** `packages/session/src/account-flows.integration.test.ts` (describe: **account flows + sessions: Postgres template DB**).
 
@@ -55,12 +62,17 @@ Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `
 | Password change invalidates sessions | `performUserPasswordChange` + explicit `devices` / `sessions` insert | `sessions.invalidated === true` for the user. |
 | Password change, wrong old password | `performUserPasswordChange` | **400** `BAD_REQUEST`. |
 | **Login → refresh → refresh** | `performUserRegister`, `performSessionLogin`, `performSessionRefresh` | Login sets `Set-Cookie` (`refreshToken`, `loggedIn=true`); DB `sessions.refresh_code` + `encryption_key` change on refresh; JSON `oldSessionKey` / `newSessionKey` match pre/post row `encryption_key`; **second** refresh with rotated cookies succeeds. |
+| **Replay pre-rotation refresh JWT** | Same as above, then third call with **first** login’s `refreshToken` + original `loggedIn` | **401** `UNAUTHORIZED` “Session was invalidated.” — JWT still verifies but `payload.rfc` no longer matches `sessions.refresh_code` after rotation. |
+| **Refresh, `loggedIn` ≠ true** | `performSessionLogin`, `performSessionRefresh` with `loggedInCookie: "false"` | **401** “User not logged in.” |
+| **Refresh, no refresh cookie** | `performSessionRefresh` with `refreshCookie: undefined`, `loggedIn: "true"` | **401** “No refresh token received.” |
 | **Login, wrong password** | `performSessionLogin` | **401** `UNAUTHORIZED` (wrong `loginHash`). |
 | **Password change, demo user** | `performUserRegister` + `UPDATE users SET demo`, `performUserPasswordChange` | **403** `FORBIDDEN` (“demo accounts”). |
 | **2FA → login (TOTP)** | `performUserTwoFactorEnableRequest` / `Finish`, `performSessionLogin` | After finish: `two_factor_auth_enabled`, `encrypted_authenticator_secret`, `encrypted_recovery_codes` set; **6×32-char hex** recovery codes; login with fresh `authenticator.generate(secret)` returns **200**-equivalent payload (`sessionId`). |
 | **2FA finish, wrong code** | `EnableRequest` then `EnableFinish` with `"000000"` | **400** `BAD_REQUEST` (“Authenticator token is incorrect.”). |
 | **2FA login without MFA** | After finish, `performSessionLogin` without `authenticatorToken` | **401** “Requires two-factor authentication.” (untrusted device). |
 | **2FA login, bad TOTP** | `authenticatorToken: "111111"` | **401** “Invalid authenticator token.” |
+| **2FA login with recovery code** | `performUserTwoFactorEnableFinish` → `performSessionLogin` with `recoveryCode` (no TOTP) | **200**-equivalent (`sessionId`); `decryptRecoveryCodes` on row shows **5** hashes left (one consumed). |
+| **2FA recovery code reuse** | Second `performSessionLogin` with same plaintext recovery code, new IP/UA | **401** “Invalid recovery code.” |
 
 **`@deepnotes/db` real Postgres (`template-db.test.ts`):**
 
@@ -70,8 +82,10 @@ Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `
 | **Sessions FK** | `INSERT sessions` without parent `users` / `devices` | Insert **rejects** (FK violation) for orphan `user_id` / `device_id`. |
 | **Devices FK** | `INSERT devices` with non-existent `user_id` | Insert **rejects** (FK to `users`). |
 | **Pages → groups FK** | `INSERT pages` with unknown `group_id` | Insert **rejects** (FK to `groups`). |
+| **`group_members` → `users` FK** | `INSERT group_members` with bogus `user_id` and `group_id` | Insert **rejects** (no parent user). |
+| **`group_members` → `groups` FK** | Insert minimal `users` row, then `group_members` with unknown `group_id` | Insert **rejects** (no parent group). |
 
-**Not yet in integration:** Redis failed-login with real `ioredis`/Upstash against `performSessionLogin` (unit tests cover rate-limit helpers); `performSessionRefresh` edge cases (expired JWT, `loggedIn` false, replayed refresh token invalidation); **2FA recovery-code login** path against real Postgres (logic exists in `two-factor.ts` + `login.ts`).
+**Not yet in integration:** Redis failed-login with real `ioredis`/Upstash against `performSessionLogin` (unit tests cover rate-limit helpers); `performSessionRefresh` with **expired** refresh JWT (would need clock-skew or short-lived token minting in test); **invalid/tampered** refresh JWT where `verifyRefreshToken` fails but `decodeRefreshTokenUnsafe` returns `sid` (invalidates row — behaviour worth an explicit test when touching refresh again).
 
 ### Sessions + account (current)
 
@@ -161,8 +175,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Package / app | Role | What runs today | Gaps (highest value next) |
 |---------------|------|------------------|---------------------------|
-| **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts`: clone template, empty `users`, **FK rejection** on orphan `sessions`, **`devices`→`users`**, **`pages`→`groups`** | More paths when groups CRUD lands (`group_members`, join tables, cascades) |
-| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` — email change, password change (PHC + unwrap, session invalidation, wrong password, **demo 403**), **`performSessionLogin`** + **double `performSessionRefresh`**, **2FA** (request/finish/DB columns, login + TOTP, wrong finish code, MFA required, bad TOTP); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; **2FA recovery-code** consumption against template DB |
+| **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts` (6 cases): clone template, empty `users`, **FK** rejects for orphan `sessions`, **`devices`→`users`**, **`pages`→`groups`**, **`group_members`→`users`**, **`group_members`→`groups`** | More paths when groups CRUD lands (join invites/requests, cascades from `groups` delete) |
+| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (16 cases) — email change, password change (PHC + unwrap, session invalidation, wrong password, **demo 403**), **`performSessionLogin`** + **double refresh** + **stale refresh JWT replay**, **refresh** `loggedIn`/missing-token guards, **2FA** (TOTP paths + **recovery code** login + one-time use + `decryptRecoveryCodes` count); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; optional explicit test for decode-without-verify invalidation path |
 | **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + session + 2FA paths); **`schemas/users.test.ts`** (email/password change, 2fa finish) | Schemas for pages/groups when they land; optional OpenAPI **snapshot** |
 | **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: 503 when env missing — includes **2FA** routes in matrix | **200** tests with stub `SessionEnv` + template DB (heavier) |
 | **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
@@ -185,8 +199,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [ ] Drizzle migrations from empty DB documented for production upgrades.
 - [ ] Cold API dev start under **2 s** (no `inspect-brk` by default) — validate on a typical laptop.
 - [ ] Collab + realtime: at least one integration test each (Redis + deps).
-- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` template test; `@deepnotes/session` `account-flows.integration.test.ts` (register, email change, password change, sessions invalidation).
-- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** crypto + Zod + Resend unit tests; **Postgres** template tests: register, email change, password change, **login + refresh (two rotations)**, wrong login password, demo password **403**, **2FA** (finish + login with TOTP, error paths); `@deepnotes/db` **sessions / devices / pages FK** (see [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail)). **Next:** Redis failed-login integration; 2FA **recovery code** login in template DB; refresh-token replay / JWT expiry; Stripe when billing exists.
+- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` `template-db.test.ts` (clone + **sessions / devices / pages / `group_members`** FK rejects); `@deepnotes/session` `account-flows.integration.test.ts` (register, email change, password change, sessions invalidation, login + refresh + **stale JWT replay**, refresh **cookie guards**, **2FA** TOTP + **recovery codes**).
+- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** crypto + Zod + Resend unit tests; **Postgres** as in [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) (16 session + 6 db integration cases when DB env is set). **Next:** Redis failed-login integration; refresh **expired** JWT; Stripe when billing exists.
 - [x] No tRPC / superjson / RevenueCat / key-rotation in **this** tree (keep absent); product sign-off for IAP/Stripe when billing ships.
 - [x] Client: zero undocumented forks, or a short owned exception list — see [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
 - [ ] Cloudflare: deploy runbook; Hyperdrive + Postgres + Redis proven in staging; collab/realtime topology chosen and load-tested.
@@ -197,7 +211,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ## Phase 3 working order (suggested)
 
-Use this when resuming: **(done)** account HTTP through 2FA (incl. `load` as POST, see map); **Postgres** coverage for 2FA service layer + extra **`@deepnotes/db` FK** tests. **(next)** `users.pages` + `groups` + `pages` REST from [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) — each slice should add **template DB** tests for new FKs and happy paths where SQL risk is high. **(then)** **realtime + collab** (no key rotation) and **Stripe** + wire billing hooks on account routes.
+Use this when resuming: **(done)** account HTTP through 2FA (incl. `load` as POST, see map); **Postgres** for 2FA (TOTP + recovery codes + refresh replay/cookie guards) + **`@deepnotes/db`** FKs through **`group_members`**. **(next)** `users.pages` + `groups` + `pages` REST from [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) — each slice should add **template DB** tests for new FKs and happy paths where SQL risk is high. **(then)** **realtime + collab** (no key rotation) and **Stripe** + wire billing hooks on account routes.
 
 ---
 
@@ -205,6 +219,7 @@ Use this when resuming: **(done)** account HTTP through 2FA (incl. `load` as POS
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **More real Postgres tests:** `account-flows.integration.test.ts` — **2FA recovery-code** login + one-time use + `decryptRecoveryCodes` count; **replay** of first refresh JWT after two rotations (**401**); **`loggedIn`** / missing refresh guards. `template-db.test.ts` — **`group_members`** FK to `users` and to `groups`. PLAN_PROGRESS: run commands, expanded tables, matrix + success criteria + working order. |
 | 2026-04-27 | **Real Postgres tests (session + db):** `account-flows.integration.test.ts` — login + double refresh, wrong password, demo **403**, **2FA** (enable/finish + TOTP login, wrong finish code, MFA required, bad TOTP). `template-db.test.ts` — orphan **`sessions`**, **`devices`**, **`pages`→`groups`** FK rejects. PLAN_PROGRESS: Phase 3 detail table, package matrix, success criteria, working order. |
 | 2026-04-27 | **2FA account HTTP:** `user-two-factor-settings.ts`, `encryptUserAuthenticatorSecret` in `session-crypto`, Zod + OpenAPI + Hono for `/api/users/me/2fa/*` (6 routes); [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) — `load` is POST not GET; see [2FA HTTP routes](#2fa-http-routes-phase-3) below. |
 | 2026-04-27 | **Integration tests:** expanded `account-flows.integration.test.ts` (email wrong code; password change PHC + keyring unwrap with salt from PHC; `sessions` invalidation; wrong old password). Renamed from `email-change.integration.test.ts`. PLAN_PROGRESS: detailed Phase 3 test table + matrix gaps. |
