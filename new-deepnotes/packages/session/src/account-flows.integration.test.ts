@@ -1376,6 +1376,103 @@ describe.skipIf(resolveTemplateContext() == null)(
       }
     });
 
+    it("pages: create with groupCreation (new shared group + first page)", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `gcreate-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const newGroupId = nanoid();
+        const newPageId = nanoid();
+        const gc = {
+          groupEncryptedName: rand32(),
+          groupIsPublic: true,
+          groupAccessKeyring: rand32(),
+          groupEncryptedInternalKeyring: rand32(),
+          groupEncryptedContentKeyring: rand32(),
+          groupPublicKeyring: rand32(),
+          groupEncryptedPrivateKeyring: rand32(),
+          groupOwnerEncryptedName: rand32(),
+        };
+        const out = await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: newGroupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: newPageId,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+            groupCreation: gc,
+          },
+        });
+        expect(out.pageId).toBe(newPageId);
+        const [gRow] = await db
+          .select({
+            id: groups.id,
+            mainPageId: groups.mainPageId,
+            userId: groups.userId,
+          })
+          .from(groups)
+          .where(eq(groups.id, newGroupId));
+        expect(gRow?.mainPageId).toBe(newPageId);
+        expect(gRow?.userId).toBeNull();
+        const [pRow] = await db
+          .select({ groupId: pages.groupId })
+          .from(pages)
+          .where(eq(pages.id, newPageId));
+        expect(pRow?.groupId).toBe(newGroupId);
+        const [mem] = await db
+          .select({ role: groupMembers.role, userId: groupMembers.userId })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, newGroupId),
+              eq(groupMembers.userId, reg.userId),
+            ),
+          );
+        expect(mem?.role).toBe("owner");
+        const { groupIds } = await performGetUserGroupIds({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(groupIds.sort()).toEqual([reg.groupId, newGroupId].sort());
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
     it("user page prefs: starting, path, favorites, recent, defaults, notifications", async () => {
       const env = testSessionEnv();
       const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;

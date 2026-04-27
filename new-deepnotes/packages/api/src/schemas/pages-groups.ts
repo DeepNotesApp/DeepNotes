@@ -42,6 +42,21 @@ export const groupPagesListQuerySchema = z.object({
     }),
 });
 
+/** Ciphertext to create a non-personal group (legacy `groupCreation` on `pages.create` / `pages.move`). */
+export const pageMoveGroupCreationRequestSchema = z
+  .object({
+    groupEncryptedName: byteB64,
+    groupPasswordHash: byteB64.optional(),
+    groupIsPublic: z.boolean(),
+    groupAccessKeyring: byteB64,
+    groupEncryptedInternalKeyring: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+    groupPublicKeyring: byteB64,
+    groupEncryptedPrivateKeyring: byteB64,
+    groupOwnerEncryptedName: byteB64,
+  })
+  .openapi("PageMoveGroupCreationRequest");
+
 export const groupPageCreateRequestSchema = z
   .object({
     parentPageId: z
@@ -55,6 +70,7 @@ export const groupPageCreateRequestSchema = z
     pageEncryptedSymmetricKeyring: byteB64,
     pageEncryptedRelativeTitle: byteB64,
     pageEncryptedAbsoluteTitle: byteB64,
+    groupCreation: pageMoveGroupCreationRequestSchema.optional(),
   })
   .openapi("GroupPageCreateRequest");
 
@@ -230,24 +246,9 @@ export const pageMoveReencryptRequestSchema = z
   })
   .openapi("PageMoveReencryptRequest");
 
-/** Create a new shared group in the same call as a move (legacy WS step 1 `groupCreation`). */
-export const pageMoveGroupCreationRequestSchema = z
-  .object({
-    groupEncryptedName: byteB64,
-    groupPasswordHash: byteB64.optional(),
-    groupIsPublic: z.boolean(),
-    groupAccessKeyring: byteB64,
-    groupEncryptedInternalKeyring: byteB64,
-    groupEncryptedContentKeyring: byteB64,
-    groupPublicKeyring: byteB64,
-    groupEncryptedPrivateKeyring: byteB64,
-    groupOwnerEncryptedName: byteB64,
-  })
-  .openapi("PageMoveGroupCreationRequest");
-
 /**
  * Replaces `websocket/pages/move` (two tRPC steps) with one `POST` (optional `reencrypt` when
- * `sourceGroupId !== destGroupId`).
+ * `sourceGroupId !== destGroupId`). Optional `groupCreation` uses `PageMoveGroupCreationRequest`.
  */
 export const pageMoveRequestSchema = z
   .object({

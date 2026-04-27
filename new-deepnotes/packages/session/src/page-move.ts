@@ -1,6 +1,5 @@
 import type { DeepnotesDb } from "@deepnotes/db/client";
 import {
-  groupMembers,
   groups,
   pageSnapshots,
   pages,
@@ -10,13 +9,13 @@ import {
 } from "@deepnotes/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 
-import {
-  computeGroupPasswordPhc,
-  encryptGroupRehashedPasswordHash,
-  ensureSodiumReady,
-} from "./crypto/session-crypto.js";
+import { ensureSodiumReady } from "./crypto/session-crypto.js";
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
+import {
+  insertSharedGroupForOwnerInTx,
+  type GroupCreationCiphertext,
+} from "./group-creation-shared.js";
 import { userHasGroupPermission } from "./group-permissions.js";
 import { getAuthenticatedUserSummary } from "./user-me.js";
 import { assertUserProPlan } from "./user-plan.js";
@@ -30,17 +29,7 @@ function bumpStringIdList(ids: string[], itemId: string, max: number): string[] 
   return [itemId, ...rest].slice(0, max);
 }
 
-export type PageMoveGroupCreation = {
-  groupEncryptedName: Uint8Array;
-  groupPasswordHash?: Uint8Array;
-  groupIsPublic: boolean;
-  groupAccessKeyring: Uint8Array;
-  groupEncryptedInternalKeyring: Uint8Array;
-  groupEncryptedContentKeyring: Uint8Array;
-  groupPublicKeyring: Uint8Array;
-  groupEncryptedPrivateKeyring: Uint8Array;
-  groupOwnerEncryptedName: Uint8Array;
-};
+export type PageMoveGroupCreation = GroupCreationCiphertext;
 
 export type PageMoveReencrypt = {
   pageEncryptedSymmetricKeyring: Uint8Array;
@@ -171,44 +160,12 @@ export async function performPageMove(input: {
 
   return await input.db.transaction(async (tx) => {
     if (groupCreation != null) {
-      let encryptedRehashed: Buffer | undefined;
-      if (
-        groupCreation.groupPasswordHash != null &&
-        groupCreation.groupPasswordHash.byteLength > 0
-      ) {
-        const phc = computeGroupPasswordPhc(groupCreation.groupPasswordHash);
-        const enc = encryptGroupRehashedPasswordHash(
-          phc,
-          input.env.GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY,
-        );
-        encryptedRehashed = Buffer.from(enc);
-      }
-      await tx.insert(groups).values({
-        id: destGroupId,
-        mainPageId: input.pageId,
-        encryptedName: toBuf(groupCreation.groupEncryptedName),
-        userId: null,
-        publicKeyring: toBuf(groupCreation.groupPublicKeyring),
-        encryptedPrivateKeyring: toBuf(
-          groupCreation.groupEncryptedPrivateKeyring,
-        ),
-        encryptedContentKeyring: toBuf(groupCreation.groupEncryptedContentKeyring),
-        accessKeyring: groupCreation.groupIsPublic
-          ? toBuf(groupCreation.groupAccessKeyring)
-          : null,
-        encryptedRehashedPasswordHash: encryptedRehashed,
-      });
-      await tx.insert(groupMembers).values({
-        groupId: destGroupId,
+      await insertSharedGroupForOwnerInTx(tx, {
+        env: input.env,
         userId,
-        role: "owner",
-        encryptedAccessKeyring: groupCreation.groupIsPublic
-          ? null
-          : toBuf(groupCreation.groupAccessKeyring),
-        encryptedInternalKeyring: toBuf(
-          groupCreation.groupEncryptedInternalKeyring,
-        ),
-        encryptedName: toBuf(groupCreation.groupOwnerEncryptedName),
+        groupId: destGroupId,
+        mainPageId: input.pageId,
+        groupCreation,
       });
     }
 

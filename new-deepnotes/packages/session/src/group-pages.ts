@@ -2,10 +2,16 @@ import type { DeepnotesDb } from "@deepnotes/db/client";
 import { groupMembers, groups, pages, users, usersPages } from "@deepnotes/db/schema";
 import { and, desc, eq, isNull, lt } from "drizzle-orm";
 
+import { ensureSodiumReady } from "./crypto/session-crypto.js";
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
+import {
+  insertSharedGroupForOwnerInTx,
+  type GroupCreationCiphertext,
+} from "./group-creation-shared.js";
 import { userHasGroupPermission } from "./group-permissions.js";
 import { getAuthenticatedUserSummary } from "./user-me.js";
+import { assertUserProPlan } from "./user-plan.js";
 
 function toBuf(u: Uint8Array): Buffer {
   return Buffer.from(u);
@@ -90,11 +96,13 @@ export type CreatePageBody = {
   pageEncryptedSymmetricKeyring: Uint8Array;
   pageEncryptedRelativeTitle: Uint8Array;
   pageEncryptedAbsoluteTitle: Uint8Array;
+  groupCreation?: GroupCreationCiphertext;
 };
 
 /**
- * Replaces legacy `pages.create` without optional `groupCreation` (new shared
- * group + first page). Pro subscription and free-page limits match legacy.
+ * Replaces legacy `pages.create` (optional `groupCreation`: new non-personal
+ * group + first page, same as tRPC’s `groupId` + `groupCreation` payload). Pro
+ * + free-page limits match legacy.
  */
 export async function performCreatePage(input: {
   db: DeepnotesDb;
@@ -104,6 +112,7 @@ export async function performCreatePage(input: {
   body: CreatePageBody;
 }): Promise<{ pageId: string; numFreePages?: number }> {
   const { userId, personalGroupId } = await getAuthenticatedUserSummary(input);
+  const groupCreation = input.body.groupCreation;
 
   const [parent] = await input.db
     .select({ id: pages.id, groupId: pages.groupId })
@@ -111,12 +120,26 @@ export async function performCreatePage(input: {
     .where(eq(pages.id, input.body.parentPageId))
     .limit(1);
 
-  if (parent == null || parent.groupId !== input.groupId) {
-    throw new SessionError(
-      400,
-      "BAD_REQUEST",
-      "parentPageId must refer to a page in this group.",
-    );
+  if (parent == null) {
+    throw new SessionError(404, "NOT_FOUND", "Parent page not found.");
+  }
+
+  if (groupCreation == null) {
+    if (parent.groupId !== input.groupId) {
+      throw new SessionError(
+        400,
+        "BAD_REQUEST",
+        "parentPageId must refer to a page in this group.",
+      );
+    }
+  } else {
+    if (parent.groupId !== personalGroupId) {
+      throw new SessionError(
+        400,
+        "BAD_REQUEST",
+        "When creating a new shared group, parentPageId must be a page in your personal group.",
+      );
+    }
   }
 
   const [groupRow] = await input.db
@@ -125,22 +148,35 @@ export async function performCreatePage(input: {
     .where(eq(groups.id, input.groupId))
     .limit(1);
 
-  if (groupRow == null) {
-    throw new SessionError(404, "NOT_FOUND", "Group not found.");
+  if (groupCreation == null) {
+    if (groupRow == null) {
+      throw new SessionError(404, "NOT_FOUND", "Group not found.");
+    }
+  } else {
+    if (groupRow != null) {
+      throw new SessionError(
+        400,
+        "BAD_REQUEST",
+        "A group with this id already exists.",
+      );
+    }
+    await assertUserProPlan({ db: input.db, userId });
+    await ensureSodiumReady();
   }
 
-  const canEdit = await userHasGroupPermission({
-    db: input.db,
-    userId,
-    groupId: input.groupId,
-    permission: "editGroupPages",
-  });
-  if (!canEdit) {
-    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  if (groupCreation == null) {
+    const canEdit = await userHasGroupPermission({
+      db: input.db,
+      userId,
+      groupId: input.groupId,
+      permission: "editGroupPages",
+    });
+    if (!canEdit) {
+      throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+    }
   }
 
-  const mustSubscribe =
-    input.groupId !== personalGroupId;
+  const mustSubscribe = input.groupId !== personalGroupId || groupCreation != null;
   if (mustSubscribe) {
     const [u] = await input.db
       .select({ plan: users.plan })
@@ -186,6 +222,16 @@ export async function performCreatePage(input: {
         .set({ numFreePages: next })
         .where(eq(users.id, userId));
       numFreePagesOut = next;
+    }
+
+    if (groupCreation != null) {
+      await insertSharedGroupForOwnerInTx(tx, {
+        env: input.env,
+        userId,
+        groupId: input.groupId,
+        mainPageId: input.body.pageId,
+        groupCreation,
+      });
     }
 
     await tx.insert(pages).values({

@@ -68,7 +68,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
-| `pages.create` | `POST /api/groups/:groupId/pages` (**implemented** — `performCreatePage`; optional `groupCreation` not yet exposed; Pro + free-page rules per legacy) |
+| `pages.create` | `POST /api/groups/:groupId/pages` (**implemented** — `performCreatePage`; optional `groupCreation` = new non-personal group + first page, same shape as `PageMoveGroupCreationRequest`, path `groupId` unused id; Pro + free-page rules per legacy) |
 | `pages.bump` | `POST /api/pages/:pageId/bump` (**implemented** — `performPageBump`; path `pageId`, optional body `{ "parentPageId" }` must chain to personal main page) |
 | `pages.backlinks.create` | `POST /api/pages/:pageId/backlinks` (**implemented** — `performPageBacklinkCreate`; path `pageId` = **target**; body `{ "sourcePageId" }`) |
 | `pages.backlinks.delete` | `DELETE /api/pages/:pageId/backlinks/:targetPageId` (**implemented** — `performPageBacklinkDelete`; path `pageId` = **source**; `targetPageId` = link target) |

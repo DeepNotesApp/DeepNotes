@@ -608,7 +608,7 @@ registry.registerPath({
   path: "/api/groups/{groupId}/pages",
   summary: "Create a page in a group",
   description:
-    "Replaces legacy `pages.create` for an existing group (optional `groupCreation` path not yet exposed). Enforces `editGroupPages`, Pro subscription when `groupId` is not the user’s personal group, and the 50 free-page cap for non‑Pro users.",
+    "Replaces legacy `pages.create`. For an **existing** group, `parentPageId` must be a page in that group and the caller needs `editGroupPages`. With optional `groupCreation`, path `groupId` is a **new** nanoid (no row yet), `parentPageId` is a page in the user’s **personal** group, and the body includes the same ciphertext as `PageMoveGroupCreationRequest` — Pro only; creates the `groups` + owner `group_members` rows then the first page (legacy parity). The 50 free-page cap applies to non‑Pro users for normal creates.",
   request: {
     params: groupIdPathSchema,
     body: {
