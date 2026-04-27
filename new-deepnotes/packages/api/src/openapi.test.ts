@@ -45,6 +45,17 @@ describe("getOpenApiDocument", () => {
     ).toBeDefined();
     expect(doc.paths?.["/api/users/me/2fa/disable"]?.post).toBeDefined();
     expect(doc.paths?.["/api/users/me/groups"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/starting"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/path"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/recent/remove"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/recent/clear"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/favorites"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/favorites/remove"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/favorites/clear"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/defaults/note"]?.patch).toBeDefined();
+    expect(doc.paths?.["/api/users/me/defaults/arrow"]?.patch).toBeDefined();
+    expect(doc.paths?.["/api/users/me/notifications"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/users/me/notifications/read"]?.post).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.post).toBeDefined();
   });

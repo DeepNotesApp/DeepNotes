@@ -33,6 +33,20 @@ export {
 export type { CreatePageBody } from "./group-pages.js";
 export { performGetUserGroupIds } from "./user-group-ids.js";
 export {
+  performAddFavoritePages,
+  performClearFavoritePages,
+  performClearRecentPages,
+  performGetCurrentPath,
+  performGetStartingPageId,
+  performLoadNotifications,
+  performMarkNotificationsRead,
+  performPatchDefaultArrow,
+  performPatchDefaultNote,
+  performRemoveFavoritePages,
+  performRemoveRecentPages,
+} from "./user-page-prefs.js";
+export type { UserNotificationItemDto } from "./user-page-prefs.js";
+export {
   performUserTwoFactorDisable,
   performUserTwoFactorEnableFinish,
   performUserTwoFactorEnableRequest,

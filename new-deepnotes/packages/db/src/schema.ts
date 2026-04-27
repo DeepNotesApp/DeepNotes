@@ -35,6 +35,11 @@ export const users = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::character(21)[]`),
+    /** Favorites lived only in KeyDB in legacy; persisted in Postgres for the new stack. */
+    favoritePageIds: char("favorite_page_ids", { length: 21 })
+      .array()
+      .notNull()
+      .default(sql`'{}'::character(21)[]`),
     personalGroupId: char("personal_group_id", { length: 21 }).notNull(),
     emailVerified: boolean("email_verified").notNull().default(false),
     publicKeyring: bytea("public_keyring").notNull(),

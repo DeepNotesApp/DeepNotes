@@ -25,6 +25,16 @@ import {
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 import {
+  userCurrentPathResponseSchema,
+  userDefaultArrowPatchSchema,
+  userDefaultNotePatchSchema,
+  userNotificationsLoadResponseSchema,
+  userNotificationsQuerySchema,
+  userPageIdsBodySchema,
+  userPagesPathQuerySchema,
+  userStartingPageResponseSchema,
+} from "./schemas/user-pages.js";
+import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   user2faEnableFinishRequestSchema,
@@ -227,6 +237,275 @@ registry.registerPath({
     },
     401: sessionUnauthorized401,
     403: sessionForbidden403,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/pages/starting",
+  summary: "Starting page id for the current user",
+  description: "Replaces legacy `users.pages.getStartingPageId` (reads `users.starting_page_id`).",
+  responses: {
+    200: {
+      description: "Nanoid of the user’s starting page.",
+      content: {
+        "application/json": {
+          schema: userStartingPageResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/pages/path",
+  summary: "Breadcrumb path from a page to the personal main page",
+  description:
+    "Replaces legacy `users.pages.getCurrentPath`. Uses `users_pages.last_parent_id` and may repair a missing parent link once (legacy KeyDB behavior).",
+  request: {
+    query: userPagesPathQuerySchema,
+  },
+  responses: {
+    200: {
+      description: "Ordered page ids from root (personal main) to `initialPageId`.",
+      content: {
+        "application/json": {
+          schema: userCurrentPathResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Missing or invalid `initialPageId` query parameter.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/pages/recent/remove",
+  summary: "Remove page ids from recent list",
+  description: "Replaces legacy `users.pages.removeRecentPages`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userPageIdsBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Updated `users.recent_page_ids`." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/pages/recent/clear",
+  summary: "Clear recent pages",
+  description: "Replaces legacy `users.pages.clearRecentPages`.",
+  responses: {
+    204: { description: "Recent list emptied." },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/pages/favorites",
+  summary: "Add favorite pages",
+  description:
+    "Replaces legacy `users.pages.addFavoritePages`. Favorites are stored in Postgres (`users.favorite_page_ids`); legacy used KeyDB only.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userPageIdsBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Favorites merged (order: new ids first, then existing)." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/pages/favorites/remove",
+  summary: "Remove favorite pages",
+  description: "Replaces legacy `users.pages.removeFavoritePages`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userPageIdsBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Favorites updated." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/pages/favorites/clear",
+  summary: "Clear favorite pages",
+  description: "Replaces legacy `users.pages.clearFavoritePages`.",
+  responses: {
+    204: { description: "Favorites emptied." },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/users/me/defaults/note",
+  summary: "Update encrypted default note template",
+  description: "Replaces legacy `users.pages.setEncryptedDefaultNote`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userDefaultNotePatchSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "`users.encrypted_default_note` updated." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "patch",
+  path: "/api/users/me/defaults/arrow",
+  summary: "Update encrypted default arrow template",
+  description: "Replaces legacy `users.pages.setEncryptedDefaultArrow`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userDefaultArrowPatchSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "`users.encrypted_default_arrow` updated." },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/notifications",
+  summary: "Load notifications for the current user",
+  description:
+    "Replaces legacy `users.pages.notifications.load`. Ciphertext fields are base64 in JSON.",
+  request: {
+    query: userNotificationsQuerySchema,
+  },
+  responses: {
+    200: {
+      description: "Window of notifications and optional `lastNotificationRead`.",
+      content: {
+        "application/json": {
+          schema: userNotificationsLoadResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Invalid query parameters.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/notifications/read",
+  summary: "Mark all notifications as read",
+  description:
+    "Replaces legacy `users.pages.notifications.markAsRead`. Sets `users.last_notification_read` to the latest linked notification id.",
+  responses: {
+    204: { description: "Read cursor updated (no-op if user has no notifications)." },
+    401: sessionUnauthorized401,
     503: sessionServiceUnavailable503,
   },
 });

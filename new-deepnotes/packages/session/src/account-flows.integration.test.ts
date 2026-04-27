@@ -19,7 +19,14 @@ import {
   type TemplateDbContext,
 } from "@deepnotes/db/testing/template-db";
 import * as schema from "@deepnotes/db/schema";
-import { devices, pages, sessions, users } from "@deepnotes/db/schema";
+import {
+  devices,
+  notifications,
+  pages,
+  sessions,
+  users,
+  usersNotifications,
+} from "@deepnotes/db/schema";
 
 import { performUserPasswordChange } from "./change-user-password.js";
 import {
@@ -49,6 +56,17 @@ import {
   performListGroupPages,
 } from "./group-pages.js";
 import { performGetUserGroupIds } from "./user-group-ids.js";
+import {
+  performAddFavoritePages,
+  performClearRecentPages,
+  performGetCurrentPath,
+  performGetStartingPageId,
+  performLoadNotifications,
+  performMarkNotificationsRead,
+  performPatchDefaultNote,
+  performRemoveFavoritePages,
+  performRemoveRecentPages,
+} from "./user-page-prefs.js";
 import { performUserRegister } from "./register-user.js";
 import { decryptUserEmail } from "./encrypt-user-email.js";
 import { hashUserEmail } from "./email-hash.js";
@@ -1301,6 +1319,201 @@ describe.skipIf(resolveTemplateContext() == null)(
             groupId: "nononononononononono1",
           }),
         ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("user page prefs: starting, path, favorites, recent, defaults, notifications", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `prefs-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const start = await performGetStartingPageId({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(start.startingPageId).toBe(reg.pageId);
+
+        const path1 = await performGetCurrentPath({
+          db,
+          env,
+          accessCookie: access,
+          initialPageId: reg.pageId,
+        });
+        expect(path1.pathPageIds).toEqual([reg.pageId]);
+
+        const newPageId = nanoid();
+        await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: newPageId,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+
+        const path2 = await performGetCurrentPath({
+          db,
+          env,
+          accessCookie: access,
+          initialPageId: newPageId,
+        });
+        expect(path2.pathPageIds).toEqual([reg.pageId, newPageId]);
+
+        await expect(
+          performGetCurrentPath({
+            db,
+            env,
+            accessCookie: access,
+            initialPageId: "nononononononononono1",
+          }),
+        ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+
+        await performAddFavoritePages({
+          db,
+          env,
+          accessCookie: access,
+          pageIds: [reg.pageId, newPageId],
+        });
+        const [favRow] = await db
+          .select({ favoritePageIds: users.favoritePageIds })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(favRow?.favoritePageIds).toEqual([reg.pageId, newPageId]);
+
+        await performRemoveFavoritePages({
+          db,
+          env,
+          accessCookie: access,
+          pageIds: [reg.pageId],
+        });
+        const [favAfter] = await db
+          .select({ favoritePageIds: users.favoritePageIds })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(favAfter?.favoritePageIds).toEqual([newPageId]);
+
+        await expect(
+          performRemoveRecentPages({
+            db,
+            env,
+            accessCookie: access,
+            pageIds: ["nononononononononono1"],
+          }),
+        ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+
+        await expect(
+          performRemoveRecentPages({
+            db,
+            env,
+            accessCookie: access,
+            pageIds: [newPageId],
+          }),
+        ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+
+        await performRemoveRecentPages({
+          db,
+          env,
+          accessCookie: access,
+          pageIds: [reg.pageId],
+        });
+        const [recentMid] = await db
+          .select({ recentPageIds: users.recentPageIds })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(recentMid?.recentPageIds).toEqual([]);
+
+        await performClearRecentPages({
+          db,
+          env,
+          accessCookie: access,
+        });
+        const [recentClear] = await db
+          .select({ recentPageIds: users.recentPageIds })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(recentClear?.recentPageIds).toEqual([]);
+
+        const newNote = rand32();
+        await performPatchDefaultNote({
+          db,
+          env,
+          accessCookie: access,
+          userEncryptedDefaultNote: newNote,
+        });
+        const [noteRow] = await db
+          .select({ enc: users.encryptedDefaultNote })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(Buffer.from(newNote).equals(noteRow!.enc)).toBe(true);
+
+        const [n] = await db
+          .insert(notifications)
+          .values({
+            type: "unit-test",
+            encryptedContent: Buffer.from("hello-notif"),
+          })
+          .returning({ id: notifications.id });
+
+        await db.insert(usersNotifications).values({
+          userId: reg.userId,
+          notificationId: n!.id,
+          encryptedSymmetricKey: Buffer.from("sym-key"),
+        });
+
+        const loaded = await performLoadNotifications({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(loaded.hasMore).toBe(false);
+        expect(loaded.items).toHaveLength(1);
+        expect(loaded.items[0]!.id).toBe(n!.id);
+        expect(loaded.items[0]!.type).toBe("unit-test");
+        expect(loaded.lastNotificationRead).toBeNull();
+
+        await performMarkNotificationsRead({
+          db,
+          env,
+          accessCookie: access,
+        });
+        const [readRow] = await db
+          .select({ lastNotificationRead: users.lastNotificationRead })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(readRow?.lastNotificationRead).toBe(n!.id);
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

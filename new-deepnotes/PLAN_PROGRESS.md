@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped (2026-04-27):** first **pages/groups** vertical — `GET /api/users/me/groups`, `GET/POST /api/groups/:groupId/pages` (list + create; see [Pages/groups REST — slice 1](#pagesgroups-rest--slice-1)). **Still ahead:** user page prefs, remaining `groupsRouter` / `pagesRouter` rows, WS→REST parity, realtime/collab, Stripe. |
+| **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped:** [pages/groups slice 1](#pagesgroups-rest--slice-1); **[users.pages prefs slice 2](#userspages-rest--slice-2)** (starting/path, recent/favorites, encrypted defaults, notifications + migration `favorite_page_ids`). **Still ahead:** remaining `groupsRouter` / `pagesRouter`, WS→REST parity, realtime/collab, Stripe. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -38,7 +38,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
 - [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change, **2FA** bodies + finish TOTP (`schemas/users.test.ts`).
 - [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
-- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — register / email change / password change / **login + refresh** (including **replay of pre-rotation refresh JWT** → 401) / **refresh cookie guards** (`loggedIn` not `true`, missing refresh) / demo **403** / **2FA** (enable → finish → TOTP login; **recovery-code login** + DB-backed **one-time consumption** via `decryptRecoveryCodes` length 5; wrong finish token; missing MFA; bad TOTP) / **groups + pages** (`performGetUserGroupIds`, `performListGroupPages`, `performCreatePage` + unknown group **404**). `@deepnotes/db` `template-db.test.ts` — clone smoke + **sessions / devices / pages→groups / group_members→users+groups FK** rejects. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
+- [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` — register / email change / password change / **login + refresh** (including **replay of pre-rotation refresh JWT** → 401) / **refresh cookie guards** (`loggedIn` not `true`, missing refresh) / demo **403** / **2FA** (enable → finish → TOTP login; **recovery-code login** + DB-backed **one-time consumption** via `decryptRecoveryCodes` length 5; wrong finish token; missing MFA; bad TOTP) / **groups + pages** (`performGetUserGroupIds`, `performListGroupPages`, `performCreatePage` + unknown group **404**) / **user page prefs** ([slice 2](#userspages-rest--slice-2): starting + path + favorites + recent remove/clear + default note PATCH + notifications load + mark read). `@deepnotes/db` `template-db.test.ts` — clone smoke + **sessions / devices / pages→groups / group_members→users+groups FK** rejects. See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail).
 
 ### Phase 3 test coverage (detail)
 
@@ -46,7 +46,7 @@ Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `
 
 **How to run locally:** ensure `.env` at `new-deepnotes/.env` has `DATABASE_URL` and (for template create/drop) `DATABASE_ADMIN_URL` with a role that can `CREATE DATABASE`. Then:
 
-- `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts`
+- `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts` (**18** cases when DB env set, including prefs slice)
 - `pnpm --filter @deepnotes/db exec vitest run src/template-db.test.ts`
 
 CI should set the same vars against the workflow Postgres service (role with `CREATEDB`).
@@ -74,6 +74,7 @@ CI should set the same vars against the workflow Postgres service (role with `CR
 | **2FA login with recovery code** | `performUserTwoFactorEnableFinish` → `performSessionLogin` with `recoveryCode` (no TOTP) | **200**-equivalent (`sessionId`); `decryptRecoveryCodes` on row shows **5** hashes left (one consumed). |
 | **2FA recovery code reuse** | Second `performSessionLogin` with same plaintext recovery code, new IP/UA | **401** “Invalid recovery code.” |
 | **Groups + pages (personal)** | `performUserRegister` then `performGetUserGroupIds` / `performListGroupPages` / `performCreatePage` (second page, `parentPageId` = initial page) | `groupIds` = `[personalGroupId]`; list returns initial `pageId`; create returns `numFreePages` **1** for default `plan`; `users.num_free_pages` = 1; two rows in `pages` for group; unknown `groupId` list → **404** `NOT_FOUND`. |
+| **User page prefs** | Register + access JWT; `performGetStartingPageId`; `performGetCurrentPath` (root page + child); unknown page **404**; `performAddFavoritePages` / `performRemoveFavoritePages` (order on `users.favorite_page_ids`); `performRemoveRecentPages` bogus id **404** / missing child in recent **404** / remove root then `recent` empty + `performClearRecentPages`; `performPatchDefaultNote`; insert `notifications` + `users_notifications` → `performLoadNotifications` (base64 ciphertext) + `performMarkNotificationsRead` → `users.last_notification_read` | Matches legacy semantics where tested; favorites column from migration `0001_favorite_page_ids`. |
 
 **`@deepnotes/db` real Postgres (`template-db.test.ts`):**
 
@@ -103,7 +104,9 @@ CI should set the same vars against the workflow Postgres service (role with `CR
 - [x] **`DELETE /api/users/me`** — replaces legacy `users.account.delete`: JSON `{ "loginHash" }` (base64); verifies access JWT + password (`encrypted_rehashed_login_hash`); blocks when any membership has `member_count > 1` and `owner_count <= 1`; deletes join invites/requests, solo-member groups (cascade pages), remaining `group_members`, then user row; clears session cookies; optional `deleteStripeCustomer(customerId)` hook (worker can wire Stripe later; failures swallowed like legacy).
 - [x] **`POST /api/users/me/password`** — replaces legacy WS `change-password` (two RPC steps → one REST call after client re-wraps keyrings). **`performUserPasswordChange`** (`packages/session/src/change-user-password.ts`): body `oldLoginHash`, `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` (base64, same semantics as `POST /api/users`); verifies current password; **403** if `users.demo === true`; updates `encrypted_rehashed_login_hash`, `encrypted_private_keyring`, `encrypted_symmetric_keyring`; sets **`sessions.invalidated`** for all user sessions; **204** + **`buildClearSessionCookies`**. Contract: `userPasswordChangeRequestSchema` in `@deepnotes/api`; map in [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md).
 
-### Account routes still to ship (Phase 3)
+### Account routes — detail (Phase 3)
+
+- [x] **`users.pages` prefs (HTTP)** — [Users/pages REST — slice 2](#userspages-rest--slice-2); [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) `users.pages` rows.
 
 - [x] **Email change**
   - [x] `POST /api/users/me/email-change` — `performUserEmailChangeRequest`: `oldLoginHash` + `newEmail`; **403** demo, **400** bad password or “email already in use” (global `email_hash` match, same as legacy); sets `encrypted_new_email` + 6-digit `email_verification_code`; Resend (subject/body like legacy) or **200** `{ "emailVerificationCode" }` when `SEND_EMAILS=false`; **204** when emailed.
@@ -136,9 +139,21 @@ CI should set the same vars against the workflow Postgres service (role with `CR
 
 **Intentional gaps (next slices):** `pages.create` optional **`groupCreation`** (new non-personal group + first page) not exposed yet; no Redis locks (legacy redlock); **`GET /api/groups/:groupId/pages`** is **auth-only** (legacy allowed optional auth for public read — can add later).
 
+### Users/pages REST — slice 2
+
+**Goal:** ship legacy `users.pages` *prefs* surface on REST + Drizzle so the SPA can manage recents, favorites, breadcrumbs, defaults, and notifications without tRPC/KeyDB.
+
+| Layer | What shipped |
+|-------|----------------|
+| **`@deepnotes/db`** | Migration **`0001_favorite_page_ids`**: `users.favorite_page_ids char(21)[] NOT NULL DEFAULT '{}'`. Legacy stored favorites only in KeyDB; greenfield persists them in Postgres (RESTART_PLAN: portable Redis, no `DataAbstraction` mirror for this field). |
+| **`@deepnotes/session`** | `user-page-prefs.ts`: `performGetStartingPageId`, `performGetCurrentPath` (`users_pages.last_parent_id` walk + one-shot repair like legacy KeyDB), `performRemoveRecentPages` / `performClearRecentPages`, `performAddFavoritePages` / `performRemoveFavoritePages` / `performClearFavoritePages`, `performPatchDefaultNote` / `performPatchDefaultArrow`, `performLoadNotifications`, `performMarkNotificationsRead`. |
+| **`@deepnotes/api`** | `schemas/user-pages.ts` — Zod + OpenAPI for query/body/response shapes; wired in `openapi.ts`. |
+| **`@deepnotes/api-worker`** | Hono routes: `GET …/me/pages/starting`, `GET …/me/pages/path`, `POST …/pages/recent/remove|clear`, `POST …/pages/favorites|…/remove|…/clear`, `PATCH …/me/defaults/note|arrow`, `GET …/me/notifications`, `POST …/me/notifications/read`. |
+
+**Cutover note:** Existing production users who had favorites only in KeyDB will see an **empty** `favorite_page_ids` after migration until a one-off backfill is run (if ever needed); new installs and new favorites use Postgres only.
+
 ### Not started (Phase 3 — pages, groups, infra)
 
-- [ ] **`users.pages`** prefs: notifications, starting page, path, recent/favorites, encrypted defaults (`GET/PATCH` per [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md)).
 - [ ] **Remaining `groupsRouter`:** `main-page`, `members`, password, privacy, soft delete / restore / purge.
 - [ ] **Remaining `pagesRouter`:** bump, backlinks, snapshots, deletion, move (plus **`groupCreation`** on create if still required for parity).
 - [ ] **Realtime / collab** (new or adapted protocols; no key rotation).
@@ -191,9 +206,9 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 | Package / app | Role | What runs today | Gaps (highest value next) |
 |---------------|------|------------------|---------------------------|
 | **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts` (6 cases): clone template, empty `users`, **FK** rejects for orphan `sessions`, **`devices`→`users`**, **`pages`→`groups`**, **`group_members`→`users`**, **`group_members`→`groups`** | More paths when groups CRUD lands (join invites/requests, cascades from `groups` delete) |
-| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**17** cases when DB env set) — … + **groups/pages** (`performGetUserGroupIds`, `performListGroupPages`, `performCreatePage`, unknown group **404**); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; **Pro-only** create in non-personal group; **viewer** cannot create; optional `groupCreation` on create |
-| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + session + 2FA + **me/groups** + **groups/{id}/pages**); **`schemas/users.test.ts`** (email/password change, 2fa finish); **`schemas/pages-groups.ts`** | Optional OpenAPI **snapshot**; Zod tests for `pages-groups` query/body edge cases |
-| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: 503 when env missing — includes **2FA** + **groups/pages** routes in matrix | **200** tests with stub `SessionEnv` + template DB (heavier) |
+| **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**18** cases when DB env set) — … + **groups/pages** + **user page prefs** ([slice 2](#userspages-rest--slice-2)); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; **Pro-only** create in non-personal group; **viewer** cannot create; optional `groupCreation` on create; pagination edge cases on `performLoadNotifications` |
+| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + session + 2FA + **me/groups** + **users/pages\*** prefs paths + **groups/{id}/pages**); **`schemas/users.test.ts`** (email/password change, 2fa finish); **`schemas/pages-groups.ts`**, **`schemas/user-pages.ts`** | Optional OpenAPI **snapshot**; Zod tests for `pages-groups` / `user-pages` query edge cases |
+| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: **34** tests (503 matrix when env/Hyperdrive missing) — **2FA**, **groups/pages**, **users/pages prefs** | **200** tests with stub `SessionEnv` + template DB (heavier) |
 | **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
 
 **Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
@@ -214,8 +229,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [ ] Drizzle migrations from empty DB documented for production upgrades.
 - [ ] Cold API dev start under **2 s** (no `inspect-brk` by default) — validate on a typical laptop.
 - [ ] Collab + realtime: at least one integration test each (Redis + deps).
-- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` `template-db.test.ts` (clone + **sessions / devices / pages / `group_members`** FK rejects); `@deepnotes/session` `account-flows.integration.test.ts` (register, email change, password change, sessions invalidation, login + refresh + **stale JWT replay**, refresh **cookie guards**, **2FA** TOTP + **recovery codes**, **groups list + page list + page create**).
-- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** crypto + Zod + Resend unit tests; **Postgres** as in [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) (**17** session + 6 db integration cases when DB env is set). **Next:** Redis failed-login integration; refresh **expired** JWT; more **pages/groups** routes; Stripe when billing exists.
+- [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` `template-db.test.ts` (clone + **sessions / devices / pages / `group_members`** FK rejects); `@deepnotes/session` `account-flows.integration.test.ts` (register, email change, password change, sessions invalidation, login + refresh + **stale JWT replay**, refresh **cookie guards**, **2FA** TOTP + **recovery codes**, **groups list + page list + page create**, **users.pages prefs** incl. notifications + `favorite_page_ids`).
+- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** crypto + Zod + Resend unit tests; **Postgres** as in [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) (**18** session + 6 db integration cases when DB env is set). **Next:** Redis failed-login integration; refresh **expired** JWT; more **pages/groups** routes; Stripe when billing exists.
 - [x] No tRPC / superjson / RevenueCat / key-rotation in **this** tree (keep absent); product sign-off for IAP/Stripe when billing ships.
 - [x] Client: zero undocumented forks, or a short owned exception list — see [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
 - [ ] Cloudflare: deploy runbook; Hyperdrive + Postgres + Redis proven in staging; collab/realtime topology chosen and load-tested.
@@ -226,7 +241,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ## Phase 3 working order (suggested)
 
-Use this when resuming: **(done)** account HTTP through 2FA; **Postgres** for 2FA + refresh guards; **`@deepnotes/db`** FKs through **`group_members`**. **(done 2026-04-27)** First **pages/groups** slice: `GET /api/users/me/groups`, `GET/POST /api/groups/:groupId/pages` + session services + integration test. **(next)** Remaining **`users.pages`** prefs; **`groupsRouter`** (members, main page, password, privacy, delete/restore/purge); **`pagesRouter`** (bump, backlinks, snapshots, delete, move; optional **`groupCreation`** on create); each slice + **template DB** tests where SQL risk is high. **(then)** **realtime + collab** (no key rotation) and **Stripe** + wire billing hooks on account routes.
+Use this when resuming: **(done)** account HTTP through 2FA; **Postgres** for 2FA + refresh guards; **`@deepnotes/db`** FKs through **`group_members`**. **(done)** First **pages/groups** slice + **`users.pages` prefs** ([slice 1](#pagesgroups-rest--slice-1), [slice 2](#userspages-rest--slice-2)). **(next)** **`groupsRouter`** (members, main page, password, privacy, delete/restore/purge); **`pagesRouter`** (bump, backlinks, snapshots, delete, move; optional **`groupCreation`** on create); each slice + **template DB** tests where SQL risk is high. **(then)** **realtime + collab** (no key rotation) and **Stripe** + wire billing hooks on account routes.
 
 ---
 
@@ -234,6 +249,7 @@ Use this when resuming: **(done)** account HTTP through 2FA; **Postgres** for 2F
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **Phase 3 — `users.pages` prefs (slice 2):** migration `0001_favorite_page_ids`; `user-page-prefs.ts` + Hono/OpenAPI routes (starting, path, recent, favorites, defaults PATCH, notifications); `schemas/user-pages.ts`; integration test **user page prefs**; TRPC_REST_MAP marked implemented; PLAN_PROGRESS sections + matrix counts (**18** session integration, **34** worker 503 rows). |
 | 2026-04-27 | **Phase 3 — pages/groups slice 1:** `performGetUserGroupIds`, `performListGroupPages`, `performCreatePage` + `group-permissions.ts`; OpenAPI + Zod `pages-groups.ts`; api-worker `GET /api/users/me/groups`, `GET/POST /api/groups/:groupId/pages` (**201** create); [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) marked implemented for `getGroupIds`, `getPages`, `pages.create`; integration test **groups + pages**; PLAN_PROGRESS [Pages/groups REST — slice 1](#pagesgroups-rest--slice-1) + matrix bumps. |
 | 2026-04-27 | **More real Postgres tests:** `account-flows.integration.test.ts` — **2FA recovery-code** login + one-time use + `decryptRecoveryCodes` count; **replay** of first refresh JWT after two rotations (**401**); **`loggedIn`** / missing refresh guards. `template-db.test.ts` — **`group_members`** FK to `users` and to `groups`. PLAN_PROGRESS: run commands, expanded tables, matrix + success criteria + working order. |
 | 2026-04-27 | **Real Postgres tests (session + db):** `account-flows.integration.test.ts` — login + double refresh, wrong password, demo **403**, **2FA** (enable/finish + TOTP login, wrong finish code, MFA required, bad TOTP). `template-db.test.ts` — orphan **`sessions`**, **`devices`**, **`pages`→`groups`** FK rejects. PLAN_PROGRESS: Phase 3 detail table, package matrix, success criteria, working order. |

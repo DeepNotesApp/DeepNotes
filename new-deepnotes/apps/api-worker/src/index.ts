@@ -5,6 +5,11 @@ import {
   groupPageCreateRequestSchema,
   groupPagesListQuerySchema,
   healthResponseSchema,
+  userDefaultArrowPatchSchema,
+  userDefaultNotePatchSchema,
+  userNotificationsQuerySchema,
+  userPageIdsBodySchema,
+  userPagesPathQuerySchema,
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
   userAccountDeleteRequestSchema,
@@ -628,6 +633,524 @@ app.get("/api/users/me/groups", async (c) => {
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
     });
     return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/users/me/pages/starting", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performGetStartingPageId } = await import("@deepnotes/session");
+    const out = await performGetStartingPageId({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/users/me/pages/path", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const qParsed = userPagesPathQuerySchema.safeParse({
+    initialPageId: c.req.query("initialPageId") ?? undefined,
+  });
+  if (!qParsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: qParsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performGetCurrentPath } = await import("@deepnotes/session");
+    const out = await performGetCurrentPath({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      initialPageId: qParsed.data.initialPageId,
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/pages/recent/remove", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+  const parsed = userPageIdsBodySchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performRemoveRecentPages } = await import("@deepnotes/session");
+    await performRemoveRecentPages({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageIds: parsed.data.pageIds,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/pages/recent/clear", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performClearRecentPages } = await import("@deepnotes/session");
+    await performClearRecentPages({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/pages/favorites", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+  const parsed = userPageIdsBodySchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performAddFavoritePages } = await import("@deepnotes/session");
+    await performAddFavoritePages({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageIds: parsed.data.pageIds,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/pages/favorites/remove", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+  const parsed = userPageIdsBodySchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performRemoveFavoritePages } = await import("@deepnotes/session");
+    await performRemoveFavoritePages({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageIds: parsed.data.pageIds,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/pages/favorites/clear", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performClearFavoritePages } = await import("@deepnotes/session");
+    await performClearFavoritePages({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.patch("/api/users/me/defaults/note", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+  const parsed = userDefaultNotePatchSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performPatchDefaultNote } = await import("@deepnotes/session");
+    await performPatchDefaultNote({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      userEncryptedDefaultNote: parsed.data.userEncryptedDefaultNote,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.patch("/api/users/me/defaults/arrow", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+  const parsed = userDefaultArrowPatchSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performPatchDefaultArrow } = await import("@deepnotes/session");
+    await performPatchDefaultArrow({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      userEncryptedDefaultArrow: parsed.data.userEncryptedDefaultArrow,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/users/me/notifications", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const qParsed = userNotificationsQuerySchema.safeParse({
+    lastNotificationId: c.req.query("lastNotificationId") ?? undefined,
+  });
+  if (!qParsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: qParsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performLoadNotifications } = await import("@deepnotes/session");
+    const out = await performLoadNotifications({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      lastNotificationId: qParsed.data.lastNotificationId,
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/notifications/read", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performMarkNotificationsRead } = await import("@deepnotes/session");
+    await performMarkNotificationsRead({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.body(null, 204);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

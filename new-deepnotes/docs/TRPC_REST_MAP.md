@@ -34,17 +34,17 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
-| `users.pages.notifications.load` | `GET /api/users/me/notifications` |
-| `users.pages.notifications.markAsRead` | `POST /api/users/me/notifications/read` |
-| `users.pages.getStartingPageId` | `GET /api/users/me/pages/starting` |
-| `users.pages.getCurrentPath` | `GET /api/users/me/pages/path` |
-| `users.pages.removeRecentPages` | `POST /api/users/me/pages/recent/remove` |
-| `users.pages.clearRecentPages` | `POST /api/users/me/pages/recent/clear` |
-| `users.pages.addFavoritePages` | `POST /api/users/me/pages/favorites` |
-| `users.pages.removeFavoritePages` | `POST /api/users/me/pages/favorites/remove` |
-| `users.pages.clearFavoritePages` | `POST /api/users/me/pages/favorites/clear` |
-| `users.pages.setEncryptedDefaultNote` | `PATCH /api/users/me/defaults/note` |
-| `users.pages.setEncryptedDefaultArrow` | `PATCH /api/users/me/defaults/arrow` |
+| `users.pages.notifications.load` | `GET /api/users/me/notifications` (**implemented** — `performLoadNotifications`; ciphertext fields base64 in JSON; optional `lastNotificationId` query) |
+| `users.pages.notifications.markAsRead` | `POST /api/users/me/notifications/read` (**implemented** — `performMarkNotificationsRead`) |
+| `users.pages.getStartingPageId` | `GET /api/users/me/pages/starting` (**implemented** — `performGetStartingPageId`) |
+| `users.pages.getCurrentPath` | `GET /api/users/me/pages/path?initialPageId=` (**implemented** — `performGetCurrentPath`; `users_pages` repair like legacy) |
+| `users.pages.removeRecentPages` | `POST /api/users/me/pages/recent/remove` (**implemented** — JSON `{ "pageIds": [...] }`; `performRemoveRecentPages`) |
+| `users.pages.clearRecentPages` | `POST /api/users/me/pages/recent/clear` (**implemented** — `performClearRecentPages`) |
+| `users.pages.addFavoritePages` | `POST /api/users/me/pages/favorites` (**implemented** — `performAddFavoritePages`; favorites in Postgres `users.favorite_page_ids`, migration `0001_favorite_page_ids`) |
+| `users.pages.removeFavoritePages` | `POST /api/users/me/pages/favorites/remove` (**implemented** — `performRemoveFavoritePages`) |
+| `users.pages.clearFavoritePages` | `POST /api/users/me/pages/favorites/clear` (**implemented** — `performClearFavoritePages`) |
+| `users.pages.setEncryptedDefaultNote` | `PATCH /api/users/me/defaults/note` (**implemented** — JSON `userEncryptedDefaultNote` base64; `performPatchDefaultNote`) |
+| `users.pages.setEncryptedDefaultArrow` | `PATCH /api/users/me/defaults/arrow` (**implemented** — `performPatchDefaultArrow`) |
 | `users.pages.getGroupIds` | `GET /api/users/me/groups` (**implemented** — `performGetUserGroupIds` in `@deepnotes/session`) |
 
 ## Groups (`groupsRouter`)

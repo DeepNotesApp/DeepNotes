@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "favorite_page_ids" char(21)[] DEFAULT '{}'::character(21)[] NOT NULL;

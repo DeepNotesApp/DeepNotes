@@ -32,6 +32,17 @@ export {
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
 export {
+  userCurrentPathResponseSchema,
+  userDefaultArrowPatchSchema,
+  userDefaultNotePatchSchema,
+  userNotificationItemSchema,
+  userNotificationsLoadResponseSchema,
+  userNotificationsQuerySchema,
+  userPageIdsBodySchema,
+  userPagesPathQuerySchema,
+  userStartingPageResponseSchema,
+} from "./schemas/user-pages.js";
+export {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,
