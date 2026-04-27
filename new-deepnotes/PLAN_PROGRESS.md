@@ -31,6 +31,15 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 
 ## Phase 3 checklist (REST + Drizzle)
 
+### Test coverage (Phase 3 account surface)
+
+- [x] **Rate limit:** failed login counters (`login-rate-limit.test.ts`).
+- [x] **Email crypto:** `encryptUserEmail` / `decryptUserEmail` + `hashUserEmail` (legacy parity cases).
+- [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
+- [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change byte fields (`schemas/users.test.ts`).
+- [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
+- [ ] **DB integration:** register → email-change request/confirm (or password change) against **template DB** with real `perform*` + minimal fixtures.
+
 ### Sessions + account (current)
 
 - [x] Document **sessions** REST paths + request schemas in OpenAPI; demo + `users/me` contracts updated.
@@ -102,6 +111,18 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [ ] **Contract tests** for the fetch wrapper (MSW or recorded OpenAPI fixtures)—optional until multiple features consume the API.
 - [ ] **E2E smoke** (Playwright recommended): login or session refresh with **httpOnly cookies** against **local compose** or **Cloudflare preview**—add CI job when stable enough (can start `manual`/`workflow_dispatch` if cost is a concern).
 
+#### Automated tests — package matrix (maintenance)
+
+| Package / app | Role | What runs today | Gaps (highest value next) |
+|---------------|------|------------------|---------------------------|
+| **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts`: clone template DB, smoke SQL | More assertions on FKs / critical columns after schema grows |
+| **`@deepnotes/session`** | Auth, account, crypto orchestration | `login-rate-limit.test.ts` (Redis port in memory); **`encrypt-user-email.test.ts`** (round-trip, case exceptions, tamper); **`email-hash.test.ts`** (stability, secret sensitivity, exceptions); **`send-email-change-code.test.ts`** (SEND_EMAILS=false no fetch, missing key **503**, Resend **502**/OK) | **Integration:** `performUserRegister`, login, password/email change against **template DB** + mocked Redis; JWT cookie helpers |
+| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + route registry); **`schemas/users.test.ts`** (email/password change bodies, 6-digit code) | Schemas for sessions + remaining routes; optional **snapshot** of OpenAPI fragment for drift |
+| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: health, OpenAPI JSON, **503** when secrets/DB not bound (incl. email-change paths) | **200-path tests** with test `SessionEnv` + Hyperdrive stub + template DB (heavier CI job) |
+| **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
+
+**Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
+
 ### Progress vs legacy (reference only)
 
 | Legacy (`apps/client`) | New (`new-deepnotes/apps/web`) |
@@ -119,7 +140,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [ ] Cold API dev start under **2 s** (no `inspect-brk` by default) — validate on a typical laptop.
 - [ ] Collab + realtime: at least one integration test each (Redis + deps).
 - [x] SQL-heavy paths: real Postgres tests; prefer **template DB** cloning (§5.7) — `@deepnotes/db` template test.
-- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0).
+- [ ] Auth, crypto, Stripe: automated coverage beyond smoke; **no** generic repository layer (§5.0). **Progress:** crypto email path (`encrypt-user-email`, `email-hash`), Resend branch behavior, and **user** Zod bodies are covered in Vitest; session **perform\*** flows still need DB integration tests.
 - [x] No tRPC / superjson / RevenueCat / key-rotation in **this** tree (keep absent); product sign-off for IAP/Stripe when billing ships.
 - [x] Client: zero undocumented forks, or a short owned exception list — see [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
 - [ ] Cloudflare: deploy runbook; Hyperdrive + Postgres + Redis proven in staging; collab/realtime topology chosen and load-tested.
@@ -138,6 +159,7 @@ Use this when resuming: **(done)** account HTTP surface through email change inc
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | **Tests:** `@deepnotes/session` — `encrypt-user-email.test.ts`, `email-hash.test.ts`, `send-email-change-code.test.ts`; `@deepnotes/api` — `schemas/users.test.ts`; api-worker — email-change routes in `503` matrix; PLAN_PROGRESS — package test matrix + Phase 3 test checklist. |
 | 2026-04-26 | Phase 3: **email change** — `POST /api/users/me/email-change` + `…/confirm` (`change-user-email.ts`, `decryptUserEmail`, `send-email-change-code`); `userEmailChange*Request` schemas, OpenAPI, Hono; TRPC_REST_MAP; PLAN_PROGRESS detail + suggested Phase 3 order. |
 | 2026-04-26 | Phase 3: **`POST /api/users/me/password`** — `performUserPasswordChange` (`change-user-password.ts`): old password verify, demo **403**, new keyrings + PHC, invalidate all `sessions`, clear cookies **204**; `userPasswordChangeRequestSchema`, OpenAPI + worker; export **`byteB64`** from `@deepnotes/api`; TRPC_REST_MAP rows for change-password; PLAN_PROGRESS Phase 3 account section expanded. |
 | 2026-04-26 | Phase 2 + §5.8: `@deepnotes/web` — Vitest + happy-dom + `@vue/test-utils`, `vite.config` from `vitest/config`, `src/app.test.ts`; Phase 3: `DELETE /api/users/me` + `performUserAccountDelete` (ownership guard, Drizzle tx, clear cookies); `userAccountDeleteRequestSchema` + OpenAPI; api-worker route; TRPC_REST_MAP note on delete body / Stripe hook. |
