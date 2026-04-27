@@ -14,6 +14,7 @@
     "@deepnotes/api": "workspace:*",
     "@deepnotes/db": "workspace:*",
     "@deepnotes/session": "workspace:*",
+    "@upstash/redis": "^1.34.8",
     "hono": "^4.7.7"
   },
   "devDependencies": {

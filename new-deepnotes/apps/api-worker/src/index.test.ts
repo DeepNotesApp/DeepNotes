@@ -26,6 +26,8 @@ describe("api-worker", () => {
     ["POST", "/api/sessions/login"],
     ["POST", "/api/sessions/refresh"],
     ["POST", "/api/sessions/logout"],
+    ["POST", "/api/sessions/demo"],
+    ["GET", "/api/users/me"],
   ] as const)("returns 503 for %s %s when auth env is not configured", async (method, path) => {
     const res = await app.request(`http://test${path}`, { method });
     expect(res.status).toBe(503);
@@ -34,13 +36,4 @@ describe("api-worker", () => {
     });
   });
 
-  it("POST /api/sessions/demo returns 501 until registration is wired", async () => {
-    const res = await app.request("http://test/api/sessions/demo", {
-      method: "POST",
-    });
-    expect(res.status).toBe(501);
-    await expect(res.json()).resolves.toMatchObject({
-      code: "NOT_IMPLEMENTED",
-    });
-  });
 });

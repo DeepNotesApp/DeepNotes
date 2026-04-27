@@ -4,6 +4,8 @@ import { authenticator } from "otplib";
 
 import { devices, users } from "@deepnotes/db/schema";
 
+import { incrementFailedLoginAttempts } from "./login-rate-limit.js";
+import type { SessionRedisPort } from "./login-rate-limit.js";
 import { SessionError } from "./errors.js";
 import {
   decryptRecoveryCodes,
@@ -28,6 +30,12 @@ export async function assertTwoFactorOk(input: {
   rememberDevice: boolean | undefined;
   userAuthenticatorKeyB64: string;
   userRecoveryCodesKeyB64: string;
+  /** When set, increments failed-login counters on bad token / recovery (legacy `sessions.login`). */
+  failedLoginRateLimit?: {
+    redis: SessionRedisPort;
+    email: string;
+    ip: string;
+  };
 }): Promise<void> {
   if (input.device.trusted) {
     return;
@@ -47,11 +55,25 @@ export async function assertTwoFactorOk(input: {
       }
       return;
     }
+    if (input.failedLoginRateLimit != null) {
+      await incrementFailedLoginAttempts(
+        input.failedLoginRateLimit.redis,
+        input.failedLoginRateLimit.email,
+        input.failedLoginRateLimit.ip,
+      );
+    }
     throw new SessionError(401, "UNAUTHORIZED", "Invalid authenticator token.");
   }
 
   if (input.recoveryCode != null) {
     if (input.user.encryptedRecoveryCodes == null) {
+      if (input.failedLoginRateLimit != null) {
+        await incrementFailedLoginAttempts(
+          input.failedLoginRateLimit.redis,
+          input.failedLoginRateLimit.email,
+          input.failedLoginRateLimit.ip,
+        );
+      }
       throw new SessionError(401, "UNAUTHORIZED", "Invalid recovery code.");
     }
     const recoveryCodes = decryptRecoveryCodes(
@@ -74,6 +96,13 @@ export async function assertTwoFactorOk(input: {
       }
     }
 
+    if (input.failedLoginRateLimit != null) {
+      await incrementFailedLoginAttempts(
+        input.failedLoginRateLimit.redis,
+        input.failedLoginRateLimit.email,
+        input.failedLoginRateLimit.ip,
+      );
+    }
     throw new SessionError(401, "UNAUTHORIZED", "Invalid recovery code.");
   }
 

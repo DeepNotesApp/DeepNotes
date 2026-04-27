@@ -13,6 +13,11 @@ import { devices, users } from "@deepnotes/db/schema";
 import { cookieOptionsFromEnv } from "./cookies.js";
 import { getDeviceHash } from "./device-hash.js";
 import type { SessionEnv } from "./env.js";
+import {
+  checkFailedLoginAttempts,
+  incrementFailedLoginAttempts,
+  type SessionRedisPort,
+} from "./login-rate-limit.js";
 import { SessionError } from "./errors.js";
 import { hashUserEmail } from "./email-hash.js";
 import {
@@ -43,8 +48,25 @@ export async function performSessionLogin(input: {
   body: SessionLoginBody;
   clientIp: string;
   userAgent: string;
+  /** When set (e.g. Upstash in Workers), enforces legacy failed-login limits. */
+  redis?: SessionRedisPort;
 }): Promise<{ json: Record<string, unknown>; cookieLines: string[] }> {
   await ensureSodiumReady();
+
+  if (input.redis != null) {
+    const { excessive, loginBlockTTLMinutes } = await checkFailedLoginAttempts(
+      input.redis,
+      input.body.email,
+      input.clientIp,
+    );
+    if (excessive) {
+      throw new SessionError(
+        429,
+        "TOO_MANY_REQUESTS",
+        `Too many failed login attempts. Try again in ${String(loginBlockTTLMinutes)} minutes.`,
+      );
+    }
+  }
 
   const exceptions = input.env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS ?? "";
   const emailHashBuf = Buffer.from(
@@ -82,6 +104,13 @@ export async function performSessionLogin(input: {
 
   const user = rows[0];
   if (user == null) {
+    if (input.redis != null) {
+      await incrementFailedLoginAttempts(
+        input.redis,
+        input.body.email,
+        input.clientIp,
+      );
+    }
     throw new SessionError(401, "UNAUTHORIZED", "Incorrect email or password.");
   }
 
@@ -99,6 +128,13 @@ export async function performSessionLogin(input: {
 
   const passwordOk = sodium.memcmp(passwordValues.hash, passwordHashValues.hashBytes);
   if (!passwordOk) {
+    if (input.redis != null) {
+      await incrementFailedLoginAttempts(
+        input.redis,
+        input.body.email,
+        input.clientIp,
+      );
+    }
     throw new SessionError(401, "UNAUTHORIZED", "Incorrect email or password.");
   }
 
@@ -164,6 +200,14 @@ export async function performSessionLogin(input: {
         rememberDevice: input.body.rememberDevice,
         userAuthenticatorKeyB64: input.env.USER_AUTHENTICATOR_SECRET_ENCRYPTION_KEY,
         userRecoveryCodesKeyB64: input.env.USER_RECOVERY_CODES_ENCRYPTION_KEY,
+        failedLoginRateLimit:
+          input.redis != null
+            ? {
+                redis: input.redis,
+                email: input.body.email,
+                ip: input.clientIp,
+              }
+            : undefined,
       });
     }
 

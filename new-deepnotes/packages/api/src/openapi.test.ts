@@ -14,5 +14,6 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/sessions/refresh"]?.post).toBeDefined();
     expect(doc.paths?.["/api/sessions/logout"]?.post).toBeDefined();
     expect(doc.paths?.["/api/sessions/demo"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me"]?.get).toBeDefined();
   });
 });

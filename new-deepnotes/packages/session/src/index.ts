@@ -3,5 +3,14 @@ export { isDev } from "./env.js";
 export { SessionError } from "./errors.js";
 export { performSessionLogin } from "./login.js";
 export type { SessionLoginBody } from "./login.js";
+export type { SessionRedisPort } from "./login-rate-limit.js";
 export { performSessionLogout } from "./logout.js";
 export { performSessionRefresh } from "./refresh.js";
+export { performSessionStartDemo } from "./start-demo.js";
+export type {
+  SessionStartDemoGroupCreation,
+  SessionStartDemoInput,
+  SessionStartDemoPageCreation,
+} from "./start-demo.js";
+export { getAuthenticatedUserSummary } from "./user-me.js";
+export type { AuthenticatedUserSummary } from "./user-me.js";

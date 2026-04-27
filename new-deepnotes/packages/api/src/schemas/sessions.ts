@@ -35,11 +35,59 @@ export const sessionLoginRequestSchema = z
 
 export type SessionLoginRequest = z.infer<typeof sessionLoginRequestSchema>;
 
+const nanoidId = z
+  .string()
+  .length(21)
+  .regex(/^[A-Za-z0-9_-]{21}$/, "expected nanoid id");
+
+const byteB64 = z
+  .string()
+  .min(1)
+  .openapi({
+    format: "byte",
+    description: "Standard base64-encoded binary (legacy tRPC used raw bytes).",
+  })
+  .transform((s) => new Uint8Array(Buffer.from(s, "base64")));
+
+const sessionDemoGroupCreationSchema = z
+  .object({
+    groupEncryptedName: byteB64,
+    groupPasswordHash: byteB64.optional(),
+    groupIsPublic: z.boolean(),
+    groupAccessKeyring: byteB64,
+    groupEncryptedInternalKeyring: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+    groupPublicKeyring: byteB64,
+    groupEncryptedPrivateKeyring: byteB64,
+    groupOwnerEncryptedName: byteB64,
+  })
+  .openapi("SessionDemoGroupCreation");
+
+const sessionDemoPageCreationSchema = z
+  .object({
+    pageEncryptedSymmetricKeyring: byteB64,
+    pageEncryptedRelativeTitle: byteB64,
+    pageEncryptedAbsoluteTitle: byteB64,
+  })
+  .openapi("SessionDemoPageCreation");
+
 /**
  * Demo session creation mirrors legacy `sessions.startDemo` input (crypto material + ids).
- * Shape will align with `POST /api/users` once registration is implemented; `additionalProperties` keeps codegen honest until then.
  */
 export const sessionDemoRequestSchema = z
-  .object({})
-  .catchall(z.unknown())
+  .object({
+    userId: nanoidId,
+    groupId: nanoidId,
+    pageId: nanoidId,
+    userPublicKeyring: byteB64,
+    userEncryptedPrivateKeyring: byteB64,
+    userEncryptedSymmetricKeyring: byteB64,
+    userEncryptedName: byteB64,
+    userEncryptedDefaultNote: byteB64,
+    userEncryptedDefaultArrow: byteB64,
+    groupCreation: sessionDemoGroupCreationSchema,
+    pageCreation: sessionDemoPageCreationSchema,
+  })
   .openapi("SessionDemoRequest");
+
+export type SessionDemoRequest = z.infer<typeof sessionDemoRequestSchema>;

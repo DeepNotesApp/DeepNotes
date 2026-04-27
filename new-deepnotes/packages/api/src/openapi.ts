@@ -4,7 +4,6 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import type { OpenAPIObject } from "openapi3-ts/oas30";
 
-import { notImplementedResponseSchema } from "./schemas/errors.js";
 import { healthResponseSchema } from "./schemas/health.js";
 import {
   serviceUnavailableResponseSchema,
@@ -16,18 +15,9 @@ import {
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
 } from "./schemas/sessions.js";
+import { userMeResponseSchema } from "./schemas/users.js";
 
 const registry = new OpenAPIRegistry();
-
-const sessionNotImplemented501 = {
-  description:
-    "Demo registration is not implemented on this route yet (Phase 3+).",
-  content: {
-    "application/json": {
-      schema: notImplementedResponseSchema,
-    },
-  },
-} as const;
 
 const sessionServiceUnavailable503 = {
   description:
@@ -41,6 +31,15 @@ const sessionServiceUnavailable503 = {
 
 const sessionUnauthorized401 = {
   description: "Invalid credentials, token, or session state.",
+  content: {
+    "application/json": {
+      schema: sessionErrorResponseSchema,
+    },
+  },
+} as const;
+
+const sessionTooManyRequests429 = {
+  description: "Too many failed login attempts (rate limited).",
   content: {
     "application/json": {
       schema: sessionErrorResponseSchema,
@@ -85,6 +84,27 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: sessionLoginSuccessSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    429: sessionTooManyRequests429,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me",
+  summary: "Current user (from access cookie)",
+  description:
+    "Minimal account summary for the authenticated user (`accessToken` cookie).",
+  responses: {
+    200: {
+      description: "Authenticated user.",
+      content: {
+        "application/json": {
+          schema: userMeResponseSchema,
         },
       },
     },
@@ -141,7 +161,23 @@ registry.registerPath({
     },
   },
   responses: {
-    501: sessionNotImplemented501,
+    200: {
+      description: "Demo user created; same response shape as login.",
+      content: {
+        "application/json": {
+          schema: sessionLoginSuccessSchema,
+        },
+      },
+    },
+    400: {
+      description: "Validation error (e.g. unsupported group password on demo).",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    503: sessionServiceUnavailable503,
   },
 });
 
