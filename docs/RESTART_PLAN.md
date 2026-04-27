@@ -4,7 +4,7 @@ This document is a **technical and delivery plan** for recreating DeepNotes in a
 
 **Audience:** engineers and technical leads who will scope work, own compatibility, and sequence migration.
 
-**Non-goals here:** detailed UI redesign, pricing, or product roadmap—only what is required to **restart the implementation safely**.
+**Non-goals here:** detailed visual redesign, pricing, or product roadmap. **In scope:** how the **new** SPA is **structured**, **decoupled** from the server, and **tested** so UI work does not recreate the legacy coupling and manual-only verification story.
 
 ---
 
@@ -93,6 +93,18 @@ The existing stack is already described accurately in [TECHNICAL_OVERVIEW.md](./
 - **Migrations:** without a **repeatable, ordered migration** story, any new service that shares the same DB is gambling on one-off DBA steps.
 - **Multi-service deployment:** **five** long-running entrypoints (client builds aside) increase coordination cost; a restart is an opportunity to **document** and eventually **consolidate** (only after contracts are clear).
 
+### 3.5 Frontend and UI (legacy): coupling, scale, and almost no automated tests
+
+The restart plan’s **backend and contracts** story is necessary but not sufficient: most user-visible risk and churn lives in **`apps/client`** (~400+ files under `src/` alone), and that surface was **not** treated as a first-class test target.
+
+- **Hard type coupling to the server:** the SPA imports **`AppRouter`** from `@deepnotes/app-server` (`src/code/trpc.ts`) and **deep paths** into the server for **WebSocket message types** and helpers (e.g. `src/code/areas/api-interface/**` importing `@deepnotes/app-server/src/websocket/...`). Any server refactor becomes a **client compile** problem; the new app must depend only on **published HTTP/OpenAPI** (and documented WS appendices), not on server source trees.
+- **Framework coupling and implicit wiring:** **Quasar** + **unplugin-auto-import** registers **`trpcClient`**, **`internals`**, **Pinia stores**, and **router helpers** as globals (`quasar.config.js`). That speeds authoring but **obscures dependency edges** and encourages large “god” objects (e.g. **`DeepNotesInternals`** in `src/boot/internals.universal.ts` tying storage, crypto, router, realtime, Tiptap, and `Pages`).
+- **Feature logic mixed with UI shells:** domain-heavy classes (e.g. **`Pages`** in `src/code/pages/pages.ts` using **`trpcClient`**) sit beside Vue layouts under `src/layouts/` and `src/pages/`, without a stable **inner boundary** between “call API / apply crypto” and “render Vue”.
+- **Sparse automated UI tests:** there are **no** `*.test.*` / `*.spec.*` files under `apps/client` in the current tree; verification for UI and integration flows is largely **manual**. The greenfield **`@deepnotes/web`** app currently wires **`test`** to a **no-op** exit in `package.json`—so CI can be “green” while the client layer has **zero** regression signal.
+- **Build and typecheck split:** the legacy client sits **outside** the root TypeScript project references (see §3.2), so IDE and CI feedback for UI code is **weaker** than for `packages/*`.
+
+**Implication for the new repo:** treat **frontend architecture and testing** as a **parallel delivery track** (package layout, API client generation, Vitest + DOM environment, optional E2E)—not an afterthought folded only into “Phase 4 — client MVP.”
+
 ---
 
 ## 4. Compatibility and migration surface
@@ -151,6 +163,7 @@ The restart is **not** a permission to **copy-paste** the legacy layout into new
 | **Decoupling** | Prefer **feature-oriented** or **vertical slices** (auth, pages, groups, billing) with **narrow imports** between packages: **HTTP handlers** depend on **application services** and **typed DTOs**, not on each other’s internals. Shared **Drizzle schema** and **OpenAPI** types live in dedicated packages; avoid cycles between “everything imports `@stdlib/data`.” |
 | **Services without repository pattern** | Use **application services** (or use-cases) that orchestrate validation, Redis, and **Drizzle queries**. **Do not** introduce a generic **repository** layer whose main job is wrapping CRUD—you have **one** database (Postgres). Where query logic repeats, extract **small typed query helpers** or **SQL modules** next to the feature, not a parallel “repository” hierarchy. |
 | **Thorough testing** | **Unit tests** for pure logic (crypto, mapping, auth helpers). **Integration tests** against a **real Postgres** (and Redis where behavior matters) for migrations, constraints, and route-level flows. Coverage expectations are highest for **auth**, **crypto**, **payments**, and **data migrations**—see §5.7. |
+| **Frontend boundaries** | The browser app **never** imports server apps or Drizzle; it depends on a **small typed HTTP client** (from OpenAPI or shared Zod IO types) and optional **client-only** packages (crypto, formatting). **Vue** components stay thin; **composables** and **feature modules** own orchestration. |
 
 ### 5.1–5.6 Target components (numbered)
 
@@ -168,8 +181,10 @@ The restart is **not** a permission to **copy-paste** the legacy layout into new
 
 5. **New client application**  
    - **Vite 6+** + **Vue 3.5+** as a standard SPA (using `vite-ssg` for marketing page SEO). **Nuxt SSR is explicitly rejected** because DeepNotes is end-to-end encrypted; the server cannot decrypt user content to render it for SEO anyway. 
-   - **Feature-based folder structure** (e.g., `src/features/auth`, `src/features/editor`) to co-locate components, API clients, and tests for better maintainability.
-   - `fetch` + **openapi-typescript** (or **hey-api** client) generated from the spec—**no** `trpc` client, **no** `superjson`, **no** Quasar.  
+   - **Feature-based folder structure** (e.g., `src/features/auth`, `src/features/editor`) to co-locate components, composables, and **tests**; keep **shared** presentational pieces under something like `src/shared/ui` (tokens, primitives) so features do not copy-paste styles.
+   - **Decouple transport from UI:** a dedicated **API surface** (package or `src/api/`) that wraps `fetch` with credentials, base URL, and error mapping; types from **openapi-typescript** / **hey-api** or Zod schemas exported from `@deepnotes/api` **without** pulling Worker or DB code into the bundle. **Do not** import `@deepnotes/app-server` or any `drizzle-*` module from the web app.
+   - **State:** prefer **explicit composables** and small Pinia stores (if used) over a single mega-`internals` object; inject test doubles at boundaries.
+   - `fetch` + generated client—**no** `trpc` client, **no** `superjson`, **no** Quasar.  
    - **Tiptap + Yjs** for the editor if you want to cap risk; **collab-server** either forked to strip rotation or rewritten against the same Yjs wire.  
    - **Capacitor** for mobile and **Tauri v2** (or Electron) for desktop after the web app is solid. Decoupling the UI from the native wrappers avoids the heavy Quasar build matrix.
 
@@ -201,6 +216,20 @@ Running **full Drizzle migrations from an empty database for every test** is cor
 - **Parallelism:** if tests run **in parallel**, each worker can own a **template clone naming prefix** or use **one DB per worker** instead of per test—tune for speed vs isolation.
 - **Testcontainers** (or a single long-lived local Postgres) remain valid **fallbacks** when CI cannot expose Postgres; templates are the **preferred** strategy **when Postgres is already there**.
 
+### 5.8 Frontend: testing layers, tooling, and CI
+
+Backend integration tests do **not** replace **UI** and **end-to-end** confidence. Plan three layers from the first meaningful UI commit:
+
+| Layer | Purpose | Typical stack |
+|-------|---------|----------------|
+| **Unit / component** | Presentational components, composables, parsers, mappers | **Vitest** with **`environment: 'jsdom'`** or **`happy-dom`** (install the DOM lib explicitly per Vitest docs), **`@vue/test-utils`** for `mount`/`shallowMount`, same **Vite** pipeline as the app (`vitest/config` + `@vitejs/plugin-vue`). Prefer **`@vitest-environment jsdom`** on specific files if only a subset needs DOM. |
+| **API / contract** | Client `fetch` wrapper respects paths, cookies, error shapes | Tests against **handlers** (e.g. **MSW** 2.x) or a short-lived **local Worker**; fixtures generated from **OpenAPI** examples so UI does not depend on a running DB for every run. |
+| **E2E smoke** | Cookie auth, navigation, “open page / type / sync” happy paths | **Playwright** (or Cypress) against **preview** or **docker-compose** stack; keep the suite **small** and fast—defer broad visual regression unless product asks for it. |
+
+**CI:** `@deepnotes/web` (or equivalent) must run **real** `vitest` (and later Playwright) in **Turbo** `test`, not a **no-op** script—otherwise UI refactors ship with **zero** automated signal (the current legacy client pattern).
+
+**Organization:** co-locate `*.spec.ts` / `*.test.ts` next to features or under `src/__tests__/` consistently; forbid **new** deep imports from server packages into the web bundle (enforce with **ESLint** `import/no-restricted-paths` or **dependency-cruiser** if needed).
+
 ---
 
 ## 6. Phased work plan (recommended order)
@@ -211,6 +240,7 @@ Running **full Drizzle migrations from an empty database for every test** is cor
 - Transcribe `postgres-init.sql` into a **Drizzle schema** and generate **migration 0001** (or squash later—goal is a **repeatable** chain).  
 - Document **cookie names**, **JWT** claims, and **CORS** origins.  
 - List which **`@deepnotes/*`** forks the **new** client can avoid entirely.
+- **Optional but valuable:** sketch **`apps/web`** (or `packages/web`) **folder conventions** and **forbidden imports** (no server, no Drizzle) in a short `README` or ADR so the first feature PRs do not invent incompatible layouts.
 
 **Exit:** OpenAPI v0 + Drizzle schema in source control; feature checklist derived from the old tRPC tree.
 
@@ -226,6 +256,7 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - **Docker compose:** **Postgres** + **Redis** (not KeyDB). New env file with **`REDIS_URL`**-style settings.  
 - **Cloudflare:** `wrangler.toml` (or Wrangler JSON), **Hyperdrive** config pointing at the same Postgres URL used locally (or a branch DB), **Pages** project for the client build output; document preview vs production env vars.  
 - **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke, and **Postgres-backed** integration tests where a **GitHub Actions `services: postgres`** (or equivalent) supplies a DB user with **`CREATEDB`** for **template clones** (§5.7); optional **deploy** job to a **Cloudflare preview** environment.
+- **Client CI is real:** replace placeholder **`test`** scripts on **`@deepnotes/web`** with **Vitest** (see §5.8) so the SPA is typechecked and unit-tested in the same pipeline as the API packages.
 
 ### Phase 3 — backend features on REST + Drizzle
 
@@ -235,7 +266,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 
 ### Phase 4 — new client MVP
 
-- Feature slice: **auth** → **page list** → **single page** → **Yjs collab** → **groups** subset.  
+- **Foundation (before heavy screens):** OpenAPI-driven **typed client** (or hand wrapper + generated types), **`src/features/*`** layout, and **Vitest + jsdom/happy-dom** running in CI (§5.8).  
+- Feature slice: **auth** → **page list** → **single page** → **Yjs collab** → **groups** subset—each slice ships with **at least** composable or API-layer tests where logic is non-trivial; auth and session flows additionally covered by **E2E smoke** when cookies and redirects are involved.  
 - Reuse or port **`@stdlib/crypto`**, `@deeplib/misc` where domain-stable; delete dead code as you go.  
 - **Electron** and **Capacitor** after web parity (they multiply CI cost).
 
@@ -260,6 +292,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 | Mobile and desktop matrices | Defer **Capacitor/Tauri** matrix; get **web** SPA (with `vite-ssg` for SEO) solid first. |
 | **Worker** CPU time and **DO** costs under collab load | Load-test **Durable Object** fan-out and Hyperdrive early; model worst-case concurrent pages and websocket churn. |
 | **Framework** assumes full **Node** | Prefer **Hono** on Workers; gate **Fastify** (or heavy native deps) behind a verified Workers profile or a non-CF deployment path. |
+| **UI regressions** and **tight UI↔server coupling** repeat | **No** server imports in the web package; **component + contract tests** from the first auth UI; **small Playwright** suite on preview; optional **Storybook** only if the team will maintain it. |
+| **God-object state** (`internals`-style) | Cap composable surface area; document **dependency injection** patterns for crypto and API clients in tests. |
 
 ---
 
@@ -274,6 +308,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - [ ] **No tRPC** and **no** `superjson` in the new default stack. **No** RevenueCat. **Key rotation** code paths are **absent** and the team signed off on **IAP** / **Stripe** user handling.  
 - [ ] **Zero** undocumented framework forks in the new default client, or a short exception list with an owner.  
 - [ ] **Cloudflare:** API + static/SSG deploy documented; **Hyperdrive** + external **Postgres** + **Redis** proven in staging; **collab/realtime** path chosen (**DO** vs separate service) and load-tested.
+- [ ] **Web app:** **Vitest** (DOM environment) runs in CI on every change to `@deepnotes/web`; **no** dependency from web source onto **app-server** / **Drizzle** packages.
+- [ ] **E2E:** at least one **automated** smoke path for **login/session cookies** (or equivalent) against a **preview** or **compose** stack before declaring client MVP “done.”
 
 ---
 
@@ -284,11 +320,12 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - `template.env` — **legacy** env names; the new app introduces **`REDIS_*`**, drops **KeyDB-** specific names, and does not add **RevenueCat** variables.  
 - `apps/app-server/src/trpc/router.ts` and `apps/app-server/src/trpc/api/**` — **legacy** procedure checklist for feature parity, not a wire spec.  
 - `apps/app-server/src/websocket/**` — **legacy** WS; **user/group rotate-keys** are **out of scope** for the new product.  
-- `postgres-init.sql` — import baseline for **Drizzle** `schema.ts`.  
+- `apps/client/**` — **legacy** Quasar/Vue SPA (**tRPC** + **`@deepnotes/app-server`** imports, large `internals` / `Pages` classes); use as **UX and behavior** reference, not as a layout or testing model for the new app.  
+- `postgres-init.sql` — import baseline for **Drizzle** `schema.ts`.
 - Up-to-date **Drizzle** (schema + migrations) documentation for the version you pin (e.g. via the Context7 MCP in Cursor if available).
 
 ---
 
 ## 10. Summary
 
-This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors—**reorganize** into **decoupled** features and **services** (no **repository** pattern), prove behavior with **thorough tests** including **Postgres template–based** integration isolation (§5.7), then retire the legacy repo when parity and data checks are proven.
+This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors—**reorganize** into **decoupled** features and **services** (no **repository** pattern), prove behavior with **thorough tests** including **Postgres template–based** integration isolation (§5.7), and treat the **SPA** as its own product: **typed HTTP client**, **feature-based UI structure**, and **Vitest + (optional) E2E** in CI (§5.8)—not a thin shell with manual-only verification. Retire the legacy repo when parity, **UI** smoke, and data checks are proven.
