@@ -3,6 +3,7 @@ import { and, eq, gt, or } from "drizzle-orm";
 import {
   createPrivateKeyring,
   createSymmetricKeyring,
+  getPasswordHashValues,
 } from "./crypto/index.js";
 import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
@@ -18,7 +19,6 @@ import {
   decryptUserRehashedLoginHash,
   derivePasswordValues,
   ensureSodiumReady,
-  getPasswordHashValues,
 } from "./crypto/session-crypto.js";
 import { createSessionRowAndCookies } from "./session-lifecycle.js";
 import { assertTwoFactorOk } from "./two-factor.js";

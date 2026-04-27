@@ -55,8 +55,6 @@ export function decryptUserRehashedLoginHash(
   );
 }
 
-export { getPasswordHashValues } from "./password-hashing.js";
-
 export function decryptUserAuthenticatorSecret(
   userEncryptedAuthenticatorSecret: Uint8Array,
   encryptionKeyB64: string,
