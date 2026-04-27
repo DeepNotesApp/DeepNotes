@@ -1,0 +1,27 @@
+{
+  "name": "new-deepnotes",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:generate": "pnpm --filter @deepnotes/db exec drizzle-kit generate",
+    "db:migrate": "pnpm --filter @deepnotes/db exec drizzle-kit migrate",
+    "db:studio": "pnpm --filter @deepnotes/db exec drizzle-kit studio",
+    "db:check": "pnpm --filter @deepnotes/db exec drizzle-kit check"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "eslint": "^9.25.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.0"
+  }
+}

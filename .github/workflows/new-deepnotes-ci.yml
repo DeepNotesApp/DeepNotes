@@ -1,0 +1,65 @@
+name: new-deepnotes CI
+
+on:
+  push:
+    paths:
+      - "new-deepnotes/**"
+      - ".github/workflows/new-deepnotes-ci.yml"
+  pull_request:
+    paths:
+      - "new-deepnotes/**"
+      - ".github/workflows/new-deepnotes-ci.yml"
+
+defaults:
+  run:
+    working-directory: new-deepnotes
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: deepnotes
+          POSTGRES_PASSWORD: deepnotes
+          POSTGRES_DB: deepnotes
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U deepnotes -d deepnotes"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://deepnotes:deepnotes@127.0.0.1:5433/deepnotes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: new-deepnotes/pnpm-lock.yaml
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      - name: Drizzle check
+        run: pnpm --filter @deepnotes/db exec drizzle-kit check
+
+      - name: Build
+        run: pnpm build

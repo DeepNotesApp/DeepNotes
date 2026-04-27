@@ -1,0 +1,10 @@
+name = "deepnotes-api"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+
+# Replace `id` with a real Hyperdrive config in Cloudflare before production deploy.
+# Local dev uses `localConnectionString` (see RESTART_PLAN.md §Hosting).
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "00000000-0000-0000-0000-000000000000"
+localConnectionString = "postgresql://deepnotes:deepnotes@127.0.0.1:5433/deepnotes"

@@ -1,0 +1,10 @@
+node_modules
+dist
+dist-bundle
+.output
+.wrangler
+.turbo
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store
