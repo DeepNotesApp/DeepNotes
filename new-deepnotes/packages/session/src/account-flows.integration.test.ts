@@ -88,6 +88,8 @@ import {
   performPageSnapshotLoad,
   performPageSnapshotSave,
   performPageSoftDelete,
+  performAppendPageCollabUpdates,
+  performGetPageCollabUpdates,
 } from "./index.js";
 import {
   performCreatePage,
@@ -1374,6 +1376,79 @@ describe.skipIf(resolveTemplateContext() == null)(
             groupId: "nononononononononono1",
           }),
         ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
+
+        const empty = await performGetPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+        });
+        expect(empty.lastIndex).toBeNull();
+        expect(empty.updates).toEqual([]);
+
+        const b0 = rand32();
+        await performAppendPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+          expectedLastIndex: null,
+          updates: [{ index: 0, encryptedData: b0 }],
+        });
+
+        const one = await performGetPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+        });
+        expect(one.lastIndex).toBe(0);
+        expect(one.updates).toHaveLength(1);
+        expect(one.updates[0]!.index).toBe(0);
+        expect(one.updates[0]!.encryptedData.equals(Buffer.from(b0))).toBe(
+          true,
+        );
+
+        const b1 = rand32();
+        await performAppendPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+          expectedLastIndex: 0,
+          updates: [{ index: 1, encryptedData: b1 }],
+        });
+
+        const two = await performGetPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+        });
+        expect(two.lastIndex).toBe(1);
+        expect(two.updates).toHaveLength(2);
+
+        await expect(
+          performAppendPageCollabUpdates({
+            db,
+            env,
+            accessCookie: access,
+            pageId: reg.pageId,
+            expectedLastIndex: 0,
+            updates: [{ index: 2, encryptedData: rand32() }],
+          }),
+        ).rejects.toMatchObject({ status: 409, code: "CONFLICT" });
+
+        await expect(
+          performAppendPageCollabUpdates({
+            db,
+            env,
+            accessCookie: access,
+            pageId: reg.pageId,
+            expectedLastIndex: 1,
+            updates: [{ index: 3, encryptedData: rand32() }],
+          }),
+        ).rejects.toMatchObject({ status: 400, code: "BAD_REQUEST" });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

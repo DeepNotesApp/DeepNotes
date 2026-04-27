@@ -86,6 +86,10 @@ export {
   performPageSoftDelete,
 } from "./page-operations.js";
 export {
+  performAppendPageCollabUpdates,
+  performGetPageCollabUpdates,
+} from "./page-collab-updates.js";
+export {
   performPageMove,
 } from "./page-move.js";
 export type {

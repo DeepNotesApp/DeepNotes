@@ -6,6 +6,7 @@ import {
   groupPagesListQuerySchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
+  pageCollabUpdatesAppendRequestSchema,
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
@@ -1563,6 +1564,130 @@ app.post("/api/pages/:pageId/bump", async (c) => {
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
       pageId: pParams.data.pageId,
       parentPageId: parsed.data.parentPageId,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/pages/:pageId/collab-updates", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performGetPageCollabUpdates } = await import("@deepnotes/session");
+    const out = await performGetPageCollabUpdates({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+    });
+    return c.json(
+      {
+        lastIndex: out.lastIndex,
+        updates: out.updates.map((u) => ({
+          index: u.index,
+          encryptedData: u.encryptedData.toString("base64"),
+        })),
+      },
+      200,
+    );
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/pages/:pageId/collab-updates", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+  const parsed = pageCollabUpdatesAppendRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performAppendPageCollabUpdates } = await import("@deepnotes/session");
+    await performAppendPageCollabUpdates({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+      expectedLastIndex: parsed.data.expectedLastIndex,
+      updates: parsed.data.updates,
     });
     return c.body(null, 204);
   } catch (e) {

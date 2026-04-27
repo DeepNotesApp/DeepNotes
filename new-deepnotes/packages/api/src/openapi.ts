@@ -38,6 +38,8 @@ import {
   groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
+  pageCollabUpdatesAppendRequestSchema,
+  pageCollabUpdatesGetResponseSchema,
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
@@ -1198,6 +1200,60 @@ registry.registerPath({
     401: sessionUnauthorized401,
     403: sessionForbidden403,
     404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/pages/{pageId}/collab-updates",
+  summary: "List encrypted Yjs page updates (Postgres)",
+  description:
+    "Bootstrap for the editor: returns all `page_updates` rows for the page, ordered by `index`. Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).",
+  request: { params: pageIdPathSchema },
+  responses: {
+    200: {
+      description: "Current ciphertext chain.",
+      content: {
+        "application/json": { schema: pageCollabUpdatesGetResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/pages/{pageId}/collab-updates",
+  summary: "Append page updates (optimistic concurrency)",
+  description:
+    "Appends ciphertext rows to `page_updates`. `expectedLastIndex` must match the current max index (or null when empty). **409** when another writer advanced the chain — client should re-GET and retry.",
+  request: {
+    params: pageIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: pageCollabUpdatesAppendRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Updates persisted." },
+    400: {
+      description: "Bad index sequence or wrong `expectedLastIndex` for an empty page.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    409: {
+      description: "Stale `expectedLastIndex` (concurrent append).",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
     503: sessionServiceUnavailable503,
   },
 });

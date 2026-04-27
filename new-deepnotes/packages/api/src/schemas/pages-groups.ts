@@ -350,3 +350,56 @@ export const pageSnapshotLoadResponseSchema = z
       .openapi({ format: "byte", description: "Base64 ciphertext." }),
   })
   .openapi("PageSnapshotLoadResponse");
+
+const pageCollabUpdateItemInputSchema = z
+  .object({
+    index: z
+      .number()
+      .int()
+      .nonnegative()
+      .openapi({
+        description:
+          "Monotonic index (legacy collab / `page_updates.index`, often Yjs clock).",
+      }),
+    encryptedData: byteB64,
+  })
+  .openapi("PageCollabUpdateItemInput");
+
+export const pageCollabUpdatesAppendRequestSchema = z
+  .object({
+    expectedLastIndex: z
+      .number()
+      .int()
+      .nonnegative()
+      .nullable()
+      .openapi({
+        description:
+          "Must match `lastIndex` from GET (`null` when the page has no updates yet).",
+      }),
+    updates: z.array(pageCollabUpdateItemInputSchema).min(1),
+  })
+  .openapi("PageCollabUpdatesAppendRequest");
+
+export const pageCollabUpdatesGetResponseSchema = z
+  .object({
+    lastIndex: z
+      .number()
+      .int()
+      .nonnegative()
+      .nullable()
+      .openapi({
+        description: "Max `index` in the database, or null if there are no rows.",
+      }),
+    updates: z.array(
+      z.object({
+        index: z.number().int().nonnegative(),
+        encryptedData: z
+          .string()
+          .openapi({
+            format: "byte",
+            description: "Base64 ciphertext (`page_updates.encrypted_data`).",
+          }),
+      }),
+    ),
+  })
+  .openapi("PageCollabUpdatesGetResponse");

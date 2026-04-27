@@ -46,6 +46,8 @@ export {
   groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
+  pageCollabUpdatesAppendRequestSchema,
+  pageCollabUpdatesGetResponseSchema,
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,

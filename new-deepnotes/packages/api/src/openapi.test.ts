@@ -106,6 +106,12 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/pages/{pageId}/move"]?.post).toBeDefined();
     expect(doc.paths?.["/api/pages/{pageId}/bump"]?.post).toBeDefined();
     expect(
+      doc.paths?.["/api/pages/{pageId}/collab-updates"]?.get,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/pages/{pageId}/collab-updates"]?.post,
+    ).toBeDefined();
+    expect(
       doc.paths?.["/api/pages/{pageId}/backlinks"]?.post,
     ).toBeDefined();
     expect(
