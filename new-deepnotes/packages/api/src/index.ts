@@ -39,4 +39,8 @@ export {
   type UserMeResponse,
   type UserPasswordChangeRequest,
   type UserRegisterResponse,
+  user2faEnableFinishRequestSchema,
+  user2faEnableRequestResponseSchema,
+  user2faPasswordBodySchema,
+  user2faRecoveryCodesResponseSchema,
 } from "./schemas/users.js";

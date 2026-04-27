@@ -34,6 +34,12 @@ describe("api-worker", () => {
     ["POST", "/api/users/email-verification/resend"],
     ["POST", "/api/users/me/email-change"],
     ["POST", "/api/users/me/email-change/confirm"],
+    ["POST", "/api/users/me/2fa/enable/request"],
+    ["POST", "/api/users/me/2fa/enable/finish"],
+    ["POST", "/api/users/me/2fa/load"],
+    ["POST", "/api/users/me/2fa/recovery-codes"],
+    ["POST", "/api/users/me/2fa/devices/forget"],
+    ["POST", "/api/users/me/2fa/disable"],
   ] as const)("returns 503 for %s %s when auth env is not configured", async (method, path) => {
     const res = await app.request(`http://test${path}`, { method });
     expect(res.status).toBe(503);

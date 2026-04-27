@@ -26,3 +26,11 @@ export {
 } from "./email-verification.js";
 export { getAuthenticatedUserSummary } from "./user-me.js";
 export type { AuthenticatedUserSummary } from "./user-me.js";
+export {
+  performUserTwoFactorDisable,
+  performUserTwoFactorEnableFinish,
+  performUserTwoFactorEnableRequest,
+  performUserTwoFactorForgetDevices,
+  performUserTwoFactorGenerateRecoveryCodes,
+  performUserTwoFactorLoad,
+} from "./user-two-factor-settings.js";

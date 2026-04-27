@@ -21,7 +21,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.account.emailChange.request` | `POST /api/users/me/email-change` (body: `oldLoginHash` b64, `newEmail`; **204** or **200** with `{ "emailVerificationCode" }` when `SEND_EMAILS=false`) |
 | `users.account.twoFactorAuth.enable.request` | `POST /api/users/me/2fa/enable/request` |
 | `users.account.twoFactorAuth.enable.finish` | `POST /api/users/me/2fa/enable/finish` |
-| `users.account.twoFactorAuth.load` | `GET /api/users/me/2fa` |
+| `users.account.twoFactorAuth.load` | `POST /api/users/me/2fa/load` (body `{ "loginHash" }` — **not** `GET` with a password, to avoid query/logging leakage) |
 | `users.account.twoFactorAuth.generateRecoveryCodes` | `POST /api/users/me/2fa/recovery-codes` |
 | `users.account.twoFactorAuth.forgetTrustedDevices` | `POST /api/users/me/2fa/devices/forget` |
 | `users.account.twoFactorAuth.disable` | `POST /api/users/me/2fa/disable` |

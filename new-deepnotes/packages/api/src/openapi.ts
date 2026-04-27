@@ -19,6 +19,10 @@ import {
 import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
+  user2faEnableFinishRequestSchema,
+  user2faEnableRequestResponseSchema,
+  user2faPasswordBodySchema,
+  user2faRecoveryCodesResponseSchema,
   userAccountDeleteRequestSchema,
   userEmailChangeConfirmRequestSchema,
   userEmailChangeRequestResponseSchema,
@@ -347,6 +351,226 @@ registry.registerPath({
       },
     },
     401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/enable/request",
+  summary: "Start 2FA setup (TOTP secret + otpauth URI)",
+  description:
+    "Replaces `users.account.twoFactorAuth.enable.request`. Stores a pending encrypted authenticator secret; client shows QR from `keyUri` or `secret`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faPasswordBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Secret generated; not yet enabled until `…/enable/finish`.",
+      content: {
+        "application/json": {
+          schema: user2faEnableRequestResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Validation error, or 2FA already fully enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/enable/finish",
+  summary: "Complete 2FA setup (TOTP + recovery codes)",
+  description: "Replaces `users.account.twoFactorAuth.enable.finish`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faEnableFinishRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "2FA enabled; one-time recovery codes returned.",
+      content: {
+        "application/json": {
+          schema: user2faRecoveryCodesResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Wrong password, wrong TOTP, or already enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/load",
+  summary: "Reveal TOTP secret and otpauth URI (after password check)",
+  description:
+    "Replaces `users.account.twoFactorAuth.load` (legacy tRPC had `loginHash` in the query; this API uses a JSON body on POST to avoid putting secrets in query strings or logs).",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faPasswordBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "Secret and `keyUri` for re-provisioning an authenticator.",
+      content: {
+        "application/json": {
+          schema: user2faEnableRequestResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Wrong password or 2FA not enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/recovery-codes",
+  summary: "Regenerate recovery codes",
+  description: "Replaces `users.account.twoFactorAuth.generateRecoveryCodes`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faPasswordBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      description: "New recovery codes (previous codes invalidated).",
+      content: {
+        "application/json": {
+          schema: user2faRecoveryCodesResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Wrong password or 2FA not enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/devices/forget",
+  summary: "Mark all user devices as not trusted",
+  description: "Replaces `users.account.twoFactorAuth.forgetTrustedDevices`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faPasswordBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "`devices.trusted` cleared for this user.",
+    },
+    400: {
+      description: "Wrong password or 2FA not enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/2fa/disable",
+  summary: "Disable 2FA",
+  description: "Replaces `users.account.twoFactorAuth.disable`.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: user2faPasswordBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "2FA disabled; authenticator and recovery material cleared.",
+    },
+    400: {
+      description: "Wrong password or 2FA not enabled.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
     404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },

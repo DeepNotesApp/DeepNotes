@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  user2faEnableFinishRequestSchema,
   userEmailChangeConfirmRequestSchema,
   userEmailChangeRequestSchema,
   userPasswordChangeRequestSchema,
@@ -49,5 +50,19 @@ describe("user request schemas (REST body validation)", () => {
     });
     expect(new TextDecoder().decode(p.oldLoginHash)).toBe("aa");
     expect(new TextDecoder().decode(p.newLoginHash)).toBe("bb");
+  });
+
+  it("user2faEnableFinishRequestSchema requires six-digit authenticatorToken", () => {
+    const ok = user2faEnableFinishRequestSchema.parse({
+      loginHash: oneByteB64,
+      authenticatorToken: "000000",
+    });
+    expect(ok.authenticatorToken).toBe("000000");
+    expect(() =>
+      user2faEnableFinishRequestSchema.parse({
+        ...ok,
+        authenticatorToken: "00",
+      }),
+    ).toThrow();
   });
 });

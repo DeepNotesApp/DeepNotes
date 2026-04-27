@@ -119,3 +119,38 @@ export const userEmailChangeConfirmRequestSchema = z
 export type UserEmailChangeConfirmRequest = z.infer<
   typeof userEmailChangeConfirmRequestSchema
 >;
+
+const totp6 = z
+  .string()
+  .regex(/^\d{6}$/, "expected 6-digit TOTP code");
+
+/**
+ * Bodies for `/api/users/me/2fa/*` (password re-check on each call; same `loginHash` as login).
+ */
+export const user2faPasswordBodySchema = z
+  .object({
+    loginHash: byteB64,
+  })
+  .openapi("User2faPasswordBody");
+
+export const user2faEnableFinishRequestSchema = z
+  .object({
+    loginHash: byteB64,
+    authenticatorToken: totp6,
+  })
+  .openapi("User2faEnableFinishRequest");
+
+export const user2faEnableRequestResponseSchema = z
+  .object({
+    secret: z.string(),
+    keyUri: z.string().openapi({ description: "otpauth:// URI for authenticator apps." }),
+  })
+  .openapi("User2faEnableRequestResponse");
+
+export const user2faRecoveryCodesResponseSchema = z
+  .object({
+    recoveryCodes: z.array(
+      z.string().regex(/^[a-f0-9]{32}$/),
+    ),
+  })
+  .openapi("User2faRecoveryCodesResponse");

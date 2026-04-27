@@ -30,5 +30,19 @@ describe("getOpenApiDocument", () => {
       doc.paths?.["/api/users/email-verification/confirm"]?.post,
     ).toBeDefined();
     expect(doc.paths?.["/api/users/me"]?.delete).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/me/2fa/enable/request"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/me/2fa/enable/finish"]?.post,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/users/me/2fa/load"]?.post).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/me/2fa/recovery-codes"]?.post,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/me/2fa/devices/forget"]?.post,
+    ).toBeDefined();
+    expect(doc.paths?.["/api/users/me/2fa/disable"]?.post).toBeDefined();
   });
 });

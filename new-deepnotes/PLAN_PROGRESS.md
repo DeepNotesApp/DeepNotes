@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **In progress** | Auth + account: sessions, register, public email verify, account delete, password + **email change** + **Postgres integration tests** for both (see [Phase 3 test coverage](#phase-3-test-coverage-detail)). **Next (priority):** 2FA HTTP surface → pages/groups CRUD → realtime/collab → Stripe webhook. |
+| **3** — REST + Drizzle features | **In progress** | Account surface includes **2FA** (`/api/users/me/2fa/...`); see [2FA HTTP routes](#2fa-http-routes-phase-3). **Next (priority):** pages + groups CRUD (per [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md)) → realtime/collab → Stripe webhook. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -36,7 +36,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] **Rate limit:** failed login counters (`login-rate-limit.test.ts`).
 - [x] **Email crypto:** `encryptUserEmail` / `decryptUserEmail` + `hashUserEmail` (legacy parity cases).
 - [x] **Email change mailer:** `sendEmailChangeVerificationEmail` (dev skip, missing API key, Resend errors/success via mocked `fetch`).
-- [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change byte fields (`schemas/users.test.ts`).
+- [x] **HTTP contracts:** OpenAPI path presence; Zod for `userEmailChange*`, password change, **2FA** bodies + finish TOTP (`schemas/users.test.ts`).
 - [x] **Worker smoke:** `503` when env/DB not configured for `/api/users/me/email-change` (+ confirm), alongside other session routes.
 - [x] **DB integration (template Postgres):** `account-flows.integration.test.ts` (renamed from `email-change.integration.test.ts`). See [Phase 3 test coverage (detail)](#phase-3-test-coverage-detail) for the per-case list.
 
@@ -76,7 +76,20 @@ Integration tests use `describe.skipIf` when `DATABASE_URL` (and admin URL for `
   - [x] `POST /api/users/me/email-change` — `performUserEmailChangeRequest`: `oldLoginHash` + `newEmail`; **403** demo, **400** bad password or “email already in use” (global `email_hash` match, same as legacy); sets `encrypted_new_email` + 6-digit `email_verification_code`; Resend (subject/body like legacy) or **200** `{ "emailVerificationCode" }` when `SEND_EMAILS=false`; **204** when emailed.
   - [x] `POST /api/users/me/email-change/confirm` — `performUserEmailChangeConfirm`: one call (WS two-step collapsed); `oldLoginHash`, `emailVerificationCode` (6 digits), `newLoginHash`, `userEncrypted*Keyring` (b64, same as register/password); verifies code + password; applies new `encrypted_email` / `email_hash`, clears pending fields, PHC + rewrapped keyrings, invalidates **all** `sessions`, **204** + `buildClearSessionCookies`; optional `updateStripeCustomerEmail` in worker (matches legacy `customers.update` after commit, errors non-fatal).
   - [x] **`decryptUserEmail`** in `@deepnotes/session` for confirm; **`sendEmailChangeVerificationEmail`** (Resend); OpenAPI + [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) updated.
-- [ ] **2FA (HTTP surface)** — `POST /api/users/me/2fa/enable/request|finish`, `GET /api/users/me/2fa`, `POST /api/users/me/2fa/recovery-codes`, `POST /api/users/me/2fa/devices/forget`, `POST /api/users/me/2fa/disable` ([docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md)). **Note:** `@deepnotes/session` already implements TOTP/recovery verification for **`POST /api/sessions/login`**; these routes expose enable/disable/load for the SPA.
+- [x] **2FA (HTTP surface)** — Hono + OpenAPI: `user-two-factor-settings.ts` (`encryptUserAuthenticatorSecret` in `session-crypto`). Routes: [2FA HTTP routes](#2fa-http-routes-phase-3). `load` is **`POST /api/users/me/2fa/load`** (password in JSON, not a `GET` — [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) footnote). **Not yet in integration template DB:** 2FA enable → login with TOTP (optional follow-up; login path already uses `assertTwoFactorOk` in [two-factor.ts](./packages/session/src/two-factor.ts)).
+
+### 2FA HTTP routes (Phase 3)
+
+| Path | Replaces (legacy) | Request body | Success |
+|------|-------------------|-------------|---------|
+| `POST /api/users/me/2fa/enable/request` | `twoFactorAuth.enable.request` | `{ "loginHash" }` b64 | **200** `{ "secret", "keyUri" }` (pending TOTP, not yet enabled) |
+| `POST /api/users/me/2fa/enable/finish` | `twoFactorAuth.enable.finish` | `{ "loginHash", "authenticatorToken" }` (6 digits) | **200** `{ "recoveryCodes" }` (6 × 32-char hex) |
+| `POST /api/users/me/2fa/load` | `twoFactorAuth.load` | `{ "loginHash" }` | **200** `{ "secret", "keyUri" }` (2FA must already be on) |
+| `POST /api/users/me/2fa/recovery-codes` | `generateRecoveryCodes` | `{ "loginHash" }` | **200** new recovery codes |
+| `POST /api/users/me/2fa/devices/forget` | `forgetTrustedDevices` | `{ "loginHash" }` | **204** |
+| `POST /api/users/me/2fa/disable` | `disable` | `{ "loginHash" }` | **204** |
+
+- **Parity:** Demo accounts **403**; wrong password **400** “Password is incorrect.”; TOTP fail on finish **400** “Authenticator token is incorrect.”; `otplib` `keyuri` issuer **“DeepNotes”** (same as legacy tRPC). Recovery codes: `libsodium` hex + [hashRecoveryCode / encryptRecoveryCodes](packages/session/src/crypto/session-crypto.ts) (legacy-equivalent). Forget devices: `UPDATE devices SET trusted = false` for `user_id`.
 
 ### Not started (Phase 3 — pages, groups, infra)
 
@@ -132,8 +145,8 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 |---------------|------|------------------|---------------------------|
 | **`@deepnotes/db`** | Drizzle + migrations | `template-db.test.ts`: clone template DB, smoke SQL | More assertions on FKs / critical columns after schema grows |
 | **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` — email change + **password change** (PHC + unwrap), wrong passwords/codes, session invalidation; template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **`performSessionLogin` / refresh** with template DB + device/session rows; **Redis** + `performSessionLogin` failed-login; optional **demo 403** integration |
-| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + route registry); **`schemas/users.test.ts`** (email/password change bodies, 6-digit code) | Schemas for sessions + remaining routes; optional **snapshot** of OpenAPI fragment for drift |
-| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: health, OpenAPI JSON, **503** when secrets/DB not bound (incl. email-change paths) | **200-path tests** with test `SessionEnv` + Hyperdrive stub + template DB (heavier CI job) |
+| **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (health + session + 2FA paths); **`schemas/users.test.ts`** (email/password change, 2fa finish) | Schemas for pages/groups when they land; optional OpenAPI **snapshot** |
+| **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: 503 when env missing — includes **2FA** routes in matrix | **200** tests with stub `SessionEnv` + template DB (heavier) |
 | **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
 
 **Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
@@ -166,7 +179,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ## Phase 3 working order (suggested)
 
-Use this when resuming: **(done)** account HTTP surface through email change including password change. **(next)** 2FA CRUD on `/api/users/me/2fa*`, reusing session crypto already used at login. **(then)** pages + groups from [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) (user prefs, CRUD, group privacy/password). **(then)** long pole: **realtime + collab** (protocol, Worker/DO, no key rotation) and **Stripe** webhook + billing routes + wire `updateStripeCustomerEmail` / `deleteStripeCustomer` from account flows where applicable.
+Use this when resuming: **(done)** account HTTP through 2FA (incl. `load` as POST, see map). **(next)** `users.pages` + `groups` + `pages` REST from [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md). **(then)** **realtime + collab** (no key rotation) and **Stripe** + wire billing hooks on account routes.
 
 ---
 
@@ -174,6 +187,7 @@ Use this when resuming: **(done)** account HTTP surface through email change inc
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **2FA account HTTP:** `user-two-factor-settings.ts`, `encryptUserAuthenticatorSecret` in `session-crypto`, Zod + OpenAPI + Hono for `/api/users/me/2fa/*` (6 routes); [TRPC_REST_MAP](./docs/TRPC_REST_MAP.md) — `load` is POST not GET; see [2FA HTTP routes](#2fa-http-routes-phase-3) below. |
 | 2026-04-27 | **Integration tests:** expanded `account-flows.integration.test.ts` (email wrong code; password change PHC + keyring unwrap with salt from PHC; `sessions` invalidation; wrong old password). Renamed from `email-change.integration.test.ts`. PLAN_PROGRESS: detailed Phase 3 test table + matrix gaps. |
 | 2026-04-26 | **Integration tests:** `@deepnotes/db` exports `@deepnotes/db/testing/template-db` + `db-url`; `@deepnotes/session` — `email-change.integration.test.ts` (Postgres template clone, register + email change + wrong password). PLAN_PROGRESS matrix + Phase 3 checklist updated. |
 | 2026-04-26 | **Tests:** `@deepnotes/session` — `encrypt-user-email.test.ts`, `email-hash.test.ts`, `send-email-change-code.test.ts`; `@deepnotes/api` — `schemas/users.test.ts`; api-worker — email-change routes in `503` matrix; PLAN_PROGRESS — package test matrix + Phase 3 test checklist. |

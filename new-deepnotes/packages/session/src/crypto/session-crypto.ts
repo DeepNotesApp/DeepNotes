@@ -78,6 +78,16 @@ export function decryptUserAuthenticatorSecret(
   );
 }
 
+export function encryptUserAuthenticatorSecret(
+  userAuthenticatorSecret: string,
+  encryptionKeyB64: string,
+): Uint8Array {
+  const key = wrapSymmetricKey(base64ToBytes(encryptionKeyB64));
+  return key.encrypt(textToBytes(userAuthenticatorSecret), {
+    associatedData: { context: "UserAuthenticatorSecret" },
+  });
+}
+
 export function decryptRecoveryCodes(
   userEncryptedRecoveryCodes: Uint8Array,
   encryptionKeyB64: string,
