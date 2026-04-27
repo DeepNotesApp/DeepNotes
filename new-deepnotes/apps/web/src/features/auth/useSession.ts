@@ -5,6 +5,11 @@ import type { components } from "../../api/api-types.generated";
 import { buildSessionDemoRequest } from "./build-demo-session";
 import { loginPreimageFromPassword, uint8ToBase64 } from "./bytes";
 import { readDocumentCookie } from "./cookies";
+import {
+  applyRefreshToStoredKeyrings,
+  clearSessionCrypto,
+  persistSessionKeyringsFromLogin,
+} from "./session-keyrings";
 
 export type UserMe = components["schemas"]["UserMeResponse"];
 export type SessionErrorBody = components["schemas"]["SessionErrorResponse"];
@@ -76,15 +81,23 @@ export function useSession() {
         const refRes = await client.POST("/api/sessions/refresh", {});
         if (refRes.response.status === 401) {
           user.value = null;
+          clearSessionCrypto();
           return;
         }
         if (refRes.error != null) {
           user.value = null;
+          clearSessionCrypto();
           setErrorFromBody(
             refRes.error,
             "Session could not be refreshed. Try signing in again.",
           );
           return;
+        }
+        if (refRes.response.status === 200 && refRes.data) {
+          await applyRefreshToStoredKeyrings({
+            oldSessionKey: refRes.data.oldSessionKey,
+            newSessionKey: refRes.data.newSessionKey,
+          });
         }
         await fetchMe();
       } finally {
@@ -108,6 +121,7 @@ export function useSession() {
       );
       if (response.status === 200 && data) {
         user.value = null;
+        clearSessionCrypto();
         await fetchMe();
         return { ok: true as const };
       }
@@ -152,6 +166,12 @@ export function useSession() {
       if (response.status === 200 && data) {
         twoFactorRequired.value = false;
         user.value = null;
+        if (data.passwordSalt != null && data.passwordSalt !== "") {
+          await persistSessionKeyringsFromLogin({
+            login: data,
+            password: input.password,
+          });
+        }
         await fetchMe();
         return { ok: true, needTwoFactor: false };
       }
@@ -183,6 +203,7 @@ export function useSession() {
       if (response.status === 204) {
         user.value = null;
         twoFactorRequired.value = false;
+        clearSessionCrypto();
       } else {
         lastError.value = "Sign out failed.";
       }

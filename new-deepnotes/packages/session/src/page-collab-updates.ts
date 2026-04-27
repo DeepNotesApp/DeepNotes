@@ -1,5 +1,10 @@
 import type { DeepnotesDb } from "@deepnotes/db/client";
-import { pageUpdates, pages } from "@deepnotes/db/schema";
+import {
+  groupMembers,
+  groups,
+  pageUpdates,
+  pages,
+} from "@deepnotes/db/schema";
 import { and, asc, eq, isNull, max } from "drizzle-orm";
 
 import type { SessionEnv } from "./env.js";
@@ -23,6 +28,11 @@ export async function performGetPageCollabUpdates(input: {
 }): Promise<{
   lastIndex: number | null;
   updates: { index: number; encryptedData: Buffer }[];
+  groupId: string;
+  pageEncryptedSymmetricKeyring: Buffer;
+  groupEncryptedContentKeyring: Buffer;
+  groupAccessKeyring: Buffer | null;
+  memberEncryptedAccessKeyring: Buffer | null;
 }> {
   const { userId } = await getAuthenticatedUserSummary({
     db: input.db,
@@ -31,7 +41,11 @@ export async function performGetPageCollabUpdates(input: {
   });
 
   const [pageRow] = await input.db
-    .select({ id: pages.id, groupId: pages.groupId })
+    .select({
+      id: pages.id,
+      groupId: pages.groupId,
+      encryptedSymmetricKeyring: pages.encryptedSymmetricKeyring,
+    })
     .from(pages)
     .where(
       and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
@@ -52,6 +66,32 @@ export async function performGetPageCollabUpdates(input: {
     throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
   }
 
+  const [groupRow] = await input.db
+    .select({
+      encryptedContentKeyring: groups.encryptedContentKeyring,
+      accessKeyring: groups.accessKeyring,
+    })
+    .from(groups)
+    .where(eq(groups.id, pageRow.groupId))
+    .limit(1);
+
+  if (groupRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Group not found.");
+  }
+
+  const [memberRow] = await input.db
+    .select({
+      encryptedAccessKeyring: groupMembers.encryptedAccessKeyring,
+    })
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, pageRow.groupId),
+        eq(groupMembers.userId, userId),
+      ),
+    )
+    .limit(1);
+
   const rows = await input.db
     .select({
       index: pageUpdates.index,
@@ -61,8 +101,20 @@ export async function performGetPageCollabUpdates(input: {
     .where(eq(pageUpdates.pageId, input.pageId))
     .orderBy(asc(pageUpdates.index));
 
+  const cryptoOut = {
+    groupId: pageRow.groupId,
+    pageEncryptedSymmetricKeyring: Buffer.from(pageRow.encryptedSymmetricKeyring),
+    groupEncryptedContentKeyring: Buffer.from(groupRow.encryptedContentKeyring),
+    groupAccessKeyring:
+      groupRow.accessKeyring != null ? Buffer.from(groupRow.accessKeyring) : null,
+    memberEncryptedAccessKeyring:
+      memberRow?.encryptedAccessKeyring != null
+        ? Buffer.from(memberRow.encryptedAccessKeyring)
+        : null,
+  };
+
   if (rows.length === 0) {
-    return { lastIndex: null, updates: [] };
+    return { lastIndex: null, updates: [], ...cryptoOut };
   }
 
   const lastIndex = rows[rows.length - 1]!.index;
@@ -72,6 +124,7 @@ export async function performGetPageCollabUpdates(input: {
       index: r.index,
       encryptedData: Buffer.from(r.encryptedData),
     })),
+    ...cryptoOut,
   };
 }
 

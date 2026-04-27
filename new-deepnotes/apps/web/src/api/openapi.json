@@ -58,6 +58,11 @@
           "encryptedSymmetricKeyring": {
             "type": "string",
             "format": "byte"
+          },
+          "passwordSalt": {
+            "type": "string",
+            "format": "byte",
+            "description": "Argon2 salt (base64)."
           }
         },
         "required": [
@@ -1183,11 +1188,46 @@
                 "encryptedData"
               ]
             }
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Owning group (`pages.group_id`) for access-key + content-key unwrap."
+          },
+          "pageEncryptedSymmetricKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "groupEncryptedContentKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "groupAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "Public group `access_keyring` bytes when set; otherwise null (use member blob)."
+          },
+          "memberEncryptedAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "`group_members.encrypted_access_keyring` for this user when present."
           }
         },
         "required": [
           "lastIndex",
-          "updates"
+          "updates",
+          "groupId",
+          "pageEncryptedSymmetricKeyring",
+          "groupEncryptedContentKeyring",
+          "groupAccessKeyring",
+          "memberEncryptedAccessKeyring"
         ]
       },
       "PageCollabUpdateItemInput": {

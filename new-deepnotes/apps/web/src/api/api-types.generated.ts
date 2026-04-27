@@ -5307,6 +5307,11 @@ export interface components {
             encryptedPrivateKeyring: string;
             /** Format: byte */
             encryptedSymmetricKeyring: string;
+            /**
+             * Format: byte
+             * @description Argon2 salt (base64).
+             */
+            passwordSalt?: string;
         };
         SessionErrorResponse: {
             code: string;
@@ -5840,6 +5845,28 @@ export interface components {
                  */
                 encryptedData: string;
             }[];
+            /** @description Owning group (`pages.group_id`) for access-key + content-key unwrap. */
+            groupId: string;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            pageEncryptedSymmetricKeyring: string;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupEncryptedContentKeyring: string;
+            /**
+             * Format: byte
+             * @description Public group `access_keyring` bytes when set; otherwise null (use member blob).
+             */
+            groupAccessKeyring: string | null;
+            /**
+             * Format: byte
+             * @description `group_members.encrypted_access_keyring` for this user when present.
+             */
+            memberEncryptedAccessKeyring: string | null;
         };
         PageCollabUpdateItemInput: {
             /** @description Monotonic index (legacy collab / `page_updates.index`, often Yjs clock). */

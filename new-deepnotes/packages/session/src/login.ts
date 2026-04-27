@@ -251,6 +251,7 @@ export async function performSessionLogin(input: {
         publicKeyring: toB64(new Uint8Array(user.publicKeyring)),
         encryptedPrivateKeyring: toB64(encPriv),
         encryptedSymmetricKeyring: toB64(encSym),
+        passwordSalt: toB64(passwordHashValues.saltBytes),
       },
       cookieLines,
     };

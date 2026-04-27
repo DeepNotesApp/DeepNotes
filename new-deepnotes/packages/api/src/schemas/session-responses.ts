@@ -22,6 +22,15 @@ export const sessionLoginSuccessSchema = z
     publicKeyring: z.string().openapi({ format: "byte" }),
     encryptedPrivateKeyring: z.string().openapi({ format: "byte" }),
     encryptedSymmetricKeyring: z.string().openapi({ format: "byte" }),
+    /**
+     * Argon2 salt (base64) from the user’s stored password hash so the SPA can
+     * derive the same `passwordValues.key` as the server for `UserPrivateKeyring` /
+     * `UserSymmetricKeyring` unwrap. Omitted for `POST /api/sessions/demo`.
+     */
+    passwordSalt: z
+      .string()
+      .optional()
+      .openapi({ format: "byte", description: "Argon2 salt (base64)." }),
   })
   .openapi("SessionLoginSuccess");
 

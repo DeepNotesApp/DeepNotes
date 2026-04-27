@@ -1385,6 +1385,10 @@ describe.skipIf(resolveTemplateContext() == null)(
         });
         expect(empty.lastIndex).toBeNull();
         expect(empty.updates).toEqual([]);
+        expect(empty.groupId).toBe(reg.groupId);
+        expect(empty.pageEncryptedSymmetricKeyring.equals(Buffer.from(reg.pageCreation.pageEncryptedSymmetricKeyring))).toBe(true);
+        expect(empty.groupEncryptedContentKeyring.byteLength).toBeGreaterThan(0);
+        expect(empty.groupAccessKeyring != null).toBe(true);
 
         const b0 = rand32();
         await performAppendPageCollabUpdates({

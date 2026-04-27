@@ -1620,6 +1620,19 @@ app.get("/api/pages/:pageId/collab-updates", async (c) => {
           index: u.index,
           encryptedData: u.encryptedData.toString("base64"),
         })),
+        groupId: out.groupId,
+        pageEncryptedSymmetricKeyring:
+          out.pageEncryptedSymmetricKeyring.toString("base64"),
+        groupEncryptedContentKeyring:
+          out.groupEncryptedContentKeyring.toString("base64"),
+        groupAccessKeyring:
+          out.groupAccessKeyring != null
+            ? out.groupAccessKeyring.toString("base64")
+            : null,
+        memberEncryptedAccessKeyring:
+          out.memberEncryptedAccessKeyring != null
+            ? out.memberEncryptedAccessKeyring.toString("base64")
+            : null,
       },
       200,
     );

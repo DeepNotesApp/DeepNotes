@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@deepnotes/e2ee": "workspace:^",
     "@tailwindcss/vite": "^4.2.4",
     "@vueuse/core": "^14.2.1",
     "class-variance-authority": "^0.7.1",

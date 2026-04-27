@@ -83,7 +83,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Capability | New surface | Notes |
 |------------|-------------|--------|
-| Load encrypted Yjs update chain from DB | `GET /api/pages/:pageId/collab-updates` (**implemented** — `performGetPageCollabUpdates`; `viewGroupPages`; Postgres `page_updates` only, no Redis cache) | Replaces initial `ALL_UPDATES_UNMERGED`-style payload for SPA bootstrap; binary collab WebSocket is still [Phase 3 — realtime/collab](../PLAN_PROGRESS.md#not-started-phase-3--realtime--collab-only). |
+| Load encrypted Yjs update chain from DB | `GET /api/pages/:pageId/collab-updates` (**implemented** — `performGetPageCollabUpdates`; `viewGroupPages`; Postgres `page_updates`; response also includes `groupId`, `pageEncryptedSymmetricKeyring`, `groupEncryptedContentKeyring`, `groupAccessKeyring`, `memberEncryptedAccessKeyring` for client-side unwrap) | Replaces initial `ALL_UPDATES_UNMERGED`-style payload for SPA bootstrap; binary collab WebSocket is still [Phase 3 — realtime/collab](../PLAN_PROGRESS.md#not-started-phase-3--realtime--collab-only). |
 | Append updates (optimistic concurrency) | `POST /api/pages/:pageId/collab-updates` (**implemented** — `performAppendPageCollabUpdates`; `editGroupPages`; body `expectedLastIndex` + `updates[]`) | **409** when `expectedLastIndex` is stale. |
 
 ## Legacy app-server WebSocket → target

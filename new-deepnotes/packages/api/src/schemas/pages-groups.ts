@@ -401,5 +401,22 @@ export const pageCollabUpdatesGetResponseSchema = z
           }),
       }),
     ),
+    groupId: z.string().openapi({
+      description: "Owning group (`pages.group_id`) for access-key + content-key unwrap.",
+    }),
+    pageEncryptedSymmetricKeyring: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+    groupAccessKeyring: byteB64
+      .nullable()
+      .openapi({
+        description:
+          "Public group `access_keyring` bytes when set; otherwise null (use member blob).",
+      }),
+    memberEncryptedAccessKeyring: byteB64
+      .nullable()
+      .openapi({
+        description:
+          "`group_members.encrypted_access_keyring` for this user when present.",
+      }),
   })
   .openapi("PageCollabUpdatesGetResponse");
