@@ -14,7 +14,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
 | **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped:** slices [1](#pagesgroups-rest--slice-1)–[5](#pagesgroups-rest--slice-5-privacy-private-re-key); [6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion); [7 — page move](#pages-rest--slice-7-move--group-creation); [8 — create + `groupCreation`](#pagesgroups-rest--slice-8-create--groupcreation); **[slice 9 — membership + join flows](#pagesgroups-rest--slice-9-membership--join-invites--requests)**. **[Stripe / billing](#phase-3--stripe-billing--webhooks--account-hooks).** **[Slice 10 — collab Postgres bootstrap](#pages-rest--slice-10-collab-updates-rest):** `GET`/`POST …/collab-updates`. **Still ahead:** **collab + realtime WebSockets** (JWT upgrade, binary fan-out, optional Redis buffer like legacy) per [RESTART_PLAN §4.3](../docs/RESTART_PLAN.md). |
-| **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
+| **4** — Client MVP | **In progress** | **Shipped:** [OpenAPI typed HTTP client](#phase-4--openapi-typed-client-bootstrap) in `@deepnotes/web` (`openapi-fetch` + generated `paths`). **Next:** routing + auth UI, then list → page → Yjs. **Parallel:** feature folders, E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
 ---
@@ -292,14 +292,35 @@ Replaces legacy Fastify `/stripe/webhook` and tRPC `users.account.stripe.*` usin
 
 Sprints **1–9** (pages / groups / membership), **Stripe**, and **[slice 10 — Postgres `page_updates` REST](#pages-rest--slice-10-collab-updates-rest)** are tracked above. Remaining work:
 
-- [ ] **Collab WebSocket + realtime** — JWT cookie upgrade; binary protocol (legacy: lib0 + `@deeplib/misc` message kinds); **no** `next_key_rotation_date` / scheduled re-key; optional **Redis** `page-update-cache` / buffer like `@deeplib/data` `getAllPageUpdates` for parity; **Durable Object** vs separate Node service per [RESTART_PLAN](../docs/RESTART_PLAN.md) §4.3 / hosting table. REST [slice 10](#pages-rest--slice-10-collab-updates-rest) covers bootstrap + offline-style append only.
+- [ ] **Collab WebSocket + realtime** — end-state: live Yjs-style sync with JWT-on-upgrade and **no** `next_key_rotation_date` / scheduled re-key ([RESTART_PLAN](../docs/RESTART_PLAN.md) §4.3). Suggested build order (can be parallelized after item 1):
+  1. **Auth on upgrade:** reuse access JWT from `accessToken` cookie (same verification as HTTP); reject missing/invalid before accepting the socket; document subprotocol / first-message handshake if needed.
+  2. **Room model:** one room per `pageId` (legacy pattern `…/page:{pageId}` or new versioned path); enforce `viewGroupPages` / `editGroupPages` from session + Drizzle before joining.
+  3. **Wire format:** either **byte parity** with legacy collab-server (lib0 + `@deeplib/misc` message enums, golden fixtures) or **collab v2** with a semver’d protocol and a single cutover client—decide explicitly in code + short appendix next to OpenAPI.
+  4. **Fan-out:** **Cloudflare Durable Object** per page (hibernatable WebSockets) vs dedicated Node/realtime process; REST [slice 10](#pages-rest--slice-10-collab-updates-rest) remains the Postgres source of truth for cold start / catch-up.
+  5. **Optional Redis:** hot `page-update-*` buffer / pub-sub for multi-instance parity with legacy `@deeplib/data`—only if load tests or migration needs justify it (standard Redis commands only).
+  6. **Tests:** at least one integration test per stream (collab + realtime) with Redis or in-memory doubles as required by the chosen topology ([RESTART_PLAN §8](../docs/RESTART_PLAN.md)).
+
+---
+
+### Phase 4 — OpenAPI typed client (bootstrap)
+
+**Goal:** SPA uses a **small typed HTTP layer** (RESTART_PLAN §5.1 / §5.8): no `@deepnotes/api-worker`, `@deepnotes/db`, or Drizzle from `apps/web` source; session cookies via `credentials: "include"`.
+
+| Layer | What shipped |
+|-------|----------------|
+| **Codegen** | `pnpm --filter @deepnotes/web run generate:api-types` — `scripts/generate-api-types.mts` imports `getOpenApiDocument` from `@deepnotes/api` (dev-time only), writes `src/api/openapi.json`, runs `openapi-typescript` → `src/api/api-types.generated.ts`. **Re-run when `packages/api` OpenAPI paths change** (CI can add a drift check later: compare committed JSON to fresh dump). |
+| **Runtime** | `openapi-fetch` + `createDeepnotesApiClient` / `resolveApiBaseUrl` in [apps/web/src/api/client.ts](apps/web/src/api/client.ts); optional `VITE_API_URL` (no trailing slash) in [vite-env.d.ts](apps/web/src/vite-env.d.ts) for cross-origin API during dev. |
+| **Tests** | [apps/web/src/api/client.test.ts](apps/web/src/api/client.test.ts) — mocked `fetch` asserts `Request.credentials === "include"` and `/api/health` URL. |
+| **Lint** | [apps/web/eslint.config.js](apps/web/eslint.config.js) ignores generated `api-types.generated.ts` and `openapi.json`. |
+
+**Intentional gaps:** no MSW/contract suite yet; no `import/no-restricted-paths` until more packages exist to accidentally import.
 
 ---
 
 ## Phase 4 checklist (client MVP)
 
 - [x] **Tooling (bootstrap):** Vitest + **happy-dom** + `@vue/test-utils` in `@deepnotes/web` (minimal `App` test); same Vite 6 pipeline via `vitest/config` `defineConfig` (RESTART_PLAN §5.8).
-- [ ] **API client:** consume **OpenAPI** (generated types + `fetch`, or hey-api) from `@deepnotes/api` / published spec—**no** workspace dependency on Worker or DB packages from web source.
+- [x] **API client (bootstrap):** typed client from the same OpenAPI document as the Worker—see [Phase 4 — OpenAPI typed client](#phase-4--openapi-typed-client-bootstrap). Runtime bundle does **not** import `@deepnotes/api` (only generated `api-types.generated.ts` + `openapi-fetch`); regenerate after OpenAPI changes.
 - [ ] **Routing + auth UI:** login / refresh / logout / 2FA flows aligned with [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md); composable or component tests + **E2E smoke** for cookie session.
 - [ ] **Pages:** list → open editor shell → integrate **Yjs** / collab when API is ready.
 - [ ] **Groups** subset and notifications UX as mapped from [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md).
@@ -325,7 +346,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ### Decoupling and layout (`@deepnotes/web`)
 
-- [ ] **Forbidden imports:** no `@deepnotes/api-worker`, `@deepnotes/db`, or Drizzle from `apps/web` source; HTTP only via a small **API layer** (generated OpenAPI client or `fetch` + shared types from `@deepnotes/api`).
+- [x] **API surface:** `src/api/` — generated `paths` + `createDeepnotesApiClient`; bundle does not depend on `@deepnotes/api` at runtime (codegen devDeps only). **Still to enforce:** ESLint `import/no-restricted-paths` banning `@deepnotes/api-worker`, `@deepnotes/db`, `drizzle-orm` from `apps/web/src/**` once rule config is added.
 - [ ] **Feature folders:** e.g. `src/features/auth`, `src/features/pages`, `src/shared/ui`—document the convention in `apps/web/README.md` (or link from repo root README).
 - [ ] **Thin Vue, fat composables:** session and crypto orchestration live in testable modules, not only in `.vue` files.
 
@@ -344,7 +365,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 | **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**24** cases when DB env set) — … + [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + [slice 7 move](#pages-rest--slice-7-move--group-creation) + [slice 8 create + `groupCreation`](#pagesgroups-rest--slice-8-create--groupcreation) + [slice 9](#pagesgroups-rest--slice-9-membership--join-invites--requests); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; optional: invitation **reject/cancel**, join-request **reject/cancel**, **private** group invite/request **access keyring** branches |
 | **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (session routes + [slice 6/7 `/api/pages/...` paths](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)); **`schemas/users.test.ts`**; **`schemas/pages-groups.ts`**, **`schemas/user-pages.ts`** | Optional OpenAPI **snapshot**; more Zod edge cases for new page schemas |
 | **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: **70** tests (503 matrix when env/Hyperdrive missing) — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + `/api/pages/{pageId}/move` + [slice 9](#pagesgroups-rest--slice-9-membership--join-invites--requests) + [slice 10 `…/collab-updates`](#pages-rest--slice-10-collab-updates-rest) (`GET` + `POST`) + [Stripe routes](#phase-3--stripe-billing--webhooks--account-hooks) (`/api/billing/stripe/*`, `/api/webhooks/stripe`) | **200** tests with stub `SessionEnv` + template DB (heavier) |
-| **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`) | Auth UI + API client as in §5.8 |
+| **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`); **`client.test.ts`** (credentials + `/api/health` URL on mocked fetch) | Auth UI + composable tests; MSW/OpenAPI fixtures optional; run `generate:api-types` when `@deepnotes/api` OpenAPI changes |
 
 **Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
 
@@ -360,7 +381,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 ## Success criteria (RESTART_PLAN §8)
 
-- [ ] OpenAPI source of truth; client **generated** types or shared Zod.
+- [x] OpenAPI source of truth; client **generated** types (`openapi-typescript`) + `openapi-fetch` in `@deepnotes/web` — [Phase 4 — OpenAPI typed client](#phase-4--openapi-typed-client-bootstrap).
 - [ ] Drizzle migrations from empty DB documented for production upgrades.
 - [ ] Cold API dev start under **2 s** (no `inspect-brk` by default) — validate on a typical laptop.
 - [ ] Collab + realtime: at least one integration test each (Redis + deps).
@@ -389,6 +410,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **Phase 4 — OpenAPI typed client:** `@deepnotes/web` — `pnpm run generate:api-types` (`tsx` + `openapi-typescript`); committed `src/api/openapi.json` + `api-types.generated.ts`; `createDeepnotesApiClient` / `resolveApiBaseUrl` (`openapi-fetch`, `credentials: "include"`); `client.test.ts`; `VITE_API_URL`; eslint ignore for generated files. **Phase 3** collab WS backlog expanded (upgrade → room → wire → fan-out → Redis → tests). PLAN_PROGRESS Phase 4 snapshot → **In progress**. |
 | 2026-04-27 | **Phase 3 — slice 10 (collab Postgres REST):** [page-collab-updates.ts](packages/session/src/page-collab-updates.ts) — `performGetPageCollabUpdates` / `performAppendPageCollabUpdates`; `GET|POST /api/pages/:pageId/collab-updates`; OpenAPI + Zod; [TRPC_REST_MAP](docs/TRPC_REST_MAP.md) collab bootstrap table; integration extends **groups + pages**; api-worker 503 matrix **70**. **Next:** collab + realtime **WebSocket** only. |
 | 2026-04-27 | **Phase 3 — Stripe (billing):** [stripe-billing.ts](packages/session/src/stripe-billing.ts) — `performStripeCreateCheckoutSession` / `performStripeCreatePortalSession`, `processStripeWebhookEvent` (legacy `customer.subscription.updated` / `deleted` → `users.plan` + `subscription_id` via `users.customer_id`); [schemas/billing.ts](packages/api/src/schemas/billing.ts) + OpenAPI; Worker `POST /api/billing/stripe/checkout-session`, `…/portal-session`, `POST /api/webhooks/stripe` ([session-env](apps/api-worker/src/session-env.ts) `getStripeBillingEnv` / `getStripeWebhookSecret`); **`STRIPE_SECRET_KEY`** hooks: `deleteStripeCustomer` on `DELETE /api/users/me`, `updateStripeCustomerEmail` on email-change confirm. Dependencies: `stripe@^17.7` in session + api-worker. [TRPC_REST_MAP](docs/TRPC_REST_MAP.md); [template.env](template.env). Api-worker 503 matrix **68** tests. **Next:** [realtime + collab](#phase-3-working-order-suggested) only. |
 | 2026-04-27 | **Phase 3 — slice 9 (membership + join flows):** [group-role-ranks.ts](packages/session/src/group-role-ranks.ts) (`canManageRole` / `canChangeRole` / `manageLowerRanks` parity); [group-membership.ts](packages/session/src/group-membership.ts) — invitations send/accept/reject/cancel, join requests send/accept/reject/cancel, `PATCH`/`DELETE` members; Zod + OpenAPI + Hono; [TRPC_REST_MAP](docs/TRPC_REST_MAP.md) WS table; **`byteB64`** passthrough in worker (decoded `Uint8Array`). `account-flows` **24** cases; api-worker 503 matrix **65**. [Slice 9 section](#pagesgroups-rest--slice-9-membership--join-invites--requests). **Next:** [realtime + collab](#phase-3-working-order-suggested). |
