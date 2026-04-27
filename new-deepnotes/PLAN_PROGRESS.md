@@ -14,7 +14,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
 | **3** — REST + Drizzle features | **In progress** | Account + **2FA** complete. **Shipped:** slices [1](#pagesgroups-rest--slice-1)–[5](#pagesgroups-rest--slice-5-privacy-private-re-key); [6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion); [7 — page move](#pages-rest--slice-7-move--group-creation); [8 — create + `groupCreation`](#pagesgroups-rest--slice-8-create--groupcreation); **[slice 9 — membership + join flows](#pagesgroups-rest--slice-9-membership--join-invites--requests)**. **[Stripe / billing](#phase-3--stripe-billing--webhooks--account-hooks).** **[Slice 10 — collab Postgres bootstrap](#pages-rest--slice-10-collab-updates-rest):** `GET`/`POST …/collab-updates`. **Still ahead:** **collab + realtime WebSockets** (JWT upgrade, binary fan-out, optional Redis buffer like legacy) per [RESTART_PLAN §4.3](../docs/RESTART_PLAN.md). |
-| **4** — Client MVP | **In progress** | **Shipped:** [OpenAPI typed HTTP client](#phase-4--openapi-typed-client-bootstrap) in `@deepnotes/web` (`openapi-fetch` + generated `paths`). **Next:** routing + auth UI, then list → page → Yjs. **Parallel:** feature folders, E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
+| **4** — Client MVP | **In progress** | **Shipped:** [OpenAPI typed client](#phase-4--openapi-typed-client-bootstrap) + [`vue-router`](#phase-4--routing--session-ui). **Next:** page list + editor shell → Yjs; `POST /api/users` register UI (must use [same password preimage as login](apps/web/README.md#sign-in-contract)). **Parallel:** E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
 ---
@@ -315,14 +315,25 @@ Sprints **1–9** (pages / groups / membership), **Stripe**, and **[slice 10 —
 
 **Intentional gaps:** no MSW/contract suite yet; no `import/no-restricted-paths` until more packages exist to accidentally import.
 
+### Phase 4 — routing + session UI
+
+| Layer | Shipped |
+|-------|---------|
+| **Router** | [`router.ts`](apps/web/src/router.ts) — `createWebHistory`, `/`, `/login` (lazy `HomeView` / `LoginView`). |
+| **Session** | [`useSession`](apps/web/src/features/auth/useSession.ts) — `bootstrap` (single in-flight + `bootstrapped` gate), `fetchMe`, `loginWithPassword` + **2FA** branch, `loginWithDemo`, `logout`. Cookie hint via [`readDocumentCookie`](apps/web/src/features/auth/cookies.ts) (`loggedIn` only; access/refresh stay httpOnly). |
+| **Demo** | [`buildSessionDemoRequest`](apps/web/src/features/auth/build-demo-session.ts) — `libsodium` + `nanoid`, base64 field shapes match OpenAPI. |
+| **Auth preimage** | [`bytes.ts`](apps/web/src/features/auth/bytes.ts) — `loginPreimageFromPassword` = UTF-8 bytes of the password; **must** match future register UI. |
+| **Vite** | [Proxy `→ 8787`](apps/web/vite.config.ts) for `wrangler dev`; `optimizeDeps` for `libsodium-wrappers-sumo`. |
+| **Docs** | [apps/web/README.md](apps/web/README.md) — feature folders + sign-in contract. |
+
 ---
 
 ## Phase 4 checklist (client MVP)
 
 - [x] **Tooling (bootstrap):** Vitest + **happy-dom** + `@vue/test-utils` in `@deepnotes/web` (minimal `App` test); same Vite 6 pipeline via `vitest/config` `defineConfig` (RESTART_PLAN §5.8).
 - [x] **API client (bootstrap):** typed client from the same OpenAPI document as the Worker—see [Phase 4 — OpenAPI typed client](#phase-4--openapi-typed-client-bootstrap). Runtime bundle does **not** import `@deepnotes/api` (only generated `api-types.generated.ts` + `openapi-fetch`); regenerate after OpenAPI changes.
-- [ ] **Routing + auth UI:** login / refresh / logout / 2FA flows aligned with [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md); composable or component tests + **E2E smoke** for cookie session.
-- [ ] **Pages:** list → open editor shell → integrate **Yjs** / collab when API is ready.
+- [x] **Routing + session UI (slice a):** `vue-router` + [`App.vue` shell](apps/web/src/App.vue) (header, Sign in / Sign out). **`useSession`** ([`useSession.ts`](apps/web/src/features/auth/useSession.ts)): deduped `bootstrap()` = `POST /api/sessions/refresh` + `GET /api/users/me` when `loggedIn` document cookie; `loginWithPassword` (UTF-8 password → base64 `loginHash`, [README contract](apps/web/README.md#sign-in-contract)); 401 + `Requires two-factor authentication.` → 2FA fields; `loginWithDemo` ([`build-demo-session.ts`](apps/web/src/features/auth/build-demo-session.ts)); `POST /api/sessions/logout`. Views: [`/login`](apps/web/src/features/auth/LoginView.vue), [`/`](apps/web/src/features/home/HomeView.vue). Vite [proxy `/api` → 127.0.0.1:8787](apps/web/vite.config.ts). Tests: [`app.test.ts`](apps/web/src/app.test.ts) (router + bootstrap), [`bytes.test.ts`](apps/web/src/features/auth/bytes.test.ts). **Not done:** Playwright E2E; `POST /api/users` **register** form (must match login preimage). **CORS:** API must allow this app’s origin; proxy avoids cross-origin in local dev.
+- [ ] **Pages / editor path:** list → open editor shell → **Yjs** + `GET`/`POST /api/pages/{id}/collab-updates` ([TRPC map](./docs/TRPC_REST_MAP.md) collab bootstrap; [Phase 3 — realtime / collab WebSocket](#not-started-phase-3--realtime--collab-websocket) still TBD for live collab).
 - [ ] **Groups** subset and notifications UX as mapped from [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md).
 - [ ] **Native wrappers** (Capacitor / Tauri): only after web MVP and CI stable.
 
@@ -347,13 +358,13 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 ### Decoupling and layout (`@deepnotes/web`)
 
 - [x] **API surface:** `src/api/` — generated `paths` + `createDeepnotesApiClient`; bundle does not depend on `@deepnotes/api` at runtime (codegen devDeps only). **Still to enforce:** ESLint `import/no-restricted-paths` banning `@deepnotes/api-worker`, `@deepnotes/db`, `drizzle-orm` from `apps/web/src/**` once rule config is added.
-- [ ] **Feature folders:** e.g. `src/features/auth`, `src/features/pages`, `src/shared/ui`—document the convention in `apps/web/README.md` (or link from repo root README).
-- [ ] **Thin Vue, fat composables:** session and crypto orchestration live in testable modules, not only in `.vue` files.
+- [x] **Feature folders (bootstrap):** `src/features/auth` (session, demo builder, bytes), `src/features/home` — [apps/web/README.md](./apps/web/README.md). **Still empty:** `src/shared/ui`, `src/features/pages` (list + editor).
+- [x] **Session composable:** [`useSession.ts`](./apps/web/src/features/auth/useSession.ts) (testable) + thin [`LoginView.vue`](./apps/web/src/features/auth/LoginView.vue) / [`App.vue`](./apps/web/src/App.vue). **Later:** keyring + page crypto in dedicated modules (not in `.vue` only).
 
 ### Testing (see RESTART_PLAN §5.8)
 
 - [x] **Vitest** in `apps/web` with DOM environment (`happy-dom`) and `@vue/test-utils` aligned with Vite 6.
-- [ ] **Component or composable tests** for the first **auth** / session flows (forms, validation, error mapping from API).
+- [x] **Composable tests (bootstrap):** [`bytes.test.ts`](./apps/web/src/features/auth/bytes.test.ts) (base64 + UTF-8 preimage); [`app.test.ts`](./apps/web/src/app.test.ts) (router + bootstrap, no `loggedIn` cookie). **Not done:** `LoginView` / `useSession` MSW or mocked `fetch` matrix (401, 2FA, demo).
 - [ ] **Contract tests** for the fetch wrapper (MSW or recorded OpenAPI fixtures)—optional until multiple features consume the API.
 - [ ] **E2E smoke** (Playwright recommended): login or session refresh with **httpOnly cookies** against **local compose** or **Cloudflare preview**—add CI job when stable enough (can start `manual`/`workflow_dispatch` if cost is a concern).
 
@@ -365,7 +376,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 | **`@deepnotes/session`** | Auth, account, crypto orchestration | Unit: `login-rate-limit`, `encrypt-user-email`, `email-hash`, `send-email-change-code`. **Integration:** `account-flows.integration.test.ts` (**24** cases when DB env set) — … + [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + [slice 7 move](#pages-rest--slice-7-move--group-creation) + [slice 8 create + `groupCreation`](#pagesgroups-rest--slice-8-create--groupcreation) + [slice 9](#pagesgroups-rest--slice-9-membership--join-invites--requests); template `dn_test_tpl_session_email`, **`@deepnotes/db/testing/template-db`**. | **Redis** + `performSessionLogin` failed-login counters; refresh **expired JWT**; optional: invitation **reject/cancel**, join-request **reject/cancel**, **private** group invite/request **access keyring** branches |
 | **`@deepnotes/api`** | Zod + OpenAPI | `openapi.test.ts` (session routes + [slice 6/7 `/api/pages/...` paths](#pages-rest--slice-6-bump-backlinks-snapshots-deletion)); **`schemas/users.test.ts`**; **`schemas/pages-groups.ts`**, **`schemas/user-pages.ts`** | Optional OpenAPI **snapshot**; more Zod edge cases for new page schemas |
 | **`@deepnotes/api-worker`** | Hono on Worker | `index.test.ts`: **70** tests (503 matrix when env/Hyperdrive missing) — includes [slice 6](#pages-rest--slice-6-bump-backlinks-snapshots-deletion) + `/api/pages/{pageId}/move` + [slice 9](#pagesgroups-rest--slice-9-membership--join-invites--requests) + [slice 10 `…/collab-updates`](#pages-rest--slice-10-collab-updates-rest) (`GET` + `POST`) + [Stripe routes](#phase-3--stripe-billing--webhooks--account-hooks) (`/api/billing/stripe/*`, `/api/webhooks/stripe`) | **200** tests with stub `SessionEnv` + template DB (heavier) |
-| **`@deepnotes/web`** | SPA | `app.test.ts` (mount `App.vue`); **`client.test.ts`** (credentials + `/api/health` URL on mocked fetch) | Auth UI + composable tests; MSW/OpenAPI fixtures optional; run `generate:api-types` when `@deepnotes/api` OpenAPI changes |
+| **`@deepnotes/web`** | SPA | `app.test.ts` (router + `App`, bootstrap); **`client.test.ts`**; **`bytes.test.ts`**; Vitest [include](apps/web/vite.config.ts) `src/**/*.test.ts` | MSW/contract for login + 2FA; `generate:api-types` when OpenAPI changes; Playwright (see Phase 4 checklist) |
 
 **Principle:** keep **fast unit tests** on pure crypto, Zod, and mail/HTTP branches; add **Postgres-backed** flows incrementally (same template pattern as `@deepnotes/db`) so Phase 3 routes do not regress silently.
 
@@ -375,7 +386,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 |------------------------|--------------------------------|
 | Quasar + Vite 2, 4GB heap builds | Vite 6 + Vue 3.5, Vitest + happy-dom in CI |
 | Imports `AppRouter`, server websocket paths | Must use **OpenAPI** + documented WS only |
-| No automated UI tests | **Done:** real `test` script + one component test |
+| No automated UI tests | **Done:** `test` + `app.test` (router) + `client.test` + `bytes.test`; auth UI in [`LoginView`](./apps/web/src/features/auth/LoginView.vue) |
 
 ---
 
@@ -410,6 +421,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **Phase 4 — routing + session UI:** `vue-router` (`/`, `/login`); `useSession` (refresh + me bootstrap, email/password + 2FA, demo, logout); `build-demo-session` + `libsodium`/`nanoid`; Vite proxy `/api` → `127.0.0.1:8787`; `App` shell + `HomeView` + `LoginView`; `bytes.test.ts` + updated `app.test.ts`; [apps/web/README.md](./apps/web/README.md). **Next (Phase 4):** page list, editor, register account form (same `loginHash` preimage as login). **Phase 3** still: collab + realtime [WebSocket](#not-started-phase-3--realtime--collab-websocket). |
 | 2026-04-27 | **Phase 4 — OpenAPI typed client:** `@deepnotes/web` — `pnpm run generate:api-types` (`tsx` + `openapi-typescript`); committed `src/api/openapi.json` + `api-types.generated.ts`; `createDeepnotesApiClient` / `resolveApiBaseUrl` (`openapi-fetch`, `credentials: "include"`); `client.test.ts`; `VITE_API_URL`; eslint ignore for generated files. **Phase 3** collab WS backlog expanded (upgrade → room → wire → fan-out → Redis → tests). PLAN_PROGRESS Phase 4 snapshot → **In progress**. |
 | 2026-04-27 | **Phase 3 — slice 10 (collab Postgres REST):** [page-collab-updates.ts](packages/session/src/page-collab-updates.ts) — `performGetPageCollabUpdates` / `performAppendPageCollabUpdates`; `GET|POST /api/pages/:pageId/collab-updates`; OpenAPI + Zod; [TRPC_REST_MAP](docs/TRPC_REST_MAP.md) collab bootstrap table; integration extends **groups + pages**; api-worker 503 matrix **70**. **Next:** collab + realtime **WebSocket** only. |
 | 2026-04-27 | **Phase 3 — Stripe (billing):** [stripe-billing.ts](packages/session/src/stripe-billing.ts) — `performStripeCreateCheckoutSession` / `performStripeCreatePortalSession`, `processStripeWebhookEvent` (legacy `customer.subscription.updated` / `deleted` → `users.plan` + `subscription_id` via `users.customer_id`); [schemas/billing.ts](packages/api/src/schemas/billing.ts) + OpenAPI; Worker `POST /api/billing/stripe/checkout-session`, `…/portal-session`, `POST /api/webhooks/stripe` ([session-env](apps/api-worker/src/session-env.ts) `getStripeBillingEnv` / `getStripeWebhookSecret`); **`STRIPE_SECRET_KEY`** hooks: `deleteStripeCustomer` on `DELETE /api/users/me`, `updateStripeCustomerEmail` on email-change confirm. Dependencies: `stripe@^17.7` in session + api-worker. [TRPC_REST_MAP](docs/TRPC_REST_MAP.md); [template.env](template.env). Api-worker 503 matrix **68** tests. **Next:** [realtime + collab](#phase-3-working-order-suggested) only. |
