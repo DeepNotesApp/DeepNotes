@@ -18,7 +18,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.account.register` | `POST /api/users` |
 | `users.account.resendVerificationEmail` | `POST /api/users/email-verification/resend` (public; body `{ "email" }` — matches legacy, not an authenticated “me” call) |
 | `users.account.verifyEmail` | `POST /api/users/email-verification/confirm` (public; body `{ "emailVerificationCode" }`, nanoid) |
-| `users.account.emailChange.request` | `POST /api/users/me/email-change` |
+| `users.account.emailChange.request` | `POST /api/users/me/email-change` (body: `oldLoginHash` b64, `newEmail`; **204** or **200** with `{ "emailVerificationCode" }` when `SEND_EMAILS=false`) |
 | `users.account.twoFactorAuth.enable.request` | `POST /api/users/me/2fa/enable/request` |
 | `users.account.twoFactorAuth.enable.finish` | `POST /api/users/me/2fa/enable/finish` |
 | `users.account.twoFactorAuth.load` | `GET /api/users/me/2fa` |
@@ -90,7 +90,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `websocket/groups/rotate-keys` | — | **removed** per RESTART_PLAN |
 | `websocket/pages/move` | `POST /api/pages/:pageId/move` | |
 | `websocket/users/account/change-password` | `POST /api/users/me/password` | **implemented** in `@deepnotes/session` (`performUserPasswordChange`) |
-| `websocket/users/account/email-change/finish` | `POST /api/users/me/email-change/confirm` | |
+| `websocket/users/account/email-change/finish` | `POST /api/users/me/email-change/confirm` | **implemented** — one call: `oldLoginHash`, `emailVerificationCode` (6 digits), `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` (b64; same as register/password); 204, clears cookies; optional Stripe in worker |
 | `websocket/users/account/rotate-keys` | — | **removed** |
 
 ## Webhooks (not tRPC)

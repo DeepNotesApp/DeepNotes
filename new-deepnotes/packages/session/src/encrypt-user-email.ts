@@ -1,4 +1,4 @@
-import { base64ToBytes, textToBytes } from "./crypto/bytes.js";
+import { base64ToBytes, bytesToText, textToBytes } from "./crypto/bytes.js";
 import { wrapSymmetricKey } from "./crypto/symmetric-key.js";
 
 function normalizeEmail(email: string, exceptions: string): string {
@@ -19,4 +19,20 @@ export function encryptUserEmail(
     padding: true,
     associatedData: { context: "UserEmail" },
   });
+}
+
+/**
+ * Decrypts ciphertext from {@link encryptUserEmail} (same key and `EMAIL_CASE_SENSITIVITY_EXCEPTIONS` rules).
+ */
+export function decryptUserEmail(
+  encrypted: Uint8Array,
+  encryptionKeyB64: string,
+  exceptions: string,
+): string {
+  const key = wrapSymmetricKey(base64ToBytes(encryptionKeyB64));
+  const plaintext = key.decrypt(encrypted, {
+    padding: true,
+    associatedData: { context: "UserEmail" },
+  });
+  return normalizeEmail(bytesToText(plaintext), exceptions);
 }

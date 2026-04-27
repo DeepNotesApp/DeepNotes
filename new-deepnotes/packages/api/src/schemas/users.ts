@@ -77,3 +77,45 @@ export const userPasswordChangeRequestSchema = z
 export type UserPasswordChangeRequest = z.infer<
   typeof userPasswordChangeRequestSchema
 >;
+
+const sixDigitCode = z
+  .string()
+  .regex(/^\d{6}$/, "expected 6-digit verification code");
+
+/**
+ * `POST /api/users/me/email-change` — legacy `users.account.emailChange.request`.
+ */
+export const userEmailChangeRequestSchema = z
+  .object({
+    oldLoginHash: byteB64,
+    newEmail: z.string().email(),
+  })
+  .openapi("UserEmailChangeRequest");
+
+export type UserEmailChangeRequest = z.infer<typeof userEmailChangeRequestSchema>;
+
+/**
+ * When `SEND_EMAILS=false`, the server returns this body (dev / local only).
+ */
+export const userEmailChangeRequestResponseSchema = z
+  .object({
+    emailVerificationCode: sixDigitCode,
+  })
+  .openapi("UserEmailChangeRequestResponse");
+
+/**
+ * `POST /api/users/me/email-change/confirm` — legacy WS `emailChange.finish` (two steps as one call).
+ */
+export const userEmailChangeConfirmRequestSchema = z
+  .object({
+    oldLoginHash: byteB64,
+    emailVerificationCode: sixDigitCode,
+    newLoginHash: byteB64,
+    userEncryptedPrivateKeyring: byteB64,
+    userEncryptedSymmetricKeyring: byteB64,
+  })
+  .openapi("UserEmailChangeConfirmRequest");
+
+export type UserEmailChangeConfirmRequest = z.infer<
+  typeof userEmailChangeConfirmRequestSchema
+>;

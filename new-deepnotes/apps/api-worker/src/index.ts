@@ -6,6 +6,8 @@ import {
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
   userAccountDeleteRequestSchema,
+  userEmailChangeConfirmRequestSchema,
+  userEmailChangeRequestSchema,
   userPasswordChangeRequestSchema,
   userRegisterRequestSchema,
 } from "@deepnotes/api";
@@ -375,6 +377,135 @@ app.post("/api/users/me/password", async (c) => {
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
       oldLoginHash: parsed.data.oldLoginHash,
+      newLoginHash: parsed.data.newLoginHash,
+      newEncryptedPrivateKeyring: parsed.data.userEncryptedPrivateKeyring,
+      newEncryptedSymmetricKeyring: parsed.data.userEncryptedSymmetricKeyring,
+    });
+    const res = c.body(null, 204);
+    appendSetCookies(res, cookieLines);
+    return res;
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/email-change", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = userEmailChangeRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performUserEmailChangeRequest } = await import("@deepnotes/session");
+    const out = await performUserEmailChangeRequest({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      oldLoginHash: parsed.data.oldLoginHash,
+      newEmail: parsed.data.newEmail,
+    });
+    if (out.devEmailVerificationCode != null) {
+      return c.json(
+        { emailVerificationCode: out.devEmailVerificationCode },
+        200,
+      );
+    }
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users/me/email-change/confirm", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = userEmailChangeConfirmRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performUserEmailChangeConfirm } = await import("@deepnotes/session");
+    const { cookieLines } = await performUserEmailChangeConfirm({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      oldLoginHash: parsed.data.oldLoginHash,
+      emailVerificationCode: parsed.data.emailVerificationCode,
       newLoginHash: parsed.data.newLoginHash,
       newEncryptedPrivateKeyring: parsed.data.userEncryptedPrivateKeyring,
       newEncryptedSymmetricKeyring: parsed.data.userEncryptedSymmetricKeyring,

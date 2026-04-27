@@ -20,6 +20,9 @@ import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,
+  userEmailChangeConfirmRequestSchema,
+  userEmailChangeRequestResponseSchema,
+  userEmailChangeRequestSchema,
   userMeResponseSchema,
   userPasswordChangeRequestSchema,
   userRegisterResponseSchema,
@@ -217,6 +220,91 @@ registry.registerPath({
     },
     400: {
       description: "Wrong current password or invalid key material.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/email-change",
+  summary: "Request account email change (6-digit code email)",
+  description:
+    "Replaces legacy `users.account.emailChange.request`. Verifies `oldLoginHash` and that the new address is not already registered. When outbound email is enabled, sends a 6-digit code. When `SEND_EMAILS=false` (e.g. local), returns 200 with `emailVerificationCode` instead of emailing.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userEmailChangeRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Code emailed to the new address; pending change stored on the user row.",
+    },
+    200: {
+      description:
+        "Out-of-band dev response when `SEND_EMAILS=false` (verification code not emailed).",
+      content: {
+        "application/json": {
+          schema: userEmailChangeRequestResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Wrong password, address in use, or validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    502: {
+      description: "Email send failed (e.g. Resend) after the pending state was written.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/email-change/confirm",
+  summary: "Confirm email change (re-wrap keyrings, new password)",
+  description:
+    "Replaces legacy WebSocket `users.account.emailChange.finish` (step 1 + 2 in one). Verifies 6-digit code and `oldLoginHash`, then applies new email + new password-encrypted keyrings, invalidates sessions, clears cookies; optional Stripe customer email update in the deployment (not in OpenAPI).",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userEmailChangeConfirmRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Email updated; sessions cleared; re-login required.",
+    },
+    400: {
+      description: "Wrong code, wrong password, no pending change, or invalid keyrings.",
       content: {
         "application/json": {
           schema: sessionErrorResponseSchema,
