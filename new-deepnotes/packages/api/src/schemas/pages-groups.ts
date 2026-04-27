@@ -111,3 +111,63 @@ export const groupPrivacyJoinRequestsPatchSchema = z
     areJoinRequestsAllowed: z.boolean(),
   })
   .openapi("GroupPrivacyJoinRequestsPatch");
+
+const nanoidRecordKeySchema = z
+  .string()
+  .regex(/^[A-Za-z0-9_-]{21}$/, "expected nanoid id");
+
+const groupPrivacyPrivateMemberSchema = z
+  .object({
+    encryptedAccessKeyring: byteB64.optional(),
+    encryptedInternalKeyring: byteB64,
+    encryptedName: byteB64.nullable(),
+  })
+  .openapi("GroupPrivacyPrivateMember");
+
+const groupPrivacyPrivateInvitationSchema = z
+  .object({
+    encryptedAccessKeyring: byteB64.optional(),
+    encryptedInternalKeyring: byteB64,
+    encryptedName: byteB64,
+  })
+  .openapi("GroupPrivacyPrivateInvitation");
+
+const groupPrivacyPrivateJoinRequestSchema = z
+  .object({
+    encryptedName: byteB64,
+  })
+  .openapi("GroupPrivacyPrivateJoinRequest");
+
+const groupPrivacyPrivatePageSchema = z
+  .object({
+    encryptedSymmetricKeyring: byteB64,
+  })
+  .openapi("GroupPrivacyPrivatePage");
+
+/**
+ * Re-key payload for `POST …/privacy/private` (legacy WS `groups.privacy.makePrivate` step 2 + `rotateGroupKeys` in one call).
+ * Record keys are user ids (members, invitations, requests) or page ids; must match current DB rows exactly.
+ */
+export const groupPrivacyPrivateRequestSchema = z
+  .object({
+    groupAccessKeyring: byteB64.optional(),
+    groupEncryptedName: byteB64,
+    groupEncryptedContentKeyring: byteB64,
+    groupPublicKeyring: byteB64,
+    groupEncryptedPrivateKeyring: byteB64,
+    groupMembers: z.record(nanoidRecordKeySchema, groupPrivacyPrivateMemberSchema),
+    groupJoinInvitations: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyPrivateInvitationSchema,
+    ),
+    groupJoinRequests: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyPrivateJoinRequestSchema,
+    ),
+    groupPages: z.record(nanoidRecordKeySchema, groupPrivacyPrivatePageSchema),
+  })
+  .openapi("GroupPrivacyPrivateRequest");
+
+export type GroupPrivacyPrivateRequest = z.infer<
+  typeof groupPrivacyPrivateRequestSchema
+>;

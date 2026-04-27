@@ -8,6 +8,7 @@ import {
   groupPasswordDisableRequestSchema,
   groupPasswordEnableRequestSchema,
   groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
   healthResponseSchema,
   userDefaultArrowPatchSchema,
@@ -1659,6 +1660,78 @@ app.patch("/api/groups/:groupId/privacy/join-requests", async (c) => {
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
       groupId,
       areJoinRequestsAllowed: parsed.data.areJoinRequestsAllowed,
+    });
+    return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/groups/:groupId/privacy/private", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = groupPrivacyPrivateRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  const payload = {
+    groupAccessKeyring: parsed.data.groupAccessKeyring,
+    groupEncryptedName: parsed.data.groupEncryptedName,
+    groupEncryptedContentKeyring: parsed.data.groupEncryptedContentKeyring,
+    groupPublicKeyring: parsed.data.groupPublicKeyring,
+    groupEncryptedPrivateKeyring: parsed.data.groupEncryptedPrivateKeyring,
+    groupMembers: parsed.data.groupMembers,
+    groupJoinInvitations: parsed.data.groupJoinInvitations,
+    groupJoinRequests: parsed.data.groupJoinRequests,
+    groupPages: parsed.data.groupPages,
+  };
+
+  try {
+    const { performGroupPrivacyMakePrivate } = await import("@deepnotes/session");
+    await performGroupPrivacyMakePrivate({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+      payload,
     });
     return c.body(null, 204);
   } catch (e) {

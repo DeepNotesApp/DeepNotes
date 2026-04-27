@@ -69,6 +69,9 @@ describe("getOpenApiDocument", () => {
     expect(
       doc.paths?.["/api/groups/{groupId}/privacy/join-requests"]?.patch,
     ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/privacy/private"]?.post,
+    ).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}"]?.delete).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/restore"]?.post).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/purge"]?.post).toBeDefined();

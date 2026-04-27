@@ -35,9 +35,11 @@ export {
   groupPasswordDisableRequestSchema,
   groupPasswordEnableRequestSchema,
   groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
+export type { GroupPrivacyPrivateRequest } from "./schemas/pages-groups.js";
 export {
   userCurrentPathResponseSchema,
   userDefaultArrowPatchSchema,

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
@@ -21,6 +21,7 @@ import {
 import * as schema from "@deepnotes/db/schema";
 import {
   devices,
+  groupMembers,
   groups,
   notifications,
   pages,
@@ -60,6 +61,7 @@ import {
   performGroupPasswordChange,
   performGroupPasswordDisable,
   performGroupPasswordEnable,
+  performGroupPrivacyMakePrivate,
   performGroupPrivacyMakePublic,
   performGroupPrivacySetJoinRequestsAllowed,
   performGroupPurge,
@@ -1546,6 +1548,160 @@ describe.skipIf(resolveTemplateContext() == null)(
           .from(users)
           .where(eq(users.id, reg.userId));
         expect(readRow?.lastNotificationRead).toBe(n!.id);
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("group privacy make private clears access_keyring and rejects repeat", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `priv-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const [mem] = await db
+          .select({
+            encryptedName: groupMembers.encryptedName,
+          })
+          .from(groupMembers)
+          .where(
+            and(
+              eq(groupMembers.groupId, reg.groupId),
+              eq(groupMembers.userId, reg.userId),
+            ),
+          );
+        expect(mem).toBeDefined();
+        const memberRow = mem!;
+
+        const newPageSym = rand32();
+        await performGroupPrivacyMakePrivate({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          payload: {
+            groupEncryptedName: rand32(),
+            groupEncryptedContentKeyring: rand32(),
+            groupPublicKeyring: rand32(),
+            groupEncryptedPrivateKeyring: rand32(),
+            groupMembers: {
+              [reg.userId]: {
+                encryptedAccessKeyring: rand32(),
+                encryptedInternalKeyring: rand32(),
+                encryptedName:
+                  memberRow.encryptedName != null ? rand32() : null,
+              },
+            },
+            groupJoinInvitations: {},
+            groupJoinRequests: {},
+            groupPages: {
+              [reg.pageId]: { encryptedSymmetricKeyring: newPageSym },
+            },
+          },
+        });
+
+        const [gAfter] = await db
+          .select({ accessKeyring: groups.accessKeyring })
+          .from(groups)
+          .where(eq(groups.id, reg.groupId));
+        expect(gAfter?.accessKeyring).toBeNull();
+
+        const [pAfter] = await db
+          .select({ sk: pages.encryptedSymmetricKeyring })
+          .from(pages)
+          .where(eq(pages.id, reg.pageId));
+        expect(
+          Buffer.from(pAfter!.sk!).equals(Buffer.from(newPageSym)),
+        ).toBe(true);
+
+        await expect(
+          performGroupPrivacyMakePrivate({
+            db,
+            env,
+            accessCookie: access,
+            groupId: reg.groupId,
+            payload: {
+              groupEncryptedName: rand32(),
+              groupEncryptedContentKeyring: rand32(),
+              groupPublicKeyring: rand32(),
+              groupEncryptedPrivateKeyring: rand32(),
+              groupMembers: {
+                [reg.userId]: {
+                  encryptedAccessKeyring: rand32(),
+                  encryptedInternalKeyring: rand32(),
+                  encryptedName: rand32(),
+                },
+              },
+              groupJoinInvitations: {},
+              groupJoinRequests: {},
+              groupPages: {
+                [reg.pageId]: { encryptedSymmetricKeyring: rand32() },
+              },
+            },
+          }),
+        ).rejects.toMatchObject({
+          code: "BAD_REQUEST",
+          message: "Group is already private.",
+        });
+
+        await db
+          .update(groups)
+          .set({ accessKeyring: Buffer.from(rand32()) })
+          .where(eq(groups.id, reg.groupId));
+        await expect(
+          performGroupPrivacyMakePrivate({
+            db,
+            env,
+            accessCookie: access,
+            groupId: reg.groupId,
+            payload: {
+              groupEncryptedName: rand32(),
+              groupEncryptedContentKeyring: rand32(),
+              groupPublicKeyring: rand32(),
+              groupEncryptedPrivateKeyring: rand32(),
+              groupMembers: {
+                [reg.userId]: {
+                  encryptedAccessKeyring: rand32(),
+                  encryptedInternalKeyring: rand32(),
+                  encryptedName: rand32(),
+                },
+              },
+              groupJoinInvitations: {},
+              groupJoinRequests: {},
+              groupPages: {
+                [reg.pageId]: { encryptedSymmetricKeyring: rand32() },
+                [nanoid()]: { encryptedSymmetricKeyring: rand32() },
+              },
+            },
+          }),
+        ).rejects.toMatchObject({ code: "BAD_REQUEST" });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

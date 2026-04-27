@@ -59,6 +59,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `groups.password.disable` | `DELETE /api/groups/:groupId/password` (JSON body; **implemented** — `performGroupPasswordDisable`; not Pro-gated, legacy match) |
 | `groups.privacy.makePublic` | `POST /api/groups/:groupId/privacy/public` (**implemented** — `performGroupPrivacyMakePublic`; clears `group_members` / `group_join_invitations` `encrypted_access_keyring`) |
 | `groups.privacy.setJoinRequestsAllowed` | `PATCH /api/groups/:groupId/privacy/join-requests` (**implemented** — `performGroupPrivacySetJoinRequestsAllowed`) |
+| (WS) `groups.privacy.makePrivate` step 1+2 | `POST /api/groups/:groupId/privacy/private` (**implemented** — `performGroupPrivacyMakePrivate`; single body = legacy `rotateGroupKeys` / `groupKeyRotationSchema`; omits `pages.next_key_rotation_date` bumps per RESTART_PLAN) |
 | `groups.deletion.delete` | `DELETE /api/groups/:groupId` (soft) (**implemented** — `performGroupSoftDelete`) |
 | `groups.deletion.restore` | `POST /api/groups/:groupId/restore` (**implemented** — `performGroupRestore`; grace only; not after purge) |
 | `groups.deletion.deletePermanently` | `POST /api/groups/:groupId/purge` (**implemented** — `performGroupPurge`) |
@@ -86,7 +87,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `websocket/groups/join-requests/*` | same | send / accept / reject / cancel |
 | `websocket/groups/change-user-role` | `PATCH /api/groups/:groupId/members/:userId` | prefer REST if acceptable |
 | `websocket/groups/remove-user` | `DELETE /api/groups/:groupId/members/:userId` | |
-| `websocket/groups/privacy/make-private` | `POST /api/groups/:groupId/privacy/private` | |
+| `websocket/groups/privacy/make-private` | `POST /api/groups/:groupId/privacy/private` | **implemented** — see `groups.privacy.makePrivate` row above |
 | `websocket/groups/rotate-keys` | — | **removed** per RESTART_PLAN |
 | `websocket/pages/move` | `POST /api/pages/:pageId/move` | |
 | `websocket/users/account/change-password` | `POST /api/users/me/password` | **implemented** in `@deepnotes/session` (`performUserPasswordChange`) |

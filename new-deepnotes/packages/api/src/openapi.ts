@@ -28,6 +28,7 @@ import {
   groupPasswordDisableRequestSchema,
   groupPasswordEnableRequestSchema,
   groupPrivacyJoinRequestsPatchSchema,
+  groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
   userGroupIdsResponseSchema,
 } from "./schemas/pages-groups.js";
@@ -773,6 +774,37 @@ registry.registerPath({
   },
   responses: {
     204: { description: "Setting updated." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/privacy/private",
+  summary: "Make group private (Pro) — full re-key payload",
+  description:
+    "Replaces legacy WS `groups.privacy.makePrivate` (step 2 `rotateGroupKeys`) in one request. Clears `access_keyring` when `groupAccessKeyring` is omitted. Member / invitation / request / page record keys must match the DB exactly.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPrivacyPrivateRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: { description: "Group is private; ciphertext updated." },
+    400: {
+      description: "Already private or payload key sets do not match group.",
+      content: {
+        "application/json": { schema: sessionErrorResponseSchema },
+      },
+    },
     401: sessionUnauthorized401,
     403: sessionForbidden403,
     404: sessionNotFound404,

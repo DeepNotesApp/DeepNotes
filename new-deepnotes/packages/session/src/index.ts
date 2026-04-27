@@ -69,6 +69,8 @@ export {
   performGroupSoftDelete,
 } from "./group-deletion.js";
 export {
+  performGroupPrivacyMakePrivate,
   performGroupPrivacyMakePublic,
   performGroupPrivacySetJoinRequestsAllowed,
 } from "./group-privacy.js";
+export type { GroupPrivacyPrivatePayload } from "./group-privacy.js";

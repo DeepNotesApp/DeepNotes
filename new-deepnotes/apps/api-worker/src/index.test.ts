@@ -78,6 +78,10 @@ describe("api-worker", () => {
       "PATCH",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/privacy/join-requests",
     ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/privacy/private",
+    ],
     ["DELETE", "/api/groups/aaaaaaaaaaaaaaaaaaaaa"],
     [
       "POST",
