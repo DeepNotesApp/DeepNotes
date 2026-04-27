@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import Collaboration from "@tiptap/extension-collaboration";
+import StarterKit from "@tiptap/starter-kit";
+import { EditorContent, useEditor } from "@tiptap/vue-3";
 import {
   base64ToBytes,
   type SymmetricKeyring,
 } from "@deepnotes/e2ee";
 import * as Y from "yjs";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
@@ -15,7 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 
 import { uint8ToBase64 } from "../auth/bytes";
 import { readSessionCrypto } from "../auth/crypto-storage";
@@ -26,6 +28,9 @@ import {
   unlockPageCollabSymmetricKeyring,
 } from "./page-collab-crypto";
 
+const Y_TEXT_DEFAULT = "default";
+const Y_FRAG_PROSEMIRROR = "prosemirror";
+
 const route = useRoute();
 const router = useRouter();
 const { client, isAuthenticated, user, bootstrapped } = useSession();
@@ -33,10 +38,7 @@ const { client, isAuthenticated, user, bootstrapped } = useSession();
 const pageId = computed(() => String(route.params.pageId ?? ""));
 
 const ydoc = new Y.Doc();
-const ytext = ydoc.getText("default");
-
-const yStateBytes = ref(0);
-const localBody = ref("");
+const legacyPlainToImport = ref<string | null>(null);
 
 const loadError = ref<string | null>(null);
 const collabLoading = ref(true);
@@ -51,21 +53,42 @@ let pageKeyring: SymmetricKeyring | null = null;
 
 let pushTimer: ReturnType<typeof setTimeout> | null = null;
 
+const yStateBytes = ref(0);
+
 function refreshYMetrics() {
   yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
 }
 
-watch(localBody, (v) => {
-  if (hydrating.value) {
-    return;
-  }
-  ydoc.transact(() => {
-    ytext.delete(0, ytext.length);
-    ytext.insert(0, v);
-  }, "ui");
-  refreshYMetrics();
-  schedulePush();
+const editor = useEditor({
+  extensions: [
+    StarterKit.configure({
+      undoRedo: false,
+    }),
+    Collaboration.configure({
+      document: ydoc,
+      field: Y_FRAG_PROSEMIRROR,
+    }),
+  ],
+  editorProps: {
+    attributes: {
+      class: "max-w-none min-h-40 px-3 py-2 text-sm leading-relaxed focus:outline-none",
+    },
+  },
+  onUpdate() {
+    refreshYMetrics();
+    if (!hydrating.value) {
+      schedulePush();
+    }
+  },
+  editable: false,
 });
+
+function setEditorEditable(on: boolean) {
+  const ed = editor.value;
+  if (ed != null && !ed.isDestroyed) {
+    ed.setEditable(on);
+  }
+}
 
 function schedulePush() {
   if (pageKeyring == null) {
@@ -103,8 +126,7 @@ async function flushPush() {
       plaintext: diff,
     });
     const expected = collabLastIndex.value;
-    const nextIndex =
-      expected == null ? 0 : expected + 1;
+    const nextIndex = expected == null ? 0 : expected + 1;
     const { error, response } = await client.POST(
       "/api/pages/{pageId}/collab-updates",
       {
@@ -136,6 +158,13 @@ async function flushPush() {
   }
 }
 
+onBeforeUnmount(() => {
+  if (pushTimer != null) {
+    clearTimeout(pushTimer);
+    pushTimer = null;
+  }
+});
+
 onMounted(() => {
   if (!isAuthenticated.value) {
     void router.replace({
@@ -144,6 +173,30 @@ onMounted(() => {
     });
   }
 });
+
+watch(
+  [editor, legacyPlainToImport],
+  () => {
+    const ed = editor.value;
+    const t = legacyPlainToImport.value;
+    if (ed == null || ed.isDestroyed || t == null) {
+      return;
+    }
+    ed.commands.setContent({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: t.length > 0 ? [{ type: "text", text: t }] : [],
+        },
+      ],
+    });
+    legacyPlainToImport.value = null;
+    serverStateVector = Y.encodeStateVector(ydoc);
+    refreshYMetrics();
+  },
+  { flush: "post" },
+);
 
 watch(
   [bootstrapped, isAuthenticated, pageId],
@@ -184,8 +237,16 @@ watch(
           "Demo sessions do not persist client crypto; sign in with a password account to decrypt page content.";
         hydrating.value = true;
         try {
-          ytext.delete(0, ytext.length);
-          localBody.value = "";
+          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
+          ydoc.transact(() => {
+            while (frag.length > 0) {
+              frag.delete(frag.length - 1, 1);
+            }
+          });
+          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
+          if (legacy.length > 0) {
+            legacy.delete(0, legacy.length);
+          }
         } finally {
           hydrating.value = false;
         }
@@ -200,8 +261,16 @@ watch(
           "Missing session crypto (sign out and sign in again with your password on this device).";
         hydrating.value = true;
         try {
-          ytext.delete(0, ytext.length);
-          localBody.value = "";
+          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
+          ydoc.transact(() => {
+            while (frag.length > 0) {
+              frag.delete(frag.length - 1, 1);
+            }
+          });
+          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
+          if (legacy.length > 0) {
+            legacy.delete(0, legacy.length);
+          }
         } finally {
           hydrating.value = false;
         }
@@ -237,8 +306,16 @@ watch(
             : "Could not unlock page encryption keys.";
         hydrating.value = true;
         try {
-          ytext.delete(0, ytext.length);
-          localBody.value = "";
+          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
+          ydoc.transact(() => {
+            while (frag.length > 0) {
+              frag.delete(frag.length - 1, 1);
+            }
+          });
+          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
+          if (legacy.length > 0) {
+            legacy.delete(0, legacy.length);
+          }
         } finally {
           hydrating.value = false;
         }
@@ -249,7 +326,16 @@ watch(
 
       hydrating.value = true;
       try {
-        ytext.delete(0, ytext.length);
+        const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
+        ydoc.transact(() => {
+          while (frag.length > 0) {
+            frag.delete(frag.length - 1, 1);
+          }
+        });
+        const legacy = ydoc.getText(Y_TEXT_DEFAULT);
+        if (legacy.length > 0) {
+          legacy.delete(0, legacy.length);
+        }
         for (const u of data.updates) {
           const plain = decryptPageDocUpdate({
             pageKeyring,
@@ -258,7 +344,13 @@ watch(
           });
           Y.applyUpdateV2(ydoc, plain);
         }
-        localBody.value = ytext.toString();
+        const legacyAfter = ydoc.getText(Y_TEXT_DEFAULT);
+        if (legacyAfter.length > 0) {
+          legacyPlainToImport.value = legacyAfter.toString();
+          ydoc.transact(() => {
+            legacyAfter.delete(0, legacyAfter.length);
+          });
+        }
         serverStateVector = Y.encodeStateVector(ydoc);
         refreshYMetrics();
       } finally {
@@ -269,6 +361,19 @@ watch(
     }
   },
   { immediate: true },
+);
+
+watch(
+  [collabLoading, loadError, cryptoError, editor],
+  () => {
+    const canEdit =
+      !collabLoading.value &&
+      loadError.value == null &&
+      cryptoError.value == null &&
+      user.value?.demo !== true;
+    setEditorEditable(canEdit);
+  },
+  { immediate: true, flush: "post" },
 );
 </script>
 
@@ -328,26 +433,33 @@ watch(
 
     <Card>
       <CardHeader>
-        <CardTitle>Yjs editor</CardTitle>
+        <CardTitle>Tiptap + Yjs</CardTitle>
         <CardDescription>
           {{ yStateBytes }} byte(s) in
-          <code class="font-mono text-xs">encodeStateAsUpdateV2</code> — edits
-          debounce-save over
+          <code class="font-mono text-xs">encodeStateAsUpdateV2</code> — rich
+          text syncs the ProseMirror
+          <code class="font-mono text-xs">Y.XmlFragment</code> (field
+          <code class="font-mono text-xs">{{ Y_FRAG_PROSEMIRROR }}</code>
+          ); debounced
           <code class="font-mono text-xs">POST …/collab-updates</code>
-          (Yjs update v2, legacy
+          (Yjs v2, legacy
           <code class="font-mono text-xs">PageDocUpdate</code>
-          AAD).
+          AAD). Plain
+          <code class="font-mono text-xs">Y.Text("{{ Y_TEXT_DEFAULT }}")</code>
+          from earlier builds is migrated into the editor once.
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-2">
-        <Label class="text-muted-foreground" for="yjs-draft">Content</Label>
-        <textarea
-          id="yjs-draft"
-          v-model="localBody"
-          :disabled="collabLoading || !!loadError || !!cryptoError"
-          class="border-input bg-background min-h-40 w-full rounded-md border px-3 py-2 font-mono text-sm disabled:opacity-50"
-        />
+        <div
+          class="border-input bg-background w-full overflow-hidden rounded-md border"
+        >
+          <template v-if="editor">
+            <EditorContent :editor="editor" class="tiptap-editor" />
+          </template>
+        </div>
       </CardContent>
     </Card>
   </div>
 </template>
+
+```

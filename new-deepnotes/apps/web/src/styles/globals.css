@@ -127,3 +127,16 @@
     @apply font-sans;
     }
 }
+
+/* Tiptap / ProseMirror (editor is headless; bring minimal list/paragraph chrome) */
+.tiptap-editor .ProseMirror {
+  outline: none;
+}
+.tiptap-editor .ProseMirror p {
+  margin: 0.35em 0;
+}
+.tiptap-editor .ProseMirror ul,
+.tiptap-editor .ProseMirror ol {
+  margin: 0.35em 0;
+  padding-left: 1.25rem;
+}

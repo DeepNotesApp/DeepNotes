@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +8,7 @@ import { useSession } from "./features/auth/useSession";
 
 const { bootstrap, isAuthenticated, user, bootstrapped, loading, logout } =
   useSession();
+const route = useRoute();
 
 onMounted(() => {
   void bootstrap();
@@ -85,7 +86,7 @@ async function onLogout() {
       </div>
     </header>
     <main class="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
-      <RouterView />
+      <RouterView :key="route.path" />
     </main>
   </div>
 </template>
