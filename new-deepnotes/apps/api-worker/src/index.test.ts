@@ -21,4 +21,17 @@ describe("api-worker", () => {
       info: { title: "DeepNotes API" },
     });
   });
+
+  it.each([
+    ["POST", "/api/sessions/login"],
+    ["POST", "/api/sessions/refresh"],
+    ["POST", "/api/sessions/logout"],
+    ["POST", "/api/sessions/demo"],
+  ] as const)("returns 501 for %s %s until implemented", async (method, path) => {
+    const res = await app.request(`http://test${path}`, { method });
+    expect(res.status).toBe(501);
+    await expect(res.json()).resolves.toMatchObject({
+      code: "NOT_IMPLEMENTED",
+    });
+  });
 });

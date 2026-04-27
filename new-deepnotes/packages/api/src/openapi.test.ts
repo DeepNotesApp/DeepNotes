@@ -7,4 +7,12 @@ describe("getOpenApiDocument", () => {
     const doc = getOpenApiDocument();
     expect(doc.paths?.["/api/health"]?.get).toBeDefined();
   });
+
+  it("includes session routes (Phase 3 contract)", () => {
+    const doc = getOpenApiDocument();
+    expect(doc.paths?.["/api/sessions/login"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/sessions/refresh"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/sessions/logout"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/sessions/demo"]?.post).toBeDefined();
+  });
 });

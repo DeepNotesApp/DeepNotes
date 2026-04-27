@@ -8,6 +8,12 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
+const sessionNotImplementedBody = {
+  code: "NOT_IMPLEMENTED" as const,
+  message:
+    "Session handlers are not wired yet (crypto, Redis, Drizzle). See OpenAPI for the contract.",
+};
+
 app.get("/api/openapi.json", (c) => c.json(getOpenApiDocument()));
 
 app.get("/api/health", (c) => {
@@ -18,5 +24,16 @@ app.get("/api/health", (c) => {
   }
   return c.json(parsed.data);
 });
+
+app.post("/api/sessions/login", (c) =>
+  c.json(sessionNotImplementedBody, 501),
+);
+app.post("/api/sessions/refresh", (c) =>
+  c.json(sessionNotImplementedBody, 501),
+);
+app.post("/api/sessions/logout", (c) =>
+  c.json(sessionNotImplementedBody, 501),
+);
+app.post("/api/sessions/demo", (c) => c.json(sessionNotImplementedBody, 501));
 
 export default app;

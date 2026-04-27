@@ -10,10 +10,10 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 
 | Phase | Status | Notes |
 |-------|--------|--------|
-| **0** — OpenAPI + Drizzle inventory | **In progress** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
+| **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Mostly done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **Not started** | Auth/sessions, pages/groups, realtime/collab, Stripe (no RevenueCat). |
+| **3** — REST + Drizzle features | **In progress** | Session contract in OpenAPI + `501` stubs on worker (`/api/sessions/*`). Next: wire login/refresh/logout/demo with crypto, Redis, Drizzle + cookies per [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md). |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -26,6 +26,16 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 - [x] Transcribe **`postgres-init.sql`** → Drizzle schema + baseline migration (`0000_legacy_baseline`: `pgcrypto`, `nanoid()`, core tables, FKs aligned with Drizzle; legacy `NOT VALID` FKs omitted for fresh installs).
 - [x] Document **cookie names**, **JWT** claims, **CORS** origins → [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md).
 - [x] List **`@deepnotes/*` forks** the new client will not use (exception list with owners if any remain) → [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md).
+
+---
+
+## Phase 3 checklist (REST + Drizzle)
+
+- [x] Document **sessions** REST paths + request schemas in OpenAPI; worker returns **501** until handlers exist.
+- [ ] Implement **sessions.login** / refresh / logout / start-demo against Drizzle + Redis + legacy crypto semantics.
+- [ ] **JWT + httpOnly cookies** (`accessToken`, `refreshToken`, `loggedIn`) matching [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md).
+- [ ] **Users** registration + `GET /api/users/me` (and remaining TRPC_REST_MAP slices as needed).
+- [ ] Pages/groups CRUD, realtime/collab, Stripe webhook (no RevenueCat).
 
 ---
 
@@ -58,6 +68,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | Phase 3 start: OpenAPI + Zod for `POST /api/sessions/login|refresh|logout|demo`; api-worker `501` stubs; Phase 0 marked done in snapshot. |
 | 2026-04-26 | Phase 0 docs (TRPC_REST_MAP, AUTH_AND_CORS, CLIENT_FORKS); Phase 2 deploy doc; Drizzle legacy baseline from `postgres-init.sql`; Vitest template-DB integration test + CI `DATABASE_ADMIN_URL`. |
 | 2026-04-26 | Initial `new-deepnotes` monorepo: `@deepnotes/api`, `@deepnotes/db`, `@deepnotes/api-worker`, `@deepnotes/web`, CI workflow. |
 
