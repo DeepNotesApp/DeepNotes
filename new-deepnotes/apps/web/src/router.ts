@@ -26,6 +26,11 @@ const router = createRouter({
       component: () => import("./features/groups/GroupsView.vue"),
     },
     {
+      path: "/notifications",
+      name: "notifications",
+      component: () => import("./features/notifications/NotificationsView.vue"),
+    },
+    {
       path: "/page/:pageId",
       name: "page",
       component: () => import("./features/pages/PageEditorView.vue"),
