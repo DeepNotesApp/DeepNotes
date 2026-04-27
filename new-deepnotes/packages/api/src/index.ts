@@ -25,6 +25,7 @@ export {
 } from "./schemas/sessions.js";
 export {
   groupIdPathSchema,
+  groupInviteCryptoBootstrapResponseSchema,
   groupMainPageResponseSchema,
   groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,
@@ -44,6 +45,7 @@ export {
   groupPrivacyJoinRequestsPatchSchema,
   groupPrivacyPrivateRequestSchema,
   groupPrivacyPublicRequestSchema,
+  groupPublicKeyringResponseSchema,
   groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
@@ -82,8 +84,10 @@ export {
   userEmailChangeConfirmRequestSchema,
   userEmailChangeRequestResponseSchema,
   userEmailChangeRequestSchema,
+  userIdPathSchema,
   userMeResponseSchema,
   userPasswordChangeRequestSchema,
+  userPublicKeyringResponseSchema,
   userRegisterResponseSchema,
   type UserAccountDeleteRequest,
   type UserEmailChangeConfirmRequest,

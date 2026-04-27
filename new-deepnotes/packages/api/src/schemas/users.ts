@@ -154,3 +154,21 @@ export const user2faRecoveryCodesResponseSchema = z
     ),
   })
   .openapi("User2faRecoveryCodesResponse");
+
+export const userIdPathSchema = z.object({
+  userId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .openapi({
+      description: "21-character nanoid (URL-safe alphabet).",
+      example: "V1StGXR8_Z5jdHi6B-myT",
+      param: { name: "userId", in: "path" },
+    }),
+});
+
+/** User box public key for wrapping group secrets when inviting (E2EE). */
+export const userPublicKeyringResponseSchema = z
+  .object({
+    publicKeyring: byteB64,
+  })
+  .openapi("UserPublicKeyringResponse");

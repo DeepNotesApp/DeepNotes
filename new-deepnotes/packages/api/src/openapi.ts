@@ -18,9 +18,11 @@ import {
 } from "./schemas/sessions.js";
 import {
   groupIdPathSchema,
+  groupInviteCryptoBootstrapResponseSchema,
   groupMainPageResponseSchema,
   groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,
+  groupPublicKeyringResponseSchema,
   groupPageCreateRequestSchema,
   groupPageCreateResponseSchema,
   groupPagesListQuerySchema,
@@ -76,8 +78,10 @@ import {
   userEmailChangeConfirmRequestSchema,
   userEmailChangeRequestResponseSchema,
   userEmailChangeRequestSchema,
+  userIdPathSchema,
   userMeResponseSchema,
   userPasswordChangeRequestSchema,
+  userPublicKeyringResponseSchema,
   userRegisterResponseSchema,
 } from "./schemas/users.js";
 
@@ -247,6 +251,28 @@ registry.registerPath({
       },
     },
     401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/{userId}/public-keyring",
+  summary: "User public keyring (E2EE box key)",
+  description:
+    "Returns `users.public_keyring` for wrapping group secrets when sending invitations. Any authenticated user may read (same visibility as legacy KeyDB `user:*:public-keyring`).",
+  request: { params: userIdPathSchema },
+  responses: {
+    200: {
+      description: "Base64 libsodium public keyring bytes.",
+      content: {
+        "application/json": {
+          schema: userPublicKeyringResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },
 });
@@ -595,6 +621,52 @@ registry.registerPath({
       description: "Structured membership for admin UIs.",
       content: {
         "application/json": { schema: groupMembersDetailResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/invite-crypto-bootstrap",
+  summary: "Encrypted group key material for invitation flows (managers)",
+  description:
+    "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Encrypted keyrings + group public key.",
+      content: {
+        "application/json": {
+          schema: groupInviteCryptoBootstrapResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/public-keyring",
+  summary: "Group public keyring for name encryption",
+  description:
+    "Returns `groups.public_keyring` when the caller may encrypt a display name for invite accept or join-request flows: active member, pending invitation, or join requests allowed and not yet a member.",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Base64 group box public keyring.",
+      content: {
+        "application/json": {
+          schema: groupPublicKeyringResponseSchema,
+        },
       },
     },
     401: sessionUnauthorized401,

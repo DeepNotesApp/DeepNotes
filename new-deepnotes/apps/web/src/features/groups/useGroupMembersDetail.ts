@@ -4,11 +4,17 @@ import { ref, type Ref } from "vue";
 export type GroupIdParamRef = Ref<string | string[] | undefined>;
 
 import type { components } from "../../api/api-types.generated";
+import { readSessionCrypto } from "../auth/session-keyrings";
 import { useSession } from "../auth/useSession";
 import {
   fetchGroupMembersDetail,
   type GroupMembersDetail,
 } from "./group-members-detail";
+import {
+  buildJoinInvitationSendBodies,
+  buildJoinRequestAcceptBodies,
+  type InviteCryptoBootstrapJson,
+} from "./group-membership-crypto";
 
 type GroupMemberRole = components["schemas"]["GroupMemberRole"];
 
@@ -168,6 +174,170 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
+  async function fetchInviteBootstrap(): Promise<
+    | { ok: true; data: InviteCryptoBootstrapJson }
+    | { ok: false; error: string }
+  > {
+    const id = resolvedGroupId();
+    if (id == null) {
+      return { ok: false, error: "Invalid group." };
+    }
+    const res = await client.GET("/api/groups/{groupId}/invite-crypto-bootstrap", {
+      params: { path: { groupId: id } },
+    });
+    if (res.response.status !== 200 || res.data == null) {
+      const msg =
+        res.error && typeof res.error === "object" && "message" in res.error
+          ? String((res.error as { message?: string }).message)
+          : "Could not load invite crypto material.";
+      return { ok: false, error: msg };
+    }
+    const d = res.data as InviteCryptoBootstrapJson;
+    return { ok: true, data: d };
+  }
+
+  async function sendJoinInvitation(input: {
+    inviteeUserId: string;
+    invitationRole: GroupMemberRole;
+    inviteeDisplayName: string;
+  }) {
+    const id = resolvedGroupId();
+    const d = detail.value;
+    if (id == null || d == null) {
+      return;
+    }
+    const stored = readSessionCrypto();
+    if (stored == null) {
+      error.value =
+        "Client crypto is not unlocked. Sign in with your account password (not demo) on this device.";
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const boot = await fetchInviteBootstrap();
+      if (!boot.ok) {
+        error.value = boot.error;
+        return;
+      }
+      const pkRes = await client.GET("/api/users/{userId}/public-keyring", {
+        params: { path: { userId: input.inviteeUserId } },
+      });
+      if (pkRes.response.status !== 200 || pkRes.data == null) {
+        error.value =
+          pkRes.error &&
+          typeof pkRes.error === "object" &&
+          "message" in pkRes.error
+            ? String((pkRes.error as { message?: string }).message)
+            : "Could not load invitee public key.";
+        return;
+      }
+      const bodies = await buildJoinInvitationSendBodies({
+        stored,
+        bootstrap: boot.data,
+        inviteePublicKeyringB64: pkRes.data.publicKeyring,
+        inviteeDisplayName: input.inviteeDisplayName,
+        groupIsPublic: d.groupIsPublic,
+      });
+      const res = await client.POST("/api/groups/{groupId}/join-invitations", {
+        params: { path: { groupId: id } },
+        body: {
+          inviteeUserId: input.inviteeUserId,
+          invitationRole: input.invitationRole,
+          encryptedInternalKeyring: bodies.encryptedInternalKeyring,
+          userEncryptedName: bodies.userEncryptedName,
+          userEncryptedNameForUser: bodies.userEncryptedNameForUser,
+          ...(bodies.encryptedAccessKeyring != null
+            ? { encryptedAccessKeyring: bodies.encryptedAccessKeyring }
+            : {}),
+        },
+      });
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not send invitation.";
+        return;
+      }
+      await load();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : "Invitation failed.";
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
+  async function acceptJoinRequestWithCrypto(input: {
+    requesterUserId: string;
+    targetRole: GroupMemberRole;
+  }) {
+    const id = resolvedGroupId();
+    const d = detail.value;
+    if (id == null || d == null) {
+      return;
+    }
+    const stored = readSessionCrypto();
+    if (stored == null) {
+      error.value =
+        "Client crypto is not unlocked. Sign in with your account password (not demo) on this device.";
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const boot = await fetchInviteBootstrap();
+      if (!boot.ok) {
+        error.value = boot.error;
+        return;
+      }
+      const pkRes = await client.GET("/api/users/{userId}/public-keyring", {
+        params: { path: { userId: input.requesterUserId } },
+      });
+      if (pkRes.response.status !== 200 || pkRes.data == null) {
+        error.value =
+          pkRes.error &&
+          typeof pkRes.error === "object" &&
+          "message" in pkRes.error
+            ? String((pkRes.error as { message?: string }).message)
+            : "Could not load requester public key.";
+        return;
+      }
+      const bodies = await buildJoinRequestAcceptBodies({
+        stored,
+        bootstrap: boot.data,
+        requesterPublicKeyringB64: pkRes.data.publicKeyring,
+        groupIsPublic: d.groupIsPublic,
+      });
+      const res = await client.POST(
+        "/api/groups/{groupId}/join-requests/{userId}/accept",
+        {
+          params: {
+            path: { groupId: id, userId: input.requesterUserId },
+          },
+          body: {
+            targetRole: input.targetRole,
+            encryptedInternalKeyring: bodies.encryptedInternalKeyring,
+            ...(bodies.encryptedAccessKeyring != null
+              ? { encryptedAccessKeyring: bodies.encryptedAccessKeyring }
+              : {}),
+          },
+        },
+      );
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not accept join request.";
+        return;
+      }
+      await load();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : "Accept request failed.";
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   async function rejectJoinRequest(requesterUserId: string) {
     const id = resolvedGroupId();
     if (id == null) {
@@ -205,5 +375,7 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     cancelInvitation,
     rejectMyInvitation,
     rejectJoinRequest,
+    sendJoinInvitation,
+    acceptJoinRequestWithCrypto,
   };
 }

@@ -56,6 +56,14 @@ describe("api-worker", () => {
     ],
     [
       "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/invite-crypto-bootstrap",
+    ],
+    [
+      "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/public-keyring",
+    ],
+    [
+      "GET",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
     ],
     [
@@ -151,6 +159,10 @@ describe("api-worker", () => {
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/restore"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/purge"],
     ["GET", "/api/users/me"],
+    [
+      "GET",
+      "/api/users/aaaaaaaaaaaaaaaaaaaaa/public-keyring",
+    ],
     ["POST", "/api/users/me/password"],
     ["DELETE", "/api/users/me"],
     ["POST", "/api/users"],

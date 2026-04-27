@@ -386,6 +386,20 @@
           "personalGroupId"
         ]
       },
+      "UserPublicKeyringResponse": {
+        "type": "object",
+        "properties": {
+          "publicKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          }
+        },
+        "required": [
+          "publicKeyring"
+        ]
+      },
       "UserGroupIdsResponse": {
         "type": "object",
         "properties": {
@@ -644,6 +658,57 @@
           "members",
           "pendingInvitations",
           "pendingJoinRequests"
+        ]
+      },
+      "GroupInviteCryptoBootstrapResponse": {
+        "type": "object",
+        "properties": {
+          "groupPublicKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "groupAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "memberEncryptedAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "memberEncryptedInternalKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          }
+        },
+        "required": [
+          "groupPublicKeyring",
+          "groupAccessKeyring",
+          "memberEncryptedAccessKeyring",
+          "memberEncryptedInternalKeyring"
+        ]
+      },
+      "GroupPublicKeyringResponse": {
+        "type": "object",
+        "properties": {
+          "groupPublicKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          }
+        },
+        "required": [
+          "groupPublicKeyring"
         ]
       },
       "GroupPagesListResponse": {
@@ -1940,6 +2005,67 @@
         }
       }
     },
+    "/api/users/{userId}/public-keyring": {
+      "get": {
+        "summary": "User public keyring (E2EE box key)",
+        "description": "Returns `users.public_keyring` for wrapping group secrets when sending invitations. Any authenticated user may read (same visibility as legacy KeyDB `user:*:public-keyring`).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "userId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Base64 libsodium public keyring bytes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublicKeyringResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/users/me/groups": {
       "get": {
         "summary": "List group IDs for the current user",
@@ -2707,6 +2833,148 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GroupMembersDetailResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/invite-crypto-bootstrap": {
+      "get": {
+        "summary": "Encrypted group key material for invitation flows (managers)",
+        "description": "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Encrypted keyrings + group public key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupInviteCryptoBootstrapResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/public-keyring": {
+      "get": {
+        "summary": "Group public keyring for name encryption",
+        "description": "Returns `groups.public_keyring` when the caller may encrypt a display name for invite accept or join-request flows: active member, pending invitation, or join requests allowed and not yet a member.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Base64 group box public keyring.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupPublicKeyringResponse"
                 }
               }
             }

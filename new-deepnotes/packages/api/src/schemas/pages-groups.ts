@@ -225,6 +225,23 @@ export const groupMembersDetailResponseSchema = z
   })
   .openapi("GroupMembersDetailResponse");
 
+/** Encrypted blobs so the SPA can build invitation / join-request-accept ciphertext (managers). */
+export const groupInviteCryptoBootstrapResponseSchema = z
+  .object({
+    groupPublicKeyring: byteB64,
+    groupAccessKeyring: byteB64.nullable(),
+    memberEncryptedAccessKeyring: byteB64.nullable(),
+    memberEncryptedInternalKeyring: byteB64,
+  })
+  .openapi("GroupInviteCryptoBootstrapResponse");
+
+/** Group box key for encrypting display names (invite accept, join request, etc.). */
+export const groupPublicKeyringResponseSchema = z
+  .object({
+    groupPublicKeyring: byteB64,
+  })
+  .openapi("GroupPublicKeyringResponse");
+
 export const groupJoinInvitationSendRequestSchema = z
   .object({
     inviteeUserId: z

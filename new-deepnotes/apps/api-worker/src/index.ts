@@ -37,6 +37,7 @@ import {
   userEmailChangeRequestSchema,
   userPasswordChangeRequestSchema,
   userRegisterRequestSchema,
+  userIdPathSchema,
   stripeCheckoutSessionRequestSchema,
 } from "@deepnotes/api";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
@@ -1316,6 +1317,112 @@ app.get("/api/groups/:groupId/members/detail", async (c) => {
       groupId,
     });
     return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/groups/:groupId/invite-crypto-bootstrap", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGetGroupInviteCryptoBootstrap } = await import(
+      "@deepnotes/session"
+    );
+    const out = await performGetGroupInviteCryptoBootstrap({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.json(
+      {
+        groupPublicKeyring: out.groupPublicKeyring.toString("base64"),
+        groupAccessKeyring:
+          out.groupAccessKeyring == null
+            ? null
+            : out.groupAccessKeyring.toString("base64"),
+        memberEncryptedAccessKeyring:
+          out.memberEncryptedAccessKeyring == null
+            ? null
+            : out.memberEncryptedAccessKeyring.toString("base64"),
+        memberEncryptedInternalKeyring:
+          out.memberEncryptedInternalKeyring.toString("base64"),
+      },
+      200,
+    );
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/groups/:groupId/public-keyring", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGetGroupPublicKeyringForMessaging } = await import(
+      "@deepnotes/session"
+    );
+    const out = await performGetGroupPublicKeyringForMessaging({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.json(
+      {
+        groupPublicKeyring: out.groupPublicKeyring.toString("base64"),
+      },
+      200,
+    );
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {
@@ -3253,6 +3360,57 @@ app.get("/api/users/me", async (c) => {
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
     });
     return c.json(summary, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/users/:userId/public-keyring", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const p = userIdPathSchema.safeParse({ userId: c.req.param("userId") });
+  if (!p.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: p.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performGetUserPublicKeyring } = await import("@deepnotes/session");
+    const out = await performGetUserPublicKeyring({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      userId: p.data.userId,
+    });
+    return c.json(
+      { publicKeyring: out.publicKeyring.toString("base64") },
+      200,
+    );
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

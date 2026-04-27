@@ -316,6 +316,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/{userId}/public-keyring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * User public keyring (E2EE box key)
+         * @description Returns `users.public_keyring` for wrapping group secrets when sending invitations. Any authenticated user may read (same visibility as legacy KeyDB `user:*:public-keyring`).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    userId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Base64 libsodium public keyring bytes. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserPublicKeyringResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/me/groups": {
         parameters: {
             query?: never;
@@ -1308,6 +1376,160 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["GroupMembersDetailResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{groupId}/invite-crypto-bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Encrypted group key material for invitation flows (managers)
+         * @description Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    groupId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Encrypted keyrings + group public key. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupInviteCryptoBootstrapResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{groupId}/public-keyring": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Group public keyring for name encryption
+         * @description Returns `groups.public_keyring` when the caller may encrypt a display name for invite accept or join-request flows: active member, pending invitation, or join requests allowed and not yet a member.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    groupId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Base64 group box public keyring. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupPublicKeyringResponse"];
                     };
                 };
                 /** @description Invalid credentials, token, or session state. */
@@ -5527,6 +5749,13 @@ export interface components {
             demo: boolean;
             personalGroupId: string;
         };
+        UserPublicKeyringResponse: {
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            publicKeyring: string;
+        };
         UserGroupIdsResponse: {
             groupIds: string[];
         };
@@ -5600,6 +5829,35 @@ export interface components {
             members: components["schemas"]["GroupMemberRow"][];
             pendingInvitations: components["schemas"]["GroupPendingInvitationRow"][];
             pendingJoinRequests: components["schemas"]["GroupPendingJoinRequestRow"][];
+        };
+        GroupInviteCryptoBootstrapResponse: {
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupPublicKeyring: string;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupAccessKeyring: string | null;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            memberEncryptedAccessKeyring: string | null;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            memberEncryptedInternalKeyring: string;
+        };
+        GroupPublicKeyringResponse: {
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupPublicKeyring: string;
         };
         GroupPagesListResponse: {
             pageIds: string[];

@@ -36,6 +36,11 @@ export {
   performGetGroupMemberUserIds,
   performGetGroupMembersDetail,
 } from "./group-main-and-members.js";
+export {
+  performGetGroupInviteCryptoBootstrap,
+  performGetGroupPublicKeyringForMessaging,
+} from "./group-invite-crypto-bootstrap.js";
+export { performGetUserPublicKeyring } from "./user-public-keyring.js";
 export { performGetUserGroupIds } from "./user-group-ids.js";
 export {
   performAddFavoritePages,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
+import { readSessionCrypto } from "../auth/session-keyrings";
 import { useSession } from "../auth/useSession";
 import {
   canChangeRole,
@@ -49,9 +52,18 @@ const {
   cancelInvitation,
   rejectMyInvitation,
   rejectJoinRequest,
+  sendJoinInvitation,
+  acceptJoinRequestWithCrypto,
 } = useGroupMembersDetail(groupIdRef);
 
 const roleDraft = ref<Record<string, GroupMemberRole>>({});
+const joinAcceptRoleDraft = ref<Record<string, GroupMemberRole>>({});
+
+const inviteeUserIdInput = ref("");
+const inviteeDisplayNameInput = ref("");
+const inviteRolePick = ref<GroupMemberRole>("member");
+
+const clientCryptoReady = () => readSessionCrypto() != null;
 
 const groupId = computed(() => {
   const g = groupIdRef.value;
@@ -95,6 +107,7 @@ watch(
   (d) => {
     if (d == null) {
       roleDraft.value = {};
+      joinAcceptRoleDraft.value = {};
       return;
     }
     const next: Record<string, GroupMemberRole> = {};
@@ -102,6 +115,11 @@ watch(
       next[m.userId] = m.role;
     }
     roleDraft.value = next;
+    const jr: Record<string, GroupMemberRole> = {};
+    for (const r of d.pendingJoinRequests) {
+      jr[r.userId] = joinAcceptRoleDraft.value[r.userId] ?? "member";
+    }
+    joinAcceptRoleDraft.value = jr;
   },
   { immediate: true },
 );
@@ -153,6 +171,34 @@ async function onRemove(userId: string) {
   }
   await removeMember(userId);
 }
+
+async function onSendInvite() {
+  const id = inviteeUserIdInput.value.trim();
+  const name = inviteeDisplayNameInput.value.trim();
+  if (!/^[A-Za-z0-9_-]{21}$/.test(id)) {
+    return;
+  }
+  if (name === "") {
+    return;
+  }
+  await sendJoinInvitation({
+    inviteeUserId: id,
+    invitationRole: inviteRolePick.value,
+    inviteeDisplayName: name,
+  });
+  if (error.value == null) {
+    inviteeUserIdInput.value = "";
+    inviteeDisplayNameInput.value = "";
+  }
+}
+
+async function onAcceptJoinRequest(requesterUserId: string) {
+  const role = joinAcceptRoleDraft.value[requesterUserId] ?? "member";
+  await acceptJoinRequestWithCrypto({
+    requesterUserId,
+    targetRole: role,
+  });
+}
 </script>
 
 <template>
@@ -200,8 +246,27 @@ async function onRemove(userId: string) {
 
       <Alert>
         <AlertTitle>Invites and join requests</AlertTitle>
-        <AlertDescription>
-          Sending invitations, accepting invites, and requesting to join still require encrypted payloads (E2EE). This screen lists people and supports leave, remove, role changes, and rejecting or cancelling pending rows where the API allows.
+        <AlertDescription class="space-y-2">
+          <p>
+            Managers can send invites below. Accepting an invite uses
+            <RouterLink
+              class="text-primary underline"
+              :to="{ name: 'group-invite', params: { groupId: groupId } }"
+            >
+              the invite landing page
+            </RouterLink>
+            (needed because invitees cannot open this members screen until they join).
+            Request to join:
+            <RouterLink
+              class="text-primary underline"
+              :to="{ name: 'group-join-request', params: { groupId: groupId } }"
+            >
+              /join
+            </RouterLink>.
+          </p>
+          <p v-if="!clientCryptoReady()" class="text-amber-800 dark:text-amber-200">
+            Encrypted actions require signing in with your password on this browser (not demo).
+          </p>
         </AlertDescription>
       </Alert>
 
@@ -210,6 +275,61 @@ async function onRemove(userId: string) {
         · {{ detail.groupIsPublic ? "Public group" : "Private group" }}
         · Join requests {{ detail.joinRequestsAllowed ? "allowed" : "disabled" }}
       </p>
+
+      <Card
+        v-if="roleHasManageLowerRanks(detail.viewerRole) && !isPersonal"
+      >
+        <CardHeader>
+          <CardTitle class="text-base">Invite member</CardTitle>
+          <CardDescription>
+            Pro plan required on both accounts. Enter the invitee’s user id and how they should appear.
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-3">
+          <div class="space-y-2">
+            <Label for="inv-uid">Invitee user id (21-char nanoid)</Label>
+            <Input
+              id="inv-uid"
+              v-model="inviteeUserIdInput"
+              class="font-mono text-xs"
+              :disabled="actionLoading"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="inv-name">Their display name in this group</Label>
+            <Input
+              id="inv-name"
+              v-model="inviteeDisplayNameInput"
+              :disabled="actionLoading"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="inv-role">Role</Label>
+            <select
+              id="inv-role"
+              v-model="inviteRolePick"
+              class="border-input bg-background h-9 w-full rounded-md border px-2 text-sm"
+              :disabled="actionLoading"
+            >
+              <option v-for="r in ROLE_OPTIONS" :key="r" :value="r">
+                {{ r }}
+              </option>
+            </select>
+          </div>
+          <Button
+            size="sm"
+            :disabled="
+              actionLoading ||
+              !clientCryptoReady() ||
+              !/^[A-Za-z0-9_-]{21}$/.test(inviteeUserIdInput.trim()) ||
+              inviteeDisplayNameInput.trim() === ''
+            "
+            @click="onSendInvite"
+          >
+            Send invitation
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -330,15 +450,36 @@ async function onRemove(userId: string) {
               class="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
             >
               <div class="font-mono text-xs break-all">{{ jr.userId }}</div>
-              <Button
+              <div
                 v-if="roleHasManageLowerRanks(detail.viewerRole)"
-                size="sm"
-                variant="outline"
-                :disabled="actionLoading"
-                @click="rejectJoinRequest(jr.userId)"
+                class="flex flex-wrap items-center gap-2"
               >
-                Reject request
-              </Button>
+                <select
+                  v-model="joinAcceptRoleDraft[jr.userId]"
+                  class="border-input bg-background h-9 rounded-md border px-2 text-xs"
+                  :disabled="actionLoading"
+                >
+                  <option v-for="r in ROLE_OPTIONS" :key="r" :value="r">
+                    {{ r }}
+                  </option>
+                </select>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  :disabled="actionLoading || !clientCryptoReady()"
+                  @click="onAcceptJoinRequest(jr.userId)"
+                >
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  :disabled="actionLoading"
+                  @click="rejectJoinRequest(jr.userId)"
+                >
+                  Reject
+                </Button>
+              </div>
             </li>
           </ul>
         </CardContent>

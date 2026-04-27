@@ -61,6 +61,15 @@ describe("getOpenApiDocument", () => {
     expect(
       doc.paths?.["/api/groups/{groupId}/members/detail"]?.get,
     ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/invite-crypto-bootstrap"]?.get,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/public-keyring"]?.get,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/users/{userId}/public-keyring"]?.get,
+    ).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.post).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/password"]?.post).toBeDefined();
