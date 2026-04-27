@@ -15,6 +15,7 @@ export type {
 export { performUserRegister } from "./register-user.js";
 export type { UserRegisterInput } from "./register-user.js";
 export { performUserAccountDelete } from "./delete-user-account.js";
+export { performUserPasswordChange } from "./change-user-password.js";
 export {
   performConfirmEmailVerification,
   performResendEmailVerification,

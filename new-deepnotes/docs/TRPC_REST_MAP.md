@@ -28,6 +28,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.account.stripe.createCheckoutSession` | `POST /api/billing/stripe/checkout-session` |
 | `users.account.stripe.createPortalSession` | `POST /api/billing/stripe/portal-session` |
 | `users.account.delete` | `DELETE /api/users/me` (JSON body `{ "loginHash" }` base64; clears cookies on 204; optional `deleteStripeCustomer` in worker when billing is wired) |
+| (WS) `users.account.changePassword` step 1+2 | `POST /api/users/me/password` (JSON: `oldLoginHash`, `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` as base64; same keyring semantics as `POST /api/users`; 204 + clears cookies + invalidates all sessions) |
 
 ## Users — pages (`users.pages`)
 
@@ -88,7 +89,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `websocket/groups/privacy/make-private` | `POST /api/groups/:groupId/privacy/private` | |
 | `websocket/groups/rotate-keys` | — | **removed** per RESTART_PLAN |
 | `websocket/pages/move` | `POST /api/pages/:pageId/move` | |
-| `websocket/users/account/change-password` | `POST /api/users/me/password` | |
+| `websocket/users/account/change-password` | `POST /api/users/me/password` | **implemented** in `@deepnotes/session` (`performUserPasswordChange`) |
 | `websocket/users/account/email-change/finish` | `POST /api/users/me/email-change/confirm` | |
 | `websocket/users/account/rotate-keys` | — | **removed** |
 

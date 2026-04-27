@@ -1,6 +1,8 @@
 import { extendZodWithOpenApi } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
 
+import { byteB64 } from "./sessions.js";
+
 extendZodWithOpenApi(z);
 
 export const userMeResponseSchema = z
@@ -56,4 +58,22 @@ export const userAccountDeleteRequestSchema = z
 
 export type UserAccountDeleteRequest = z.infer<
   typeof userAccountDeleteRequestSchema
+>;
+
+/**
+ * `POST /api/users/me/password` — replaces legacy WebSocket
+ * `users.account.changePassword` (two-step flow collapsed: client re-wraps
+ * keyrings with the new password before calling).
+ */
+export const userPasswordChangeRequestSchema = z
+  .object({
+    oldLoginHash: byteB64,
+    newLoginHash: byteB64,
+    userEncryptedPrivateKeyring: byteB64,
+    userEncryptedSymmetricKeyring: byteB64,
+  })
+  .openapi("UserPasswordChangeRequest");
+
+export type UserPasswordChangeRequest = z.infer<
+  typeof userPasswordChangeRequestSchema
 >;

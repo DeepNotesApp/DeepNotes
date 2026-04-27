@@ -28,6 +28,7 @@ describe("api-worker", () => {
     ["POST", "/api/sessions/logout"],
     ["POST", "/api/sessions/demo"],
     ["GET", "/api/users/me"],
+    ["POST", "/api/users/me/password"],
     ["DELETE", "/api/users/me"],
     ["POST", "/api/users"],
     ["POST", "/api/users/email-verification/resend"],

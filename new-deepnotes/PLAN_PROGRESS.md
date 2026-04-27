@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). **`@deepnotes/web`:** Vitest + happy-dom + `@vue/test-utils`; `vite.config` uses `defineConfig` from `vitest/config`. Optional: Wrangler deploy job. |
-| **3** — REST + Drizzle features | **In progress** | Sessions, register, email verify/resend/confirm, **`DELETE /api/users/me`** (`performUserAccountDelete`: password + sole-owner guard, Drizzle tx; Stripe customer hook optional on worker). **Next:** `POST /api/users/me/password`, email-change + confirm, 2FA routes, pages/groups CRUD, realtime/collab, Stripe webhook. |
+| **3** — REST + Drizzle features | **In progress** | Sessions, register, email verify/resend/confirm, account delete, **password change** (see Phase 3 checklist). **Next:** email-change + confirm, 2FA routes, pages/groups CRUD, realtime/collab, Stripe webhook. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, small E2E smoke—see [Frontend / UI track](#frontend--ui-track). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -44,13 +44,15 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
   - [x] `POST /api/users/email-verification/confirm` — public, `{ "emailVerificationCode" }` (nanoid, legacy `verifyEmail`); 204 / 400; DB update copies `encrypted_new_email` → `encrypted_email`.
   - [x] `sendRegistrationEmail` + optional **`RESEND_API_KEY`**, optional **`PUBLIC_APP_URL`** in `SessionEnv` / [template.env](./template.env); duplicate unverified registration re-sends via same helper (401 “New email sent”).
 - [x] **`DELETE /api/users/me`** — replaces legacy `users.account.delete`: JSON `{ "loginHash" }` (base64); verifies access JWT + password (`encrypted_rehashed_login_hash`); blocks when any membership has `member_count > 1` and `owner_count <= 1`; deletes join invites/requests, solo-member groups (cascade pages), remaining `group_members`, then user row; clears session cookies; optional `deleteStripeCustomer(customerId)` hook (worker can wire Stripe later; failures swallowed like legacy).
+- [x] **`POST /api/users/me/password`** — replaces legacy WS `change-password` (two RPC steps → one REST call after client re-wraps keyrings). **`performUserPasswordChange`** (`packages/session/src/change-user-password.ts`): body `oldLoginHash`, `newLoginHash`, `userEncryptedPrivateKeyring`, `userEncryptedSymmetricKeyring` (base64, same semantics as `POST /api/users`); verifies current password; **403** if `users.demo === true`; updates `encrypted_rehashed_login_hash`, `encrypted_private_keyring`, `encrypted_symmetric_keyring`; sets **`sessions.invalidated`** for all user sessions; **204** + **`buildClearSessionCookies`**. Contract: `userPasswordChangeRequestSchema` in `@deepnotes/api`; map in [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md).
 
-### Not started (Phase 3 remainder)
+### Account routes still to ship (Phase 3)
 
-- [ ] **Account (remaining tRPC / WS parity):**
-  - [ ] `POST /api/users/me/email-change` + `POST /api/users/me/email-change/confirm` (WS finish → REST).
-  - [ ] 2FA: `POST …/2fa/enable/request|finish`, `GET …/2fa`, `POST …/2fa/recovery-codes`, `POST …/2fa/devices/forget`, `POST …/2fa/disable` (see [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md)).
-  - [ ] `POST /api/users/me/password` (legacy WS `change-password` → REST).
+- [ ] **`POST /api/users/me/email-change`** + **`POST /api/users/me/email-change/confirm`** — legacy tRPC `emailChange.request` + WS `email-change/finish` → two REST steps; Resend / `encrypted_new_email` / verification fields; invalidate sessions on confirm if legacy does (verify in `apps/app-server`).
+- [ ] **2FA (HTTP surface)** — `POST /api/users/me/2fa/enable/request|finish`, `GET /api/users/me/2fa`, `POST /api/users/me/2fa/recovery-codes`, `POST /api/users/me/2fa/devices/forget`, `POST /api/users/me/2fa/disable` ([docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md)). **Note:** `@deepnotes/session` already implements TOTP/recovery verification for **`POST /api/sessions/login`**; these routes expose enable/disable/load for the SPA.
+
+### Not started (Phase 3 — pages, groups, infra)
+
 - [ ] **Pages** (user prefs + CRUD) and **groups** CRUD / privacy / passwords per map.
 - [ ] **Realtime / collab** (new or adapted protocols; no key rotation).
 - [ ] **Stripe:** `POST /api/webhooks/stripe`, checkout/portal (no RevenueCat); wire **`deleteStripeCustomer`** from account delete when keys exist.
@@ -127,6 +129,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | Phase 3: **`POST /api/users/me/password`** — `performUserPasswordChange` (`change-user-password.ts`): old password verify, demo **403**, new keyrings + PHC, invalidate all `sessions`, clear cookies **204**; `userPasswordChangeRequestSchema`, OpenAPI + worker; export **`byteB64`** from `@deepnotes/api`; TRPC_REST_MAP rows for change-password; PLAN_PROGRESS Phase 3 account section expanded. |
 | 2026-04-26 | Phase 2 + §5.8: `@deepnotes/web` — Vitest + happy-dom + `@vue/test-utils`, `vite.config` from `vitest/config`, `src/app.test.ts`; Phase 3: `DELETE /api/users/me` + `performUserAccountDelete` (ownership guard, Drizzle tx, clear cookies); `userAccountDeleteRequestSchema` + OpenAPI; api-worker route; TRPC_REST_MAP note on delete body / Stripe hook. |
 | 2026-04-26 | Phase 3: email verification `POST /api/users/email-verification/resend` and `…/confirm`; `performResendEmailVerification` / `performConfirmEmailVerification`; Resend in `sendRegistrationEmail`; `RESEND_API_KEY` + `PUBLIC_APP_URL`; first mail on register + re-send on duplicate unverified; OpenAPI 502 on register if provider fails; `c.env?.HYPERDRIVE` on confirm for Vitest. |
 | 2026-04-26 | Phase 3: **`POST /api/users`** (`performUserRegister`), `encryptUserRehashedLoginHash`, `addHours`, OpenAPI 201/400/401/409; optional **`SEND_EMAILS`** on session env (auto-verify when `false`); group password on register still rejected (same as demo). |

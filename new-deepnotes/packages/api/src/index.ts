@@ -14,6 +14,7 @@ export {
   sessionRefreshSuccessSchema,
 } from "./schemas/session-responses.js";
 export {
+  byteB64,
   sessionDemoRequestSchema,
   sessionLoginEmailSchema,
   sessionLoginRequestSchema,
@@ -27,8 +28,10 @@ export {
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,
   userMeResponseSchema,
+  userPasswordChangeRequestSchema,
   userRegisterResponseSchema,
   type UserAccountDeleteRequest,
   type UserMeResponse,
+  type UserPasswordChangeRequest,
   type UserRegisterResponse,
 } from "./schemas/users.js";

@@ -21,6 +21,7 @@ import {
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,
   userMeResponseSchema,
+  userPasswordChangeRequestSchema,
   userRegisterResponseSchema,
 } from "./schemas/users.js";
 
@@ -65,6 +66,15 @@ const sessionConflict409 = {
 
 const sessionNotFound404 = {
   description: "Resource not found.",
+  content: {
+    "application/json": {
+      schema: sessionErrorResponseSchema,
+    },
+  },
+} as const;
+
+const sessionForbidden403 = {
+  description: "Action not allowed for this account (e.g. demo user).",
   content: {
     "application/json": {
       schema: sessionErrorResponseSchema,
@@ -181,6 +191,41 @@ registry.registerPath({
       },
     },
     401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users/me/password",
+  summary: "Change password (re-wrap keyrings)",
+  description:
+    "Replaces legacy WebSocket `users.account.changePassword`. Requires `accessToken`; verifies `oldLoginHash`; stores keyrings encrypted with the new password (`userEncrypted*` are plaintext keyrings from the client, same as registration). Invalidates all sessions and clears cookies — client must log in again.",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userPasswordChangeRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description:
+        "Password updated; all sessions invalidated; session cookies cleared.",
+    },
+    400: {
+      description: "Wrong current password or invalid key material.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },
 });

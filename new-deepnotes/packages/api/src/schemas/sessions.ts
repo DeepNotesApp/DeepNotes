@@ -40,7 +40,8 @@ const nanoidId = z
   .length(21)
   .regex(/^[A-Za-z0-9_-]{21}$/, "expected nanoid id");
 
-const byteB64 = z
+/** Base64 JSON field decoded to `Uint8Array` (legacy tRPC used raw bytes). */
+export const byteB64 = z
   .string()
   .min(1)
   .openapi({
