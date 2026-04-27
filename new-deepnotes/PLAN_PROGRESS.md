@@ -13,7 +13,7 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 | **0** — OpenAPI + Drizzle inventory | **Done** | tRPC→REST/WS map: [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md). Drizzle + migration `0000_legacy_baseline` match `postgres-init.sql` core tables. Auth/CORS/forks: [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md), [docs/CLIENT_FORKS.md](./docs/CLIENT_FORKS.md). |
 | **1** — Legacy repo hygiene | **Optional / n/a** | Parallel track only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Mostly done** | Template DB integration test + CI `DATABASE_ADMIN_URL`; deploy doc: [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md). Optional: Wrangler deploy job. **Gap:** `apps/web` tests still no-op—see Phase 2 checklist + [Frontend / UI track](#frontend--ui-track). |
-| **3** — REST + Drizzle features | **In progress** | `POST /api/sessions/login|refresh|logout` + **`POST /api/sessions/demo`** + **`GET /api/users/me`** via `@deepnotes/session`. Optional **Upstash** (`UPSTASH_REDIS_REST_*`) wires legacy-style **failed-login rate limits**; without it, limits are skipped (local dev). **New secret:** `USER_EMAIL_ENCRYPTION_KEY` (legacy email encryption). Next: `POST /api/users` registration, pages/groups CRUD, Stripe. |
+| **3** — REST + Drizzle features | **In progress** | `POST /api/sessions/login|refresh|logout` + **`POST /api/sessions/demo`** + **`GET /api/users/me`** + **`POST /api/users`** (registration) via `@deepnotes/session`. Optional **Upstash** (`UPSTASH_REDIS_REST_*`) for failed-login limits; **`SEND_EMAILS=false`** auto-verifies new users (no mailer yet). Next: email verification resend/confirm REST, pages/groups CRUD, Stripe. |
 | **4** — Client MVP | **Not started** | Auth → list → page → Yjs → groups; crypto/libs port as needed. **Parallel:** SPA structure, OpenAPI client, Vitest+DOM in CI, small E2E smoke—see [Frontend / UI track](#frontend--ui-track) (not deferred to “when MVP is done”). |
 | **5** — Cutover | **Not started** | Canary, redirect, retire `/trpc` when safe. |
 
@@ -32,11 +32,12 @@ Living checklist for the greenfield work described in [docs/RESTART_PLAN.md](../
 ## Phase 3 checklist (REST + Drizzle)
 
 - [x] Document **sessions** REST paths + request schemas in OpenAPI; demo + `users/me` contracts updated.
-- [x] Implement **sessions.login** / refresh / logout against Drizzle + legacy crypto semantics (JWT via `jose`; **Redis** rate limits not wired yet—parity with legacy `login` lockouts).
+- [x] Implement **sessions.login** / refresh / logout against Drizzle + legacy crypto semantics (JWT via `jose`; optional **Redis** failed-login limits when Upstash env is set).
 - [x] Implement **sessions.start-demo** (`POST /api/sessions/demo`) + **Redis** for failed-login when Upstash env is set.
 - [x] **JWT + httpOnly cookies** (`accessToken`, `refreshToken`, `loggedIn`) matching [docs/AUTH_AND_CORS.md](./docs/AUTH_AND_CORS.md).
 - [x] **`GET /api/users/me`** (minimal summary from `accessToken` cookie).
-- [ ] **Users** `POST /api/users` registration + remaining TRPC_REST_MAP slices as needed.
+- [x] **Users** `POST /api/users` registration (crypto payload aligned with demo; conflict / unverified parity; optional `SEND_EMAILS=false` auto-verify).
+- [ ] **Users** email verification resend/confirm (`POST /api/users/me/email-verification/*`) + remaining TRPC_REST_MAP slices as needed.
 - [ ] Pages/groups CRUD, realtime/collab, Stripe webhook (no RevenueCat).
 
 ---
@@ -110,6 +111,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-26 | Phase 3: **`POST /api/users`** (`performUserRegister`), `encryptUserRehashedLoginHash`, `addHours`, OpenAPI 201/400/401/409; optional **`SEND_EMAILS`** on session env (auto-verify when `false`); group password on register still rejected (same as demo). |
 | 2026-04-26 | Phase 3: `POST /api/sessions/demo` (`performSessionStartDemo`), `GET /api/users/me`, Redis failed-login limits (`SessionRedisPort` + optional Upstash), `USER_EMAIL_ENCRYPTION_KEY` on `SessionEnv`; OpenAPI 200/400 for demo, 429 for login, `userMeResponseSchema`; Vitest `login-rate-limit.test.ts`. |
 | 2026-04-26 | Docs: [docs/RESTART_PLAN.md](../docs/RESTART_PLAN.md) §3.5 legacy frontend pain points, §5.8 frontend testing/CI, phased updates; this file: **Frontend / UI track** + Phase 2/4 notes on real web tests. |
 | 2026-04-26 | Phase 3: `@deepnotes/session` (login/refresh/logout + 2FA TOTP/recovery), api-worker Hyperdrive + dynamic import for Workers bundle; OpenAPI 200/401/503 for session routes; demo remains `501`; session crypto vendored in-package (no parent `@stdlib` links); `libsodium-wrappers-sumo@^0.8` override for Wrangler. |

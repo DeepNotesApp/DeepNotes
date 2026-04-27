@@ -91,3 +91,18 @@ export const sessionDemoRequestSchema = z
   .openapi("SessionDemoRequest");
 
 export type SessionDemoRequest = z.infer<typeof sessionDemoRequestSchema>;
+
+/**
+ * `POST /api/users` — same crypto payload as demo registration plus email and login hash.
+ */
+export const userRegisterRequestSchema = sessionDemoRequestSchema
+  .extend({
+    email: z
+      .string()
+      .email()
+      .transform((e) => e.trim().toLowerCase()),
+    loginHash: byteB64,
+  })
+  .openapi("UserRegisterRequest");
+
+export type UserRegisterRequest = z.infer<typeof userRegisterRequestSchema>;

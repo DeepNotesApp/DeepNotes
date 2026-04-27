@@ -11,6 +11,7 @@ import {
   base64ToBytes,
   bytesToText,
   concatUint8Arrays,
+  textToBytes,
 } from "./bytes.js";
 import { cryptoJsWordArrayToUint8Array } from "./crypto-js-wordarray.js";
 import { wrapSymmetricKey } from "./symmetric-key.js";
@@ -53,6 +54,16 @@ export function decryptUserRehashedLoginHash(
       associatedData: { context: "UserRehashedLoginHash" },
     }),
   );
+}
+
+export function encryptUserRehashedLoginHash(
+  userRehashedLoginHashPhc: string,
+  encryptionKeyB64: string,
+): Uint8Array {
+  const key = wrapSymmetricKey(base64ToBytes(encryptionKeyB64));
+  return key.encrypt(textToBytes(userRehashedLoginHashPhc), {
+    associatedData: { context: "UserRehashedLoginHash" },
+  });
 }
 
 export function decryptUserAuthenticatorSecret(

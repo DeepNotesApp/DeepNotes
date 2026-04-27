@@ -13,3 +13,12 @@ export const userMeResponseSchema = z
   .openapi("UserMeResponse");
 
 export type UserMeResponse = z.infer<typeof userMeResponseSchema>;
+
+export const userRegisterResponseSchema = z
+  .object({
+    userId: z.string(),
+    emailVerified: z.boolean(),
+  })
+  .openapi("UserRegisterResponse");
+
+export type UserRegisterResponse = z.infer<typeof userRegisterResponseSchema>;

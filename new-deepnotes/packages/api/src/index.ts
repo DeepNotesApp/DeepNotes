@@ -17,10 +17,14 @@ export {
   sessionDemoRequestSchema,
   sessionLoginEmailSchema,
   sessionLoginRequestSchema,
+  userRegisterRequestSchema,
   type SessionDemoRequest,
   type SessionLoginRequest,
+  type UserRegisterRequest,
 } from "./schemas/sessions.js";
 export {
   userMeResponseSchema,
+  userRegisterResponseSchema,
   type UserMeResponse,
+  type UserRegisterResponse,
 } from "./schemas/users.js";

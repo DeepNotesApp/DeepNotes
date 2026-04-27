@@ -28,6 +28,7 @@ describe("api-worker", () => {
     ["POST", "/api/sessions/logout"],
     ["POST", "/api/sessions/demo"],
     ["GET", "/api/users/me"],
+    ["POST", "/api/users"],
   ] as const)("returns 503 for %s %s when auth env is not configured", async (method, path) => {
     const res = await app.request(`http://test${path}`, { method });
     expect(res.status).toBe(503);

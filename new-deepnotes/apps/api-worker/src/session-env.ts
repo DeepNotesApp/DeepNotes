@@ -11,6 +11,8 @@ export type WorkerSessionBindings = {
   DEV?: string;
   COOKIE_DOMAIN?: string;
   EMAIL_CASE_SENSITIVITY_EXCEPTIONS?: string;
+  /** When `"false"`, new registrations are email-verified without sending mail (local/CI). */
+  SEND_EMAILS?: string;
   /** Optional; when set with token, failed-login rate limits use Upstash REST Redis. */
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
@@ -53,5 +55,6 @@ export function getSessionEnv(
     DEV: env.DEV,
     COOKIE_DOMAIN: env.COOKIE_DOMAIN,
     EMAIL_CASE_SENSITIVITY_EXCEPTIONS: env.EMAIL_CASE_SENSITIVITY_EXCEPTIONS,
+    SEND_EMAILS: env.SEND_EMAILS,
   };
 }

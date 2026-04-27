@@ -3,6 +3,7 @@ import {
   healthResponseSchema,
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
+  userRegisterRequestSchema,
 } from "@deepnotes/api";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { Hono } from "hono";
@@ -244,6 +245,76 @@ app.post("/api/sessions/demo", async (c) => {
     const res = c.json(json, 200);
     appendSetCookies(res, cookieLines);
     return res;
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.post("/api/users", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  const parsed = userRegisterRequestSchema.safeParse(bodyJson);
+  if (!parsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: parsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+
+  try {
+    const { performUserRegister } = await import("@deepnotes/session");
+    const result = await performUserRegister({
+      db,
+      env: sessionEnv,
+      body: {
+        email: parsed.data.email,
+        loginHash: parsed.data.loginHash,
+        userId: parsed.data.userId,
+        groupId: parsed.data.groupId,
+        pageId: parsed.data.pageId,
+        userPublicKeyring: parsed.data.userPublicKeyring,
+        userEncryptedPrivateKeyring: parsed.data.userEncryptedPrivateKeyring,
+        userEncryptedSymmetricKeyring: parsed.data.userEncryptedSymmetricKeyring,
+        userEncryptedName: parsed.data.userEncryptedName,
+        userEncryptedDefaultNote: parsed.data.userEncryptedDefaultNote,
+        userEncryptedDefaultArrow: parsed.data.userEncryptedDefaultArrow,
+        groupCreation: parsed.data.groupCreation,
+        pageCreation: parsed.data.pageCreation,
+      },
+    });
+    return c.json(result, 201);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

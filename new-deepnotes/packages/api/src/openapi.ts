@@ -14,8 +14,12 @@ import {
 import {
   sessionDemoRequestSchema,
   sessionLoginRequestSchema,
+  userRegisterRequestSchema,
 } from "./schemas/sessions.js";
-import { userMeResponseSchema } from "./schemas/users.js";
+import {
+  userMeResponseSchema,
+  userRegisterResponseSchema,
+} from "./schemas/users.js";
 
 const registry = new OpenAPIRegistry();
 
@@ -40,6 +44,15 @@ const sessionUnauthorized401 = {
 
 const sessionTooManyRequests429 = {
   description: "Too many failed login attempts (rate limited).",
+  content: {
+    "application/json": {
+      schema: sessionErrorResponseSchema,
+    },
+  },
+} as const;
+
+const sessionConflict409 = {
+  description: "Resource already exists (e.g. email already registered).",
   content: {
     "application/json": {
       schema: sessionErrorResponseSchema,
@@ -89,6 +102,45 @@ registry.registerPath({
     },
     401: sessionUnauthorized401,
     429: sessionTooManyRequests429,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/users",
+  summary: "Register a new account",
+  description:
+    "Replaces legacy `users.account.register`. Creates user, personal group, and first page; sets email verification unless `SEND_EMAILS=false` (then verifies immediately, legacy parity).",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: userRegisterRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description:
+        "User created. `emailVerified` is true when outbound mail is disabled (`SEND_EMAILS=false`).",
+      content: {
+        "application/json": {
+          schema: userRegisterResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Validation error.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    409: sessionConflict409,
     503: sessionServiceUnavailable503,
   },
 });

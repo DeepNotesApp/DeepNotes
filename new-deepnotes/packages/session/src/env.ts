@@ -16,6 +16,11 @@ export type SessionEnv = {
   COOKIE_DOMAIN?: string;
   /** Semicolon-separated emails that skip lowercasing (legacy). */
   EMAIL_CASE_SENSITIVITY_EXCEPTIONS?: string;
+  /**
+   * When `"false"`, skip outbound verification email and mark the account verified
+   * immediately after insert (legacy `SEND_EMAILS=false` / local dev).
+   */
+  SEND_EMAILS?: string;
 };
 
 export function isDev(env: Pick<SessionEnv, "DEV">): boolean {
