@@ -2,6 +2,15 @@
 
 Vue 3 SPA for the greenfield stack. The bundle talks to the API only through [`src/api/`](./src/api/) (OpenAPI-generated `paths` + `openapi-fetch`); it does not import server or Drizzle packages at runtime.
 
+## Styling
+
+- **Tailwind CSS v4** with the [Vite plugin](https://tailwindcss.com/docs/installation/framework-guides) (`@tailwindcss/vite` in [`vite.config.ts`](./vite.config.ts)), global entry [`src/styles/globals.css`](./src/styles/globals.css).
+- **[shadcn-vue](https://www.shadcn-vue.com/)** (Reka + `components.json`); UI primitives live under [`src/components/ui/`](./src/components/ui). Add more with:
+
+  `pnpm dlx shadcn-vue@latest add <component> --yes`
+
+- **Imports:** Vite + `tsconfig` path alias `@` → [`src`](./tsconfig.app.json) (e.g. `@/components/ui/button`).
+
 ## Layout
 
 - `src/api/` — `createDeepnotesApiClient`, generated types (`pnpm run generate:api-types` when `packages/api` changes).

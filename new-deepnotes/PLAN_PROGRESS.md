@@ -360,6 +360,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 - [x] **API surface:** `src/api/` — generated `paths` + `createDeepnotesApiClient`; bundle does not depend on `@deepnotes/api` at runtime (codegen devDeps only). **Still to enforce:** ESLint `import/no-restricted-paths` banning `@deepnotes/api-worker`, `@deepnotes/db`, `drizzle-orm` from `apps/web/src/**` once rule config is added.
 - [x] **Feature folders (bootstrap):** `src/features/auth` (session, demo builder, bytes), `src/features/home` — [apps/web/README.md](./apps/web/README.md). **Still empty:** `src/shared/ui`, `src/features/pages` (list + editor).
 - [x] **Session composable:** [`useSession.ts`](./apps/web/src/features/auth/useSession.ts) (testable) + thin [`LoginView.vue`](./apps/web/src/features/auth/LoginView.vue) / [`App.vue`](./apps/web/src/App.vue). **Later:** keyring + page crypto in dedicated modules (not in `.vue` only).
+- [x] **Tailwind + shadcn-vue:** Tailwind v4 (`@tailwindcss/vite`, [`globals.css`](./apps/web/src/styles/globals.css)); `npx shadcn-vue init` + `button` / `input` / `label` / `card` / `alert` / `checkbox`; shell uses utility classes + `@/components/ui/*` ([README — Styling](./apps/web/README.md#styling)). ESLint ignores generated [`src/components/ui`](./apps/web/src/components/ui).
 
 ### Testing (see RESTART_PLAN §5.8)
 
@@ -421,6 +422,7 @@ Cross-cutting work so the new SPA does not repeat **legacy `apps/client`** patte
 
 | Date | Change |
 |------|--------|
+| 2026-04-27 | **Stack:** `@deepnotes/web` — Tailwind CSS v4 + shadcn-vue (Reka), `components.json`, `@/*` alias, [`README` styling](./apps/web/README.md#styling). |
 | 2026-04-27 | **Phase 4 — routing + session UI:** `vue-router` (`/`, `/login`); `useSession` (refresh + me bootstrap, email/password + 2FA, demo, logout); `build-demo-session` + `libsodium`/`nanoid`; Vite proxy `/api` → `127.0.0.1:8787`; `App` shell + `HomeView` + `LoginView`; `bytes.test.ts` + updated `app.test.ts`; [apps/web/README.md](./apps/web/README.md). **Next (Phase 4):** page list, editor, register account form (same `loginHash` preimage as login). **Phase 3** still: collab + realtime [WebSocket](#not-started-phase-3--realtime--collab-websocket). |
 | 2026-04-27 | **Phase 4 — OpenAPI typed client:** `@deepnotes/web` — `pnpm run generate:api-types` (`tsx` + `openapi-typescript`); committed `src/api/openapi.json` + `api-types.generated.ts`; `createDeepnotesApiClient` / `resolveApiBaseUrl` (`openapi-fetch`, `credentials: "include"`); `client.test.ts`; `VITE_API_URL`; eslint ignore for generated files. **Phase 3** collab WS backlog expanded (upgrade → room → wire → fan-out → Redis → tests). PLAN_PROGRESS Phase 4 snapshot → **In progress**. |
 | 2026-04-27 | **Phase 3 — slice 10 (collab Postgres REST):** [page-collab-updates.ts](packages/session/src/page-collab-updates.ts) — `performGetPageCollabUpdates` / `performAppendPageCollabUpdates`; `GET|POST /api/pages/:pageId/collab-updates`; OpenAPI + Zod; [TRPC_REST_MAP](docs/TRPC_REST_MAP.md) collab bootstrap table; integration extends **groups + pages**; api-worker 503 matrix **70**. **Next:** collab + realtime **WebSocket** only. |

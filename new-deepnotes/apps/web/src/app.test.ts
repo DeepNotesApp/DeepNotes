@@ -16,12 +16,12 @@ describe("App", () => {
     for (let i = 0; i < 30; i++) {
       await flushPromises();
       await nextTick();
-      if (wrapper.find(".app").exists()) {
+      if (wrapper.find(".app-root").exists()) {
         break;
       }
     }
 
-    expect(wrapper.find(".app").exists()).toBe(true);
+    expect(wrapper.find(".app-root").exists()).toBe(true);
     expect(wrapper.text()).toContain("DeepNotes");
     expect(wrapper.text()).toContain("Sign in");
   });

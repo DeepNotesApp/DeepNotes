@@ -1,90 +1,72 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { useSession } from "../auth/useSession";
 
 const { user, loading, bootstrapped, isAuthenticated } = useSession();
 </script>
 
 <template>
-  <section class="panel">
-    <p v-if="!bootstrapped || loading" class="muted">Loading session…</p>
-    <template v-else-if="isAuthenticated && user">
-      <p class="lead">Signed in</p>
-      <dl class="kv">
-        <dt>User</dt>
-        <dd>
-          <code>{{ user.userId }}</code>
-        </dd>
-        <dt>Email verified</dt>
-        <dd>{{ user.emailVerified ? "yes" : "no" }}</dd>
-        <dt>Demo</dt>
-        <dd>{{ user.demo ? "yes" : "no" }}</dd>
-        <dt>Personal group</dt>
-        <dd>
-          <code>{{ user.personalGroupId }}</code>
-        </dd>
-      </dl>
-    </template>
-    <template v-else>
-      <p class="lead">Welcome</p>
-      <p class="muted">
-        Sign in to continue. The API sets httpOnly cookies; the
-        <code>loggedIn</code> hint cookie drives client UI.
-      </p>
-      <RouterLink class="btn primary" to="/login">Sign in</RouterLink>
-    </template>
-  </section>
+  <div class="space-y-4">
+    <p
+      v-if="!bootstrapped || loading"
+      class="text-muted-foreground text-sm"
+    >
+      Loading session…
+    </p>
+    <Card v-else-if="isAuthenticated && user">
+      <CardHeader>
+        <CardTitle>Signed in</CardTitle>
+        <CardDescription>Account details from the API.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <dl
+          class="text-sm [&_dd]:text-foreground grid gap-1.5 [&_dd]:mt-0.5 [&_dd]:font-mono [&_dd]:break-all [&_dd]:text-xs [&_dt]:text-xs [&_dt]:font-medium [&_dt]:text-muted-foreground"
+        >
+          <div>
+            <dt>User</dt>
+            <dd>{{ user.userId }}</dd>
+          </div>
+          <div>
+            <dt>Email verified</dt>
+            <dd>{{ user.emailVerified ? "yes" : "no" }}</dd>
+          </div>
+          <div>
+            <dt>Demo</dt>
+            <dd>{{ user.demo ? "yes" : "no" }}</dd>
+          </div>
+          <div>
+            <dt>Personal group</dt>
+            <dd>{{ user.personalGroupId }}</dd>
+          </div>
+        </dl>
+      </CardContent>
+    </Card>
+    <Card v-else>
+      <CardHeader>
+        <CardTitle>Welcome</CardTitle>
+        <CardDescription>
+          Sign in to continue. The API sets httpOnly cookies; the
+          <code class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
+            >loggedIn</code
+          >
+          hint cookie drives this UI.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Button as-child>
+          <RouterLink to="/login">Sign in</RouterLink>
+        </Button>
+      </CardContent>
+    </Card>
+  </div>
 </template>
-
-<style scoped>
-.panel {
-  max-width: 32rem;
-}
-
-.lead {
-  font-size: 1.125rem;
-  margin: 0 0 1rem;
-}
-
-.muted {
-  color: #5c5c5c;
-  margin: 0 0 1rem;
-}
-
-.kv {
-  display: grid;
-  grid-template-columns: 10rem 1fr;
-  gap: 0.35rem 1rem;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.kv dt {
-  margin: 0;
-  color: #5c5c5c;
-}
-
-.kv dd {
-  margin: 0;
-  font-family: ui-monospace, monospace;
-  word-break: break-all;
-}
-
-.btn {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.btn.primary {
-  background: #1a1a7a;
-  color: #fff;
-}
-
-.btn.primary:hover {
-  background: #12125a;
-}
-</style>

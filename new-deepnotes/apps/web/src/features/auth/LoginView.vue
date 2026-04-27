@@ -2,6 +2,20 @@
 import { onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
 import { useSession } from "./useSession";
 
 const router = useRouter();
@@ -60,197 +74,122 @@ async function onSubmit() {
 </script>
 
 <template>
-  <section class="panel">
-    <h1 class="title">Sign in</h1>
-    <p v-if="lastError" class="err" role="alert">
-      {{ lastError }}
-    </p>
-
-    <form class="form" @submit.prevent="onSubmit">
-      <label class="field">
-        <span>Email</span>
-        <input
-          v-model="email"
-          autocomplete="username"
-          :disabled="loading"
-          name="email"
-          required
-          type="email"
-        />
-      </label>
-      <label class="field">
-        <span>Password</span>
-        <input
-          v-model="password"
-          autocomplete="current-password"
-          :disabled="loading"
-          name="password"
-          required
-          type="password"
-        />
-      </label>
-      <label class="check">
-        <input v-model="rememberSession" :disabled="loading" type="checkbox" />
-        Remember this device
-      </label>
-
-      <div v-if="twoFactorRequired" class="mfa">
-        <p class="muted">
-          Enter a 6-digit code from your authenticator app, or a recovery code.
-        </p>
-        <label class="field">
-          <span>Authenticator code</span>
-          <input
-            v-model="authenticatorToken"
-            autocomplete="one-time-code"
-            :disabled="loading"
-            inputmode="numeric"
-            maxlength="6"
-            pattern="[0-9]*"
-            placeholder="000000"
-            type="text"
-          />
-        </label>
-        <label class="field">
-          <span>Recovery code (optional)</span>
-          <input
-            v-model="recoveryCode"
-            :disabled="loading"
-            inputmode="text"
-            maxlength="32"
-            placeholder="32 hex characters"
-            spellcheck="false"
-            type="text"
-          />
-        </label>
-      </div>
-
-      <div class="actions">
-        <button :disabled="loading" class="btn primary" type="submit">
-          {{ loading ? "Signing in…" : "Sign in" }}
-        </button>
-        <button
-          :disabled="loading"
-          class="btn ghost"
-          type="button"
-          @click="onDemo"
+  <div class="mx-auto w-full max-w-md">
+    <Card>
+      <CardHeader>
+        <CardTitle>Sign in</CardTitle>
+        <CardDescription>
+          Use your account email and password, or start a local demo session.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Alert
+          v-if="lastError"
+          class="mb-4"
+          role="alert"
+          variant="destructive"
         >
-          Try demo
-        </button>
-      </div>
-    </form>
+          <AlertDescription>
+            {{ lastError }}
+          </AlertDescription>
+        </Alert>
 
-    <p class="footer">
-      <RouterLink to="/">Home</RouterLink>
-    </p>
-  </section>
+        <form class="space-y-4" @submit.prevent="onSubmit">
+          <div class="space-y-2">
+            <Label for="login-email">Email</Label>
+            <Input
+              id="login-email"
+              v-model="email"
+              autocomplete="username"
+              :disabled="loading"
+              name="email"
+              required
+              type="email"
+            />
+          </div>
+          <div class="space-y-2">
+            <Label for="login-password">Password</Label>
+            <Input
+              id="login-password"
+              v-model="password"
+              autocomplete="current-password"
+              :disabled="loading"
+              name="password"
+              required
+              type="password"
+            />
+          </div>
+          <div class="flex items-center gap-2">
+            <Checkbox
+              id="remember"
+              v-model:checked="rememberSession"
+              :disabled="loading"
+            />
+            <Label
+              class="text-muted-foreground font-normal"
+              for="remember"
+            >
+              Remember this device
+            </Label>
+          </div>
+
+          <div
+            v-if="twoFactorRequired"
+            class="border-border space-y-3 border-t pt-4"
+          >
+            <p class="text-muted-foreground text-sm">
+              Enter a 6-digit code from your authenticator app, or a recovery
+              code.
+            </p>
+            <div class="space-y-2">
+              <Label for="login-otp">Authenticator code</Label>
+              <Input
+                id="login-otp"
+                v-model="authenticatorToken"
+                autocomplete="one-time-code"
+                :disabled="loading"
+                inputmode="numeric"
+                maxlength="6"
+                pattern="[0-9]*"
+                placeholder="000000"
+                type="text"
+              />
+            </div>
+            <div class="space-y-2">
+              <Label for="login-recovery">Recovery code (optional)</Label>
+              <Input
+                id="login-recovery"
+                v-model="recoveryCode"
+                :disabled="loading"
+                inputmode="text"
+                maxlength="32"
+                placeholder="32 hex characters"
+                spellcheck="false"
+                type="text"
+              />
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <Button :disabled="loading" type="submit" variant="default">
+              {{ loading ? "Signing in…" : "Sign in" }}
+            </Button>
+            <Button
+              :disabled="loading"
+              type="button"
+              variant="secondary"
+              @click="onDemo"
+            >
+              Try demo
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Button as-child class="p-0" size="sm" variant="link">
+          <RouterLink to="/">← Home</RouterLink>
+        </Button>
+      </CardFooter>
+    </Card>
+  </div>
 </template>
-
-<style scoped>
-.panel {
-  max-width: 22rem;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0 0 1.25rem;
-}
-
-.err {
-  color: #9a1c1c;
-  background: #fce8e8;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.9rem;
-  margin: 0 0 1rem;
-}
-
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.9rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.field input {
-  font: inherit;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid #c8c8c8;
-  border-radius: 0.375rem;
-}
-
-.check {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.mfa {
-  padding-top: 0.25rem;
-  border-top: 1px solid #e8e8e8;
-  margin-top: 0.25rem;
-}
-
-.muted {
-  color: #5c5c5c;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin: 0 0 0.5rem;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.btn {
-  font: inherit;
-  padding: 0.5rem 0.9rem;
-  border-radius: 0.375rem;
-  border: 1px solid #c8c8c8;
-  background: #fff;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn.primary {
-  background: #1a1a7a;
-  color: #fff;
-  border-color: #1a1a7a;
-}
-
-.btn.primary:hover:not(:disabled) {
-  background: #12125a;
-}
-
-.btn.ghost:hover:not(:disabled) {
-  background: #f2f2f2;
-}
-
-.footer {
-  margin: 1.5rem 0 0;
-  font-size: 0.9rem;
-}
-
-.footer a {
-  color: #1a1a7a;
-}
-</style>
