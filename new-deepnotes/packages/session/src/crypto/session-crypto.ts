@@ -1,13 +1,19 @@
+/**
+ * Session/login helpers: password derivation, server-encrypted user fields,
+ * and recovery codes. Uses primitives in this folder (`wrapSymmetricKey`, etc.)
+ * so stored Postgres blobs remain compatible.
+ */
 import CryptoJS from "crypto-js";
 import sodium from "libsodium-wrappers-sumo";
 import { pack, unpack } from "msgpackr";
+
 import {
   base64ToBytes,
   bytesToText,
   concatUint8Arrays,
-} from "./crypto/bytes.js";
-import { cryptoJsWordArrayToUint8Array } from "./crypto/crypto-js-wordarray.js";
-import { wrapSymmetricKey } from "./crypto/symmetric-key.js";
+} from "./bytes.js";
+import { cryptoJsWordArrayToUint8Array } from "./crypto-js-wordarray.js";
+import { wrapSymmetricKey } from "./symmetric-key.js";
 
 export async function ensureSodiumReady(): Promise<void> {
   await sodium.ready;
@@ -49,7 +55,7 @@ export function decryptUserRehashedLoginHash(
   );
 }
 
-export { getPasswordHashValues } from "./crypto/password-hashing.js";
+export { getPasswordHashValues } from "./password-hashing.js";
 
 export function decryptUserAuthenticatorSecret(
   userEncryptedAuthenticatorSecret: Uint8Array,

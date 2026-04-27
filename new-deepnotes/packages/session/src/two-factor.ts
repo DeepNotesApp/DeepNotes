@@ -10,7 +10,7 @@ import {
   decryptUserAuthenticatorSecret,
   encryptRecoveryCodes,
   verifyRecoveryCode,
-} from "./legacy-crypto.js";
+} from "./crypto/session-crypto.js";
 
 type User2faRow = {
   id: string;

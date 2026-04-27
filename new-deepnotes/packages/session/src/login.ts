@@ -19,7 +19,7 @@ import {
   derivePasswordValues,
   ensureSodiumReady,
   getPasswordHashValues,
-} from "./legacy-crypto.js";
+} from "./crypto/session-crypto.js";
 import { createSessionRowAndCookies } from "./session-lifecycle.js";
 import { assertTwoFactorOk } from "./two-factor.js";
 

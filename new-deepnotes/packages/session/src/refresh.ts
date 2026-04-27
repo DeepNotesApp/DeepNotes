@@ -10,7 +10,7 @@ import {
   decodeRefreshTokenUnsafe,
   verifyRefreshToken,
 } from "./jwt.js";
-import { ensureSodiumReady } from "./legacy-crypto.js";
+import { ensureSodiumReady } from "./crypto/session-crypto.js";
 import { rotateSessionRowAndCookies } from "./session-lifecycle.js";
 
 export async function performSessionRefresh(input: {

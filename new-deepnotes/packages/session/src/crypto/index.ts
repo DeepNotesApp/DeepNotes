@@ -1,6 +1,6 @@
 /**
- * In-repo crypto primitives required for session/login parity with stored user blobs.
- * (Selective port of former `@stdlib/crypto` keyring + hashing wire shapes — no workspace link.)
+ * Keyring + PHC helpers for stored user blobs. Higher-level login glue lives in
+ * `./session-crypto.ts` (password derivation, encrypted user fields, recovery codes).
  */
 export { createPrivateKeyring } from "./private-keyring.js";
 export type { PrivateKeyring } from "./private-keyring.js";
