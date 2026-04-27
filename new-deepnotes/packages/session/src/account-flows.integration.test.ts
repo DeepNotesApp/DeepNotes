@@ -19,7 +19,7 @@ import {
   type TemplateDbContext,
 } from "@deepnotes/db/testing/template-db";
 import * as schema from "@deepnotes/db/schema";
-import { devices, sessions, users } from "@deepnotes/db/schema";
+import { devices, pages, sessions, users } from "@deepnotes/db/schema";
 
 import { performUserPasswordChange } from "./change-user-password.js";
 import {
@@ -44,6 +44,11 @@ import {
   ensureSodiumReady,
 } from "./crypto/session-crypto.js";
 import type { UserRegisterInput } from "./register-user.js";
+import {
+  performCreatePage,
+  performListGroupPages,
+} from "./group-pages.js";
+import { performGetUserGroupIds } from "./user-group-ids.js";
 import { performUserRegister } from "./register-user.js";
 import { decryptUserEmail } from "./encrypt-user-email.js";
 import { hashUserEmail } from "./email-hash.js";
@@ -1206,6 +1211,96 @@ describe.skipIf(resolveTemplateContext() == null)(
           status: 401,
           message: "Invalid recovery code.",
         });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("groups: get ids, list pages, create second page in personal group", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `grp-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash);
+        await performUserRegister({ db, env, body: reg });
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        const { groupIds } = await performGetUserGroupIds({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(groupIds).toEqual([reg.groupId]);
+
+        const listed = await performListGroupPages({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        expect(listed.hasMore).toBe(false);
+        expect(listed.pageIds).toEqual([reg.pageId]);
+
+        const newPageId = nanoid();
+        const out = await performCreatePage({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          body: {
+            parentPageId: reg.pageId,
+            pageId: newPageId,
+            pageEncryptedSymmetricKeyring: rand32(),
+            pageEncryptedRelativeTitle: rand32(),
+            pageEncryptedAbsoluteTitle: rand32(),
+          },
+        });
+        expect(out.pageId).toBe(newPageId);
+        expect(out.numFreePages).toBe(1);
+
+        const [urow] = await db
+          .select({ n: users.numFreePages })
+          .from(users)
+          .where(eq(users.id, reg.userId));
+        expect(urow?.n).toBe(1);
+
+        const ids = await db
+          .select({ id: pages.id })
+          .from(pages)
+          .where(eq(pages.groupId, reg.groupId));
+        expect(ids.map((r) => r.id).sort()).toEqual(
+          [reg.pageId, newPageId].sort(),
+        );
+
+        await expect(
+          performListGroupPages({
+            db,
+            env,
+            accessCookie: access,
+            groupId: "nononononononononono1",
+          }),
+        ).rejects.toMatchObject({ status: 404, code: "NOT_FOUND" });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

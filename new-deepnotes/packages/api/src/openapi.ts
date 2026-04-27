@@ -17,6 +17,14 @@ import {
   userRegisterRequestSchema,
 } from "./schemas/sessions.js";
 import {
+  groupIdPathSchema,
+  groupPageCreateRequestSchema,
+  groupPageCreateResponseSchema,
+  groupPagesListQuerySchema,
+  groupPagesListResponseSchema,
+  userGroupIdsResponseSchema,
+} from "./schemas/pages-groups.js";
+import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   user2faEnableFinishRequestSchema,
@@ -198,6 +206,101 @@ registry.registerPath({
       },
     },
     401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/groups",
+  summary: "List group IDs for the current user",
+  description:
+    "Replaces legacy `users.pages.getGroupIds`. Returns `group_id` values from `group_members` ordered by recent activity (desc).",
+  responses: {
+    200: {
+      description: "Ordered group ids.",
+      content: {
+        "application/json": {
+          schema: userGroupIdsResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/pages",
+  summary: "List page IDs in a group",
+  description:
+    "Replaces legacy `groups.getPages` (authenticated). Optional `lastPageId` cursor for pagination (newest `last_activity_date` first). Omits soft-deleted pages (`permanent_deletion_date` set). Public groups allow `viewGroupPages` without membership.",
+  request: {
+    params: groupIdPathSchema,
+    query: groupPagesListQuerySchema,
+  },
+  responses: {
+    200: {
+      description: "Page id window (max 20) and `hasMore`.",
+      content: {
+        "application/json": {
+          schema: groupPagesListResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Invalid `lastPageId` (not in group).",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "post",
+  path: "/api/groups/{groupId}/pages",
+  summary: "Create a page in a group",
+  description:
+    "Replaces legacy `pages.create` for an existing group (optional `groupCreation` path not yet exposed). Enforces `editGroupPages`, Pro subscription when `groupId` is not the user’s personal group, and the 50 free-page cap for non‑Pro users.",
+  request: {
+    params: groupIdPathSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: groupPageCreateRequestSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Page and `users_pages` row created.",
+      content: {
+        "application/json": {
+          schema: groupPageCreateResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Invalid parent page or body.",
+      content: {
+        "application/json": {
+          schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },
 });

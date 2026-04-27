@@ -27,6 +27,15 @@ describe("api-worker", () => {
     ["POST", "/api/sessions/refresh"],
     ["POST", "/api/sessions/logout"],
     ["POST", "/api/sessions/demo"],
+    ["GET", "/api/users/me/groups"],
+    [
+      "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
+    ],
+    [
+      "POST",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
+    ],
     ["GET", "/api/users/me"],
     ["POST", "/api/users/me/password"],
     ["DELETE", "/api/users/me"],

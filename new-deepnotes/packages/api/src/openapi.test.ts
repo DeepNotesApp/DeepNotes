@@ -44,5 +44,8 @@ describe("getOpenApiDocument", () => {
       doc.paths?.["/api/users/me/2fa/devices/forget"]?.post,
     ).toBeDefined();
     expect(doc.paths?.["/api/users/me/2fa/disable"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/groups"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/pages"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/pages"]?.post).toBeDefined();
   });
 });

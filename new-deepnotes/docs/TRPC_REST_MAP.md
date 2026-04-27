@@ -45,7 +45,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.pages.clearFavoritePages` | `POST /api/users/me/pages/favorites/clear` |
 | `users.pages.setEncryptedDefaultNote` | `PATCH /api/users/me/defaults/note` |
 | `users.pages.setEncryptedDefaultArrow` | `PATCH /api/users/me/defaults/arrow` |
-| `users.pages.getGroupIds` | `GET /api/users/me/groups` |
+| `users.pages.getGroupIds` | `GET /api/users/me/groups` (**implemented** — `performGetUserGroupIds` in `@deepnotes/session`) |
 
 ## Groups (`groupsRouter`)
 
@@ -53,7 +53,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 |------------------|----------------------|
 | `groups.getMainPageId` | `GET /api/groups/:groupId/main-page` |
 | `groups.getUserIds` | `GET /api/groups/:groupId/members` (ids / minimal DTO) |
-| `groups.getPages` | `GET /api/groups/:groupId/pages` |
+| `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; query `lastPageId`; soft-deleted pages excluded) |
 | `groups.password.enable` | `POST /api/groups/:groupId/password` |
 | `groups.password.change` | `PATCH /api/groups/:groupId/password` |
 | `groups.password.disable` | `DELETE /api/groups/:groupId/password` |
@@ -67,7 +67,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
-| `pages.create` | `POST /api/groups/:groupId/pages` |
+| `pages.create` | `POST /api/groups/:groupId/pages` (**implemented** — `performCreatePage`; optional `groupCreation` not yet exposed; Pro + free-page rules per legacy) |
 | `pages.bump` | `POST /api/pages/:pageId/bump` |
 | `pages.backlinks.create` | `POST /api/pages/:pageId/backlinks` |
 | `pages.backlinks.delete` | `DELETE /api/pages/:pageId/backlinks/:targetPageId` |

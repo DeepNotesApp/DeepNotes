@@ -27,6 +27,12 @@ export {
 export { getAuthenticatedUserSummary } from "./user-me.js";
 export type { AuthenticatedUserSummary } from "./user-me.js";
 export {
+  performCreatePage,
+  performListGroupPages,
+} from "./group-pages.js";
+export type { CreatePageBody } from "./group-pages.js";
+export { performGetUserGroupIds } from "./user-group-ids.js";
+export {
   performUserTwoFactorDisable,
   performUserTwoFactorEnableFinish,
   performUserTwoFactorEnableRequest,

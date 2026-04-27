@@ -24,6 +24,14 @@ export {
   type UserRegisterRequest,
 } from "./schemas/sessions.js";
 export {
+  groupIdPathSchema,
+  groupPageCreateRequestSchema,
+  groupPageCreateResponseSchema,
+  groupPagesListQuerySchema,
+  groupPagesListResponseSchema,
+  userGroupIdsResponseSchema,
+} from "./schemas/pages-groups.js";
+export {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   userAccountDeleteRequestSchema,
