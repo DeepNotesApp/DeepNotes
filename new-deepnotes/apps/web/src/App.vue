@@ -48,9 +48,14 @@ async function onLogout() {
           >
             {{ user.demo ? "Demo" : "Signed in" }}
           </span>
-          <Button v-if="!isAuthenticated" as-child variant="ghost" size="sm">
-            <RouterLink to="/login">Sign in</RouterLink>
-          </Button>
+          <template v-if="!isAuthenticated">
+            <Button as-child variant="ghost" size="sm">
+              <RouterLink to="/register">Register</RouterLink>
+            </Button>
+            <Button as-child variant="ghost" size="sm">
+              <RouterLink to="/login">Sign in</RouterLink>
+            </Button>
+          </template>
           <Button
             v-else
             :disabled="loading"

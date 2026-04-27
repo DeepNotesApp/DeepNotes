@@ -14,6 +14,17 @@ const router = createRouter({
       component: () => import("./features/auth/LoginView.vue"),
       meta: { public: true },
     },
+    {
+      path: "/register",
+      name: "register",
+      component: () => import("./features/auth/RegisterView.vue"),
+      meta: { public: true },
+    },
+    {
+      path: "/page/:pageId",
+      name: "page",
+      component: () => import("./features/pages/PageEditorView.vue"),
+    },
   ],
 });
 

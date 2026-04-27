@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -36,6 +36,8 @@ const password = ref("");
 const rememberSession = ref(true);
 const authenticatorToken = ref("");
 const recoveryCode = ref("");
+
+const registeredOk = computed(() => route.query.registered === "1");
 
 onMounted(() => {
   if (isAuthenticated.value) {
@@ -83,6 +85,16 @@ async function onSubmit() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        <Alert
+          v-if="registeredOk"
+          class="mb-4"
+          role="status"
+        >
+          <AlertDescription>
+            Account created. Sign in with the same email and password.
+          </AlertDescription>
+        </Alert>
+
         <Alert
           v-if="lastError"
           class="mb-4"
@@ -185,7 +197,10 @@ async function onSubmit() {
           </div>
         </form>
       </CardContent>
-      <CardFooter>
+      <CardFooter class="flex flex-col items-start gap-2">
+        <Button as-child class="p-0" size="sm" variant="link">
+          <RouterLink to="/register">Create an account</RouterLink>
+        </Button>
         <Button as-child class="p-0" size="sm" variant="link">
           <RouterLink to="/">← Home</RouterLink>
         </Button>
