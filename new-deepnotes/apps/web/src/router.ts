@@ -21,6 +21,11 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: "/groups/:groupId",
+      name: "group-detail",
+      component: () => import("./features/groups/GroupDetailView.vue"),
+    },
+    {
       path: "/groups",
       name: "groups",
       component: () => import("./features/groups/GroupsView.vue"),

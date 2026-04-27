@@ -19,6 +19,7 @@ import {
 import {
   groupIdPathSchema,
   groupMainPageResponseSchema,
+  groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,
   groupPageCreateRequestSchema,
   groupPageCreateResponseSchema,
@@ -573,6 +574,27 @@ registry.registerPath({
       description: "Distinct user ids (unordered).",
       content: {
         "application/json": { schema: groupMemberUserIdsResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/members/detail",
+  summary: "Group membership detail (roles + pending invites/requests)",
+  description:
+    "Returns the caller’s role, full member list with roles, pending invitations and non-rejected join requests, and group flags (`groupIsPublic`, `joinRequestsAllowed`). Requires `viewGroupMembers` and an active membership row.",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Structured membership for admin UIs.",
+      content: {
+        "application/json": { schema: groupMembersDetailResponseSchema },
       },
     },
     401: sessionUnauthorized401,

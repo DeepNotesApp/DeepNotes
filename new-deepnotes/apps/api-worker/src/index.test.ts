@@ -52,6 +52,10 @@ describe("api-worker", () => {
     ],
     [
       "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/members/detail",
+    ],
+    [
+      "GET",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
     ],
     [

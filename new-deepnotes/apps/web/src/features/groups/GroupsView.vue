@@ -127,6 +127,13 @@ watch(
                 </Button>
               </li>
             </ul>
+            <div class="pt-1">
+              <Button as-child size="sm" variant="secondary">
+                <RouterLink :to="`/groups/${g.groupId}`">
+                  Members &amp; invites
+                </RouterLink>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </li>

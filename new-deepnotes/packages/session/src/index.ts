@@ -34,6 +34,7 @@ export type { CreatePageBody } from "./group-pages.js";
 export {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
+  performGetGroupMembersDetail,
 } from "./group-main-and-members.js";
 export { performGetUserGroupIds } from "./user-group-ids.js";
 export {

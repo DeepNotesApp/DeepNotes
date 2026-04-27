@@ -59,6 +59,7 @@ import type { UserRegisterInput } from "./register-user.js";
 import {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
+  performGetGroupMembersDetail,
 } from "./group-main-and-members.js";
 import {
   performGroupJoinInvitationSend,
@@ -1653,6 +1654,31 @@ describe.skipIf(resolveTemplateContext() == null)(
           );
         expect(invRow?.role).toBe("member");
 
+        const detailInv = await performGetGroupMembersDetail({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+        });
+        expect(detailInv.viewerUserId).toBe(regA.userId);
+        expect(detailInv.viewerRole).toBe("owner");
+        expect(detailInv.groupIsPublic).toBe(true);
+        expect(detailInv.joinRequestsAllowed).toBe(true);
+        expect(
+          detailInv.pendingInvitations.some(
+            (p) => p.userId === regB.userId && p.role === "member",
+          ),
+        ).toBe(true);
+
+        await expect(
+          performGetGroupMembersDetail({
+            db,
+            env,
+            accessCookie: accessB,
+            groupId: sharedGroupId,
+          }),
+        ).rejects.toMatchObject({ status: 403 });
+
         const acceptName = rand32();
         await performGroupJoinInvitationAccept({
           db,
@@ -1672,6 +1698,31 @@ describe.skipIf(resolveTemplateContext() == null)(
             ),
           );
         expect(memAfter?.role).toBe("member");
+
+        const detailAccepted = await performGetGroupMembersDetail({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+        });
+        expect(
+          detailAccepted.members.some(
+            (m) => m.userId === regB.userId && m.role === "member",
+          ),
+        ).toBe(true);
+        expect(
+          detailAccepted.pendingInvitations.some(
+            (p) => p.userId === regB.userId,
+          ),
+        ).toBe(false);
+
+        const detailBMember = await performGetGroupMembersDetail({
+          db,
+          env,
+          accessCookie: accessB,
+          groupId: sharedGroupId,
+        });
+        expect(detailBMember.viewerRole).toBe("member");
 
         await performGroupMemberRoleChange({
           db,
@@ -1718,6 +1769,18 @@ describe.skipIf(resolveTemplateContext() == null)(
           encryptedUserName: rand32(),
           encryptedUserNameForUser: rand32(),
         });
+
+        const detailPendingJr = await performGetGroupMembersDetail({
+          db,
+          env,
+          accessCookie: accessA,
+          groupId: sharedGroupId,
+        });
+        expect(
+          detailPendingJr.pendingJoinRequests.some(
+            (p) => p.userId === regB.userId,
+          ),
+        ).toBe(true);
 
         await performGroupJoinRequestAccept({
           db,

@@ -53,6 +53,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 |------------------|----------------------|
 | `groups.getMainPageId` | `GET /api/groups/:groupId/main-page` (**implemented** — `performGetGroupMainPageId`; `groups.main_page_id`; requires `viewGroupPages`) |
 | `groups.getUserIds` | `GET /api/groups/:groupId/members` (**implemented** — `performGetGroupMemberUserIds`; members ∪ join requests ∪ invitations; requires `viewGroupMembers`, not public-only read) |
+| *(greenfield)* | `GET /api/groups/:groupId/members/detail` (**implemented** — `performGetGroupMembersDetail`; members with roles, pending invites/requests, viewer role, public flag, `joinRequestsAllowed`; same permission as `…/members`) |
 | `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; query `lastPageId`; soft-deleted pages excluded) |
 | `groups.password.enable` | `POST /api/groups/:groupId/password` (**implemented** — `performGroupPasswordEnable`; Pro + `editGroupSettings`; `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY`) |
 | `groups.password.change` | `PATCH /api/groups/:groupId/password` (**implemented** — `performGroupPasswordChange`) |

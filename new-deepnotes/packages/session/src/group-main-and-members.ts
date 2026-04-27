@@ -5,7 +5,7 @@ import {
   groupMembers,
   groups,
 } from "@deepnotes/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
@@ -101,4 +101,100 @@ export async function performGetGroupMemberUserIds(input: {
   for (const r of invitationRows) ids.add(r.userId);
 
   return { userIds: [...ids] };
+}
+
+/**
+ * Structured membership for group admin UIs: roles, pending invites/requests,
+ * and viewer context. Requires `viewGroupMembers` and an active `group_members`
+ * row (same as {@link performGetGroupMemberUserIds}).
+ */
+export async function performGetGroupMembersDetail(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+  groupId: string;
+}): Promise<{
+  viewerUserId: string;
+  viewerRole: string;
+  groupIsPublic: boolean;
+  joinRequestsAllowed: boolean;
+  members: { userId: string; role: string }[];
+  pendingInvitations: { userId: string; role: string }[];
+  pendingJoinRequests: { userId: string }[];
+}> {
+  const { userId: viewerUserId } = await getAuthenticatedUserSummary(input);
+
+  const [groupRow] = await input.db
+    .select({
+      accessKeyring: groups.accessKeyring,
+      areJoinRequestsAllowed: groups.areJoinRequestsAllowed,
+    })
+    .from(groups)
+    .where(eq(groups.id, input.groupId))
+    .limit(1);
+
+  if (groupRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Group not found.");
+  }
+
+  const allowed = await userHasGroupPermission({
+    db: input.db,
+    userId: viewerUserId,
+    groupId: input.groupId,
+    permission: "viewGroupMembers",
+  });
+  if (!allowed) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const [viewerMember] = await input.db
+    .select({ role: groupMembers.role })
+    .from(groupMembers)
+    .where(
+      and(
+        eq(groupMembers.groupId, input.groupId),
+        eq(groupMembers.userId, viewerUserId),
+      ),
+    )
+    .limit(1);
+
+  if (viewerMember == null) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const [memberRows, invitationRows, requestRows] = await Promise.all([
+    input.db
+      .select({ userId: groupMembers.userId, role: groupMembers.role })
+      .from(groupMembers)
+      .where(eq(groupMembers.groupId, input.groupId)),
+    input.db
+      .select({
+        userId: groupJoinInvitations.userId,
+        role: groupJoinInvitations.role,
+      })
+      .from(groupJoinInvitations)
+      .where(eq(groupJoinInvitations.groupId, input.groupId)),
+    input.db
+      .select({ userId: groupJoinRequests.userId })
+      .from(groupJoinRequests)
+      .where(
+        and(
+          eq(groupJoinRequests.groupId, input.groupId),
+          eq(groupJoinRequests.rejected, false),
+        ),
+      ),
+  ]);
+
+  return {
+    viewerUserId,
+    viewerRole: viewerMember.role,
+    groupIsPublic: groupRow.accessKeyring != null,
+    joinRequestsAllowed: groupRow.areJoinRequestsAllowed,
+    members: memberRows.map((r) => ({ userId: r.userId, role: r.role })),
+    pendingInvitations: invitationRows.map((r) => ({
+      userId: r.userId,
+      role: r.role,
+    })),
+    pendingJoinRequests: requestRows.map((r) => ({ userId: r.userId })),
+  };
 }

@@ -26,6 +26,7 @@ export {
 export {
   groupIdPathSchema,
   groupMainPageResponseSchema,
+  groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,
   groupPageCreateRequestSchema,
   groupPageCreateResponseSchema,

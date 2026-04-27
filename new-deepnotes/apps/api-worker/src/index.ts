@@ -1287,6 +1287,47 @@ app.get("/api/groups/:groupId/members", async (c) => {
   }
 });
 
+app.get("/api/groups/:groupId/members/detail", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGetGroupMembersDetail } = await import("@deepnotes/session");
+    const out = await performGetGroupMembersDetail({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
 app.get("/api/groups/:groupId/pages", async (c) => {
   const sessionEnv = getSessionEnv(c.env);
   if (sessionEnv == null) {

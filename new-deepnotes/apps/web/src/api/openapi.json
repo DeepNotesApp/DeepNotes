@@ -551,6 +551,101 @@
           "userIds"
         ]
       },
+      "GroupMemberRole": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "admin",
+          "moderator",
+          "member",
+          "viewer"
+        ]
+      },
+      "GroupMemberRow": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/GroupMemberRole"
+          }
+        },
+        "required": [
+          "userId",
+          "role"
+        ]
+      },
+      "GroupPendingInvitationRow": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/GroupMemberRole"
+          }
+        },
+        "required": [
+          "userId",
+          "role"
+        ]
+      },
+      "GroupPendingJoinRequestRow": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "GroupMembersDetailResponse": {
+        "type": "object",
+        "properties": {
+          "viewerUserId": {
+            "type": "string"
+          },
+          "viewerRole": {
+            "$ref": "#/components/schemas/GroupMemberRole"
+          },
+          "groupIsPublic": {
+            "type": "boolean"
+          },
+          "joinRequestsAllowed": {
+            "type": "boolean"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupMemberRow"
+            }
+          },
+          "pendingInvitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupPendingInvitationRow"
+            }
+          },
+          "pendingJoinRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupPendingJoinRequestRow"
+            }
+          }
+        },
+        "required": [
+          "viewerUserId",
+          "viewerRole",
+          "groupIsPublic",
+          "joinRequestsAllowed",
+          "members",
+          "pendingInvitations",
+          "pendingJoinRequests"
+        ]
+      },
       "GroupPagesListResponse": {
         "type": "object",
         "properties": {
@@ -939,16 +1034,6 @@
           "groupJoinInvitations",
           "groupJoinRequests",
           "groupPages"
-        ]
-      },
-      "GroupMemberRole": {
-        "type": "string",
-        "enum": [
-          "owner",
-          "admin",
-          "moderator",
-          "member",
-          "viewer"
         ]
       },
       "GroupJoinInvitationSendRequest": {
@@ -2551,6 +2636,77 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GroupMemberUserIdsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/members/detail": {
+      "get": {
+        "summary": "Group membership detail (roles + pending invites/requests)",
+        "description": "Returns the caller’s role, full member list with roles, pending invitations and non-rejected join requests, and group flags (`groupIsPublic`, `joinRequestsAllowed`). Requires `viewGroupMembers` and an active membership row.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Structured membership for admin UIs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembersDetailResponse"
                 }
               }
             }

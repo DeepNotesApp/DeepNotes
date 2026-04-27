@@ -192,6 +192,39 @@ export const groupMemberRoleSchema = z
   .enum(["owner", "admin", "moderator", "member", "viewer"])
   .openapi("GroupMemberRole");
 
+const groupMemberRowSchema = z
+  .object({
+    userId: z.string(),
+    role: groupMemberRoleSchema,
+  })
+  .openapi("GroupMemberRow");
+
+const groupPendingInvitationRowSchema = z
+  .object({
+    userId: z.string(),
+    role: groupMemberRoleSchema,
+  })
+  .openapi("GroupPendingInvitationRow");
+
+const groupPendingJoinRequestRowSchema = z
+  .object({
+    userId: z.string(),
+  })
+  .openapi("GroupPendingJoinRequestRow");
+
+/** Roles + pending flows for authenticated members (`viewGroupMembers`). */
+export const groupMembersDetailResponseSchema = z
+  .object({
+    viewerUserId: z.string(),
+    viewerRole: groupMemberRoleSchema,
+    groupIsPublic: z.boolean(),
+    joinRequestsAllowed: z.boolean(),
+    members: z.array(groupMemberRowSchema),
+    pendingInvitations: z.array(groupPendingInvitationRowSchema),
+    pendingJoinRequests: z.array(groupPendingJoinRequestRowSchema),
+  })
+  .openapi("GroupMembersDetailResponse");
+
 export const groupJoinInvitationSendRequestSchema = z
   .object({
     inviteeUserId: z

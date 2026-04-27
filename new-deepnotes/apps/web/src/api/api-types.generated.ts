@@ -1279,6 +1279,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{groupId}/members/detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Group membership detail (roles + pending invites/requests)
+         * @description Returns the caller’s role, full member list with roles, pending invitations and non-rejected join requests, and group flags (`groupIsPublic`, `joinRequestsAllowed`). Requires `viewGroupMembers` and an active membership row.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    groupId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Structured membership for admin UIs. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupMembersDetailResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{groupId}/pages": {
         parameters: {
             query?: never;
@@ -5502,6 +5579,28 @@ export interface components {
         GroupMemberUserIdsResponse: {
             userIds: string[];
         };
+        /** @enum {string} */
+        GroupMemberRole: "owner" | "admin" | "moderator" | "member" | "viewer";
+        GroupMemberRow: {
+            userId: string;
+            role: components["schemas"]["GroupMemberRole"];
+        };
+        GroupPendingInvitationRow: {
+            userId: string;
+            role: components["schemas"]["GroupMemberRole"];
+        };
+        GroupPendingJoinRequestRow: {
+            userId: string;
+        };
+        GroupMembersDetailResponse: {
+            viewerUserId: string;
+            viewerRole: components["schemas"]["GroupMemberRole"];
+            groupIsPublic: boolean;
+            joinRequestsAllowed: boolean;
+            members: components["schemas"]["GroupMemberRow"][];
+            pendingInvitations: components["schemas"]["GroupPendingInvitationRow"][];
+            pendingJoinRequests: components["schemas"]["GroupPendingJoinRequestRow"][];
+        };
         GroupPagesListResponse: {
             pageIds: string[];
             hasMore: boolean;
@@ -5719,8 +5818,6 @@ export interface components {
                 [key: string]: components["schemas"]["GroupPrivacyPrivatePage"];
             };
         };
-        /** @enum {string} */
-        GroupMemberRole: "owner" | "admin" | "moderator" | "member" | "viewer";
         GroupJoinInvitationSendRequest: {
             /**
              * @description 21-character nanoid (URL-safe alphabet).
