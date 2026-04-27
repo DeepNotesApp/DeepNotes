@@ -64,3 +64,15 @@ export const groupPageCreateResponseSchema = z
     numFreePages: z.number().int().optional(),
   })
   .openapi("GroupPageCreateResponse");
+
+export const groupMainPageResponseSchema = z
+  .object({
+    mainPageId: z.string(),
+  })
+  .openapi("GroupMainPageResponse");
+
+export const groupMemberUserIdsResponseSchema = z
+  .object({
+    userIds: z.array(z.string()),
+  })
+  .openapi("GroupMemberUserIdsResponse");

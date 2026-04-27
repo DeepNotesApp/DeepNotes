@@ -25,6 +25,8 @@ export {
 } from "./schemas/sessions.js";
 export {
   groupIdPathSchema,
+  groupMainPageResponseSchema,
+  groupMemberUserIdsResponseSchema,
   groupPageCreateRequestSchema,
   groupPageCreateResponseSchema,
   groupPagesListQuerySchema,

@@ -18,6 +18,8 @@ import {
 } from "./schemas/sessions.js";
 import {
   groupIdPathSchema,
+  groupMainPageResponseSchema,
+  groupMemberUserIdsResponseSchema,
   groupPageCreateRequestSchema,
   groupPageCreateResponseSchema,
   groupPagesListQuerySchema,
@@ -506,6 +508,48 @@ registry.registerPath({
   responses: {
     204: { description: "Read cursor updated (no-op if user has no notifications)." },
     401: sessionUnauthorized401,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/main-page",
+  summary: "Get the group main page id",
+  description:
+    "Replaces legacy `groups.getMainPageId` (KeyDB `main-page-id`). Source: `groups.main_page_id`. Requires `viewGroupPages` (same as listing pages).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Main page id for the group.",
+      content: {
+        "application/json": { schema: groupMainPageResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/members",
+  summary: "List user ids (members, requests, invitations)",
+  description:
+    "Replaces legacy `groups.getUserIds`: union of `group_members`, `group_join_requests`, and `group_join_invitations` for the group. Requires `viewGroupMembers` (not granted for public read without membership).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Distinct user ids (unordered).",
+      content: {
+        "application/json": { schema: groupMemberUserIdsResponseSchema },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
     503: sessionServiceUnavailable503,
   },
 });

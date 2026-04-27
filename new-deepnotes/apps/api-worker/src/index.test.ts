@@ -44,6 +44,14 @@ describe("api-worker", () => {
     ["POST", "/api/users/me/notifications/read"],
     [
       "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/main-page",
+    ],
+    [
+      "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/members",
+    ],
+    [
+      "GET",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/pages",
     ],
     [

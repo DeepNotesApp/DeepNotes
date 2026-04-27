@@ -56,6 +56,8 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/users/me/defaults/arrow"]?.patch).toBeDefined();
     expect(doc.paths?.["/api/users/me/notifications"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users/me/notifications/read"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/main-page"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/groups/{groupId}/members"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.get).toBeDefined();
     expect(doc.paths?.["/api/groups/{groupId}/pages"]?.post).toBeDefined();
   });

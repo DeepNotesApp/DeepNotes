@@ -51,8 +51,8 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
-| `groups.getMainPageId` | `GET /api/groups/:groupId/main-page` |
-| `groups.getUserIds` | `GET /api/groups/:groupId/members` (ids / minimal DTO) |
+| `groups.getMainPageId` | `GET /api/groups/:groupId/main-page` (**implemented** — `performGetGroupMainPageId`; `groups.main_page_id`; requires `viewGroupPages`) |
+| `groups.getUserIds` | `GET /api/groups/:groupId/members` (**implemented** — `performGetGroupMemberUserIds`; members ∪ join requests ∪ invitations; requires `viewGroupMembers`, not public-only read) |
 | `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; query `lastPageId`; soft-deleted pages excluded) |
 | `groups.password.enable` | `POST /api/groups/:groupId/password` |
 | `groups.password.change` | `PATCH /api/groups/:groupId/password` |

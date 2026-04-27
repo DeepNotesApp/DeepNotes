@@ -31,6 +31,10 @@ export {
   performListGroupPages,
 } from "./group-pages.js";
 export type { CreatePageBody } from "./group-pages.js";
+export {
+  performGetGroupMainPageId,
+  performGetGroupMemberUserIds,
+} from "./group-main-and-members.js";
 export { performGetUserGroupIds } from "./user-group-ids.js";
 export {
   performAddFavoritePages,

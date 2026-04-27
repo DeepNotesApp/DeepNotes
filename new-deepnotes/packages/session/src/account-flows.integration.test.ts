@@ -52,6 +52,10 @@ import {
 } from "./crypto/session-crypto.js";
 import type { UserRegisterInput } from "./register-user.js";
 import {
+  performGetGroupMainPageId,
+  performGetGroupMemberUserIds,
+} from "./group-main-and-members.js";
+import {
   performCreatePage,
   performListGroupPages,
 } from "./group-pages.js";
@@ -1279,6 +1283,22 @@ describe.skipIf(resolveTemplateContext() == null)(
         });
         expect(listed.hasMore).toBe(false);
         expect(listed.pageIds).toEqual([reg.pageId]);
+
+        const main = await performGetGroupMainPageId({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        expect(main.mainPageId).toBe(reg.pageId);
+
+        const members = await performGetGroupMemberUserIds({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        expect(members.userIds.sort()).toEqual([reg.userId]);
 
         const newPageId = nanoid();
         const out = await performCreatePage({
