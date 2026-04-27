@@ -50,7 +50,7 @@ Workers are **not full Node** by default: prefer frameworks that fit the **Worke
 |------|---------------------|
 | **New project** | A separate repository or clearly isolated worktree, with a modern default toolchain (lockfile, Node LTS, CI) chosen deliberately—not inherited from 2022-era constraints. |
 | **Backward compatible (data + crypto)** | **PostgreSQL** data that existing users rely on: rows and **bytea** blobs remain **readable** after the migration, using the same client-side and server-stored key material as today, **without** the old **tRPC** HTTP contract. **Cookie + JWT** patterns can stay familiar to users, but the **JSON bodies and paths** of the new HTTP API are new. **Realtime** and **collab** WebSocket **binary protocols** are optional compatibility targets: simplest path is a **new client** written against **documented** protocols, whether or not they are byte-for-byte identical to the old server. |
-| **Better maintenance** | Clear module boundaries, **OpenAPI** as the contract, **Drizzle** migrations, test coverage where risk is high (auth, crypto, payments, data transitions), and faster dev feedback (no default `tsx --inspect-brk` in hot paths, modern bundler, smaller “forked dependency” surface). |
+| **Better maintenance** | Clear module boundaries, **OpenAPI** as the contract, **Drizzle** migrations, **decoupled** feature modules with **services** (not a generic **repository** layer), **thorough** tests where risk is high (auth, crypto, payments, data transitions)—including **real Postgres** integration tests via **template DB clones** (§5.7)—and faster dev feedback (no default `tsx --inspect-brk` in hot paths, modern bundler, smaller “forked dependency” surface). |
 
 **License and obligations:** the project is **AGPL-3.0** (`LICENSE`); a restart does not change copyleft or deployment obligations. Keep compliance visible in the new repo.
 
@@ -142,6 +142,18 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
 
 ## 5. Proposed target shape (aligned with decided choices)
 
+### 5.0 Implementation principles (decoupling, structure, and tests)
+
+The restart is **not** a permission to **copy-paste** the legacy layout into new files. Treat the old monorepo as a **behavioral reference**, **crypto/session semantics**, and **fixtures**—then **reorganize** modules so boundaries are obvious and **automated tests** can target each layer without pulling half the app.
+
+| Principle | Practice |
+|-----------|----------|
+| **Decoupling** | Prefer **feature-oriented** or **vertical slices** (auth, pages, groups, billing) with **narrow imports** between packages: **HTTP handlers** depend on **application services** and **typed DTOs**, not on each other’s internals. Shared **Drizzle schema** and **OpenAPI** types live in dedicated packages; avoid cycles between “everything imports `@stdlib/data`.” |
+| **Services without repository pattern** | Use **application services** (or use-cases) that orchestrate validation, Redis, and **Drizzle queries**. **Do not** introduce a generic **repository** layer whose main job is wrapping CRUD—you have **one** database (Postgres). Where query logic repeats, extract **small typed query helpers** or **SQL modules** next to the feature, not a parallel “repository” hierarchy. |
+| **Thorough testing** | **Unit tests** for pure logic (crypto, mapping, auth helpers). **Integration tests** against a **real Postgres** (and Redis where behavior matters) for migrations, constraints, and route-level flows. Coverage expectations are highest for **auth**, **crypto**, **payments**, and **data migrations**—see §5.7. |
+
+### 5.1–5.6 Target components (numbered)
+
 1. **Contracts: OpenAPI + Zod/Valibot**  
    A small **`@deepnotes/api`** (name TBD) package contains **route handlers**’ input/output types and a published **OpenAPI** document. The **Drizzle** package stays separate to avoid server importing UI and vice versa. For **realtime** / **collab**, add a short **appendix** (or separate JSON spec) for message kinds and field order.
 
@@ -152,7 +164,7 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
    **Hono** on **Cloudflare Workers** is the default alignment with the **Cloudflare** hosting decision (same codebase path for REST, middleware, and fetch-handler tests). **Fastify** remains viable for **Node-only** targets (e.g. local scripts, a secondary deployment) if the team splits stacks—avoid assuming **Fastify** plugins work unchanged on Workers without verification. REST routes, **no** tRPC plugin. **Cookie** + **JWT** middleware shared with WebSocket upgrade paths. Rate limiting backed by **Redis** (see hosting table).
 
 4. **Redis**  
-   **Local / CI:** **Redis 7+** (or LTS) in `docker-compose`. **Production (Cloudflare):** managed **Redis-compatible** service (see *Hosting* row)—no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** repositories (cache-aside or simple keys + pub/sub if still needed for multi-instance cache coherence).
+   **Local / CI:** **Redis 7+** (or LTS) in `docker-compose`. **Production (Cloudflare):** managed **Redis-compatible** service (see *Hosting* row)—no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** modules: **cache-aside** in services, **simple key naming**, and **pub/sub** only where multi-instance coherence still requires it—without a separate “repository” abstraction for Redis.
 
 5. **New client application**  
    - **Vite 6+** + **Vue 3.5+** as a standard SPA (using `vite-ssg` for marketing page SEO). **Nuxt SSR is explicitly rejected** because DeepNotes is end-to-end encrypted; the server cannot decrypt user content to render it for SEO anyway. 
@@ -162,7 +174,32 @@ Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire
    - **Capacitor** for mobile and **Tauri v2** (or Electron) for desktop after the web app is solid. Decoupling the UI from the native wrappers avoids the heavy Quasar build matrix.
 
 6. **CI/CD and observability**  
-   One CI, Node LTS matrix, E2E smoke. **Production deploy:** **Wrangler** (or Pages Git integration) to Cloudflare; preview deployments per PR where useful. **Prometheus** `/metrics` on any long-lived **non-Worker** services; for Workers, use **Cloudflare** logging/metrics (and **Tail** / observability products) as the primary edge story.
+   One CI, Node LTS matrix, E2E smoke. **Production deploy:** **Wrangler** (or Pages Git integration) to Cloudflare; preview deployments per PR where useful. **Prometheus** `/metrics` on any long-lived **non-Worker** services; for Workers, use **Cloudflare** logging/metrics (and **Tail** / observability products) as the primary edge story. **Integration tests** that need Postgres should run in a job with a **Postgres service** (or Compose) and use the **template-database** pattern in §5.7—not only mocks.
+
+### 5.7 Integration testing: real Postgres + Drizzle + **database templates**
+
+Running **full Drizzle migrations from an empty database for every test** is correct but **slow** at scale. **PostgreSQL database templates** give **per-test isolation** at filesystem-copy speed: migrate **once** into a **template database**, then **`CREATE DATABASE … TEMPLATE …`** for each test (or file), run the test against a dedicated **`pg` + Drizzle** client, then **`DROP DATABASE`**. This avoids **Testcontainers** startup cost when CI already provides a **Postgres service** or **Docker Compose** Postgres (still “real” SQL, real constraints).
+
+**Global setup (once per suite)** — e.g. Vitest **`globalSetup`** / Jest **`globalSetup`**:
+
+1. Connect with **`pg`** to the maintenance database (typically **`postgres`**).
+2. **`DROP DATABASE IF EXISTS`** the template name (dev/CI only), then **`CREATE DATABASE`** a dedicated template DB (e.g. `test_template_db`).
+3. Connect to that DB, construct Drizzle + **`migrate()`** from **`drizzle-orm/node-postgres/migrator`** (or your chosen driver’s migrator) with **`migrationsFolder`** pointing at the repo’s Drizzle migration folder.
+4. **Close all connections** to the template DB. Postgres **refuses** to use a database as **`TEMPLATE`** if any session remains open.
+
+**Per test (`beforeEach`)** — unique name (**UUID** / random suffix, **never** user-controlled strings in DDL):
+
+1. Admin client to **`postgres`**: **`CREATE DATABASE test_<uuid> TEMPLATE test_template_db`**.
+2. Open a new **`pg` Client** (and Drizzle instance) to `test_<uuid>`; inject that **`db`** into the code under test.
+
+**Teardown (`afterEach`)** — end the test client, then admin: **`DROP DATABASE IF EXISTS test_<uuid>`** with **`FORCE`** if you adopt PG 13+ drop semantics for stuck sessions.
+
+**Details to document in the repo:**
+
+- **Connection URLs** for admin vs app; CI needs a role that can **`CREATE DATABASE`**.
+- **Identifier safety:** only **generated** database names in `CREATE`/`DROP`—no string concatenation from request input.
+- **Parallelism:** if tests run **in parallel**, each worker can own a **template clone naming prefix** or use **one DB per worker** instead of per test—tune for speed vs isolation.
+- **Testcontainers** (or a single long-lived local Postgres) remain valid **fallbacks** when CI cannot expose Postgres; templates are the **preferred** strategy **when Postgres is already there**.
 
 ---
 
@@ -188,7 +225,7 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - New repo: **pnpm** + **Turborepo 2** (or Nx)—**Node 22/24** LTS.  
 - **Docker compose:** **Postgres** + **Redis** (not KeyDB). New env file with **`REDIS_URL`**-style settings.  
 - **Cloudflare:** `wrangler.toml` (or Wrangler JSON), **Hyperdrive** config pointing at the same Postgres URL used locally (or a branch DB), **Pages** project for the client build output; document preview vs production env vars.  
-- **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke; optional **deploy** job to a **Cloudflare preview** environment.
+- **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke, and **Postgres-backed** integration tests where a **GitHub Actions `services: postgres`** (or equivalent) supplies a DB user with **`CREATEDB`** for **template clones** (§5.7); optional **deploy** job to a **Cloudflare preview** environment.
 
 ### Phase 3 — backend features on REST + Drizzle
 
@@ -232,6 +269,8 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 - [ ] **Drizzle** migrations apply from **empty** DB to **current** schema deterministically; production upgrade path is documented.  
 - [ ] **< 2 s** cold `dev` **API** start (no `inspect-brk` by default) on a standard laptop.  
 - [ ] **Collab** + **realtime** each have at least one **integration** test against **Redis** + in-memory or dockerized deps.  
+- [ ] **SQL-heavy paths** use **integration tests** against a **real Postgres**; default approach is **one migrated template DB** + **`CREATE DATABASE … TEMPLATE`** per test or per worker (§5.7), not re-migrating from empty for every case.  
+- [ ] **Auth**, **crypto**, and **Stripe** flows have **automated** coverage beyond smoke; new code favors **decoupled modules** and **services** without a generic **repository** layer (§5.0).  
 - [ ] **No tRPC** and **no** `superjson` in the new default stack. **No** RevenueCat. **Key rotation** code paths are **absent** and the team signed off on **IAP** / **Stripe** user handling.  
 - [ ] **Zero** undocumented framework forks in the new default client, or a short exception list with an owner.  
 - [ ] **Cloudflare:** API + static/SSG deploy documented; **Hyperdrive** + external **Postgres** + **Redis** proven in staging; **collab/realtime** path chosen (**DO** vs separate service) and load-tested.
@@ -252,4 +291,4 @@ Only if you still touch the old monorepo: remove default **`--inspect-brk`**, ad
 
 ## 10. Summary
 
-This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors, then retire it when parity and data checks are proven.
+This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors—**reorganize** into **decoupled** features and **services** (no **repository** pattern), prove behavior with **thorough tests** including **Postgres template–based** integration isolation (§5.7), then retire the legacy repo when parity and data checks are proven.
