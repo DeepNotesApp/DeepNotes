@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "strict": true,
@@ -9,5 +9,5 @@
     "noEmit": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "playwright.config.ts", "e2e/**/*.ts"]
 }

@@ -9,6 +9,7 @@
     "dev": "vite",
     "lint": "eslint vite.config.ts \"src/**/*.ts\"",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "vue-tsc --noEmit -p tsconfig.app.json",
     "preview": "vite preview"
   },
@@ -36,6 +37,7 @@
     "yjs": "^13.6.30"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/test-utils": "^2.4.6",

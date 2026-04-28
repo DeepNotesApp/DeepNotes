@@ -2,7 +2,7 @@
 
 Checklist for [docs/RESTART_PLAN.md](../docs/RESTART_PLAN.md). **Procedure-level map:** [docs/TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) (legacy tRPC + app-server WebSocket rows are marked **implemented** or **removed**).
 
-**Last reviewed:** 2026-04-27
+**Last reviewed:** 2026-04-28
 
 ---
 
@@ -14,7 +14,7 @@ Checklist for [docs/RESTART_PLAN.md](../docs/RESTART_PLAN.md). **Procedure-level
 | **1** — Legacy repo hygiene | **Optional** | Only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Turbo, CI, template DB tests, deploy notes. |
 | **3** — REST + Drizzle | **In progress** | All **HTTP** items in TRPC_REST_MAP through **slice 10** (`…/collab-updates`), **Stripe**, **2FA**, membership, crypto bootstrap routes. **Not started:** **live Yjs collab WebSocket** and **realtime** (legacy `realtime-server` / msgpackr — separate from collab). |
-| **4** — Client MVP | **In progress** | Auth, register (E2EE), pages list, Tiptap+Yjs+REST collab, groups + invites/join E2EE, notifications (list/read; **no** body decrypt), MSW contract smoke, ESLint import walls. **Next:** Playwright (or broader MSW) for cookies; optional demo keyring for CI. |
+| **4** — Client MVP | **In progress** | Auth, register (E2EE), pages list, Tiptap+Yjs+REST collab, groups + invites/join E2EE, notifications (list/read; **no** body decrypt), MSW contract smoke, ESLint import walls. **Done:** Playwright smoke for **demo** session (httpOnly tokens, `loggedIn` hint, reload → bootstrap/refresh). **Next:** password-login E2E (registered user fixture or flow); optional demo keyring assertions; marketing `vite-ssg` per plan. |
 | **5** — Cutover | **Not started** | Canary, retire `/trpc` when safe. |
 
 ---
@@ -62,8 +62,19 @@ Cross-check [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md): **sessions**, **users.a
 - [x] `/groups`, `/groups/:id`, invite landing `/invite`, join `/join`, membership crypto  
 - [x] `/notifications` (ciphertext not decrypted in UI)  
 - [x] MSW: `GET /api/health`, `GET /api/users/me`; ESLint `no-restricted-imports` on `src/**/*.ts`  
-- [ ] Playwright (or equivalent) E2E for httpOnly session  
+- [x] Playwright: demo session against real `wrangler dev` + Vite (see **E2E / Playwright** below)  
+- [ ] Password-login (or registered-user) Playwright path; optional/crypto assertions beyond cookies  
 - [ ] Capacitor / Tauri after web MVP  
+
+### E2E / Playwright (detail)
+
+| Item | Detail |
+|------|--------|
+| **Spec** | [`apps/web/e2e/session.spec.ts`](./apps/web/e2e/session.spec.ts) — “Try demo”, assert `accessToken` / `refreshToken` **not** in `document.cookie`, `loggedIn` hint present, **reload** then still “Signed in” (refresh + `/me`). |
+| **Config** | [`apps/web/playwright.config.ts`](./apps/web/playwright.config.ts) — `webServer`: `pnpm --filter @deepnotes/api-worker dev` (waits on `GET /api/health`) + `pnpm --filter @deepnotes/web dev` on `127.0.0.1:5174`. |
+| **CI secrets file** | [`e2e/dev.vars.ci`](./e2e/dev.vars.ci) — copied to `apps/api-worker/.dev.vars` in GitHub Actions (non-production test-only values, same shape as `account-flows.integration.test.ts`). |
+| **CI DB** | Job runs `pnpm db:migrate` on the service Postgres **before** lint/test so the worker’s Hyperdrive DB matches the session integration template schema. |
+| **Local** | Docker Compose Postgres on **5433** (matches `wrangler.toml` `localConnectionString`), `pnpm db:migrate`, copy `e2e/dev.vars.ci` → `apps/api-worker/.dev.vars`, then `pnpm test:e2e` from repo root. |
 
 ---
 
@@ -78,18 +89,19 @@ Cross-check [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md): **sessions**, **users.a
 ## Tests & tooling (maintenance)
 
 | Package | What runs | Notes |
-|---------|-----------|--------|
+|---------|-----------|-------|
 | `@deepnotes/session` | **`account-flows.integration.test.ts`** — **20** `it()` when `DATABASE_URL` + admin URL set; clones template DB | Account, 2FA, groups/pages, prefs, slices 4–10, membership, collab REST |
 | `@deepnotes/db` | `template-db.test.ts` — **6** FK/clone cases | |
 | `@deepnotes/api` | `openapi.test.ts`, `schemas/users.test.ts`, … | |
 | `@deepnotes/api-worker` | **`index.test.ts`** — **71** route × 503 matrix + **1** extra `email-verification/confirm` 503 | Totals **72** env-missing smoke cases |
-| `@deepnotes/web` | Vitest + happy-dom; composable/API tests | Extend MSW/login matrix; Playwright later |
+| `@deepnotes/web` | Vitest + happy-dom; composable/API tests | MSW contracts; extend login matrix |
+| **Playwright** | `pnpm test:e2e` (root) → `@deepnotes/web` **1** spec (demo cookies + reload) | Needs migrated DB + `.dev.vars`; CI installs Chromium only |
 
 Run session integration (from repo root):  
 `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts`  
 (requires `new-deepnotes/.env` with DB URLs as in package README.)
 
-**Follow-ups:** Redis failed-login integration; expired refresh JWT; optional OpenAPI snapshot CI drift check.
+**Follow-ups:** Redis failed-login integration; expired refresh JWT; optional OpenAPI snapshot CI drift check; second Playwright spec for email/password registration + login.
 
 ---
 
@@ -102,7 +114,7 @@ Run session integration (from repo root):
 - [ ] Stripe (and other high-risk paths): deeper automated coverage where secrets allow.  
 - [ ] Cloudflare staging: Hyperdrive + Postgres + Redis + chosen WS topology load-tested.  
 - [x] Web: Vitest in CI; restricted imports from `apps/web` TS.  
-- [ ] E2E smoke (cookies) before calling client MVP “done”.  
+- [ ] E2E smoke **complete for client MVP:** demo path [x]; password/session edge cases [ ].  
 
 ---
 
@@ -110,6 +122,7 @@ Run session integration (from repo root):
 
 | Date | Change |
 |------|--------|
+| 2026-04-28 | Playwright demo E2E (`session.spec.ts`), `e2e/dev.vars.ci`, CI: migrate app DB, copy `.dev.vars`, Chromium + `pnpm test:e2e`; root `test:e2e`; tsconfig.node includes playwright + e2e. |
 | 2026-04-27 | Compacted PLAN_PROGRESS; verified legacy map vs `TRPC_REST_MAP` — HTTP + listed WS flows migrated; added **realtime** vs **collab WS** distinction, optional gaps (public page list, vite-ssg, scheduler). Corrected counts: **20** session integration `it()`, **72** worker 503 smokes (71-route matrix + confirm). |
 | 2026-04-27 | MSW contract tests + ESLint restricted imports on web `*.ts`. |
 | 2026-04-27 | Tiptap + Yjs editor; invite/join E2EE + crypto bootstrap API; members detail UI; notifications thin SPA; groups overview; collab REST + `passwordSalt`; Stripe. |
