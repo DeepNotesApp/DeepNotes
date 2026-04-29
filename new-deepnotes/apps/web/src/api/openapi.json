@@ -439,6 +439,20 @@
           "pathPageIds"
         ]
       },
+      "UserPageIdListResponse": {
+        "type": "object",
+        "properties": {
+          "pageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "pageIds"
+        ]
+      },
       "UserPageIdsBody": {
         "type": "object",
         "properties": {
@@ -2233,6 +2247,160 @@
         }
       }
     },
+    "/api/users/me/pages/recent": {
+      "get": {
+        "summary": "Recent page ids for the current user",
+        "description": "Returns `users.recent_page_ids` (most recently bumped first). Complements POST mutations that do not echo the list.",
+        "responses": {
+          "200": {
+            "description": "Ordered recent page nanoids.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPageIdListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me/pages/favorites": {
+      "get": {
+        "summary": "Favorite page ids for the current user",
+        "description": "Returns `users.favorite_page_ids` (newest additions first per add order). Complements POST mutations.",
+        "responses": {
+          "200": {
+            "description": "Ordered favorite page nanoids.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPageIdListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add favorite pages",
+        "description": "Replaces legacy `users.pages.addFavoritePages`. Favorites are stored in Postgres (`users.favorite_page_ids`); legacy used KeyDB only.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserPageIdsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Favorites merged (order: new ids first, then existing)."
+          },
+          "400": {
+            "description": "Validation error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/users/me/pages/recent/remove": {
       "post": {
         "summary": "Remove page ids from recent list",
@@ -2303,66 +2471,6 @@
           },
           "401": {
             "description": "Invalid credentials, token, or session state.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/users/me/pages/favorites": {
-      "post": {
-        "summary": "Add favorite pages",
-        "description": "Replaces legacy `users.pages.addFavoritePages`. Favorites are stored in Postgres (`users.favorite_page_ids`); legacy used KeyDB only.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserPageIdsBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Favorites merged (order: new ids first, then existing)."
-          },
-          "400": {
-            "description": "Validation error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Invalid credentials, token, or session state.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Resource not found.",
             "content": {
               "application/json": {
                 "schema": {

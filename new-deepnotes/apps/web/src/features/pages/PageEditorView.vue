@@ -22,6 +22,7 @@ import {
 import { uint8ToBase64 } from "../auth/bytes";
 import { readSessionCrypto } from "../auth/crypto-storage";
 import { useSession } from "../auth/useSession";
+import { useUserPageLists } from "./useUserPageLists";
 import {
   decryptPageDocUpdate,
   encryptPageDocUpdate,
@@ -34,8 +35,23 @@ const Y_FRAG_PROSEMIRROR = "prosemirror";
 const route = useRoute();
 const router = useRouter();
 const { client, isAuthenticated, user, bootstrapped } = useSession();
+const {
+  favoritePageIds,
+  error: pageListError,
+  load: loadPageLists,
+  removeFromRecent: removeRecentPages,
+  addFavorites,
+  removeFavorites,
+} = useUserPageLists();
 
 const pageId = computed(() => String(route.params.pageId ?? ""));
+
+const pathPageIds = ref<string[]>([]);
+const pathError = ref<string | null>(null);
+const pathLoading = ref(false);
+const pagePrefsLoading = ref(false);
+const bumpMessage = ref<string | null>(null);
+const favoriteMessage = ref<string | null>(null);
 
 const ydoc = new Y.Doc();
 const legacyPlainToImport = ref<string | null>(null);
@@ -173,6 +189,102 @@ onMounted(() => {
     });
   }
 });
+
+const isFavorite = computed(
+  () => pageId.value !== "" && favoritePageIds.value.includes(pageId.value),
+);
+
+async function loadPathAndPrefs() {
+  if (!bootstrapped.value || !isAuthenticated.value) {
+    return;
+  }
+  const id = pageId.value;
+  if (!id) {
+    return;
+  }
+  pathLoading.value = true;
+  pathError.value = null;
+  pagePrefsLoading.value = true;
+  try {
+    const [pathRes] = await Promise.all([
+      client.GET("/api/users/me/pages/path", {
+        params: { query: { initialPageId: id } },
+      }),
+      loadPageLists(),
+    ]);
+    if (pathRes.response.status !== 200 || !pathRes.data) {
+      pathError.value =
+        pathRes.error &&
+        typeof pathRes.error === "object" &&
+        "message" in pathRes.error
+          ? String((pathRes.error as { message?: string }).message)
+          : "Could not load page path.";
+      pathPageIds.value = [];
+    } else {
+      pathPageIds.value = pathRes.data.pathPageIds;
+    }
+  } finally {
+    pathLoading.value = false;
+    pagePrefsLoading.value = false;
+  }
+}
+
+watch([bootstrapped, isAuthenticated, pageId], () => {
+  void loadPathAndPrefs();
+}, { immediate: true });
+
+async function bumpAsStarting() {
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    return;
+  }
+  bumpMessage.value = null;
+  const res = await client.POST("/api/pages/{pageId}/bump", {
+    params: { path: { pageId: id } },
+    body: {},
+  });
+  if (res.response.status !== 204) {
+    bumpMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not bump page.";
+    return;
+  }
+  bumpMessage.value = "Updated starting page and recents.";
+  await loadPathAndPrefs();
+}
+
+async function toggleFavorite() {
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    return;
+  }
+  favoriteMessage.value = null;
+  if (isFavorite.value) {
+    const ok = await removeFavorites([id]);
+    if (!ok && pageListError.value) {
+      favoriteMessage.value = pageListError.value;
+    }
+  } else {
+    const ok = await addFavorites([id]);
+    if (!ok && pageListError.value) {
+      favoriteMessage.value = pageListError.value;
+    }
+  }
+}
+
+async function removeThisFromRecent() {
+  const id = pageId.value;
+  if (!id) {
+    return;
+  }
+  favoriteMessage.value = null;
+  const ok = await removeRecentPages([id]);
+  if (!ok && pageListError.value) {
+    favoriteMessage.value =
+      pageListError.value ?? "Could not remove from recents.";
+  }
+}
 
 watch(
   [editor, legacyPlainToImport],
@@ -397,6 +509,62 @@ watch(
 
     <Card>
       <CardHeader>
+        <CardTitle class="text-base">Path and prefs</CardTitle>
+        <CardDescription>
+          Breadcrumb toward your personal main page, plus starting-page bump and favorites (legacy
+          <code class="font-mono text-xs">users.pages</code> / <code class="font-mono text-xs">pages.bump</code>).
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-3 text-sm">
+        <p v-if="pathLoading" class="text-muted-foreground">Loading path…</p>
+        <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
+        <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1 text-xs">
+          <template v-for="(pid, i) in pathPageIds" :key="pid">
+            <span v-if="i > 0" aria-hidden="true">/</span>
+            <RouterLink
+              v-if="i < pathPageIds.length - 1"
+              class="text-primary font-mono underline"
+              :to="`/pages/${pid}`"
+            >{{ pid.slice(0, 8) }}…</RouterLink>
+            <span v-else class="text-foreground font-mono font-medium">{{ pid }}</span>
+          </template>
+        </nav>
+        <div class="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            :disabled="user?.demo === true || pagePrefsLoading"
+            @click="bumpAsStarting()"
+          >
+            Make starting page
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            :disabled="user?.demo === true || pagePrefsLoading"
+            @click="toggleFavorite()"
+          >
+            {{ isFavorite ? "Remove favorite" : "Add favorite" }}
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            :disabled="pagePrefsLoading"
+            @click="removeThisFromRecent()"
+          >
+            Remove from recent
+          </Button>
+        </div>
+        <p v-if="bumpMessage" class="text-muted-foreground text-xs">{{ bumpMessage }}</p>
+        <p v-if="favoriteMessage" class="text-amber-800 dark:text-amber-200 text-xs">{{ favoriteMessage }}</p>
+        <p v-if="user?.demo" class="text-muted-foreground text-xs">
+          Demo accounts cannot bump starting page or favorites.
+        </p>
+      </CardContent>
+    </Card>
+
+    <Card>
+      <CardHeader>
         <CardTitle>Server collab</CardTitle>
         <CardDescription>
           <code
@@ -461,5 +629,3 @@ watch(
     </Card>
   </div>
 </template>
-
-```

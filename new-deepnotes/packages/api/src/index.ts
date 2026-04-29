@@ -71,6 +71,7 @@ export {
   userPageIdsBodySchema,
   userPagesPathQuerySchema,
   userStartingPageResponseSchema,
+  userPageIdListResponseSchema,
 } from "./schemas/user-pages.js";
 export {
   stripeCheckoutSessionRequestSchema,

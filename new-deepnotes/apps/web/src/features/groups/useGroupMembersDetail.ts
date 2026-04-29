@@ -363,6 +363,58 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
+  async function setJoinRequestsAllowed(allowed: boolean) {
+    const id = resolvedGroupId();
+    if (id == null) {
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const res = await client.PATCH(
+        "/api/groups/{groupId}/privacy/join-requests",
+        {
+          params: { path: { groupId: id } },
+          body: { areJoinRequestsAllowed: allowed },
+        },
+      );
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not update join request policy.";
+        return;
+      }
+      await load();
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
+  async function softDeleteGroup() {
+    const id = resolvedGroupId();
+    if (id == null) {
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const res = await client.DELETE("/api/groups/{groupId}", {
+        params: { path: { groupId: id } },
+      });
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not delete group.";
+        return;
+      }
+      detail.value = null;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   return {
     loading,
     actionLoading,
@@ -377,5 +429,7 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     rejectJoinRequest,
     sendJoinInvitation,
     acceptJoinRequestWithCrypto,
+    setJoinRequestsAllowed,
+    softDeleteGroup,
   };
 }

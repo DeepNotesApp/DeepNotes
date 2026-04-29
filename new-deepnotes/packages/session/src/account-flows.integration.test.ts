@@ -101,6 +101,8 @@ import {
   performAddFavoritePages,
   performClearRecentPages,
   performGetCurrentPath,
+  performGetFavoritePageIds,
+  performGetRecentPageIds,
   performGetStartingPageId,
   performLoadNotifications,
   performMarkNotificationsRead,
@@ -1890,6 +1892,18 @@ describe.skipIf(resolveTemplateContext() == null)(
           accessCookie: access,
           pageIds: [reg.pageId, newPageId],
         });
+        const listFav = await performGetFavoritePageIds({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(listFav.pageIds).toEqual([reg.pageId, newPageId]);
+        const listRecent = await performGetRecentPageIds({
+          db,
+          env,
+          accessCookie: access,
+        });
+        expect(listRecent.pageIds[0]).toBe(reg.pageId);
         const [favRow] = await db
           .select({ favoritePageIds: users.favoritePageIds })
           .from(users)

@@ -95,6 +95,46 @@ export async function performGetStartingPageId(input: {
   return { startingPageId: row.startingPageId };
 }
 
+export async function performGetRecentPageIds(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+}): Promise<{ pageIds: string[] }> {
+  const { userId } = await getAuthenticatedUserSummary(input);
+
+  const [row] = await input.db
+    .select({ recentPageIds: users.recentPageIds })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (row == null) {
+    throw new SessionError(404, "NOT_FOUND", "User not found.");
+  }
+
+  return { pageIds: row.recentPageIds };
+}
+
+export async function performGetFavoritePageIds(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+}): Promise<{ pageIds: string[] }> {
+  const { userId } = await getAuthenticatedUserSummary(input);
+
+  const [row] = await input.db
+    .select({ favoritePageIds: users.favoritePageIds })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (row == null) {
+    throw new SessionError(404, "NOT_FOUND", "User not found.");
+  }
+
+  return { pageIds: row.favoritePageIds };
+}
+
 /**
  * Replaces legacy `users.pages.getCurrentPath` (KeyDB `user-page` chain + repair).
  */

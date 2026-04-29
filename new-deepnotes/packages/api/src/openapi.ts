@@ -58,6 +58,7 @@ import {
   userDefaultNotePatchSchema,
   userNotificationsLoadResponseSchema,
   userNotificationsQuerySchema,
+  userPageIdListResponseSchema,
   userPageIdsBodySchema,
   userPagesPathQuerySchema,
   userStartingPageResponseSchema,
@@ -341,6 +342,48 @@ registry.registerPath({
       content: {
         "application/json": {
           schema: sessionErrorResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/pages/recent",
+  summary: "Recent page ids for the current user",
+  description:
+    "Returns `users.recent_page_ids` (most recently bumped first). Complements POST mutations that do not echo the list.",
+  responses: {
+    200: {
+      description: "Ordered recent page nanoids.",
+      content: {
+        "application/json": {
+          schema: userPageIdListResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/users/me/pages/favorites",
+  summary: "Favorite page ids for the current user",
+  description:
+    "Returns `users.favorite_page_ids` (newest additions first per add order). Complements POST mutations.",
+  responses: {
+    200: {
+      description: "Ordered favorite page nanoids.",
+      content: {
+        "application/json": {
+          schema: userPageIdListResponseSchema,
         },
       },
     },

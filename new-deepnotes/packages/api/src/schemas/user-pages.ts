@@ -30,6 +30,13 @@ export const userCurrentPathResponseSchema = z
   })
   .openapi("UserCurrentPathResponse");
 
+/** Recent or favorite id lists (`users.recent_page_ids` / `users.favorite_page_ids`). */
+export const userPageIdListResponseSchema = z
+  .object({
+    pageIds: z.array(z.string()),
+  })
+  .openapi("UserPageIdListResponse");
+
 export const userPageIdsBodySchema = z
   .object({
     pageIds: z.array(nanoid21).min(1),

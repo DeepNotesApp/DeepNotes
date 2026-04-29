@@ -18,6 +18,7 @@ import { readSessionCrypto } from "../auth/session-keyrings";
 import { useSession } from "../auth/useSession";
 import {
   canChangeRole,
+  canEditGroupSettings,
   canManageRole,
   roleHasManageLowerRanks,
 } from "./group-role-policy";
@@ -54,10 +55,13 @@ const {
   rejectJoinRequest,
   sendJoinInvitation,
   acceptJoinRequestWithCrypto,
+  setJoinRequestsAllowed,
+  softDeleteGroup,
 } = useGroupMembersDetail(groupIdRef);
 
 const roleDraft = ref<Record<string, GroupMemberRole>>({});
 const joinAcceptRoleDraft = ref<Record<string, GroupMemberRole>>({});
+const joinRequestsDraft = ref(false);
 
 const inviteeUserIdInput = ref("");
 const inviteeDisplayNameInput = ref("");
@@ -110,6 +114,7 @@ watch(
       joinAcceptRoleDraft.value = {};
       return;
     }
+    joinRequestsDraft.value = d.joinRequestsAllowed;
     const next: Record<string, GroupMemberRole> = {};
     for (const m of d.members) {
       next[m.userId] = m.role;
@@ -199,6 +204,28 @@ async function onAcceptJoinRequest(requesterUserId: string) {
     targetRole: role,
   });
 }
+
+async function onSaveJoinPolicy() {
+  const d = detail.value;
+  if (d == null || joinRequestsDraft.value === d.joinRequestsAllowed) {
+    return;
+  }
+  await setJoinRequestsAllowed(joinRequestsDraft.value);
+}
+
+async function onSoftDeleteGroup() {
+  if (
+    !confirm(
+      "Schedule this group for deletion? Members lose access after the grace period unless you restore it from an owner session.",
+    )
+  ) {
+    return;
+  }
+  await softDeleteGroup();
+  if (detail.value == null && error.value == null) {
+    void router.replace({ name: "groups" });
+  }
+}
 </script>
 
 <template>
@@ -275,6 +302,54 @@ async function onAcceptJoinRequest(requesterUserId: string) {
         · {{ detail.groupIsPublic ? "Public group" : "Private group" }}
         · Join requests {{ detail.joinRequestsAllowed ? "allowed" : "disabled" }}
       </p>
+
+      <Card
+        v-if="canEditGroupSettings(detail.viewerRole) && !isPersonal"
+      >
+        <CardHeader>
+          <CardTitle class="text-base">Group settings</CardTitle>
+          <CardDescription>
+            Join policy and deletion (public/private changes need crypto; use a full client for those flows if required).
+          </CardDescription>
+        </CardHeader>
+        <CardContent class="space-y-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <label class="flex cursor-pointer items-center gap-2 text-sm">
+              <input
+                v-model="joinRequestsDraft"
+                type="checkbox"
+                class="border-input rounded border"
+                :disabled="actionLoading"
+              />
+              Allow join requests
+            </label>
+            <Button
+              size="sm"
+              variant="secondary"
+              :disabled="
+                actionLoading ||
+                joinRequestsDraft === detail.joinRequestsAllowed
+              "
+              @click="onSaveJoinPolicy"
+            >
+              Save join policy
+            </Button>
+          </div>
+          <div class="border-border border-t pt-3">
+            <Button
+              size="sm"
+              variant="destructive"
+              :disabled="actionLoading || user?.demo === true"
+              @click="onSoftDeleteGroup"
+            >
+              Schedule group deletion…
+            </Button>
+            <p class="text-muted-foreground mt-2 text-xs">
+              Soft-deletes the group (grace period). Demo sessions cannot delete groups.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card
         v-if="roleHasManageLowerRanks(detail.viewerRole) && !isPersonal"

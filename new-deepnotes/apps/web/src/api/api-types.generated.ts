@@ -593,6 +593,199 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/users/me/pages/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recent page ids for the current user
+         * @description Returns `users.recent_page_ids` (most recently bumped first). Complements POST mutations that do not echo the list.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ordered recent page nanoids. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserPageIdListResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/me/pages/favorites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Favorite page ids for the current user
+         * @description Returns `users.favorite_page_ids` (newest additions first per add order). Complements POST mutations.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Ordered favorite page nanoids. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserPageIdListResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Add favorite pages
+         * @description Replaces legacy `users.pages.addFavoritePages`. Favorites are stored in Postgres (`users.favorite_page_ids`); legacy used KeyDB only.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UserPageIdsBody"];
+                };
+            };
+            responses: {
+                /** @description Favorites merged (order: new ids first, then existing). */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Validation error. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/users/me/pages/recent/remove": {
         parameters: {
             query?: never;
@@ -701,83 +894,6 @@ export interface paths {
                 };
                 /** @description Invalid credentials, token, or session state. */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SessionErrorResponse"];
-                    };
-                };
-                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
-                503: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/users/me/pages/favorites": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add favorite pages
-         * @description Replaces legacy `users.pages.addFavoritePages`. Favorites are stored in Postgres (`users.favorite_page_ids`); legacy used KeyDB only.
-         */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: {
-                content: {
-                    "application/json": components["schemas"]["UserPageIdsBody"];
-                };
-            };
-            responses: {
-                /** @description Favorites merged (order: new ids first, then existing). */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content?: never;
-                };
-                /** @description Validation error. */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SessionErrorResponse"];
-                    };
-                };
-                /** @description Invalid credentials, token, or session state. */
-                401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SessionErrorResponse"];
-                    };
-                };
-                /** @description Resource not found. */
-                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -5764,6 +5880,9 @@ export interface components {
         };
         UserCurrentPathResponse: {
             pathPageIds: string[];
+        };
+        UserPageIdListResponse: {
+            pageIds: string[];
         };
         UserPageIdsBody: {
             pageIds: string[];

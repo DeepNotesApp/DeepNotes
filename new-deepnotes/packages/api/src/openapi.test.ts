@@ -47,8 +47,10 @@ describe("getOpenApiDocument", () => {
     expect(doc.paths?.["/api/users/me/groups"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/starting"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/path"]?.get).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/recent"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/recent/remove"]?.post).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/recent/clear"]?.post).toBeDefined();
+    expect(doc.paths?.["/api/users/me/pages/favorites"]?.get).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/favorites"]?.post).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/favorites/remove"]?.post).toBeDefined();
     expect(doc.paths?.["/api/users/me/pages/favorites/clear"]?.post).toBeDefined();

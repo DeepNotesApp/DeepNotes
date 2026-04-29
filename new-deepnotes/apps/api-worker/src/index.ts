@@ -775,6 +775,80 @@ app.get("/api/users/me/pages/path", async (c) => {
   }
 });
 
+app.get("/api/users/me/pages/recent", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performGetRecentPageIds } = await import("@deepnotes/session");
+    const out = await performGetRecentPageIds({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/users/me/pages/favorites", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  try {
+    const { performGetFavoritePageIds } = await import("@deepnotes/session");
+    const out = await performGetFavoritePageIds({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
 app.post("/api/users/me/pages/recent/remove", async (c) => {
   const sessionEnv = getSessionEnv(c.env);
   if (sessionEnv == null) {

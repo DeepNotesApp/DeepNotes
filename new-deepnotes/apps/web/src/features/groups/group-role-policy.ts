@@ -41,3 +41,8 @@ export function canChangeRole(
 export function roleHasManageLowerRanks(role: string): boolean {
   return ["owner", "admin", "moderator"].includes(role);
 }
+
+/** Matches session `editGroupSettings` (owners and admins). */
+export function canEditGroupSettings(viewerRole: string): boolean {
+  return ["owner", "admin"].includes(viewerRole);
+}

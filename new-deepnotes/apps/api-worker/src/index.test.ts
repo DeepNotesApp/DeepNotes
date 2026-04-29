@@ -33,6 +33,8 @@ describe("api-worker", () => {
       "GET",
       "/api/users/me/pages/path?initialPageId=aaaaaaaaaaaaaaaaaaaaa",
     ],
+    ["GET", "/api/users/me/pages/recent"],
+    ["GET", "/api/users/me/pages/favorites"],
     ["POST", "/api/users/me/pages/recent/remove"],
     ["POST", "/api/users/me/pages/recent/clear"],
     ["POST", "/api/users/me/pages/favorites"],

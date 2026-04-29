@@ -40,8 +40,10 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `users.pages.getStartingPageId` | `GET /api/users/me/pages/starting` (**implemented** — `performGetStartingPageId`) |
 | `users.pages.getCurrentPath` | `GET /api/users/me/pages/path?initialPageId=` (**implemented** — `performGetCurrentPath`; `users_pages` repair like legacy) |
 | `users.pages.removeRecentPages` | `POST /api/users/me/pages/recent/remove` (**implemented** — JSON `{ "pageIds": [...] }`; `performRemoveRecentPages`) |
+| *(greenfield read)* | `GET /api/users/me/pages/recent` (**implemented** — `performGetRecentPageIds`; returns `{ "pageIds": [...] }`) |
 | `users.pages.clearRecentPages` | `POST /api/users/me/pages/recent/clear` (**implemented** — `performClearRecentPages`) |
 | `users.pages.addFavoritePages` | `POST /api/users/me/pages/favorites` (**implemented** — `performAddFavoritePages`; favorites in Postgres `users.favorite_page_ids`, migration `0001_favorite_page_ids`) |
+| *(greenfield read)* | `GET /api/users/me/pages/favorites` (**implemented** — `performGetFavoritePageIds`) |
 | `users.pages.removeFavoritePages` | `POST /api/users/me/pages/favorites/remove` (**implemented** — `performRemoveFavoritePages`) |
 | `users.pages.clearFavoritePages` | `POST /api/users/me/pages/favorites/clear` (**implemented** — `performClearFavoritePages`) |
 | `users.pages.setEncryptedDefaultNote` | `PATCH /api/users/me/defaults/note` (**implemented** — JSON `userEncryptedDefaultNote` base64; `performPatchDefaultNote`) |

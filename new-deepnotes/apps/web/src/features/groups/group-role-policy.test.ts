@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { canChangeRole, canManageRole, roleHasManageLowerRanks } from "./group-role-policy";
+import {
+  canChangeRole,
+  canEditGroupSettings,
+  canManageRole,
+  roleHasManageLowerRanks,
+} from "./group-role-policy";
 
 describe("group-role-policy", () => {
   it("owner can manage lower ranks", () => {
@@ -21,5 +26,12 @@ describe("group-role-policy", () => {
   it("roleHasManageLowerRanks", () => {
     expect(roleHasManageLowerRanks("moderator")).toBe(true);
     expect(roleHasManageLowerRanks("member")).toBe(false);
+  });
+
+  it("canEditGroupSettings matches owner and admin only", () => {
+    expect(canEditGroupSettings("owner")).toBe(true);
+    expect(canEditGroupSettings("admin")).toBe(true);
+    expect(canEditGroupSettings("moderator")).toBe(false);
+    expect(canEditGroupSettings("member")).toBe(false);
   });
 });

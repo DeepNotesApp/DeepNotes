@@ -47,6 +47,8 @@ export {
   performClearFavoritePages,
   performClearRecentPages,
   performGetCurrentPath,
+  performGetFavoritePageIds,
+  performGetRecentPageIds,
   performGetStartingPageId,
   performLoadNotifications,
   performMarkNotificationsRead,
