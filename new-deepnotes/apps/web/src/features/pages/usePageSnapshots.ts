@@ -3,6 +3,7 @@ import type { Doc } from "yjs";
 import type { ComputedRef, Ref } from "vue";
 import { ref } from "vue";
 
+import type { DeepnotesApiClient } from "@/api/client";
 import type { UserMe } from "../auth/useSession";
 import {
   applyYjsFullStateSnapshot,
@@ -10,7 +11,7 @@ import {
   decryptPageSnapshotPlainUpdate,
 } from "./page-snapshot-crypto";
 import { Y_FRAG_PROSEMIRROR, Y_TEXT_DEFAULT } from "./page-editor-constants";
-import type { SnapshotRow } from "./page-snapshot-list";
+import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
 
 export type { SnapshotRow } from "./page-snapshot-list";
 
