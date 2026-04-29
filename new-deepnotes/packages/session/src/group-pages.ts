@@ -10,7 +10,10 @@ import {
   type GroupCreationCiphertext,
 } from "./group-creation-shared.js";
 import { userHasGroupPermission } from "./group-permissions.js";
-import { getAuthenticatedUserSummary } from "./user-me.js";
+import {
+  getAuthenticatedUserSummary,
+  tryGetAuthenticatedUserSummary,
+} from "./user-me.js";
 import { assertUserProPlan } from "./user-plan.js";
 
 function toBuf(u: Uint8Array): Buffer {
@@ -18,8 +21,10 @@ function toBuf(u: Uint8Array): Buffer {
 }
 
 /**
- * Replaces legacy `groups.getPages` (authenticated): page IDs in the group,
- * newest activity first, optional cursor `lastPageId`.
+ * Replaces legacy `groups.getPages` (`optionalAuthProcedure`): page IDs in the
+ * group, newest activity first, optional cursor `lastPageId`. Authenticated or
+ * anonymous callers may list **public** groups (`groups.access_keyring` set);
+ * private groups require a session with `viewGroupPages`.
  */
 export async function performListGroupPages(input: {
   db: DeepnotesDb;
@@ -28,7 +33,7 @@ export async function performListGroupPages(input: {
   groupId: string;
   lastPageId?: string | undefined;
 }): Promise<{ pageIds: string[]; hasMore: boolean }> {
-  const { userId } = await getAuthenticatedUserSummary(input);
+  const summary = await tryGetAuthenticatedUserSummary(input);
 
   const [groupRow] = await input.db
     .select({ id: groups.id })
@@ -40,12 +45,23 @@ export async function performListGroupPages(input: {
     throw new SessionError(404, "NOT_FOUND", "Group not found.");
   }
 
-  const allowed = await userHasGroupPermission({
-    db: input.db,
-    userId,
-    groupId: input.groupId,
-    permission: "viewGroupPages",
-  });
+  let allowed = false;
+  if (summary != null) {
+    allowed = await userHasGroupPermission({
+      db: input.db,
+      userId: summary.userId,
+      groupId: input.groupId,
+      permission: "viewGroupPages",
+    });
+  } else {
+    const [pub] = await input.db
+      .select({ accessKeyring: groups.accessKeyring })
+      .from(groups)
+      .where(eq(groups.id, input.groupId))
+      .limit(1);
+    allowed = pub?.accessKeyring != null;
+  }
+
   if (!allowed) {
     throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
   }

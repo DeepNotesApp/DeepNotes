@@ -54,3 +54,48 @@ export async function getAuthenticatedUserSummary(input: {
     personalGroupId: row.personalGroupId,
   };
 }
+
+/**
+ * Legacy `optionalAuthProcedure`: missing/invalid JWT yields `null` (not 401).
+ * Invalid user id in DB yields `null`.
+ */
+export async function tryGetAuthenticatedUserSummary(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+}): Promise<AuthenticatedUserSummary | null> {
+  if (input.accessCookie == null || input.accessCookie === "") {
+    return null;
+  }
+
+  const payload = await verifyAccessToken(
+    input.accessCookie,
+    input.env.ACCESS_SECRET,
+  );
+  if (payload == null) {
+    return null;
+  }
+
+  const rows = await input.db
+    .select({
+      id: users.id,
+      emailVerified: users.emailVerified,
+      demo: users.demo,
+      personalGroupId: users.personalGroupId,
+    })
+    .from(users)
+    .where(eq(users.id, payload.uid))
+    .limit(1);
+
+  const row = rows[0];
+  if (row == null) {
+    return null;
+  }
+
+  return {
+    userId: row.id,
+    emailVerified: row.emailVerified,
+    demo: row.demo ?? false,
+    personalGroupId: row.personalGroupId,
+  };
+}

@@ -781,7 +781,7 @@ registry.registerPath({
   path: "/api/groups/{groupId}/pages",
   summary: "List page IDs in a group",
   description:
-    "Replaces legacy `groups.getPages` (authenticated). Optional `lastPageId` cursor for pagination (newest `last_activity_date` first). Omits soft-deleted pages (`permanent_deletion_date` set). Public groups allow `viewGroupPages` without membership.",
+    "Replaces legacy `groups.getPages` (`optionalAuthProcedure`). Cookie optional: **public** groups (`access_keyring` set) may be listed without a session (same as legacy anonymous `viewGroupPages`). Private groups require `viewGroupPages`. Optional `lastPageId` cursor for pagination (newest `last_activity_date` first). Omits soft-deleted pages (`permanent_deletion_date` set).",
   request: {
     params: groupIdPathSchema,
     query: groupPagesListQuerySchema,

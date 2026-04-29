@@ -24,7 +24,10 @@ export {
   performConfirmEmailVerification,
   performResendEmailVerification,
 } from "./email-verification.js";
-export { getAuthenticatedUserSummary } from "./user-me.js";
+export {
+  getAuthenticatedUserSummary,
+  tryGetAuthenticatedUserSummary,
+} from "./user-me.js";
 export type { AuthenticatedUserSummary } from "./user-me.js";
 export {
   performCreatePage,

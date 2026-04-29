@@ -162,11 +162,13 @@ function cookieValueFromSetCookieLines(
 async function buildRegisterBody(
   email: string,
   loginHash: Uint8Array,
+  opts?: { groupIsPublic?: boolean },
 ): Promise<UserRegisterInput> {
   await ensureSodiumReady();
   const userId = nanoid();
   const groupId = nanoid();
   const pageId = nanoid();
+  const groupIsPublic = opts?.groupIsPublic ?? true;
   return {
     userId,
     groupId,
@@ -181,7 +183,7 @@ async function buildRegisterBody(
     userEncryptedDefaultArrow: rand32(),
     groupCreation: {
       groupEncryptedName: rand32(),
-      groupIsPublic: true,
+      groupIsPublic,
       groupAccessKeyring: rand32(),
       groupEncryptedInternalKeyring: rand32(),
       groupEncryptedContentKeyring: rand32(),
@@ -1457,6 +1459,83 @@ describe.skipIf(resolveTemplateContext() == null)(
             updates: [{ index: 3, encryptedData: rand32() }],
           }),
         ).rejects.toMatchObject({ status: 400, code: "BAD_REQUEST" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("groups: list pages optional auth — anon only for public groups", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const email = `gpub-${nanoid()}@example.com`;
+        const loginHash = rand32();
+        const reg = await buildRegisterBody(email, loginHash, {
+          groupIsPublic: false,
+        });
+        await performUserRegister({ db, env, body: reg });
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+        const access = await signAccessToken({
+          secret: env.ACCESS_SECRET,
+          userId: reg.userId,
+          sessionId: nanoid(),
+        });
+
+        await expect(
+          performListGroupPages({
+            db,
+            env,
+            accessCookie: undefined,
+            groupId: reg.groupId,
+          }),
+        ).rejects.toMatchObject({
+          status: 403,
+          code: "FORBIDDEN",
+        });
+
+        await performGroupPrivacyMakePublic({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+          accessKeyring: rand32(),
+        });
+
+        const anonListed = await performListGroupPages({
+          db,
+          env,
+          accessCookie: undefined,
+          groupId: reg.groupId,
+        });
+        expect(anonListed.hasMore).toBe(false);
+        expect(anonListed.pageIds).toEqual([reg.pageId]);
+
+        const authListed = await performListGroupPages({
+          db,
+          env,
+          accessCookie: access,
+          groupId: reg.groupId,
+        });
+        expect(authListed.pageIds).toEqual([reg.pageId]);
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

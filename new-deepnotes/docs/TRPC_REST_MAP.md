@@ -59,7 +59,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | *(greenfield)* | `GET /api/groups/:groupId/members/detail` (**implemented** — `performGetGroupMembersDetail`; members with roles, pending invites/requests, viewer role, public flag, `joinRequestsAllowed`; same permission as `…/members`) |
 | *(greenfield)* | `GET /api/groups/:groupId/invite-crypto-bootstrap` (**implemented** — `performGetGroupInviteCryptoBootstrap`; encrypted member/group key blobs for managers building slice-9 invite / join-request-accept bodies in the SPA) |
 | *(greenfield)* | `GET /api/groups/:groupId/public-keyring` (**implemented** — `performGetGroupPublicKeyringForMessaging`; `groups.public_keyring` when caller may encrypt a display name: member, pending invitee, or join-requests allowed + not yet member) |
-| `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; query `lastPageId`; soft-deleted pages excluded) |
+| `groups.getPages` | `GET /api/groups/:groupId/pages` (**implemented** — `performListGroupPages`; legacy `optionalAuthProcedure`; anonymous callers allowed for **public** groups only; query `lastPageId`; soft-deleted pages excluded) |
 | `groups.password.enable` | `POST /api/groups/:groupId/password` (**implemented** — `performGroupPasswordEnable`; Pro + `editGroupSettings`; `GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY`) |
 | `groups.password.change` | `PATCH /api/groups/:groupId/password` (**implemented** — `performGroupPasswordChange`) |
 | `groups.password.disable` | `DELETE /api/groups/:groupId/password` (JSON body; **implemented** — `performGroupPasswordDisable`; not Pro-gated, legacy match) |
