@@ -86,6 +86,7 @@ import {
   performPagePurge,
   performPageRestore,
   performPageSnapshotDelete,
+  performPageSnapshotList,
   performPageSnapshotLoad,
   performPageSnapshotSave,
   performPageSoftDelete,
@@ -2456,6 +2457,13 @@ describe.skipIf(resolveTemplateContext() == null)(
           encryptedSymmetricKey: kSym,
           encryptedData: kData,
         });
+        const listed = await performPageSnapshotList({
+          db,
+          env,
+          accessCookie: access,
+          pageId: page2,
+        });
+        expect(listed.snapshots.map((s) => s.snapshotId)).toContain(snapshotId);
         const loaded = await performPageSnapshotLoad({
           db,
           env,

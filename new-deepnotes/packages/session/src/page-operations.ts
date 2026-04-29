@@ -398,6 +398,63 @@ export async function performPageSnapshotSave(input: {
   });
 }
 
+/**
+ * Lists snapshot metadata for a page (new read; legacy listed via tRPC shapes).
+ */
+export async function performPageSnapshotList(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+  pageId: string;
+}): Promise<{
+  snapshots: { snapshotId: string; creationDate: string; type: string }[];
+}> {
+  const { userId } = await getAuthenticatedUserSummary({
+    db: input.db,
+    env: input.env,
+    accessCookie: input.accessCookie,
+  });
+  await assertUserProPlan({ db: input.db, userId });
+
+  const [pageRow] = await input.db
+    .select({ groupId: pages.groupId })
+    .from(pages)
+    .where(
+      and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
+    )
+    .limit(1);
+  if (pageRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Page not found.");
+  }
+  const can = await userHasGroupPermission({
+    db: input.db,
+    userId,
+    groupId: pageRow.groupId,
+    permission: "editGroupPages",
+  });
+  if (!can) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const rows = await input.db
+    .select({
+      id: pageSnapshots.id,
+      creationDate: pageSnapshots.creationDate,
+      type: pageSnapshots.type,
+    })
+    .from(pageSnapshots)
+    .where(eq(pageSnapshots.pageId, input.pageId))
+    .orderBy(desc(pageSnapshots.creationDate));
+
+  return {
+    snapshots: rows.map((r) => ({
+      snapshotId: r.id,
+      creationDate: r.creationDate,
+      type: r.type,
+    })),
+  };
+}
+
 export async function performPageSnapshotLoad(input: {
   db: DeepnotesDb;
   env: SessionEnv;

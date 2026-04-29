@@ -3922,7 +3922,68 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List page snapshot metadata (Pro)
+         * @description Returns snapshot ids and timestamps for manual and pre-restore snapshots (no ciphertext).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    pageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Newest first. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageSnapshotListResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
         put?: never;
         /**
          * Save encrypted page snapshot (Pro)
@@ -6362,6 +6423,16 @@ export interface components {
              * @example V1StGXR8_Z5jdHi6B-myT
              */
             sourcePageId: string;
+        };
+        PageSnapshotListItem: {
+            snapshotId: string;
+            /** @description ISO-8601 timestamp from `page_snapshots.creation_date`. */
+            creationDate: string;
+            /** @enum {string} */
+            type: "manual" | "pre-restore";
+        };
+        PageSnapshotListResponse: {
+            snapshots: components["schemas"]["PageSnapshotListItem"][];
         };
         PageSnapshotCreateResponse: {
             snapshotId: string;

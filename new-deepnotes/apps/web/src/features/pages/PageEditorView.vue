@@ -28,6 +28,15 @@ import {
   encryptPageDocUpdate,
   unlockPageCollabSymmetricKeyring,
 } from "./page-collab-crypto";
+import {
+  applyYjsFullStateSnapshot,
+  buildPageSnapshotSaveBodies,
+  decryptPageSnapshotPlainUpdate,
+} from "./page-snapshot-crypto";
+
+import type { components } from "@/api/api-types.generated";
+
+type SnapshotRow = components["schemas"]["PageSnapshotListItem"];
 
 const Y_TEXT_DEFAULT = "default";
 const Y_FRAG_PROSEMIRROR = "prosemirror";
@@ -52,6 +61,11 @@ const pathLoading = ref(false);
 const pagePrefsLoading = ref(false);
 const bumpMessage = ref<string | null>(null);
 const favoriteMessage = ref<string | null>(null);
+
+const collabGroupId = ref<string | null>(null);
+const snapshots = ref<SnapshotRow[]>([]);
+const snapshotLoading = ref(false);
+const pageOpsMessage = ref<string | null>(null);
 
 const ydoc = new Y.Doc();
 const legacyPlainToImport = ref<string | null>(null);
@@ -286,6 +300,212 @@ async function removeThisFromRecent() {
   }
 }
 
+async function loadSnapshots() {
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    snapshots.value = [];
+    return;
+  }
+  snapshotLoading.value = true;
+  try {
+    const res = await client.GET("/api/pages/{pageId}/snapshots", {
+      params: { path: { pageId: id } },
+    });
+    if (res.response.status === 200 && res.data) {
+      snapshots.value = res.data.snapshots;
+    } else {
+      snapshots.value = [];
+    }
+  } finally {
+    snapshotLoading.value = false;
+  }
+}
+
+async function saveSnapshotManual() {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  const pk = pageKeyring;
+  if (!id || pk == null || user.value?.demo === true) {
+    return;
+  }
+  const bodies = buildPageSnapshotSaveBodies({
+    pageKeyring: pk,
+    pageId: id,
+    ydoc,
+  });
+  const res = await client.POST("/api/pages/{pageId}/snapshots", {
+    params: { path: { pageId: id } },
+    body: {
+      encryptedSymmetricKey: bodies.encryptedSymmetricKey,
+      encryptedData: bodies.encryptedData,
+    },
+  });
+  if (res.response.status !== 201) {
+    pageOpsMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not save snapshot.";
+    return;
+  }
+  await loadSnapshots();
+  pageOpsMessage.value = "Snapshot saved.";
+}
+
+async function restoreFromSnapshot(snapshotId: string) {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  const pk = pageKeyring;
+  if (!id || pk == null || user.value?.demo === true) {
+    return;
+  }
+  if (
+    !confirm(
+      "Restore this snapshot? The current editor state is snapshotted as pre-restore (Pro), then content is replaced locally and queued to sync.",
+    )
+  ) {
+    return;
+  }
+  const preBodies = buildPageSnapshotSaveBodies({
+    pageKeyring: pk,
+    pageId: id,
+    ydoc,
+  });
+  const loadRes = await client.GET("/api/pages/{pageId}/snapshots/{snapshotId}", {
+    params: { path: { pageId: id, snapshotId } },
+  });
+  if (loadRes.response.status !== 200 || loadRes.data == null) {
+    pageOpsMessage.value =
+      loadRes.error && typeof loadRes.error === "object" && "message" in loadRes.error
+        ? String((loadRes.error as { message?: string }).message)
+        : "Could not load snapshot.";
+    return;
+  }
+  let plain: Uint8Array;
+  try {
+    plain = decryptPageSnapshotPlainUpdate({
+      pageKeyring: pk,
+      pageId: id,
+      encryptedSymmetricKeyB64: loadRes.data.encryptedSymmetricKey ?? undefined,
+      encryptedDataB64: loadRes.data.encryptedData,
+    });
+  } catch (e) {
+    pageOpsMessage.value =
+      e instanceof Error ? e.message : "Could not decrypt snapshot.";
+    return;
+  }
+  hydrating.value = true;
+  try {
+    applyYjsFullStateSnapshot({
+      ydoc,
+      proseField: Y_FRAG_PROSEMIRROR,
+      legacyTextName: Y_TEXT_DEFAULT,
+      update: plain,
+    });
+  } finally {
+    hydrating.value = false;
+  }
+  refreshYMetrics();
+  const savePre = await client.POST("/api/pages/{pageId}/snapshots", {
+    params: { path: { pageId: id } },
+    body: {
+      encryptedSymmetricKey: preBodies.encryptedSymmetricKey,
+      encryptedData: preBodies.encryptedData,
+      preRestore: true,
+    },
+  });
+  if (savePre.response.status !== 201) {
+    pageOpsMessage.value =
+      savePre.error && typeof savePre.error === "object" && "message" in savePre.error
+        ? String((savePre.error as { message?: string }).message)
+        : "Restored locally but could not save pre-restore snapshot.";
+    schedulePush();
+    return;
+  }
+  await loadSnapshots();
+  pageOpsMessage.value = "Snapshot restored; pre-restore copy saved.";
+  schedulePush();
+}
+
+async function deleteSnapshot(snapshotId: string) {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    return;
+  }
+  if (!confirm("Delete this snapshot permanently?")) {
+    return;
+  }
+  const res = await client.DELETE("/api/pages/{pageId}/snapshots/{snapshotId}", {
+    params: { path: { pageId: id, snapshotId } },
+  });
+  if (res.response.status !== 204) {
+    pageOpsMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not delete snapshot.";
+    return;
+  }
+  await loadSnapshots();
+}
+
+async function setAsGroupMainPage() {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  const gid = collabGroupId.value;
+  if (!id || gid == null || user.value?.demo === true) {
+    return;
+  }
+  if (
+    !confirm(
+      "Set this page as the group’s main page? Requires Pro and manager permission on this group (legacy `pages.move`).",
+    )
+  ) {
+    return;
+  }
+  const res = await client.POST("/api/pages/{pageId}/move", {
+    params: { path: { pageId: id } },
+    body: {
+      destGroupId: gid,
+      setAsMainPage: true,
+    },
+  });
+  if (res.response.status !== 204) {
+    pageOpsMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not update main page.";
+    return;
+  }
+  pageOpsMessage.value = "Main page updated.";
+  await loadPathAndPrefs();
+}
+
+async function softDeleteThisPage() {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    return;
+  }
+  if (
+    !confirm(
+      "Soft-delete this page? It leaves a grace period before purge (cannot delete a group’s main page).",
+    )
+  ) {
+    return;
+  }
+  const res = await client.DELETE("/api/pages/{pageId}", {
+    params: { path: { pageId: id } },
+  });
+  if (res.response.status !== 204) {
+    pageOpsMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not delete page.";
+    return;
+  }
+  void router.replace({ path: "/" });
+}
+
 watch(
   [editor, legacyPlainToImport],
   () => {
@@ -323,6 +543,8 @@ watch(
     if (!id) {
       return;
     }
+    collabGroupId.value = null;
+    snapshots.value = [];
     loadError.value = null;
     cryptoError.value = null;
     collabLoading.value = true;
@@ -341,6 +563,7 @@ watch(
         return;
       }
 
+      collabGroupId.value = data.groupId;
       collabLastIndex.value = data.lastIndex;
       updateCount.value = data.updates.length;
 
@@ -371,6 +594,7 @@ watch(
       if (stored == null) {
         cryptoError.value =
           "Missing session crypto (sign out and sign in again with your password on this device).";
+        void loadSnapshots();
         hydrating.value = true;
         try {
           const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
@@ -416,6 +640,7 @@ watch(
           e instanceof Error
             ? e.message
             : "Could not unlock page encryption keys.";
+        void loadSnapshots();
         hydrating.value = true;
         try {
           const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
@@ -468,6 +693,7 @@ watch(
       } finally {
         hydrating.value = false;
       }
+      void loadSnapshots();
     } finally {
       collabLoading.value = false;
     }
@@ -499,7 +725,8 @@ watch(
           v-if="user"
           class="text-muted-foreground font-mono text-xs break-all"
         >
-          {{ pageId }} · personal group {{ user.personalGroupId }}
+          {{ pageId }} · group {{ collabGroupId ?? "—" }} · personal
+          {{ user.personalGroupId }}
         </p>
       </div>
       <Button as-child size="sm" variant="outline">
@@ -560,6 +787,104 @@ watch(
         <p v-if="user?.demo" class="text-muted-foreground text-xs">
           Demo accounts cannot bump starting page or favorites.
         </p>
+      </CardContent>
+    </Card>
+
+    <p
+      v-if="pageOpsMessage"
+      class="text-muted-foreground border-border rounded-md border px-3 py-2 text-sm"
+    >
+      {{ pageOpsMessage }}
+    </p>
+
+    <Card v-if="user?.demo !== true">
+      <CardHeader>
+        <CardTitle class="text-base">Snapshots (Pro)</CardTitle>
+        <CardDescription>
+          Encrypted Yjs checkpoints (
+          <code class="font-mono text-xs">PageSnapshotData</code>
+          ). Requires edit access + subscription server-side.
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="space-y-3 text-sm">
+        <p v-if="snapshotLoading" class="text-muted-foreground">Loading snapshots…</p>
+        <p v-else-if="snapshots.length === 0" class="text-muted-foreground">No snapshots yet.</p>
+        <ul v-else class="space-y-2">
+          <li
+            v-for="s in snapshots"
+            :key="s.snapshotId"
+            class="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div class="text-xs">
+              <div class="font-mono font-medium">{{ s.snapshotId }}</div>
+              <div class="text-muted-foreground">
+                {{ s.type }} · {{ s.creationDate }}
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="secondary"
+                :disabled="
+                  collabLoading ||
+                    loadError != null ||
+                    cryptoError != null
+                "
+                @click="restoreFromSnapshot(s.snapshotId)"
+              >
+                Restore
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                @click="deleteSnapshot(s.snapshotId)"
+              >
+                Delete
+              </Button>
+            </div>
+          </li>
+        </ul>
+        <Button
+          size="sm"
+          :disabled="
+            collabLoading ||
+              loadError != null ||
+              cryptoError != null
+          "
+          @click="saveSnapshotManual()"
+        >
+          Save snapshot
+        </Button>
+      </CardContent>
+    </Card>
+
+    <Card v-if="user?.demo !== true">
+      <CardHeader>
+        <CardTitle class="text-base">Page management</CardTitle>
+        <CardDescription>
+          Main-page promotion uses
+          <code class="font-mono text-xs">POST …/move</code>
+          with the same group id (Pro). Soft-delete uses
+          <code class="font-mono text-xs">DELETE …/pages/:id</code>.
+        </CardDescription>
+      </CardHeader>
+      <CardContent class="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          :disabled="collabGroupId == null || collabLoading"
+          @click="setAsGroupMainPage()"
+        >
+          Set as group main page
+        </Button>
+        <Button
+          size="sm"
+          variant="destructive"
+          :disabled="user?.demo === true"
+          @click="softDeleteThisPage()"
+        >
+          Soft-delete page…
+        </Button>
       </CardContent>
     </Card>
 

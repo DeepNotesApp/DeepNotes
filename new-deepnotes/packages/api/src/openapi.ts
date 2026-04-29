@@ -46,6 +46,7 @@ import {
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
+  pageSnapshotListResponseSchema,
   pageSnapshotLoadResponseSchema,
   pageSnapshotPathSchema,
   pageSnapshotSaveRequestSchema,
@@ -1433,6 +1434,27 @@ registry.registerPath({
   request: { params: pageTargetPagePathSchema },
   responses: {
     204: { description: "Backlink removed." },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/pages/{pageId}/snapshots",
+  summary: "List page snapshot metadata (Pro)",
+  description:
+    "Returns snapshot ids and timestamps for manual and pre-restore snapshots (no ciphertext).",
+  request: { params: pageIdPathSchema },
+  responses: {
+    200: {
+      description: "Newest first.",
+      content: {
+        "application/json": { schema: pageSnapshotListResponseSchema },
+      },
+    },
     401: sessionUnauthorized401,
     403: sessionForbidden403,
     404: sessionNotFound404,

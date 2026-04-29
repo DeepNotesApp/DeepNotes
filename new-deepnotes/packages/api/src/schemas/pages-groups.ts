@@ -392,6 +392,22 @@ export const pageSnapshotCreateResponseSchema = z
   })
   .openapi("PageSnapshotCreateResponse");
 
+export const pageSnapshotListItemSchema = z
+  .object({
+    snapshotId: z.string(),
+    creationDate: z
+      .string()
+      .openapi({ description: "ISO-8601 timestamp from `page_snapshots.creation_date`." }),
+    type: z.enum(["manual", "pre-restore"]),
+  })
+  .openapi("PageSnapshotListItem");
+
+export const pageSnapshotListResponseSchema = z
+  .object({
+    snapshots: z.array(pageSnapshotListItemSchema),
+  })
+  .openapi("PageSnapshotListResponse");
+
 export const pageSnapshotLoadResponseSchema = z
   .object({
     encryptedSymmetricKey: z.string().nullable(),

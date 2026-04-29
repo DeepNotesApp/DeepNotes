@@ -54,6 +54,7 @@ export {
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
+  pageSnapshotListResponseSchema,
   pageSnapshotLoadResponseSchema,
   pageSnapshotPathSchema,
   pageSnapshotSaveRequestSchema,

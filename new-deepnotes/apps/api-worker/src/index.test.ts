@@ -148,6 +148,7 @@ describe("api-worker", () => {
       "DELETE",
       "/api/pages/aaaaaaaaaaaaaaaaaaaaa/backlinks/bbbbbbbbbbbbbbbbbbbbb",
     ],
+    ["GET", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/snapshots"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/snapshots"],
     [
       "GET",

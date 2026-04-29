@@ -89,6 +89,7 @@ export {
   performPagePurge,
   performPageRestore,
   performPageSnapshotDelete,
+  performPageSnapshotList,
   performPageSnapshotLoad,
   performPageSnapshotSave,
   performPageSoftDelete,

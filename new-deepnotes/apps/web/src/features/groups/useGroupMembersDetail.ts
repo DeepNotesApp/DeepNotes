@@ -13,6 +13,7 @@ import {
 import {
   buildJoinInvitationSendBodies,
   buildJoinRequestAcceptBodies,
+  buildMakePublicAccessKeyringB64,
   type InviteCryptoBootstrapJson,
 } from "./group-membership-crypto";
 
@@ -415,6 +416,53 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
+  async function makeGroupPublic() {
+    const id = resolvedGroupId();
+    const d = detail.value;
+    if (id == null || d == null) {
+      return;
+    }
+    if (d.groupIsPublic) {
+      error.value = "Group is already public.";
+      return;
+    }
+    const stored = readSessionCrypto();
+    if (stored == null) {
+      error.value =
+        "Client crypto is not unlocked. Sign in with your account password (not demo) on this device.";
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const boot = await fetchInviteBootstrap();
+      if (!boot.ok) {
+        error.value = boot.error;
+        return;
+      }
+      const accessKeyring = await buildMakePublicAccessKeyringB64({
+        stored,
+        bootstrap: boot.data,
+      });
+      const res = await client.POST("/api/groups/{groupId}/privacy/public", {
+        params: { path: { groupId: id } },
+        body: { accessKeyring },
+      });
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not make group public.";
+        return;
+      }
+      await load();
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : "Could not make group public.";
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   return {
     loading,
     actionLoading,
@@ -430,6 +478,7 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     sendJoinInvitation,
     acceptJoinRequestWithCrypto,
     setJoinRequestsAllowed,
+    makeGroupPublic,
     softDeleteGroup,
   };
 }

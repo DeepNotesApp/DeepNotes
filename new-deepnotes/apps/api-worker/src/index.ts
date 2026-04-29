@@ -10,6 +10,7 @@ import {
   pageMoveRequestSchema,
   pageIdPathSchema,
   pageSnapshotCreateResponseSchema,
+  pageSnapshotListResponseSchema,
   pageSnapshotSaveRequestSchema,
   groupPasswordChangeRequestSchema,
   groupPasswordDisableRequestSchema,
@@ -2045,6 +2046,61 @@ app.delete("/api/pages/:pageId/backlinks/:targetPageId", async (c) => {
       targetPageId: pParams.data.targetPageId,
     });
     return c.body(null, 204);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/pages/:pageId/snapshots", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  try {
+    const { performPageSnapshotList } = await import("@deepnotes/session");
+    const out = await performPageSnapshotList({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      pageId: pParams.data.pageId,
+    });
+    const body = pageSnapshotListResponseSchema.parse({
+      snapshots: out.snapshots.map((s) => ({
+        snapshotId: s.snapshotId,
+        creationDate: s.creationDate,
+        type: s.type,
+      })),
+    });
+    return c.json(body, 200);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

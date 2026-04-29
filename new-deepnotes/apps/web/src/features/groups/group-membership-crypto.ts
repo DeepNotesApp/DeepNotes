@@ -112,6 +112,31 @@ async function wrapGroupKeyringsForRecipientPublicKey(input: {
 }
 
 /**
+ * Raw `groups.access_keyring` bytes for `POST …/privacy/public` (legacy `accessKeyring.wrappedValue`).
+ */
+export async function buildMakePublicAccessKeyringB64(input: {
+  stored: StoredSessionCrypto;
+  bootstrap: InviteCryptoBootstrapJson;
+}): Promise<string> {
+  await ensureSodiumReady();
+  const keyPair = await unlockSessionKeyPair(input.stored);
+  const accessBytes = pickAccessKeyringBytes({
+    memberB64: input.bootstrap.memberEncryptedAccessKeyring,
+    groupB64: input.bootstrap.groupAccessKeyring,
+  });
+  let accessRing = createSymmetricKeyring(accessBytes);
+  if (accessRing.topLayer === DataLayer.Asymmetric) {
+    accessRing = accessRing.unwrapAsymmetric(keyPair.privateKey);
+  }
+  if (accessRing.topLayer !== DataLayer.Raw) {
+    throw new Error(
+      "Group access keyring is still locked (e.g. group password). Public transition is not available until unlock is implemented.",
+    );
+  }
+  return uint8ToBase64(accessRing.wrappedValue);
+}
+
+/**
  * Ciphertexts for `POST /api/groups/{groupId}/join-invitations` (manager).
  */
 export async function buildJoinInvitationSendBodies(input: {

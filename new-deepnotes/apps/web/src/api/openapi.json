@@ -1450,6 +1450,44 @@
           "sourcePageId"
         ]
       },
+      "PageSnapshotListItem": {
+        "type": "object",
+        "properties": {
+          "snapshotId": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string",
+            "description": "ISO-8601 timestamp from `page_snapshots.creation_date`."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "pre-restore"
+            ]
+          }
+        },
+        "required": [
+          "snapshotId",
+          "creationDate",
+          "type"
+        ]
+      },
+      "PageSnapshotListResponse": {
+        "type": "object",
+        "properties": {
+          "snapshots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PageSnapshotListItem"
+            }
+          }
+        },
+        "required": [
+          "snapshots"
+        ]
+      },
       "PageSnapshotCreateResponse": {
         "type": "object",
         "properties": {
@@ -5310,6 +5348,75 @@
       }
     },
     "/api/pages/{pageId}/snapshots": {
+      "get": {
+        "summary": "List page snapshot metadata (Pro)",
+        "description": "Returns snapshot ids and timestamps for manual and pre-restore snapshots (no ciphertext).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "pageId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newest first.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageSnapshotListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Save encrypted page snapshot (Pro)",
         "description": "Replaces `pages.snapshots.save` — asserts Pro plan (legacy `assertUserSubscribed`).",

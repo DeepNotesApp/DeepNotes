@@ -132,6 +132,9 @@ describe("getOpenApiDocument", () => {
       doc.paths?.["/api/pages/{pageId}/backlinks/{targetPageId}"]?.delete,
     ).toBeDefined();
     expect(
+      doc.paths?.["/api/pages/{pageId}/snapshots"]?.get,
+    ).toBeDefined();
+    expect(
       doc.paths?.["/api/pages/{pageId}/snapshots"]?.post,
     ).toBeDefined();
     expect(

@@ -79,6 +79,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `pages.backlinks.create` | `POST /api/pages/:pageId/backlinks` (**implemented** — `performPageBacklinkCreate`; path `pageId` = **target**; body `{ "sourcePageId" }`) |
 | `pages.backlinks.delete` | `DELETE /api/pages/:pageId/backlinks/:targetPageId` (**implemented** — `performPageBacklinkDelete`; path `pageId` = **source**; `targetPageId` = link target) |
 | `pages.snapshots.save` | `POST /api/pages/:pageId/snapshots` (**implemented** — `performPageSnapshotSave`; Pro; trim >10 + age rule like legacy `insertPageSnapshot`) |
+| *(greenfield read)* | `GET /api/pages/:pageId/snapshots` (**implemented** — `performPageSnapshotList`; Pro; metadata only, newest first) |
 | `pages.snapshots.load` | `GET /api/pages/:pageId/snapshots/:snapshotId` (**implemented** — `performPageSnapshotLoad`; Pro) |
 | `pages.snapshots.delete` | `DELETE /api/pages/:pageId/snapshots/:snapshotId` (**implemented** — `performPageSnapshotDelete`) |
 | `pages.deletion.delete` | `DELETE /api/pages/:pageId` (soft) (**implemented** — `performPageSoftDelete`) |

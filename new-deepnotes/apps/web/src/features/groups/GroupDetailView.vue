@@ -57,6 +57,7 @@ const {
   acceptJoinRequestWithCrypto,
   setJoinRequestsAllowed,
   softDeleteGroup,
+  makeGroupPublic,
 } = useGroupMembersDetail(groupIdRef);
 
 const roleDraft = ref<Record<string, GroupMemberRole>>({});
@@ -226,6 +227,17 @@ async function onSoftDeleteGroup() {
     void router.replace({ name: "groups" });
   }
 }
+
+async function onMakeGroupPublic() {
+  if (
+    !confirm(
+      "Make this group public? Shared read access keyring will be stored on the group row and member invite access ciphertexts cleared (legacy parity).",
+    )
+  ) {
+    return;
+  }
+  await makeGroupPublic();
+}
 </script>
 
 <template>
@@ -309,10 +321,27 @@ async function onSoftDeleteGroup() {
         <CardHeader>
           <CardTitle class="text-base">Group settings</CardTitle>
           <CardDescription>
-            Join policy and deletion (public/private changes need crypto; use a full client for those flows if required).
+            Join policy, visibility, and deletion (make-private re-key remains a dedicated crypto flow).
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
+          <div
+            v-if="!detail.groupIsPublic"
+            class="space-y-2 border-border border-b pb-3"
+          >
+            <p class="text-muted-foreground text-xs">
+              Private group — managers can publish read access (Pro + client crypto) to match legacy
+              <code class="font-mono">groups.privacy.makePublic</code>.
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+              @click="onMakeGroupPublic"
+            >
+              Make group public…
+            </Button>
+          </div>
           <div class="flex flex-wrap items-center gap-3">
             <label class="flex cursor-pointer items-center gap-2 text-sm">
               <input
