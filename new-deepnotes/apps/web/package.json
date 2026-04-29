@@ -20,6 +20,7 @@
     "@tiptap/starter-kit": "^3.22.4",
     "@tiptap/vue-3": "^3.22.4",
     "@vueuse/core": "^14.2.1",
+    "@vueuse/shared": "14.2.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "libsodium-wrappers-sumo": "^0.8.0",
