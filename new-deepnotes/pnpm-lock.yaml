@@ -50,6 +50,9 @@ importers:
       hono:
         specifier: ^4.7.7
         version: 4.12.15
+      msgpackr:
+        specifier: ^1.11.8
+        version: 1.11.10
       stripe:
         specifier: ^17.7.0
         version: 17.7.0

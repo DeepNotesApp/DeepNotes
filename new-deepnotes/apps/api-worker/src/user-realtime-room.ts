@@ -12,6 +12,15 @@ import {
   type RealtimeHashPort,
 } from "./realtime-ws-batch.js";
 import { getDbForConnectionString } from "./db-pool.js";
+import {
+  buildDataUpdatePublishPayload,
+  bytesToBase64,
+  parseDataUpdateSubscribePayload,
+  parseRealtimeFullKey,
+  parseUpstashPubSubSseLine,
+  realtimeDataUpdateChannel,
+  upstashPublish,
+} from "./realtime-redis-pubsub.js";
 
 export type UserRealtimeRoomEnv = {
   REALTIME_INTERNAL_SECRET?: string;
@@ -24,10 +33,18 @@ export type UserRealtimeRoomEnv = {
 /**
  * Durable Object: one instance per `userId` (see `idFromName(userId)`).
  * - Legacy-framed `USER_NOTIFICATION` fan-out (internal POST).
- * - Optional Upstash Redis `user:{userId}` hash HGET/HSET/SUBSCRIBE (legacy REQUEST batch).
+ * - Optional Upstash Redis hash **HGET/HSET/SUBSCRIBE** (legacy REQUEST batch) + **PUBLISH** on
+ *   `data-update|{fullKey}` and **SSE `/subscribe`** so other isolates/users receive **DATA_NOTIFICATION**.
  */
 export class UserRealtimeRoom {
   private _redis: Redis | null | undefined;
+  /** 16-byte origin id for Redis pub/sub self-echo filtering (legacy `getSelfPublisherIdBytes`). */
+  private _publisherIdBytes: Uint8Array | undefined;
+  /** `fullKey` (`prefix:suffix>field`) → SSE bridge from Upstash `SUBSCRIBE` */
+  private readonly _dataUpdateBridgeAborters = new Map<
+    string,
+    AbortController
+  >();
   /** `fullKey` (`prefix:suffix>field`) → subscribed sockets */
   private readonly _fieldSubs = new Map<string, Set<WebSocket>>();
   /** WebSocket → keys it subscribed to (cleanup on close) */
@@ -77,12 +94,150 @@ export class UserRealtimeRoom {
       },
       hset: async (key, entries) => {
         await r.hset(key, entries);
+        const restUrl = this.env.UPSTASH_REDIS_REST_URL;
+        const restToken = this.env.UPSTASH_REDIS_REST_TOKEN;
+        if (
+          restUrl == null ||
+          restUrl === "" ||
+          restToken == null ||
+          restToken === ""
+        ) {
+          return;
+        }
+        const pubId = this.publisherId();
+        for (const [field, value] of Object.entries(entries)) {
+          const fullKey = `${key}>${field}`;
+          const channel = realtimeDataUpdateChannel(fullKey);
+          const msg = bytesToBase64(buildDataUpdatePublishPayload(pubId, value));
+          try {
+            await upstashPublish(restUrl, restToken, channel, msg);
+          } catch {
+            // Best-effort fan-out; hash write already succeeded.
+          }
+        }
       },
     };
   }
 
+  private publisherId(): Uint8Array {
+    if (this._publisherIdBytes == null) {
+      const b = new Uint8Array(16);
+      crypto.getRandomValues(b);
+      this._publisherIdBytes = b;
+    }
+    return this._publisherIdBytes;
+  }
+
+  private startDataUpdateBridgeIfRedis(fullKey: string): void {
+    const url = this.env.UPSTASH_REDIS_REST_URL;
+    const token = this.env.UPSTASH_REDIS_REST_TOKEN;
+    if (url == null || url === "" || token == null || token === "") {
+      return;
+    }
+    if (this._dataUpdateBridgeAborters.has(fullKey)) {
+      return;
+    }
+    const ac = new AbortController();
+    this._dataUpdateBridgeAborters.set(fullKey, ac);
+    void this.runDataUpdateBridgeLoop(fullKey, url, token, ac.signal);
+  }
+
+  private stopDataUpdateBridge(fullKey: string): void {
+    const ac = this._dataUpdateBridgeAborters.get(fullKey);
+    ac?.abort();
+    this._dataUpdateBridgeAborters.delete(fullKey);
+  }
+
+  private async runDataUpdateBridgeLoop(
+    fullKey: string,
+    baseUrl: string,
+    token: string,
+    signal: AbortSignal,
+  ): Promise<void> {
+    const channel = realtimeDataUpdateChannel(fullKey);
+    const subBase = baseUrl.replace(/\/$/, "");
+    const subUrl = `${subBase}/subscribe/${encodeURIComponent(channel)}`;
+    const pubId = this.publisherId();
+    while (!signal.aborted) {
+      try {
+        const res = await fetch(subUrl, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "text/event-stream",
+          },
+          signal,
+        });
+        if (!res.ok || res.body == null) {
+          await sleepWhile(1500, signal);
+          continue;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        while (!signal.aborted) {
+          const { done, value } = await reader.read();
+          if (done) {
+            break;
+          }
+          buffer += decoder.decode(value, { stream: true });
+          let nl: number;
+          while ((nl = buffer.indexOf("\n")) >= 0) {
+            const line = buffer.slice(0, nl);
+            buffer = buffer.slice(nl + 1);
+            const parsed = parseUpstashPubSubSseLine(line);
+            if (parsed.kind !== "message") {
+              continue;
+            }
+            if (parsed.channel !== channel) {
+              continue;
+            }
+            const payload = parseDataUpdateSubscribePayload(
+              parsed.payload,
+              pubId,
+            );
+            if (!payload.ok || payload.fromSelf) {
+              continue;
+            }
+            const triple = parseRealtimeFullKey(fullKey);
+            if (triple == null) {
+              continue;
+            }
+            const frame = encodeRealtimeServerDataNotification({
+              items: [
+                {
+                  prefix: triple.prefix,
+                  suffix: triple.suffix,
+                  field: triple.field,
+                  value: payload.value,
+                },
+              ],
+            });
+            const subs = this._fieldSubs.get(fullKey);
+            if (subs == null || subs.size === 0) {
+              continue;
+            }
+            for (const socket of subs) {
+              try {
+                socket.send(frame);
+              } catch {
+                // ignore
+              }
+            }
+          }
+        }
+      } catch {
+        if (signal.aborted) {
+          break;
+        }
+        await sleepWhile(1500, signal);
+      }
+    }
+  }
+
   private addSubscription(fullKey: string, ws: WebSocket): void {
     let set = this._fieldSubs.get(fullKey);
+    const wasEmpty = set == null || set.size === 0;
     if (set == null) {
       set = new Set();
       this._fieldSubs.set(fullKey, set);
@@ -94,6 +249,9 @@ export class UserRealtimeRoom {
       this._subsByWs.set(ws, ks);
     }
     ks.add(fullKey);
+    if (wasEmpty) {
+      this.startDataUpdateBridgeIfRedis(fullKey);
+    }
   }
 
   private removeSubscription(fullKey: string, ws: WebSocket): void {
@@ -104,6 +262,7 @@ export class UserRealtimeRoom {
     set.delete(ws);
     if (set.size === 0) {
       this._fieldSubs.delete(fullKey);
+      this.stopDataUpdateBridge(fullKey);
     }
     const ks = this._subsByWs.get(ws);
     ks?.delete(fullKey);
@@ -256,18 +415,29 @@ export class UserRealtimeRoom {
   webSocketClose(ws: WebSocket): void | Promise<void> {
     const keys = this._subsByWs.get(ws);
     if (keys != null) {
-      for (const fk of keys) {
-        const set = this._fieldSubs.get(fk);
-        if (set != null) {
-          set.delete(ws);
-          if (set.size === 0) {
-            this._fieldSubs.delete(fk);
-          }
-        }
+      for (const fk of [...keys]) {
+        this.removeSubscription(fk, ws);
       }
-      this._subsByWs.delete(ws);
     }
   }
+}
+
+function sleepWhile(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+    const t = setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
+  });
 }
 
 function base64ToUint8Standard(b64: string): Uint8Array {

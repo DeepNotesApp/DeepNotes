@@ -17,6 +17,7 @@
     "@deepnotes/db": "workspace:*",
     "@deepnotes/session": "workspace:*",
     "@upstash/redis": "^1.34.8",
+    "msgpackr": "^1.11.8",
     "hono": "^4.7.7",
     "stripe": "^17.7.0"
   },
