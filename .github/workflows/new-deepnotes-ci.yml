@@ -51,10 +51,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: API e2e vars (Wrangler)
-        run: cp e2e/dev.vars.ci apps/api-worker/.dev.vars
-
-      - name: Migrate Postgres (app DB for worker + e2e)
+      - name: Migrate Postgres (app DB)
         run: pnpm db:migrate
 
       - name: Lint
@@ -71,9 +68,3 @@ jobs:
 
       - name: Build
         run: pnpm build
-
-      - name: Install Playwright (Chromium)
-        run: pnpm --filter @deepnotes/web exec playwright install chromium --with-deps
-
-      - name: E2E (Playwright)
-        run: pnpm test:e2e

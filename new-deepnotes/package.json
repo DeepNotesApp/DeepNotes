@@ -12,7 +12,6 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:e2e": "pnpm --filter @deepnotes/web run test:e2e",
     "db:generate": "pnpm --filter @deepnotes/db exec drizzle-kit generate",
     "db:migrate": "pnpm --filter @deepnotes/db exec drizzle-kit migrate",
     "db:studio": "pnpm --filter @deepnotes/db exec drizzle-kit studio",

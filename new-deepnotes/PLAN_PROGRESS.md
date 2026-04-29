@@ -36,11 +36,11 @@
 
 **Required for parity** unless *Deferred* above.
 
-**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages (starting/recent/favorites/defaults), `PageEditorView` (path, bump, favorite, recent), groups+members+invite/join+crypto + **group settings** (join requests, soft-delete), notifications list + decrypt, **`AccountView`**, MSW+Vitest session matrix, ESLint restricted imports, Playwright **demo**, `apps/marketing`, theme (VueUse + header switcher).
+**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages (starting/recent/favorites/defaults), `PageEditorView` (path, bump, favorite, recent), groups+members+invite/join+crypto + **group settings** (join requests, soft-delete), notifications list + decrypt, **`AccountView`**, MSW+Vitest session matrix, ESLint restricted imports, `apps/marketing`, theme (VueUse + header switcher).
 
 **Open:**
 
-- [ ] Password (registered) Playwright + stronger session/crypto asserts  
+- [ ] Stronger Vitest (or integration) coverage for password path + session/crypto asserts  
 - [ ] Live editing: **collab WS** client + Phase 3 server path  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
@@ -48,8 +48,6 @@
 - [x] `[parity]` Notifications: decrypt/display as legacy  
 - [ ] Legacy **realtime** equivalent (after protocol choice)  
 - [ ] Capacitor/Tauri **after web parity**
-
-**E2E:** `apps/web/e2e/session.spec.ts` · `pnpm test:e2e` — needs migrated DB + `e2e/dev.vars.ci` → `apps/api-worker/.dev.vars` (see CI + [docs/DEPLOY_CLOUDFLARE.md](./docs/DEPLOY_CLOUDFLARE.md)).
 
 ---
 
@@ -60,7 +58,6 @@
 | `@deepnotes/session` | `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts` (+ `.env` DB URLs) |
 | `@deepnotes/web` | `pnpm --filter @deepnotes/web test` (Vitest) |
 | `@deepnotes/api-worker` | 503 matrix env-smoke in `index.test.ts` |
-| Root E2E | `pnpm test:e2e` |
 
 **Follow-ups:** Redis failed-login IT; refresh expiry; optional OpenAPI snapshot CI.
 
@@ -75,7 +72,6 @@
 - [ ] Collab **and** realtime: ≥1 integration test each (stack TBD)  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
-- [ ] E2E beyond demo (password path)  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete done; collab WS + realtime + deeper editor still open — goal above)
 
 ---
@@ -88,7 +84,7 @@
 | 2026-04-29 | **Page prefs + group settings UI:** `GET …/pages/recent|favorites`, home (starting/recent/favorites/spatial defaults), editor path + bump/favorite/recent; group join-policy + soft-delete. |
 | 2026-04-29 | **`AccountView`** (`/account`): Stripe checkout/portal, password + email verify/change/confirm + raw keyrings, 2FA (enable/load/recovery/disable/devices), delete account; **`extractRawUserKeyringsBase64FromSession`** + **`build-password-and-email-confirm`**; notifications **msgpack decrypt** (`UserNotificationContent`); header link. |
 | 2026-04-29 | Theme: **`@vueuse/core` `useColorMode`**, hydrate pre-mount, **`ThemeSwitcher`**, Vitest hydration/migration tests, `App` unified shell (`data-testid="app-shell"`). |
-| 2026-04-29 | Compacted doc; parity goal + checklist preserved; condensed tests/E2E. |
+| 2026-04-29 | Compacted doc; parity goal + checklist preserved; condensed tests. |
 | 2026-04-29 | Full parity as product gate; `[full parity]` rows + Phase 5 parity gate. |
 | 2026-04-27 | TRPC_REST_MAP verified; realtime vs collab WS called out; counts corrected. |
 
