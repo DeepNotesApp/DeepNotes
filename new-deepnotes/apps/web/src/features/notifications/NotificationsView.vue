@@ -81,7 +81,8 @@ function formatWhen(iso: string): string {
     </div>
 
     <p class="text-muted-foreground text-sm">
-      This list shows type and time. Message bodies stay encrypted in the API response.
+      With password-backed keyrings in this browser, message bodies are decrypted here (legacy <code class="bg-muted rounded px-1 py-0.5 text-xs">UserNotificationContent</code> scope).
+      Otherwise only type and timestamp are reliable.
     </p>
 
     <p
@@ -113,8 +114,17 @@ function formatWhen(iso: string): string {
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent class="text-muted-foreground text-xs">
-            Message body is not shown (encrypted).
+          <CardContent class="space-y-2">
+            <pre
+              v-if="n.decryptedText != null && n.decryptedText !== ''"
+              class="bg-muted max-h-[18rem] overflow-auto rounded-md p-2 text-[11px] leading-snug whitespace-pre-wrap font-mono"
+            >{{ n.decryptedText }}</pre>
+            <p
+              v-else
+              class="text-muted-foreground text-xs"
+            >
+              Encrypted payload could not be decrypted (sign in with email + password on this device, or ciphertext may be stale).
+            </p>
           </CardContent>
         </Card>
       </li>

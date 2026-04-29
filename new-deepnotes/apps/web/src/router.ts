@@ -46,6 +46,11 @@ const router = createRouter({
       component: () => import("./features/notifications/NotificationsView.vue"),
     },
     {
+      path: "/account",
+      name: "account",
+      component: () => import("./features/account/AccountView.vue"),
+    },
+    {
       path: "/pages",
       name: "pages-entry",
       component: () => import("./features/pages/PagesEntryRedirectView.vue"),

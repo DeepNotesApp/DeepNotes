@@ -2,6 +2,7 @@ import { ref, type Ref } from "vue";
 
 import { useSession } from "../auth/useSession";
 import {
+  attachDecryptedNotificationText,
   fetchNotificationsPage,
   markAllNotificationsRead,
   type NotificationRow,
@@ -28,7 +29,7 @@ export function useNotifications() {
     error.value = null;
     try {
       const out = await fetchNotificationsPage({ client });
-      rows.value = out.rows;
+      rows.value = await attachDecryptedNotificationText(out.rows);
       hasMore.value = out.hasMore;
       lastReadCursor.value =
         out.lastNotificationRead === undefined
@@ -60,7 +61,8 @@ export function useNotifications() {
         error.value = out.error;
         return;
       }
-      rows.value = [...rows.value, ...out.rows];
+      const more = await attachDecryptedNotificationText(out.rows);
+      rows.value = [...rows.value, ...more];
       hasMore.value = out.hasMore;
     } finally {
       loading.value = false;

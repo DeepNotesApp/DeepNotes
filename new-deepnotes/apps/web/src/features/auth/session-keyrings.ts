@@ -157,5 +157,45 @@ export async function applyRefreshToStoredKeyrings(input: {
   writeSessionCrypto(next);
 }
 
+/**
+ * Unwrap stored session keyrings to the **raw** inner blobs the API expects when
+ * re-wraping after password change (`UserEncrypted*` / register-shaped bodies).
+ */
+export async function extractRawUserKeyringsBase64FromSession(): Promise<{
+  userEncryptedPrivateKeyring: string;
+  userEncryptedSymmetricKeyring: string;
+} | null> {
+  const stored = readSessionCrypto();
+  if (stored == null) {
+    return null;
+  }
+  await ensureSodiumReady();
+  const sessionKey = wrapSymmetricKey(base64ToBytes(stored.sessionKeyB64));
+  const { userId } = stored;
+
+  const privateKeyring = createPrivateKeyring(
+    base64ToBytes(stored.encryptedPrivateKeyringB64),
+  ).unwrapSymmetric(sessionKey, {
+    associatedData: {
+      context: "SessionUserPrivateKeyring",
+      userId,
+    },
+  });
+
+  const symmetricKeyring = createSymmetricKeyring(
+    base64ToBytes(stored.encryptedSymmetricKeyringB64),
+  ).unwrapSymmetric(sessionKey, {
+    associatedData: {
+      context: "SessionUserSymmetricKeyring",
+      userId,
+    },
+  });
+
+  return {
+    userEncryptedPrivateKeyring: uint8ToBase64(privateKeyring.wrappedValue),
+    userEncryptedSymmetricKeyring: uint8ToBase64(symmetricKeyring.wrappedValue),
+  };
+}
+
 export { clearSessionCrypto, readSessionCrypto };
 export type { StoredSessionCrypto };

@@ -6,14 +6,44 @@ export type NotificationRow = {
   dateTime: string;
   /** True when this row is newer than the server’s read cursor (or cursor unset). */
   unread: boolean;
+  encryptedSymmetricKey: string;
+  encryptedContent: string;
+  /** Filled client-side after `tryDecryptNotificationBody` succeeds. */
+  decryptedText?: string | null;
 };
+
+import {
+  formatNotificationPayload,
+  tryDecryptNotificationBody,
+} from "./decrypt-notification-body";
+
+/**
+ * Fill `decryptedText` where session keyrings can unlock the ciphertext.
+ */
+export async function attachDecryptedNotificationText(
+  rows: NotificationRow[],
+): Promise<NotificationRow[]> {
+  const out = await Promise.all(
+    rows.map(async (r) => {
+      const dec = await tryDecryptNotificationBody({
+        encryptedSymmetricKey: r.encryptedSymmetricKey,
+        encryptedContent: r.encryptedContent,
+      });
+      return {
+        ...r,
+        decryptedText:
+          dec === null ? null : formatNotificationPayload(dec),
+      };
+    }),
+  );
+  return out;
+}
 
 /**
  * `GET /api/users/me/notifications` with optional older-than pagination.
  * The API includes `lastNotificationRead` on the first page only; for `load more`,
  * pass the same cursor you stored from the first response so unread badges stay
  * correct.
- * Payload ciphertext is not decrypted here; the UI shows type + time only.
  */
 export async function fetchNotificationsPage(input: {
   client: DeepnotesApiClient;
@@ -62,6 +92,9 @@ export async function fetchNotificationsPage(input: {
     type: it.type,
     dateTime: it.dateTime,
     unread: isNotificationUnread(it.id, readCursor),
+    encryptedSymmetricKey: it.encryptedSymmetricKey,
+    encryptedContent: it.encryptedContent,
+    decryptedText: undefined,
   }));
 
   return {

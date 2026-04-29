@@ -70,6 +70,14 @@ async function onLogout() {
             >
               <RouterLink to="/notifications">Notifications</RouterLink>
             </Button>
+            <Button
+              v-if="isAuthenticated"
+              as-child
+              size="sm"
+              variant="ghost"
+            >
+              <RouterLink to="/account">Account</RouterLink>
+            </Button>
             <template v-if="!isAuthenticated">
               <Button as-child variant="ghost" size="sm">
                 <RouterLink to="/register">Register</RouterLink>

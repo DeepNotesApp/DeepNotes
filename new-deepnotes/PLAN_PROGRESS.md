@@ -13,7 +13,7 @@
 | Area | State |
 |------|--------|
 | **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** + **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST), groups/**members**/invite/join, notifications **metadata** only, theme (VueUse **`useColorMode`**, persist / system / toggle). Missing: live collab, account/billing/pages ops/group prefs UIs, notification decrypt, native shells. Editor ≠ legacy infinite canvas/note tree until product-aligned. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST), groups/**members**/invite/join, notifications list **with decrypt** (password-backed keyrings), **`/account`** (billing Stripe, password, email verify/change/confirm, 2FA, delete), theme (VueUse **`useColorMode`**). Missing: live collab WS, realtime, page/group prefs UIs beyond API, richer editor UX, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -36,16 +36,16 @@
 
 **Required for parity** unless *Deferred* above.
 
-**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages, `PageEditorView`, groups+members+invite/join+crypto, notifications shell, MSW+Vitest session matrix, ESLint restricted imports, Playwright **demo**, `apps/marketing`, theme (VueUse + header switcher).
+**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages, `PageEditorView`, groups+members+invite/join+crypto, notifications list + decrypt, **`AccountView`** (Stripe billing, password/email/2FA/delete), MSW+Vitest session matrix, ESLint restricted imports, Playwright **demo**, `apps/marketing`, theme (VueUse + header switcher).
 
 **Open:**
 
 - [ ] Password (registered) Playwright + stronger session/crypto asserts  
 - [ ] Live editing: **collab WS** client + Phase 3 server path  
-- [ ] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
+- [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [ ] `[parity]` Page ops + group settings + prefs (recents/favorites/path…) — UIs  
 - [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope)  
-- [ ] `[parity]` Notifications: decrypt/display as legacy  
+- [x] `[parity]` Notifications: decrypt/display as legacy  
 - [ ] Legacy **realtime** equivalent (after protocol choice)  
 - [ ] Capacitor/Tauri **after web parity**
 
@@ -76,7 +76,7 @@
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] E2E beyond demo (password path)  
-- [ ] **UI parity** in `@deepnotes/web` (goal above)
+- [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt done; page prefs, collab, realtime, editor still open — goal above)
 
 ---
 
@@ -84,6 +84,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **`AccountView`** (`/account`): Stripe checkout/portal, password + email verify/change/confirm + raw keyrings, 2FA (enable/load/recovery/disable/devices), delete account; **`extractRawUserKeyringsBase64FromSession`** + **`build-password-and-email-confirm`**; notifications **msgpack decrypt** (`UserNotificationContent`); header link. |
 | 2026-04-29 | Theme: **`@vueuse/core` `useColorMode`**, hydrate pre-mount, **`ThemeSwitcher`**, Vitest hydration/migration tests, `App` unified shell (`data-testid="app-shell"`). |
 | 2026-04-29 | Compacted doc; parity goal + checklist preserved; condensed tests/E2E. |
 | 2026-04-29 | Full parity as product gate; `[full parity]` rows + Phase 5 parity gate. |
