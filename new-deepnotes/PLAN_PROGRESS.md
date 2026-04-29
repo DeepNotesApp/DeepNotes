@@ -13,7 +13,7 @@
 | Area | State |
 |------|--------|
 | **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: **realtime** (hash channel), tables/math/images/spatial editor depth, native shells. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, **tables, images, tasks, highlight, align, sub/sup, HR**, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: **realtime** (hash channel), math/code-highlight/spatial/youtube-level editor depth, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -44,7 +44,7 @@
 - [x] Live editing: **collab WS** client + **Durable Object** + internal Postgres append (greenfield; legacy-framed **DOC** relay + optional **AWARENESS** relay; **no** key rotation / Redis merge)  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
-- [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope) — **partial:** WS awareness+carets, link/underline/placeholder (not tables/math/images/world)  
+- [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope) — **partial:** WS awareness+carets; TipTap **tables, images, tasks**, typography (highlight, align, sub/sup, HR), link/underline/placeholder (**no** legacy math blocks / code lowlight / YouTube / spatial world yet)  
 - [x] `[parity]` Notifications: decrypt/display as legacy  
 - [ ] Legacy **realtime** equivalent (after protocol choice)  
 - [ ] Capacitor/Tauri **after web parity**
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **TipTap parity slice:** tables (resizable), images (inline + base64), task lists, highlight, text align, sub/sup, horizontal rule; scoped editor CSS + Vitest on extension bundle. |
 | 2026-04-29 | **Editor collab parity:** `PageAwarenessUpdate` E2EE over WS, `@tiptap/extension-collaboration-caret` + `y-protocols`, link/underline/placeholder; `decodeIncomingCollabBinaryMessage` in `@deepnotes/collab-wire`. |
 | 2026-04-29 | **Collab WebSocket:** `@deepnotes/collab-wire` (lib0), `PageCollabRoom` DO + `WORKER_SELF` internal append, SPA `PageEditorView` WS + REST fallback; `COLLAB_INTERNAL_SECRET`; Vite `ws` proxy. |
 | 2026-04-29 | **Make-private bootstrap + SPA**, **collab GET titles**, **group collab context**, **cross-group move/reencrypt**, **page + group purge** UI; `byteB64EmptyOk` for empty group name on make-private POST. |

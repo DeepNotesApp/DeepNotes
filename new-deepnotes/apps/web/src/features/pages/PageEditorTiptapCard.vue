@@ -94,4 +94,43 @@ defineProps<{
   height: 0;
   pointer-events: none;
 }
+
+:deep(.tiptap-editor .ProseMirror table) {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 0.75rem 0;
+  overflow: hidden;
+}
+
+:deep(.tiptap-editor .ProseMirror td),
+:deep(.tiptap-editor .ProseMirror th) {
+  min-width: 1em;
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.5rem;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+}
+
+:deep(.tiptap-editor .ProseMirror th) {
+  font-weight: 600;
+  text-align: left;
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+:deep(.tiptap-editor .ProseMirror ul[data-type="taskList"]) {
+  list-style: none;
+  padding-left: 0;
+}
+
+:deep(.tiptap-editor .ProseMirror ul[data-type="taskList"] li) {
+  display: flex;
+  gap: 0.35rem;
+}
+
+:deep(.tiptap-editor .ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+}
 </style>
