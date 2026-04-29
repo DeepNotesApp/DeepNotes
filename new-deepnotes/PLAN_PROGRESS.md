@@ -40,7 +40,7 @@
 
 **Open:**
 
-- [ ] Stronger Vitest (or integration) coverage for password path + session/crypto asserts  
+- [x] Stronger Vitest (or integration) coverage for password path + session/crypto asserts (`apps/web/src/features/auth/session-keyrings.test.ts`)
 - [ ] Live editing: **collab WS** client + Phase 3 server path  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Session keyrings Vitest:** persist/extract round-trip, **`applyRefreshToStoredKeyrings`** stability, legacy **`UserPrivate` / `UserSymmetric`** unwrap before session wrap + **`buildPasswordChangePayload`**; no‑salt early exit. |
 | 2026-04-29 | **Make-private bootstrap + SPA**, **collab GET titles**, **group collab context**, **cross-group move/reencrypt**, **page + group purge** UI; `byteB64EmptyOk` for empty group name on make-private POST. |
 | 2026-04-29 | **Page prefs + group settings UI:** `GET …/pages/recent|favorites`, home (starting/recent/favorites/spatial defaults), editor path + bump/favorite/recent; group join-policy + soft-delete. |
 | 2026-04-29 | **`AccountView`** (`/account`): Stripe checkout/portal, password + email verify/change/confirm + raw keyrings, 2FA (enable/load/recovery/disable/devices), delete account; **`extractRawUserKeyringsBase64FromSession`** + **`build-password-and-email-confirm`**; notifications **msgpack decrypt** (`UserNotificationContent`); header link. |
