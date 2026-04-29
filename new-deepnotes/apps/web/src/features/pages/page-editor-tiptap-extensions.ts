@@ -1,5 +1,6 @@
 import Collaboration from "@tiptap/extension-collaboration";
 import CollaborationCaret from "@tiptap/extension-collaboration-caret";
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { Highlight } from "@tiptap/extension-highlight";
 import { HorizontalRule } from "@tiptap/extension-horizontal-rule";
 import { Image } from "@tiptap/extension-image";
@@ -14,12 +15,20 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TextAlign } from "@tiptap/extension-text-align";
+import Youtube from "@tiptap/extension-youtube";
 import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
+import { common, createLowlight } from "lowlight";
 import * as Y from "yjs";
 import type { Awareness } from "y-protocols/awareness";
 
 import { Y_FRAG_PROSEMIRROR } from "./page-editor-constants";
+import {
+  InlineMathTipTapExtension,
+  MathBlockTipTapExtension,
+} from "./tiptap-math-extensions";
+
+const pageEditorLowlight = createLowlight(common);
 
 export function createPageEditorTipTapExtensions(opts: {
   ydoc: Y.Doc;
@@ -29,6 +38,7 @@ export function createPageEditorTipTapExtensions(opts: {
   return [
     StarterKit.configure({
       undoRedo: false,
+      codeBlock: false,
       horizontalRule: false,
       heading: {
         levels: [1, 2, 3],
@@ -68,6 +78,17 @@ export function createPageEditorTipTapExtensions(opts: {
     TableRow,
     TableHeader,
     TableCell,
+    CodeBlockLowlight.configure({
+      lowlight: pageEditorLowlight,
+    }),
+    InlineMathTipTapExtension,
+    MathBlockTipTapExtension,
+    Youtube.configure({
+      inline: true,
+      width: 640,
+      height: 360,
+      controls: true,
+    }),
     Placeholder.configure({
       placeholder: "Write something…",
     }),

@@ -133,4 +133,28 @@ defineProps<{
   max-width: 100%;
   height: auto;
 }
+
+:deep(.tiptap-editor .ProseMirror pre) {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+  background: color-mix(in oklab, var(--muted) 88%, #0d1117);
+}
+
+:deep(.tiptap-editor .ProseMirror[data-youtube-video]) {
+  margin: 0.5rem 0;
+}
+
+:deep(.tiptap-editor .ProseMirror iframe) {
+  max-width: 100%;
+  border: 0;
+  border-radius: 0.375rem;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+}
 </style>
