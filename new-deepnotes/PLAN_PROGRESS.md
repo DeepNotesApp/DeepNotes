@@ -13,7 +13,7 @@
 | Area | State |
 |------|--------|
 | **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** + **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST), groups/**members**/invite/join, notifications **metadata** only. Missing: theme UX, live collab, account/billing/pages ops/group prefs UIs, notification decrypt, native shells. Editor ≠ legacy infinite canvas/note tree until product-aligned. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST), groups/**members**/invite/join, notifications **metadata** only, theme (VueUse **`useColorMode`**, persist / system / toggle). Missing: live collab, account/billing/pages ops/group prefs UIs, notification decrypt, native shells. Editor ≠ legacy infinite canvas/note tree until product-aligned. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -36,12 +36,11 @@
 
 **Required for parity** unless *Deferred* above.
 
-**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages, `PageEditorView`, groups+members+invite/join+crypto, notifications shell, MSW+Vitest session matrix, ESLint restricted imports, Playwright **demo**, `apps/marketing`.
+**Done:** typed client, `useSession`, register/login/demo/logout+2FA, home+pages, `PageEditorView`, groups+members+invite/join+crypto, notifications shell, MSW+Vitest session matrix, ESLint restricted imports, Playwright **demo**, `apps/marketing`, theme (VueUse + header switcher).
 
 **Open:**
 
 - [ ] Password (registered) Playwright + stronger session/crypto asserts  
-- [ ] Theme: persist + `prefers-color-scheme` + toggle (tokens exist in `globals.css`)  
 - [ ] Live editing: **collab WS** client + Phase 3 server path  
 - [ ] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [ ] `[parity]` Page ops + group settings + prefs (recents/favorites/path…) — UIs  
@@ -85,6 +84,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | Theme: **`@vueuse/core` `useColorMode`**, hydrate pre-mount, **`ThemeSwitcher`**, Vitest hydration/migration tests, `App` unified shell (`data-testid="app-shell"`). |
 | 2026-04-29 | Compacted doc; parity goal + checklist preserved; condensed tests/E2E. |
 | 2026-04-29 | Full parity as product gate; `[full parity]` rows + Phase 5 parity gate. |
 | 2026-04-27 | TRPC_REST_MAP verified; realtime vs collab WS called out; counts corrected. |
