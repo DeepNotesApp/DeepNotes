@@ -92,6 +92,8 @@ import {
   performPageSoftDelete,
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
+  performTrustedAppendNextPageCollabUpdate,
+  resolveRealtimeHashFieldAccess,
 } from "./index.js";
 import {
   performCreatePage,
@@ -1157,13 +1159,26 @@ describe.skipIf(resolveTemplateContext() == null)(
           accessCookie: access,
           loginHash,
         });
-        await performUserTwoFactorEnableFinish({
-          db,
-          env,
-          accessCookie: access,
-          loginHash,
-          authenticatorToken: authenticator.generate(secret),
-        });
+        let finishError: unknown;
+        for (let i = 0; i < 5; i++) {
+          try {
+            await performUserTwoFactorEnableFinish({
+              db,
+              env,
+              accessCookie: access,
+              loginHash,
+              authenticatorToken: authenticator.generate(secret),
+            });
+            finishError = undefined;
+            break;
+          } catch (e) {
+            finishError = e;
+            await new Promise((r) => setTimeout(r, 100));
+          }
+        }
+        if (finishError != null) {
+          throw finishError;
+        }
 
         await expect(
           performSessionLogin({
@@ -1438,6 +1453,42 @@ describe.skipIf(resolveTemplateContext() == null)(
         expect(two.lastIndex).toBe(1);
         expect(two.updates).toHaveLength(2);
 
+        await db
+          .update(users)
+          .set({ plan: "pro" })
+          .where(eq(users.id, reg.userId));
+
+        const trustedBlob = rand32();
+        const trusted = await performTrustedAppendNextPageCollabUpdate({
+          db,
+          pageId: reg.pageId,
+          userId: reg.userId,
+          encryptedData: trustedBlob,
+        });
+        expect(trusted.newIndex).toBe(2);
+
+        const three = await performGetPageCollabUpdates({
+          db,
+          env,
+          accessCookie: access,
+          pageId: reg.pageId,
+        });
+        expect(three.lastIndex).toBe(2);
+        expect(three.updates).toHaveLength(3);
+        expect(three.updates[2]!.encryptedData.equals(Buffer.from(trustedBlob))).toBe(
+          true,
+        );
+
+        const outsider = nanoid();
+        await expect(
+          performTrustedAppendNextPageCollabUpdate({
+            db,
+            pageId: reg.pageId,
+            userId: outsider,
+            encryptedData: rand32(),
+          }),
+        ).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
+
         await expect(
           performAppendPageCollabUpdates({
             db,
@@ -1455,10 +1506,99 @@ describe.skipIf(resolveTemplateContext() == null)(
             env,
             accessCookie: access,
             pageId: reg.pageId,
-            expectedLastIndex: 1,
-            updates: [{ index: 3, encryptedData: rand32() }],
+            expectedLastIndex: 2,
+            updates: [{ index: 4, encryptedData: rand32() }],
           }),
         ).rejects.toMatchObject({ status: 400, code: "BAD_REQUEST" });
+      } finally {
+        await client.end({ timeout: 5 });
+        const admin2 = postgres(ctx.adminUrl, { max: 1 });
+        try {
+          await dropDatabaseIfExists(admin2, cloneName);
+        } finally {
+          await admin2.end({ timeout: 5 });
+        }
+      }
+    });
+
+    it("realtime hash ACL: user/page/group keys from Postgres membership + public view", async () => {
+      const env = testSessionEnv();
+      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
+      const admin = postgres(ctx.adminUrl, { max: 1 });
+      try {
+        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
+      } finally {
+        await admin.end({ timeout: 5 });
+      }
+
+      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
+      const client = postgres(cloneUrl, { max: 1 });
+      const db = drizzle(client, { schema });
+      try {
+        const loginA = rand32();
+        const loginB = rand32();
+        const regA = await buildRegisterBody(`a-${nanoid()}@example.com`, loginA, {
+          groupIsPublic: true,
+        });
+        const regB = await buildRegisterBody(`b-${nanoid()}@example.com`, loginB, {
+          groupIsPublic: true,
+        });
+        await performUserRegister({ db, env, body: regA });
+        await performUserRegister({ db, env, body: regB });
+
+        const foreignUserKey = `user:${nanoid()}`;
+        const needs = new Map<
+          string,
+          { read: boolean; write: boolean }
+        >([
+          [`user:${regA.userId}`, { read: true, write: true }],
+          [foreignUserKey, { read: true, write: false }],
+          [`page:${regA.pageId}`, { read: true, write: true }],
+          [`group:${regA.groupId}`, { read: true, write: true }],
+        ]);
+
+        const ownerRes = await resolveRealtimeHashFieldAccess({
+          db,
+          userId: regA.userId,
+          needs,
+        });
+        expect(ownerRes.get(`user:${regA.userId}`)).toEqual({
+          readOk: true,
+          writeOk: true,
+        });
+        expect(ownerRes.get(foreignUserKey)).toEqual({
+          readOk: false,
+          writeOk: true,
+        });
+        expect(ownerRes.get(`page:${regA.pageId}`)).toEqual({
+          readOk: true,
+          writeOk: true,
+        });
+        expect(ownerRes.get(`group:${regA.groupId}`)).toEqual({
+          readOk: true,
+          writeOk: true,
+        });
+
+        const outsiderNeeds = new Map<
+          string,
+          { read: boolean; write: boolean }
+        >([
+          [`page:${regA.pageId}`, { read: true, write: true }],
+          [`group:${regA.groupId}`, { read: true, write: true }],
+        ]);
+        const pub = await resolveRealtimeHashFieldAccess({
+          db,
+          userId: regB.userId,
+          needs: outsiderNeeds,
+        });
+        expect(pub.get(`page:${regA.pageId}`)).toEqual({
+          readOk: true,
+          writeOk: false,
+        });
+        expect(pub.get(`group:${regA.groupId}`)).toEqual({
+          readOk: true,
+          writeOk: false,
+        });
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

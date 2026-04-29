@@ -55,7 +55,7 @@
 
 | Package | Command / note |
 |---------|----------------|
-| `@deepnotes/session` | `pnpm --filter @deepnotes/session exec vitest run src/account-flows.integration.test.ts` (+ `.env` DB URLs) |
+| `@deepnotes/session` | `pnpm --filter @deepnotes/session exec vitest run` (+ `.env` DB URLs); template DB tests include **collab trusted append** + **realtime hash ACL** |
 | `@deepnotes/web` | `pnpm --filter @deepnotes/web test` (Vitest) |
 | `@deepnotes/api-worker` | 503 matrix env-smoke in `index.test.ts` |
 
@@ -69,7 +69,7 @@
 
 **Open:**
 
-- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; **realtime-wire** framing Vitest round-trips; **api-worker** `executeRealtimeWsBatch` (**user** / **page** / **group** hash + ACL denial/write-deny/mixed/unsubscribe + **Vitest**) — full DO + Redis in CI **TBD**; SPA **decryptPageAbsoluteTitle** encrypt/decrypt Vitest (**`page-collab-crypto.absolute-title.test.ts`**)  
+- [x] Collab **and** realtime: **Postgres-backed integration** — `account-flows.integration.test.ts`: **`performTrustedAppendNextPageCollabUpdate`** (internal WS append path + outsider **403**) alongside existing cookie **`performAppendPageCollabUpdates`**; **`resolveRealtimeHashFieldAccess`** (owner **user:/page:/group:** vs public-group outsider **view-only**). Still **TBD:** full **UserRealtimeRoom** DO + live **Upstash** in CI (worker **`executeRealtimeWsBatch` Vitest** + **`collab-wire`** / **`realtime-wire`** unit tests already in repo; SPA **`page-collab-crypto.absolute-title.test.ts`**)  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete + rich TipTap **done**; **realtime hash** path titles **partial** (same-group **page:** slice); **spatial/world** still open — goal above)
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Postgres parity tests:** `performTrustedAppendNextPageCollabUpdate` + **`resolveRealtimeHashFieldAccess`** in **`account-flows.integration.test.ts`**; 2FA invalid-TOTP test retry around **`enableFinish`** (TOTP window edge); **`PLAN_PROGRESS` §8** integration checkbox tightened (DO+Redis CI still TBD). |
 | 2026-04-29 | **Path breadcrumb + tests:** SPA path card unknown label **`[Page ${pageId}]`** (legacy `pageAbsoluteTitles`); Vitest **`decryptPageAbsoluteTitle`** round-trip; realtime batch **UNSUBSCRIBE** invokes **`unsubscribeField`** (full-key parity). |
 | 2026-04-29 | **Realtime hash Redis TTL:** `UserRealtimeRoom` **`EXPIRE`** (7d) on `user:` / `page:` / `group:` hash keys after **hmget** / **hset** — standard-Redis substitute for KeyDB **`expiremember`**; TRPC_REST_MAP + plan snapshot. |
 | 2026-04-29 | **Realtime hash cross-instance pub/sub:** after Upstash **HSET**, `UserRealtimeRoom` **PUBLISH**es `data-update|{fullKey}` (legacy-style **msgpack** + 16-byte publisher id, base64); per-field **SSE `/subscribe`** loop forwards remote updates as **DATA_NOTIFICATION**; `realtime-redis-pubsub` Vitest; TRPC_REST_MAP + plan. |
