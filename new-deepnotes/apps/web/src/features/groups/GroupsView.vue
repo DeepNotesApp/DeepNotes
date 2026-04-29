@@ -84,7 +84,7 @@ watch(
                 <dt>Main page</dt>
                 <dd>
                   <Button as-child size="sm" variant="link" class="h-auto p-0">
-                    <RouterLink :to="`/page/${g.mainPageId}`">
+                    <RouterLink :to="`/pages/${g.mainPageId}`">
                       {{ g.mainPageId }}
                     </RouterLink>
                   </Button>
@@ -123,7 +123,7 @@ watch(
             >
               <li v-for="pid in g.pageIds" :key="pid">
                 <Button as-child size="sm" variant="outline">
-                  <RouterLink :to="`/page/${pid}`">{{ pid }}</RouterLink>
+                  <RouterLink :to="`/pages/${pid}`">{{ pid }}</RouterLink>
                 </Button>
               </li>
             </ul>

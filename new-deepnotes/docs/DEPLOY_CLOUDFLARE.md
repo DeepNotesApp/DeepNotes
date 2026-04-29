@@ -7,7 +7,8 @@ High-level runbook aligned with [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.m
 | Piece | Target | Config |
 |-------|--------|--------|
 | HTTP API | Cloudflare Workers | `apps/api-worker/wrangler.toml` |
-| SPA | Cloudflare Pages (or Workers static assets) | Build `apps/web` `dist/` |
+| SPA (signed-in app) | Cloudflare Pages (or Workers static assets) | Build `apps/web` → `dist/` |
+| Marketing (public landing, SEO) | Cloudflare Pages (separate project or path) | Build `apps/marketing` → `dist/` (`vite-ssg`). At build time set **`VITE_WEB_APP_URL`** for the “Open app” link (e.g. `https://app.example.com`). |
 | Postgres | Managed Postgres (external) | **Hyperdrive** binding → same logical DB as local |
 | Redis | Upstash / Redis Cloud / TCP-capable provider | `REDIS_URL` (or vendor HTTP API) via secrets |
 
@@ -31,6 +32,7 @@ Typical pattern:
 - **Preview Worker**: separate environment in Wrangler (`env.preview`) or a second Worker name; secrets scoped to a **branch database** or read-only clone.
 - **Preview Pages**: branch deployments; set **environment variables** in Pages project for **public** config only (e.g. `VITE_API_URL=https://api-preview.example.com`).
 - **Never** put DB passwords or signing keys in `VITE_*` client variables.
+- **Marketing build:** only non-secret URLs belong in `VITE_WEB_APP_URL` (public SPA origin).
 
 ### Local
 

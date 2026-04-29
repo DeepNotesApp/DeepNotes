@@ -46,9 +46,20 @@ const router = createRouter({
       component: () => import("./features/notifications/NotificationsView.vue"),
     },
     {
-      path: "/page/:pageId",
+      path: "/pages",
+      name: "pages-entry",
+      component: () => import("./features/pages/PagesEntryRedirectView.vue"),
+    },
+    {
+      path: "/pages/:pageId",
       name: "page",
       component: () => import("./features/pages/PageEditorView.vue"),
+    },
+    {
+      path: "/page/:pageId",
+      redirect: (to) => ({
+        path: `/pages/${String(to.params.pageId ?? "")}`,
+      }),
     },
   ],
 });

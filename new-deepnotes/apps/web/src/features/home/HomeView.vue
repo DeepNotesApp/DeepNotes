@@ -90,7 +90,7 @@ watch(isAuthenticated, (ok) => {
               <ul class="mt-1 flex flex-wrap gap-2">
                 <li v-for="pid in g.pageIds" :key="pid">
                   <Button as-child size="sm" variant="outline">
-                    <RouterLink :to="`/page/${pid}`">{{ pid }}</RouterLink>
+                    <RouterLink :to="`/pages/${pid}`">{{ pid }}</RouterLink>
                   </Button>
                 </li>
               </ul>

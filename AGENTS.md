@@ -1,0 +1,2 @@
+- vue-shadcn and Tailwind for UI.
+- Feature-based folder structure.
