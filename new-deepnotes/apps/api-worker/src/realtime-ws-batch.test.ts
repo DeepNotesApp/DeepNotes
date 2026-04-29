@@ -10,6 +10,8 @@ import {
   canRealtimeHashAccess,
   executeRealtimeWsBatch,
   realtimeFullKey,
+  redisHashKey,
+  type RealtimeHashAclPort,
   type RealtimeHashPort,
 } from "./realtime-ws-batch.js";
 
@@ -52,7 +54,7 @@ function createMemoryHashPort(
 }
 
 describe("executeRealtimeWsBatch", () => {
-  it("denies group/page hash access (user-only until Postgres ACL)", () => {
+  it("denies page/group hash without Postgres ACL port (user-only sync)", () => {
     expect(canRealtimeHashAccess("u1", "group", "g1")).toBe(false);
     expect(canRealtimeHashAccess("u1", "page", "p1")).toBe(false);
     expect(canRealtimeHashAccess("u1", "user", "u1")).toBe(true);
@@ -86,6 +88,7 @@ describe("executeRealtimeWsBatch", () => {
       decoded,
       redis: port,
       hooks,
+      acl: null,
     });
     expect(out.responseBytes).not.toBeNull();
     expect(out.subscribeNotifyBytes).toBeNull();
@@ -120,6 +123,7 @@ describe("executeRealtimeWsBatch", () => {
         },
         unsubscribeField: () => {},
       },
+      acl: null,
     });
     expect(subs).toEqual([realtimeFullKey("user", "u1", "email")]);
     expect(out.subscribeNotifyBytes).not.toBeNull();
@@ -145,10 +149,46 @@ describe("executeRealtimeWsBatch", () => {
       decoded,
       redis: port,
       hooks: { subscribeField: () => {}, unsubscribeField: () => {} },
+      acl: null,
     });
     expect(out.hsetBroadcastItems).toHaveLength(1);
     expect(out.hsetBroadcastItems[0]?.fullKey).toBe(
       realtimeFullKey("user", "u1", "email"),
     );
+  });
+
+  it("HGET on page hash succeeds when ACL grants read", async () => {
+    const { port } = createMemoryHashPort({
+      "page:p9": { "encrypted-relative-title": "enc" },
+    });
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 5,
+      commands: [
+        {
+          type: RealtimeCommandType.HGET,
+          args: ["page", "p9", "encrypted-relative-title"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch(needs) {
+        expect(needs.get(redisHashKey("page", "p9"))?.read).toBe(true);
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("page", "p9"), { readOk: true, writeOk: true });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: { subscribeField: () => {}, unsubscribeField: () => {} },
+      acl,
+    });
+    expect(out.responseBytes).not.toBeNull();
   });
 });

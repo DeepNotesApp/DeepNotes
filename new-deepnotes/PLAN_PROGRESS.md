@@ -12,8 +12,8 @@
 
 | Area | State |
 |------|--------|
-| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** **`GET /api/realtime-ws`** + **`UserRealtimeRoom` DO** + `@deepnotes/realtime-wire`. Framing + Vitest round-trips; **`USER_NOTIFICATION`** push after `performNotifyUsers`. **Hash slice:** when **Upstash** is configured (`UPSTASH_REDIS_*`), DO handles legacy **REQUEST** batches for **`user:{userId}`** Redis (**HGET**/**HSET**/**SUBSCRIBE**/**UNSUBSCRIBE** → **RESPONSE** + **DATA_NOTIFICATION** intra-DO fan-out). **Still open:** **`page`** / **`group`** hash ACL vs Postgres (legacy DataAbstraction); cross-process Redis pub/sub (legacy `expiremember`/KeyDB) not replicated. SPA remains REST-heavy for titles until client opts into hash WS. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, **tables, images, tasks, code (lowlight), KaTeX math (inline + block), YouTube embeds (Vue node view + resize handle like legacy)**, highlight, align, sub/sup, HR, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme, **live notification toast** when **`/api/realtime-ws`** connected. Missing: **`page`/`group` realtime hashes + SPA wired** (full legacy parity; worker has **`user:{id}`** hash slice when Upstash is set); **spatial/world** canvas, native shells. |
+| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** **`GET /api/realtime-ws`** + **`UserRealtimeRoom` DO** + `@deepnotes/realtime-wire`. Framing + Vitest round-trips; **`USER_NOTIFICATION`** push after `performNotifyUsers`. **Hash slice:** when **Upstash** (`UPSTASH_REDIS_*`) **and** **`HYPERDRIVE`** are set, DO serves **`user:`** / **`page:`** / **`group:`** Redis hashes with Postgres ACL (`resolveRealtimeHashFieldAccess`: read=`viewGroupPages`, write=`editGroupPages`). With Upstash only, **`user:{id}`** still works (sync user-only gate). **Still open:** cross-process Redis pub/sub (legacy `expiremember`/KeyDB); SPA still REST-first for titles until it sends legacy **REQUEST** batches. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, **tables, images, tasks, code (lowlight), KaTeX math (inline + block), YouTube embeds (Vue node view + resize handle like legacy)**, highlight, align, sub/sup, HR, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme, **live notification toast** when **`/api/realtime-ws`** connected. Missing: **legacy RealtimeClient-style REQUEST batches** from SPA for **`page`/`group`** hash titles (API path ready when Upstash+HYPERDRIVE); **spatial/world** canvas, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -26,7 +26,7 @@
 | **0** | Done | Map, OpenAPI, Drizzle baseline, CLIENT_FORKS |
 | **1** | Skip? | Legacy monorepo only |
 | **2** | Done | Turbo/CI/template DB/deploy docs |
-| **3** | WIP | **realtime:** `USER_NOTIFICATION` WS + DO + invite **`notifyUsers`**; **`user`-hash** REQUEST (**Upstash**) + RESP/DATA_NOTIFICATION in-DO (**`page`/`group` ACL + cross-node pub/sub** still open); collab WS MVP **done** |
+| **3** | WIP | **realtime:** `USER_NOTIFICATION` WS + DO + invite **`notifyUsers`**; hash **REQUEST** + **`page`/`group` Postgres ACL** when Hyperdrive + Upstash; cross-node Redis pub/sub **still open**; collab WS MVP **done** |
 | **4** | WIP | See checklist below |
 | **5** | Todo | Cutover after **parity gate** + metrics + decrypt spot-checks |
 
@@ -46,7 +46,7 @@
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
 - [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope) — **partial:** WS awareness+carets; TipTap **tables, images, tasks**, **code (lowlight), math (inline + block), YouTube** (Vue node view + resize handle), typography (highlight, align, sub/sup, HR), link/underline/placeholder (**no** spatial/world canvas yet)  
 - [x] `[parity]` Notifications: decrypt/display as legacy  
-- [x] Legacy **realtime** — **partial:** `USER_NOTIFICATION` over **`/api/realtime-ws`** + per-user DO (`@deepnotes/realtime-wire`); join-invite **DB notifications** + E2EE payloads; **`user:{id}`** hash **REQUEST**/RESP (**Upstash** optional); **`page`/`group`** caches + Redis pub/sub parity **not** done  
+- [x] Legacy **realtime** — **partial:** `USER_NOTIFICATION` + hash **REQUEST** (`user` / `page` / `group` when **Upstash** + **Hyperdrive**); join-invite **DB notifications** + E2EE payloads; cross-process Redis pub/sub parity **not** done  
 - [ ] Capacitor/Tauri **after web parity**
 
 ---
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Realtime hash ACL (Postgres):** `resolveRealtimeHashFieldAccess` in `@deepnotes/session` for **`page:`** / **`group:`** (`viewGroupPages` / `editGroupPages`); `UserRealtimeRoom` wires **Hyperdrive** + Vitest mock-ACL **page** HGET. |
 | 2026-04-29 | **Realtime Redis hash slice (Upstash):** `UserRealtimeRoom` handles binary **REQUEST** (`executeRealtimeWsBatch`); **`user:{userId}`** HGET/HSET/SUBSCRIBE/UNSUBSCRIBE + subscriber fan-out; **`realtime-ws-batch.test.ts`**. |
 | 2026-04-29 | **Realtime wire framing parity:** `@deepnotes/realtime-wire` decodes/encodes legacy **RESPONSE**, **DATA_NOTIFICATION**, and client **REQUEST** batches (msgpackr + lib0) with Vitest; Worker DO unchanged (`USER_NOTIFICATION` only). Moves toward Redis hash cache parity without E2E. |
 | 2026-04-29 | **Realtime `USER_NOTIFICATION` parity slice:** `@deepnotes/realtime-wire`, `UserRealtimeRoom` DO, `GET /api/realtime-ws`, `performNotifyUsers` + join-invite optional `notifications` + bootstrap `?inviteeUserId=` keyrings; SPA toast + `buildGroupInviteSentNotifications`. |

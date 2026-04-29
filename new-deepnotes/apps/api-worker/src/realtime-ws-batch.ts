@@ -1,6 +1,6 @@
 /**
  * LEGACY-compat realtime hash commands over WS (RESPONSE / DATA_NOTIFICATION).
- * Only `user:{userId}` Redis hashes are allowed for parity until group/page ACL is wired via Postgres.
+ * `user:{id}` allowed on the isolate; `page:` / `group:` when `acl` resolves Postgres membership.
  */
 import {
   RealtimeCommandType,
@@ -30,6 +30,75 @@ export function canRealtimeHashAccess(
 ): boolean {
   if (prefix === "user") return suffix === viewerUserId;
   return false;
+}
+
+export type RealtimeHashAclPort = {
+  resolveBatch(
+    needs: Map<string, { read: boolean; write: boolean }>,
+  ): Promise<Map<string, { readOk: boolean; writeOk: boolean }>>;
+};
+
+function accumulateRealtimeHashNeeds(
+  meta: { cmd: RealtimeClientCommand; commandId: number }[],
+): Map<string, { read: boolean; write: boolean }> {
+  const needs = new Map<string, { read: boolean; write: boolean }>();
+  function add(key: string, read: boolean, write: boolean): void {
+    const cur = needs.get(key) ?? { read: false, write: false };
+    if (read) {
+      cur.read = true;
+    }
+    if (write) {
+      cur.write = true;
+    }
+    needs.set(key, cur);
+  }
+  for (const { cmd } of meta) {
+    switch (cmd.type) {
+      case RealtimeCommandType.HGET: {
+        const t = parseTripleArgs(cmd.args);
+        if (t != null) {
+          add(redisHashKey(t[0], t[1]), true, false);
+        }
+        break;
+      }
+      case RealtimeCommandType.SUBSCRIBE: {
+        const t = parseTripleArgs(cmd.args);
+        if (t != null) {
+          add(redisHashKey(t[0], t[1]), true, false);
+        }
+        break;
+      }
+      case RealtimeCommandType.HSET: {
+        const t = parseHSetArgs(cmd.args);
+        if (t != null) {
+          add(redisHashKey(t.prefix, t.suffix), false, true);
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  return needs;
+}
+
+function syncResolveRealtimeHashAccess(
+  userId: string,
+  needs: Map<string, { read: boolean; write: boolean }>,
+): Map<string, { readOk: boolean; writeOk: boolean }> {
+  const out = new Map<string, { readOk: boolean; writeOk: boolean }>();
+  for (const [key, need] of needs) {
+    const i = key.indexOf(":");
+    const prefix = i > 0 ? key.slice(0, i) : "";
+    const suffix = i > 0 ? key.slice(i + 1) : "";
+    const allowed =
+      prefix !== "" && canRealtimeHashAccess(userId, prefix, suffix);
+    out.set(key, {
+      readOk: !need.read || allowed,
+      writeOk: !need.write || allowed,
+    });
+  }
+  return out;
 }
 
 export type RealtimeHashPort = {
@@ -85,12 +154,21 @@ export async function executeRealtimeWsBatch(input: {
   decoded: DecodedRealtimeClientRequest;
   redis: RealtimeHashPort | null;
   hooks: RealtimeBatchHooks;
+  acl: RealtimeHashAclPort | null;
 }): Promise<ExecuteRealtimeWsBatchResult> {
-  const { userId, decoded, redis, hooks } = input;
+  const { userId, decoded, redis, hooks, acl } = input;
   const meta = decoded.commands.map((cmd, i) => ({
     cmd,
     commandId: decoded.firstCommandId + i,
   }));
+
+  const needs = accumulateRealtimeHashNeeds(meta);
+  const resolved =
+    needs.size === 0
+      ? new Map<string, { readOk: boolean; writeOk: boolean }>()
+      : acl != null
+        ? await acl.resolveBatch(needs)
+        : syncResolveRealtimeHashAccess(userId, needs);
 
   const hgetResponses = new Map<number, unknown>();
 
@@ -112,7 +190,7 @@ export async function executeRealtimeWsBatch(input: {
       continue;
     }
     const [prefix, suffix, field] = t;
-    if (!canRealtimeHashAccess(userId, prefix, suffix)) {
+    if (!resolved.get(redisHashKey(prefix, suffix))?.readOk) {
       hgetResponses.set(row.commandId, undefined);
       continue;
     }
@@ -168,7 +246,7 @@ export async function executeRealtimeWsBatch(input: {
         if (t == null) {
           return;
         }
-        if (!canRealtimeHashAccess(userId, t.prefix, t.suffix)) {
+        if (!resolved.get(redisHashKey(t.prefix, t.suffix))?.writeOk) {
           return;
         }
         const fk = realtimeFullKey(t.prefix, t.suffix, t.field);
@@ -193,7 +271,7 @@ export async function executeRealtimeWsBatch(input: {
         }
         const [prefix, suffix, field] = t;
         const fk = realtimeFullKey(prefix, suffix, field);
-        if (!canRealtimeHashAccess(userId, prefix, suffix)) {
+        if (!resolved.get(redisHashKey(prefix, suffix))?.readOk) {
           subscribeItems.push({ prefix, suffix, field, value: undefined });
           return;
         }

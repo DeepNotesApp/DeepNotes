@@ -127,6 +127,8 @@ export type {
   NotifyUsersItem,
   RealtimeNotificationDelivery,
 } from "./notify-users.js";
+export { resolveRealtimeHashFieldAccess } from "./realtime-hash-acl.js";
+export type { RealtimeHashAccessNeeds } from "./realtime-hash-acl.js";
 export type { StripeBillingEnv } from "./stripe-billing.js";
 export {
   findUserIdByStripeCustomerId,

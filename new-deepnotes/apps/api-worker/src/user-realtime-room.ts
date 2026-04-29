@@ -4,16 +4,21 @@ import {
   encodeRealtimeServerDataNotification,
   encodeUserNotificationServerMessage,
 } from "@deepnotes/realtime-wire";
+import { resolveRealtimeHashFieldAccess } from "@deepnotes/session";
 
 import {
   executeRealtimeWsBatch,
+  type RealtimeHashAclPort,
   type RealtimeHashPort,
 } from "./realtime-ws-batch.js";
+import { getDbForConnectionString } from "./db-pool.js";
 
 export type UserRealtimeRoomEnv = {
   REALTIME_INTERNAL_SECRET?: string;
   UPSTASH_REDIS_REST_URL?: string;
   UPSTASH_REDIS_REST_TOKEN?: string;
+  /** When set, `page:` / `group:` hash REQUEST batches use Postgres-backed ACL. */
+  HYPERDRIVE?: Hyperdrive;
 };
 
 /**
@@ -182,10 +187,24 @@ export class UserRealtimeRoom {
     }
 
     try {
+      const hyper = this.env.HYPERDRIVE;
+      const acl: RealtimeHashAclPort | null =
+        hyper != null
+          ? {
+              resolveBatch: (needs) =>
+                resolveRealtimeHashFieldAccess({
+                  db: getDbForConnectionString(hyper.connectionString),
+                  userId,
+                  needs,
+                }),
+            }
+          : null;
+
       const out = await executeRealtimeWsBatch({
         userId,
         decoded,
         redis: this.hashPort(),
+        acl,
         hooks: {
           subscribeField: (fk) => {
             this.addSubscription(fk, ws);
