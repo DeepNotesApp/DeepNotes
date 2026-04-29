@@ -381,6 +381,9 @@ importers:
       lib0:
         specifier: ^0.2.114
         version: 0.2.117
+      msgpackr:
+        specifier: ^1.11.8
+        version: 1.11.10
     devDependencies:
       typescript:
         specifier: ^5.8.3

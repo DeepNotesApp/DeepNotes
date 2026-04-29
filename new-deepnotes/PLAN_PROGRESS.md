@@ -12,7 +12,7 @@
 
 | Area | State |
 |------|--------|
-| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** `USER_NOTIFICATION` path: **`GET /api/realtime-ws`** + **`UserRealtimeRoom` DO** + `@deepnotes/realtime-wire` (hash `HGET/SUBSCRIBE` channel **not** reimplemented—SPA still REST-heavy for page/group titles). |
+| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** `USER_NOTIFICATION` path: **`GET /api/realtime-ws`** + **`UserRealtimeRoom` DO** + `@deepnotes/realtime-wire`. **`@deepnotes/realtime-wire`** now implements legacy **REQUEST / RESPONSE / DATA_NOTIFICATION** framing + Vitest round-trips (Worker still pushes **`USER_NOTIFICATION` only**; Redis-backed hash **`HGET`/`SUBSCRIBE`** parity **not** wired—SPA stays REST-heavy for titles). |
 | **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, **tables, images, tasks, code (lowlight), KaTeX math (inline + block), YouTube embeds (Vue node view + resize handle like legacy)**, highlight, align, sub/sup, HR, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme, **live notification toast** when **`/api/realtime-ws`** connected. Missing: **realtime hash cache** (full legacy parity), **spatial/world** canvas, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
@@ -69,7 +69,7 @@
 
 **Open:**
 
-- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; full DO path **TBD** in CI  
+- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; **realtime-wire** RESPONSE/DATA_NOTIFICATION/REQUEST Vitest round-trips; full DO / Redis hash path **TBD** in CI  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete + rich TipTap **done**; **realtime hash cache** + **spatial/world** still open — goal above)
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Realtime wire framing parity:** `@deepnotes/realtime-wire` decodes/encodes legacy **RESPONSE**, **DATA_NOTIFICATION**, and client **REQUEST** batches (msgpackr + lib0) with Vitest; Worker DO unchanged (`USER_NOTIFICATION` only). Moves toward Redis hash cache parity without E2E. |
 | 2026-04-29 | **Realtime `USER_NOTIFICATION` parity slice:** `@deepnotes/realtime-wire`, `UserRealtimeRoom` DO, `GET /api/realtime-ws`, `performNotifyUsers` + join-invite optional `notifications` + bootstrap `?inviteeUserId=` keyrings; SPA toast + `buildGroupInviteSentNotifications`. |
 | 2026-04-29 | **TipTap deep parity:** code blocks (**lowlight** + atom-one-dark CSS), **YouTube** embeds, **KaTeX** inline + block math (Vue node views, legacy `inline-math` / `math-block` HTML tags); direct **`@tiptap/core` + `@tiptap/pm`** deps to avoid parent-monorepo TipTap v2 resolution. |
 | 2026-04-29 | **TipTap parity slice:** tables (resizable), images (inline + base64), task lists, highlight, text align, sub/sup, horizontal rule; scoped editor CSS + Vitest on extension bundle. |
