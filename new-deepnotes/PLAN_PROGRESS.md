@@ -1,6 +1,6 @@
 # Restart plan — progress (`new-deepnotes`)
 
-**Refs:** [RESTART_PLAN.md](../docs/RESTART_PLAN.md) · [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) (REST + legacy WS parity map).
+**Refs:** [RESTART_PLAN.md](../docs/RESTART_PLAN.md) · [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) (REST + legacy WS parity map) · [MOBILE_SHELLS.md](./docs/MOBILE_SHELLS.md) · [STAGING_LOADTEST.md](./docs/STAGING_LOADTEST.md).
 
 **Goal:** **Full behavioral parity** with legacy `apps/client` in `new-deepnotes` before cutover. **Exceptions** (explicit in RESTART_PLAN): no tRPC wire, no user/group **rotate-keys**, no **RevenueCat**. MVP = milestone, **not** scope ceiling.
 
@@ -28,7 +28,7 @@
 | **2** | Done | Turbo/CI/template DB/deploy docs |
 | **3** | WIP | **realtime:** `USER_NOTIFICATION` WS + DO + invite **`notifyUsers`**; hash **REQUEST** + **`page`/`group` Postgres ACL** when Hyperdrive + Upstash; SPA path **page:** title **HGET/SUBSCRIBE** when collab crypto ready (same group); cross-node Redis **PUBLISH/SUBSCRIBE** for hash **DATA_NOTIFICATION** (Upstash REST+SSE); collab WS MVP **done** |
 | **4** | WIP | See checklist below |
-| **5** | Todo | Cutover after **parity gate** + metrics + decrypt spot-checks |
+| **5** | Todo | Cutover after **parity gate** + metrics + decrypt spot-checks; staging topology smoke/load prep: [STAGING_LOADTEST.md](./docs/STAGING_LOADTEST.md) |
 
 ---
 
@@ -47,7 +47,7 @@
 - [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope) — **partial:** WS awareness+carets; TipTap **tables, images, tasks**, **code (lowlight), math (inline + block), YouTube** (Vue node view + resize handle), typography (highlight, align, sub/sup, HR), link/underline/placeholder; **spatial/world:** **`/spatial`** stub + home/header entry points (**no** full canvas / spatial containers in editor yet)  
 - [x] `[parity]` Notifications: decrypt/display as legacy  
 - [x] Legacy **realtime** — **partial:** `USER_NOTIFICATION` + hash **REQUEST** / **SUBSCRIBE** for **`page:`** absolute titles in SPA path (same group as editor; **Upstash** + **Hyperdrive**); join-invite **DB notifications** + E2EE payloads; cross-process Redis **pub/sub** for hash field updates (**PUBLISH** + DO **SSE subscribe** bridge; KeyDB-only helpers still **not** replicated)  
-- [ ] Capacitor/Tauri **after web parity**
+- [ ] Capacitor/Tauri **after web parity** — checklist [MOBILE_SHELLS.md](./docs/MOBILE_SHELLS.md) (**doc-only** until parity; native scaffolding deferred to avoid CI churn)
 
 ---
 
@@ -71,7 +71,7 @@
 
 - [x] Collab **and** realtime: **Postgres-backed integration** — `account-flows.integration.test.ts`: **`performTrustedAppendNextPageCollabUpdate`** (internal WS append path + outsider **403**) alongside existing cookie **`performAppendPageCollabUpdates`**; **`resolveRealtimeHashFieldAccess`** (owner **user:/page:/group:** vs public-group outsider **view-only**). Still **TBD:** full **UserRealtimeRoom** DO + live **Upstash** in CI (worker **`executeRealtimeWsBatch` Vitest** + **`collab-wire`** / **`realtime-wire`** unit tests already in repo; SPA **`page-collab-crypto.absolute-title.test.ts`**)  
 - [x] Stripe — **`parseStripeWebhookEvent`** + **`processStripeWebhookEvent`** Vitest (`stripe-billing.test.ts`; signed payloads via `generateTestHeaderString`; no live Stripe API). Optional later: worker route IT with DB fixture.  
-- [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
+- [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested — runbook [STAGING_LOADTEST.md](./docs/STAGING_LOADTEST.md)  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete + rich TipTap **done**; **realtime hash** path titles **partial** (same-group **page:** slice); **spatial/world** — stub route + wiring **done**; **interactive** world canvas still open — goal above)
 
 ---
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Cutover prep docs:** [MOBILE_SHELLS.md](./docs/MOBILE_SHELLS.md) (Capacitor vs Tauri, env URLs, no RevenueCat); [STAGING_LOADTEST.md](./docs/STAGING_LOADTEST.md) (§8 staging smoke + what to measure). OpenAPI `info.description` clarifies Stripe-only billing; no native shell scaffolding yet (CI). |
 | 2026-04-29 | **Spatial/world stub:** `/spatial` placeholder shell (grid + copy), header **Spatial** link, home **Spatial defaults** → preview; `router.test.ts` route registration. Full canvas still out of scope. |
 | 2026-04-29 | **Stripe webhook units:** `parseStripeWebhookEvent` + `processStripeWebhookEvent` tests (`stripe-billing.test.ts`, no API secrets). **`LOCAL_CACHE_PARITY.md`** — legacy in-process cache/pub/sub vs DO + Redis. PLAN_PROGRESS gap row updated. |
 | 2026-04-29 | **Postgres parity tests:** `performTrustedAppendNextPageCollabUpdate` + **`resolveRealtimeHashFieldAccess`** in **`account-flows.integration.test.ts`**; 2FA invalid-TOTP test retry around **`enableFinish`** (TOTP window edge); **`PLAN_PROGRESS` §8** integration checkbox tightened (DO+Redis CI still TBD). |

@@ -2232,7 +2232,7 @@ export function getOpenApiDocument(): OpenAPIObject {
       title: "DeepNotes API",
       version: "0.0.0",
       description:
-        "Greenfield HTTP API (REST + OpenAPI). Legacy /trpc is not a compatibility target.",
+        "Greenfield HTTP API (REST + OpenAPI). Legacy /trpc is not a compatibility target. Billing in this product is Stripe on the web only; native IAP/RevenueCat surfaces are out of scope (see RESTART_PLAN).",
     },
     servers: [{ url: "/" }],
   });
