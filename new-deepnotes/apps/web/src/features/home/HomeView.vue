@@ -237,6 +237,11 @@ async function applyBuiltInDefaults() {
             Re-save the built-in empty note and arrow templates encrypted with your account keys
             (parity with legacy default note/arrow prefs).
           </p>
+          <div class="flex flex-wrap gap-2">
+            <Button as-child size="sm" variant="outline">
+              <RouterLink to="/spatial">Open spatial preview (stub)</RouterLink>
+            </Button>
+          </div>
           <Button
             size="sm"
             variant="secondary"

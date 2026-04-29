@@ -51,6 +51,12 @@ const router = createRouter({
       component: () => import("./features/account/AccountView.vue"),
     },
     {
+      path: "/spatial",
+      name: "spatial-world-stub",
+      component: () =>
+        import("./features/spatial/SpatialWorldStubView.vue"),
+    },
+    {
       path: "/pages",
       name: "pages-entry",
       component: () => import("./features/pages/PagesEntryRedirectView.vue"),

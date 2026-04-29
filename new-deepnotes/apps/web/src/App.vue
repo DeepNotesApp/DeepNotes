@@ -62,6 +62,14 @@ async function onLogout() {
               size="sm"
               variant="ghost"
             >
+              <RouterLink to="/spatial">Spatial</RouterLink>
+            </Button>
+            <Button
+              v-if="isAuthenticated"
+              as-child
+              size="sm"
+              variant="ghost"
+            >
               <RouterLink to="/groups">Groups</RouterLink>
             </Button>
             <Button
