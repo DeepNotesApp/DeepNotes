@@ -10,16 +10,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-defineProps<{
+const props = defineProps<{
   pathLoading: boolean;
   pathError: string | null;
   pathPageIds: string[];
+  /** Decrypted absolute titles from realtime `page:` hash when WS + ACL available (same group as editor). */
+  pathPageLabels: Record<string, string>;
   pagePrefsLoading: boolean;
   isFavorite: boolean;
   bumpMessage: string | null;
   favoriteMessage: string | null;
   isDemo: boolean;
 }>();
+
+function pagePathLabel(pid: string): string {
+  const label = props.pathPageLabels[pid];
+  if (label != null && label.length > 0) {
+    return label;
+  }
+  return `${pid.slice(0, 8)}…`;
+}
 
 defineEmits<{
   bumpAsStarting: [];
@@ -45,10 +55,10 @@ defineEmits<{
           <span v-if="i > 0" aria-hidden="true">/</span>
           <RouterLink
             v-if="i < pathPageIds.length - 1"
-            class="text-primary font-mono underline"
+            class="text-primary underline"
             :to="`/pages/${pid}`"
-          >{{ pid.slice(0, 8) }}…</RouterLink>
-          <span v-else class="text-foreground font-mono font-medium">{{ pid }}</span>
+          >{{ pagePathLabel(pid) }}</RouterLink>
+          <span v-else class="text-foreground font-medium">{{ pagePathLabel(pid) }}</span>
         </template>
       </nav>
       <div class="flex flex-wrap gap-2">

@@ -79,6 +79,13 @@ export function usePageCollabEditor(opts: {
   const collabWsError = ref<string | null>(null);
 
   const collabGroupId = ref<string | null>(null);
+  /** Group-scoped collab key material for decrypting sibling path pages via realtime hashes (same group as editor). */
+  const collabGroupCrypto = ref<{
+    groupId: string;
+    groupEncryptedContentKeyring: Uint8Array;
+    memberEncryptedAccessKeyring: Uint8Array | null;
+    groupAccessKeyring: Uint8Array | null;
+  } | null>(null);
   const collabReloadNonce = ref(0);
   const moveDestGroupId = ref("");
   const pageEncRelTitleB64 = ref<string | null>(null);
@@ -475,6 +482,7 @@ export function usePageCollabEditor(opts: {
         return;
       }
       collabGroupId.value = null;
+      collabGroupCrypto.value = null;
       pageEncRelTitleB64.value = null;
       pageEncAbsTitleB64.value = null;
       collabEncryptedUpdatesForMove.value = [];
@@ -570,6 +578,20 @@ export function usePageCollabEditor(opts: {
                 : null,
             stored,
           });
+          collabGroupCrypto.value = {
+            groupId: data.groupId,
+            groupEncryptedContentKeyring: base64ToBytes(
+              data.groupEncryptedContentKeyring,
+            ),
+            memberEncryptedAccessKeyring:
+              data.memberEncryptedAccessKeyring != null
+                ? base64ToBytes(data.memberEncryptedAccessKeyring)
+                : null,
+            groupAccessKeyring:
+              data.groupAccessKeyring != null
+                ? base64ToBytes(data.groupAccessKeyring)
+                : null,
+          };
         } catch (e) {
           cryptoError.value =
             e instanceof Error
@@ -671,6 +693,7 @@ export function usePageCollabEditor(opts: {
     collabWsLive,
     collabWsError,
     collabGroupId,
+    collabGroupCrypto,
     collabReloadNonce,
     moveDestGroupId,
     pageEncRelTitleB64,

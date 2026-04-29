@@ -15,6 +15,7 @@ import { createPageCollabDoc } from "./page-yjs-doc";
 import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
+import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { usePageSnapshots } from "./usePageSnapshots";
 
 import type { SnapshotRow } from "./page-snapshot-list";
@@ -64,6 +65,7 @@ const {
   updateCount,
   collabWsLive,
   collabWsError,
+  collabGroupCrypto,
   pushError,
   yStateBytes,
   flushPush,
@@ -87,6 +89,18 @@ const {
   isAuthenticated,
   client,
   user,
+});
+
+const isDemoSession = computed(() => user.value?.demo === true);
+
+const { pathPageLabels } = usePagePathRealtimeTitles({
+  pathPageIds,
+  collabGroupCrypto,
+  bootstrapped,
+  isAuthenticated,
+  demo: isDemoSession,
+  collabLoading,
+  cryptoError,
 });
 
 const snapshotsApi = usePageSnapshots({
@@ -118,8 +132,6 @@ const management = usePageManagement({
   collabReloadNonce,
   flushPush,
 });
-
-const isDemoSession = computed(() => user.value?.demo === true);
 
 const {
   snapshots: snapshotList,
@@ -162,6 +174,7 @@ onMounted(() => {
       :path-loading="pathLoading"
       :path-error="pathError"
       :path-page-ids="pathPageIds"
+      :path-page-labels="pathPageLabels"
       :page-prefs-loading="pagePrefsLoading"
       :is-favorite="isFavorite"
       :bump-message="bumpMessage"
