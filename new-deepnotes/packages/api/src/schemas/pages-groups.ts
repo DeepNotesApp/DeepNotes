@@ -10,6 +10,53 @@ export const nanoidIdOpenapi = {
   example: "V1StGXR8_Z5jdHi6B-myT",
 } as const;
 
+export const deepnotesNotificationTypeValues = [
+  "group-request-sent",
+  "group-request-canceled",
+  "group-request-accepted",
+  "group-request-rejected",
+  "group-invitation-sent",
+  "group-invitation-canceled",
+  "group-invitation-accepted",
+  "group-invitation-rejected",
+  "group-member-role-changed",
+  "group-member-removed",
+] as const;
+
+export const deepnotesNotificationTypeSchema = z
+  .enum(deepnotesNotificationTypeValues)
+  .openapi("DeepnotesNotificationType");
+
+export const groupInviteNotificationPayloadSchema = z
+  .object({
+    type: deepnotesNotificationTypeSchema,
+    encryptedContent: byteB64,
+    recipients: z.record(
+      z
+        .string()
+        .regex(/^[A-Za-z0-9_-]{21}$/)
+        .openapi(nanoidIdOpenapi),
+      z.object({
+        encryptedSymmetricKey: byteB64,
+      }),
+    ),
+  })
+  .openapi("GroupInviteNotificationPayload");
+
+/** Optional `?inviteeUserId=` for manager invite flows (notification recipient keyrings). */
+export const groupInviteCryptoBootstrapQuerySchema = z.object({
+  inviteeUserId: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{21}$/)
+    .optional()
+    .openapi({
+      ...nanoidIdOpenapi,
+      param: { name: "inviteeUserId", in: "query" },
+      description:
+        "When set, includes public keyrings for group managers and this user so the SPA can build `notifications` on `POST …/join-invitations`.",
+    }),
+});
+
 export const groupIdPathSchema = z.object({
   groupId: z
     .string()
@@ -236,6 +283,13 @@ export const groupMembersDetailResponseSchema = z
   })
   .openapi("GroupMembersDetailResponse");
 
+const notificationRecipientPublicKeyringRowSchema = z
+  .object({
+    userId: z.string().openapi(nanoidIdOpenapi),
+    publicKeyring: byteB64,
+  })
+  .openapi("NotificationRecipientPublicKeyringRow");
+
 /** Encrypted blobs so the SPA can build invitation / join-request-accept ciphertext (managers). */
 export const groupInviteCryptoBootstrapResponseSchema = z
   .object({
@@ -243,6 +297,10 @@ export const groupInviteCryptoBootstrapResponseSchema = z
     groupAccessKeyring: byteB64.nullable(),
     memberEncryptedAccessKeyring: byteB64.nullable(),
     memberEncryptedInternalKeyring: byteB64,
+    /** Present when `?inviteeUserId=` was set; managers ∪ invitee for E2EE notifications. */
+    notificationRecipientPublicKeyrings: z
+      .array(notificationRecipientPublicKeyringRowSchema)
+      .optional(),
   })
   .openapi("GroupInviteCryptoBootstrapResponse");
 
@@ -348,6 +406,8 @@ export const groupJoinInvitationSendRequestSchema = z
     encryptedInternalKeyring: byteB64,
     userEncryptedName: byteB64,
     userEncryptedNameForUser: byteB64,
+    /** Legacy WS step 2: E2EE `notifyUsers` payloads (optional). */
+    notifications: z.array(groupInviteNotificationPayloadSchema).optional(),
   })
   .openapi("GroupJoinInvitationSendRequest");
 

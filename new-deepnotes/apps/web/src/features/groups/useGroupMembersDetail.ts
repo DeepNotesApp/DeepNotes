@@ -3,6 +3,8 @@ import { ref, type Ref } from "vue";
 /** Route `params.groupId` may be undefined until matched. */
 export type GroupIdParamRef = Ref<string | string[] | undefined>;
 
+import { base64ToBytes } from "@deepnotes/e2ee";
+
 import type { components } from "../../api/api-types.generated";
 import { readSessionCrypto } from "../auth/session-keyrings";
 import { useSession } from "../auth/useSession";
@@ -16,12 +18,15 @@ import {
   buildMakePublicAccessKeyringB64,
   type InviteCryptoBootstrapJson,
 } from "./group-membership-crypto";
+import { buildGroupInviteSentNotifications } from "./group-notification-crypto";
 import {
   buildGroupPrivacyMakePrivateRequest,
   type GroupPrivacyMakePrivateBootstrapJson,
 } from "./group-make-private-crypto";
 
 type GroupMemberRole = components["schemas"]["GroupMemberRole"];
+type GroupInviteNotificationPayload =
+  components["schemas"]["GroupInviteNotificationPayload"];
 
 export function useGroupMembersDetail(groupId: GroupIdParamRef) {
   const loading: Ref<boolean> = ref(false);
@@ -179,7 +184,7 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
-  async function fetchInviteBootstrap(): Promise<
+  async function fetchInviteBootstrap(inviteeUserId?: string): Promise<
     | { ok: true; data: InviteCryptoBootstrapJson }
     | { ok: false; error: string }
   > {
@@ -188,7 +193,13 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
       return { ok: false, error: "Invalid group." };
     }
     const res = await client.GET("/api/groups/{groupId}/invite-crypto-bootstrap", {
-      params: { path: { groupId: id } },
+      params: {
+        path: { groupId: id },
+        query:
+          inviteeUserId != null && inviteeUserId !== ""
+            ? { inviteeUserId }
+            : {},
+      },
     });
     if (res.response.status !== 200 || res.data == null) {
       const msg =
@@ -220,7 +231,7 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     actionLoading.value = true;
     error.value = null;
     try {
-      const boot = await fetchInviteBootstrap();
+      const boot = await fetchInviteBootstrap(input.inviteeUserId);
       if (!boot.ok) {
         error.value = boot.error;
         return;
@@ -244,6 +255,25 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
         inviteeDisplayName: input.inviteeDisplayName,
         groupIsPublic: d.groupIsPublic,
       });
+
+      const recipientPublicKeyrings =
+        boot.data.notificationRecipientPublicKeyrings?.map((r) => ({
+          userId: r.userId,
+          publicKeyring: base64ToBytes(r.publicKeyring),
+        })) ?? [];
+
+      let notifications: GroupInviteNotificationPayload[] | undefined;
+      if (recipientPublicKeyrings.length > 0 && user.value?.userId != null) {
+        notifications = await buildGroupInviteSentNotifications({
+          stored,
+          agentUserId: user.value.userId,
+          inviteeUserId: input.inviteeUserId,
+          groupId: id,
+          inviteeDisplayName: input.inviteeDisplayName,
+          recipientPublicKeyrings,
+        });
+      }
+
       const res = await client.POST("/api/groups/{groupId}/join-invitations", {
         params: { path: { groupId: id } },
         body: {
@@ -254,6 +284,9 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
           userEncryptedNameForUser: bodies.userEncryptedNameForUser,
           ...(bodies.encryptedAccessKeyring != null
             ? { encryptedAccessKeyring: bodies.encryptedAccessKeyring }
+            : {}),
+          ...(notifications != null && notifications.length > 0
+            ? { notifications }
             : {}),
         },
       });

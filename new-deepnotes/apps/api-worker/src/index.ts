@@ -2,6 +2,7 @@ import {
   emailVerificationConfirmRequestSchema,
   emailVerificationResendRequestSchema,
   getOpenApiDocument,
+  groupInviteCryptoBootstrapQuerySchema,
   groupPageCreateRequestSchema,
   groupPagesListQuerySchema,
   pageBacklinkCreateRequestSchema,
@@ -45,6 +46,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import type { DurableObjectNamespace, Fetcher } from "@cloudflare/workers-types";
 import { Hono } from "hono";
 import type { PageMoveBody } from "@deepnotes/session";
+import { uint8ToBase64Standard } from "@deepnotes/collab-wire";
 import Stripe from "stripe";
 
 import { getDbForConnectionString } from "./db-pool.js";
@@ -56,6 +58,7 @@ import {
   getStripeWebhookSecret,
   type WorkerSessionBindings,
 } from "./session-env.js";
+import { frameUserNotificationForWire } from "./user-realtime-room.js";
 
 type Bindings = WorkerSessionBindings & {
   /** Wired in `wrangler.toml`; optional in unit tests that do not pass `env`. */
@@ -66,9 +69,45 @@ type Bindings = WorkerSessionBindings & {
   WORKER_SELF?: Fetcher;
   /** Shared secret for `/api/internal/.../collab-ws-append` (Wrangler secret / `.dev.vars`). */
   COLLAB_INTERNAL_SECRET?: string;
+  /** Per-user realtime fan-out (legacy `USER_NOTIFICATION`). */
+  USER_REALTIME_ROOM?: DurableObjectNamespace;
+  /** Shared secret for USER_REALTIME_ROOM internal push (Wrangler secret / `.dev.vars`). */
+  REALTIME_INTERNAL_SECRET?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
+
+async function dispatchRealtimeNotificationDeliveries(
+  env: Bindings,
+  deliveries: { userId: string; notificationInnerPacked: Uint8Array }[],
+): Promise<void> {
+  const ns = env.USER_REALTIME_ROOM;
+  const secret = env.REALTIME_INTERNAL_SECRET;
+  if (
+    ns == null ||
+    secret == null ||
+    secret === "" ||
+    deliveries.length === 0
+  ) {
+    return;
+  }
+  for (const d of deliveries) {
+    const framed = frameUserNotificationForWire(d.notificationInnerPacked);
+    const stub = ns.get(ns.idFromName(d.userId));
+    await stub.fetch(
+      new Request("http://internal/realtime/push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Realtime-Internal-Secret": secret,
+        },
+        body: JSON.stringify({
+          framedBase64: uint8ToBase64Standard(framed),
+        }),
+      }),
+    );
+  }
+}
 
 const serviceUnavailableBody = {
   code: "SERVICE_UNAVAILABLE" as const,
@@ -1431,6 +1470,19 @@ app.get("/api/groups/:groupId/invite-crypto-bootstrap", async (c) => {
   const cookieHeader = c.req.header("Cookie");
   const groupId = c.req.param("groupId");
 
+  const qParsed = groupInviteCryptoBootstrapQuerySchema.safeParse({
+    inviteeUserId: c.req.query("inviteeUserId") ?? undefined,
+  });
+  if (!qParsed.success) {
+    return c.json(
+      {
+        code: "VALIDATION_ERROR",
+        message: qParsed.error.flatten().formErrors.join("; "),
+      },
+      400,
+    );
+  }
+
   try {
     const { performGetGroupInviteCryptoBootstrap } = await import(
       "@deepnotes/session"
@@ -1440,6 +1492,7 @@ app.get("/api/groups/:groupId/invite-crypto-bootstrap", async (c) => {
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
       groupId,
+      inviteeUserIdForNotify: qParsed.data.inviteeUserId,
     });
     return c.json(
       {
@@ -1454,6 +1507,11 @@ app.get("/api/groups/:groupId/invite-crypto-bootstrap", async (c) => {
             : out.memberEncryptedAccessKeyring.toString("base64"),
         memberEncryptedInternalKeyring:
           out.memberEncryptedInternalKeyring.toString("base64"),
+        notificationRecipientPublicKeyrings:
+          out.notificationRecipientPublicKeyrings.map((r) => ({
+            userId: r.userId,
+            publicKeyring: r.publicKeyring.toString("base64"),
+          })),
       },
       200,
     );
@@ -3295,7 +3353,18 @@ app.post("/api/groups/:groupId/join-invitations", async (c) => {
 
   try {
     const { performGroupJoinInvitationSend } = await import("@deepnotes/session");
-    await performGroupJoinInvitationSend({
+    const notifications =
+      parsed.data.notifications?.map((n) => ({
+        type: n.type,
+        encryptedContent: n.encryptedContent,
+        recipients: Object.fromEntries(
+          Object.entries(n.recipients).map(([uid, r]) => [
+            uid,
+            r.encryptedSymmetricKey,
+          ]),
+        ),
+      })) ?? undefined;
+    const { realtimeDeliveries } = await performGroupJoinInvitationSend({
       db,
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
@@ -3306,7 +3375,9 @@ app.post("/api/groups/:groupId/join-invitations", async (c) => {
       encryptedInternalKeyring: parsed.data.encryptedInternalKeyring,
       userEncryptedName: parsed.data.userEncryptedName,
       userEncryptedNameForUser: parsed.data.userEncryptedNameForUser,
+      notifications,
     });
+    await dispatchRealtimeNotificationDeliveries(c.env, realtimeDeliveries);
     return c.body(null, 204);
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
@@ -4430,5 +4501,85 @@ app.post("/api/webhooks/stripe", async (c) => {
   }
 });
 
+app.get("/api/realtime-ws", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+
+  if (c.req.header("Upgrade") !== "websocket") {
+    return c.text("Expected WebSocket Upgrade request.", 426);
+  }
+
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const ns = c.env.USER_REALTIME_ROOM;
+  if (ns == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "USER_REALTIME_ROOM durable object binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  let summary: { userId: string; demo: boolean };
+  try {
+    const { getAuthenticatedUserSummary } = await import("@deepnotes/session");
+    summary = await getAuthenticatedUserSummary({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    if (summary.demo) {
+      return c.json(
+        {
+          code: "FORBIDDEN",
+          message: "Demo sessions cannot use realtime WebSocket.",
+        },
+        403,
+      );
+    }
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+
+  const id = ns.idFromName(summary.userId);
+  const stub = ns.get(id);
+
+  const h = new Headers();
+  const raw = c.req.raw;
+  for (const [k, v] of raw.headers.entries()) {
+    if (k.toLowerCase() === "x-verified-user-id") {
+      continue;
+    }
+    h.append(k, v);
+  }
+  h.set("X-Verified-User-Id", summary.userId);
+
+  return stub.fetch(new Request(raw.url, { headers: h, method: raw.method }));
+});
+
 export { PageCollabRoom } from "./page-collab-room.js";
+export { UserRealtimeRoom } from "./user-realtime-room.js";
 export default app;

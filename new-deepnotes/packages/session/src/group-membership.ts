@@ -15,6 +15,12 @@ import {
   canManageRole,
   roleHasManageLowerRanks,
 } from "./group-role-ranks.js";
+import {
+  listGroupInviteNotificationRecipientIds,
+  performNotifyUsers,
+  type NotifyUsersItem,
+  type RealtimeNotificationDelivery,
+} from "./notify-users.js";
 import { getAuthenticatedUserSummary } from "./user-me.js";
 import { assertUserProPlan } from "./user-plan.js";
 
@@ -67,7 +73,7 @@ async function countOwners(input: {
   return Number(row?.n ?? 0);
 }
 
-/** Legacy `groups.joinInvitations.send` step 1 (DB only). */
+/** Legacy `groups.joinInvitations.send` step 1 + optional step 2 notifications. */
 export async function performGroupJoinInvitationSend(input: {
   db: DeepnotesDb;
   env: SessionEnv;
@@ -80,7 +86,9 @@ export async function performGroupJoinInvitationSend(input: {
   encryptedInternalKeyring: Uint8Array;
   userEncryptedName: Uint8Array;
   userEncryptedNameForUser: Uint8Array;
-}): Promise<void> {
+  /** E2EE payloads from SPA (legacy WS step 2). */
+  notifications?: NotifyUsersItem[];
+}): Promise<{ realtimeDeliveries: RealtimeNotificationDelivery[] }> {
   const { userId: agentId } = await getAuthenticatedUserSummary(input);
   await assertUserProPlan({ db: input.db, userId: agentId });
 
@@ -153,6 +161,35 @@ export async function performGroupJoinInvitationSend(input: {
       encryptedNameForUser: Buffer.from(input.userEncryptedNameForUser),
     });
   });
+
+  if (input.notifications == null || input.notifications.length === 0) {
+    return { realtimeDeliveries: [] };
+  }
+
+  const allowed = await listGroupInviteNotificationRecipientIds({
+    db: input.db,
+    groupId: input.groupId,
+    inviteeUserId: input.inviteeUserId,
+  });
+
+  for (const n of input.notifications) {
+    for (const uid of Object.keys(n.recipients)) {
+      if (!allowed.has(uid)) {
+        throw new SessionError(
+          400,
+          "BAD_REQUEST",
+          "Notification recipient is not allowed for this invite.",
+        );
+      }
+    }
+  }
+
+  const realtimeDeliveries = await performNotifyUsers({
+    db: input.db,
+    items: input.notifications,
+  });
+
+  return { realtimeDeliveries };
 }
 
 /** Legacy `groups.joinInvitations.accept` step 1. */

@@ -15,6 +15,7 @@
   "dependencies": {
     "@deepnotes/collab-wire": "workspace:^",
     "@deepnotes/e2ee": "workspace:^",
+    "@deepnotes/realtime-wire": "workspace:^",
     "@tailwindcss/vite": "^4.2.4",
     "@tiptap/core": "3.22.4",
     "@tiptap/extension-code-block-lowlight": "3.22.4",

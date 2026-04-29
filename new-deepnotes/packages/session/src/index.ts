@@ -122,6 +122,11 @@ export {
   performGroupMemberRemove,
   performGroupMemberRoleChange,
 } from "./group-membership.js";
+export { performNotifyUsers } from "./notify-users.js";
+export type {
+  NotifyUsersItem,
+  RealtimeNotificationDelivery,
+} from "./notify-users.js";
 export type { StripeBillingEnv } from "./stripe-billing.js";
 export {
   findUserIdByStripeCustomerId,

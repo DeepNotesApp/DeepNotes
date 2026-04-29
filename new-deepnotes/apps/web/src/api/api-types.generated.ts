@@ -1549,11 +1549,13 @@ export interface paths {
         };
         /**
          * Encrypted group key material for invitation flows (managers)
-         * @description Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).
+         * @description Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator). With optional `inviteeUserId` query, also returns public keyrings for E2EE group notifications (legacy WS step 2).
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    inviteeUserId?: string;
+                };
                 header?: never;
                 path: {
                     groupId: string;
@@ -6173,6 +6175,18 @@ export interface components {
             pendingInvitations: components["schemas"]["GroupPendingInvitationRow"][];
             pendingJoinRequests: components["schemas"]["GroupPendingJoinRequestRow"][];
         };
+        NotificationRecipientPublicKeyringRow: {
+            /**
+             * @description 21-character nanoid (URL-safe alphabet).
+             * @example V1StGXR8_Z5jdHi6B-myT
+             */
+            userId: string;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            publicKeyring: string;
+        };
         GroupInviteCryptoBootstrapResponse: {
             /**
              * Format: byte
@@ -6194,6 +6208,7 @@ export interface components {
              * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
              */
             memberEncryptedInternalKeyring: string;
+            notificationRecipientPublicKeyrings?: components["schemas"]["NotificationRecipientPublicKeyringRow"][];
         };
         GroupCollabCryptoContextResponse: {
             /**
@@ -6493,6 +6508,25 @@ export interface components {
                 [key: string]: components["schemas"]["GroupPrivacyPrivatePage"];
             };
         };
+        /** @enum {string} */
+        DeepnotesNotificationType: "group-request-sent" | "group-request-canceled" | "group-request-accepted" | "group-request-rejected" | "group-invitation-sent" | "group-invitation-canceled" | "group-invitation-accepted" | "group-invitation-rejected" | "group-member-role-changed" | "group-member-removed";
+        GroupInviteNotificationPayload: {
+            type: components["schemas"]["DeepnotesNotificationType"];
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            encryptedContent: string;
+            recipients: {
+                [key: string]: {
+                    /**
+                     * Format: byte
+                     * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+                     */
+                    encryptedSymmetricKey: string;
+                };
+            };
+        };
         GroupJoinInvitationSendRequest: {
             /**
              * @description 21-character nanoid (URL-safe alphabet).
@@ -6520,6 +6554,7 @@ export interface components {
              * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
              */
             userEncryptedNameForUser: string;
+            notifications?: components["schemas"]["GroupInviteNotificationPayload"][];
         };
         GroupJoinInvitationAcceptRequest: {
             /**

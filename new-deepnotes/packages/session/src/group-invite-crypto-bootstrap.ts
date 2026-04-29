@@ -8,6 +8,7 @@ import { and, eq } from "drizzle-orm";
 
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
+import { loadGroupInviteNotificationRecipientPublicKeyrings } from "./notify-users.js";
 import { roleHasManageLowerRanks } from "./group-role-ranks.js";
 import { getAuthenticatedUserSummary } from "./user-me.js";
 
@@ -20,11 +21,14 @@ export async function performGetGroupInviteCryptoBootstrap(input: {
   env: SessionEnv;
   accessCookie: string | undefined;
   groupId: string;
+  /** When set, response includes public keyrings for managers ∪ this user (notification encrypt). */
+  inviteeUserIdForNotify?: string;
 }): Promise<{
   groupPublicKeyring: Buffer;
   groupAccessKeyring: Buffer | null;
   memberEncryptedAccessKeyring: Buffer | null;
   memberEncryptedInternalKeyring: Buffer;
+  notificationRecipientPublicKeyrings: { userId: string; publicKeyring: Buffer }[];
 }> {
   const { userId } = await getAuthenticatedUserSummary(input);
 
@@ -67,11 +71,28 @@ export async function performGetGroupInviteCryptoBootstrap(input: {
     throw new SessionError(404, "NOT_FOUND", "Group not found.");
   }
 
+  let notificationRecipientPublicKeyrings: {
+    userId: string;
+    publicKeyring: Buffer;
+  }[] = [];
+  if (
+    input.inviteeUserIdForNotify != null &&
+    input.inviteeUserIdForNotify !== ""
+  ) {
+    notificationRecipientPublicKeyrings =
+      await loadGroupInviteNotificationRecipientPublicKeyrings({
+        db: input.db,
+        groupId: input.groupId,
+        inviteeUserId: input.inviteeUserIdForNotify,
+      });
+  }
+
   return {
     groupPublicKeyring: groupRow.publicKeyring,
     groupAccessKeyring: groupRow.accessKeyring,
     memberEncryptedAccessKeyring: memberRow.encryptedAccessKeyring,
     memberEncryptedInternalKeyring: memberRow.encryptedInternalKeyring,
+    notificationRecipientPublicKeyrings,
   };
 }
 

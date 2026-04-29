@@ -674,6 +674,26 @@
           "pendingJoinRequests"
         ]
       },
+      "NotificationRecipientPublicKeyringRow": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "21-character nanoid (URL-safe alphabet).",
+            "example": "V1StGXR8_Z5jdHi6B-myT"
+          },
+          "publicKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          }
+        },
+        "required": [
+          "userId",
+          "publicKeyring"
+        ]
+      },
       "GroupInviteCryptoBootstrapResponse": {
         "type": "object",
         "properties": {
@@ -702,6 +722,12 @@
             "minLength": 1,
             "format": "byte",
             "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "notificationRecipientPublicKeyrings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationRecipientPublicKeyringRow"
+            }
           }
         },
         "required": [
@@ -1278,6 +1304,57 @@
           "groupPages"
         ]
       },
+      "DeepnotesNotificationType": {
+        "type": "string",
+        "enum": [
+          "group-request-sent",
+          "group-request-canceled",
+          "group-request-accepted",
+          "group-request-rejected",
+          "group-invitation-sent",
+          "group-invitation-canceled",
+          "group-invitation-accepted",
+          "group-invitation-rejected",
+          "group-member-role-changed",
+          "group-member-removed"
+        ]
+      },
+      "GroupInviteNotificationPayload": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/DeepnotesNotificationType"
+          },
+          "encryptedContent": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "recipients": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "encryptedSymmetricKey": {
+                  "type": "string",
+                  "minLength": 1,
+                  "format": "byte",
+                  "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+                }
+              },
+              "required": [
+                "encryptedSymmetricKey"
+              ]
+            }
+          }
+        },
+        "required": [
+          "type",
+          "encryptedContent",
+          "recipients"
+        ]
+      },
       "GroupJoinInvitationSendRequest": {
         "type": "object",
         "properties": {
@@ -1313,6 +1390,12 @@
             "minLength": 1,
             "format": "byte",
             "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GroupInviteNotificationPayload"
+            }
           }
         },
         "required": [
@@ -3206,7 +3289,7 @@
     "/api/groups/{groupId}/invite-crypto-bootstrap": {
       "get": {
         "summary": "Encrypted group key material for invitation flows (managers)",
-        "description": "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).",
+        "description": "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator). With optional `inviteeUserId` query, also returns public keyrings for E2EE group notifications (legacy WS step 2).",
         "parameters": [
           {
             "schema": {
@@ -3218,6 +3301,17 @@
             "required": true,
             "name": "groupId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "When set, includes public keyrings for group managers and this user so the SPA can build `notifications` on `POST …/join-invitations`.",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": false,
+            "name": "inviteeUserId",
+            "in": "query"
           }
         ],
         "responses": {

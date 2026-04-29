@@ -19,6 +19,7 @@ import {
 import {
   groupIdPathSchema,
   groupCollabCryptoContextResponseSchema,
+  groupInviteCryptoBootstrapQuerySchema,
   groupInviteCryptoBootstrapResponseSchema,
   groupPrivacyMakePrivateBootstrapResponseSchema,
   groupMainPageResponseSchema,
@@ -681,8 +682,11 @@ registry.registerPath({
   path: "/api/groups/{groupId}/invite-crypto-bootstrap",
   summary: "Encrypted group key material for invitation flows (managers)",
   description:
-    "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator).",
-  request: { params: groupIdPathSchema },
+    "Returns ciphertext the caller’s browser unwraps to build `POST …/join-invitations` and `POST …/join-requests/{userId}/accept` bodies. Requires membership with manager role (owner/admin/moderator). With optional `inviteeUserId` query, also returns public keyrings for E2EE group notifications (legacy WS step 2).",
+  request: {
+    params: groupIdPathSchema,
+    query: groupInviteCryptoBootstrapQuerySchema,
+  },
   responses: {
     200: {
       description: "Encrypted keyrings + group public key.",

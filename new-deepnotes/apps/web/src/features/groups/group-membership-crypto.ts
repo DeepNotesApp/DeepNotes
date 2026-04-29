@@ -18,6 +18,10 @@ export type InviteCryptoBootstrapJson = {
   groupAccessKeyring: string | null;
   memberEncryptedAccessKeyring: string | null;
   memberEncryptedInternalKeyring: string;
+  notificationRecipientPublicKeyrings?: {
+    userId: string;
+    publicKeyring: string;
+  }[];
 };
 
 function textToBytes(s: string): Uint8Array {

@@ -5,10 +5,12 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 
 import { useSession } from "./features/auth/useSession";
+import { realtimeToastMessage, useRealtimeUserChannel } from "./features/realtime/useRealtimeUserChannel";
 import ThemeSwitcher from "./features/theme/ThemeSwitcher.vue";
 
 const { bootstrap, isAuthenticated, user, bootstrapped, loading, logout } =
   useSession();
+useRealtimeUserChannel(user);
 const route = useRoute();
 
 onMounted(() => {
@@ -111,5 +113,12 @@ async function onLogout() {
         :key="route.path"
       />
     </main>
+    <div
+      v-if="realtimeToastMessage"
+      class="bg-card fixed bottom-4 left-1/2 z-50 max-w-md -translate-x-1/2 rounded-md border px-4 py-2 text-sm shadow-lg"
+      role="status"
+    >
+      {{ realtimeToastMessage }}
+    </div>
   </div>
 </template>

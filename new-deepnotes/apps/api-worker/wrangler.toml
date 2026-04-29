@@ -7,9 +7,17 @@ compatibility_flags = ["nodejs_compat"]
 name = "PAGE_COLLAB_ROOM"
 class_name = "PageCollabRoom"
 
+[[durable_objects.bindings]]
+name = "USER_REALTIME_ROOM"
+class_name = "UserRealtimeRoom"
+
 [[migrations]]
 tag = "collab-room-v1"
 new_classes = ["PageCollabRoom"]
+
+[[migrations]]
+tag = "user-realtime-v1"
+new_classes = ["UserRealtimeRoom"]
 
 [[services]]
 binding = "WORKER_SELF"
