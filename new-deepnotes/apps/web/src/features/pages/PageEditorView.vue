@@ -1,544 +1,133 @@
 <script setup lang="ts">
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCaret from "@tiptap/extension-collaboration-caret";
-import Link from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import Underline from "@tiptap/extension-underline";
-import StarterKit from "@tiptap/starter-kit";
-import { EditorContent, useEditor } from "@tiptap/vue-3";
-import {
-  base64ToBytes,
-  type SymmetricKeyring,
-} from "@deepnotes/e2ee";
-import * as Y from "yjs";
-import {
-  applyAwarenessUpdate,
-  Awareness,
-  encodeAwarenessUpdate,
-  removeAwarenessStates,
-} from "y-protocols/awareness";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-import { uint8ToBase64 } from "../auth/bytes";
-import { readSessionCrypto } from "../auth/crypto-storage";
 import { useSession } from "../auth/useSession";
-import { useUserPageLists } from "./useUserPageLists";
-import {
-  decryptPageAwarenessUpdate,
-  decryptPageDocUpdate,
-  encryptPageAwarenessUpdate,
-  encryptPageDocUpdate,
-  unlockPageCollabSymmetricKeyring,
-} from "./page-collab-crypto";
-import {
-  applyYjsFullStateSnapshot,
-  buildPageSnapshotSaveBodies,
-  decryptPageSnapshotPlainUpdate,
-} from "./page-snapshot-crypto";
-import { buildCrossGroupPageMoveReencrypt } from "./page-move-crypto";
+import PageEditorCollabStatusCard from "./PageEditorCollabStatusCard.vue";
+import PageEditorManagementCard from "./PageEditorManagementCard.vue";
+import PageEditorPathCard from "./PageEditorPathCard.vue";
+import PageEditorSnapshotsCard from "./PageEditorSnapshotsCard.vue";
+import PageEditorTiptapCard from "./PageEditorTiptapCard.vue";
+import { Y_FRAG_PROSEMIRROR, Y_TEXT_DEFAULT } from "./page-editor-constants";
+import { createPageCollabDoc } from "./page-yjs-doc";
+import { usePageCollabEditor } from "./usePageCollabEditor";
+import { usePageManagement } from "./usePageManagement";
+import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
+import { usePageSnapshots } from "./usePageSnapshots";
 
-import {
-  decodeIncomingCollabBinaryMessage,
-  encodeAwarenessMessage,
-  encodeDocSingleUpdateFromClient,
-} from "@deepnotes/collab-wire";
-
-import type { components } from "@/api/api-types.generated";
-
-type SnapshotRow = components["schemas"]["PageSnapshotListItem"];
-
-const Y_TEXT_DEFAULT = "default";
-const Y_FRAG_PROSEMIRROR = "prosemirror";
+import type { SnapshotRow } from "./page-snapshot-list";
 
 const route = useRoute();
 const router = useRouter();
 const { client, isAuthenticated, user, bootstrapped } = useSession();
-const {
-  favoritePageIds,
-  error: pageListError,
-  load: loadPageLists,
-  removeFromRecent: removeRecentPages,
-  addFavorites,
-  removeFavorites,
-} = useUserPageLists();
 
 const pageId = computed(() => String(route.params.pageId ?? ""));
 
-const pathPageIds = ref<string[]>([]);
-const pathError = ref<string | null>(null);
-const pathLoading = ref(false);
-const pagePrefsLoading = ref(false);
-const bumpMessage = ref<string | null>(null);
-const favoriteMessage = ref<string | null>(null);
-
-const collabGroupId = ref<string | null>(null);
-const collabReloadNonce = ref(0);
-const moveDestGroupId = ref("");
-const pageEncRelTitleB64 = ref<string | null>(null);
-const pageEncAbsTitleB64 = ref<string | null>(null);
-const collabEncryptedUpdatesForMove = ref<Uint8Array[]>([]);
 const snapshots = ref<SnapshotRow[]>([]);
 const snapshotLoading = ref(false);
+
+const { ydoc, collabAwareness, collabCaretProvider } = createPageCollabDoc();
+
 const pageOpsMessage = ref<string | null>(null);
 
-const ydoc = new Y.Doc();
-const collabAwareness = new Awareness(ydoc);
-const collabCaretProvider = { awareness: collabAwareness };
-
-collabAwareness.on(
-  "update",
-  ({
-    added,
-    updated,
-    removed,
-  }: {
-    added: number[];
-    updated: number[];
-    removed: number[];
-  }) => {
-    const cid = collabAwareness.doc.clientID;
-    if (
-      !added.includes(cid) &&
-      !updated.includes(cid) &&
-      !removed.includes(cid)
-    ) {
-      return;
-    }
-    scheduleAwarenessPush();
-  },
-);
-
-function cursorColorForUserId(userId: string): string {
-  let h = 0;
-  for (let i = 0; i < userId.length; i++) {
-    h = userId.charCodeAt(i) + ((h << 5) - h);
-  }
-  const hue = Math.abs(h) % 360;
-  return `hsl(${hue} 65% 42%)`;
-}
-
-function clearRemoteCollabAwareness(a: Awareness) {
-  const self = a.doc.clientID;
-  const others = Array.from(a.getStates().keys()).filter((id) => id !== self);
-  if (others.length > 0) {
-    removeAwarenessStates(a, others, "page-load");
-  }
-}
-
-let awarenessPushTimer: ReturnType<typeof setTimeout> | null = null;
-
-function scheduleAwarenessPush() {
-  if (user.value?.demo === true) {
-    return;
-  }
-  if (
-    !collabWsLive.value ||
-    collabWs == null ||
-    collabWs.readyState !== WebSocket.OPEN
-  ) {
-    return;
-  }
-  if (awarenessPushTimer != null) {
-    clearTimeout(awarenessPushTimer);
-  }
-  awarenessPushTimer = setTimeout(() => {
-    awarenessPushTimer = null;
-    flushAwarenessWs();
-  }, 200);
-}
-
-function flushAwarenessWs() {
-  const pk = pageKeyring;
-  const id = pageId.value;
-  if (
-    pk == null ||
-    !id ||
-    !collabWsLive.value ||
-    collabWs == null ||
-    collabWs.readyState !== WebSocket.OPEN
-  ) {
-    return;
-  }
-  try {
-    const encoded = encodeAwarenessUpdate(collabAwareness, [
-      collabAwareness.doc.clientID,
-    ]);
-    const enc = encryptPageAwarenessUpdate({
-      pageKeyring: pk,
-      pageId: id,
-      plaintext: encoded,
-    });
-    collabWs.send(encodeAwarenessMessage([enc]));
-  } catch {
-    // ignore
-  }
-}
-
-const legacyPlainToImport = ref<string | null>(null);
-
-const loadError = ref<string | null>(null);
-const collabLoading = ref(true);
-const cryptoError = ref<string | null>(null);
-const pushError = ref<string | null>(null);
-const collabLastIndex = ref<number | null>(null);
-const updateCount = ref(0);
-
-const hydrating = ref(false);
-let serverStateVector: Uint8Array = Y.encodeStateVector(ydoc);
-let pageKeyring: SymmetricKeyring | null = null;
-
-let pushTimer: ReturnType<typeof setTimeout> | null = null;
-
-const yStateBytes = ref(0);
-
-let collabWs: WebSocket | null = null;
-let collabClientUpdateId = 0;
-const collabWsLive = ref(false);
-const collabWsError = ref<string | null>(null);
-
-function teardownCollabWebSocket() {
-  collabWsLive.value = false;
-  collabWsError.value = null;
-  if (awarenessPushTimer != null) {
-    clearTimeout(awarenessPushTimer);
-    awarenessPushTimer = null;
-  }
-  try {
-    removeAwarenessStates(
-      collabAwareness,
-      [collabAwareness.doc.clientID],
-      "disconnect",
-    );
-  } catch {
-    // ignore
-  }
-  if (collabWs != null) {
-    collabWs.close();
-    collabWs = null;
-  }
-  collabClientUpdateId = 0;
-}
-
-function connectCollabWebSocket() {
-  const id = pageId.value;
-  if (
-    !id ||
-    user.value?.demo === true ||
-    pageKeyring == null ||
-    typeof window === "undefined"
-  ) {
-    teardownCollabWebSocket();
-    return;
-  }
-  teardownCollabWebSocket();
-  const proto = window.location.protocol === "https:" ? "wss" : "ws";
-  const wsUrl = `${proto}://${window.location.host}/api/pages/${encodeURIComponent(id)}/collab-ws`;
-  const ws = new WebSocket(wsUrl);
-  collabWs = ws;
-  ws.binaryType = "arraybuffer";
-  ws.onopen = () => {
-    collabWsLive.value = true;
-    collabWsError.value = null;
-    flushAwarenessWs();
-  };
-  ws.onerror = () => {
-    collabWsError.value = "Live collab WebSocket error.";
-  };
-  ws.onclose = () => {
-    collabWsLive.value = false;
-    collabWs = null;
-    void flushPush();
-  };
-  ws.onmessage = (ev: MessageEvent) => {
-    handleCollabWsMessage(ev);
-  };
-}
-
-function handleCollabWsMessage(ev: MessageEvent) {
-  if (!(ev.data instanceof ArrayBuffer)) {
-    return;
-  }
-  const data = new Uint8Array(ev.data);
-  const incoming = decodeIncomingCollabBinaryMessage(data);
-  if (incoming == null) {
-    return;
-  }
-  const id = pageId.value;
-  const pk = pageKeyring;
-  if (incoming.kind === "awareness") {
-    if (pk == null || !id) {
-      return;
-    }
-    hydrating.value = true;
-    try {
-      for (const chunk of incoming.encryptedChunks) {
-        try {
-          const plain = decryptPageAwarenessUpdate({
-            pageKeyring: pk,
-            pageId: id,
-            ciphertext: chunk,
-          });
-          applyAwarenessUpdate(collabAwareness, plain, "remote");
-        } catch {
-          // ignore decrypt failures
-        }
-      }
-    } finally {
-      hydrating.value = false;
-    }
-    return;
-  }
-  const msg = incoming;
-  if (msg.kind === "single-update") {
-    if (pk == null || !id) {
-      return;
-    }
-    hydrating.value = true;
-    try {
-      const plain = decryptPageDocUpdate({
-        pageKeyring: pk,
-        pageId: id,
-        ciphertext: msg.encryptedUpdate,
-      });
-      Y.applyUpdateV2(ydoc, plain, "collab-ws-remote");
-      serverStateVector = Y.encodeStateVector(ydoc);
-      if (msg.dbIndex != null) {
-        collabLastIndex.value = msg.dbIndex;
-      }
-      refreshYMetrics();
-    } catch {
-      // ignore decrypt failures
-    } finally {
-      hydrating.value = false;
-    }
-    return;
-  }
-  if (msg.kind === "single-update-ack") {
-    serverStateVector = Y.encodeStateVector(ydoc);
-    if (msg.dbIndex != null) {
-      collabLastIndex.value = msg.dbIndex;
-    }
-  }
-}
-
-function flushPushWs() {
-  pushTimer = null;
-  if (pageKeyring == null || !isAuthenticated.value) {
-    return;
-  }
-  const id = pageId.value;
-  if (!id) {
-    return;
-  }
-  if (
-    !collabWsLive.value ||
-    collabWs == null ||
-    collabWs.readyState !== WebSocket.OPEN
-  ) {
-    return;
-  }
-  const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector);
-  if (diff.byteLength === 0) {
-    return;
-  }
-  pushError.value = null;
-  try {
-    const enc = encryptPageDocUpdate({
-      pageKeyring,
-      pageId: id,
-      plaintext: diff,
-    });
-    const uid = collabClientUpdateId++;
-    collabWs.send(
-      encodeDocSingleUpdateFromClient({
-        updateId: uid,
-        encryptedUpdate: enc,
-      }),
-    );
-  } catch (e) {
-    pushError.value =
-      e instanceof Error ? e.message : "Could not send collab update.";
-  }
-}
-
-function refreshYMetrics() {
-  yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
-}
-
-const editor = useEditor({
-  extensions: [
-    StarterKit.configure({
-      undoRedo: false,
-    }),
-    Underline,
-    Link.configure({
-      autolink: true,
-      linkOnPaste: true,
-      openOnClick: false,
-    }),
-    Placeholder.configure({
-      placeholder: "Write something…",
-    }),
-    Collaboration.configure({
-      document: ydoc,
-      field: Y_FRAG_PROSEMIRROR,
-    }),
-    CollaborationCaret.configure({
-      provider: collabCaretProvider,
-      user: {
-        name: "You",
-        color: "#64748b",
-      },
-    }),
-  ],
-  editorProps: {
-    attributes: {
-      class: "max-w-none min-h-40 px-3 py-2 text-sm leading-relaxed focus:outline-none",
-    },
-  },
-  onUpdate() {
-    refreshYMetrics();
-    if (!hydrating.value) {
-      schedulePush();
-    }
-  },
-  editable: false,
+const collab = usePageCollabEditor({
+  ydoc,
+  collabAwareness,
+  collabCaretProvider,
+  pageId,
+  user,
+  bootstrapped,
+  isAuthenticated,
+  client,
+  snapshots,
+  snapshotLoading,
 });
 
-function setEditorEditable(on: boolean) {
-  const ed = editor.value;
-  if (ed != null && !ed.isDestroyed) {
-    ed.setEditable(on);
-  }
-}
+const {
+  editor,
+  pageKeyring,
+  hydrating,
+  refreshYMetrics,
+  schedulePush,
+  collabGroupId,
+  moveDestGroupId,
+  pageEncRelTitleB64,
+  pageEncAbsTitleB64,
+  collabEncryptedUpdatesForMove,
+  collabReloadNonce,
+  loadError,
+  collabLoading,
+  cryptoError,
+  collabLastIndex,
+  updateCount,
+  collabWsLive,
+  collabWsError,
+  pushError,
+  yStateBytes,
+  flushPush,
+} = collab;
 
-watch(
-  [user, editor],
-  () => {
-    const u = user.value;
-    const ed = editor.value;
-    if (u == null || ed == null || ed.isDestroyed) {
-      return;
-    }
-    const label =
-      u.userId.length > 0 ? `You (${u.userId.slice(0, 8)}…)` : "You";
-    ed.commands.updateUser({
-      name: label,
-      color: cursorColorForUserId(u.userId),
-    });
-  },
-  { flush: "post" },
-);
-
-function schedulePush() {
-  if (pageKeyring == null) {
-    return;
-  }
-  if (user.value?.demo === true) {
-    return;
-  }
-  if (pushTimer != null) {
-    clearTimeout(pushTimer);
-  }
-  if (
-    collabWsLive.value &&
-    collabWs != null &&
-    collabWs.readyState === WebSocket.OPEN
-  ) {
-    pushTimer = setTimeout(() => {
-      void flushPushWs();
-    }, 200);
-    return;
-  }
-  pushTimer = setTimeout(() => {
-    void flushPush();
-  }, 700);
-}
-
-async function flushPush() {
-  pushTimer = null;
-  if (
-    collabWsLive.value &&
-    collabWs != null &&
-    collabWs.readyState === WebSocket.OPEN
-  ) {
-    return;
-  }
-  if (pageKeyring == null || !isAuthenticated.value) {
-    return;
-  }
-  const id = pageId.value;
-  if (!id) {
-    return;
-  }
-  const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector);
-  if (diff.byteLength === 0) {
-    return;
-  }
-  pushError.value = null;
-  try {
-    const enc = encryptPageDocUpdate({
-      pageKeyring,
-      pageId: id,
-      plaintext: diff,
-    });
-    const expected = collabLastIndex.value;
-    const nextIndex = expected == null ? 0 : expected + 1;
-    const { error, response } = await client.POST(
-      "/api/pages/{pageId}/collab-updates",
-      {
-        params: { path: { pageId: id } },
-        body: {
-          expectedLastIndex: expected,
-          updates: [
-            {
-              index: nextIndex,
-              encryptedData: uint8ToBase64(enc),
-            },
-          ],
-        },
-      },
-    );
-    if (response.status === 204) {
-      serverStateVector = Y.encodeStateVector(ydoc);
-      collabLastIndex.value = nextIndex;
-      return;
-    }
-    if (error && typeof error === "object" && "message" in error) {
-      pushError.value = String((error as { message: string }).message);
-    } else {
-      pushError.value = "Could not save page update.";
-    }
-  } catch (e) {
-    pushError.value =
-      e instanceof Error ? e.message : "Could not save page update.";
-  }
-}
-
-onBeforeUnmount(() => {
-  teardownCollabWebSocket();
-  if (pushTimer != null) {
-    clearTimeout(pushTimer);
-    pushTimer = null;
-  }
-  const ed = editor.value;
-  if (ed != null && !ed.isDestroyed) {
-    ed.destroy();
-  }
-  collabAwareness.destroy();
+const {
+  pathPageIds,
+  pathError,
+  pathLoading,
+  pagePrefsLoading,
+  bumpMessage,
+  favoriteMessage,
+  isFavorite,
+  loadPathAndPrefs,
+  bumpAsStarting,
+  toggleFavorite,
+  removeThisFromRecent,
+} = usePagePathAndPrefs({
+  pageId,
+  bootstrapped,
+  isAuthenticated,
+  client,
+  user,
 });
+
+const snapshotsApi = usePageSnapshots({
+  pageId,
+  user,
+  client,
+  ydoc,
+  pageKeyring,
+  hydrating,
+  refreshYMetrics,
+  schedulePush,
+  pageOpsMessage,
+});
+
+const management = usePageManagement({
+  pageId,
+  user,
+  client,
+  router,
+  collabGroupId,
+  moveDestGroupId,
+  pageEncRelTitleB64,
+  pageEncAbsTitleB64,
+  collabEncryptedUpdatesForMove,
+  snapshots,
+  pageKeyring,
+  pageOpsMessage,
+  loadPathAndPrefs,
+  collabReloadNonce,
+  flushPush,
+});
+
+const isDemoSession = computed(() => user.value?.demo === true);
+
+const {
+  snapshots: snapshotList,
+  snapshotLoading: snapshotsLoading,
+  restoreFromSnapshot,
+  deleteSnapshot,
+  saveSnapshotManual,
+} = snapshotsApi;
 
 onMounted(() => {
   if (!isAuthenticated.value) {
@@ -548,689 +137,6 @@ onMounted(() => {
     });
   }
 });
-
-const isFavorite = computed(
-  () => pageId.value !== "" && favoritePageIds.value.includes(pageId.value),
-);
-
-async function loadPathAndPrefs() {
-  if (!bootstrapped.value || !isAuthenticated.value) {
-    return;
-  }
-  const id = pageId.value;
-  if (!id) {
-    return;
-  }
-  pathLoading.value = true;
-  pathError.value = null;
-  pagePrefsLoading.value = true;
-  try {
-    const [pathRes] = await Promise.all([
-      client.GET("/api/users/me/pages/path", {
-        params: { query: { initialPageId: id } },
-      }),
-      loadPageLists(),
-    ]);
-    if (pathRes.response.status !== 200 || !pathRes.data) {
-      pathError.value =
-        pathRes.error &&
-        typeof pathRes.error === "object" &&
-        "message" in pathRes.error
-          ? String((pathRes.error as { message?: string }).message)
-          : "Could not load page path.";
-      pathPageIds.value = [];
-    } else {
-      pathPageIds.value = pathRes.data.pathPageIds;
-    }
-  } finally {
-    pathLoading.value = false;
-    pagePrefsLoading.value = false;
-  }
-}
-
-watch([bootstrapped, isAuthenticated, pageId], () => {
-  void loadPathAndPrefs();
-}, { immediate: true });
-
-async function bumpAsStarting() {
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    return;
-  }
-  bumpMessage.value = null;
-  const res = await client.POST("/api/pages/{pageId}/bump", {
-    params: { path: { pageId: id } },
-    body: {},
-  });
-  if (res.response.status !== 204) {
-    bumpMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not bump page.";
-    return;
-  }
-  bumpMessage.value = "Updated starting page and recents.";
-  await loadPathAndPrefs();
-}
-
-async function toggleFavorite() {
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    return;
-  }
-  favoriteMessage.value = null;
-  if (isFavorite.value) {
-    const ok = await removeFavorites([id]);
-    if (!ok && pageListError.value) {
-      favoriteMessage.value = pageListError.value;
-    }
-  } else {
-    const ok = await addFavorites([id]);
-    if (!ok && pageListError.value) {
-      favoriteMessage.value = pageListError.value;
-    }
-  }
-}
-
-async function removeThisFromRecent() {
-  const id = pageId.value;
-  if (!id) {
-    return;
-  }
-  favoriteMessage.value = null;
-  const ok = await removeRecentPages([id]);
-  if (!ok && pageListError.value) {
-    favoriteMessage.value =
-      pageListError.value ?? "Could not remove from recents.";
-  }
-}
-
-async function loadSnapshots() {
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    snapshots.value = [];
-    return;
-  }
-  snapshotLoading.value = true;
-  try {
-    const res = await client.GET("/api/pages/{pageId}/snapshots", {
-      params: { path: { pageId: id } },
-    });
-    if (res.response.status === 200 && res.data) {
-      snapshots.value = res.data.snapshots;
-    } else {
-      snapshots.value = [];
-    }
-  } finally {
-    snapshotLoading.value = false;
-  }
-}
-
-async function saveSnapshotManual() {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  const pk = pageKeyring;
-  if (!id || pk == null || user.value?.demo === true) {
-    return;
-  }
-  const bodies = buildPageSnapshotSaveBodies({
-    pageKeyring: pk,
-    pageId: id,
-    ydoc,
-  });
-  const res = await client.POST("/api/pages/{pageId}/snapshots", {
-    params: { path: { pageId: id } },
-    body: {
-      encryptedSymmetricKey: bodies.encryptedSymmetricKey,
-      encryptedData: bodies.encryptedData,
-    },
-  });
-  if (res.response.status !== 201) {
-    pageOpsMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not save snapshot.";
-    return;
-  }
-  await loadSnapshots();
-  pageOpsMessage.value = "Snapshot saved.";
-}
-
-async function restoreFromSnapshot(snapshotId: string) {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  const pk = pageKeyring;
-  if (!id || pk == null || user.value?.demo === true) {
-    return;
-  }
-  if (
-    !confirm(
-      "Restore this snapshot? The current editor state is snapshotted as pre-restore (Pro), then content is replaced locally and queued to sync.",
-    )
-  ) {
-    return;
-  }
-  const preBodies = buildPageSnapshotSaveBodies({
-    pageKeyring: pk,
-    pageId: id,
-    ydoc,
-  });
-  const loadRes = await client.GET("/api/pages/{pageId}/snapshots/{snapshotId}", {
-    params: { path: { pageId: id, snapshotId } },
-  });
-  if (loadRes.response.status !== 200 || loadRes.data == null) {
-    pageOpsMessage.value =
-      loadRes.error && typeof loadRes.error === "object" && "message" in loadRes.error
-        ? String((loadRes.error as { message?: string }).message)
-        : "Could not load snapshot.";
-    return;
-  }
-  let plain: Uint8Array;
-  try {
-    plain = decryptPageSnapshotPlainUpdate({
-      pageKeyring: pk,
-      pageId: id,
-      encryptedSymmetricKeyB64: loadRes.data.encryptedSymmetricKey ?? undefined,
-      encryptedDataB64: loadRes.data.encryptedData,
-    });
-  } catch (e) {
-    pageOpsMessage.value =
-      e instanceof Error ? e.message : "Could not decrypt snapshot.";
-    return;
-  }
-  hydrating.value = true;
-  try {
-    applyYjsFullStateSnapshot({
-      ydoc,
-      proseField: Y_FRAG_PROSEMIRROR,
-      legacyTextName: Y_TEXT_DEFAULT,
-      update: plain,
-    });
-  } finally {
-    hydrating.value = false;
-  }
-  refreshYMetrics();
-  const savePre = await client.POST("/api/pages/{pageId}/snapshots", {
-    params: { path: { pageId: id } },
-    body: {
-      encryptedSymmetricKey: preBodies.encryptedSymmetricKey,
-      encryptedData: preBodies.encryptedData,
-      preRestore: true,
-    },
-  });
-  if (savePre.response.status !== 201) {
-    pageOpsMessage.value =
-      savePre.error && typeof savePre.error === "object" && "message" in savePre.error
-        ? String((savePre.error as { message?: string }).message)
-        : "Restored locally but could not save pre-restore snapshot.";
-    schedulePush();
-    return;
-  }
-  await loadSnapshots();
-  pageOpsMessage.value = "Snapshot restored; pre-restore copy saved.";
-  schedulePush();
-}
-
-async function deleteSnapshot(snapshotId: string) {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    return;
-  }
-  if (!confirm("Delete this snapshot permanently?")) {
-    return;
-  }
-  const res = await client.DELETE("/api/pages/{pageId}/snapshots/{snapshotId}", {
-    params: { path: { pageId: id, snapshotId } },
-  });
-  if (res.response.status !== 204) {
-    pageOpsMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not delete snapshot.";
-    return;
-  }
-  await loadSnapshots();
-}
-
-async function setAsGroupMainPage() {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  const gid = collabGroupId.value;
-  if (!id || gid == null || user.value?.demo === true) {
-    return;
-  }
-  if (
-    !confirm(
-      "Set this page as the group’s main page? Requires Pro and manager permission on this group (legacy `pages.move`).",
-    )
-  ) {
-    return;
-  }
-  const res = await client.POST("/api/pages/{pageId}/move", {
-    params: { path: { pageId: id } },
-    body: {
-      destGroupId: gid,
-      setAsMainPage: true,
-    },
-  });
-  if (res.response.status !== 204) {
-    pageOpsMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not update main page.";
-    return;
-  }
-  pageOpsMessage.value = "Main page updated.";
-  await loadPathAndPrefs();
-}
-
-async function softDeleteThisPage() {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    return;
-  }
-  if (
-    !confirm(
-      "Soft-delete this page? It leaves a grace period before purge (cannot delete a group’s main page).",
-    )
-  ) {
-    return;
-  }
-  const res = await client.DELETE("/api/pages/{pageId}", {
-    params: { path: { pageId: id } },
-  });
-  if (res.response.status !== 204) {
-    pageOpsMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not delete page.";
-    return;
-  }
-  void router.replace({ path: "/" });
-}
-
-async function purgeThisPagePermanently() {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  if (!id || user.value?.demo === true) {
-    return;
-  }
-  if (
-    !confirm(
-      "Permanently purge this page? Irreversible after processing (cannot purge a group’s main page).",
-    )
-  ) {
-    return;
-  }
-  const res = await client.POST("/api/pages/{pageId}/purge", {
-    params: { path: { pageId: id } },
-  });
-  if (res.response.status !== 204) {
-    pageOpsMessage.value =
-      res.error && typeof res.error === "object" && "message" in res.error
-        ? String((res.error as { message?: string }).message)
-        : "Could not purge page.";
-    return;
-  }
-  void router.replace({ path: "/" });
-}
-
-async function movePageToOtherGroup() {
-  pageOpsMessage.value = null;
-  const id = pageId.value;
-  const srcG = collabGroupId.value;
-  const dest = moveDestGroupId.value.trim();
-  const rel = pageEncRelTitleB64.value;
-  const abs = pageEncAbsTitleB64.value;
-  const pk = pageKeyring;
-  if (!id || srcG == null || user.value?.demo === true) {
-    return;
-  }
-  if (!/^[A-Za-z0-9_-]{21}$/.test(dest)) {
-    pageOpsMessage.value =
-      "Enter a valid 21-character destination group id.";
-    return;
-  }
-  if (dest === srcG) {
-    pageOpsMessage.value =
-      "Destination group must differ from the current group.";
-    return;
-  }
-  if (rel == null || abs == null || pk == null) {
-    pageOpsMessage.value = "Page crypto or titles are not loaded yet.";
-    return;
-  }
-  const stored = readSessionCrypto();
-  if (stored == null) {
-    pageOpsMessage.value =
-      "Unlock session crypto (password login) to move pages.";
-    return;
-  }
-  if (
-    !confirm(
-      "Move this page to another group? Re-encrypts titles, merges Yjs history into one update, and re-keys all snapshots (Pro). Requires editor access on the destination group.",
-    )
-  ) {
-    return;
-  }
-  await flushPush();
-  try {
-    const destCtx = await client.GET(
-      "/api/groups/{groupId}/collab-crypto-context",
-      { params: { path: { groupId: dest } } },
-    );
-    if (destCtx.response.status !== 200 || destCtx.data == null) {
-      pageOpsMessage.value =
-        destCtx.error &&
-        typeof destCtx.error === "object" &&
-        "message" in destCtx.error
-          ? String((destCtx.error as { message?: string }).message)
-          : "Could not load destination group crypto.";
-      return;
-    }
-    const snapLoads: {
-      snapshotId: string;
-      encryptedSymmetricKey: string | null;
-      encryptedData: string;
-    }[] = [];
-    for (const s of snapshots.value) {
-      const lr = await client.GET(
-        "/api/pages/{pageId}/snapshots/{snapshotId}",
-        {
-          params: { path: { pageId: id, snapshotId: s.snapshotId } },
-        },
-      );
-      if (lr.response.status !== 200 || lr.data == null) {
-        pageOpsMessage.value =
-          lr.error && typeof lr.error === "object" && "message" in lr.error
-            ? String((lr.error as { message?: string }).message)
-            : "Could not load snapshot ciphertext for move.";
-        return;
-      }
-      snapLoads.push({
-        snapshotId: s.snapshotId,
-        encryptedSymmetricKey: lr.data.encryptedSymmetricKey ?? null,
-        encryptedData: lr.data.encryptedData,
-      });
-    }
-    const reencrypt = await buildCrossGroupPageMoveReencrypt({
-      pageId: id,
-      destGroupId: dest,
-      oldPageKeyring: pk,
-      pageEncryptedRelativeTitleB64: rel,
-      pageEncryptedAbsoluteTitleB64: abs,
-      collabUpdates: collabEncryptedUpdatesForMove.value.map((encryptedData) => ({
-        encryptedData,
-      })),
-      snapshotRows: snapLoads,
-      destGroupEncryptedContentKeyringB64:
-        destCtx.data.groupEncryptedContentKeyring,
-      destGroupAccessKeyringB64: destCtx.data.groupAccessKeyring ?? null,
-      destMemberEncryptedAccessKeyringB64:
-        destCtx.data.memberEncryptedAccessKeyring ?? null,
-      stored,
-    });
-    const mv = await client.POST("/api/pages/{pageId}/move", {
-      params: { path: { pageId: id } },
-      body: {
-        destGroupId: dest,
-        setAsMainPage: false,
-        reencrypt,
-      },
-    });
-    if (mv.response.status !== 204) {
-      pageOpsMessage.value =
-        mv.error && typeof mv.error === "object" && "message" in mv.error
-          ? String((mv.error as { message?: string }).message)
-          : "Could not move page.";
-      return;
-    }
-    pageOpsMessage.value = "Page moved; reloading…";
-    moveDestGroupId.value = "";
-    collabReloadNonce.value += 1;
-    await loadPathAndPrefs();
-  } catch (e) {
-    pageOpsMessage.value =
-      e instanceof Error ? e.message : "Could not move page.";
-  }
-}
-
-watch(
-  [collabLoading, loadError, cryptoError, pageId, () => user.value?.demo],
-  () => {
-    if (
-      collabLoading.value ||
-      loadError.value != null ||
-      cryptoError.value != null ||
-      user.value?.demo === true ||
-      pageId.value === ""
-    ) {
-      teardownCollabWebSocket();
-      return;
-    }
-    connectCollabWebSocket();
-  },
-  { flush: "post" },
-);
-
-watch(
-  [editor, legacyPlainToImport],
-  () => {
-    const ed = editor.value;
-    const t = legacyPlainToImport.value;
-    if (ed == null || ed.isDestroyed || t == null) {
-      return;
-    }
-    ed.commands.setContent({
-      type: "doc",
-      content: [
-        {
-          type: "paragraph",
-          content: t.length > 0 ? [{ type: "text", text: t }] : [],
-        },
-      ],
-    });
-    legacyPlainToImport.value = null;
-    serverStateVector = Y.encodeStateVector(ydoc);
-    refreshYMetrics();
-  },
-  { flush: "post" },
-);
-
-watch(
-  [bootstrapped, isAuthenticated, pageId, collabReloadNonce],
-  async () => {
-    if (!bootstrapped.value) {
-      return;
-    }
-    if (!isAuthenticated.value) {
-      return;
-    }
-    const id = pageId.value;
-    if (!id) {
-      return;
-    }
-    collabGroupId.value = null;
-    pageEncRelTitleB64.value = null;
-    pageEncAbsTitleB64.value = null;
-    collabEncryptedUpdatesForMove.value = [];
-    snapshots.value = [];
-    loadError.value = null;
-    cryptoError.value = null;
-    collabLoading.value = true;
-    pageKeyring = null;
-    try {
-      const { data, error, response } = await client.GET(
-        "/api/pages/{pageId}/collab-updates",
-        { params: { path: { pageId: id } } },
-      );
-      if (response.status !== 200 || !data) {
-        if (error && typeof error === "object" && "message" in error) {
-          loadError.value = String((error as { message: string }).message);
-        } else {
-          loadError.value = "Could not load collab state.";
-        }
-        return;
-      }
-
-      collabGroupId.value = data.groupId;
-      pageEncRelTitleB64.value = data.pageEncryptedRelativeTitle;
-      pageEncAbsTitleB64.value = data.pageEncryptedAbsoluteTitle;
-      collabEncryptedUpdatesForMove.value = data.updates.map((u) =>
-        base64ToBytes(u.encryptedData),
-      );
-      collabLastIndex.value = data.lastIndex;
-      updateCount.value = data.updates.length;
-
-      if (user.value?.demo === true) {
-        cryptoError.value =
-          "Demo sessions do not persist client crypto; sign in with a password account to decrypt page content.";
-        hydrating.value = true;
-        try {
-          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-          ydoc.transact(() => {
-            while (frag.length > 0) {
-              frag.delete(frag.length - 1, 1);
-            }
-          });
-          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-          if (legacy.length > 0) {
-            legacy.delete(0, legacy.length);
-          }
-        } finally {
-          hydrating.value = false;
-        }
-        serverStateVector = Y.encodeStateVector(ydoc);
-        refreshYMetrics();
-        return;
-      }
-
-      const stored = readSessionCrypto();
-      if (stored == null) {
-        cryptoError.value =
-          "Missing session crypto (sign out and sign in again with your password on this device).";
-        void loadSnapshots();
-        hydrating.value = true;
-        try {
-          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-          ydoc.transact(() => {
-            while (frag.length > 0) {
-              frag.delete(frag.length - 1, 1);
-            }
-          });
-          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-          if (legacy.length > 0) {
-            legacy.delete(0, legacy.length);
-          }
-        } finally {
-          hydrating.value = false;
-        }
-        serverStateVector = Y.encodeStateVector(ydoc);
-        refreshYMetrics();
-        return;
-      }
-
-      try {
-        pageKeyring = await unlockPageCollabSymmetricKeyring({
-          pageId: id,
-          groupId: data.groupId,
-          pageEncryptedSymmetricKeyring: base64ToBytes(
-            data.pageEncryptedSymmetricKeyring,
-          ),
-          groupEncryptedContentKeyring: base64ToBytes(
-            data.groupEncryptedContentKeyring,
-          ),
-          memberEncryptedAccessKeyring:
-            data.memberEncryptedAccessKeyring != null
-              ? base64ToBytes(data.memberEncryptedAccessKeyring)
-              : null,
-          groupAccessKeyring:
-            data.groupAccessKeyring != null
-              ? base64ToBytes(data.groupAccessKeyring)
-              : null,
-          stored,
-        });
-      } catch (e) {
-        cryptoError.value =
-          e instanceof Error
-            ? e.message
-            : "Could not unlock page encryption keys.";
-        void loadSnapshots();
-        hydrating.value = true;
-        try {
-          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-          ydoc.transact(() => {
-            while (frag.length > 0) {
-              frag.delete(frag.length - 1, 1);
-            }
-          });
-          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-          if (legacy.length > 0) {
-            legacy.delete(0, legacy.length);
-          }
-        } finally {
-          hydrating.value = false;
-        }
-        serverStateVector = Y.encodeStateVector(ydoc);
-        refreshYMetrics();
-        return;
-      }
-
-      hydrating.value = true;
-      try {
-        clearRemoteCollabAwareness(collabAwareness);
-        const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-        ydoc.transact(() => {
-          while (frag.length > 0) {
-            frag.delete(frag.length - 1, 1);
-          }
-        });
-        const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-        if (legacy.length > 0) {
-          legacy.delete(0, legacy.length);
-        }
-        for (const u of data.updates) {
-          const plain = decryptPageDocUpdate({
-            pageKeyring,
-            pageId: id,
-            ciphertext: base64ToBytes(u.encryptedData),
-          });
-          Y.applyUpdateV2(ydoc, plain);
-        }
-        const legacyAfter = ydoc.getText(Y_TEXT_DEFAULT);
-        if (legacyAfter.length > 0) {
-          legacyPlainToImport.value = legacyAfter.toString();
-          ydoc.transact(() => {
-            legacyAfter.delete(0, legacyAfter.length);
-          });
-        }
-        serverStateVector = Y.encodeStateVector(ydoc);
-        refreshYMetrics();
-      } finally {
-        hydrating.value = false;
-      }
-      void loadSnapshots();
-    } finally {
-      collabLoading.value = false;
-    }
-  },
-  { immediate: true },
-);
-
-watch(
-  [collabLoading, loadError, cryptoError, editor],
-  () => {
-    const canEdit =
-      !collabLoading.value &&
-      loadError.value == null &&
-      cryptoError.value == null &&
-      user.value?.demo !== true;
-    setEditorEditable(canEdit);
-  },
-  { immediate: true, flush: "post" },
-);
 </script>
 
 <template>
@@ -1252,61 +158,19 @@ watch(
       </Button>
     </div>
 
-    <Card>
-      <CardHeader>
-        <CardTitle class="text-base">Path and prefs</CardTitle>
-        <CardDescription>
-          Breadcrumb toward your personal main page, plus starting-page bump and favorites (legacy
-          <code class="font-mono text-xs">users.pages</code> / <code class="font-mono text-xs">pages.bump</code>).
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-3 text-sm">
-        <p v-if="pathLoading" class="text-muted-foreground">Loading path…</p>
-        <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
-        <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1 text-xs">
-          <template v-for="(pid, i) in pathPageIds" :key="pid">
-            <span v-if="i > 0" aria-hidden="true">/</span>
-            <RouterLink
-              v-if="i < pathPageIds.length - 1"
-              class="text-primary font-mono underline"
-              :to="`/pages/${pid}`"
-            >{{ pid.slice(0, 8) }}…</RouterLink>
-            <span v-else class="text-foreground font-mono font-medium">{{ pid }}</span>
-          </template>
-        </nav>
-        <div class="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            :disabled="user?.demo === true || pagePrefsLoading"
-            @click="bumpAsStarting()"
-          >
-            Make starting page
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            :disabled="user?.demo === true || pagePrefsLoading"
-            @click="toggleFavorite()"
-          >
-            {{ isFavorite ? "Remove favorite" : "Add favorite" }}
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            :disabled="pagePrefsLoading"
-            @click="removeThisFromRecent()"
-          >
-            Remove from recent
-          </Button>
-        </div>
-        <p v-if="bumpMessage" class="text-muted-foreground text-xs">{{ bumpMessage }}</p>
-        <p v-if="favoriteMessage" class="text-amber-800 dark:text-amber-200 text-xs">{{ favoriteMessage }}</p>
-        <p v-if="user?.demo" class="text-muted-foreground text-xs">
-          Demo accounts cannot bump starting page or favorites.
-        </p>
-      </CardContent>
-    </Card>
+    <PageEditorPathCard
+      :path-loading="pathLoading"
+      :path-error="pathError"
+      :path-page-ids="pathPageIds"
+      :page-prefs-loading="pagePrefsLoading"
+      :is-favorite="isFavorite"
+      :bump-message="bumpMessage"
+      :favorite-message="favoriteMessage"
+      :is-demo="isDemoSession"
+      @bump-as-starting="bumpAsStarting()"
+      @toggle-favorite="toggleFavorite()"
+      @remove-from-recent="removeThisFromRecent()"
+    />
 
     <p
       v-if="pageOpsMessage"
@@ -1315,261 +179,47 @@ watch(
       {{ pageOpsMessage }}
     </p>
 
-    <Card v-if="user?.demo !== true">
-      <CardHeader>
-        <CardTitle class="text-base">Snapshots (Pro)</CardTitle>
-        <CardDescription>
-          Encrypted Yjs checkpoints (
-          <code class="font-mono text-xs">PageSnapshotData</code>
-          ). Requires edit access + subscription server-side.
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-3 text-sm">
-        <p v-if="snapshotLoading" class="text-muted-foreground">Loading snapshots…</p>
-        <p v-else-if="snapshots.length === 0" class="text-muted-foreground">No snapshots yet.</p>
-        <ul v-else class="space-y-2">
-          <li
-            v-for="s in snapshots"
-            :key="s.snapshotId"
-            class="flex flex-col gap-2 rounded-md border p-3 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div class="text-xs">
-              <div class="font-mono font-medium">{{ s.snapshotId }}</div>
-              <div class="text-muted-foreground">
-                {{ s.type }} · {{ s.creationDate }}
-              </div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant="secondary"
-                :disabled="
-                  collabLoading ||
-                    loadError != null ||
-                    cryptoError != null
-                "
-                @click="restoreFromSnapshot(s.snapshotId)"
-              >
-                Restore
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                @click="deleteSnapshot(s.snapshotId)"
-              >
-                Delete
-              </Button>
-            </div>
-          </li>
-        </ul>
-        <Button
-          size="sm"
-          :disabled="
-            collabLoading ||
-              loadError != null ||
-              cryptoError != null
-          "
-          @click="saveSnapshotManual()"
-        >
-          Save snapshot
-        </Button>
-      </CardContent>
-    </Card>
+    <PageEditorSnapshotsCard
+      v-if="!isDemoSession"
+      :snapshot-loading="snapshotsLoading"
+      :snapshots="snapshotList"
+      :collab-loading="collabLoading"
+      :load-error="loadError"
+      :crypto-error="cryptoError"
+      @restore="restoreFromSnapshot($event)"
+      @remove="deleteSnapshot($event)"
+      @save-manual="saveSnapshotManual()"
+    />
 
-    <Card v-if="user?.demo !== true">
-      <CardHeader>
-        <CardTitle class="text-base">Page management</CardTitle>
-        <CardDescription>
-          Main-page promotion uses
-          <code class="font-mono text-xs">POST …/move</code>
-          with the same group id (Pro). Cross-group move re-encrypts ciphertext client-side. Soft-delete and purge use
-          <code class="font-mono text-xs">DELETE …/pages/:id</code>
-          and
-          <code class="font-mono text-xs">POST …/purge</code>.
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-4">
-        <div class="space-y-2">
-          <Label for="move-dest-gid" class="text-muted-foreground text-xs">
-            Move to group id (21-char nanoid, Pro)
-          </Label>
-          <div class="flex flex-wrap items-end gap-2">
-            <Input
-              id="move-dest-gid"
-              v-model="moveDestGroupId"
-              class="max-w-md font-mono text-xs"
-              placeholder="Destination group id"
-              :disabled="
-                collabLoading ||
-                  loadError != null ||
-                  cryptoError != null
-              "
-            />
-            <Button
-              size="sm"
-              variant="secondary"
-              :disabled="
-                collabLoading ||
-                  loadError != null ||
-                  cryptoError != null
-              "
-              @click="movePageToOtherGroup()"
-            >
-              Move to group…
-            </Button>
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            variant="secondary"
-            :disabled="collabGroupId == null || collabLoading"
-            @click="setAsGroupMainPage()"
-          >
-            Set as group main page
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            @click="softDeleteThisPage()"
-          >
-            Soft-delete page…
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            @click="purgeThisPagePermanently()"
-          >
-            Purge page permanently…
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <PageEditorManagementCard
+      v-if="!isDemoSession"
+      v-model:move-dest-group-id="moveDestGroupId"
+      :collab-loading="collabLoading"
+      :load-error="loadError"
+      :crypto-error="cryptoError"
+      :collab-group-id="collabGroupId"
+      @move-to-group="management.movePageToOtherGroup()"
+      @set-as-main-page="management.setAsGroupMainPage()"
+      @soft-delete="management.softDeleteThisPage()"
+      @purge="management.purgeThisPagePermanently()"
+    />
 
-    <Card>
-      <CardHeader>
-        <CardTitle>Server collab</CardTitle>
-        <CardDescription>
-          <code
-            class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
-            >GET /api/pages/…/collab-updates</code
-          >
-          bootstraps ciphertext; live edits use
-          <code
-            class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
-            >WebSocket …/collab-ws</code
-          >
-          (Durable Object relay + Postgres append) when configured, otherwise
-          <code class="font-mono text-xs">POST …/collab-updates</code>.
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-2 text-sm">
-        <p v-if="collabLoading" class="text-muted-foreground">Loading…</p>
-        <template v-else>
-          <p v-if="loadError" class="text-destructive">
-            {{ loadError }}
-          </p>
-          <p v-else-if="cryptoError" class="text-amber-700 dark:text-amber-400">
-            {{ cryptoError }}
-          </p>
-          <template v-else>
-            <p>
-              <span class="text-muted-foreground">Live collab</span>:
-              <span :class="collabWsLive ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'">
-                {{ collabWsLive ? "WebSocket connected" : "offline (REST only)" }}
-              </span>
-            </p>
-            <p v-if="collabWsError" class="text-destructive">
-              {{ collabWsError }}
-            </p>
-            <p>
-              <span class="text-muted-foreground">Updates on server</span>:
-              {{ updateCount }} ·
-              <span class="text-muted-foreground">lastIndex</span>:
-              {{ collabLastIndex === null ? "—" : collabLastIndex }}
-            </p>
-            <p v-if="pushError" class="text-destructive">
-              Save error: {{ pushError }}
-            </p>
-          </template>
-        </template>
-      </CardContent>
-    </Card>
+    <PageEditorCollabStatusCard
+      :collab-loading="collabLoading"
+      :load-error="loadError"
+      :crypto-error="cryptoError"
+      :collab-ws-live="collabWsLive"
+      :collab-ws-error="collabWsError"
+      :update-count="updateCount"
+      :collab-last-index="collabLastIndex"
+      :push-error="pushError"
+    />
 
-    <Card>
-      <CardHeader>
-        <CardTitle>Tiptap + Yjs</CardTitle>
-        <CardDescription>
-          {{ yStateBytes }} byte(s) in
-          <code class="font-mono text-xs">encodeStateAsUpdateV2</code> — rich
-          text syncs the ProseMirror
-          <code class="font-mono text-xs">Y.XmlFragment</code> (field
-          <code class="font-mono text-xs">{{ Y_FRAG_PROSEMIRROR }}</code>
-          ).
-          When the collab WebSocket is connected, Yjs updates and encrypted awareness (caret/selection)
-          use the legacy wire frame via
-          <code class="font-mono text-xs">WebSocket …/collab-ws</code>; otherwise
-          debounced
-          <code class="font-mono text-xs">POST …/collab-updates</code>
-          (Yjs v2:
-          <code class="font-mono text-xs">PageDocUpdate</code>
-          and
-          <code class="font-mono text-xs">PageAwarenessUpdate</code>
-          AAD).
-          Plain
-          <code class="font-mono text-xs">Y.Text("{{ Y_TEXT_DEFAULT }}")</code>
-          from earlier builds is migrated into the editor once.
-        </CardDescription>
-      </CardHeader>
-      <CardContent class="space-y-2">
-        <div
-          class="border-input bg-background w-full overflow-hidden rounded-md border"
-        >
-          <template v-if="editor">
-            <EditorContent :editor="editor" class="tiptap-editor" />
-          </template>
-        </div>
-      </CardContent>
-    </Card>
+    <PageEditorTiptapCard
+      :editor="editor"
+      :y-state-bytes="yStateBytes"
+      :y-frag-prosemirror="Y_FRAG_PROSEMIRROR"
+      :y-text-default="Y_TEXT_DEFAULT"
+    />
   </div>
 </template>
-
-<style scoped>
-:deep(.collaboration-carets__caret) {
-  position: relative;
-  border-left: 2px solid;
-  margin-left: -1px;
-  margin-right: -1px;
-  pointer-events: none;
-  word-break: normal;
-}
-
-:deep(.collaboration-carets__label) {
-  position: absolute;
-  top: -1.4em;
-  left: -1px;
-  z-index: 10;
-  font-size: 0.65rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: white;
-  padding: 0.1rem 0.35rem;
-  border-radius: 0.2rem;
-  white-space: nowrap;
-  pointer-events: none;
-  user-select: none;
-}
-
-:deep(.collaboration-carets__selection) {
-  border-radius: 2px;
-  pointer-events: none;
-}
-
-:deep(.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before) {
-  color: var(--muted-foreground);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-</style>
