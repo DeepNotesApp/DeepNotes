@@ -39,6 +39,18 @@ function setErrorFromBody(body: unknown, fallback: string) {
   lastError.value = fallback;
 }
 
+/**
+ * Resets {@link useSession} module state between Vitest cases (singleton refs).
+ */
+export function resetSessionSingletonForTests(): void {
+  user.value = null;
+  loading.value = false;
+  bootstrapped.value = false;
+  lastError.value = null;
+  twoFactorRequired.value = false;
+  bootstrapInFlight = null;
+}
+
 export function useSession() {
   const isAuthenticated = computed(() => user.value != null);
   const loggedInHint = computed(

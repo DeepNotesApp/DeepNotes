@@ -14,7 +14,7 @@ Checklist for [docs/RESTART_PLAN.md](../docs/RESTART_PLAN.md). **Procedure-level
 | **1** — Legacy repo hygiene | **Optional** | Only if still editing the old monorepo. |
 | **2** — Repo bootstrap | **Done** | Turbo, CI, template DB tests, deploy notes. |
 | **3** — REST + Drizzle | **In progress** | All **HTTP** items in TRPC_REST_MAP through **slice 10** (`…/collab-updates`), **Stripe**, **2FA**, membership, crypto bootstrap routes. **Not started:** **live Yjs collab WebSocket** and **realtime** (legacy `realtime-server` / msgpackr — separate from collab). |
-| **4** — Client MVP | **In progress** | Auth, register (E2EE), pages list, Tiptap+Yjs+REST collab, groups + invites/join E2EE, notifications (list/read; **no** body decrypt), MSW contract smoke, ESLint import walls, **`apps/marketing`** (`vite-ssg`). **Done:** Playwright smoke for **demo** session (httpOnly tokens, `loggedIn` hint, reload → bootstrap/refresh). **Next:** password-login E2E (registered user fixture or flow); optional demo keyring assertions. |
+| **4** — Client MVP | **In progress** | Same as Phase 4 checklist; **added** MSW + Vitest session POST contracts and `useSession` unit matrix. **Done:** Playwright demo session E2E; **Next:** optional password-login Playwright or Phase 3 collab/realtime WS MVP. |
 | **5** — Cutover | **Not started** | Canary, retire `/trpc` when safe. |
 
 ---
@@ -62,6 +62,7 @@ Cross-check [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md): **sessions**, **users.a
 - [x] `/groups`, `/groups/:id`, invite landing `/invite`, join `/join`, membership crypto  
 - [x] `/notifications` (ciphertext not decrypted in UI)  
 - [x] MSW: `GET /api/health`, `GET /api/users/me`; ESLint `no-restricted-imports` on `src/**/*.ts`  
+- [x] MSW + Vitest: session POST routes (`login`, `demo`, `refresh`, `logout`) + `useSession` flows (password login, 2FA flag, demo, logout, bootstrap)  
 - [x] Playwright: demo session against real `wrangler dev` + Vite (see **E2E / Playwright** below)  
 - [x] Marketing landing (`vite-ssg`): `apps/marketing`  
 - [ ] Password-login (or registered-user) Playwright path; optional/crypto assertions beyond cookies  
@@ -91,11 +92,11 @@ Cross-check [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md): **sessions**, **users.a
 
 | Package | What runs | Notes |
 |---------|-----------|-------|
-| `@deepnotes/session` | **`account-flows.integration.test.ts`** — **20** `it()` when `DATABASE_URL` + admin URL set; clones template DB | Account, 2FA, groups/pages, prefs, slices 4–10, membership, collab REST |
+| `@deepnotes/session` | **`account-flows.integration.test.ts`** — **24** `it()` when `DATABASE_URL` + admin URL set; clones template DB | Account, 2FA, groups/pages, prefs, slices 4–10, membership, collab REST |
 | `@deepnotes/db` | `template-db.test.ts` — **6** FK/clone cases | |
 | `@deepnotes/api` | `openapi.test.ts`, `schemas/users.test.ts`, … | |
 | `@deepnotes/api-worker` | **`index.test.ts`** — **71** route × 503 matrix + **1** extra `email-verification/confirm` 503 | Totals **72** env-missing smoke cases |
-| `@deepnotes/web` | Vitest + happy-dom; composable/API tests | MSW contracts; extend login matrix |
+| `@deepnotes/web` | Vitest + happy-dom; MSW + `useSession` tests | **34** unit smoke cases (incl. session routes + `useSession`) |
 | `@deepnotes/marketing` | `vite-ssg build` → `dist/` | Static landing; `VITE_WEB_APP_URL` for app link |
 | **Playwright** | `pnpm test:e2e` (root) → `@deepnotes/web` **1** spec (demo cookies + reload) | Needs migrated DB + `.dev.vars`; CI installs Chromium only |
 
@@ -124,8 +125,9 @@ Run session integration (from repo root):
 
 | Date | Change |
 |------|--------|
+| 2026-04-29 | MSW handlers + contract tests for session POST routes; Vitest `useSession` matrix (`resetSessionSingletonForTests`); plan progress (+ session integration `it()` count). |
 | 2026-04-29 | `apps/marketing` (`vite-ssg` single-page), `docs/DRIZZLE_MIGRATIONS.md`, deploy doc row for marketing + `VITE_WEB_APP_URL`; plan progress. |
-| 2026-04-27 | Compacted PLAN_PROGRESS; verified legacy map vs `TRPC_REST_MAP` — HTTP + listed WS flows migrated; added **realtime** vs **collab WS** distinction, optional gaps (public page list, vite-ssg, scheduler). Corrected counts: **20** session integration `it()`, **72** worker 503 smokes (71-route matrix + confirm). |
+| 2026-04-27 | Compacted PLAN_PROGRESS; verified legacy map vs `TRPC_REST_MAP` — HTTP + listed WS flows migrated; added **realtime** vs **collab WS** distinction, optional gaps (public page list, vite-ssg, scheduler). Corrected counts: session integration `it()` tally and **72** worker 503 smokes (71-route matrix + confirm). |
 | 2026-04-27 | MSW contract tests + ESLint restricted imports on web `*.ts`. |
 | 2026-04-27 | Tiptap + Yjs editor; invite/join E2EE + crypto bootstrap API; members detail UI; notifications thin SPA; groups overview; collab REST + `passwordSalt`; Stripe. |
 
