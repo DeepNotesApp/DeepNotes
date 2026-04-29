@@ -15,7 +15,6 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TextAlign } from "@tiptap/extension-text-align";
-import Youtube from "@tiptap/extension-youtube";
 import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
@@ -27,6 +26,7 @@ import {
   InlineMathTipTapExtension,
   MathBlockTipTapExtension,
 } from "./tiptap-math-extensions";
+import { YoutubeVideoTipTapExtension } from "./tiptap-youtube-extension";
 
 const pageEditorLowlight = createLowlight(common);
 
@@ -83,7 +83,7 @@ export function createPageEditorTipTapExtensions(opts: {
     }),
     InlineMathTipTapExtension,
     MathBlockTipTapExtension,
-    Youtube.configure({
+    YoutubeVideoTipTapExtension.configure({
       inline: true,
       width: 640,
       height: 360,

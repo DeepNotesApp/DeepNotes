@@ -148,13 +148,9 @@ defineProps<{
   margin: 0.5rem 0;
 }
 
-:deep(.tiptap-editor .ProseMirror iframe) {
+/* YouTube node view sets width/height on `.youtube-iframe`; avoid overriding with fluid aspect-ratio */
+:deep(.tiptap-editor .ProseMirror .youtube-iframe) {
   max-width: 100%;
   border: 0;
-  border-radius: 0.375rem;
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  height: auto;
-  min-height: 200px;
 }
 </style>
