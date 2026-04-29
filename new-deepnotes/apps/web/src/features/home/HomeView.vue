@@ -239,7 +239,7 @@ async function applyBuiltInDefaults() {
           </p>
           <div class="flex flex-wrap gap-2">
             <Button as-child size="sm" variant="outline">
-              <RouterLink to="/spatial">Open spatial preview (stub)</RouterLink>
+              <RouterLink to="/spatial">Open page canvas map</RouterLink>
             </Button>
           </div>
           <Button

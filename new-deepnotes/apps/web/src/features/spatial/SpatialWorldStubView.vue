@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
@@ -13,11 +13,49 @@ import {
 
 import { useSession } from "../auth/useSession";
 import { useUserPageLists } from "../pages/useUserPageLists";
+import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
+import { spiralPagePinLayout } from "./spatial-layout";
 
 const route = useRoute();
 const router = useRouter();
 const { isAuthenticated, user } = useSession();
-const { startingPageId, load: loadLists } = useUserPageLists();
+const {
+  startingPageId,
+  recentPageIds,
+  favoritePageIds,
+  load: loadLists,
+} = useUserPageLists();
+
+const canvasRef = ref<{ resetView: () => void } | null>(null);
+
+const pagePins = computed(() => {
+  const ids: string[] = [];
+  const pushUnique = (id: string | null) => {
+    if (id && !ids.includes(id)) {
+      ids.push(id);
+    }
+  };
+  pushUnique(startingPageId.value);
+  for (const id of favoritePageIds.value) {
+    pushUnique(id);
+  }
+  for (const id of recentPageIds.value) {
+    pushUnique(id);
+  }
+  const layout = spiralPagePinLayout(ids.length);
+  return ids.map((id, i) => ({
+    id,
+    x: layout[i]!.x,
+    y: layout[i]!.y,
+  }));
+});
+
+function pinLabel(id: string): string {
+  if (id.length <= 12) {
+    return id;
+  }
+  return `${id.slice(0, 4)}…${id.slice(-6)}`;
+}
 
 onMounted(() => {
   if (!isAuthenticated.value) {
@@ -40,10 +78,10 @@ onMounted(() => {
   >
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <h1 class="text-lg font-semibold">Spatial workspace</h1>
+        <h1 class="text-lg font-semibold">Page canvas</h1>
         <p class="text-muted-foreground text-xs">
-          Preview shell — full infinite canvas parity is not shipped in this
-          build.
+          Every DeepNotes page is a spatial world. This map is a quick overview;
+          open a page to edit—with multi-note canvas parity tracked toward legacy.
         </p>
       </div>
       <Button as-child size="sm" variant="outline">
@@ -53,22 +91,45 @@ onMounted(() => {
 
     <Card>
       <CardHeader>
-        <CardTitle>Canvas stub</CardTitle>
+        <CardTitle>Pan and zoom</CardTitle>
         <CardDescription>
-          Legacy DeepNotes renders notes on a pannable, zoomable world inside a
-          page. The new app’s rich editor is document-first; this route reserves
-          UX and navigation for a future spatial layer without blocking
-          shipping the rest of parity.
+          Ctrl/Cmd + wheel to zoom toward the cursor. Wheel pans. Middle-drag or
+          hold Space and drag to pan (Space is ignored while typing in inputs or
+          the editor).
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-4">
-        <div
-          class="border-border bg-muted/20 bg-size-[24px_24px] flex min-h-[220px] items-center justify-center rounded-md border border-dashed bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)]"
-          aria-hidden="true"
-        >
-          <p class="text-muted-foreground max-w-sm text-center text-sm">
-            Placeholder grid — no interactive canvas yet.
-          </p>
+        <SpatialWorldCanvas ref="canvasRef">
+          <RouterLink
+            v-for="pin in pagePins"
+            :key="pin.id"
+            :to="`/pages/${pin.id}`"
+            class="border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 z-10 max-w-44 rounded-md border px-2 py-1.5 text-xs shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring outline-none focus-visible:ring-2"
+            :style="{
+              transform: `translate(${pin.x}px, ${pin.y}px) translate(-50%, -50%)`,
+            }"
+          >
+            <span class="font-medium">Open page</span>
+            <span
+              class="text-muted-foreground mt-0.5 block truncate font-mono text-[10px]"
+              :title="pin.id"
+            >
+              {{ pinLabel(pin.id) }}
+            </span>
+          </RouterLink>
+        </SpatialWorldCanvas>
+        <div class="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="secondary" @click="canvasRef?.resetView()">
+            Reset view
+          </Button>
+          <span
+            v-if="pagePins.length === 0"
+            class="text-muted-foreground text-xs"
+          >
+            No starting, favorite, or recent pages yet — use
+            <RouterLink class="underline" to="/pages">Pages</RouterLink>
+            to open one.
+          </span>
         </div>
         <p v-if="user" class="text-muted-foreground font-mono text-xs break-all">
           Personal group {{ user.personalGroupId }}

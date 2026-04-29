@@ -62,7 +62,9 @@ async function onLogout() {
               size="sm"
               variant="ghost"
             >
-              <RouterLink to="/spatial">Spatial</RouterLink>
+              <RouterLink to="/spatial" title="Map of spatial pages"
+                >Canvas</RouterLink
+              >
             </Button>
             <Button
               v-if="isAuthenticated"

@@ -156,10 +156,14 @@ onMounted(() => {
   <div v-else class="space-y-4">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <div>
-        <h1 class="text-lg font-semibold">Page</h1>
+        <h1 class="text-lg font-semibold">Spatial page</h1>
+        <p class="text-muted-foreground text-xs">
+          Pages are spatial worlds; this editor focuses the shared rich-text note
+          for collab (multi-note canvas parity follows legacy).
+        </p>
         <p
           v-if="user"
-          class="text-muted-foreground font-mono text-xs break-all"
+          class="text-muted-foreground mt-1 font-mono text-xs break-all"
         >
           {{ pageId }} · group {{ collabGroupId ?? "—" }} · personal
           {{ user.personalGroupId }}
