@@ -1,9 +1,3 @@
-import Collaboration from "@tiptap/extension-collaboration";
-import CollaborationCaret from "@tiptap/extension-collaboration-caret";
-import Link from "@tiptap/extension-link";
-import Placeholder from "@tiptap/extension-placeholder";
-import Underline from "@tiptap/extension-underline";
-import StarterKit from "@tiptap/starter-kit";
 import { useEditor } from "@tiptap/vue-3";
 import { base64ToBytes, type SymmetricKeyring } from "@deepnotes/e2ee";
 import {
@@ -12,12 +6,7 @@ import {
   encodeDocSingleUpdateFromClient,
 } from "@deepnotes/collab-wire";
 import * as Y from "yjs";
-import {
-  applyAwarenessUpdate,
-  encodeAwarenessUpdate,
-  removeAwarenessStates,
-  type Awareness,
-} from "y-protocols/awareness";
+import { encodeAwarenessUpdate, removeAwarenessStates, type Awareness } from "y-protocols/awareness";
 import type { ComputedRef, Ref } from "vue";
 import { onBeforeUnmount, ref, watch } from "vue";
 
@@ -28,13 +17,18 @@ import { readSessionCrypto } from "../auth/crypto-storage";
 import type { UserMe } from "../auth/useSession";
 import { cursorColorForUserId, clearRemoteCollabAwareness } from "./page-awareness-utils";
 import {
-  decryptPageAwarenessUpdate,
-  decryptPageDocUpdate,
   encryptPageAwarenessUpdate,
   encryptPageDocUpdate,
+  decryptPageDocUpdate,
   unlockPageCollabSymmetricKeyring,
 } from "./page-collab-crypto";
+import { applyIncomingCollabWsMessage } from "./page-collab-ws-incoming";
+import { clearYjsProseMirrorAndLegacyText } from "./page-collab-yjs-clear";
 import { Y_FRAG_PROSEMIRROR, Y_TEXT_DEFAULT } from "./page-editor-constants";
+import {
+  createPageEditorTipTapExtensions,
+  PAGE_EDITOR_TIPTAP_CLASS,
+} from "./page-editor-tiptap-extensions";
 import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
 
 export function usePageCollabEditor(opts: {
@@ -72,7 +66,7 @@ export function usePageCollabEditor(opts: {
   const updateCount = ref(0);
 
   const hydrating = ref(false);
-  let serverStateVector: Uint8Array = Y.encodeStateVector(ydoc);
+  const serverStateVector = { current: Y.encodeStateVector(ydoc) };
   const pageKeyring = ref<SymmetricKeyring | null>(null);
 
   let pushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -92,6 +86,19 @@ export function usePageCollabEditor(opts: {
   const collabEncryptedUpdatesForMove = ref<Uint8Array[]>([]);
 
   let awarenessPushTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const wsIncomingCtx = {
+    ydoc,
+    collabAwareness,
+    getPageId: () => pageId.value,
+    getPageKeyring: () => pageKeyring.value,
+    hydrating,
+    collabLastIndex,
+    serverStateVector,
+    refreshYMetrics: (): void => {
+      yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
+    },
+  };
 
   function scheduleAwarenessPush() {
     if (user.value?.demo === true) {
@@ -171,7 +178,11 @@ export function usePageCollabEditor(opts: {
       awarenessPushTimer = null;
     }
     try {
-      removeAwarenessStates(collabAwareness, [collabAwareness.doc.clientID], "disconnect");
+      removeAwarenessStates(
+        collabAwareness,
+        [collabAwareness.doc.clientID],
+        "disconnect",
+      );
     } catch {
       // ignore
     }
@@ -213,75 +224,15 @@ export function usePageCollabEditor(opts: {
       void flushPush();
     };
     ws.onmessage = (ev: MessageEvent) => {
-      handleCollabWsMessage(ev);
+      if (!(ev.data instanceof ArrayBuffer)) {
+        return;
+      }
+      const incoming = decodeIncomingCollabBinaryMessage(new Uint8Array(ev.data));
+      if (incoming == null) {
+        return;
+      }
+      applyIncomingCollabWsMessage(incoming, wsIncomingCtx);
     };
-  }
-
-  function handleCollabWsMessage(ev: MessageEvent) {
-    if (!(ev.data instanceof ArrayBuffer)) {
-      return;
-    }
-    const data = new Uint8Array(ev.data);
-    const incoming = decodeIncomingCollabBinaryMessage(data);
-    if (incoming == null) {
-      return;
-    }
-    const id = pageId.value;
-    const pk = pageKeyring.value;
-    if (incoming.kind === "awareness") {
-      if (pk == null || !id) {
-        return;
-      }
-      hydrating.value = true;
-      try {
-        for (const chunk of incoming.encryptedChunks) {
-          try {
-            const plain = decryptPageAwarenessUpdate({
-              pageKeyring: pk,
-              pageId: id,
-              ciphertext: chunk,
-            });
-            applyAwarenessUpdate(collabAwareness, plain, "remote");
-          } catch {
-            // ignore decrypt failures
-          }
-        }
-      } finally {
-        hydrating.value = false;
-      }
-      return;
-    }
-    const msg = incoming;
-    if (msg.kind === "single-update") {
-      if (pk == null || !id) {
-        return;
-      }
-      hydrating.value = true;
-      try {
-        const plain = decryptPageDocUpdate({
-          pageKeyring: pk,
-          pageId: id,
-          ciphertext: msg.encryptedUpdate,
-        });
-        Y.applyUpdateV2(ydoc, plain, "collab-ws-remote");
-        serverStateVector = Y.encodeStateVector(ydoc);
-        if (msg.dbIndex != null) {
-          collabLastIndex.value = msg.dbIndex;
-        }
-        refreshYMetrics();
-      } catch {
-        // ignore decrypt failures
-      } finally {
-        hydrating.value = false;
-      }
-      return;
-    }
-    if (msg.kind === "single-update-ack") {
-      serverStateVector = Y.encodeStateVector(ydoc);
-      if (msg.dbIndex != null) {
-        collabLastIndex.value = msg.dbIndex;
-      }
-    }
   }
 
   function flushPushWs() {
@@ -300,7 +251,7 @@ export function usePageCollabEditor(opts: {
     ) {
       return;
     }
-    const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector);
+    const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector.current);
     if (diff.byteLength === 0) {
       return;
     }
@@ -325,39 +276,14 @@ export function usePageCollabEditor(opts: {
   }
 
   function refreshYMetrics() {
-    yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
+    wsIncomingCtx.refreshYMetrics();
   }
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        undoRedo: false,
-      }),
-      Underline,
-      Link.configure({
-        autolink: true,
-        linkOnPaste: true,
-        openOnClick: false,
-      }),
-      Placeholder.configure({
-        placeholder: "Write something…",
-      }),
-      Collaboration.configure({
-        document: ydoc,
-        field: Y_FRAG_PROSEMIRROR,
-      }),
-      CollaborationCaret.configure({
-        provider: collabCaretProvider,
-        user: {
-          name: "You",
-          color: "#64748b",
-        },
-      }),
-    ],
+    extensions: createPageEditorTipTapExtensions({ ydoc, collabCaretProvider }),
     editorProps: {
       attributes: {
-        class:
-          "max-w-none min-h-40 px-3 py-2 text-sm leading-relaxed focus:outline-none",
+        class: PAGE_EDITOR_TIPTAP_CLASS,
       },
     },
     onUpdate() {
@@ -436,7 +362,7 @@ export function usePageCollabEditor(opts: {
     if (!id) {
       return;
     }
-    const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector);
+    const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector.current);
     if (diff.byteLength === 0) {
       return;
     }
@@ -465,7 +391,7 @@ export function usePageCollabEditor(opts: {
         },
       );
       if (response.status === 204) {
-        serverStateVector = Y.encodeStateVector(ydoc);
+        serverStateVector.current = Y.encodeStateVector(ydoc);
         collabLastIndex.value = nextIndex;
         return;
       }
@@ -529,7 +455,7 @@ export function usePageCollabEditor(opts: {
         ],
       });
       legacyPlainToImport.value = null;
-      serverStateVector = Y.encodeStateVector(ydoc);
+      serverStateVector.current = Y.encodeStateVector(ydoc);
       refreshYMetrics();
     },
     { flush: "post" },
@@ -585,20 +511,15 @@ export function usePageCollabEditor(opts: {
             "Demo sessions do not persist client crypto; sign in with a password account to decrypt page content.";
           hydrating.value = true;
           try {
-            const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-            ydoc.transact(() => {
-              while (frag.length > 0) {
-                frag.delete(frag.length - 1, 1);
-              }
-            });
-            const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-            if (legacy.length > 0) {
-              legacy.delete(0, legacy.length);
-            }
+            clearYjsProseMirrorAndLegacyText(
+              ydoc,
+              Y_FRAG_PROSEMIRROR,
+              Y_TEXT_DEFAULT,
+            );
           } finally {
             hydrating.value = false;
           }
-          serverStateVector = Y.encodeStateVector(ydoc);
+          serverStateVector.current = Y.encodeStateVector(ydoc);
           refreshYMetrics();
           return;
         }
@@ -616,20 +537,15 @@ export function usePageCollabEditor(opts: {
           });
           hydrating.value = true;
           try {
-            const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-            ydoc.transact(() => {
-              while (frag.length > 0) {
-                frag.delete(frag.length - 1, 1);
-              }
-            });
-            const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-            if (legacy.length > 0) {
-              legacy.delete(0, legacy.length);
-            }
+            clearYjsProseMirrorAndLegacyText(
+              ydoc,
+              Y_FRAG_PROSEMIRROR,
+              Y_TEXT_DEFAULT,
+            );
           } finally {
             hydrating.value = false;
           }
-          serverStateVector = Y.encodeStateVector(ydoc);
+          serverStateVector.current = Y.encodeStateVector(ydoc);
           refreshYMetrics();
           return;
         }
@@ -668,20 +584,15 @@ export function usePageCollabEditor(opts: {
           });
           hydrating.value = true;
           try {
-            const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-            ydoc.transact(() => {
-              while (frag.length > 0) {
-                frag.delete(frag.length - 1, 1);
-              }
-            });
-            const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-            if (legacy.length > 0) {
-              legacy.delete(0, legacy.length);
-            }
+            clearYjsProseMirrorAndLegacyText(
+              ydoc,
+              Y_FRAG_PROSEMIRROR,
+              Y_TEXT_DEFAULT,
+            );
           } finally {
             hydrating.value = false;
           }
-          serverStateVector = Y.encodeStateVector(ydoc);
+          serverStateVector.current = Y.encodeStateVector(ydoc);
           refreshYMetrics();
           return;
         }
@@ -694,16 +605,11 @@ export function usePageCollabEditor(opts: {
         hydrating.value = true;
         try {
           clearRemoteCollabAwareness(collabAwareness);
-          const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
-          ydoc.transact(() => {
-            while (frag.length > 0) {
-              frag.delete(frag.length - 1, 1);
-            }
-          });
-          const legacy = ydoc.getText(Y_TEXT_DEFAULT);
-          if (legacy.length > 0) {
-            legacy.delete(0, legacy.length);
-          }
+          clearYjsProseMirrorAndLegacyText(
+            ydoc,
+            Y_FRAG_PROSEMIRROR,
+            Y_TEXT_DEFAULT,
+          );
           for (const u of data.updates) {
             const plain = decryptPageDocUpdate({
               pageKeyring: pk,
@@ -719,7 +625,7 @@ export function usePageCollabEditor(opts: {
               legacyAfter.delete(0, legacyAfter.length);
             });
           }
-          serverStateVector = Y.encodeStateVector(ydoc);
+          serverStateVector.current = Y.encodeStateVector(ydoc);
           refreshYMetrics();
         } finally {
           hydrating.value = false;
