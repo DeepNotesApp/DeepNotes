@@ -37,6 +37,11 @@ import {
 } from "./page-snapshot-crypto";
 import { buildCrossGroupPageMoveReencrypt } from "./page-move-crypto";
 
+import {
+  decodeServerDocBinaryMessage,
+  encodeDocSingleUpdateFromClient,
+} from "@deepnotes/collab-wire";
+
 import type { components } from "@/api/api-types.generated";
 
 type SnapshotRow = components["schemas"]["PageSnapshotListItem"];
@@ -93,6 +98,138 @@ let pushTimer: ReturnType<typeof setTimeout> | null = null;
 
 const yStateBytes = ref(0);
 
+let collabWs: WebSocket | null = null;
+let collabClientUpdateId = 0;
+const collabWsLive = ref(false);
+const collabWsError = ref<string | null>(null);
+
+function teardownCollabWebSocket() {
+  collabWsLive.value = false;
+  collabWsError.value = null;
+  if (collabWs != null) {
+    collabWs.close();
+    collabWs = null;
+  }
+  collabClientUpdateId = 0;
+}
+
+function connectCollabWebSocket() {
+  const id = pageId.value;
+  if (
+    !id ||
+    user.value?.demo === true ||
+    pageKeyring == null ||
+    typeof window === "undefined"
+  ) {
+    teardownCollabWebSocket();
+    return;
+  }
+  teardownCollabWebSocket();
+  const proto = window.location.protocol === "https:" ? "wss" : "ws";
+  const wsUrl = `${proto}://${window.location.host}/api/pages/${encodeURIComponent(id)}/collab-ws`;
+  const ws = new WebSocket(wsUrl);
+  collabWs = ws;
+  ws.binaryType = "arraybuffer";
+  ws.onopen = () => {
+    collabWsLive.value = true;
+    collabWsError.value = null;
+  };
+  ws.onerror = () => {
+    collabWsError.value = "Live collab WebSocket error.";
+  };
+  ws.onclose = () => {
+    collabWsLive.value = false;
+    collabWs = null;
+    void flushPush();
+  };
+  ws.onmessage = (ev: MessageEvent) => {
+    handleCollabWsMessage(ev);
+  };
+}
+
+function handleCollabWsMessage(ev: MessageEvent) {
+  if (!(ev.data instanceof ArrayBuffer)) {
+    return;
+  }
+  const data = new Uint8Array(ev.data);
+  const msg = decodeServerDocBinaryMessage(data);
+  if (msg == null) {
+    return;
+  }
+  const id = pageId.value;
+  const pk = pageKeyring;
+  if (msg.kind === "single-update") {
+    if (pk == null || !id) {
+      return;
+    }
+    hydrating.value = true;
+    try {
+      const plain = decryptPageDocUpdate({
+        pageKeyring: pk,
+        pageId: id,
+        ciphertext: msg.encryptedUpdate,
+      });
+      Y.applyUpdateV2(ydoc, plain, "collab-ws-remote");
+      serverStateVector = Y.encodeStateVector(ydoc);
+      if (msg.dbIndex != null) {
+        collabLastIndex.value = msg.dbIndex;
+      }
+      refreshYMetrics();
+    } catch {
+      // ignore decrypt failures
+    } finally {
+      hydrating.value = false;
+    }
+    return;
+  }
+  if (msg.kind === "single-update-ack") {
+    serverStateVector = Y.encodeStateVector(ydoc);
+    if (msg.dbIndex != null) {
+      collabLastIndex.value = msg.dbIndex;
+    }
+  }
+}
+
+function flushPushWs() {
+  pushTimer = null;
+  if (pageKeyring == null || !isAuthenticated.value) {
+    return;
+  }
+  const id = pageId.value;
+  if (!id) {
+    return;
+  }
+  if (
+    !collabWsLive.value ||
+    collabWs == null ||
+    collabWs.readyState !== WebSocket.OPEN
+  ) {
+    return;
+  }
+  const diff = Y.encodeStateAsUpdateV2(ydoc, serverStateVector);
+  if (diff.byteLength === 0) {
+    return;
+  }
+  pushError.value = null;
+  try {
+    const enc = encryptPageDocUpdate({
+      pageKeyring,
+      pageId: id,
+      plaintext: diff,
+    });
+    const uid = collabClientUpdateId++;
+    collabWs.send(
+      encodeDocSingleUpdateFromClient({
+        updateId: uid,
+        encryptedUpdate: enc,
+      }),
+    );
+  } catch (e) {
+    pushError.value =
+      e instanceof Error ? e.message : "Could not send collab update.";
+  }
+}
+
 function refreshYMetrics() {
   yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
 }
@@ -138,6 +275,16 @@ function schedulePush() {
   if (pushTimer != null) {
     clearTimeout(pushTimer);
   }
+  if (
+    collabWsLive.value &&
+    collabWs != null &&
+    collabWs.readyState === WebSocket.OPEN
+  ) {
+    pushTimer = setTimeout(() => {
+      void flushPushWs();
+    }, 200);
+    return;
+  }
   pushTimer = setTimeout(() => {
     void flushPush();
   }, 700);
@@ -145,6 +292,13 @@ function schedulePush() {
 
 async function flushPush() {
   pushTimer = null;
+  if (
+    collabWsLive.value &&
+    collabWs != null &&
+    collabWs.readyState === WebSocket.OPEN
+  ) {
+    return;
+  }
   if (pageKeyring == null || !isAuthenticated.value) {
     return;
   }
@@ -197,6 +351,7 @@ async function flushPush() {
 }
 
 onBeforeUnmount(() => {
+  teardownCollabWebSocket();
   if (pushTimer != null) {
     clearTimeout(pushTimer);
     pushTimer = null;
@@ -661,6 +816,24 @@ async function movePageToOtherGroup() {
 }
 
 watch(
+  [collabLoading, loadError, cryptoError, pageId, () => user.value?.demo],
+  () => {
+    if (
+      collabLoading.value ||
+      loadError.value != null ||
+      cryptoError.value != null ||
+      user.value?.demo === true ||
+      pageId.value === ""
+    ) {
+      teardownCollabWebSocket();
+      return;
+    }
+    connectCollabWebSocket();
+  },
+  { flush: "post" },
+);
+
+watch(
   [editor, legacyPlainToImport],
   () => {
     const ed = editor.value;
@@ -1098,8 +1271,13 @@ watch(
             class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
             >GET /api/pages/…/collab-updates</code
           >
-          loads ciphertext + page/group key material; the client decrypts with
-          keys from your password session.
+          bootstraps ciphertext; live edits use
+          <code
+            class="bg-muted rounded px-1 py-0.5 font-mono text-xs"
+            >WebSocket …/collab-ws</code
+          >
+          (Durable Object relay + Postgres append) when configured, otherwise
+          <code class="font-mono text-xs">POST …/collab-updates</code>.
         </CardDescription>
       </CardHeader>
       <CardContent class="space-y-2 text-sm">
@@ -1112,6 +1290,15 @@ watch(
             {{ cryptoError }}
           </p>
           <template v-else>
+            <p>
+              <span class="text-muted-foreground">Live collab</span>:
+              <span :class="collabWsLive ? 'text-green-700 dark:text-green-400' : 'text-muted-foreground'">
+                {{ collabWsLive ? "WebSocket connected" : "offline (REST only)" }}
+              </span>
+            </p>
+            <p v-if="collabWsError" class="text-destructive">
+              {{ collabWsError }}
+            </p>
             <p>
               <span class="text-muted-foreground">Updates on server</span>:
               {{ updateCount }} ·
@@ -1135,7 +1322,10 @@ watch(
           text syncs the ProseMirror
           <code class="font-mono text-xs">Y.XmlFragment</code> (field
           <code class="font-mono text-xs">{{ Y_FRAG_PROSEMIRROR }}</code>
-          ); debounced
+          ). When the collab WebSocket is connected, Yjs updates use the legacy
+          wire frame via
+          <code class="font-mono text-xs">WebSocket …/collab-ws</code>; otherwise
+          debounced
           <code class="font-mono text-xs">POST …/collab-updates</code>
           (Yjs v2, legacy
           <code class="font-mono text-xs">PageDocUpdate</code>

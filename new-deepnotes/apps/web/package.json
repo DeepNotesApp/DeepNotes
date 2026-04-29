@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@deepnotes/collab-wire": "workspace:^",
     "@deepnotes/e2ee": "workspace:^",
     "@tailwindcss/vite": "^4.2.4",
     "@tiptap/extension-collaboration": "^3.22.4",

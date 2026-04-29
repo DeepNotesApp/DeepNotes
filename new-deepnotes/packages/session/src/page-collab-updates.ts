@@ -4,6 +4,7 @@ import {
   groups,
   pageUpdates,
   pages,
+  users,
 } from "@deepnotes/db/schema";
 import { and, asc, eq, isNull, max } from "drizzle-orm";
 
@@ -227,4 +228,125 @@ export async function performAppendPageCollabUpdates(input: {
       })),
     );
   });
+}
+
+/**
+ * Append one `page_updates` row using the next contiguous index.
+ * For **internal** calls only (collab WebSocket worker route) after shared-secret auth;
+ * `userId` must match an editor allowed on the page (and Pro vs free-page like legacy collab).
+ */
+export async function performTrustedAppendNextPageCollabUpdate(input: {
+  db: DeepnotesDb;
+  pageId: string;
+  userId: string;
+  encryptedData: Uint8Array;
+}): Promise<{ newIndex: number }> {
+  const [pageRow] = await input.db
+    .select({
+      id: pages.id,
+      groupId: pages.groupId,
+      free: pages.free,
+    })
+    .from(pages)
+    .where(
+      and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
+    )
+    .limit(1);
+
+  if (pageRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Page not found.");
+  }
+
+  const canEdit = await userHasGroupPermission({
+    db: input.db,
+    userId: input.userId,
+    groupId: pageRow.groupId,
+    permission: "editGroupPages",
+  });
+  if (!canEdit) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const [userRow] = await input.db
+    .select({ plan: users.plan })
+    .from(users)
+    .where(eq(users.id, input.userId))
+    .limit(1);
+
+  const isPro = userRow?.plan === "pro";
+  const pageFree = pageRow.free === true;
+  if (!isPro && !pageFree) {
+    throw new SessionError(
+      403,
+      "FORBIDDEN",
+      "Editing this page requires a Pro plan.",
+    );
+  }
+
+  return await input.db.transaction(async (tx) => {
+    const [agg] = await tx
+      .select({ m: max(pageUpdates.index) })
+      .from(pageUpdates)
+      .where(eq(pageUpdates.pageId, input.pageId));
+
+    const actualLast: number | null = agg?.m ?? null;
+    const nextIndex = actualLast === null ? 0 : actualLast + 1;
+
+    await tx.insert(pageUpdates).values({
+      pageId: input.pageId,
+      index: nextIndex,
+      encryptedData: toBuf(input.encryptedData),
+    });
+
+    return { newIndex: nextIndex };
+  });
+}
+
+/** HTTP + WS gate: authenticated editor, Pro-or-free-page (matches legacy collab publish rules). */
+export async function assertPageCollabWsConnectionAllowed(input: {
+  db: DeepnotesDb;
+  userId: string;
+  pageId: string;
+}): Promise<void> {
+  const [pageRow] = await input.db
+    .select({
+      id: pages.id,
+      groupId: pages.groupId,
+      free: pages.free,
+    })
+    .from(pages)
+    .where(
+      and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
+    )
+    .limit(1);
+
+  if (pageRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Page not found.");
+  }
+
+  const canEdit = await userHasGroupPermission({
+    db: input.db,
+    userId: input.userId,
+    groupId: pageRow.groupId,
+    permission: "editGroupPages",
+  });
+  if (!canEdit) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const [userRow] = await input.db
+    .select({ plan: users.plan })
+    .from(users)
+    .where(eq(users.id, input.userId))
+    .limit(1);
+
+  const isPro = userRow?.plan === "pro";
+  const pageFree = pageRow.free === true;
+  if (!isPro && !pageFree) {
+    throw new SessionError(
+      403,
+      "FORBIDDEN",
+      "Editing this page requires a Pro plan.",
+    );
+  }
 }

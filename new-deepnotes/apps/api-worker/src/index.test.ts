@@ -151,6 +151,7 @@ describe("api-worker", () => {
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/bump"],
     ["GET", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/collab-updates"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/collab-updates"],
+    ["GET", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/collab-ws"],
     ["POST", "/api/pages/aaaaaaaaaaaaaaaaaaaaa/backlinks"],
     [
       "DELETE",

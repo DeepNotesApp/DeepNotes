@@ -32,6 +32,9 @@ importers:
       '@deepnotes/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@deepnotes/collab-wire':
+        specifier: workspace:*
+        version: link:../../packages/collab-wire
       '@deepnotes/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -112,6 +115,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@deepnotes/collab-wire':
+        specifier: workspace:^
+        version: link:../../packages/collab-wire
       '@deepnotes/e2ee':
         specifier: workspace:^
         version: link:../../packages/e2ee
@@ -233,6 +239,19 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.1.1
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/collab-wire:
+    dependencies:
+      lib0:
+        specifier: ^0.2.114
+        version: 0.2.117
+    devDependencies:
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
         version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
   packages/db:

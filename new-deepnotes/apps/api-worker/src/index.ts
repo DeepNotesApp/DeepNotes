@@ -42,6 +42,7 @@ import {
   stripeCheckoutSessionRequestSchema,
 } from "@deepnotes/api";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import type { DurableObjectNamespace, Fetcher } from "@cloudflare/workers-types";
 import { Hono } from "hono";
 import type { PageMoveBody } from "@deepnotes/session";
 import Stripe from "stripe";
@@ -59,6 +60,12 @@ import {
 type Bindings = WorkerSessionBindings & {
   /** Wired in `wrangler.toml`; optional in unit tests that do not pass `env`. */
   HYPERDRIVE?: Hyperdrive;
+  /** Durable Object namespace for live page collab (optional in Vitest). */
+  PAGE_COLLAB_ROOM?: DurableObjectNamespace;
+  /** Same-worker service binding for DO → HTTP internal append. */
+  WORKER_SELF?: Fetcher;
+  /** Shared secret for `/api/internal/.../collab-ws-append` (Wrangler secret / `.dev.vars`). */
+  COLLAB_INTERNAL_SECRET?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -1899,6 +1906,206 @@ app.post("/api/pages/:pageId/bump", async (c) => {
     }
     throw e;
   }
+});
+
+app.post("/api/internal/pages/:pageId/collab-ws-append", async (c) => {
+  const secretConfigured = c.env.COLLAB_INTERNAL_SECRET;
+  if (secretConfigured == null || secretConfigured === "") {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "Collab internal secret is not configured.",
+      },
+      503,
+    );
+  }
+  if (c.req.header("X-Collab-Internal-Secret") !== secretConfigured) {
+    return c.json(
+      { code: "UNAUTHORIZED", message: "Invalid collab internal secret." },
+      401,
+    );
+  }
+
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  let bodyJson: unknown;
+  try {
+    bodyJson = await c.req.json();
+  } catch {
+    return c.json({ code: "BAD_REQUEST", message: "Expected JSON body." }, 400);
+  }
+
+  if (
+    bodyJson == null ||
+    typeof bodyJson !== "object" ||
+    !("userId" in bodyJson) ||
+    !("encryptedDataBase64" in bodyJson) ||
+    typeof (bodyJson as { userId: unknown }).userId !== "string" ||
+    typeof (bodyJson as { encryptedDataBase64: unknown }).encryptedDataBase64 !==
+      "string"
+  ) {
+    return c.json(
+      { code: "BAD_REQUEST", message: "Expected userId and encryptedDataBase64." },
+      400,
+    );
+  }
+
+  const { base64ToUint8Standard } = await import("@deepnotes/collab-wire");
+  const userId = (bodyJson as { userId: string }).userId;
+  const encryptedData = base64ToUint8Standard(
+    (bodyJson as { encryptedDataBase64: string }).encryptedDataBase64,
+  );
+
+  const db = getDbForConnectionString(hyper.connectionString);
+
+  try {
+    const { performTrustedAppendNextPageCollabUpdate } =
+      await import("@deepnotes/session");
+    const { newIndex } = await performTrustedAppendNextPageCollabUpdate({
+      db,
+      pageId: pParams.data.pageId,
+      userId,
+      encryptedData,
+    });
+    return c.json({ newIndex }, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/pages/:pageId/collab-ws", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+
+  if (c.req.header("Upgrade") !== "websocket") {
+    return c.text("Expected WebSocket Upgrade request.", 426);
+  }
+
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+  const ns = c.env.PAGE_COLLAB_ROOM;
+  if (ns == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "PAGE_COLLAB_ROOM durable object binding is not configured.",
+      },
+      503,
+    );
+  }
+  if (c.env.COLLAB_INTERNAL_SECRET == null || c.env.COLLAB_INTERNAL_SECRET === "") {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "COLLAB_INTERNAL_SECRET is not configured.",
+      },
+      503,
+    );
+  }
+  if (c.env.WORKER_SELF == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "WORKER_SELF service binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+
+  let summary: { userId: string; demo: boolean };
+  try {
+    const { getAuthenticatedUserSummary, assertPageCollabWsConnectionAllowed } =
+      await import("@deepnotes/session");
+    summary = await getAuthenticatedUserSummary({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+    });
+    if (summary.demo) {
+      return c.json(
+        {
+          code: "FORBIDDEN",
+          message: "Demo sessions cannot use live collab WebSocket.",
+        },
+        403,
+      );
+    }
+    await assertPageCollabWsConnectionAllowed({
+      db,
+      userId: summary.userId,
+      pageId: pParams.data.pageId,
+    });
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+
+  const id = ns.idFromName(pParams.data.pageId);
+  const stub = ns.get(id);
+
+  const h = new Headers();
+  const raw = c.req.raw;
+  for (const [k, v] of raw.headers.entries()) {
+    if (k.toLowerCase() === "x-verified-user-id") {
+      continue;
+    }
+    h.append(k, v);
+  }
+  h.set("X-Verified-User-Id", summary.userId);
+
+  const doReq = new Request(raw.url, { headers: h, method: raw.method });
+  return stub.fetch(doReq);
 });
 
 app.get("/api/pages/:pageId/collab-updates", async (c) => {
@@ -4223,4 +4430,5 @@ app.post("/api/webhooks/stripe", async (c) => {
   }
 });
 
+export { PageCollabRoom } from "./page-collab-room.js";
 export default app;

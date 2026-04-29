@@ -97,8 +97,10 @@ export {
   performPageSoftDelete,
 } from "./page-operations.js";
 export {
+  assertPageCollabWsConnectionAllowed,
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
+  performTrustedAppendNextPageCollabUpdate,
 } from "./page-collab-updates.js";
 export {
   performPageMove,

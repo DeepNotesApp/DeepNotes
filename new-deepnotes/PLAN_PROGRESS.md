@@ -12,8 +12,8 @@
 
 | Area | State |
 |------|--------|
-| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** + **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: live collab WS, realtime, richer editor UX, native shells. |
+| **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** (legacy msgpackr) **not**. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: **realtime**, richer editor UX, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -26,7 +26,7 @@
 | **0** | Done | Map, OpenAPI, Drizzle baseline, CLIENT_FORKS |
 | **1** | Skip? | Legacy monorepo only |
 | **2** | Done | Turbo/CI/template DB/deploy docs |
-| **3** | WIP | **Collab WS** + **realtime**; integration tests; [RESTART_PLAN §4.3](../docs/RESTART_PLAN.md) |
+| **3** | WIP | **realtime** (msgpackr); collab WS MVP **done** (integration tests vs DO later) |
 | **4** | WIP | See checklist below |
 | **5** | Todo | Cutover after **parity gate** + metrics + decrypt spot-checks |
 
@@ -41,7 +41,7 @@
 **Open:**
 
 - [x] Stronger Vitest (or integration) coverage for password path + session/crypto asserts (`apps/web/src/features/auth/session-keyrings.test.ts`)
-- [ ] Live editing: **collab WS** client + Phase 3 server path  
+- [x] Live editing: **collab WS** client + **Durable Object** + internal Postgres append (greenfield; legacy-framed **DOC** relay + optional **AWARENESS** relay; **no** key rotation / Redis merge)  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
 - [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope)  
@@ -69,7 +69,7 @@
 
 **Open:**
 
-- [ ] Collab **and** realtime: ≥1 integration test each (stack TBD)  
+- [ ] Collab **and** realtime: ≥1 integration test each — collab DO path **TBD** in CI  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete done; collab WS + realtime + deeper editor still open — goal above)
@@ -80,7 +80,7 @@
 
 | Date | Note |
 |------|------|
-| 2026-04-29 | **Session keyrings Vitest:** persist/extract round-trip, **`applyRefreshToStoredKeyrings`** stability, legacy **`UserPrivate` / `UserSymmetric`** unwrap before session wrap + **`buildPasswordChangePayload`**; no‑salt early exit. |
+| 2026-04-29 | **Collab WebSocket:** `@deepnotes/collab-wire` (lib0), `PageCollabRoom` DO + `WORKER_SELF` internal append, SPA `PageEditorView` WS + REST fallback; `COLLAB_INTERNAL_SECRET`; Vite `ws` proxy. |
 | 2026-04-29 | **Make-private bootstrap + SPA**, **collab GET titles**, **group collab context**, **cross-group move/reencrypt**, **page + group purge** UI; `byteB64EmptyOk` for empty group name on make-private POST. |
 | 2026-04-29 | **Page prefs + group settings UI:** `GET …/pages/recent|favorites`, home (starting/recent/favorites/spatial defaults), editor path + bump/favorite/recent; group join-policy + soft-delete. |
 | 2026-04-29 | **`AccountView`** (`/account`): Stripe checkout/portal, password + email verify/change/confirm + raw keyrings, 2FA (enable/load/recovery/disable/devices), delete account; **`extractRawUserKeyringsBase64FromSession`** + **`build-password-and-email-confirm`**; notifications **msgpack decrypt** (`UserNotificationContent`); header link. |

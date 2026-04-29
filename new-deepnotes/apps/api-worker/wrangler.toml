@@ -3,6 +3,18 @@ main = "src/index.ts"
 compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat"]
 
+[[durable_objects.bindings]]
+name = "PAGE_COLLAB_ROOM"
+class_name = "PageCollabRoom"
+
+[[migrations]]
+tag = "collab-room-v1"
+new_classes = ["PageCollabRoom"]
+
+[[services]]
+binding = "WORKER_SELF"
+service = "deepnotes-api"
+
 # Replace `id` with a real Hyperdrive config in Cloudflare before production deploy.
 # Local dev uses `localConnectionString` (see RESTART_PLAN.md §Hosting).
 [[hyperdrive]]
