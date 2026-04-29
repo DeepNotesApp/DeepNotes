@@ -431,4 +431,38 @@ describe("executeRealtimeWsBatch", () => {
       { commandId: 101, value: "ok@x.y" },
     ]);
   });
+
+  it("UNSUBSCRIBE invokes unsubscribeField with legacy full key", async () => {
+    const { port } = createMemoryHashPort();
+    const unsub: string[] = [];
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 0,
+      commands: [
+        {
+          type: RealtimeCommandType.UNSUBSCRIBE,
+          args: ["user", "u1", "email"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: {
+        subscribeField: () => {},
+        unsubscribeField: (fk) => {
+          unsub.push(fk);
+        },
+      },
+      acl: null,
+    });
+    expect(unsub).toEqual([realtimeFullKey("user", "u1", "email")]);
+    expect(out.responseBytes).toBeNull();
+    expect(out.subscribeNotifyBytes).toBeNull();
+    expect(out.hsetBroadcastItems).toEqual([]);
+  });
 });

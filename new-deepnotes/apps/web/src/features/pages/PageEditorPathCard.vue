@@ -28,7 +28,8 @@ function pagePathLabel(pid: string): string {
   if (label != null && label.length > 0) {
     return label;
   }
-  return `${pid.slice(0, 8)}…`;
+  // Legacy `pageAbsoluteTitles` unknown placeholder: `[Page ${pageId}]`
+  return `[Page ${pid}]`;
 }
 
 defineEmits<{
