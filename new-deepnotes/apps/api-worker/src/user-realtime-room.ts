@@ -22,6 +22,9 @@ import {
   upstashPublish,
 } from "./realtime-redis-pubsub.js";
 
+/** Same as legacy `@stdlib/data` `DEFAULT_REMOTE_TTL` (7d). KeyDB used `expiremember` per field; standard Redis uses one TTL on the whole hash key. */
+const REALTIME_HASH_CACHE_TTL_SEC = 7 * 24 * 60 * 60;
+
 export type UserRealtimeRoomEnv = {
   REALTIME_INTERNAL_SECRET?: string;
   UPSTASH_REDIS_REST_URL?: string;
@@ -72,6 +75,11 @@ export class UserRealtimeRoom {
   private hashPort(): RealtimeHashPort | null {
     const r = this.getRedis();
     if (r == null) return null;
+    const refreshTtl = (redisKey: string): void => {
+      void r.expire(redisKey, REALTIME_HASH_CACHE_TTL_SEC).catch(() => {
+        // best-effort; matches legacy fire-and-forget expiremember
+      });
+    };
     return {
       hmget: async (key, fields) => {
         if (fields.length === 0) {
@@ -85,15 +93,18 @@ export class UserRealtimeRoom {
           return fields.map(() => null);
         }
         const obj = got as Record<string, unknown>;
-        return fields.map((f) => {
+        const out = fields.map((f) => {
           if (!Object.prototype.hasOwnProperty.call(obj, f)) {
             return null;
           }
           return obj[f] ?? null;
         });
+        refreshTtl(key);
+        return out;
       },
       hset: async (key, entries) => {
         await r.hset(key, entries);
+        refreshTtl(key);
         const restUrl = this.env.UPSTASH_REDIS_REST_URL;
         const restToken = this.env.UPSTASH_REDIS_REST_TOKEN;
         if (
