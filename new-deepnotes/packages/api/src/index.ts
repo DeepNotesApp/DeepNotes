@@ -25,7 +25,9 @@ export {
 } from "./schemas/sessions.js";
 export {
   groupIdPathSchema,
+  groupCollabCryptoContextResponseSchema,
   groupInviteCryptoBootstrapResponseSchema,
+  groupPrivacyMakePrivateBootstrapResponseSchema,
   groupMainPageResponseSchema,
   groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,

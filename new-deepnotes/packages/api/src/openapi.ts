@@ -18,7 +18,9 @@ import {
 } from "./schemas/sessions.js";
 import {
   groupIdPathSchema,
+  groupCollabCryptoContextResponseSchema,
   groupInviteCryptoBootstrapResponseSchema,
+  groupPrivacyMakePrivateBootstrapResponseSchema,
   groupMainPageResponseSchema,
   groupMembersDetailResponseSchema,
   groupMemberUserIdsResponseSchema,
@@ -689,6 +691,56 @@ registry.registerPath({
           schema: groupInviteCryptoBootstrapResponseSchema,
         },
       },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/collab-crypto-context",
+  summary: "Group ciphertext for page move / re-key (edit pages)",
+  description:
+    "Returns `groups.encrypted_content_keyring`, optional `access_keyring`, and the caller’s `group_members.encrypted_access_keyring` so the SPA can unwrap `GroupContentKeyring` when moving a page into this group. Requires `editGroupPages` and membership.",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Encrypted blobs for destination-side symmetric wrap.",
+      content: {
+        "application/json": {
+          schema: groupCollabCryptoContextResponseSchema,
+        },
+      },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/groups/{groupId}/privacy/make-private-bootstrap",
+  summary: "Read model for making a public group private (re-key)",
+  description:
+    "Returns member/invite/request/page ciphertext ids and user public keys matching legacy WS `groups.privacy.makePrivate` step 1, so the browser can build `POST …/privacy/private`. Requires Pro, `editGroupSettings`, and a public group (`access_keyring` set).",
+  request: { params: groupIdPathSchema },
+  responses: {
+    200: {
+      description: "Key rotation bootstrap (base64 fields).",
+      content: {
+        "application/json": {
+          schema: groupPrivacyMakePrivateBootstrapResponseSchema,
+        },
+      },
+    },
+    400: {
+      description: "Group is already private.",
+      content: { "application/json": { schema: sessionErrorResponseSchema } },
     },
     401: sessionUnauthorized401,
     403: sessionForbidden403,

@@ -1617,6 +1617,169 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/groups/{groupId}/collab-crypto-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Group ciphertext for page move / re-key (edit pages)
+         * @description Returns `groups.encrypted_content_keyring`, optional `access_keyring`, and the caller’s `group_members.encrypted_access_keyring` so the SPA can unwrap `GroupContentKeyring` when moving a page into this group. Requires `editGroupPages` and membership.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    groupId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Encrypted blobs for destination-side symmetric wrap. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupCollabCryptoContextResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/groups/{groupId}/privacy/make-private-bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Read model for making a public group private (re-key)
+         * @description Returns member/invite/request/page ciphertext ids and user public keys matching legacy WS `groups.privacy.makePrivate` step 1, so the browser can build `POST …/privacy/private`. Requires Pro, `editGroupSettings`, and a public group (`access_keyring` set).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    groupId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Key rotation bootstrap (base64 fields). */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupPrivacyMakePrivateBootstrapResponse"];
+                    };
+                };
+                /** @description Group is already private. */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/groups/{groupId}/public-keyring": {
         parameters: {
             query?: never;
@@ -6032,6 +6195,80 @@ export interface components {
              */
             memberEncryptedInternalKeyring: string;
         };
+        GroupCollabCryptoContextResponse: {
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupEncryptedContentKeyring: string;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            groupAccessKeyring: string | null;
+            /**
+             * Format: byte
+             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             */
+            memberEncryptedAccessKeyring: string | null;
+        };
+        GroupPrivacyMakePrivateMemberBootstrap: {
+            /**
+             * Format: byte
+             * @description Invitee/member `users.public_keyring` (base64).
+             */
+            publicKeyring: string;
+            /**
+             * Format: byte
+             * @description `group_members.encrypted_name` (base64) or null.
+             */
+            encryptedName: string | null;
+        };
+        GroupPrivacyMakePrivateInvitationBootstrap: {
+            /** Format: byte */
+            publicKeyring: string;
+            /** Format: byte */
+            encryptedName: string;
+        };
+        GroupPrivacyMakePrivateJoinRequestBootstrap: {
+            /** Format: byte */
+            encryptedName: string;
+        };
+        GroupPrivacyMakePrivatePageBootstrap: {
+            /** Format: byte */
+            encryptedSymmetricKeyring: string;
+        };
+        GroupPrivacyMakePrivateBootstrapResponse: {
+            /** Format: byte */
+            groupAccessKeyring: string | null;
+            /** Format: byte */
+            groupEncryptedName: string;
+            /** Format: byte */
+            groupEncryptedContentKeyring: string;
+            /** Format: byte */
+            groupPublicKeyring: string;
+            /** Format: byte */
+            groupEncryptedPrivateKeyring: string;
+            /**
+             * Format: byte
+             * @description Viewer’s `group_members.encrypted_access_keyring` (often null when public).
+             */
+            groupEncryptedAccessKeyring: string | null;
+            /** Format: byte */
+            groupEncryptedInternalKeyring: string;
+            groupMembers: {
+                [key: string]: components["schemas"]["GroupPrivacyMakePrivateMemberBootstrap"];
+            };
+            groupJoinInvitations: {
+                [key: string]: components["schemas"]["GroupPrivacyMakePrivateInvitationBootstrap"];
+            };
+            groupJoinRequests: {
+                [key: string]: components["schemas"]["GroupPrivacyMakePrivateJoinRequestBootstrap"];
+            };
+            groupPages: {
+                [key: string]: components["schemas"]["GroupPrivacyMakePrivatePageBootstrap"];
+            };
+        };
         GroupPublicKeyringResponse: {
             /**
              * Format: byte
@@ -6225,7 +6462,7 @@ export interface components {
             groupAccessKeyring?: string;
             /**
              * Format: byte
-             * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
+             * @description Standard base64; empty string means zero-length binary.
              */
             groupEncryptedName: string;
             /**
@@ -6387,6 +6624,16 @@ export interface components {
              * @description Standard base64-encoded binary (legacy tRPC used raw bytes).
              */
             pageEncryptedSymmetricKeyring: string;
+            /**
+             * Format: byte
+             * @description `pages.encrypted_relative_title` (re-key on cross-group move).
+             */
+            pageEncryptedRelativeTitle: string;
+            /**
+             * Format: byte
+             * @description `pages.encrypted_absolute_title` (re-key on cross-group move).
+             */
+            pageEncryptedAbsoluteTitle: string;
             /**
              * Format: byte
              * @description Standard base64-encoded binary (legacy tRPC used raw bytes).

@@ -132,6 +132,17 @@ const nanoidRecordKeySchema = z
   .string()
   .regex(/^[A-Za-z0-9_-]{21}$/, "expected nanoid id");
 
+/** Base64 to bytes; allows empty string → zero-length `Uint8Array` (personal / empty ciphertext). */
+const byteB64EmptyOk = z
+  .string()
+  .openapi({
+    format: "byte",
+    description: "Standard base64; empty string means zero-length binary.",
+  })
+  .transform((s) =>
+    s === "" ? new Uint8Array(0) : new Uint8Array(Buffer.from(s, "base64")),
+  );
+
 const groupPrivacyPrivateMemberSchema = z
   .object({
     encryptedAccessKeyring: byteB64.optional(),
@@ -167,7 +178,7 @@ const groupPrivacyPrivatePageSchema = z
 export const groupPrivacyPrivateRequestSchema = z
   .object({
     groupAccessKeyring: byteB64.optional(),
-    groupEncryptedName: byteB64,
+    groupEncryptedName: byteB64EmptyOk,
     groupEncryptedContentKeyring: byteB64,
     groupPublicKeyring: byteB64,
     groupEncryptedPrivateKeyring: byteB64,
@@ -234,6 +245,89 @@ export const groupInviteCryptoBootstrapResponseSchema = z
     memberEncryptedInternalKeyring: byteB64,
   })
   .openapi("GroupInviteCryptoBootstrapResponse");
+
+/** Destination group ciphertext for client-side unwrap (`PageKeyring` re-wrap on cross-group move). */
+export const groupCollabCryptoContextResponseSchema = z
+  .object({
+    groupEncryptedContentKeyring: byteB64,
+    groupAccessKeyring: byteB64.nullable(),
+    memberEncryptedAccessKeyring: byteB64.nullable(),
+  })
+  .openapi("GroupCollabCryptoContextResponse");
+
+const groupPrivacyMakePrivateMemberBootstrapSchema = z
+  .object({
+    publicKeyring: z
+      .string()
+      .openapi({ format: "byte", description: "Invitee/member `users.public_keyring` (base64)." }),
+    encryptedName: z
+      .string()
+      .nullable()
+      .openapi({
+        format: "byte",
+        description: "`group_members.encrypted_name` (base64) or null.",
+      }),
+  })
+  .openapi("GroupPrivacyMakePrivateMemberBootstrap");
+
+const groupPrivacyMakePrivateInvitationBootstrapSchema = z
+  .object({
+    publicKeyring: z.string().openapi({ format: "byte" }),
+    encryptedName: z.string().openapi({ format: "byte" }),
+  })
+  .openapi("GroupPrivacyMakePrivateInvitationBootstrap");
+
+const groupPrivacyMakePrivateJoinRequestBootstrapSchema = z
+  .object({
+    encryptedName: z.string().openapi({ format: "byte" }),
+  })
+  .openapi("GroupPrivacyMakePrivateJoinRequestBootstrap");
+
+const groupPrivacyMakePrivatePageBootstrapSchema = z
+  .object({
+    encryptedSymmetricKeyring: z.string().openapi({ format: "byte" }),
+  })
+  .openapi("GroupPrivacyMakePrivatePageBootstrap");
+
+/**
+ * Read model for `POST …/privacy/private` body construction (legacy WS make-private step 1).
+ */
+export const groupPrivacyMakePrivateBootstrapResponseSchema = z
+  .object({
+    groupAccessKeyring: z
+      .string()
+      .nullable()
+      .openapi({ format: "byte" }),
+    groupEncryptedName: z.string().openapi({ format: "byte" }),
+    groupEncryptedContentKeyring: z.string().openapi({ format: "byte" }),
+    groupPublicKeyring: z.string().openapi({ format: "byte" }),
+    groupEncryptedPrivateKeyring: z.string().openapi({ format: "byte" }),
+    groupEncryptedAccessKeyring: z
+      .string()
+      .nullable()
+      .openapi({
+        format: "byte",
+        description: "Viewer’s `group_members.encrypted_access_keyring` (often null when public).",
+      }),
+    groupEncryptedInternalKeyring: z.string().openapi({ format: "byte" }),
+    groupMembers: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyMakePrivateMemberBootstrapSchema,
+    ),
+    groupJoinInvitations: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyMakePrivateInvitationBootstrapSchema,
+    ),
+    groupJoinRequests: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyMakePrivateJoinRequestBootstrapSchema,
+    ),
+    groupPages: z.record(
+      nanoidRecordKeySchema,
+      groupPrivacyMakePrivatePageBootstrapSchema,
+    ),
+  })
+  .openapi("GroupPrivacyMakePrivateBootstrapResponse");
 
 /** Group box key for encrypting display names (invite accept, join request, etc.). */
 export const groupPublicKeyringResponseSchema = z
@@ -471,6 +565,12 @@ export const pageCollabUpdatesGetResponseSchema = z
       description: "Owning group (`pages.group_id`) for access-key + content-key unwrap.",
     }),
     pageEncryptedSymmetricKeyring: byteB64,
+    pageEncryptedRelativeTitle: byteB64.openapi({
+      description: "`pages.encrypted_relative_title` (re-key on cross-group move).",
+    }),
+    pageEncryptedAbsoluteTitle: byteB64.openapi({
+      description: "`pages.encrypted_absolute_title` (re-key on cross-group move).",
+    }),
     groupEncryptedContentKeyring: byteB64,
     groupAccessKeyring: byteB64
       .nullable()

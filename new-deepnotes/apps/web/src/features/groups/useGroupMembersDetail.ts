@@ -16,6 +16,10 @@ import {
   buildMakePublicAccessKeyringB64,
   type InviteCryptoBootstrapJson,
 } from "./group-membership-crypto";
+import {
+  buildGroupPrivacyMakePrivateRequest,
+  type GroupPrivacyMakePrivateBootstrapJson,
+} from "./group-make-private-crypto";
 
 type GroupMemberRole = components["schemas"]["GroupMemberRole"];
 
@@ -416,6 +420,30 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
+  async function purgeGroup() {
+    const id = resolvedGroupId();
+    if (id == null) {
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const res = await client.POST("/api/groups/{groupId}/purge", {
+        params: { path: { groupId: id } },
+      });
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not purge group.";
+        return;
+      }
+      detail.value = null;
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   async function makeGroupPublic() {
     const id = resolvedGroupId();
     const d = detail.value;
@@ -463,6 +491,64 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     }
   }
 
+  async function makeGroupPrivate() {
+    const id = resolvedGroupId();
+    const d = detail.value;
+    if (id == null || d == null) {
+      return;
+    }
+    if (!d.groupIsPublic) {
+      error.value = "Group is already private.";
+      return;
+    }
+    const stored = readSessionCrypto();
+    if (stored == null) {
+      error.value =
+        "Client crypto is not unlocked. Sign in with your account password (not demo) on this device.";
+      return;
+    }
+    actionLoading.value = true;
+    error.value = null;
+    try {
+      const bootRes = await client.GET(
+        "/api/groups/{groupId}/privacy/make-private-bootstrap",
+        { params: { path: { groupId: id } } },
+      );
+      if (bootRes.response.status !== 200 || bootRes.data == null) {
+        error.value =
+          bootRes.error &&
+          typeof bootRes.error === "object" &&
+          "message" in bootRes.error
+            ? String((bootRes.error as { message?: string }).message)
+            : "Could not load make-private bootstrap.";
+        return;
+      }
+      const body = await buildGroupPrivacyMakePrivateRequest({
+        groupId: id,
+        groupIsPublic: false,
+        stored,
+        bootstrap: bootRes.data as GroupPrivacyMakePrivateBootstrapJson,
+      });
+      const res = await client.POST("/api/groups/{groupId}/privacy/private", {
+        params: { path: { groupId: id } },
+        body,
+      });
+      if (res.response.status !== 204) {
+        error.value =
+          res.error && typeof res.error === "object" && "message" in res.error
+            ? String((res.error as { message?: string }).message)
+            : "Could not make group private.";
+        return;
+      }
+      await load();
+    } catch (e) {
+      error.value =
+        e instanceof Error ? e.message : "Could not make group private.";
+    } finally {
+      actionLoading.value = false;
+    }
+  }
+
   return {
     loading,
     actionLoading,
@@ -479,6 +565,8 @@ export function useGroupMembersDetail(groupId: GroupIdParamRef) {
     acceptJoinRequestWithCrypto,
     setJoinRequestsAllowed,
     makeGroupPublic,
+    makeGroupPrivate,
     softDeleteGroup,
+    purgeGroup,
   };
 }

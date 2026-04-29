@@ -40,6 +40,8 @@ export {
   performGetGroupInviteCryptoBootstrap,
   performGetGroupPublicKeyringForMessaging,
 } from "./group-invite-crypto-bootstrap.js";
+export { performGetGroupCollabCryptoContext } from "./group-collab-crypto-context.js";
+export { performGetGroupPrivacyMakePrivateBootstrap } from "./group-privacy-make-private-bootstrap.js";
 export { performGetUserPublicKeyring } from "./user-public-keyring.js";
 export { performGetUserGroupIds } from "./user-group-ids.js";
 export {

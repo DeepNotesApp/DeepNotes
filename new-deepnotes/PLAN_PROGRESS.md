@@ -13,7 +13,7 @@
 | Area | State |
 |------|--------|
 | **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** + **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: live collab WS, realtime, richer editor UX, native shells. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab REST, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: live collab WS, realtime, richer editor UX, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -43,7 +43,7 @@
 - [ ] Password (registered) Playwright + stronger session/crypto asserts  
 - [ ] Live editing: **collab WS** client + Phase 3 server path  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
-- [ ] `[parity]` Page ops + group settings — make **private** + cross-group **move/reencrypt** + **purge** UI; **make public**, snapshots + main + soft-delete **done** in SPA  
+- [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
 - [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope)  
 - [x] `[parity]` Notifications: decrypt/display as legacy  
 - [ ] Legacy **realtime** equivalent (after protocol choice)  
@@ -76,7 +76,7 @@
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] E2E beyond demo (password path)  
-- [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete done; **group make-private / cross-group move / purge** + collab WS + realtime + deeper editor still open — goal above)
+- [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete done; collab WS + realtime + deeper editor still open — goal above)
 
 ---
 
@@ -84,7 +84,7 @@
 
 | Date | Note |
 |------|------|
-| 2026-04-29 | **Snapshots + page ops + make public:** `GET …/pages/:id/snapshots`, editor snapshot crypto (legacy AAD), restore w/ pre-restore, set-as-main `move`, soft-delete; group **make public** from bootstrap; plan/map updates. |
+| 2026-04-29 | **Make-private bootstrap + SPA**, **collab GET titles**, **group collab context**, **cross-group move/reencrypt**, **page + group purge** UI; `byteB64EmptyOk` for empty group name on make-private POST. |
 | 2026-04-29 | **Page prefs + group settings UI:** `GET …/pages/recent|favorites`, home (starting/recent/favorites/spatial defaults), editor path + bump/favorite/recent; group join-policy + soft-delete. |
 | 2026-04-29 | **`AccountView`** (`/account`): Stripe checkout/portal, password + email verify/change/confirm + raw keyrings, 2FA (enable/load/recovery/disable/devices), delete account; **`extractRawUserKeyringsBase64FromSession`** + **`build-password-and-email-confirm`**; notifications **msgpack decrypt** (`UserNotificationContent`); header link. |
 | 2026-04-29 | Theme: **`@vueuse/core` `useColorMode`**, hydrate pre-mount, **`ThemeSwitcher`**, Vitest hydration/migration tests, `App` unified shell (`data-testid="app-shell"`). |

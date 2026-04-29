@@ -18,6 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 import { uint8ToBase64 } from "../auth/bytes";
 import { readSessionCrypto } from "../auth/crypto-storage";
@@ -33,6 +35,7 @@ import {
   buildPageSnapshotSaveBodies,
   decryptPageSnapshotPlainUpdate,
 } from "./page-snapshot-crypto";
+import { buildCrossGroupPageMoveReencrypt } from "./page-move-crypto";
 
 import type { components } from "@/api/api-types.generated";
 
@@ -63,6 +66,11 @@ const bumpMessage = ref<string | null>(null);
 const favoriteMessage = ref<string | null>(null);
 
 const collabGroupId = ref<string | null>(null);
+const collabReloadNonce = ref(0);
+const moveDestGroupId = ref("");
+const pageEncRelTitleB64 = ref<string | null>(null);
+const pageEncAbsTitleB64 = ref<string | null>(null);
+const collabEncryptedUpdatesForMove = ref<Uint8Array[]>([]);
 const snapshots = ref<SnapshotRow[]>([]);
 const snapshotLoading = ref(false);
 const pageOpsMessage = ref<string | null>(null);
@@ -506,6 +514,152 @@ async function softDeleteThisPage() {
   void router.replace({ path: "/" });
 }
 
+async function purgeThisPagePermanently() {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  if (!id || user.value?.demo === true) {
+    return;
+  }
+  if (
+    !confirm(
+      "Permanently purge this page? Irreversible after processing (cannot purge a group’s main page).",
+    )
+  ) {
+    return;
+  }
+  const res = await client.POST("/api/pages/{pageId}/purge", {
+    params: { path: { pageId: id } },
+  });
+  if (res.response.status !== 204) {
+    pageOpsMessage.value =
+      res.error && typeof res.error === "object" && "message" in res.error
+        ? String((res.error as { message?: string }).message)
+        : "Could not purge page.";
+    return;
+  }
+  void router.replace({ path: "/" });
+}
+
+async function movePageToOtherGroup() {
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  const srcG = collabGroupId.value;
+  const dest = moveDestGroupId.value.trim();
+  const rel = pageEncRelTitleB64.value;
+  const abs = pageEncAbsTitleB64.value;
+  const pk = pageKeyring;
+  if (!id || srcG == null || user.value?.demo === true) {
+    return;
+  }
+  if (!/^[A-Za-z0-9_-]{21}$/.test(dest)) {
+    pageOpsMessage.value =
+      "Enter a valid 21-character destination group id.";
+    return;
+  }
+  if (dest === srcG) {
+    pageOpsMessage.value =
+      "Destination group must differ from the current group.";
+    return;
+  }
+  if (rel == null || abs == null || pk == null) {
+    pageOpsMessage.value = "Page crypto or titles are not loaded yet.";
+    return;
+  }
+  const stored = readSessionCrypto();
+  if (stored == null) {
+    pageOpsMessage.value =
+      "Unlock session crypto (password login) to move pages.";
+    return;
+  }
+  if (
+    !confirm(
+      "Move this page to another group? Re-encrypts titles, merges Yjs history into one update, and re-keys all snapshots (Pro). Requires editor access on the destination group.",
+    )
+  ) {
+    return;
+  }
+  await flushPush();
+  try {
+    const destCtx = await client.GET(
+      "/api/groups/{groupId}/collab-crypto-context",
+      { params: { path: { groupId: dest } } },
+    );
+    if (destCtx.response.status !== 200 || destCtx.data == null) {
+      pageOpsMessage.value =
+        destCtx.error &&
+        typeof destCtx.error === "object" &&
+        "message" in destCtx.error
+          ? String((destCtx.error as { message?: string }).message)
+          : "Could not load destination group crypto.";
+      return;
+    }
+    const snapLoads: {
+      snapshotId: string;
+      encryptedSymmetricKey: string | null;
+      encryptedData: string;
+    }[] = [];
+    for (const s of snapshots.value) {
+      const lr = await client.GET(
+        "/api/pages/{pageId}/snapshots/{snapshotId}",
+        {
+          params: { path: { pageId: id, snapshotId: s.snapshotId } },
+        },
+      );
+      if (lr.response.status !== 200 || lr.data == null) {
+        pageOpsMessage.value =
+          lr.error && typeof lr.error === "object" && "message" in lr.error
+            ? String((lr.error as { message?: string }).message)
+            : "Could not load snapshot ciphertext for move.";
+        return;
+      }
+      snapLoads.push({
+        snapshotId: s.snapshotId,
+        encryptedSymmetricKey: lr.data.encryptedSymmetricKey ?? null,
+        encryptedData: lr.data.encryptedData,
+      });
+    }
+    const reencrypt = await buildCrossGroupPageMoveReencrypt({
+      pageId: id,
+      destGroupId: dest,
+      oldPageKeyring: pk,
+      pageEncryptedRelativeTitleB64: rel,
+      pageEncryptedAbsoluteTitleB64: abs,
+      collabUpdates: collabEncryptedUpdatesForMove.value.map((encryptedData) => ({
+        encryptedData,
+      })),
+      snapshotRows: snapLoads,
+      destGroupEncryptedContentKeyringB64:
+        destCtx.data.groupEncryptedContentKeyring,
+      destGroupAccessKeyringB64: destCtx.data.groupAccessKeyring ?? null,
+      destMemberEncryptedAccessKeyringB64:
+        destCtx.data.memberEncryptedAccessKeyring ?? null,
+      stored,
+    });
+    const mv = await client.POST("/api/pages/{pageId}/move", {
+      params: { path: { pageId: id } },
+      body: {
+        destGroupId: dest,
+        setAsMainPage: false,
+        reencrypt,
+      },
+    });
+    if (mv.response.status !== 204) {
+      pageOpsMessage.value =
+        mv.error && typeof mv.error === "object" && "message" in mv.error
+          ? String((mv.error as { message?: string }).message)
+          : "Could not move page.";
+      return;
+    }
+    pageOpsMessage.value = "Page moved; reloading…";
+    moveDestGroupId.value = "";
+    collabReloadNonce.value += 1;
+    await loadPathAndPrefs();
+  } catch (e) {
+    pageOpsMessage.value =
+      e instanceof Error ? e.message : "Could not move page.";
+  }
+}
+
 watch(
   [editor, legacyPlainToImport],
   () => {
@@ -531,7 +685,7 @@ watch(
 );
 
 watch(
-  [bootstrapped, isAuthenticated, pageId],
+  [bootstrapped, isAuthenticated, pageId, collabReloadNonce],
   async () => {
     if (!bootstrapped.value) {
       return;
@@ -544,6 +698,9 @@ watch(
       return;
     }
     collabGroupId.value = null;
+    pageEncRelTitleB64.value = null;
+    pageEncAbsTitleB64.value = null;
+    collabEncryptedUpdatesForMove.value = [];
     snapshots.value = [];
     loadError.value = null;
     cryptoError.value = null;
@@ -564,6 +721,11 @@ watch(
       }
 
       collabGroupId.value = data.groupId;
+      pageEncRelTitleB64.value = data.pageEncryptedRelativeTitle;
+      pageEncAbsTitleB64.value = data.pageEncryptedAbsoluteTitle;
+      collabEncryptedUpdatesForMove.value = data.updates.map((u) =>
+        base64ToBytes(u.encryptedData),
+      );
       collabLastIndex.value = data.lastIndex;
       updateCount.value = data.updates.length;
 
@@ -864,27 +1026,67 @@ watch(
         <CardDescription>
           Main-page promotion uses
           <code class="font-mono text-xs">POST …/move</code>
-          with the same group id (Pro). Soft-delete uses
-          <code class="font-mono text-xs">DELETE …/pages/:id</code>.
+          with the same group id (Pro). Cross-group move re-encrypts ciphertext client-side. Soft-delete and purge use
+          <code class="font-mono text-xs">DELETE …/pages/:id</code>
+          and
+          <code class="font-mono text-xs">POST …/purge</code>.
         </CardDescription>
       </CardHeader>
-      <CardContent class="flex flex-wrap gap-2">
-        <Button
-          size="sm"
-          variant="secondary"
-          :disabled="collabGroupId == null || collabLoading"
-          @click="setAsGroupMainPage()"
-        >
-          Set as group main page
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          :disabled="user?.demo === true"
-          @click="softDeleteThisPage()"
-        >
-          Soft-delete page…
-        </Button>
+      <CardContent class="space-y-4">
+        <div class="space-y-2">
+          <Label for="move-dest-gid" class="text-muted-foreground text-xs">
+            Move to group id (21-char nanoid, Pro)
+          </Label>
+          <div class="flex flex-wrap items-end gap-2">
+            <Input
+              id="move-dest-gid"
+              v-model="moveDestGroupId"
+              class="max-w-md font-mono text-xs"
+              placeholder="Destination group id"
+              :disabled="
+                collabLoading ||
+                  loadError != null ||
+                  cryptoError != null
+              "
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              :disabled="
+                collabLoading ||
+                  loadError != null ||
+                  cryptoError != null
+              "
+              @click="movePageToOtherGroup()"
+            >
+              Move to group…
+            </Button>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            :disabled="collabGroupId == null || collabLoading"
+            @click="setAsGroupMainPage()"
+          >
+            Set as group main page
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            @click="softDeleteThisPage()"
+          >
+            Soft-delete page…
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            @click="purgeThisPagePermanently()"
+          >
+            Purge page permanently…
+          </Button>
+        </div>
       </CardContent>
     </Card>
 

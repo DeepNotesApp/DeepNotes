@@ -30,6 +30,8 @@ export async function performGetPageCollabUpdates(input: {
   updates: { index: number; encryptedData: Buffer }[];
   groupId: string;
   pageEncryptedSymmetricKeyring: Buffer;
+  pageEncryptedRelativeTitle: Buffer;
+  pageEncryptedAbsoluteTitle: Buffer;
   groupEncryptedContentKeyring: Buffer;
   groupAccessKeyring: Buffer | null;
   memberEncryptedAccessKeyring: Buffer | null;
@@ -45,6 +47,8 @@ export async function performGetPageCollabUpdates(input: {
       id: pages.id,
       groupId: pages.groupId,
       encryptedSymmetricKeyring: pages.encryptedSymmetricKeyring,
+      encryptedRelativeTitle: pages.encryptedRelativeTitle,
+      encryptedAbsoluteTitle: pages.encryptedAbsoluteTitle,
     })
     .from(pages)
     .where(
@@ -104,6 +108,8 @@ export async function performGetPageCollabUpdates(input: {
   const cryptoOut = {
     groupId: pageRow.groupId,
     pageEncryptedSymmetricKeyring: Buffer.from(pageRow.encryptedSymmetricKeyring),
+    pageEncryptedRelativeTitle: Buffer.from(pageRow.encryptedRelativeTitle),
+    pageEncryptedAbsoluteTitle: Buffer.from(pageRow.encryptedAbsoluteTitle),
     groupEncryptedContentKeyring: Buffer.from(groupRow.encryptedContentKeyring),
     groupAccessKeyring:
       groupRow.accessKeyring != null ? Buffer.from(groupRow.accessKeyring) : null,

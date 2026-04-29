@@ -58,6 +58,8 @@ const {
   setJoinRequestsAllowed,
   softDeleteGroup,
   makeGroupPublic,
+  makeGroupPrivate,
+  purgeGroup,
 } = useGroupMembersDetail(groupIdRef);
 
 const roleDraft = ref<Record<string, GroupMemberRole>>({});
@@ -228,6 +230,20 @@ async function onSoftDeleteGroup() {
   }
 }
 
+async function onPurgeGroup() {
+  if (
+    !confirm(
+      "Permanently purge this group? This cannot be undone if the server accepts the request (legacy groups.deletion.deletePermanently).",
+    )
+  ) {
+    return;
+  }
+  await purgeGroup();
+  if (detail.value == null && error.value == null) {
+    void router.replace({ name: "groups" });
+  }
+}
+
 async function onMakeGroupPublic() {
   if (
     !confirm(
@@ -237,6 +253,17 @@ async function onMakeGroupPublic() {
     return;
   }
   await makeGroupPublic();
+}
+
+async function onMakeGroupPrivate() {
+  if (
+    !confirm(
+      "Make this group private? This re-keys the group and re-encrypts member, invitation, join request, and page key material for all current rows (legacy groups.privacy.makePrivate).",
+    )
+  ) {
+    return;
+  }
+  await makeGroupPrivate();
 }
 </script>
 
@@ -321,10 +348,27 @@ async function onMakeGroupPublic() {
         <CardHeader>
           <CardTitle class="text-base">Group settings</CardTitle>
           <CardDescription>
-            Join policy, visibility, and deletion (make-private re-key remains a dedicated crypto flow).
+            Join policy, visibility, and deletion.
           </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
+          <div
+            v-if="detail.groupIsPublic"
+            class="space-y-2 border-border border-b pb-3"
+          >
+            <p class="text-muted-foreground text-xs">
+              Public group — managers can make it private (Pro + client crypto): re-keys members, invitations, join requests, and page symmetric keyrings (legacy
+              <code class="font-mono">groups.privacy.makePrivate</code>).
+            </p>
+            <Button
+              size="sm"
+              variant="secondary"
+              :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+              @click="onMakeGroupPrivate"
+            >
+              Make group private…
+            </Button>
+          </div>
           <div
             v-if="!detail.groupIsPublic"
             class="space-y-2 border-border border-b pb-3"
@@ -364,7 +408,7 @@ async function onMakeGroupPublic() {
               Save join policy
             </Button>
           </div>
-          <div class="border-border border-t pt-3">
+          <div class="border-border border-t pt-3 space-y-2">
             <Button
               size="sm"
               variant="destructive"
@@ -373,8 +417,17 @@ async function onMakeGroupPublic() {
             >
               Schedule group deletion…
             </Button>
-            <p class="text-muted-foreground mt-2 text-xs">
-              Soft-deletes the group (grace period). Demo sessions cannot delete groups.
+            <Button
+              size="sm"
+              variant="destructive"
+              class="ml-0 sm:ml-2"
+              :disabled="actionLoading || user?.demo === true"
+              @click="onPurgeGroup"
+            >
+              Purge group permanently…
+            </Button>
+            <p class="text-muted-foreground text-xs">
+              Soft-deletes the group (grace period). Purge forces permanent deletion when allowed. Demo sessions cannot delete groups.
             </p>
           </div>
         </CardContent>

@@ -62,6 +62,14 @@ describe("api-worker", () => {
     ],
     [
       "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/collab-crypto-context",
+    ],
+    [
+      "GET",
+      "/api/groups/aaaaaaaaaaaaaaaaaaaaa/privacy/make-private-bootstrap",
+    ],
+    [
+      "GET",
       "/api/groups/aaaaaaaaaaaaaaaaaaaaa/public-keyring",
     ],
     [

@@ -65,6 +65,8 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 | `groups.password.disable` | `DELETE /api/groups/:groupId/password` (JSON body; **implemented** — `performGroupPasswordDisable`; not Pro-gated, legacy match) |
 | `groups.privacy.makePublic` | `POST /api/groups/:groupId/privacy/public` (**implemented** — `performGroupPrivacyMakePublic`; clears `group_members` / `group_join_invitations` `encrypted_access_keyring`) |
 | `groups.privacy.setJoinRequestsAllowed` | `PATCH /api/groups/:groupId/privacy/join-requests` (**implemented** — `performGroupPrivacySetJoinRequestsAllowed`) |
+| *(greenfield read)* | `GET /api/groups/:groupId/collab-crypto-context` (**implemented** — `performGetGroupCollabCryptoContext`; `editGroupPages` + membership; exposes `encrypted_content_keyring` + access blobs for SPA destination unwrap on page move) |
+| *(greenfield read)* | `GET /api/groups/:groupId/privacy/make-private-bootstrap` (**implemented** — `performGetGroupPrivacyMakePrivateBootstrap`; Pro + `editGroupSettings` + public group only; mirrors legacy WS make-private step 1 for browser `POST …/privacy/private`) |
 | (WS) `groups.privacy.makePrivate` step 1+2 | `POST /api/groups/:groupId/privacy/private` (**implemented** — `performGroupPrivacyMakePrivate`; single body = legacy `rotateGroupKeys` / `groupKeyRotationSchema`; omits `pages.next_key_rotation_date` bumps per RESTART_PLAN) |
 | `groups.deletion.delete` | `DELETE /api/groups/:groupId` (soft) (**implemented** — `performGroupSoftDelete`) |
 | `groups.deletion.restore` | `POST /api/groups/:groupId/restore` (**implemented** — `performGroupRestore`; grace only; not after purge) |
@@ -90,7 +92,7 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Capability | New surface | Notes |
 |------------|-------------|--------|
-| Load encrypted Yjs update chain from DB | `GET /api/pages/:pageId/collab-updates` (**implemented** — `performGetPageCollabUpdates`; `viewGroupPages`; Postgres `page_updates`; response also includes `groupId`, `pageEncryptedSymmetricKeyring`, `groupEncryptedContentKeyring`, `groupAccessKeyring`, `memberEncryptedAccessKeyring` for client-side unwrap) | Replaces initial `ALL_UPDATES_UNMERGED`-style payload for SPA bootstrap; binary collab WebSocket is still [Phase 3 — realtime/collab](../PLAN_PROGRESS.md#not-started-phase-3--realtime--collab-only). |
+| Load encrypted Yjs update chain from DB | `GET /api/pages/:pageId/collab-updates` (**implemented** — `performGetPageCollabUpdates`; `viewGroupPages`; Postgres `page_updates`; response includes **encrypted page titles** (`encrypted_relative_title` / `encrypted_absolute_title` b64), `groupId`, `pageEncryptedSymmetricKeyring`, `groupEncryptedContentKeyring`, `groupAccessKeyring`, `memberEncryptedAccessKeyring` for client-side unwrap + cross-group move) | Replaces initial `ALL_UPDATES_UNMERGED`-style payload for SPA bootstrap; binary collab WebSocket is still [Phase 3 — realtime/collab](../PLAN_PROGRESS.md#not-started-phase-3--realtime--collab-only). |
 | Append updates (optimistic concurrency) | `POST /api/pages/:pageId/collab-updates` (**implemented** — `performAppendPageCollabUpdates`; `editGroupPages`; body `expectedLastIndex` + `updates[]`) | **409** when `expectedLastIndex` is stale. |
 
 ## Legacy app-server WebSocket → target

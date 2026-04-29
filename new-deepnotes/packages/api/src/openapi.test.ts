@@ -67,6 +67,12 @@ describe("getOpenApiDocument", () => {
       doc.paths?.["/api/groups/{groupId}/invite-crypto-bootstrap"]?.get,
     ).toBeDefined();
     expect(
+      doc.paths?.["/api/groups/{groupId}/collab-crypto-context"]?.get,
+    ).toBeDefined();
+    expect(
+      doc.paths?.["/api/groups/{groupId}/privacy/make-private-bootstrap"]?.get,
+    ).toBeDefined();
+    expect(
       doc.paths?.["/api/groups/{groupId}/public-keyring"]?.get,
     ).toBeDefined();
     expect(

@@ -711,6 +711,170 @@
           "memberEncryptedInternalKeyring"
         ]
       },
+      "GroupCollabCryptoContextResponse": {
+        "type": "object",
+        "properties": {
+          "groupEncryptedContentKeyring": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "groupAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          },
+          "memberEncryptedAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "format": "byte",
+            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+          }
+        },
+        "required": [
+          "groupEncryptedContentKeyring",
+          "groupAccessKeyring",
+          "memberEncryptedAccessKeyring"
+        ]
+      },
+      "GroupPrivacyMakePrivateMemberBootstrap": {
+        "type": "object",
+        "properties": {
+          "publicKeyring": {
+            "type": "string",
+            "format": "byte",
+            "description": "Invitee/member `users.public_keyring` (base64)."
+          },
+          "encryptedName": {
+            "type": "string",
+            "nullable": true,
+            "format": "byte",
+            "description": "`group_members.encrypted_name` (base64) or null."
+          }
+        },
+        "required": [
+          "publicKeyring",
+          "encryptedName"
+        ]
+      },
+      "GroupPrivacyMakePrivateInvitationBootstrap": {
+        "type": "object",
+        "properties": {
+          "publicKeyring": {
+            "type": "string",
+            "format": "byte"
+          },
+          "encryptedName": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "required": [
+          "publicKeyring",
+          "encryptedName"
+        ]
+      },
+      "GroupPrivacyMakePrivateJoinRequestBootstrap": {
+        "type": "object",
+        "properties": {
+          "encryptedName": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "required": [
+          "encryptedName"
+        ]
+      },
+      "GroupPrivacyMakePrivatePageBootstrap": {
+        "type": "object",
+        "properties": {
+          "encryptedSymmetricKeyring": {
+            "type": "string",
+            "format": "byte"
+          }
+        },
+        "required": [
+          "encryptedSymmetricKeyring"
+        ]
+      },
+      "GroupPrivacyMakePrivateBootstrapResponse": {
+        "type": "object",
+        "properties": {
+          "groupAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "format": "byte"
+          },
+          "groupEncryptedName": {
+            "type": "string",
+            "format": "byte"
+          },
+          "groupEncryptedContentKeyring": {
+            "type": "string",
+            "format": "byte"
+          },
+          "groupPublicKeyring": {
+            "type": "string",
+            "format": "byte"
+          },
+          "groupEncryptedPrivateKeyring": {
+            "type": "string",
+            "format": "byte"
+          },
+          "groupEncryptedAccessKeyring": {
+            "type": "string",
+            "nullable": true,
+            "format": "byte",
+            "description": "Viewer’s `group_members.encrypted_access_keyring` (often null when public)."
+          },
+          "groupEncryptedInternalKeyring": {
+            "type": "string",
+            "format": "byte"
+          },
+          "groupMembers": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupPrivacyMakePrivateMemberBootstrap"
+            }
+          },
+          "groupJoinInvitations": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupPrivacyMakePrivateInvitationBootstrap"
+            }
+          },
+          "groupJoinRequests": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupPrivacyMakePrivateJoinRequestBootstrap"
+            }
+          },
+          "groupPages": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/GroupPrivacyMakePrivatePageBootstrap"
+            }
+          }
+        },
+        "required": [
+          "groupAccessKeyring",
+          "groupEncryptedName",
+          "groupEncryptedContentKeyring",
+          "groupPublicKeyring",
+          "groupEncryptedPrivateKeyring",
+          "groupEncryptedAccessKeyring",
+          "groupEncryptedInternalKeyring",
+          "groupMembers",
+          "groupJoinInvitations",
+          "groupJoinRequests",
+          "groupPages"
+        ]
+      },
       "GroupPublicKeyringResponse": {
         "type": "object",
         "properties": {
@@ -1057,9 +1221,8 @@
           },
           "groupEncryptedName": {
             "type": "string",
-            "minLength": 1,
             "format": "byte",
-            "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
+            "description": "Standard base64; empty string means zero-length binary."
           },
           "groupEncryptedContentKeyring": {
             "type": "string",
@@ -1363,6 +1526,18 @@
             "format": "byte",
             "description": "Standard base64-encoded binary (legacy tRPC used raw bytes)."
           },
+          "pageEncryptedRelativeTitle": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "`pages.encrypted_relative_title` (re-key on cross-group move)."
+          },
+          "pageEncryptedAbsoluteTitle": {
+            "type": "string",
+            "minLength": 1,
+            "format": "byte",
+            "description": "`pages.encrypted_absolute_title` (re-key on cross-group move)."
+          },
           "groupEncryptedContentKeyring": {
             "type": "string",
             "minLength": 1,
@@ -1389,6 +1564,8 @@
           "updates",
           "groupId",
           "pageEncryptedSymmetricKeyring",
+          "pageEncryptedRelativeTitle",
+          "pageEncryptedAbsoluteTitle",
           "groupEncryptedContentKeyring",
           "groupAccessKeyring",
           "memberEncryptedAccessKeyring"
@@ -3050,6 +3227,158 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GroupInviteCryptoBootstrapResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/collab-crypto-context": {
+      "get": {
+        "summary": "Group ciphertext for page move / re-key (edit pages)",
+        "description": "Returns `groups.encrypted_content_keyring`, optional `access_keyring`, and the caller’s `group_members.encrypted_access_keyring` so the SPA can unwrap `GroupContentKeyring` when moving a page into this group. Requires `editGroupPages` and membership.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Encrypted blobs for destination-side symmetric wrap.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupCollabCryptoContextResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/groups/{groupId}/privacy/make-private-bootstrap": {
+      "get": {
+        "summary": "Read model for making a public group private (re-key)",
+        "description": "Returns member/invite/request/page ciphertext ids and user public keys matching legacy WS `groups.privacy.makePrivate` step 1, so the browser can build `POST …/privacy/private`. Requires Pro, `editGroupSettings`, and a public group (`access_keyring` set).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "groupId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Key rotation bootstrap (base64 fields).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupPrivacyMakePrivateBootstrapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Group is already private.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
                 }
               }
             }

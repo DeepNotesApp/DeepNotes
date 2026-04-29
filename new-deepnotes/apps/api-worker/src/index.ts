@@ -1462,6 +1462,106 @@ app.get("/api/groups/:groupId/invite-crypto-bootstrap", async (c) => {
   }
 });
 
+app.get("/api/groups/:groupId/collab-crypto-context", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGetGroupCollabCryptoContext } = await import(
+      "@deepnotes/session"
+    );
+    const out = await performGetGroupCollabCryptoContext({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.json(
+      {
+        groupEncryptedContentKeyring:
+          out.groupEncryptedContentKeyring.toString("base64"),
+        groupAccessKeyring:
+          out.groupAccessKeyring == null
+            ? null
+            : out.groupAccessKeyring.toString("base64"),
+        memberEncryptedAccessKeyring:
+          out.memberEncryptedAccessKeyring == null
+            ? null
+            : out.memberEncryptedAccessKeyring.toString("base64"),
+      },
+      200,
+    );
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
+app.get("/api/groups/:groupId/privacy/make-private-bootstrap", async (c) => {
+  const sessionEnv = getSessionEnv(c.env);
+  if (sessionEnv == null) {
+    return c.json(serviceUnavailableBody, 503);
+  }
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+  const cookieHeader = c.req.header("Cookie");
+  const groupId = c.req.param("groupId");
+
+  try {
+    const { performGetGroupPrivacyMakePrivateBootstrap } = await import(
+      "@deepnotes/session"
+    );
+    const out = await performGetGroupPrivacyMakePrivateBootstrap({
+      db,
+      env: sessionEnv,
+      accessCookie: readCookieHeader(cookieHeader, "accessToken"),
+      groupId,
+    });
+    return c.json(out, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
 app.get("/api/groups/:groupId/public-keyring", async (c) => {
   const sessionEnv = getSessionEnv(c.env);
   if (sessionEnv == null) {
@@ -1846,6 +1946,10 @@ app.get("/api/pages/:pageId/collab-updates", async (c) => {
         groupId: out.groupId,
         pageEncryptedSymmetricKeyring:
           out.pageEncryptedSymmetricKeyring.toString("base64"),
+        pageEncryptedRelativeTitle:
+          out.pageEncryptedRelativeTitle.toString("base64"),
+        pageEncryptedAbsoluteTitle:
+          out.pageEncryptedAbsoluteTitle.toString("base64"),
         groupEncryptedContentKeyring:
           out.groupEncryptedContentKeyring.toString("base64"),
         groupAccessKeyring:

@@ -102,6 +102,67 @@ export async function unlockPageCollabSymmetricKeyring(input: {
   return pageRing;
 }
 
+/**
+ * Unwrap `groups.encrypted_content_keyring` to raw symmetric material (legacy `GroupContentKeyring` context).
+ */
+export async function unwrapGroupContentSymmetricKeyring(input: {
+  groupId: string;
+  groupEncryptedContentKeyring: Uint8Array;
+  memberEncryptedAccessKeyring: Uint8Array | null;
+  groupAccessKeyring: Uint8Array | null;
+  stored: StoredSessionCrypto;
+}): Promise<SymmetricKeyring> {
+  await ensureSodiumReady();
+  const sessionKey = wrapSymmetricKey(
+    base64ToBytes(input.stored.sessionKeyB64),
+  );
+  const { userId } = input.stored;
+
+  const publicKeyring = createKeyring(
+    base64ToBytes(input.stored.publicKeyringB64),
+  );
+  const privateKeyring = createPrivateKeyring(
+    base64ToBytes(input.stored.encryptedPrivateKeyringB64),
+  ).unwrapSymmetric(sessionKey, {
+    associatedData: {
+      context: "SessionUserPrivateKeyring",
+      userId,
+    },
+  });
+  const keyPair = wrapKeyPair(publicKeyring, privateKeyring);
+
+  const accessBytes = pickAccessKeyringBytes({
+    member: input.memberEncryptedAccessKeyring,
+    group: input.groupAccessKeyring,
+  });
+
+  let accessRing = createSymmetricKeyring(accessBytes);
+  if (accessRing.topLayer === DataLayer.Asymmetric) {
+    accessRing = accessRing.unwrapAsymmetric(keyPair.privateKey);
+  }
+  if (accessRing.topLayer !== DataLayer.Raw) {
+    throw new Error(
+      "Group access keyring is still locked (e.g. group password). Unlock is not implemented in the web MVP.",
+    );
+  }
+
+  let groupContent = createSymmetricKeyring(input.groupEncryptedContentKeyring);
+  if (groupContent.topLayer === DataLayer.Symmetric) {
+    groupContent = groupContent.unwrapSymmetric(accessRing, {
+      associatedData: {
+        context: "GroupContentKeyring",
+        groupId: input.groupId,
+      },
+    });
+  }
+  if (groupContent.topLayer !== DataLayer.Raw) {
+    throw new Error(
+      "Group content keyring could not be fully unwrapped (password-protected group?).",
+    );
+  }
+  return groupContent;
+}
+
 export function decryptPageDocUpdate(input: {
   pageKeyring: SymmetricKeyring;
   pageId: string;
