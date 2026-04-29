@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   encodeRealtimeClientRequest,
   decodeRealtimeClientBinaryMessage,
+  decodeRealtimeServerBinaryMessage,
   RealtimeCommandType,
+  unpackRealtimeDataNotificationItems,
+  unpackRealtimeResponseValues,
 } from "@deepnotes/realtime-wire";
 
 import {
@@ -190,5 +193,242 @@ describe("executeRealtimeWsBatch", () => {
       acl,
     });
     expect(out.responseBytes).not.toBeNull();
+  });
+
+  it("HGET on page hash omits value when ACL denies read", async () => {
+    const { port } = createMemoryHashPort({
+      "page:p9": { secret: "x" },
+    });
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 7,
+      commands: [
+        {
+          type: RealtimeCommandType.HGET,
+          args: ["page", "p9", "secret"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch(needs) {
+        expect(needs.has(redisHashKey("page", "p9"))).toBe(true);
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("page", "p9"), { readOk: false, writeOk: false });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: { subscribeField: () => {}, unsubscribeField: () => {} },
+      acl,
+    });
+    expect(out.responseBytes).not.toBeNull();
+    const srv = decodeRealtimeServerBinaryMessage(out.responseBytes!);
+    expect(srv?.kind).toBe("response");
+    if (srv?.kind !== "response") {
+      throw new Error("expected response");
+    }
+    const vals = unpackRealtimeResponseValues(srv);
+    expect(vals).toEqual([{ commandId: 7, value: undefined }]);
+  });
+
+  it("SUBSCRIBE on page hash does not register hook when ACL denies read", async () => {
+    const { port } = createMemoryHashPort({
+      "page:p9": { title: "t" },
+    });
+    const subs: string[] = [];
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 0,
+      commands: [
+        {
+          type: RealtimeCommandType.SUBSCRIBE,
+          args: ["page", "p9", "title"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch() {
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("page", "p9"), { readOk: false, writeOk: false });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: {
+        subscribeField: (fk) => {
+          subs.push(fk);
+        },
+        unsubscribeField: () => {},
+      },
+      acl,
+    });
+    expect(subs).toEqual([]);
+    expect(out.subscribeNotifyBytes).not.toBeNull();
+    const dn = decodeRealtimeServerBinaryMessage(out.subscribeNotifyBytes!);
+    expect(dn?.kind).toBe("data-notification");
+    if (dn?.kind !== "data-notification") {
+      throw new Error("expected data-notification");
+    }
+    const items = unpackRealtimeDataNotificationItems(dn);
+    expect(items).toEqual([
+      {
+        prefix: "page",
+        suffix: "p9",
+        field: "title",
+        value: undefined,
+      },
+    ]);
+  });
+
+  it("SUBSCRIBE on group hash registers hook when ACL grants read", async () => {
+    const { port } = createMemoryHashPort({
+      "group:g1": { name: "Alpha" },
+    });
+    const subs: string[] = [];
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 0,
+      commands: [
+        {
+          type: RealtimeCommandType.SUBSCRIBE,
+          args: ["group", "g1", "name"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch(needs) {
+        expect(needs.has(redisHashKey("group", "g1"))).toBe(true);
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("group", "g1"), { readOk: true, writeOk: false });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: {
+        subscribeField: (fk) => {
+          subs.push(fk);
+        },
+        unsubscribeField: () => {},
+      },
+      acl,
+    });
+    expect(subs).toEqual([realtimeFullKey("group", "g1", "name")]);
+    const dn = decodeRealtimeServerBinaryMessage(out.subscribeNotifyBytes!);
+    if (dn?.kind !== "data-notification") {
+      throw new Error("expected data-notification");
+    }
+    expect(unpackRealtimeDataNotificationItems(dn)).toEqual([
+      {
+        prefix: "group",
+        suffix: "g1",
+        field: "name",
+        value: "Alpha",
+      },
+    ]);
+    expect(out.hsetBroadcastItems).toEqual([]);
+  });
+
+  it("HSET on page hash skips Redis and broadcast when ACL denies write", async () => {
+    const { port, snapshot } = createMemoryHashPort({
+      "page:p9": { tick: 1 },
+    });
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 1,
+      commands: [
+        {
+          type: RealtimeCommandType.HSET,
+          args: ["page", "p9", "tick", 99],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch() {
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("page", "p9"), { readOk: true, writeOk: false });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: { subscribeField: () => {}, unsubscribeField: () => {} },
+      acl,
+    });
+    expect(out.hsetBroadcastItems).toEqual([]);
+    expect(snapshot()).toEqual({
+      "page:p9": { tick: 1 },
+    });
+  });
+
+  it("mixed batch: denied page HGET and allowed user HGET in one RESPONSE", async () => {
+    const { port } = createMemoryHashPort({
+      "user:u1": { email: "ok@x.y" },
+      "page:p9": { x: "secret" },
+    });
+    const req = encodeRealtimeClientRequest({
+      firstCommandId: 100,
+      commands: [
+        {
+          type: RealtimeCommandType.HGET,
+          args: ["page", "p9", "x"],
+        },
+        {
+          type: RealtimeCommandType.HGET,
+          args: ["user", "u1", "email"],
+        },
+      ],
+    });
+    const decoded = decodeRealtimeClientBinaryMessage(req);
+    if (decoded == null) {
+      throw new Error("decode");
+    }
+    const acl: RealtimeHashAclPort = {
+      async resolveBatch(needs) {
+        expect(needs.get(redisHashKey("page", "p9"))?.read).toBe(true);
+        expect(needs.get(redisHashKey("user", "u1"))?.read).toBe(true);
+        const m = new Map<string, { readOk: boolean; writeOk: boolean }>();
+        m.set(redisHashKey("page", "p9"), { readOk: false, writeOk: false });
+        m.set(redisHashKey("user", "u1"), { readOk: true, writeOk: true });
+        return m;
+      },
+    };
+    const out = await executeRealtimeWsBatch({
+      userId: "u1",
+      decoded,
+      redis: port,
+      hooks: { subscribeField: () => {}, unsubscribeField: () => {} },
+      acl,
+    });
+    const srv = decodeRealtimeServerBinaryMessage(out.responseBytes!);
+    if (srv?.kind !== "response") {
+      throw new Error("expected response");
+    }
+    expect(unpackRealtimeResponseValues(srv)).toEqual([
+      { commandId: 100, value: undefined },
+      { commandId: 101, value: "ok@x.y" },
+    ]);
   });
 });

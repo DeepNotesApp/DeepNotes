@@ -69,7 +69,7 @@
 
 **Open:**
 
-- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; **realtime-wire** framing Vitest round-trips; **api-worker** `executeRealtimeWsBatch` (**user** hash) Vitest — full DO + Redis in CI **TBD**  
+- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; **realtime-wire** framing Vitest round-trips; **api-worker** `executeRealtimeWsBatch` (**user** / **page** / **group** hash + ACL denial/write-deny/mixed batch) Vitest — full DO + Redis in CI **TBD**  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete + rich TipTap **done**; **realtime hash** path titles **partial** (same-group **page:** slice); **spatial/world** still open — goal above)
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **`executeRealtimeWsBatch` Vitest:** ACL deny page **HGET**/ **SUBSCRIBE**; deny page **HSET** write; **group** **SUBSCRIBE** with ACL; mixed batch page deny + user allow; decode via **RESPONSE** / **DATA_NOTIFICATION** unpack helpers. |
 | 2026-04-29 | **SPA realtime path titles:** shared `realtime-user-ws` REQUEST queue + `usePagePathRealtimeTitles` (HGET `group-id` / title / keyring, **SUBSCRIBE** title updates, decrypt with `collabGroupCrypto`); `decryptPageAbsoluteTitle`; `PageEditorPathCard` labels. |
 | 2026-04-29 | **Realtime Redis hash slice (Upstash):** `UserRealtimeRoom` handles binary **REQUEST** (`executeRealtimeWsBatch`); **`user:{userId}`** HGET/HSET/SUBSCRIBE/UNSUBSCRIBE + subscriber fan-out; **`realtime-ws-batch.test.ts`**. |
 | 2026-04-29 | **Realtime wire framing parity:** `@deepnotes/realtime-wire` decodes/encodes legacy **RESPONSE**, **DATA_NOTIFICATION**, and client **REQUEST** batches (msgpackr + lib0) with Vitest; Worker DO unchanged (`USER_NOTIFICATION` only). Moves toward Redis hash cache parity without E2E. |
