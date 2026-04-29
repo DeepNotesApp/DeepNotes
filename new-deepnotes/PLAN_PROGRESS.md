@@ -13,7 +13,7 @@
 | Area | State |
 |------|--------|
 | **API / REST** | TRPC_REST_MAP HTTP rows largely done; **collab WS** MVP (**Durable Object** relay + Postgres append, legacy lib0 framing via `@deepnotes/collab-wire`); **realtime** (legacy msgpackr) **not**. |
-| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: **realtime**, richer editor UX, native shells. |
+| **SPA** | Auth, lists, **`PageEditorView`** (Tiptap+Y+collab **WebSocket when configured** else REST, **encrypted awareness + collaboration carets** on WS, link/underline/placeholder, path breadcrumb, bump/favorite/recent, **snapshots list/save/restore/delete**, **set-as-main + soft-delete + purge**, **cross-group move/reencrypt**), groups/**members**/invite/join + **group settings** (join policy, soft-delete, **make public / make private**, **group purge**), notifications list **with decrypt**, **`/account`**, home **recents/favorites/starting/defaults** UIs, theme. Missing: **realtime** (hash channel), tables/math/images/spatial editor depth, native shells. |
 
 **Deferred (confirm vs parity):** optional anon `GET …/groups/:id/pages`; richer Stripe webhook tests. **Infra naming:** Workers/DO replaces standalone collab/realtime/scheduler processes.
 
@@ -44,7 +44,7 @@
 - [x] Live editing: **collab WS** client + **Durable Object** + internal Postgres append (greenfield; legacy-framed **DOC** relay + optional **AWARENESS** relay; **no** key rotation / Redis merge)  
 - [x] `[parity]` Account / billing / 2FA / email / delete — UIs wired to REST ([TRPC_REST_MAP](./docs/TRPC_REST_MAP.md))  
 - [x] `[parity]` Page ops + group settings — **make private** + cross-group **move/reencrypt** + **purge** UI (page + group); **make public**, snapshots + main + soft-delete **done** in SPA  
-- [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope)  
+- [ ] `[parity]` Editor UX vs legacy (rich + spatial/world if in scope) — **partial:** WS awareness+carets, link/underline/placeholder (not tables/math/images/world)  
 - [x] `[parity]` Notifications: decrypt/display as legacy  
 - [ ] Legacy **realtime** equivalent (after protocol choice)  
 - [ ] Capacitor/Tauri **after web parity**
@@ -69,7 +69,7 @@
 
 **Open:**
 
-- [ ] Collab **and** realtime: ≥1 integration test each — collab DO path **TBD** in CI  
+- [ ] Collab **and** realtime: ≥1 integration test each — `collab-wire` **decodeIncoming** unit coverage; full DO path **TBD** in CI  
 - [ ] Stripe / high-risk: deeper tests when secrets allow  
 - [ ] Staging CF: Hyperdrive + Postgres + Redis + WS topology load-tested  
 - [ ] **UI parity** in `@deepnotes/web` (account + notification decrypt + page prefs/home/editor + group join/delete done; collab WS + realtime + deeper editor still open — goal above)
@@ -80,6 +80,7 @@
 
 | Date | Note |
 |------|------|
+| 2026-04-29 | **Editor collab parity:** `PageAwarenessUpdate` E2EE over WS, `@tiptap/extension-collaboration-caret` + `y-protocols`, link/underline/placeholder; `decodeIncomingCollabBinaryMessage` in `@deepnotes/collab-wire`. |
 | 2026-04-29 | **Collab WebSocket:** `@deepnotes/collab-wire` (lib0), `PageCollabRoom` DO + `WORKER_SELF` internal append, SPA `PageEditorView` WS + REST fallback; `COLLAB_INTERNAL_SECRET`; Vite `ws` proxy. |
 | 2026-04-29 | **Make-private bootstrap + SPA**, **collab GET titles**, **group collab context**, **cross-group move/reencrypt**, **page + group purge** UI; `byteB64EmptyOk` for empty group name on make-private POST. |
 | 2026-04-29 | **Page prefs + group settings UI:** `GET …/pages/recent|favorites`, home (starting/recent/favorites/spatial defaults), editor path + bump/favorite/recent; group join-policy + soft-delete. |

@@ -190,3 +190,32 @@ export function encryptPageDocUpdate(input: {
     },
   });
 }
+
+/** Legacy `PageAwarenessUpdate` AAD (y-protocols awareness payload). */
+export function decryptPageAwarenessUpdate(input: {
+  pageKeyring: SymmetricKeyring;
+  pageId: string;
+  ciphertext: Uint8Array;
+}): Uint8Array {
+  return input.pageKeyring.decrypt(input.ciphertext, {
+    padding: true,
+    associatedData: {
+      context: "PageAwarenessUpdate",
+      pageId: input.pageId,
+    },
+  });
+}
+
+export function encryptPageAwarenessUpdate(input: {
+  pageKeyring: SymmetricKeyring;
+  pageId: string;
+  plaintext: Uint8Array;
+}): Uint8Array {
+  return input.pageKeyring.encrypt(input.plaintext, {
+    padding: true,
+    associatedData: {
+      context: "PageAwarenessUpdate",
+      pageId: input.pageId,
+    },
+  });
+}

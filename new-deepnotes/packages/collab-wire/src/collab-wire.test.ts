@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   decodeClientCollabBinaryMessage,
+  decodeIncomingCollabBinaryMessage,
   decodeServerDocBinaryMessage,
+  encodeAwarenessMessage,
   encodeDocSingleUpdateAck,
   encodeDocSingleUpdateFromClient,
   encodeDocSingleUpdateFromServer,
@@ -48,5 +50,20 @@ describe("@deepnotes/collab-wire", () => {
   it("base64 helpers round-trip", () => {
     const u8 = new Uint8Array(5000).map((_, i) => i % 256);
     expect(base64ToUint8Standard(uint8ToBase64Standard(u8))).toEqual(u8);
+  });
+
+  it("decodeIncoming splits awareness chunks vs doc", () => {
+    const a = new Uint8Array([7, 8]);
+    const bin = encodeAwarenessMessage([a, new Uint8Array([1])]);
+    expect(decodeIncomingCollabBinaryMessage(bin)).toEqual({
+      kind: "awareness",
+      encryptedChunks: [a, new Uint8Array([1])],
+    });
+    const doc = encodeDocSingleUpdateFromServer(a, 3);
+    expect(decodeIncomingCollabBinaryMessage(doc)).toEqual({
+      kind: "single-update",
+      encryptedUpdate: a,
+      dbIndex: 3,
+    });
   });
 });

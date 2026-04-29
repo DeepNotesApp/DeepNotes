@@ -101,15 +101,36 @@ export type DecodedServerDocMessage =
   | { kind: "single-update"; encryptedUpdate: Uint8Array; dbIndex: number | null }
   | { kind: "single-update-ack"; updateId: number; dbIndex: number | null };
 
-export function decodeServerDocBinaryMessage(message: Uint8Array): DecodedServerDocMessage | null {
+/** Server/relay → client: awareness broadcast or doc message (legacy framing). */
+export type DecodedIncomingCollabMessage =
+  | { kind: "awareness"; encryptedChunks: Uint8Array[] }
+  | DecodedServerDocMessage;
+
+export function decodeIncomingCollabBinaryMessage(
+  message: Uint8Array,
+): DecodedIncomingCollabMessage | null {
   const dec = decoding.createDecoder(message);
   if (!decoding.hasContent(dec)) {
     return null;
   }
   const top = decoding.readVarUint(dec);
+  if (top === CollabMessageType.AWARENESS) {
+    const n = decoding.readVarUint(dec);
+    const encryptedChunks: Uint8Array[] = [];
+    for (let i = 0; i < n; i++) {
+      encryptedChunks.push(decoding.readVarUint8Array(dec));
+    }
+    return { kind: "awareness", encryptedChunks };
+  }
   if (top !== CollabMessageType.DOC) {
     return null;
   }
+  return decodeServerDocFromDocDecoder(dec);
+}
+
+function decodeServerDocFromDocDecoder(
+  dec: decoding.Decoder,
+): DecodedServerDocMessage | null {
   const docKind = decoding.readVarUint(dec);
   if (docKind === CollabServerDocMessageType.SINGLE_UPDATE) {
     const encryptedUpdate = decoding.readVarUint8Array(dec);
@@ -122,6 +143,18 @@ export function decodeServerDocBinaryMessage(message: Uint8Array): DecodedServer
     return { kind: "single-update-ack", updateId, dbIndex };
   }
   return null;
+}
+
+export function decodeServerDocBinaryMessage(message: Uint8Array): DecodedServerDocMessage | null {
+  const dec = decoding.createDecoder(message);
+  if (!decoding.hasContent(dec)) {
+    return null;
+  }
+  const top = decoding.readVarUint(dec);
+  if (top !== CollabMessageType.DOC) {
+    return null;
+  }
+  return decodeServerDocFromDocDecoder(dec);
 }
 
 /** Chunked base64 for large ciphertext (Workers-safe). */

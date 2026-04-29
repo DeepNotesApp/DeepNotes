@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import Collaboration from "@tiptap/extension-collaboration";
+import CollaborationCaret from "@tiptap/extension-collaboration-caret";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
+import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 import { EditorContent, useEditor } from "@tiptap/vue-3";
 import {
@@ -7,6 +11,12 @@ import {
   type SymmetricKeyring,
 } from "@deepnotes/e2ee";
 import * as Y from "yjs";
+import {
+  applyAwarenessUpdate,
+  Awareness,
+  encodeAwarenessUpdate,
+  removeAwarenessStates,
+} from "y-protocols/awareness";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
@@ -26,7 +36,9 @@ import { readSessionCrypto } from "../auth/crypto-storage";
 import { useSession } from "../auth/useSession";
 import { useUserPageLists } from "./useUserPageLists";
 import {
+  decryptPageAwarenessUpdate,
   decryptPageDocUpdate,
+  encryptPageAwarenessUpdate,
   encryptPageDocUpdate,
   unlockPageCollabSymmetricKeyring,
 } from "./page-collab-crypto";
@@ -38,7 +50,8 @@ import {
 import { buildCrossGroupPageMoveReencrypt } from "./page-move-crypto";
 
 import {
-  decodeServerDocBinaryMessage,
+  decodeIncomingCollabBinaryMessage,
+  encodeAwarenessMessage,
   encodeDocSingleUpdateFromClient,
 } from "@deepnotes/collab-wire";
 
@@ -81,6 +94,98 @@ const snapshotLoading = ref(false);
 const pageOpsMessage = ref<string | null>(null);
 
 const ydoc = new Y.Doc();
+const collabAwareness = new Awareness(ydoc);
+const collabCaretProvider = { awareness: collabAwareness };
+
+collabAwareness.on(
+  "update",
+  ({
+    added,
+    updated,
+    removed,
+  }: {
+    added: number[];
+    updated: number[];
+    removed: number[];
+  }) => {
+    const cid = collabAwareness.doc.clientID;
+    if (
+      !added.includes(cid) &&
+      !updated.includes(cid) &&
+      !removed.includes(cid)
+    ) {
+      return;
+    }
+    scheduleAwarenessPush();
+  },
+);
+
+function cursorColorForUserId(userId: string): string {
+  let h = 0;
+  for (let i = 0; i < userId.length; i++) {
+    h = userId.charCodeAt(i) + ((h << 5) - h);
+  }
+  const hue = Math.abs(h) % 360;
+  return `hsl(${hue} 65% 42%)`;
+}
+
+function clearRemoteCollabAwareness(a: Awareness) {
+  const self = a.doc.clientID;
+  const others = Array.from(a.getStates().keys()).filter((id) => id !== self);
+  if (others.length > 0) {
+    removeAwarenessStates(a, others, "page-load");
+  }
+}
+
+let awarenessPushTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleAwarenessPush() {
+  if (user.value?.demo === true) {
+    return;
+  }
+  if (
+    !collabWsLive.value ||
+    collabWs == null ||
+    collabWs.readyState !== WebSocket.OPEN
+  ) {
+    return;
+  }
+  if (awarenessPushTimer != null) {
+    clearTimeout(awarenessPushTimer);
+  }
+  awarenessPushTimer = setTimeout(() => {
+    awarenessPushTimer = null;
+    flushAwarenessWs();
+  }, 200);
+}
+
+function flushAwarenessWs() {
+  const pk = pageKeyring;
+  const id = pageId.value;
+  if (
+    pk == null ||
+    !id ||
+    !collabWsLive.value ||
+    collabWs == null ||
+    collabWs.readyState !== WebSocket.OPEN
+  ) {
+    return;
+  }
+  try {
+    const encoded = encodeAwarenessUpdate(collabAwareness, [
+      collabAwareness.doc.clientID,
+    ]);
+    const enc = encryptPageAwarenessUpdate({
+      pageKeyring: pk,
+      pageId: id,
+      plaintext: encoded,
+    });
+    collabWs.send(encodeAwarenessMessage([enc]));
+  } catch {
+    // ignore
+  }
+}
+
 const legacyPlainToImport = ref<string | null>(null);
 
 const loadError = ref<string | null>(null);
@@ -106,6 +211,19 @@ const collabWsError = ref<string | null>(null);
 function teardownCollabWebSocket() {
   collabWsLive.value = false;
   collabWsError.value = null;
+  if (awarenessPushTimer != null) {
+    clearTimeout(awarenessPushTimer);
+    awarenessPushTimer = null;
+  }
+  try {
+    removeAwarenessStates(
+      collabAwareness,
+      [collabAwareness.doc.clientID],
+      "disconnect",
+    );
+  } catch {
+    // ignore
+  }
   if (collabWs != null) {
     collabWs.close();
     collabWs = null;
@@ -133,6 +251,7 @@ function connectCollabWebSocket() {
   ws.onopen = () => {
     collabWsLive.value = true;
     collabWsError.value = null;
+    flushAwarenessWs();
   };
   ws.onerror = () => {
     collabWsError.value = "Live collab WebSocket error.";
@@ -152,12 +271,36 @@ function handleCollabWsMessage(ev: MessageEvent) {
     return;
   }
   const data = new Uint8Array(ev.data);
-  const msg = decodeServerDocBinaryMessage(data);
-  if (msg == null) {
+  const incoming = decodeIncomingCollabBinaryMessage(data);
+  if (incoming == null) {
     return;
   }
   const id = pageId.value;
   const pk = pageKeyring;
+  if (incoming.kind === "awareness") {
+    if (pk == null || !id) {
+      return;
+    }
+    hydrating.value = true;
+    try {
+      for (const chunk of incoming.encryptedChunks) {
+        try {
+          const plain = decryptPageAwarenessUpdate({
+            pageKeyring: pk,
+            pageId: id,
+            ciphertext: chunk,
+          });
+          applyAwarenessUpdate(collabAwareness, plain, "remote");
+        } catch {
+          // ignore decrypt failures
+        }
+      }
+    } finally {
+      hydrating.value = false;
+    }
+    return;
+  }
+  const msg = incoming;
   if (msg.kind === "single-update") {
     if (pk == null || !id) {
       return;
@@ -239,9 +382,25 @@ const editor = useEditor({
     StarterKit.configure({
       undoRedo: false,
     }),
+    Underline,
+    Link.configure({
+      autolink: true,
+      linkOnPaste: true,
+      openOnClick: false,
+    }),
+    Placeholder.configure({
+      placeholder: "Write something…",
+    }),
     Collaboration.configure({
       document: ydoc,
       field: Y_FRAG_PROSEMIRROR,
+    }),
+    CollaborationCaret.configure({
+      provider: collabCaretProvider,
+      user: {
+        name: "You",
+        color: "#64748b",
+      },
     }),
   ],
   editorProps: {
@@ -264,6 +423,24 @@ function setEditorEditable(on: boolean) {
     ed.setEditable(on);
   }
 }
+
+watch(
+  [user, editor],
+  () => {
+    const u = user.value;
+    const ed = editor.value;
+    if (u == null || ed == null || ed.isDestroyed) {
+      return;
+    }
+    const label =
+      u.userId.length > 0 ? `You (${u.userId.slice(0, 8)}…)` : "You";
+    ed.commands.updateUser({
+      name: label,
+      color: cursorColorForUserId(u.userId),
+    });
+  },
+  { flush: "post" },
+);
 
 function schedulePush() {
   if (pageKeyring == null) {
@@ -356,6 +533,11 @@ onBeforeUnmount(() => {
     clearTimeout(pushTimer);
     pushTimer = null;
   }
+  const ed = editor.value;
+  if (ed != null && !ed.isDestroyed) {
+    ed.destroy();
+  }
+  collabAwareness.destroy();
 });
 
 onMounted(() => {
@@ -998,6 +1180,7 @@ watch(
 
       hydrating.value = true;
       try {
+        clearRemoteCollabAwareness(collabAwareness);
         const frag = ydoc.getXmlFragment(Y_FRAG_PROSEMIRROR);
         ydoc.transact(() => {
           while (frag.length > 0) {
@@ -1322,14 +1505,18 @@ watch(
           text syncs the ProseMirror
           <code class="font-mono text-xs">Y.XmlFragment</code> (field
           <code class="font-mono text-xs">{{ Y_FRAG_PROSEMIRROR }}</code>
-          ). When the collab WebSocket is connected, Yjs updates use the legacy
-          wire frame via
+          ).
+          When the collab WebSocket is connected, Yjs updates and encrypted awareness (caret/selection)
+          use the legacy wire frame via
           <code class="font-mono text-xs">WebSocket …/collab-ws</code>; otherwise
           debounced
           <code class="font-mono text-xs">POST …/collab-updates</code>
-          (Yjs v2, legacy
+          (Yjs v2:
           <code class="font-mono text-xs">PageDocUpdate</code>
-          AAD). Plain
+          and
+          <code class="font-mono text-xs">PageAwarenessUpdate</code>
+          AAD).
+          Plain
           <code class="font-mono text-xs">Y.Text("{{ Y_TEXT_DEFAULT }}")</code>
           from earlier builds is migrated into the editor once.
         </CardDescription>
@@ -1346,3 +1533,43 @@ watch(
     </Card>
   </div>
 </template>
+
+<style scoped>
+:deep(.collaboration-carets__caret) {
+  position: relative;
+  border-left: 2px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  word-break: normal;
+}
+
+:deep(.collaboration-carets__label) {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  z-index: 10;
+  font-size: 0.65rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: white;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+}
+
+:deep(.collaboration-carets__selection) {
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+:deep(.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before) {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+</style>
