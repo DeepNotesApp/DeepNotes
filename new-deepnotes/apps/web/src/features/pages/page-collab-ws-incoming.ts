@@ -16,8 +16,10 @@ export type CollabWsIncomingContext = {
   getPageKeyring: () => SymmetricKeyring | null;
   hydrating: Ref<boolean>;
   collabLastIndex: Ref<number | null>;
-  /** Server-acknowledged Yjs state vector (v2). */
-  serverStateVector: { current: Uint8Array };
+  /** Server-acknowledged Yjs document (advances on ACK / remote update). */
+  serverDoc: Y.Doc;
+  /** Unacked WS updates keyed by client updateId. */
+  unackedUpdates: Map<number, Uint8Array>;
   refreshYMetrics: () => void;
 };
 
@@ -63,7 +65,7 @@ export function applyIncomingCollabWsMessage(
         ciphertext: msg.encryptedUpdate,
       });
       Y.applyUpdateV2(ctx.ydoc, plain, "collab-ws-remote");
-      ctx.serverStateVector.current = Y.encodeStateVector(ctx.ydoc);
+      Y.applyUpdateV2(ctx.serverDoc, plain);
       if (msg.dbIndex != null) {
         ctx.collabLastIndex.value = msg.dbIndex;
       }
@@ -76,7 +78,11 @@ export function applyIncomingCollabWsMessage(
     return;
   }
   if (msg.kind === "single-update-ack") {
-    ctx.serverStateVector.current = Y.encodeStateVector(ctx.ydoc);
+    const ackedDiff = ctx.unackedUpdates.get(msg.updateId);
+    if (ackedDiff) {
+      Y.applyUpdateV2(ctx.serverDoc, ackedDiff);
+      ctx.unackedUpdates.delete(msg.updateId);
+    }
     if (msg.dbIndex != null) {
       ctx.collabLastIndex.value = msg.dbIndex;
     }

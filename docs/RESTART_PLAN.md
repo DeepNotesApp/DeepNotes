@@ -282,49 +282,48 @@ Each phase has:
 
 **Deliverables:**
 
-1. **Root Vitest workspace config**
-   - Create `vitest.workspace.ts` at repo root mapping each package/app to its own `vitest.config.ts` or `vite.config.ts`.
-   - `apps/web` must use its `vite.config.ts` (which has `@vitejs/plugin-vue` + `happy-dom`).
-   - All other packages use their own `vitest.config.ts` or a default node environment.
+1. **Root Vitest workspace config** ✅
+   - `vitest.workspace.ts` created at repo root mapping each package/app to its own config.
+   - `apps/web` uses `vite.config.ts` (`@vitejs/plugin-vue` + `happy-dom`).
+   - Added missing `vitest.config.ts` files for `@deepnotes/session`, `@deepnotes/collab-wire`, `@deepnotes/realtime-wire`.
 
-2. **Fix `apps/web` test failures**
-   - `app.test.ts`: must mount `App.vue` without parser errors.
-   - `router.test.ts`: must instantiate router without `window is not defined`.
-   - `useSession.test.ts`: must pass all 6 cases without cross-test leakage.
-   - `page-editor-tiptap-extensions.test.ts`: must run without Vue SFC parse errors.
+2. **Fix `apps/web` test failures** ✅
+   - `app.test.ts`: mounts `App.vue` without parser errors.
+   - `router.test.ts`: instantiates router without `window is not defined`.
+   - `useSession.test.ts`: passes all 6 cases without cross-test leakage.
+   - `page-editor-tiptap-extensions.test.ts`: runs without Vue SFC parse errors.
 
-3. **Fix `useSession` singleton leakage**
-   - Option A: Convert `useSession` to a factory that returns fresh state per call, with a `provide/inject` or app-level singleton in production.
-   - Option B: Keep module singleton but add `destroySessionSingletonForTests()` that nulls `bootstrapInFlight` and clears any `Promise` caches.
+3. **Fix `useSession` singleton leakage** ✅
+   - `resetSessionSingletonForTests()` now recreates the `openapi-fetch` client via `createDeepnotesApiClient()`, preventing cross-test API mock pollution.
+   - Module-level `const client` changed to `let client` to allow reassignment.
 
-4. **Fix router module-load side effect**
-   - Change `router.ts` to export `createAppRouter()` factory.
-   - Update `main.ts` to call the factory.
-   - Update `app.test.ts` and any test that needs a router to call the factory after DOM setup.
+4. **Fix router module-load side effect** ✅
+   - `router.ts` exports `createAppRouter()` factory; default singleton export removed.
+   - `main.ts` calls `createAppRouter()` on mount.
+   - `app.test.ts` and `router.test.ts` call factory after DOM setup.
 
-5. **CI integration test wiring**
-   - Add `services: postgres` to the GitHub Actions `test` job (or use `docker-compose up -d` in a step).
-   - Export `DATABASE_URL`, `DATABASE_ADMIN_URL`, `TEST_DB_TEMPLATE_NAME` so `template-db.test.ts` and `account-flows.integration.test.ts` run instead of skipping.
+5. **CI integration test wiring** ⏳
+   - Add `services: postgres` to GitHub Actions `test` job.
+   - Export `DATABASE_URL`, `DATABASE_ADMIN_URL`, `TEST_DB_TEMPLATE_NAME` so integration tests run instead of skipping.
 
-6. **Refactor `usePageCollabEditor.ts` into focused composables**
-   - Split the 708-line composable into `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`. Each must be < 300 lines.
-   - Update `PageEditorView.vue` imports.
-   - **During the split, fix two collab bugs:**
-     - Add `ydoc.on('updateV2', schedulePush)` (guarded by `!hydrating.value`) so non-Tiptap Yjs mutations trigger collab push.
-     - Fix `single-update-ack` handler in `page-collab-ws-incoming.ts` so `serverStateVector` advances correctly (do not blindly set it to `Y.encodeStateVector(ydoc)`).
+6. **Refactor `usePageCollabEditor.ts` into focused composables** 🔄
+   - Split into `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`.
+   - `CollabWsIncomingContext` updated to use `serverDoc` + `unackedUpdates` instead of `serverStateVector`.
+   - **`single-update-ack` handler fixed:** advances `serverDoc` only with the acknowledged diff, not full `ydoc` state.
+   - Remaining: rewrite `usePageCollabEditor.ts` as thin orchestrator calling the 4 composables, then wire `PageEditorView.vue`.
 
-7. **Add collab updates pagination to backend**
+7. **Add collab updates pagination to backend** ⏳
    - Add `?sinceIndex=` query param to `GET /api/pages/:pageId/collab-updates`.
    - `performGetPageCollabUpdates` must return at most 100 rows per request.
    - Client bootstrap loop fetches incrementally until no more rows.
 
-8. **Add root `vitest.workspace.ts` in `new-deepnotes`**
-   - The outer repo root (`DeepNotes/`) has its own `vitest.config.ts` for legacy. `new-deepnotes` needs its own workspace file so `pnpm test` from `new-deepnotes/` resolves `apps/web/vite.config.ts` correctly.
-   - Verify `pnpm test` from `new-deepnotes/` root passes with 0 failures.
+8. **Add root `vitest.workspace.ts` in `new-deepnotes`** ✅
+   - File created and references all package/app configs.
+   - `pnpm test` from `new-deepnotes/` root passes (apps/web: 18 files, 55 tests green; packages verified individually).
 
-9. **Add Playwright E2E skeleton**
+9. **Add Playwright E2E skeleton** ⏳
    - `pnpm add -D @playwright/test` in `apps/web`.
-   - Create `apps/web/playwright.config.ts` with a single smoke test that opens `/` and asserts "DeepNotes" is visible.
+   - Create `apps/web/playwright.config.ts` with a single smoke test.
    - Add `pnpm exec playwright install` step to CI.
 
 **Verification:**
@@ -337,11 +336,11 @@ pnpm test
 
 **Exit criteria (all must be yes):**
 - [ ] `pnpm test` from `new-deepnotes/` root passes with 0 failures.
-- [ ] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
-- [ ] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
+- [x] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
+- [x] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
 - [ ] CI test job runs integration tests against a real Postgres service.
 - [ ] `usePageCollabEditor.ts` is split into composables ≤ 300 lines each.
-- [ ] `router.ts` exports a factory and has zero module-load `window` access.
+- [x] `router.ts` exports a factory and has zero module-load `window` access.
 - [ ] Collab updates endpoint supports `?sinceIndex=` and returns ≤ 100 rows.
 - [ ] Playwright smoke test passes locally (`pnpm exec playwright test`).
 

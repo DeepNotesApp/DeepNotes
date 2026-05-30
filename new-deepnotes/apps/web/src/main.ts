@@ -5,10 +5,10 @@ import "katex/dist/katex.min.css";
 import "./styles/globals.css";
 import App from "./App.vue";
 import { hydrateThemeFromStorage } from "./features/theme/useThemePreference";
-import router from "./router";
+import { createAppRouter } from "./router";
 
 hydrateThemeFromStorage();
 
 const app = createApp(App);
-app.use(router);
+app.use(createAppRouter());
 app.mount("#app");

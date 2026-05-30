@@ -16,7 +16,7 @@ export type SessionErrorBody = components["schemas"]["SessionErrorResponse"];
 
 const TWO_FACTOR_MESSAGE = "Requires two-factor authentication.";
 
-const client = createDeepnotesApiClient();
+let client = createDeepnotesApiClient();
 
 const user: Ref<UserMe | null> = ref(null);
 const loading: Ref<boolean> = ref(false);
@@ -49,6 +49,7 @@ export function resetSessionSingletonForTests(): void {
   lastError.value = null;
   twoFactorRequired.value = false;
   bootstrapInFlight = null;
+  client = createDeepnotesApiClient();
 }
 
 export function useSession() {

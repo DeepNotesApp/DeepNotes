@@ -3,10 +3,11 @@ import { nextTick } from "vue";
 import { describe, expect, it } from "vitest";
 
 import App from "./App.vue";
-import router from "./router";
+import { createAppRouter } from "./router";
 
 describe("App", () => {
   it("renders shell after session bootstrap (no session cookie)", async () => {
+    const router = createAppRouter();
     await router.push("/");
     await router.isReady();
 
