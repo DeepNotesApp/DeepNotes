@@ -143,7 +143,7 @@ function createDefaultLabel(): Y.XmlFragment {
 // Note helpers
 // ------------------------------------------------------------------
 
-export function createNoteMap(opts?: { id?: string }): Y.Map<unknown> {
+export function createNoteMap(): Y.Map<unknown> {
   const note = new Y.Map<unknown>();
   note.set(YPAGE_NOTE_KEY.regionId, null);
   note.set(YPAGE_NOTE_KEY.link, "");

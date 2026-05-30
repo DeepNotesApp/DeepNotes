@@ -5,6 +5,7 @@ import { RouterLink, useRoute, useRouter } from "vue-router";
 import { Button } from "@/components/ui/button";
 
 import { useSession } from "../auth/useSession";
+import SpatialPageView from "../spatial/SpatialPageView.vue";
 import PageEditorCollabStatusCard from "./PageEditorCollabStatusCard.vue";
 import PageEditorManagementCard from "./PageEditorManagementCard.vue";
 import PageEditorPathCard from "./PageEditorPathCard.vue";
@@ -220,6 +221,8 @@ onMounted(() => {
       @soft-delete="management.softDeleteThisPage()"
       @purge="management.purgeThisPagePermanently()"
     />
+
+    <SpatialPageView :ydoc="ydoc" />
 
     <PageEditorCollabStatusCard
       :collab-loading="collabLoading"

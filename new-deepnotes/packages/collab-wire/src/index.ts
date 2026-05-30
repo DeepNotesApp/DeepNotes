@@ -179,3 +179,27 @@ export function base64ToUint8Standard(b64: string): Uint8Array {
   }
   return out;
 }
+
+export {
+  YPAGE_KEY,
+  YPAGE_PAGE_KEY,
+  YPAGE_NOTE_KEY,
+  YPAGE_ARROW_KEY,
+  createPageYDoc,
+  createNoteMap,
+  createArrowMap,
+  addNoteToPage,
+  addArrowToPage,
+  removeNoteFromPage,
+  removeArrowFromPage,
+  getPageMap,
+  getNotesMap,
+  getArrowsMap,
+  getNoteIds,
+  getArrowIds,
+  getNoteMap,
+  getArrowMap,
+  getNextZIndex,
+  setNextZIndex,
+  applyPageBootstrapUpdates,
+} from "./page-doc-schema.js";

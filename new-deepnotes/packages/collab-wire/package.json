@@ -15,7 +15,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "lib0": "^0.2.114"
+    "lib0": "^0.2.114",
+    "yjs": "^13.6.30"
   },
   "devDependencies": {
     "typescript": "^5.8.3",

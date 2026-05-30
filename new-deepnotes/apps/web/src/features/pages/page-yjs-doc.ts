@@ -1,8 +1,8 @@
-import * as Y from "yjs";
 import { Awareness } from "y-protocols/awareness";
+import { createPageYDoc } from "@deepnotes/collab-wire";
 
 export function createPageCollabDoc() {
-  const ydoc = new Y.Doc();
+  const ydoc = createPageYDoc();
   const collabAwareness = new Awareness(ydoc);
   const collabCaretProvider = { awareness: collabAwareness };
 

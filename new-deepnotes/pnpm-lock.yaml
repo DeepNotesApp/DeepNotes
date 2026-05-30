@@ -333,6 +333,9 @@ importers:
       lib0:
         specifier: ^0.2.114
         version: 0.2.117
+      yjs:
+        specifier: ^13.6.30
+        version: 13.6.30
     devDependencies:
       typescript:
         specifier: ^5.8.3

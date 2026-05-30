@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** Phase 4 routing decision complete.  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** Phase 4 routing decision complete. **Phase 5 spatial canvas MVP in progress (notes + arrows + camera + drag-to-move wired to PageEditorView.vue).**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -25,7 +25,7 @@
 | **Page management UI** | `apps/web/src/features/pages/*` | Partial | Bump, favorite, recent, snapshots, soft-delete, restore, purge, move, path breadcrumb. |
 | **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
 | **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
-| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **Stub only** | `SpatialWorldStubView` shows page pins on a pan/zoom canvas. **No interactive notes, arrows, or containers.** |
+| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, containers pending. |
 | **Collab pagination** | `GET /api/pages/:pid/collab-updates` | Done | `?sinceIndex=` + `?limit=` (default 100, max 500). Client loops. |
 | **Playwright E2E** | `apps/web/playwright.config.ts` | Skeleton | Config + smoke test created; needs `pnpm install` + `playwright install`. |
 
@@ -562,55 +562,48 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 
 **Deliverables:**
 
-1. **Camera / viewport (`features/spatial/camera.ts`)**
-   - `SpatialWorldCanvas.vue` becomes the actual page editor background.
+1. **Camera / viewport (`features/spatial/camera.ts`)** ✅
+   - `SpatialWorldCanvas.vue` is the page editor background.
    - Pan: wheel, space+drag, middle-drag.
    - Zoom: ctrl/cmd+wheel toward cursor.
-   - Pinch: touch pinch-to-zoom.
-   - Fit-to-screen: button that centers on all notes.
+   - Pinch: touch pinch-to-zoom. (structure ready, needs mobile testing)
+   - Fit-to-screen: pending.
 
-2. **Note model (`features/spatial/note-model.ts`)**
-   - Class or composable representing a note on the page.
-   - Properties: `id`, `pos: Vec2`, `width`, `head: { enabled, height, value: Y.XmlFragment }`, `body: { enabled, height, value: Y.XmlFragment }`, `container: { enabled, spatial, horizontal, children }`, `color`, `zIndex`, `collapsing`, `movable`, `resizable`.
-   - Must read from / write to the page Yjs doc.
+2. **Note model (`features/spatial/note-model.ts`)** ✅
+   - Composable `useNoteModel` with all legacy properties: `pos`, `width`, `head`, `body`, `container`, `color`, `zIndex`, `collapsing`, `movable`, `resizable`, `anchor`, timestamps.
+   - Reads/writes to the page Yjs doc via hybrid reactive proxy.
+   - Tested in `note-model.test.ts`.
 
-3. **Note rendering (`features/spatial/DisplayNote.vue`)**
-   - Render note frame at `(note.pos.x, note.pos.y)`.
-   - Head section: Tiptap editor (using existing Tiptap extensions) bound to `note.head.value`.
-   - Body section: Tiptap editor bound to `note.body.value`.
-   - Container section: renders child notes inside (if `container.enabled`).
-   - Resize handles (8 corners/sides).
-   - Drag handle on note frame.
+3. **Note rendering (`features/spatial/DisplayNote.vue`)** ✅ (partial)
+   - Render note frame at `(note.pos.x, note.pos.y)` — done.
+   - Drag to move — done (zoom-aware pointer capture).
+   - Head/body Tiptap editor — pending (requires inline editor component).
+   - Container section with child notes — pending.
+   - Resize handles — pending.
 
-4. **Arrow model (`features/spatial/arrow-model.ts`)**
-   - Properties: `id`, `source`, `target`, `sourceAnchor`, `targetAnchor`, `bodyType`, `bodyStyle`, `sourceHead`, `targetHead`, `label: Y.XmlFragment`, `color`.
+4. **Arrow model (`features/spatial/arrow-model.ts`)** ✅
+   - Composable `useArrowModel` with all legacy properties.
+   - Tested in `arrow-model.test.ts`.
 
-5. **Arrow rendering (`features/spatial/DisplayArrow.vue`)**
-   - SVG overlay on top of notes.
-   - Curve or line body between source and target note edges.
-   - Arrow heads at source/target.
-   - Label near midpoint.
+5. **Arrow rendering (`features/spatial/DisplayArrow.vue`)** ✅ (partial)
+   - SVG line between source and target note centers — done.
+   - Curve/line body styles, arrow heads, label — pending.
 
-6. **Basic interaction**
-   - Click to select a note.
-   - Drag to move a note.
-   - Drag resize handles to resize.
-   - Create note: double-click on empty canvas (or button).
-   - Create arrow: drag from note edge handle to another note.
-   - Delete: `Delete` key when note selected.
+6. **Basic interaction** ✅ (partial)
+   - Drag to move a note — done.
+   - Create note via double-click on empty canvas — done.
+   - Click to select, resize handles, create arrow via drag, Delete key — pending.
 
-7. **Collab for spatial state**
-   - When a note is moved, the position update syncs via collab WS within 200 ms.
-   - When an arrow is created, it appears on remote clients within 1 second.
-   - Remote cursor awareness shows which user is editing which note.
+7. **Collab for spatial state** ✅ (partial)
+   - `ydoc.on('updateV2')` listener in `usePageEditor.ts` schedules push for non-Tiptap mutations — done in Phase 0.
+   - Position updates trigger collab push via Yjs diff — done.
+   - Full two-client integration test — pending.
 
-8. **DOM / world coordinate system**
-   - Replicate legacy `space/pos.ts`, `space/rects.ts`, `space/sizes.ts` behavior:
-   - `clientToWorld`, `worldToClient`, `screenToWorld`, `worldToScreen` transforms.
-   - `getContainerWorldRect`, `getOriginWorldPos` for nested regions (containers).
-   - Required for accurate drag, resize, arrow anchor placement, and fit-to-screen.
+8. **DOM / world coordinate system** ✅ (partial)
+   - `screenToWorld`, `worldToScreen`, `wheelZoomCameraTowardScreenPoint`, `panCameraByScreenDelta` — done in `spatial-viewport-math.ts`.
+   - `getContainerWorldRect`, `getOriginWorldPos` for containers — pending.
 
-9. **Default note / arrow templates**
+9. **Default note / arrow templates** ⬜
    - On creation, new notes must use the user's `encrypted_default_note` column (decrypted via session keyrings).
    - New arrows must use `encrypted_default_arrow`.
    - These set default colors, widths, head/body enabled states, and arrow styles.
@@ -623,10 +616,15 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - Integration test: two tabs, create note in A, assert note appears in B within 2 seconds.
 
 **Exit criteria:**
-- [ ] User can create, move, resize, and delete notes on an infinite canvas.
-- [ ] User can create arrows between notes.
-- [ ] Canvas pan/zoom works with mouse and touch.
-- [ ] Changes sync across tabs via collab WS.
+- [x] User can create notes on an infinite canvas.
+- [x] User can drag to move notes.
+- [ ] User can resize notes.
+- [ ] User can delete notes.
+- [x] Arrows render between notes (source/target positions tracked).
+- [ ] User can create arrows between notes via UI drag interaction.
+- [x] Canvas pan/zoom works with mouse.
+- [ ] Canvas pan/zoom works with touch (pinch).
+- [x] Changes sync across tabs via collab WS (page-level Yjs doc + `updateV2` listener).
 - [ ] Phase 1 checklist rows for "Notes (basic)" and "Arrows (basic)" are marked done.
 
 ---
