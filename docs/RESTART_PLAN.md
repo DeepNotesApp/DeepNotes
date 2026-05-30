@@ -1,8 +1,9 @@
-# DeepNotes — Restart (greenfield) plan — v2
+# DeepNotes — Restart (greenfield) plan — v3
 
 > **Last updated:** 2026-05-29  
 > **Status:** Phase 2–3 backend largely complete. Phase 4–5 SPA partially complete. **Foundation bugs and spatial canvas NOT started.**  
-> **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.
+> **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
+> **Analyzed:** 2026-05-29 — additional gaps identified in §0.4, §3, §5–8.
 
 ---
 
@@ -72,6 +73,41 @@ The new `PageEditorView.vue` currently hosts **a single Tiptap rich-text card**.
 The legacy collab syncs the **entire page state** (note positions, arrow endpoints, container nesting) via a single Yjs/SyncedStore document. The new collab syncs **only the ProseMirror fragment** inside one note. Rebuilding spatial collab is a major engineering effort, not a UI polish task.
 
 **Decision required:** Do we commit to full spatial parity, or do we ship a **single-note-per-page** product first and add the canvas later? This plan assumes **full spatial parity is required** because the legacy product is defined by it. If product wants to defer spatial canvas to a v2, rewrite §0.3 and all Phase 6+ references accordingly.
+
+---
+
+## 0.4 Additional critical gaps discovered
+
+These were found during the v3 analysis and must be addressed in the phases below.
+
+1. **`usePageCollabEditor.ts` is already a god object (708 lines)**
+   - The plan itself recommends capping composables at 300 lines (§7). The main collab composable already violates this.
+   - **Fix:** Split into `useCollabWebSocket.ts`, `useCollabCrypto.ts`, `useCollabPush.ts`, `usePageEditor.ts` before any spatial work.
+
+2. **`PageCollabRoom` DO is a stateless relay, not an in-memory Yjs host**
+   - Legacy `collab-server` held Yjs `Doc` instances in memory and synced via `y-protocols`. The new DO only decrypts/relays opaque blobs via `WORKER_SELF`.
+   - **Impact:** The server cannot enforce page size limits, merge updates intelligently, or validate structure.
+   - **Fix:** Document the architectural trade-off in `docs/COLLAB_DO_ARCHITECTURE.md`. If page-level Yjs is added (Phase 3), consider whether the DO should load the Yjs doc into memory.
+
+3. **`page_updates` backward compatibility**
+   - Existing production rows contain encrypted ProseMirror-only Yjs updates. Phase 3 will introduce page-level Yjs docs (notes + arrows).
+   - **Decision required:** Add `page_spatial_updates` table, or version the update format within `page_updates` so old rows remain readable.
+
+4. **SSR and i18n regressions vs legacy**
+   - Legacy `apps/client` had SSR (`src-ssr`) and `vue-i18n`. New `apps/web` is pure SPA with no i18n infrastructure.
+   - **Fix:** Product decision — document as accepted regressions or schedule recovery.
+
+5. **Group password unlock is unscheduled**
+   - `unlockPageCollabSymmetricKeyring` throws when a group requires a password. The comment says "Unlock is not implemented in the web MVP."
+   - **Fix:** Add to Phase 8 (group/account polish) or document as v2 scope.
+
+6. **`page_links` / backlink UI is missing**
+   - The backend has `pageLinks` table and routes (`POST /api/pages/:pageId/backlinks`). No SPA UI exposes backlinks.
+   - **Fix:** Add backlink display to Phase 5 or Phase 8.
+
+7. **No scheduler / manager CLI replacement**
+   - Legacy had `apps/scheduler` (cleanup) and `apps/manager` (ops CLI). New repo defers scheduler to "Cron Triggers or Queues" but has no implementation.
+   - **Fix:** Add deferred scheduler task to Phase 8 or Phase 9.
 
 ---
 
@@ -217,18 +253,29 @@ Each phase has:
    - Add `services: postgres` to the GitHub Actions `test` job (or use `docker-compose up -d` in a step).
    - Export `DATABASE_URL`, `DATABASE_ADMIN_URL`, `TEST_DB_TEMPLATE_NAME` so `template-db.test.ts` and `account-flows.integration.test.ts` run instead of skipping.
 
+6. **Refactor `usePageCollabEditor.ts` into focused composables**
+   - Split the 708-line composable into `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`. Each must be < 300 lines.
+   - Update `PageEditorView.vue` imports.
+
+7. **Add root `vitest.workspace.ts` in `new-deepnotes`**
+   - The outer repo root (`DeepNotes/`) has its own `vitest.config.ts` for legacy. `new-deepnotes` needs its own workspace file so `pnpm test` from `new-deepnotes/` resolves `apps/web/vite.config.ts` correctly.
+   - Verify `pnpm test` from `new-deepnotes/` root passes with 0 failures.
+
 **Verification:**
 ```bash
+# From new-deepnotes/
 pnpm test
 # Expected: 0 failures, 0 skips for core tests.
 # Integration tests may still be long-running but must not be skipped for env reasons.
 ```
 
 **Exit criteria (all must be yes):**
-- [ ] `pnpm test` from repo root passes with 0 failures.
+- [ ] `pnpm test` from `new-deepnotes/` root passes with 0 failures.
 - [ ] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
 - [ ] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
 - [ ] CI test job runs integration tests against a real Postgres service.
+- [ ] `usePageCollabEditor.ts` is split into composables ≤ 300 lines each.
+- [ ] `router.ts` exports a factory and has zero module-load `window` access.
 
 ---
 
@@ -244,6 +291,7 @@ pnpm test
    - `apps/client/src/code/pages/page/` (notes, arrows, camera, space, elems, selection, regions, collab)
    - `apps/client/src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/DisplayWorld/`
    - `apps/client/src/code/pages/page/collab/`
+   - Specifically include `space/pos.ts`, `space/rects.ts`, `space/sizes.ts` for coordinate transform parity.
 
 2. **Produce `docs/SPATIAL_PARITY_CHECKLIST.md`** with one table per subsystem:
    - **Notes:** create, delete, move (drag), resize, align, clone, collapsing, head/body/container sections, color, link, z-index.
@@ -253,6 +301,9 @@ pnpm test
    - **Clipboard:** cut, copy, paste across pages.
    - **Editing:** find-and-replace, undo/redo.
    - **Collab:** SyncedStore Yjs doc with `notes` and `arrows` maps, awareness, remote cursor positions.
+   - **Templates:** default note / arrow from `users.encrypted_default_note` / `encrypted_default_arrow`.
+   - **Backlinks:** incoming page links display.
+   - **Group access:** password-protected group unlock flow.
 
 3. **For each checklist item, specify:**
    - Legacy file(s) to reference.
@@ -261,7 +312,7 @@ pnpm test
 
 **Verification:**
 - Review checklist with a human who has used the legacy app. Sign off on completeness.
-- Checklist must contain **at least 50 rows** (if it has fewer, the inventory is incomplete).
+- Checklist must contain **at least 60 rows** (if it has fewer, the inventory is incomplete).
 
 **Exit criteria:**
 - [ ] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed.
@@ -328,7 +379,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 2. **Page collab bootstrap**
    - `GET /api/pages/:pageId/collab-updates` already returns encrypted Yjs updates.
    - Verify that the server can persist and serve **page-level updates** (not just ProseMirror).
-   - If the current `page_updates` table stores only ProseMirror diffs, extend the schema or add a separate `page_state_updates` table. **Decision required.**
+   - **Decision required (see §0.4 gap 3):** If the current `page_updates` table stores only ProseMirror diffs, extend the schema or add a separate `page_spatial_updates` table. Document the compatibility strategy in `docs/COLLAB_DATA_MIGRATION.md`.
 
 3. **SPA page document loader**
    - Replace `createPageCollabDoc()` (which creates a bare `Y.Doc`) with a function that loads the page structure from the server bootstrap and initializes `Y.Map`s for notes and arrows.
@@ -338,6 +389,16 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Add `PAGE_DOC` message type for page-level Yjs updates (note positions, arrow creation, etc.).
    - Update `PageCollabRoom` DO to accept and relay `PAGE_DOC` updates.
 
+5. **`page_updates` backward compatibility**
+   - Existing rows contain ProseMirror-only encrypted Yjs updates. Page-level updates must not corrupt old rows.
+   - **Option A:** Add `page_spatial_updates` table for page-level Yjs diffs; keep `page_updates` for ProseMirror-only legacy rows.
+   - **Option B:** Embed a version byte in the encrypted payload or add a `formatVersion` column.
+   - **Decision required before coding.** Document in `docs/COLLAB_DATA_MIGRATION.md`.
+
+6. **DO architecture decision document**
+   - Document why `PageCollabRoom` is a stateless relay (no in-memory Yjs doc) vs legacy's stateful `collab-server`.
+   - If the DO should load the Yjs doc into memory for validation/size limits, include a spike in Phase 3.
+
 **Verification:**
 - Unit test: create a `YPageDoc`, add a note, encode state, decode state, assert note position matches.
 - Integration test: two clients connect to `PageCollabRoom` via WS; client A creates a note; client B receives the update and the note appears in its Yjs doc within 2 seconds.
@@ -346,6 +407,8 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [ ] `packages/collab-wire` can encode/decode a page-level Yjs update.
 - [ ] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
 - [ ] Two browser tabs can sync note creation/deletion via WS (integration test or manual QA with sign-off).
+- [ ] `docs/COLLAB_DATA_MIGRATION.md` documents the `page_updates` compatibility strategy.
+- [ ] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs.
 
 ---
 
@@ -418,6 +481,10 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - WS fallback to REST `POST /collab-updates` works.
    - Demo mode uses local-only Yjs (no WS, no REST push).
 
+4. **Backlink display**
+   - The backend exposes `POST /api/pages/:pageId/backlinks` and `DELETE /api/pages/:pageId/backlinks/:targetPageId`.
+   - Add a backlinks card to `PageEditorView.vue` showing incoming links with decrypted titles.
+
 **Verification:**
 - `page-editor-tiptap-extensions.test.ts` passes.
 - Manual QA: open a page in two tabs, type in both, verify text syncs within 1 second.
@@ -486,6 +553,17 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - When a note is moved, the position update syncs via collab WS within 200 ms.
    - When an arrow is created, it appears on remote clients within 1 second.
    - Remote cursor awareness shows which user is editing which note.
+
+8. **DOM / world coordinate system**
+   - Replicate legacy `space/pos.ts`, `space/rects.ts`, `space/sizes.ts` behavior:
+   - `clientToWorld`, `worldToClient`, `screenToWorld`, `worldToScreen` transforms.
+   - `getContainerWorldRect`, `getOriginWorldPos` for nested regions (containers).
+   - Required for accurate drag, resize, arrow anchor placement, and fit-to-screen.
+
+9. **Default note / arrow templates**
+   - On creation, new notes must use the user's `encrypted_default_note` column (decrypted via session keyrings).
+   - New arrows must use `encrypted_default_arrow`.
+   - These set default colors, widths, head/body enabled states, and arrow styles.
 
 **Verification:**
 - Unit tests for camera math (world ↔ screen transforms).
@@ -583,6 +661,16 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Recents, favorites, starting page, spatial defaults.
    - Search (if legacy had it).
 
+5. **Group password unlock**
+   - `unlockPageCollabSymmetricKeyring` currently throws for password-protected groups.
+   - Implement group password UI and key derivation so users can unlock password-protected groups.
+   - Add integration test for password-protected group join + page decrypt.
+
+6. **Scheduler / background cleanup**
+   - Legacy `apps/scheduler` ran scheduled cleanup (purge soft-deleted data).
+   - Implement a Cloudflare Cron Trigger or Queue worker that calls `performScheduledCleanup` from `@deepnotes/session`.
+   - Document in `docs/SCHEDULER.md`.
+
 **Verification:**
 - E2E smoke test: register → create group → create page → invite member → member joins → both edit page → logout.
 - This smoke test must pass against a preview deployment or local compose stack.
@@ -641,6 +729,11 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 | **Stripe-only after dropping RevenueCat** | Low | User churn | Communicate to IAP users before cutover. Offer migration grace period. |
 | **Worker CPU limits under collab load** | Medium | Dropped connections | Load test early (Phase 9 staging). If DO CPU is the bottleneck, shard `PageCollabRoom` by page ID prefix. |
 | **God-object state returns** | Medium | Unmaintainable code | Cap composable size at 300 lines. If `useSpatialViewport.ts` grows beyond that, split into `useCamera`, `usePanning`, `useZooming`. |
+| **`page_updates` format migration** | Medium | Data corruption or unreadable legacy pages | Decide Option A/B in Phase 3 before any spatial collab code. Test decrypt of 100 random legacy pages after migration. |
+| **DO hibernation drops WS state** | Medium | Users see collab reconnects | `PageCollabRoom` is stateless relay, so hibernation is safe. Document in `docs/COLLAB_DO_ARCHITECTURE.md`. If stateful DO chosen later, implement reconnect protocol. |
+| **i18n / SSR regressions** | Low | Accessibility, SEO, share-ability loss | Document as accepted v2 regressions or schedule recovery. |
+| **Group password not implemented** | Low | Users cannot access password-protected groups in new app | Add to Phase 8. If deferred, document v2 scope. |
+| **No scheduler = soft-deleted data accumulates** | Medium | DB bloat | Add Cron Trigger or Queue cleanup to Phase 8/9. |
 
 ---
 
@@ -648,18 +741,22 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 
 A criterion is **not met** until the verification command or check passes in CI.
 
-- [ ] **Test foundation:** `pnpm test` from repo root passes with 0 failures. `apps/web` tests mount `.vue` files and run in `happy-dom`.
+- [ ] **Test foundation:** `pnpm test` from `new-deepnotes/` root passes with 0 failures. `apps/web` tests mount `.vue` files and run in `happy-dom`.
+- [ ] **Composable size:** No SPA composable > 300 lines (`usePageCollabEditor.ts` split before spatial work).
 - [ ] **OpenAPI:** `GET /api/openapi.json` returns a valid OpenAPI 3 document. Client types are regenerated from it in CI.
 - [ ] **Drizzle:** `drizzle-kit migrate` applies cleanly from empty DB to current schema. `drizzle-kit check` passes in CI.
 - [ ] **Backend parity:** Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing automated test (unit or integration).
 - [ ] **Collab:** `PageCollabRoom` integration test: two clients sync note creation via WS within 2 seconds.
+- [ ] **Collab data migration:** `docs/COLLAB_DATA_MIGRATION.md` exists and explains how legacy `page_updates` rows remain compatible.
 - [ ] **Postgres tests:** Integration tests use template DB clones (§5.7). No test re-migrates from empty DB.
 - [ ] **Auth + crypto:** 2FA enable/disable flow tested end-to-end. Password change invalidates all sessions.
 - [ ] **No banned tech:** No tRPC, no `superjson`, no RevenueCat, no key rotation code paths. Enforced by ESLint `no-restricted-imports`.
 - [ ] **Spatial canvas (Phase 6):** User can create, move, resize, delete notes and arrows on an infinite canvas. Changes sync via WS.
 - [ ] **Spatial polish (Phase 7):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
+- [ ] **Backlinks:** SPA displays incoming page backlinks with decrypted titles.
 - [ ] **E2E smoke:** Playwright test covers register → create page → edit → invite → logout in < 60 seconds.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms.
+- [ ] **Scheduler:** Cron Trigger or Queue cleanup job purges soft-deleted data periodically.
 - [ ] **Cutover:** 100 random legacy pages decrypt correctly. 24-hour canary error < 0.1%.
 
 ---
