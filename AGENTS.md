@@ -2,5 +2,6 @@
     - vue-shadcn and Tailwind for UI.
     - Feature-based folder structure.
 - Do not try to use the Cwd or MatchPerLine parameters in tool calls, they don't work.
+- Use `pnpm -C` instead of Cwd.
 - Run tests via `pnpm test` from the package root (e.g. `cd packages/session && pnpm test`). Do not use `vitest run --workspace` or `pnpm test --run`.
 - A DeepNotes "page" is an infinite spatial canvas.
