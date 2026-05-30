@@ -15,8 +15,10 @@ import {
   alignTop,
   alignMiddle,
   alignBottom,
+  distributeHorizontally,
+  distributeVertically,
 } from "./alignment";
-import { screenToWorld } from "./spatial-viewport-math";
+import { screenToWorld, worldToScreen } from "./spatial-viewport-math";
 
 const props = defineProps<{
   ydoc: any;
@@ -48,6 +50,13 @@ const selection = useSpatialSelection();
 
 const pasteCount = ref(0);
 
+// --- arrow drag state ---
+const arrowDrag = ref<{
+  sourceId: string;
+  endX: number;
+  endY: number;
+} | null>(null);
+
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
   for (const n of noteList.value) {
@@ -60,6 +69,40 @@ const notesByZIndex = computed(() => {
   return [...rootNoteList.value].sort(
     (a, b) => a.model.zIndex.value - b.model.zIndex.value,
   );
+});
+
+const previewLine = computed(() => {
+  if (!arrowDrag.value || !canvasRef.value?.rootEl) return null;
+  const sourceNote = noteList.value.find(
+    (n) => n.id === arrowDrag.value!.sourceId,
+  );
+  if (!sourceNote) return null;
+
+  const rect = canvasRef.value.rootEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const z = canvasRef.value.zoom;
+  const camX = canvasRef.value.camX;
+  const camY = canvasRef.value.camY;
+
+  const wStr = sourceNote.model.width.value.expanded;
+  const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+  const sourceScreen = worldToScreen(
+    sourceNote.model.pos.value.x + w / 2,
+    sourceNote.model.pos.value.y + 40,
+    cx,
+    cy,
+    camX,
+    camY,
+    z,
+  );
+
+  return {
+    x1: sourceScreen.x,
+    y1: sourceScreen.y,
+    x2: arrowDrag.value.endX,
+    y2: arrowDrag.value.endY,
+  };
 });
 
 function onCanvasDoubleClick(e: MouseEvent) {
@@ -138,6 +181,40 @@ function onCanvasPointerUp() {
   }
 
   boxState = null;
+}
+
+// --- arrow drag ---
+function onArrowDragStart(sourceId: string) {
+  arrowDrag.value = { sourceId, endX: 0, endY: 0 };
+  window.addEventListener("pointermove", onArrowDragMove);
+  window.addEventListener("pointerup", onArrowDragEnd);
+}
+
+function onArrowDragMove(e: PointerEvent) {
+  if (!arrowDrag.value) return;
+  arrowDrag.value.endX = e.clientX;
+  arrowDrag.value.endY = e.clientY;
+}
+
+function onArrowDragEnd(e: PointerEvent) {
+  window.removeEventListener("pointermove", onArrowDragMove);
+  window.removeEventListener("pointerup", onArrowDragEnd);
+
+  if (!arrowDrag.value) return;
+  const sourceId = arrowDrag.value.sourceId;
+  arrowDrag.value = null;
+
+  // Find target note under cursor
+  const targetEl = document.elementFromPoint(e.clientX, e.clientY);
+  if (!targetEl) return;
+
+  const noteEl = targetEl.closest("[data-note-id]") as HTMLElement | null;
+  if (!noteEl) return;
+
+  const targetId = noteEl.dataset.noteId;
+  if (!targetId || targetId === sourceId) return;
+
+  createArrow(sourceId, targetId);
 }
 
 function rectsIntersect(
@@ -401,6 +478,14 @@ function onKeyDown(e: KeyboardEvent) {
           e.preventDefault();
           alignBottom(selectedNotes);
           return;
+        case "h":
+          e.preventDefault();
+          distributeHorizontally(selectedNotes);
+          return;
+        case "v":
+          e.preventDefault();
+          distributeVertically(selectedNotes);
+          return;
       }
     }
   }
@@ -421,7 +506,9 @@ onUnmounted(() => {
       Double-click on the canvas to create a note. Scroll to pan, Ctrl+scroll to
       zoom. Click a note to select, Ctrl+click to multi-select, drag on empty
       canvas to box-select, Ctrl+A to select all, then press Delete to remove.
-      Shift+click another note to connect with an arrow.
+      Shift+click another note to connect with an arrow, or drag the small
+      handles that appear on selected note edges to draw an arrow.
+      Ctrl+Shift+L/C/R/T/M/B aligns selected notes; H/V distributes them.
     </div>
     <div class="relative">
       <SpatialWorldCanvas
@@ -463,6 +550,7 @@ onUnmounted(() => {
               ? createArrow(selection.activeId.value, note.id)
               : undefined
           "
+          @arrow-drag-start="onArrowDragStart($event.noteId)"
           @dragend="onNoteDragEnd"
         />
       </SpatialWorldCanvas>
@@ -478,6 +566,23 @@ onUnmounted(() => {
           height: `${selection.boxRect.value.height}px`,
         }"
       />
+
+      <!-- arrow drag preview line -->
+      <svg
+        v-if="previewLine"
+        class="pointer-events-none absolute inset-0 z-50 overflow-visible"
+      >
+        <line
+          :x1="previewLine.x1"
+          :y1="previewLine.y1"
+          :x2="previewLine.x2"
+          :y2="previewLine.y2"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-dasharray="4 4"
+          class="text-primary"
+        />
+      </svg>
     </div>
   </div>
 </template>

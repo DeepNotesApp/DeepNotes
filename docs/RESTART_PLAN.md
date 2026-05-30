@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container).** Remaining: distribution, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group access.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows).** Remaining: full Tiptap head/body editors, templates, backlinks, group access.**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 

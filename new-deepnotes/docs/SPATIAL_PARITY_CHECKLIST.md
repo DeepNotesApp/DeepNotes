@@ -12,10 +12,10 @@
 | 1.1 | Create note (double-click / button) | `code/pages/page/notes/notes.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.2 | Delete note (`Delete` key) | `code/pages/page/elems/deleting.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.3 | Move note (drag) | `code/pages/page/notes/dragging.ts` | `features/spatial/note-model.ts` | `note-model.test.ts`, `DisplayNote.vue` comp. test | ✅ 2026-05-30 |
-| 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | 🟡 2026-05-30 (1 handle: bottom-right; full 8-handle parity in Phase 6) |
+| 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 (8 handles on edges/corners; width resize with position shift for west-side handles) |
 | 1.5 | Clone note | `code/pages/page/notes/cloning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.6 | Align notes (left/center/right/top/middle/bottom) | `code/pages/page/notes/aligning.ts` | `features/spatial/alignment.ts` | `alignment.test.ts` | ✅ 2026-05-30 |
-| 1.7 | Distribute notes (horizontal/vertical) | `code/pages/page/notes/aligning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.7 | Distribute notes (horizontal/vertical) | `code/pages/page/notes/aligning.ts` | `features/spatial/alignment.ts` | `alignment.test.ts` | ✅ 2026-05-30 |
 | 1.8 | Note head section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
 | 1.9 | Note body section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
 | 1.10 | Container section (enabled, spatial, horizontal) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
@@ -36,7 +36,7 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 2.1 | Create arrow (drag from note edge) | `code/pages/page/arrows/arrow-creation.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | 🟡 2026-05-30 (Shift+click interaction; drag-from-edge in Phase 6) |
+| 2.1 | Create arrow (drag from note edge) | `code/pages/page/arrows/arrow-creation.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ✅ 2026-05-30 (arrow handles on selected notes; preview line; drop on target) |
 | 2.2 | Delete arrow | `code/pages/page/elems/deleting.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ✅ 2026-05-30 |
 | 2.3 | Source / target anchors | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.4 | Source / target head styles | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |

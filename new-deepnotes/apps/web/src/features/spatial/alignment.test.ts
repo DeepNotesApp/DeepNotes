@@ -9,6 +9,8 @@ import {
   alignTop,
   alignMiddle,
   alignBottom,
+  distributeHorizontally,
+  distributeVertically,
 } from "./alignment";
 
 describe("alignment", () => {
@@ -110,5 +112,51 @@ describe("alignment", () => {
     alignTop(page.noteList.value);
 
     expect(page.noteList.value.find((n) => n.id === n1)!.model.pos.value).toEqual({ x: 10, y: 20 });
+  });
+
+  it("distributes notes horizontally", () => {
+    const ydoc = createPageYDoc();
+    const ur = useSpatialUndoRedo(ydoc);
+    const page = useSpatialPage(ydoc, ur);
+
+    const n1 = page.createNoteAt(0, 0);
+    const n2 = page.createNoteAt(50, 0);
+    const n3 = page.createNoteAt(100, 0);
+
+    distributeHorizontally(page.noteList.value);
+
+    expect(page.noteList.value.find((n) => n.id === n1)!.model.pos.value.x).toBe(0);
+    expect(page.noteList.value.find((n) => n.id === n2)!.model.pos.value.x).toBe(50);
+    expect(page.noteList.value.find((n) => n.id === n3)!.model.pos.value.x).toBe(100);
+  });
+
+  it("distributes notes vertically", () => {
+    const ydoc = createPageYDoc();
+    const ur = useSpatialUndoRedo(ydoc);
+    const page = useSpatialPage(ydoc, ur);
+
+    const n1 = page.createNoteAt(0, 0);
+    const n2 = page.createNoteAt(0, 40);
+    const n3 = page.createNoteAt(0, 80);
+
+    distributeVertically(page.noteList.value);
+
+    expect(page.noteList.value.find((n) => n.id === n1)!.model.pos.value.y).toBe(0);
+    expect(page.noteList.value.find((n) => n.id === n2)!.model.pos.value.y).toBe(40);
+    expect(page.noteList.value.find((n) => n.id === n3)!.model.pos.value.y).toBe(80);
+  });
+
+  it("does nothing for distribution with fewer than 3 notes", () => {
+    const ydoc = createPageYDoc();
+    const ur = useSpatialUndoRedo(ydoc);
+    const page = useSpatialPage(ydoc, ur);
+
+    const n1 = page.createNoteAt(10, 20);
+    const n2 = page.createNoteAt(100, 200);
+    distributeHorizontally(page.noteList.value);
+    distributeVertically(page.noteList.value);
+
+    expect(page.noteList.value.find((n) => n.id === n1)!.model.pos.value).toEqual({ x: 10, y: 20 });
+    expect(page.noteList.value.find((n) => n.id === n2)!.model.pos.value).toEqual({ x: 100, y: 200 });
   });
 });

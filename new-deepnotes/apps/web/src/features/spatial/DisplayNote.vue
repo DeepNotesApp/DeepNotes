@@ -17,6 +17,7 @@ const emit = defineEmits<{
   toggle: [];
   shiftClick: [];
   dragend: [id: string];
+  arrowDragStart: [payload: { noteId: string }];
 }>();
 
 const resolvedColor = computed(() => {
@@ -132,35 +133,55 @@ function onPointerUp(e: PointerEvent) {
   }
 }
 
-// --- resize handle ---
-let resizePointerId: number | null = null;
-let resizeStartX = 0;
-let resizeStartWidth = 0;
+// --- 8-handle resize ---
+type ResizeHandle = "n" | "ne" | "e" | "se" | "s" | "sw" | "w" | "nw";
 
-function onResizePointerDown(e: PointerEvent) {
+let resizePointerId: number | null = null;
+let resizeHandle: ResizeHandle | null = null;
+let resizeStartX = 0;
+let resizeStartY = 0;
+let resizeStartWidth = 0;
+let resizeStartPosX = 0;
+
+function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   if (e.button !== 0) return;
   if (props.model.readOnly.value) return;
   e.stopPropagation();
   resizePointerId = e.pointerId;
+  resizeHandle = handle;
   resizeStartX = e.clientX;
+  resizeStartY = e.clientY;
   const w = props.model.width.value.expanded;
   resizeStartWidth = w === "Auto" ? 160 : parseFloat(w);
+  resizeStartPosX = props.model.pos.value.x;
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
 }
 
 function onResizePointerMove(e: PointerEvent) {
-  if (resizePointerId !== e.pointerId) return;
+  if (resizePointerId !== e.pointerId || !resizeHandle) return;
   const z = props.zoom || 1;
   const dx = (e.clientX - resizeStartX) / z;
-  const next = Math.max(80, Math.round(resizeStartWidth + dx));
+
+  const isWest = resizeHandle.includes("w");
+  const nextWidth = Math.max(
+    80,
+    Math.round(isWest ? resizeStartWidth - dx : resizeStartWidth + dx),
+  );
+
   const widthMap = props.model.rawMap.get("width") as import("yjs").Map<string>;
-  widthMap.set("expanded", String(next));
+  widthMap.set("expanded", String(nextWidth));
+
+  if (isWest) {
+    const posMap = props.model.rawMap.get("pos") as import("yjs").Map<number>;
+    posMap.set("x", Math.round(resizeStartPosX + dx));
+  }
 }
 
 function onResizePointerUp(e: PointerEvent) {
   if (resizePointerId !== e.pointerId) return;
   resizePointerId = null;
+  resizeHandle = null;
   const el = e.currentTarget as HTMLElement;
   if (el.releasePointerCapture) {
     try {
@@ -180,6 +201,7 @@ function toggleCollapsed() {
 <template>
   <div
     data-testid="display-note"
+    :data-note-id="id"
     :class="frameClasses"
     :style="transform"
     @pointerdown="onPointerDown"
@@ -213,15 +235,46 @@ function toggleCollapsed() {
       </p>
     </div>
 
-    <!-- resize handle -->
-    <div
-      v-if="model.resizable.value && !model.readOnly.value"
-      class="bg-primary absolute -bottom-1.5 -right-1.5 h-3 w-3 cursor-nwse-resize rounded-full"
-      @pointerdown="onResizePointerDown"
-      @pointermove="onResizePointerMove"
-      @pointerup="onResizePointerUp"
-      @pointercancel="onResizePointerUp"
-    />
+    <!-- 8 resize handles -->
+    <template v-if="model.resizable.value && !model.readOnly.value">
+      <div
+        v-for="h in ([
+          { key: 'nw', cls: '-top-1.5 -left-1.5 cursor-nwse-resize' },
+          { key: 'n', cls: '-top-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize' },
+          { key: 'ne', cls: '-top-1.5 -right-1.5 cursor-nesw-resize' },
+          { key: 'e', cls: '-right-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' },
+          { key: 'se', cls: '-bottom-1.5 -right-1.5 cursor-nwse-resize' },
+          { key: 's', cls: '-bottom-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize' },
+          { key: 'sw', cls: '-bottom-1.5 -left-1.5 cursor-nesw-resize' },
+          { key: 'w', cls: '-left-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' },
+        ] as const)"
+        :key="h.key"
+        class="bg-primary absolute h-3 w-3 rounded-full"
+        :class="h.cls"
+        @pointerdown="(e: PointerEvent) => onResizePointerDown(e, h.key)"
+        @pointermove="onResizePointerMove"
+        @pointerup="onResizePointerUp"
+        @pointercancel="onResizePointerUp"
+      />
+    </template>
+
+    <!-- arrow handles -->
+    <template v-if="selected && !model.readOnly.value">
+      <div
+        v-for="h in ([
+          { cls: '-top-3 left-1/2 -translate-x-1/2' },
+          { cls: '-right-3 top-1/2 -translate-y-1/2' },
+          { cls: '-bottom-3 left-1/2 -translate-x-1/2' },
+          { cls: '-left-3 top-1/2 -translate-y-1/2' },
+        ] as const)"
+        :key="h.cls"
+        class="bg-primary/80 hover:bg-primary absolute h-2.5 w-2.5 cursor-crosshair rounded-full"
+        :class="h.cls"
+        @pointerdown.stop="(e: PointerEvent) => {
+          emit('arrowDragStart', { noteId: props.id });
+        }"
+      />
+    </template>
 
     <!-- container children -->
     <template v-if="model.container.enabled.value && childModels?.length && !model.collapsing.collapsed.value">

@@ -64,3 +64,35 @@ export function alignBottom(notes: AlignedNote[]): void {
     posMap.set("y", maxY);
   }
 }
+
+export function distributeHorizontally(notes: AlignedNote[]): void {
+  if (notes.length < 3) return;
+  const sorted = [...notes].sort(
+    (a, b) => a.model.pos.value.x - b.model.pos.value.x,
+  );
+  const first = sorted[0]!;
+  const last = sorted[sorted.length - 1]!;
+  const minX = first.model.pos.value.x;
+  const maxX = last.model.pos.value.x;
+  const gap = (maxX - minX) / (sorted.length - 1);
+  for (let i = 0; i < sorted.length; i++) {
+    const posMap = sorted[i]!.model.rawMap.get("pos") as import("yjs").Map<number>;
+    posMap.set("x", Math.round(minX + gap * i));
+  }
+}
+
+export function distributeVertically(notes: AlignedNote[]): void {
+  if (notes.length < 3) return;
+  const sorted = [...notes].sort(
+    (a, b) => a.model.pos.value.y - b.model.pos.value.y,
+  );
+  const first = sorted[0]!;
+  const last = sorted[sorted.length - 1]!;
+  const minY = first.model.pos.value.y;
+  const maxY = last.model.pos.value.y;
+  const gap = (maxY - minY) / (sorted.length - 1);
+  for (let i = 0; i < sorted.length; i++) {
+    const posMap = sorted[i]!.model.rawMap.get("pos") as import("yjs").Map<number>;
+    posMap.set("y", Math.round(minY + gap * i));
+  }
+}
