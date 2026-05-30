@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createPageYDoc } from "@deepnotes/collab-wire";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialUndoRedo } from "./undo-redo";
-import { searchNotes, replaceInNote } from "./find-replace";
+import { searchNotes } from "./find-replace";
 
 describe("find-replace", () => {
   it("finds text in note head and body", () => {
@@ -10,7 +10,7 @@ describe("find-replace", () => {
     const ur = useSpatialUndoRedo(ydoc);
     const page = useSpatialPage(ydoc, ur);
 
-    const n1 = page.createNoteAt(0, 0);
+    page.createNoteAt(0, 0);
     // head text is the default fragment from createNoteMap
     // we can't easily set it from here without Tiptap
     // so we just verify search returns empty for default empty text

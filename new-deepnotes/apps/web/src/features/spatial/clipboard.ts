@@ -1,4 +1,3 @@
-import * as Y from "yjs";
 import type { NoteModel } from "./note-model";
 import type { ArrowModel } from "./arrow-model";
 

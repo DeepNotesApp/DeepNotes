@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createPageYDoc } from "@deepnotes/collab-wire";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialUndoRedo } from "./undo-redo";
-import { copySelection, pastePayload, getClipboardBuffer, setClipboardBuffer } from "./clipboard";
+import { copySelection, pastePayload, getClipboardBuffer } from "./clipboard";
 
 describe("clipboard", () => {
   it("copies selected notes to buffer", () => {

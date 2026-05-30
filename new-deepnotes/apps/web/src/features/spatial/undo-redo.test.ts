@@ -12,7 +12,7 @@ describe("useSpatialUndoRedo", () => {
 
     expect(page.noteList.value.length).toBe(0);
 
-    const id = page.createNoteAt(10, 20);
+    page.createNoteAt(10, 20);
     expect(page.noteList.value.length).toBe(1);
 
     ur.undo();
@@ -116,7 +116,7 @@ describe("useSpatialUndoRedo", () => {
 
     const n1 = page.createNoteAt(0, 0);
     const n2 = page.createNoteAt(100, 0);
-    const a1 = page.createArrow(n1, n2);
+    page.createArrow(n1, n2);
     expect(page.arrowList.value.length).toBe(1);
 
     ur.undo();
