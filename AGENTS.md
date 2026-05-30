@@ -1,2 +1,4 @@
-- vue-shadcn and Tailwind for UI.
-- Feature-based folder structure.
+- Greenfield project is in /new-deepnotes:
+    - vue-shadcn and Tailwind for UI.
+    - Feature-based folder structure.
+- Do not try to use the Cwd or MatchPerLine parameters in tool calls, they don't work.
