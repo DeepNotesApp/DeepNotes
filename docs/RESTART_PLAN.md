@@ -1,331 +1,724 @@
-# DeepNotes — Restart (greenfield) plan
+# DeepNotes — Restart (greenfield) plan — v2
 
-This document is a **technical and delivery plan** for recreating DeepNotes in a new codebase while **preserving user data and crypto semantics** and planning a **coordinated cutover**; it does **not** promise wire compatibility with the legacy **tRPC** or **KeyDB** stack (see *Decided stack* below). It complements the product and architecture summaries in [NON_TECHNICAL_OVERVIEW.md](./NON_TECHNICAL_OVERVIEW.md) and [TECHNICAL_OVERVIEW.md](./TECHNICAL_OVERVIEW.md), and reflects a thorough read of the current monorepo layout, API boundaries, and operational patterns.
-
-**Audience:** engineers and technical leads who will scope work, own compatibility, and sequence migration.
-
-**Non-goals here:** detailed visual redesign, pricing, or product roadmap. **In scope:** how the **new** SPA is **structured**, **decoupled** from the server, and **tested** so UI work does not recreate the legacy coupling and manual-only verification story.
+> **Last updated:** 2026-05-29  
+> **Status:** Phase 2–3 backend largely complete. Phase 4–5 SPA partially complete. **Foundation bugs and spatial canvas NOT started.**  
+> **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.
 
 ---
 
-## Decided stack and product choices (this restart)
+## 0. Status reality check (read this first)
 
-The following are **set decisions** for the new implementation (they override earlier “strawman” text elsewhere in this doc where they conflict).
+### 0.1 What is actually done in `new-deepnotes` today
 
-| Area | Choice |
-|------|--------|
-| **HTTP API** | **No tRPC.** Use a conventional **HTTP API** (e.g. **REST** under `/api/...` or a small set of versioned resource routes) with **request/response schemas** in code (**Zod** or **Valibot**) and a published **OpenAPI** spec. The client uses plain `fetch` or a thin typed client generated from that spec. |
-| **ORM / SQL** | **Drizzle** for **schema, migrations, and queries** in the new project—replacing **Knex + Objection** from the current codebase. |
-| **Cache / sessions** | **Redis** (standard **open-source Redis** or a managed **Redis**-compatible service). **Not KeyDB** as a hard dependency. |
-| **Key rotation** | **Removed** from the product and codebase to reduce complexity. No user/group “rotate keys” WebSocket flows; no **scheduled page key re-encryption** in **collab** (`next_key_rotation_date` and related logic in the current app are dropped, not reimplemented). Existing ciphertext in Postgres that was encrypted with the **current** keys **remains valid**; you simply stop the rotation machinery. Revisit only if a future security incident **requires** forced re-keying. |
-| **Mobile / IAP billing** | **RevenueCat** is **out of scope** for the new stack (no webhook, no client integration). **Stripe** remains the web subscription source of truth where billing applies. |
-| **Legacy wire compatibility** | The **tRPC** (`/trpc/...`) wire protocol and **`superjson`**-shaped payloads are **not** a compatibility target. **Backward compatibility** for this plan means **data** (Postgres + decryptable page blobs with existing keys) and, where you choose to keep them, **WebSocket** protocols for **realtime** and **collab**—**not** HTTP API parity with the old app. Migration = **one coordinated cutover** to the new client and API (or a **temporary** legacy API gateway, which you are **not** committing to by default). |
-| **Hosting** | **Cloudflare** as the primary production surface: **Workers** for the HTTP API (and Worker-backed WebSocket entrypoints where appropriate), **Cloudflare Pages** (or Workers **static assets**) for the built **SPA** and **`vite-ssg`** marketing output. **PostgreSQL** stays a **separate** managed database (not D1 for the main app DB unless you later commit to a full Postgres→D1 migration—**out of scope** for this plan); connect from Workers via **[Hyperdrive](https://developers.cloudflare.com/hyperdrive/)** so each request uses a pooled connection instead of paying full TCP/TLS/auth cost on every isolate. **Redis** has no first-party Cloudflare equivalent—use **Upstash Redis**, **Redis Cloud**, or another **Redis-compatible** TCP or HTTP service reachable from Workers, with credentials in **Wrangler secrets** / dashboard. |
+| Area | Files | Status | Notes |
+|------|-------|--------|-------|
+| **Monorepo / CI** | `package.json`, `turbo.json`, `pnpm-workspace.yaml` | Done | pnpm 9 + Turbo 2 + Node 22. |
+| **DB schema + migrations** | `packages/db/src/schema.ts`, `drizzle/` | Done | Transcribed from `postgres-init.sql`. Template-DB integration test pattern exists (§5.7). |
+| **OpenAPI + typed client** | `packages/api/src/openapi.ts`, `apps/web/src/api/` | Done | Zod-to-OpenAPI, `openapi-fetch` client, generated types. |
+| **HTTP API (Hono on Workers)** | `apps/api-worker/src/routes/*` | Done | Auth, users, groups, pages, billing, realtime WS entry. |
+| **Collab WebSocket (DO)** | `apps/api-worker/src/page-collab-room.ts` | Done | `PageCollabRoom` Durable Object, lib0 framing via `@deepnotes/collab-wire`. |
+| **Realtime WebSocket (DO)** | `apps/api-worker/src/user-realtime-room.ts` | Done | `UserRealtimeRoom` DO, hash HGET/HSET/SUBSCRIBE, Upstash PUBLISH bridge. |
+| **Session / auth** | `packages/session/src/*` | Done | Register, login, refresh, logout, 2FA, email change, password change, demo. |
+| **Crypto** | `packages/e2ee/src/*`, `packages/session/src/crypto/*` | Done | Sodium wrappers, keyrings, page encrypt/decrypt, awareness encrypt. |
+| **SPA auth + routing** | `apps/web/src/features/auth/*`, `router.ts` | Done | Login, register, demo, logout, 2FA UI, account page, group pages, notifications. |
+| **Page management UI** | `apps/web/src/features/pages/*` | Partial | Bump, favorite, recent, snapshots, soft-delete, restore, purge, move, path breadcrumb. |
+| **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
+| **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
+| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **Stub only** | `SpatialWorldStubView` shows page pins on a pan/zoom canvas. **No interactive notes, arrows, or containers.** |
 
-**Redis vs KeyDB caveat:** the current `DataAbstraction` layer in `@stdlib/data` defines Redis commands such as **`expiremember`**, which is a **KeyDB / Redis Stack–style** extension, not part of standard Redis. A migration to “normal Redis” must **reimplement** TTL and cache invalidation using **standard** commands (e.g. per-key `EXPIRE`, key naming, or hashes without field-level `EXPIRE` unless you accept `HEXPIRE` only on **Redis 8+** or similar—decide in implementation).
+### 0.2 Critical bugs that block everything else
 
-### Cloudflare hosting — what to take into account
+These must be fixed **before any agent adds new features**. They are root-cause failures in the dev/test loop, not feature gaps.
 
-Workers are **not full Node** by default: prefer frameworks that fit the **Workers** model (**Hono** is a strong default on Workers). If you standardize on **Fastify**, validate **Wrangler** `compatibility_flags` (e.g. **`nodejs_compat`**) and dependency support early—some npm packages assume long-lived processes or Node APIs Workers do not provide.
+1. **`apps/web` Vitest configuration is broken for monorepo runs**
+   - **Symptom:** Running `pnpm vitest run` from repo root fails on `.vue` SFC parsing (`Install @vitejs/plugin-vue`), `window is not defined` (router), and `document is not defined` (useSession).
+   - **Root cause:** Root-level `pnpm vitest run` does **not** resolve `apps/web/vite.config.ts`. The web app’s `test: { environment: "happy-dom" }` and `@vitejs/plugin-vue` are ignored when tests are discovered from the root.
+   - **Fix:** Add a root `vitest.workspace.ts` (or `vitest.config.ts` with workspace projects) that explicitly maps `apps/web` to its `vite.config.ts`. See §6.1.
 
-| Topic | Implication |
-|--------|-------------|
-| **Postgres + Drizzle** | Point Drizzle/`pg` / **Postgres.js** at the **Hyperdrive** connection string (create a **new client per request**; Hyperdrive pools upstream). Avoid opening a raw remote Postgres connection from every Worker invocation without Hyperdrive—latency and connection limits will hurt. |
-| **Redis** | Use an external **Redis-compatible** service (e.g. **Upstash**). Wire **`REDIS_URL`** (or vendor-specific HTTP APIs) via env bindings/secrets; document any **TCP vs HTTP** client choice for Workers. |
-| **Realtime / collab WebSockets** | Stateful rooms (Yjs, presence, fan-out) map naturally to **Durable Objects** (WebSocket **hibernation** APIs where you need many idle connections). A plain Worker fetch upgrade can work for thin proxies, but **collab**-scale state belongs in **DOs** or a dedicated service—decide per protocol and load-test. |
-| **Static SPA + SSG** | **Pages** (linked to the repo build) or Workers static assets for `dist/`; keep **API** on a **Workers** route or subdomain (`api.…`) so cookies, **CORS**, and **Stripe** webhooks have a clear origin story. |
-| **Scheduler / cron** | Replace long-running **scheduler** processes with **Cron Triggers** on Workers where the job is idempotent and short; heavier work can enqueue to a queue (**Queues**) or stay on a small VM if you outgrow Worker CPU limits. |
-| **Observability** | **Workers Logs**, **Tail Workers**, and tracing integrations replace “SSH and Prometheus on a box” for the edge tier; keep **`/metrics`** on any **non-Worker** services you retain, or adopt CF-compatible metrics. |
-| **Limits and cost** | CPU time, concurrent requests, **Durable Object** billing, and Hyperdrive **query** limits are product inputs—set SLOs and load-test **collab** early. |
-| **Secrets** | **Wrangler secrets** / dashboard for production; never ship DB or signing keys in the client bundle. |
-| **AGPL** | Hosting on Cloudflare does **not** change **AGPL-3.0** obligations; source remains available per license. |
+2. **`useSession` singleton state leaks between tests**
+   - **Symptom:** All `useSession.test.ts` cases fail in batch even though individual assertions are correct.
+   - **Root cause:** `useSession` uses module-level `ref()` singletons. `resetSessionSingletonForTests()` resets the refs but does not clear the `bootstrapInFlight` promise or any other module-level caches. Concurrent test execution + module caching in Vitest causes cross-test pollution.
+   - **Fix:** Make `useSession` accept an optional `createClient` override in test mode, or refactor to a factory pattern. See §6.2.
 
-**Local dev:** keep **Docker Compose** (**Postgres + Redis**) for laptops and CI; use **`wrangler dev`** with Hyperdrive **local** configuration to approximate production DB behavior.
+3. **`router.ts` executes `createWebHistory()` at module load time**
+   - **Symptom:** `router.test.ts` crashes with `window is not defined` before any test body runs.
+   - **Root cause:** `const router = createRouter({ history: createWebHistory(...) })` runs on `import`, which is before `happy-dom` installs `window`.
+   - **Fix:** Export a `createRouter()` factory function instead of a singleton router instance. Mount the router in `main.ts` and in tests after the DOM environment is ready. See §6.3.
+
+4. **Integration tests silently skip in CI when `DATABASE_URL` is absent**
+   - **Symptom:** `template-db.test.ts` and `account-flows.integration.test.ts` skip with `describe.skipIf(ctx == null)`.
+   - **Root cause:** No CI job sets `DATABASE_URL` + `DATABASE_ADMIN_URL`.
+   - **Fix:** Add a GitHub Actions job (or local `docker-compose up` step) that exports DB URLs before `pnpm test`. See §6.4.
+
+### 0.3 The spatial gap (why the original plan was dangerously wrong)
+
+**In DeepNotes, a "page" is NOT a text document. A "page" is a spatial infinite canvas containing many notes, arrows between notes, and nested spatial containers.** The legacy `PageEditorView` equivalent is the entire `DisplayWorld.vue` tree — 37 Vue render files and 76 TypeScript model files (camera, panning, zooming, pinching, notes, arrows, selection, regions, undo/redo, clipboard, etc.).
+
+The new `PageEditorView.vue` currently hosts **a single Tiptap rich-text card**. This is not "partial page parity." It is **zero page canvas parity**. The original plan buried this under "editor UX vs legacy (rich + spatial/world if in scope)" and labeled a stub route as "spatial/world stub + home/header entry points done." That is misleading to the point of being dangerous for agent delegation.
+
+**Quantified gap:**
+
+| Subsystem | Legacy files | New files | Gap |
+|-----------|-------------|-----------|-----|
+| Page model (camera, space, rects, sizes, pos) | `code/pages/page/*` (excl. subdirs) + `camera/`, `space/` ≈ 11 | 0 | **100% missing** |
+| Notes (model + collab schema + operations) | `code/pages/page/notes/` ≈ 9 | 0 | **100% missing** |
+| Arrows (model + collab schema + operations) | `code/pages/page/arrows/` ≈ 3 | 0 | **100% missing** |
+| Elements (selection, clipboard, editing, find/replace, deleting) | `code/pages/page/elems/`, `selection/` ≈ 14 | 0 | **100% missing** |
+| Regions / containers | `code/pages/page/regions/` ≈ 2 | 0 | **100% missing** |
+| Collab (SyncedStore page doc with notes + arrows) | `code/pages/page/collab/` ≈ 3 | `usePageCollabEditor.ts` (ProseMirror-only) | **Massive scope reduction** |
+| Display / rendering | `DisplayWorld/` ≈ 37 | `SpatialWorldCanvas.vue` + `SpatialWorldStubView.vue` ≈ 2 | **~95% missing** |
+| **Total spatial engine** | **~113** | **~2** | **~98% missing** |
+
+The legacy collab syncs the **entire page state** (note positions, arrow endpoints, container nesting) via a single Yjs/SyncedStore document. The new collab syncs **only the ProseMirror fragment** inside one note. Rebuilding spatial collab is a major engineering effort, not a UI polish task.
+
+**Decision required:** Do we commit to full spatial parity, or do we ship a **single-note-per-page** product first and add the canvas later? This plan assumes **full spatial parity is required** because the legacy product is defined by it. If product wants to defer spatial canvas to a v2, rewrite §0.3 and all Phase 6+ references accordingly.
 
 ---
 
-## 1. What “restart” should mean
+## 1. What "restart" should mean (revised)
 
 | Goal | Meaning in practice |
 |------|---------------------|
-| **New project** | A separate repository or clearly isolated worktree, with a modern default toolchain (lockfile, Node LTS, CI) chosen deliberately—not inherited from 2022-era constraints. |
-| **Backward compatible (data + crypto)** | **PostgreSQL** data that existing users rely on: rows and **bytea** blobs remain **readable** after the migration, using the same client-side and server-stored key material as today, **without** the old **tRPC** HTTP contract. **Cookie + JWT** patterns can stay familiar to users, but the **JSON bodies and paths** of the new HTTP API are new. **Realtime** and **collab** WebSocket **binary protocols** are optional compatibility targets: simplest path is a **new client** written against **documented** protocols, whether or not they are byte-for-byte identical to the old server. |
-| **Better maintenance** | Clear module boundaries, **OpenAPI** as the contract, **Drizzle** migrations, **decoupled** feature modules with **services** (not a generic **repository** layer), **thorough** tests where risk is high (auth, crypto, payments, data transitions)—including **real Postgres** integration tests via **template DB clones** (§5.7)—and faster dev feedback (no default `tsx --inspect-brk` in hot paths, modern bundler, smaller “forked dependency” surface). |
-
-**License and obligations:** the project is **AGPL-3.0** (`LICENSE`); a restart does not change copyleft or deployment obligations. Keep compliance visible in the new repo.
-
----
-
-## 2. Current architecture (as-is), condensed
-
-The existing stack is already described accurately in [TECHNICAL_OVERVIEW.md](./TECHNICAL_OVERVIEW.md). These points matter most for a restart:
-
-- **Monorepo:** pnpm workspaces + **Turbo**; TypeScript project references build **server apps and shared `packages/*`**, while the **Quasar client** is compiled by Vite/Quasar (not the root `tsc` graph for the SPA code).
-- **Client (`@deepnotes/client`):** **Vue 3.2** + **forked Quasar** (`@deepnotes/quasar`, `@deepnotes/quasar-app-vite`), **Vite ~2.9**, **Pinia**, **Tiptap** + **Yjs** + **SyncedStore**; depends on **workspace** `@deepnotes/app-server` for the **tRPC `AppRouter`** type.
-- **App server (legacy):** **Fastify** + **tRPC v10** on `/trpc` + **separate WebSocket** handlers under `src/websocket/` (group invites, page moves, password/email, **key rotation**—dropped in the new stack, etc.); **Stripe** + (legacy) **RevenueCat** webhooks; **Objection** + **Knex** + **Postgres**; **KeyDB** via **`DataAbstraction`** in `@stdlib/data` (large, cross-cutting).
-- **Other services:** `realtime-server` (msgpackr-style **live** protocol), `collab-server` (**Yjs**-aligned binary protocol, path e.g. `COLLAB_SERVER_URL/page:{pageId}` on the client), `scheduler`, `manager` CLI.
-- **Schema management:** `postgres-init.sql` is a **full dump-style** artifact; there is **no in-repo chain of versioned SQL migrations** (a major operational and compatibility risk for any “new project” that must coexist with production).
+| **New project** | `new-deepnotes` already exists. Do not create a third repo. |
+| **Data compatible** | Postgres rows + encrypted blobs remain readable. Drizzle schema must support all legacy columns (including those we may later drop). |
+| **No tRPC wire** | Client never calls `/trpc`. All HTTP via REST/OpenAPI. |
+| **No key rotation** | `next_key_rotation_date` columns are inert. No scheduled re-encryption. |
+| **No RevenueCat** | Stripe-only billing. |
+| **Spatial parity** | A DeepNotes "page" is a canvas with notes, arrows, and containers. A single rich-text card is **not** parity. |
+| **Testable** | Every phase has **automated tests that pass in CI** before the phase is declared done. |
 
 ---
 
-## 3. Pain points this exploration validated (or clarified)
+## 2. Current architecture comparison
 
-### 3.1 Tight coupling (in the legacy app)
+### 2.1 Legacy (`apps/client`, `apps/app-server`)
 
-- **Type coupling:** the client imports `@deepnotes/app-server` to share **`AppRouter`**, wiring UI code to the entire server package graph. The new stack **replaces** that with **OpenAPI-generated** (or Zod-shared) client types.
-- **Data layer:** `DataAbstraction` centralizes **Redis + pub/sub + in-process LRU** and domain-specific hashes; it is powerful but **hard to replace incrementally** and scatters “truth” about cache key semantics.
-- **Split protocols:** business logic is split between **tRPC** and **two WebSocket systems** (app + realtime + collab), with **sensitive flows** (password change, **legacy** key rotation, etc.) on app-server WebSockets—duplication and more surfaces to regression-test. The restart **consolidates HTTP** behind **one REST+OpenAPI** layer and **drops** key-rotation paths entirely.
-- **Forked/patched dependencies:** the client list includes **`@deepnotes/*` scoping** for Quasar, Vite app plugin, `superjson`, `ioredis`, `html2canvas`, tiptap collaboration cursor, and `dotenv-expand` patches—each is ongoing **security and upgrade debt**.
+- **Client:** Vue 3.2 + forked Quasar + Pinia + Tiptap/Yjs/SyncedStore + tRPC client + custom WS (realtime + collab).
+- **Server:** Fastify + tRPC v10 + WebSocket handlers + Knex/Objection + KeyDB.
+- **Collab:** Per-page Yjs Doc via SyncedStore contains `page`, `notes`, `arrows` maps. Binary protocol via `collab-server`.
+- **Realtime:** `realtime-server` WebSocket with msgpackr custom protocol.
+- **Scheduler:** Background cleanup worker.
 
-### 3.2 Slow build and tooling drift
+### 2.2 New (`new-deepnotes`)
 
-- **Vite 2** and old Quasar app pipelines are far behind current Vite performance and ecosystem; **4 GB heap** in client build scripts is a red flag.
-- **pnpm 7.6.0** and **root `engines.node`: `>=14`** are out of step with modern LTS and with **CI** (e.g. Node 18/20 in places per docs)—harmonize early in a new project.
-- **Client is outside** `tsconfig.packages.json` references, so the **typecheck story** is split (Quasar/Vue vs. packages), which often hurts “instant” feedback in the IDE.
-
-### 3.3 Slow debugging feedback loop
-
-- Server `dev` scripts in several apps use **`tsx --inspect-brk`** (breakpoint at startup unless changed)—fine for one-off debugging, **expensive** as a daily default.
-- **Sparse automated tests** in `apps/client` and `apps/app-server` (documented in [TECHNICAL_OVERVIEW.md](./TECHNICAL_OVERVIEW.md)); most coverage lives in `@stdlib/*` and `@deeplib/misc`, so refactors are **high manual verification** cost.
-
-### 3.4 Data and operations gaps
-
-- **Migrations:** without a **repeatable, ordered migration** story, any new service that shares the same DB is gambling on one-off DBA steps.
-- **Multi-service deployment:** **five** long-running entrypoints (client builds aside) increase coordination cost; a restart is an opportunity to **document** and eventually **consolidate** (only after contracts are clear).
-
-### 3.5 Frontend and UI (legacy): coupling, scale, and almost no automated tests
-
-The restart plan’s **backend and contracts** story is necessary but not sufficient: most user-visible risk and churn lives in **`apps/client`** (~400+ files under `src/` alone), and that surface was **not** treated as a first-class test target.
-
-- **Hard type coupling to the server:** the SPA imports **`AppRouter`** from `@deepnotes/app-server` (`src/code/trpc.ts`) and **deep paths** into the server for **WebSocket message types** and helpers (e.g. `src/code/areas/api-interface/**` importing `@deepnotes/app-server/src/websocket/...`). Any server refactor becomes a **client compile** problem; the new app must depend only on **published HTTP/OpenAPI** (and documented WS appendices), not on server source trees.
-- **Framework coupling and implicit wiring:** **Quasar** + **unplugin-auto-import** registers **`trpcClient`**, **`internals`**, **Pinia stores**, and **router helpers** as globals (`quasar.config.js`). That speeds authoring but **obscures dependency edges** and encourages large “god” objects (e.g. **`DeepNotesInternals`** in `src/boot/internals.universal.ts` tying storage, crypto, router, realtime, Tiptap, and `Pages`).
-- **Feature logic mixed with UI shells:** domain-heavy classes (e.g. **`Pages`** in `src/code/pages/pages.ts` using **`trpcClient`**) sit beside Vue layouts under `src/layouts/` and `src/pages/`, without a stable **inner boundary** between “call API / apply crypto” and “render Vue”.
-- **Sparse automated UI tests:** there are **no** `*.test.*` / `*.spec.*` files under `apps/client` in the current tree; verification for UI and integration flows is largely **manual**. The greenfield **`@deepnotes/web`** app currently wires **`test`** to a **no-op** exit in `package.json`—so CI can be “green” while the client layer has **zero** regression signal.
-- **Build and typecheck split:** the legacy client sits **outside** the root TypeScript project references (see §3.2), so IDE and CI feedback for UI code is **weaker** than for `packages/*`.
-
-**Implication for the new repo:** treat **frontend architecture and testing** as a **parallel delivery track** (package layout, API client generation, Vitest + DOM environment, optional E2E)—not an afterthought folded only into “Phase 4 — client MVP.”
+- **Client:** Vue 3.5 + Vite 6 + plain `fetch` + `openapi-fetch` + Tiptap/Yjs (ProseMirror-only) + custom WS (collab + realtime).
+- **Server:** Hono on Cloudflare Workers + Drizzle + Postgres via Hyperdrive + Upstash Redis.
+- **Collab:** `PageCollabRoom` Durable Object. Yjs updates persisted to Postgres `page_updates`. **Only ProseMirror content is synced.**
+- **Realtime:** `UserRealtimeRoom` Durable Object. Hash HGET/HSET + pub/sub via Upstash.
+- **Scheduler:** Cron Triggers or Queues (not yet implemented; deferred).
 
 ---
 
-## 4. Compatibility and migration surface
+## 3. Pain points validated
 
-### 4.0 New “API product” (authoritative for the greenfield app)
-
-- **OpenAPI 3** spec (generated or hand-maintained) + **Zod/Valibot** as the single source of truth for request/response bodies.  
-- **Drizzle** `schema.ts` (or split table files) drives **migrations**; the OpenAPI and DB layer stay in sync by convention and **CI checks** (or codegen from one source—pick one pattern and stick to it).
-
-**Legacy tRPC (reference only for migration and parity checklists, not a wire target):** the old app exposed **~60+** procedure implementations under `apps/app-server/src/trpc/api/`, with routers for `users` (account, pages), `sessions`, `groups`, `pages`. When porting *behavior*, use that tree and `router.ts` as a **checklist of features** to re-cover in REST, not as something to emulate on the wire.
-
-### 4.1 Legacy HTTP (not preserved)
-
-- The old **tRPC** paths (`POST /trpc/...`, **`superjson`**) and **relying on** `@deepnotes/app-server`’s `AppRouter` in the **client** go away.  
-- **Feature parity** (login, page CRUD, groups, etc.) is implemented as **new** REST (or resource-style) endpoints. Old mobile/desktop builds that still call `/trpc` would need a **dedicated** compatibility gateway—**out of scope** unless you add it explicitly for a straggler user cohort.
-
-### 4.2 App-server WebSocket routes (legacy) — which to reimplement
-
-`srv/fastify` registers hand-written handlers under `apps/app-server/src/websocket/` (groups, pages/move, user account, **key rotation** for users and groups). For the new stack:
-
-- **Reimplement** the flows you still need (e.g. password change, page move, group invites) **on new WebSocket paths or the REST layer**, with **fresh** message shapes documented next to OpenAPI.  
-- **Do not reimplement** **user** or **group** **rotate keys** (see *Decided stack* above).  
-- If you need **one** “sensitive” channel, prefer **fewer** long-lived WebSockets and more **idempotent** REST for anything that is not high-frequency.
-
-### 4.3 Realtime and collab servers
-
-- **Realtime:** JWT from cookies on HTTP upgrade; **msgpackr**-based custom protocol; `/metrics` on the HTTP side. Reference: `apps/client/src/code/areas/realtime/`.  
-- **Collab:** per-page Yjs-style updates + awareness; URL pattern **`…/page:{pageId}`**; binary messages via **lib0** encodings (`apps/client/src/code/pages/page/collab/websocket.ts`). The legacy **collab-server** also encodes **scheduled key rotation** (`next_key_rotation_date`); the new service **omits** that path entirely (no background re-encryption; keys stay stable).
-
-Capture **message types** (`@deeplib/misc` collab message enums) and on-the-wire order as **golden fixtures** for whatever you keep byte-compatible; otherwise treat as **reimplement** with a **versioned** collab protocol and one released client.
-
-### 4.4 Auth and session model
-
-- **HTTP-only cookies**; **`accessToken`** and **`loggedIn`** can remain the names for **WS** auth on upgrade if you want minimal client change in those layers.  
-- **Redis (standard):** session invalidation flags, rate limits, and any **cache** that replaces the old **DataAbstraction**-style projections—implemented with **portable** commands only (see *Redis vs KeyDB caveat* above). Replace `KEYDB_HOSTS` / `KEYDB_PASSWORD` with a conventional **`REDIS_URL`** (or `REDIS_HOST` / `PORT` / `PASSWORD`) in the new app’s `template.env`.
-
-### 4.5 PostgreSQL schema, Drizzle, and encryption
-
-- **Drizzle** should **reflect** the migrated schema: start from **`postgres-init.sql`**, import or transcribe into `schema.ts`, and **emit** migrations. Columns tied only to **rotation** (e.g. `next_key_rotation_date` on `pages` in the old model) can become **unused** and later dropped in a separate migration, or be left **nullable inert** during the first cut.  
-- **E2E:** [NON_TECHNICAL_OVERVIEW.md](./NON_TECHNICAL_OVERVIEW.md) and the **Whitepaper** remain the product story; the new codebase needs **tests** for encrypt/decrypt and page load, **without** rotation code paths.
-
-### 4.6 Billing and devices
-
-- **Stripe** (web) only for the new stack—webhook signing, customer portal, checkout. **RevenueCat** is **not** reimplemented. Existing subscribers who only used mobile IAP will need a **one-time** migration story (e.g. link to Stripe, grace period, or support-led)—set explicitly in product, not in this plan. **Device** / **session** tables are modeled in Drizzle as needed.
+1. **Type coupling (legacy):** Client imported `@deepnotes/app-server` for `AppRouter`. **Fixed** in new repo via OpenAPI-generated types.
+2. **DataAbstraction (legacy):** Centralized KeyDB + pub/sub + LRU. **Partially fixed** — replaced with explicit Upstash Redis calls in `UserRealtimeRoom`, but no equivalent for the spatial state cache.
+3. **Split protocols (legacy):** tRPC + app WS + realtime WS + collab WS. **Partially fixed** — consolidated to REST + two WS protocols, but collab WS scope is much smaller.
+4. **Forked dependencies (legacy):** `@deepnotes/quasar`, `@deepnotes/ioredis`, patched `dotenv-expand`. **Fixed** — no Quasar, no forked Vite, no patched deps in new repo.
+5. **Build drift (legacy):** Vite 2, Node >=14, 4 GB heap. **Fixed** — Vite 6, Node 22, standard heap.
+6. **No client tests (legacy):** Zero `*.test.*` in `apps/client`. **Partially fixed** — some web tests exist, but **test infrastructure is broken** (see §0.2).
+7. **Schema drift (legacy):** `postgres-init.sql` dump, no migration chain. **Fixed** — Drizzle migrations exist.
+8. **God-object state (legacy):** `DeepNotesInternals` + `Pages` monolith. **Partially fixed** — composables are smaller, but `usePageCollabEditor.ts` is already 700+ lines and growing.
 
 ---
 
-## 5. Proposed target shape (aligned with decided choices)
+## 4. Compatibility and migration surface (unchanged decisions)
 
-### 5.0 Implementation principles (decoupling, structure, and tests)
+This section preserves the decisions from the original plan that are still correct.
 
-The restart is **not** a permission to **copy-paste** the legacy layout into new files. Treat the old monorepo as a **behavioral reference**, **crypto/session semantics**, and **fixtures**—then **reorganize** modules so boundaries are obvious and **automated tests** can target each layer without pulling half the app.
-
-| Principle | Practice |
-|-----------|----------|
-| **Decoupling** | Prefer **feature-oriented** or **vertical slices** (auth, pages, groups, billing) with **narrow imports** between packages: **HTTP handlers** depend on **application services** and **typed DTOs**, not on each other’s internals. Shared **Drizzle schema** and **OpenAPI** types live in dedicated packages; avoid cycles between “everything imports `@stdlib/data`.” |
-| **Services without repository pattern** | Use **application services** (or use-cases) that orchestrate validation, Redis, and **Drizzle queries**. **Do not** introduce a generic **repository** layer whose main job is wrapping CRUD—you have **one** database (Postgres). Where query logic repeats, extract **small typed query helpers** or **SQL modules** next to the feature, not a parallel “repository” hierarchy. |
-| **Thorough testing** | **Unit tests** for pure logic (crypto, mapping, auth helpers). **Integration tests** against a **real Postgres** (and Redis where behavior matters) for migrations, constraints, and route-level flows. Coverage expectations are highest for **auth**, **crypto**, **payments**, and **data migrations**—see §5.7. |
-| **Frontend boundaries** | The browser app **never** imports server apps or Drizzle; it depends on a **small typed HTTP client** (from OpenAPI or shared Zod IO types) and optional **client-only** packages (crypto, formatting). **Vue** components stay thin; **composables** and **feature modules** own orchestration. |
-
-### 5.1–5.6 Target components (numbered)
-
-1. **Contracts: OpenAPI + Zod/Valibot**  
-   A small **`@deepnotes/api`** (name TBD) package contains **route handlers**’ input/output types and a published **OpenAPI** document. The **Drizzle** package stays separate to avoid server importing UI and vice versa. For **realtime** / **collab**, add a short **appendix** (or separate JSON spec) for message kinds and field order.
-
-2. **Drizzle from day one**  
-   **One migration chain:** `drizzle-kit` (or equivalent) applied to Postgres; devs never rely on a single frozen `postgres-init.sql` for drift long term—use it only as the **import** source for the first `schema.ts`.
-
-3. **HTTP server**  
-   **Hono** on **Cloudflare Workers** is the default alignment with the **Cloudflare** hosting decision (same codebase path for REST, middleware, and fetch-handler tests). **Fastify** remains viable for **Node-only** targets (e.g. local scripts, a secondary deployment) if the team splits stacks—avoid assuming **Fastify** plugins work unchanged on Workers without verification. REST routes, **no** tRPC plugin. **Cookie** + **JWT** middleware shared with WebSocket upgrade paths. Rate limiting backed by **Redis** (see hosting table).
-
-4. **Redis**  
-   **Local / CI:** **Redis 7+** (or LTS) in `docker-compose`. **Production (Cloudflare):** managed **Redis-compatible** service (see *Hosting* row)—no KeyDB module assumptions. Replaces **DataAbstraction** with **narrower, explicit** modules: **cache-aside** in services, **simple key naming**, and **pub/sub** only where multi-instance coherence still requires it—without a separate “repository” abstraction for Redis.
-
-5. **New client application**  
-   - **Vite 6+** + **Vue 3.5+** as a standard SPA (using `vite-ssg` for marketing page SEO). **Nuxt SSR is explicitly rejected** because DeepNotes is end-to-end encrypted; the server cannot decrypt user content to render it for SEO anyway. 
-   - **Feature-based folder structure** (e.g., `src/features/auth`, `src/features/editor`) to co-locate components, composables, and **tests**; keep **shared** presentational pieces under something like `src/shared/ui` (tokens, primitives) so features do not copy-paste styles.
-   - **Decouple transport from UI:** a dedicated **API surface** (package or `src/api/`) that wraps `fetch` with credentials, base URL, and error mapping; types from **openapi-typescript** / **hey-api** or Zod schemas exported from `@deepnotes/api` **without** pulling Worker or DB code into the bundle. **Do not** import `@deepnotes/app-server` or any `drizzle-*` module from the web app.
-   - **State:** prefer **explicit composables** and small Pinia stores (if used) over a single mega-`internals` object; inject test doubles at boundaries.
-   - `fetch` + generated client—**no** `trpc` client, **no** `superjson`, **no** Quasar.  
-   - **Tiptap + Yjs** for the editor if you want to cap risk; **collab-server** either forked to strip rotation or rewritten against the same Yjs wire.  
-   - **Capacitor** for mobile and **Tauri v2** (or Electron) for desktop after the web app is solid. Decoupling the UI from the native wrappers avoids the heavy Quasar build matrix.
-
-6. **CI/CD and observability**  
-   One CI, Node LTS matrix, E2E smoke. **Production deploy:** **Wrangler** (or Pages Git integration) to Cloudflare; preview deployments per PR where useful. **Prometheus** `/metrics` on any long-lived **non-Worker** services; for Workers, use **Cloudflare** logging/metrics (and **Tail** / observability products) as the primary edge story. **Integration tests** that need Postgres should run in a job with a **Postgres service** (or Compose) and use the **template-database** pattern in §5.7—not only mocks.
-
-### 5.7 Integration testing: real Postgres + Drizzle + **database templates**
-
-Running **full Drizzle migrations from an empty database for every test** is correct but **slow** at scale. **PostgreSQL database templates** give **per-test isolation** at filesystem-copy speed: migrate **once** into a **template database**, then **`CREATE DATABASE … TEMPLATE …`** for each test (or file), run the test against a dedicated **`pg` + Drizzle** client, then **`DROP DATABASE`**. This avoids **Testcontainers** startup cost when CI already provides a **Postgres service** or **Docker Compose** Postgres (still “real” SQL, real constraints).
-
-**Global setup (once per suite)** — e.g. Vitest **`globalSetup`** / Jest **`globalSetup`**:
-
-1. Connect with **`pg`** to the maintenance database (typically **`postgres`**).
-2. **`DROP DATABASE IF EXISTS`** the template name (dev/CI only), then **`CREATE DATABASE`** a dedicated template DB (e.g. `test_template_db`).
-3. Connect to that DB, construct Drizzle + **`migrate()`** from **`drizzle-orm/node-postgres/migrator`** (or your chosen driver’s migrator) with **`migrationsFolder`** pointing at the repo’s Drizzle migration folder.
-4. **Close all connections** to the template DB. Postgres **refuses** to use a database as **`TEMPLATE`** if any session remains open.
-
-**Per test (`beforeEach`)** — unique name (**UUID** / random suffix, **never** user-controlled strings in DDL):
-
-1. Admin client to **`postgres`**: **`CREATE DATABASE test_<uuid> TEMPLATE test_template_db`**.
-2. Open a new **`pg` Client** (and Drizzle instance) to `test_<uuid>`; inject that **`db`** into the code under test.
-
-**Teardown (`afterEach`)** — end the test client, then admin: **`DROP DATABASE IF EXISTS test_<uuid>`** with **`FORCE`** if you adopt PG 13+ drop semantics for stuck sessions.
-
-**Details to document in the repo:**
-
-- **Connection URLs** for admin vs app; CI needs a role that can **`CREATE DATABASE`**.
-- **Identifier safety:** only **generated** database names in `CREATE`/`DROP`—no string concatenation from request input.
-- **Parallelism:** if tests run **in parallel**, each worker can own a **template clone naming prefix** or use **one DB per worker** instead of per test—tune for speed vs isolation.
-- **Testcontainers** (or a single long-lived local Postgres) remain valid **fallbacks** when CI cannot expose Postgres; templates are the **preferred** strategy **when Postgres is already there**.
-
-### 5.8 Frontend: testing layers, tooling, and CI
-
-Backend integration tests do **not** replace **UI** and **end-to-end** confidence. Plan three layers from the first meaningful UI commit:
-
-| Layer | Purpose | Typical stack |
-|-------|---------|----------------|
-| **Unit / component** | Presentational components, composables, parsers, mappers | **Vitest** with **`environment: 'jsdom'`** or **`happy-dom`** (install the DOM lib explicitly per Vitest docs), **`@vue/test-utils`** for `mount`/`shallowMount`, same **Vite** pipeline as the app (`vitest/config` + `@vitejs/plugin-vue`). Prefer **`@vitest-environment jsdom`** on specific files if only a subset needs DOM. |
-| **API / contract** | Client `fetch` wrapper respects paths, cookies, error shapes | Tests against **handlers** (e.g. **MSW** 2.x) or a short-lived **local Worker**; fixtures generated from **OpenAPI** examples so UI does not depend on a running DB for every run. |
-| **E2E smoke** | Cookie auth, navigation, “open page / type / sync” happy paths | **Playwright** (or Cypress) against **preview** or **docker-compose** stack; keep the suite **small** and fast—defer broad visual regression unless product asks for it. |
-
-**CI:** `@deepnotes/web` (or equivalent) must run **real** `vitest` (and later Playwright) in **Turbo** `test`, not a **no-op** script—otherwise UI refactors ship with **zero** automated signal (the current legacy client pattern).
-
-**Organization:** co-locate `*.spec.ts` / `*.test.ts` next to features or under `src/__tests__/` consistently; forbid **new** deep imports from server packages into the web bundle (enforce with **ESLint** `import/no-restricted-paths` or **dependency-cruiser** if needed).
+- **HTTP API:** OpenAPI 3 + Zod. REST under `/api/...`.
+- **ORM:** Drizzle for schema, migrations, and queries.
+- **Cache:** Standard Redis (Upstash), not KeyDB. No `expiremember`.
+- **Key rotation:** Removed. Existing ciphertext remains valid.
+- **Billing:** Stripe only. No RevenueCat.
+- **Hosting:** Cloudflare Workers + Pages, Hyperdrive to Postgres, external Redis.
+- **Auth:** HTTP-only cookies + JWT. `accessToken` / `loggedIn` cookie names kept for WS auth.
 
 ---
 
-## 6. Phased work plan (recommended order)
+## 5. Target shape (revised)
 
-### Phase 0 — inventory to OpenAPI and Drizzle (1–2 weeks)
+### 5.1 Principles
 
-- From the legacy `app-server`, list **tRPC** procedures and **WebSocket** handlers and map them to **proposed REST + WS** resource names; produce a **skeleton OpenAPI** (endpoints can `501` at first).  
-- Transcribe `postgres-init.sql` into a **Drizzle schema** and generate **migration 0001** (or squash later—goal is a **repeatable** chain).  
-- Document **cookie names**, **JWT** claims, and **CORS** origins.  
-- List which **`@deepnotes/*`** forks the **new** client can avoid entirely.
-- **Optional but valuable:** sketch **`apps/web`** (or `packages/web`) **folder conventions** and **forbidden imports** (no server, no Drizzle) in a short `README` or ADR so the first feature PRs do not invent incompatible layouts.
+1. **Feature-based vertical slices.** Every feature (auth, pages, groups, spatial, billing) owns its own folder with handlers, services, composables, and tests.
+2. **No generic repository layer.** One Postgres. Use Drizzle queries directly in services. Extract query helpers, not a parallel hierarchy.
+3. **Frontend never imports server or Drizzle.** Only OpenAPI types + a thin `fetch` wrapper.
+4. **Tests must pass in CI before merge.** No "skip in CI" for core features.
 
-**Exit:** OpenAPI v0 + Drizzle schema in source control; feature checklist derived from the old tRPC tree.
+### 5.2 Packages
 
-### Phase 1 — optional: legacy repo hygiene (parallel track)
+| Package | Responsibility |
+|---------|---------------|
+| `@deepnotes/api` | OpenAPI registry + Zod schemas. |
+| `@deepnotes/db` | Drizzle schema, migrations, template-DB test helpers. |
+| `@deepnotes/e2ee` | libsodium wrappers, keyrings, encrypt/decrypt. |
+| `@deepnotes/session` | Auth, group, page operations (pure logic + DB queries). |
+| `@deepnotes/collab-wire` | Binary framing for collab WS (lib0). |
+| `@deepnotes/realtime-wire` | Binary framing for realtime WS (msgpackr). |
+| `@deepnotes/web` | Vue SPA. No server imports. |
+| `@deepnotes/api-worker` | Hono Worker entrypoint + DO classes. |
+| `@deepnotes/marketing` | `vite-ssg` marketing pages. |
 
-Only if you still touch the old monorepo: remove default **`--inspect-brk`**, add minimal tests, and align Node/pnpm. **Do not** invest in extracting **tRPC** types for the new world—favor **Phase 0** instead.
+### 5.3 Frontend boundaries
 
-**Exit:** optional; can be skipped if the team goes straight to the new repository.
+- **`src/api/`**: Typed `fetch` client from OpenAPI spec. Error mapping.
+- **`src/features/{auth,pages,groups,spatial,...}/`**: Co-located components, composables, and tests.
+- **`src/shared/ui/`**: Presentational primitives (buttons, cards, inputs) so features don't copy-paste.
+- **Forbidden imports:** `eslint` rule banning `apps/web` from importing `apps/api-worker`, `@deepnotes/db`, or any `drizzle-orm` module.
 
-### Phase 2 — new repository bootstrap
+### 5.4 Testing layers (from first meaningful UI commit)
 
-- New repo: **pnpm** + **Turborepo 2** (or Nx)—**Node 22/24** LTS.  
-- **Docker compose:** **Postgres** + **Redis** (not KeyDB). New env file with **`REDIS_URL`**-style settings.  
-- **Cloudflare:** `wrangler.toml` (or Wrangler JSON), **Hyperdrive** config pointing at the same Postgres URL used locally (or a branch DB), **Pages** project for the client build output; document preview vs production env vars.  
-- **CI** green: lint, typecheck, `drizzle-kit check`, unit smoke, and **Postgres-backed** integration tests where a **GitHub Actions `services: postgres`** (or equivalent) supplies a DB user with **`CREATEDB`** for **template clones** (§5.7); optional **deploy** job to a **Cloudflare preview** environment.
-- **Client CI is real:** replace placeholder **`test`** scripts on **`@deepnotes/web`** with **Vitest** (see §5.8) so the SPA is typechecked and unit-tested in the same pipeline as the API packages.
-
-### Phase 3 — backend features on REST + Drizzle
-
-- Implement **auth and sessions** (cookies + JWT) and core **pages** / **groups** routes against **Drizzle**; add **realtime** and **collab** services **without** key-rotation and **without** tRPC.  
-- **Load tests** on collab and realtime only after the protocol is frozen.  
-- **Stripe** webhooks; **no** RevenueCat.
-
-### Phase 4 — new client MVP
-
-- **Foundation (before heavy screens):** OpenAPI-driven **typed client** (or hand wrapper + generated types), **`src/features/*`** layout, and **Vitest + jsdom/happy-dom** running in CI (§5.8).  
-- Feature slice: **auth** → **page list** → **single page** → **Yjs collab** → **groups** subset—each slice ships with **at least** composable or API-layer tests where logic is non-trivial; auth and session flows additionally covered by **E2E smoke** when cookies and redirects are involved.  
-- Reuse or port **`@stdlib/crypto`**, `@deeplib/misc` where domain-stable; delete dead code as you go.  
-- **Electron** and **Capacitor** after web parity (they multiply CI cost).
-
-### Phase 5 — cutover and decommissioning
-
-- **Staged rollout:** canary users, then full redirect; old **`/trpc`** stack retired when **no** supported client still calls it (or keep a read-only **legacy** deployment for a defined window).  
-- Decommission the old monorepo only when **error rates**, **Stripe**, **E2E**, and **data** checks (random page decrypt) are green.
+| Layer | Stack | Environment |
+|-------|-------|-------------|
+| Unit / component | Vitest + `@vue/test-utils` | `happy-dom` |
+| API contract | Vitest + MSW 2.x | `node` |
+| Integration (DB) | Vitest + real Postgres via template DB | `node` |
+| E2E smoke | Playwright against local compose or preview | browser |
 
 ---
 
-## 7. Risks and mitigations
+## 6. Rewritten phased plan (agent-safe)
 
-| Risk | Mitigation |
-|------|------------|
-| REST hand-written drift vs **OpenAPI** | Generate types from the spec (or use Zod-to-OpenAPI) and **test** 4xx/5xx contracts in CI. |
-| Collab **binary** protocol mismatch or dropped rotation | Decide **byte parity** vs **bump collab v2**; for v2, ship **one** new client and retire old together. **Document** that rotation is no longer a safety valve—rely on strong at-rest and transport crypto without periodic rekey. |
-| **Redis** lacks KeyDB’s **`expiremember`** and similar | Redesign those fields as first-class keys or standard hash + TTL; benchmark before cutover. |
-| **Stripe-only** after dropping RevenueCat | User comms and support scripts for any **IAP-only** customers; one-time data fix if `users` has provider-specific fields. |
-| Dropping **key rotation** in collab with **live** old servers | **Cut over collab and app together** so no mixed fleet runs incompatible rotation expectations. |
-| **2FA** and group **password** flows | Still re-test hard; rotation removal does not remove all crypto edge cases. |
-| Migration mistakes on live Postgres | Staged env + backup + runbook; Drizzle migrations reviewed like production DDL. |
-| Mobile and desktop matrices | Defer **Capacitor/Tauri** matrix; get **web** SPA (with `vite-ssg` for SEO) solid first. |
-| **Worker** CPU time and **DO** costs under collab load | Load-test **Durable Object** fan-out and Hyperdrive early; model worst-case concurrent pages and websocket churn. |
-| **Framework** assumes full **Node** | Prefer **Hono** on Workers; gate **Fastify** (or heavy native deps) behind a verified Workers profile or a non-CF deployment path. |
-| **UI regressions** and **tight UI↔server coupling** repeat | **No** server imports in the web package; **component + contract tests** from the first auth UI; **small Playwright** suite on preview; optional **Storybook** only if the team will maintain it. |
-| **God-object state** (`internals`-style) | Cap composable surface area; document **dependency injection** patterns for crypto and API clients in tests. |
+Each phase has:
+- **Prerequisites:** what must be true before starting.
+- **Deliverables:** files, functions, routes, or components that must exist.
+- **Verification:** exact test commands or checklist items that must pass.
+- **Exit criteria:** objective yes/no questions. A phase is **not done** until every exit criterion is green.
 
 ---
 
-## 8. Success criteria (objective)
+### Phase 0: Fix foundation — tests and dev loop (1 week)
 
-- [ ] **OpenAPI** is the **source of truth** for public HTTP; client uses **generated** types or shared Zod.  
-- [ ] **Drizzle** migrations apply from **empty** DB to **current** schema deterministically; production upgrade path is documented.  
-- [ ] **< 2 s** cold `dev` **API** start (no `inspect-brk` by default) on a standard laptop.  
-- [ ] **Collab** + **realtime** each have at least one **integration** test against **Redis** + in-memory or dockerized deps.  
-- [ ] **SQL-heavy paths** use **integration tests** against a **real Postgres**; default approach is **one migrated template DB** + **`CREATE DATABASE … TEMPLATE`** per test or per worker (§5.7), not re-migrating from empty for every case.  
-- [ ] **Auth**, **crypto**, and **Stripe** flows have **automated** coverage beyond smoke; new code favors **decoupled modules** and **services** without a generic **repository** layer (§5.0).  
-- [ ] **No tRPC** and **no** `superjson` in the new default stack. **No** RevenueCat. **Key rotation** code paths are **absent** and the team signed off on **IAP** / **Stripe** user handling.  
-- [ ] **Zero** undocumented framework forks in the new default client, or a short exception list with an owner.  
-- [ ] **Cloudflare:** API + static/SSG deploy documented; **Hyperdrive** + external **Postgres** + **Redis** proven in staging; **collab/realtime** path chosen (**DO** vs separate service) and load-tested.
-- [ ] **Web app:** **Vitest** (DOM environment) runs in CI on every change to `@deepnotes/web`; **no** dependency from web source onto **app-server** / **Drizzle** packages.
-- [ ] **E2E:** at least one **automated** smoke path for **login/session cookies** (or equivalent) against a **preview** or **compose** stack before declaring client MVP “done.”
+**Prerequisites:** None. This is the first priority.
+
+**Deliverables:**
+
+1. **Root Vitest workspace config**
+   - Create `vitest.workspace.ts` at repo root mapping each package/app to its own `vitest.config.ts` or `vite.config.ts`.
+   - `apps/web` must use its `vite.config.ts` (which has `@vitejs/plugin-vue` + `happy-dom`).
+   - All other packages use their own `vitest.config.ts` or a default node environment.
+
+2. **Fix `apps/web` test failures**
+   - `app.test.ts`: must mount `App.vue` without parser errors.
+   - `router.test.ts`: must instantiate router without `window is not defined`.
+   - `useSession.test.ts`: must pass all 6 cases without cross-test leakage.
+   - `page-editor-tiptap-extensions.test.ts`: must run without Vue SFC parse errors.
+
+3. **Fix `useSession` singleton leakage**
+   - Option A: Convert `useSession` to a factory that returns fresh state per call, with a `provide/inject` or app-level singleton in production.
+   - Option B: Keep module singleton but add `destroySessionSingletonForTests()` that nulls `bootstrapInFlight` and clears any `Promise` caches.
+
+4. **Fix router module-load side effect**
+   - Change `router.ts` to export `createAppRouter()` factory.
+   - Update `main.ts` to call the factory.
+   - Update `app.test.ts` and any test that needs a router to call the factory after DOM setup.
+
+5. **CI integration test wiring**
+   - Add `services: postgres` to the GitHub Actions `test` job (or use `docker-compose up -d` in a step).
+   - Export `DATABASE_URL`, `DATABASE_ADMIN_URL`, `TEST_DB_TEMPLATE_NAME` so `template-db.test.ts` and `account-flows.integration.test.ts` run instead of skipping.
+
+**Verification:**
+```bash
+pnpm test
+# Expected: 0 failures, 0 skips for core tests.
+# Integration tests may still be long-running but must not be skipped for env reasons.
+```
+
+**Exit criteria (all must be yes):**
+- [ ] `pnpm test` from repo root passes with 0 failures.
+- [ ] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
+- [ ] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
+- [ ] CI test job runs integration tests against a real Postgres service.
 
 ---
 
-## 9. Related documents
+### Phase 1: Legacy spatial inventory → concrete checklist (1 week)
 
-- [NON_TECHNICAL_OVERVIEW.md](./NON_TECHNICAL_OVERVIEW.md) — product, privacy, plans, and limitations.  
-- [TECHNICAL_OVERVIEW.md](./TECHNICAL_OVERVIEW.md) — architecture map, commands, and known caveats (the **tRPC/KeyDB/RevenueCat** parts describe the **old** app).  
-- `template.env` — **legacy** env names; the new app introduces **`REDIS_*`**, drops **KeyDB-** specific names, and does not add **RevenueCat** variables.  
-- `apps/app-server/src/trpc/router.ts` and `apps/app-server/src/trpc/api/**` — **legacy** procedure checklist for feature parity, not a wire spec.  
-- `apps/app-server/src/websocket/**` — **legacy** WS; **user/group rotate-keys** are **out of scope** for the new product.  
-- `apps/client/**` — **legacy** Quasar/Vue SPA (**tRPC** + **`@deepnotes/app-server`** imports, large `internals` / `Pages` classes); use as **UX and behavior** reference, not as a layout or testing model for the new app.  
-- `postgres-init.sql` — import baseline for **Drizzle** `schema.ts`.
-- Up-to-date **Drizzle** (schema + migrations) documentation for the version you pin (e.g. via the Context7 MCP in Cursor if available).
+**Prerequisites:** Phase 0 done.
+
+**Goal:** Produce an **unambiguous feature checklist** for the spatial canvas so agents cannot misreport "done" on stubs.
+
+**Deliverables:**
+
+1. **Read every legacy spatial file** under:
+   - `apps/client/src/code/pages/page/` (notes, arrows, camera, space, elems, selection, regions, collab)
+   - `apps/client/src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/DisplayWorld/`
+   - `apps/client/src/code/pages/page/collab/`
+
+2. **Produce `docs/SPATIAL_PARITY_CHECKLIST.md`** with one table per subsystem:
+   - **Notes:** create, delete, move (drag), resize, align, clone, collapsing, head/body/container sections, color, link, z-index.
+   - **Arrows:** create, delete, source/target anchors, body types (curve/line), head styles, label editing, color, read-only.
+   - **Camera / viewport:** pan (wheel, space+drag, middle-drag), zoom (ctrl+wheel, fit-to-screen), pinch (touch).
+   - **Selection:** click, box-select, multi-select, active element, active region.
+   - **Clipboard:** cut, copy, paste across pages.
+   - **Editing:** find-and-replace, undo/redo.
+   - **Collab:** SyncedStore Yjs doc with `notes` and `arrows` maps, awareness, remote cursor positions.
+
+3. **For each checklist item, specify:**
+   - Legacy file(s) to reference.
+   - New file(s) where it should live (e.g., `apps/web/src/features/spatial/note-model.ts`).
+   - Test file(s) that must pass before it's done.
+
+**Verification:**
+- Review checklist with a human who has used the legacy app. Sign off on completeness.
+- Checklist must contain **at least 50 rows** (if it has fewer, the inventory is incomplete).
+
+**Exit criteria:**
+- [ ] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed.
+- [ ] Every legacy `DisplayWorld` component has a corresponding row in the checklist.
+- [ ] No row is marked "done" unless the feature is actually implemented (not stubbed).
+
+---
+
+### Phase 2: Backend REST + Drizzle parity (mainly done — verify only)
+
+**Prerequisites:** Phase 0 done.
+
+**Goal:** Confirm all non-spatial backend features are implemented and tested.
+
+**Verification checklist:**
+
+| Feature | REST route | Test file | Status |
+|---------|------------|-----------|--------|
+| Register | `POST /api/users` | `account-flows.integration.test.ts` | Verify green |
+| Login | `POST /api/sessions/login` | `account-flows.integration.test.ts` | Verify green |
+| Refresh | `POST /api/sessions/refresh` | `account-flows.integration.test.ts` | Verify green |
+| Logout | `POST /api/sessions/logout` | `account-flows.integration.test.ts` | Verify green |
+| 2FA enable/load/disable | `POST /api/users/me/2fa/*` | `account-flows.integration.test.ts` | Verify green |
+| Page CRUD | `POST /api/groups/:gid/pages`, `DELETE /api/pages/:pid` | `account-flows.integration.test.ts` | Verify green |
+| Page move/reencrypt | `POST /api/pages/:pid/move` | `account-flows.integration.test.ts` | Verify green |
+| Snapshots | `GET/POST/DELETE /api/pages/:pid/snapshots` | `account-flows.integration.test.ts` | Verify green |
+| Group members/invite/join | `POST /api/groups/:gid/join-invitations/*` | `account-flows.integration.test.ts` | Verify green |
+| Group privacy (public/private) | `POST /api/groups/:gid/privacy/*` | `account-flows.integration.test.ts` | Verify green |
+| Group password | `POST/PATCH/DELETE /api/groups/:gid/password` | `account-flows.integration.test.ts` | Verify green |
+| Billing (Stripe) | `POST /api/billing/stripe/*` | `stripe-billing.test.ts` | Verify green |
+| Realtime WS (hash) | `GET /api/realtime-ws` | `realtime-ws-batch.test.ts` | Verify green |
+| Collab WS (DO) | `GET /api/pages/:pid/collab-ws` | `collab-wire` unit tests | Verify green |
+
+**Exit criteria:**
+- [ ] Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing test in CI.
+- [ ] `api-worker` 503 matrix test (`index.test.ts`) passes (all routes return 503 when env is missing).
+- [ ] No backend route is "stubbed" (returns 501 or empty body) for a feature claimed as done.
+
+---
+
+### Phase 3: Collab wire parity — page-level Yjs doc (2 weeks)
+
+**Prerequisites:** Phase 0 done. Phase 2 verified.
+
+**Goal:** The collab WebSocket must sync the **page-level Yjs document** (notes + arrows + metadata), not just a single ProseMirror fragment.
+
+**Context:** Legacy uses `@syncedstore/core` to create a reactive Yjs-backed store:
+```ts
+store.page: { noteIds, arrowIds, nextZIndex }
+store.notes: Record<string, INoteCollabComplete>
+store.arrows: Record<string, IArrowCollabOutput>
+```
+
+The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need to extend the collab protocol to support the **page document**.
+
+**Deliverables:**
+
+1. **Page Yjs schema definition**
+   - Define `YPageDoc` structure in a new file (e.g., `packages/collab-wire/src/page-doc-schema.ts`).
+   - Must contain: `noteIds: Y.Array<string>`, `arrowIds: Y.Array<string>`, `nextZIndex: Y.Number`, `notes: Y.Map<INoteCollab>`, `arrows: Y.Map<IArrowCollab>`.
+   - Each note collab must have `pos: {x,y}`, `width`, `head` (Y.XmlFragment), `body` (Y.XmlFragment), `container` (enabled, spatial, horizontal, children), etc.
+   - Each arrow collab must have `source`, `target`, `sourceAnchor`, `targetAnchor`, `bodyType`, `label` (Y.XmlFragment), etc.
+
+2. **Page collab bootstrap**
+   - `GET /api/pages/:pageId/collab-updates` already returns encrypted Yjs updates.
+   - Verify that the server can persist and serve **page-level updates** (not just ProseMirror).
+   - If the current `page_updates` table stores only ProseMirror diffs, extend the schema or add a separate `page_state_updates` table. **Decision required.**
+
+3. **SPA page document loader**
+   - Replace `createPageCollabDoc()` (which creates a bare `Y.Doc`) with a function that loads the page structure from the server bootstrap and initializes `Y.Map`s for notes and arrows.
+
+4. **Collab wire framing extension**
+   - `@deepnotes/collab-wire` currently frames `DOC` (ProseMirror update) and `AWARENESS`.
+   - Add `PAGE_DOC` message type for page-level Yjs updates (note positions, arrow creation, etc.).
+   - Update `PageCollabRoom` DO to accept and relay `PAGE_DOC` updates.
+
+**Verification:**
+- Unit test: create a `YPageDoc`, add a note, encode state, decode state, assert note position matches.
+- Integration test: two clients connect to `PageCollabRoom` via WS; client A creates a note; client B receives the update and the note appears in its Yjs doc within 2 seconds.
+
+**Exit criteria:**
+- [ ] `packages/collab-wire` can encode/decode a page-level Yjs update.
+- [ ] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
+- [ ] Two browser tabs can sync note creation/deletion via WS (integration test or manual QA with sign-off).
+
+---
+
+### Phase 4: SPA foundation + feature slice routing (1 week)
+
+**Prerequisites:** Phase 0 done.
+
+**Goal:** The web app has a stable shell, feature-based routing, and the `spatial/` feature folder is ready to receive code.
+
+**Deliverables:**
+
+1. **App shell layout**
+   - `App.vue` renders a consistent header, sidebar (if needed), and router outlet.
+   - Theme switcher works across all routes.
+   - `useSession` bootstrap runs once on app mount.
+
+2. **Feature-based route registration**
+   - `router.ts` imports route definitions from each feature:
+     - `features/auth/auth-routes.ts`
+     - `features/pages/pages-routes.ts`
+     - `features/groups/groups-routes.ts`
+     - `features/spatial/spatial-routes.ts`
+   - No route definition lives outside its feature.
+
+3. **ESLint import restriction**
+   - Add `import/no-restricted-paths` rule (or `dependency-cruiser`) enforcing:
+     - `apps/web` may NOT import from `apps/api-worker`, `@deepnotes/db`, `drizzle-orm`.
+     - Features may only import from `src/shared/ui`, `src/api`, `src/lib`, and themselves.
+
+4. **Test infrastructure hardening**
+   - Every feature has a co-located `__tests__` folder or `*.test.ts` files.
+   - `pnpm --filter @deepnotes/web test` runs in < 30 seconds.
+
+**Verification:**
+- `app.test.ts` passes (shell renders, auth state reflects cookie).
+- `router.test.ts` passes (all expected routes registered, no duplicates).
+- ESLint passes with zero violations of restricted imports.
+
+**Exit criteria:**
+- [ ] `pnpm test` passes for `@deepnotes/web`.
+- [ ] `pnpm lint` passes for `@deepnotes/web`.
+- [ ] Adding a new feature route requires changes in **only one folder**.
+
+---
+
+### Phase 5: Single-note editor parity (2 weeks)
+
+**Prerequisites:** Phase 0 and Phase 4 done.
+
+**Goal:** The `PageEditorView` is a fully functional **single-note** editor with all rich-text features from legacy. This is a **stepping stone** to the spatial canvas, not the final state.
+
+**Deliverables:**
+
+1. **Rich-text feature completeness**
+   - Verify every Tiptap extension from legacy is present:
+     - StarterKit (bold, italic, bullet, ordered, blockquote, hard break, heading, horizontal rule)
+     - Link, underline, placeholder
+     - Table (resizable), image (inline + base64), task list
+     - Highlight, text align, subscript, superscript
+     - Code block (lowlight), inline math, math block, YouTube embed
+   - Styling matches legacy (or deliberate product decision documents differences).
+
+2. **Editor management**
+   - Snapshots: list, save, load, delete.
+   - Path breadcrumb with decrypted titles.
+   - Bump, favorite, recent, starting page.
+
+3. **Collab in single-note mode**
+   - WS awareness (caret colors, selection) works.
+   - WS fallback to REST `POST /collab-updates` works.
+   - Demo mode uses local-only Yjs (no WS, no REST push).
+
+**Verification:**
+- `page-editor-tiptap-extensions.test.ts` passes.
+- Manual QA: open a page in two tabs, type in both, verify text syncs within 1 second.
+- Snapshot save/load integration test passes.
+
+**Exit criteria:**
+- [ ] All Tiptap extensions listed above are present and tested.
+- [ ] Collab syncs text + awareness in real time across tabs.
+- [ ] Page management (bump, favorite, snapshots, soft-delete) works end-to-end.
+
+---
+
+### Phase 6: Spatial canvas MVP — notes + arrows + camera (4 weeks)
+
+**Prerequisites:** Phase 1 checklist signed off, Phase 3 page-level Yjs doc done, Phase 5 done.
+
+**Goal:** A `PageEditorView` that renders an **infinite canvas** with draggable, resizable notes and connectable arrows. This is the core DeepNotes product differentiator.
+
+**Architecture decision required before coding:**
+- **Option A (legacy-like):** Use SyncedStore or a custom reactive wrapper around Yjs maps so Vue components re-render when CRDT state changes.
+- **Option B (explicit):** Read Yjs state into plain objects on every frame or interaction, and write back explicitly. Simpler but less "live."
+- **Option C (hybrid):** Keep Yjs as the collab source of truth, but maintain a plain reactive proxy for Vue reactivity, syncing bidirectionally.
+
+**Recommendation:** Option A (SyncedStore) if it works with modern Vite/Vue. Option C if SyncedStore has bundling issues. **Document the decision in `docs/SPATIAL_ARCHITECTURE_DECISION.md`.**
+
+**Deliverables:**
+
+1. **Camera / viewport (`features/spatial/camera.ts`)**
+   - `SpatialWorldCanvas.vue` becomes the actual page editor background.
+   - Pan: wheel, space+drag, middle-drag.
+   - Zoom: ctrl/cmd+wheel toward cursor.
+   - Pinch: touch pinch-to-zoom.
+   - Fit-to-screen: button that centers on all notes.
+
+2. **Note model (`features/spatial/note-model.ts`)**
+   - Class or composable representing a note on the page.
+   - Properties: `id`, `pos: Vec2`, `width`, `head: { enabled, height, value: Y.XmlFragment }`, `body: { enabled, height, value: Y.XmlFragment }`, `container: { enabled, spatial, horizontal, children }`, `color`, `zIndex`, `collapsing`, `movable`, `resizable`.
+   - Must read from / write to the page Yjs doc.
+
+3. **Note rendering (`features/spatial/DisplayNote.vue`)**
+   - Render note frame at `(note.pos.x, note.pos.y)`.
+   - Head section: Tiptap editor (using existing Tiptap extensions) bound to `note.head.value`.
+   - Body section: Tiptap editor bound to `note.body.value`.
+   - Container section: renders child notes inside (if `container.enabled`).
+   - Resize handles (8 corners/sides).
+   - Drag handle on note frame.
+
+4. **Arrow model (`features/spatial/arrow-model.ts`)**
+   - Properties: `id`, `source`, `target`, `sourceAnchor`, `targetAnchor`, `bodyType`, `bodyStyle`, `sourceHead`, `targetHead`, `label: Y.XmlFragment`, `color`.
+
+5. **Arrow rendering (`features/spatial/DisplayArrow.vue`)**
+   - SVG overlay on top of notes.
+   - Curve or line body between source and target note edges.
+   - Arrow heads at source/target.
+   - Label near midpoint.
+
+6. **Basic interaction**
+   - Click to select a note.
+   - Drag to move a note.
+   - Drag resize handles to resize.
+   - Create note: double-click on empty canvas (or button).
+   - Create arrow: drag from note edge handle to another note.
+   - Delete: `Delete` key when note selected.
+
+7. **Collab for spatial state**
+   - When a note is moved, the position update syncs via collab WS within 200 ms.
+   - When an arrow is created, it appears on remote clients within 1 second.
+   - Remote cursor awareness shows which user is editing which note.
+
+**Verification:**
+- Unit tests for camera math (world ↔ screen transforms).
+- Unit tests for note model (read/write to Yjs doc).
+- Unit tests for arrow geometry (point-to-rect intersection for anchor placement).
+- Component test: mount `DisplayNote`, simulate drag, assert `note.pos` changed.
+- Integration test: two tabs, create note in A, assert note appears in B within 2 seconds.
+
+**Exit criteria:**
+- [ ] User can create, move, resize, and delete notes on an infinite canvas.
+- [ ] User can create arrows between notes.
+- [ ] Canvas pan/zoom works with mouse and touch.
+- [ ] Changes sync across tabs via collab WS.
+- [ ] Phase 1 checklist rows for "Notes (basic)" and "Arrows (basic)" are marked done.
+
+---
+
+### Phase 7: Spatial canvas polish (3 weeks)
+
+**Prerequisites:** Phase 6 done.
+
+**Goal:** All remaining spatial interactions from the legacy checklist.
+
+**Deliverables (from checklist):**
+
+1. **Selection**
+   - Multi-select (ctrl/cmd + click).
+   - Box selection (drag on empty canvas).
+   - Select all (`Ctrl+A`).
+   - Active element / active region tracking.
+
+2. **Containers**
+   - Note can contain child notes (container section enabled).
+   - Spatial container: children positioned freely inside parent.
+   - Horizontal container: children arranged in a row.
+   - Drag child out to detach.
+   - Drag note into container to attach.
+
+3. **Clipboard**
+   - Cut / copy / paste notes and arrows.
+   - Cross-page paste (requires serialization format).
+
+4. **Alignment + distribution**
+   - Align left / center / right / top / middle / bottom.
+   - Distribute horizontally / vertically.
+
+5. **Undo / redo**
+   - `Ctrl+Z` / `Ctrl+Shift+Z` for note operations (move, create, delete, resize).
+   - Must integrate with Yjs undo manager or a custom command stack.
+
+6. **Find and replace**
+   - Search across all note head/body text.
+   - Replace text.
+
+7. **Visual polish**
+   - Grid background.
+   - Note color inheritance.
+   - Collapsing notes.
+   - Z-index ordering.
+   - Read-only notes.
+
+**Verification:**
+- Each deliverable has a test (unit, component, or integration).
+- Phase 1 checklist is >80% marked done.
+
+**Exit criteria:**
+- [ ] Phase 1 checklist ≥ 80% complete.
+- [ ] No "P1" checklist item remains open.
+- [ ] Manual QA session with 3+ users finds no blocking usability issues.
+
+---
+
+### Phase 8: Account, billing, groups polish (1 week)
+
+**Prerequisites:** Phase 5 done.
+
+**Goal:** All non-editor UX is polished and tested.
+
+**Deliverables:**
+
+1. **Account page parity**
+   - Password change, email change/verify, 2FA management, raw keyrings display, account deletion.
+   - Stripe checkout + customer portal.
+
+2. **Group management parity**
+   - Invite by user ID, accept invite, join request, member roles, remove member.
+   - Group settings: join policy, password, make public/private, soft-delete, purge.
+
+3. **Notifications**
+   - Realtime toast when invite received.
+   - Notifications list with decrypt.
+   - Mark as read.
+
+4. **Home / navigation**
+   - Recents, favorites, starting page, spatial defaults.
+   - Search (if legacy had it).
+
+**Verification:**
+- E2E smoke test: register → create group → create page → invite member → member joins → both edit page → logout.
+- This smoke test must pass against a preview deployment or local compose stack.
+
+**Exit criteria:**
+- [ ] E2E smoke test passes end-to-end.
+- [ ] All `TRPC_REST_MAP.md` rows marked "implemented" have been manually verified once.
+
+---
+
+### Phase 9: Mobile shells and cutover (2 weeks)
+
+**Prerequisites:** Phase 7 and Phase 8 done.
+
+**Goal:** Prepare for production cutover.
+
+**Deliverables:**
+
+1. **Staging topology**
+   - Cloudflare Workers + Pages preview branch.
+   - Hyperdrive connected to staging Postgres.
+   - Upstash Redis staging instance.
+   - Load test: 50 concurrent collab pages, verify WS latency < 200 ms p95.
+
+2. **Mobile shells (deferred from original plan)**
+   - Capacitor for iOS/Android (if product requires it).
+   - Tauri v2 for desktop (if product requires it).
+   - **Decision:** If product is web-first, document that mobile shells are v2 scope.
+
+3. **Data migration runbook**
+   - Step-by-step to migrate existing Postgres data to new schema (if any schema changes required).
+   - Encrypted blob compatibility check: random sample of 100 pages decrypted successfully.
+
+4. **Cutover**
+   - Canary redirect: 5% of traffic to new stack.
+   - Monitor error rates, collab latency, Stripe webhooks.
+   - Full cutover when 24-hour error rate < 0.1%.
+
+**Exit criteria:**
+- [ ] Staging load test passes.
+- [ ] 100 random legacy pages decrypt correctly in new stack.
+- [ ] 24-hour canary error rate < 0.1%.
+- [ ] Old `/trpc` stack receives zero requests for 48 hours.
+
+---
+
+## 7. Risks and mitigations (revised)
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| **Test infrastructure stays broken** | High if not prioritized | Blocks all other work | **Phase 0 is mandatory and comes first.** No feature work until tests pass. |
+| **Spatial canvas underestimated** | Already happened | 6+ weeks slip | Acknowledged in §0.3. Do not allow agents to mark stubs as "done." Use checklist in Phase 1. |
+| **SyncedStore / Yjs reactivity issues** | Medium | Blocks Phase 6 | Make architecture decision (§6) before coding. Spike 1 day to test SyncedStore with Vite 6 + Vue 3.5. |
+| **Collab protocol mismatch** | Medium | Data corruption | Version the collab protocol (`v1` = ProseMirror-only, `v2` = page-level). Reject unknown message types gracefully. |
+| **Performance: many notes on one page** | Medium | Laggy canvas | Set a soft limit (e.g., 200 notes) and benchmark. Use virtual rendering or canvas-based rendering if DOM scales poorly. |
+| **Stripe-only after dropping RevenueCat** | Low | User churn | Communicate to IAP users before cutover. Offer migration grace period. |
+| **Worker CPU limits under collab load** | Medium | Dropped connections | Load test early (Phase 9 staging). If DO CPU is the bottleneck, shard `PageCollabRoom` by page ID prefix. |
+| **God-object state returns** | Medium | Unmaintainable code | Cap composable size at 300 lines. If `useSpatialViewport.ts` grows beyond that, split into `useCamera`, `usePanning`, `useZooming`. |
+
+---
+
+## 8. Success criteria (revised — objective, verifiable)
+
+A criterion is **not met** until the verification command or check passes in CI.
+
+- [ ] **Test foundation:** `pnpm test` from repo root passes with 0 failures. `apps/web` tests mount `.vue` files and run in `happy-dom`.
+- [ ] **OpenAPI:** `GET /api/openapi.json` returns a valid OpenAPI 3 document. Client types are regenerated from it in CI.
+- [ ] **Drizzle:** `drizzle-kit migrate` applies cleanly from empty DB to current schema. `drizzle-kit check` passes in CI.
+- [ ] **Backend parity:** Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing automated test (unit or integration).
+- [ ] **Collab:** `PageCollabRoom` integration test: two clients sync note creation via WS within 2 seconds.
+- [ ] **Postgres tests:** Integration tests use template DB clones (§5.7). No test re-migrates from empty DB.
+- [ ] **Auth + crypto:** 2FA enable/disable flow tested end-to-end. Password change invalidates all sessions.
+- [ ] **No banned tech:** No tRPC, no `superjson`, no RevenueCat, no key rotation code paths. Enforced by ESLint `no-restricted-imports`.
+- [ ] **Spatial canvas (Phase 6):** User can create, move, resize, delete notes and arrows on an infinite canvas. Changes sync via WS.
+- [ ] **Spatial polish (Phase 7):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
+- [ ] **E2E smoke:** Playwright test covers register → create page → edit → invite → logout in < 60 seconds.
+- [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms.
+- [ ] **Cutover:** 100 random legacy pages decrypt correctly. 24-hour canary error < 0.1%.
+
+---
+
+## 9. Appendix: Legacy spatial system inventory
+
+For agent reference. Do not copy-paste this code into the new repo. Use it as a behavioral spec.
+
+### 9.1 Key legacy files
+
+| File | Responsibility |
+|------|---------------|
+| `apps/client/src/code/pages/page/page.ts` | `Page` class. Owns camera, panning, zooming, pinching, selection, notes, arrows, elems, undo/redo. |
+| `apps/client/src/code/pages/page/camera/camera.ts` | `PageCamera`. `zoom`, `pos`, `fitToScreen()`. |
+| `apps/client/src/code/pages/page/camera/panning.ts` | `PagePanning`. Middle-drag, space-drag. |
+| `apps/client/src/code/pages/page/camera/zooming.ts` | `PageZooming`. Wheel + ctrl zoom. |
+| `apps/client/src/code/pages/page/space/pos.ts` | `PagePos`. Client ↔ world coordinate transforms. |
+| `apps/client/src/code/pages/page/space/rects.ts` | `PageRects`. Rect math, DOM ↔ world. |
+| `apps/client/src/code/pages/page/notes/note.ts` | `PageNote` class. ~650 lines. Head, body, container sections, resizing, dragging, color, link, z-index. |
+| `apps/client/src/code/pages/page/notes/note-collab.ts` | `INoteCollab` Zod/SyncedStore schema. Defines note CRDT shape. |
+| `apps/client/src/code/pages/page/arrows/arrow.ts` | `PageArrow` class. ~580 lines. Source/target, anchors, body styles, label, color, interregional logic. |
+| `apps/client/src/code/pages/page/elems/elem.ts` | `PageElem` base class. `id`, `page`, `react`, `visible`. |
+| `apps/client/src/code/pages/page/selection/selection.ts` | `PageSelection`. Click, multi-select, set/clear. |
+| `apps/client/src/code/pages/page/collab/collab.ts` | `PageCollab`. SyncedStore setup, Yjs doc, websocket, presence. |
+| `apps/client/src/code/pages/utils.ts` | `createPageStore()` — SyncedStore factory for `page`, `notes`, `arrows`. |
+| `apps/client/src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/DisplayWorld/DisplayWorld.vue` | Root canvas component. Renders background, arrows, notes, box selection, panning board. |
+| `apps/client/src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/DisplayWorld/DisplayNote/DisplayNote.vue` | Note render. Teleport to overlay when dragging. Head, body, container sections. |
+| `apps/client/src/layouts/PagesLayout/MainContent/DisplayPage/DisplayScreens/DisplayWorld/DisplayArrow/DisplayArrow.vue` | Arrow render. SVG curve/line. |
+
+### 9.2 Collab data model (legacy)
+
+```
+Y.Doc
+├── store.page         : { noteIds: string[], arrowIds: string[], nextZIndex: number }
+├── store.notes        : Y.Map<INoteCollab>
+│   └── [noteId]       : { pos, width, head, body, container, collapsing, color, zIndex, ... }
+│       └── head.value : Y.XmlFragment (ProseMirror content)
+│       └── body.value : Y.XmlFragment
+│       └── container  : { enabled, spatial, horizontal, children, ... }
+├── store.arrows       : Y.Map<IArrowCollab>
+│   └── [arrowId]      : { source, target, sourceAnchor, targetAnchor, bodyType, label, color, ... }
+│       └── label      : Y.XmlFragment
+```
+
+The new app must replicate this shape (or a documented evolution of it) for collab to support spatial notes and arrows.
 
 ---
 
 ## 10. Summary
 
-This restart is **intentionally not tRPC- or KeyDB-compatible** on the wire. Success depends on **OpenAPI + REST**, **Drizzle** migrations, **vanilla Redis**, a **simpler crypto story** (no key rotation, no **RevenueCat**), and a **coordinated** rollout of the new **HTTP** stack with **realtime**/**collab** and clients that no longer expect `/trpc` or scheduled re-keying. **Production** targets **Cloudflare** (**Workers** + **Pages**, **Hyperdrive** to Postgres, external **Redis**, **Durable Objects** where stateful WebSockets need them). Treat the old monorepo as a **behavioral reference** and a **one-time** source of schema and test vectors—**reorganize** into **decoupled** features and **services** (no **repository** pattern), prove behavior with **thorough tests** including **Postgres template–based** integration isolation (§5.7), and treat the **SPA** as its own product: **typed HTTP client**, **feature-based UI structure**, and **Vitest + (optional) E2E** in CI (§5.8)—not a thin shell with manual-only verification. Retire the legacy repo when parity, **UI** smoke, and data checks are proven.
+This restart is **not tRPC- or KeyDB-compatible** on the wire, and it **does not rotate keys**. Those decisions remain correct.
+
+What was wrong: the original plan **catastrophically underestimated the spatial canvas** by treating a single rich-text card as "partial page parity." A DeepNotes page is an infinite canvas with notes, arrows, containers, and real-time collaboration across all of them. Rebuilding this is **6+ weeks of focused work**, not a UI polish task.
+
+What must happen now:
+1. **Fix the test foundation (Phase 0).** No agent should add features while tests are broken.
+2. **Inventory spatial features (Phase 1).** Produce a checklist that prevents misreporting stubs as done.
+3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes.
+4. **Build the spatial canvas incrementally (Phases 6–7).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo).
+5. **Verify everything with automated tests.** Every phase has objective exit criteria.
+
+Retire the legacy repo only when spatial parity, auth smoke, and data checks are proven.

@@ -1,8 +1,10 @@
 # Restart plan — progress (`new-deepnotes`)
 
+> **DEPRECATED SNAPSHOT — 2026-04-29.** This file records factual progress against the original restart plan. The plan has been rewritten (see updated [RESTART_PLAN.md](../docs/RESTART_PLAN.md)). Do not use the phase numbers or success criteria below for new work; they are preserved here only as a historical inventory of implemented code. Current progress should be tracked against the new plan §8 success criteria.
+
 **Refs:** [RESTART_PLAN.md](../docs/RESTART_PLAN.md) · [TRPC_REST_MAP.md](./docs/TRPC_REST_MAP.md) (REST + legacy WS parity map) · [MOBILE_SHELLS.md](./docs/MOBILE_SHELLS.md) · [STAGING_LOADTEST.md](./docs/STAGING_LOADTEST.md).
 
-**Goal:** **Full behavioral parity** with legacy `apps/client` in `new-deepnotes` before cutover. **Exceptions** (explicit in RESTART_PLAN): no tRPC wire, no user/group **rotate-keys**, no **RevenueCat**. MVP = milestone, **not** scope ceiling.
+**Goal (historical):** **Full behavioral parity** with legacy `apps/client` in `new-deepnotes` before cutover. **Exceptions** (explicit in RESTART_PLAN): no tRPC wire, no user/group **rotate-keys**, no **RevenueCat**. MVP = milestone, **not** scope ceiling.
 
 **Last reviewed:** 2026-04-29
 
