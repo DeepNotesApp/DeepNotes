@@ -6,6 +6,16 @@ import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
+import { useSpatialUndoRedo } from "./undo-redo";
+import { copySelection, pastePayload, getClipboardBuffer } from "./clipboard";
+import {
+  alignLeft,
+  alignCenter,
+  alignRight,
+  alignTop,
+  alignMiddle,
+  alignBottom,
+} from "./alignment";
 import { screenToWorld } from "./spatial-viewport-math";
 
 const props = defineProps<{
@@ -19,6 +29,8 @@ const canvasRef = ref<{
   rootEl: HTMLElement | null;
 } | null>(null);
 
+const undoRedo = useSpatialUndoRedo(props.ydoc);
+
 const {
   noteList,
   rootNoteList,
@@ -30,9 +42,11 @@ const {
   createArrow,
   moveNoteIntoContainer,
   moveNoteOutOfContainer,
-} = useSpatialPage(props.ydoc);
+} = useSpatialPage(props.ydoc, undoRedo);
 
 const selection = useSpatialSelection();
+
+const pasteCount = ref(0);
 
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
@@ -284,6 +298,111 @@ function onKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     selection.selectAll(rootNoteList.value.map((n) => n.id));
     return;
+  }
+
+  if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    if (e.shiftKey) {
+      undoRedo.redo();
+    } else {
+      undoRedo.undo();
+    }
+    return;
+  }
+
+  if (e.key === "c" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const selectedNotes = noteList.value.filter((n) =>
+      selection.isSelected(n.id),
+    );
+    const selectedArrows = arrowList.value.filter((a) =>
+      selection.isSelected(a.id),
+    );
+    if (selectedNotes.length > 0) {
+      copySelection(selectedNotes, selectedArrows);
+    }
+    return;
+  }
+
+  if (e.key === "x" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const selectedNotes = noteList.value.filter((n) =>
+      selection.isSelected(n.id),
+    );
+    const selectedArrows = arrowList.value.filter((a) =>
+      selection.isSelected(a.id),
+    );
+    if (selectedNotes.length > 0) {
+      copySelection(selectedNotes, selectedArrows);
+      for (const id of selection.selectedOfKind("note")) {
+        deleteNote(id);
+      }
+      for (const id of selection.selectedOfKind("arrow")) {
+        deleteArrow(id);
+      }
+      selection.clear();
+    }
+    return;
+  }
+
+  if (e.key === "v" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const payload = getClipboardBuffer();
+    if (payload && payload.notes.length > 0) {
+      const canvas = canvasRef.value;
+      const centerX = canvas?.camX ?? 0;
+      const centerY = canvas?.camY ?? 0;
+      const offset = pasteCount.value * 32;
+      pasteCount.value += 1;
+
+      const result = pastePayload(payload, {
+        createNote: createNoteAt,
+        createArrow: createArrow,
+        offsetX: centerX + offset,
+        offsetY: centerY + offset,
+      });
+
+      selection.clear();
+      for (const id of result.noteIds) {
+        selection.select(id, "note", true);
+      }
+    }
+    return;
+  }
+
+  // Alignment shortcuts (Ctrl+Shift+...)
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+    const selectedNotes = noteList.value.filter((n) =>
+      selection.isSelected(n.id),
+    );
+    if (selectedNotes.length >= 2) {
+      switch (e.key) {
+        case "l":
+          e.preventDefault();
+          alignLeft(selectedNotes);
+          return;
+        case "c":
+          e.preventDefault();
+          alignCenter(selectedNotes);
+          return;
+        case "r":
+          e.preventDefault();
+          alignRight(selectedNotes);
+          return;
+        case "t":
+          e.preventDefault();
+          alignTop(selectedNotes);
+          return;
+        case "m":
+          e.preventDefault();
+          alignMiddle(selectedNotes);
+          return;
+        case "b":
+          e.preventDefault();
+          alignBottom(selectedNotes);
+          return;
+      }
+    }
   }
 }
 

@@ -56,11 +56,11 @@ const transform = computed(() => {
 
 const frameClasses = computed(() => {
   const ro = props.model.readOnly.value;
-  const movable = props.model.movable.value;
+  const movable = props.model.movable.value && !ro;
   return [
     "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none",
     ro ? "opacity-70" : "",
-    movable ? "cursor-grab active:cursor-grabbing" : "",
+    movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
     props.selected ? "ring-2 ring-primary" : "",
   ];
 });
@@ -87,7 +87,7 @@ function onPointerDown(e: PointerEvent) {
     emit("select");
   }
 
-  if (!props.model.movable.value) return;
+  if (!props.model.movable.value || props.model.readOnly.value) return;
 
   dragPointerId = e.pointerId;
   startX = e.clientX;
@@ -139,6 +139,7 @@ let resizeStartWidth = 0;
 
 function onResizePointerDown(e: PointerEvent) {
   if (e.button !== 0) return;
+  if (props.model.readOnly.value) return;
   e.stopPropagation();
   resizePointerId = e.pointerId;
   resizeStartX = e.clientX;
@@ -188,7 +189,7 @@ function toggleCollapsed() {
   >
     <div class="border-border flex items-center gap-1 border-b px-2 py-1 text-xs font-medium">
       <button
-        v-if="model.collapsing.enabled.value"
+        v-if="model.collapsing.enabled.value && !model.readOnly.value"
         class="text-muted-foreground hover:text-foreground focus:outline-none"
         @pointerdown.stop="toggleCollapsed"
       >
@@ -214,7 +215,7 @@ function toggleCollapsed() {
 
     <!-- resize handle -->
     <div
-      v-if="model.resizable.value"
+      v-if="model.resizable.value && !model.readOnly.value"
       class="bg-primary absolute -bottom-1.5 -right-1.5 h-3 w-3 cursor-nwse-resize rounded-full"
       @pointerdown="onResizePointerDown"
       @pointermove="onResizePointerMove"

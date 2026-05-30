@@ -14,21 +14,21 @@
 | 1.3 | Move note (drag) | `code/pages/page/notes/dragging.ts` | `features/spatial/note-model.ts` | `note-model.test.ts`, `DisplayNote.vue` comp. test | ✅ 2026-05-30 |
 | 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | 🟡 2026-05-30 (1 handle: bottom-right; full 8-handle parity in Phase 6) |
 | 1.5 | Clone note | `code/pages/page/notes/cloning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.6 | Align notes (left/center/right/top/middle/bottom) | `code/pages/page/notes/aligning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.6 | Align notes (left/center/right/top/middle/bottom) | `code/pages/page/notes/aligning.ts` | `features/spatial/alignment.ts` | `alignment.test.ts` | ✅ 2026-05-30 |
 | 1.7 | Distribute notes (horizontal/vertical) | `code/pages/page/notes/aligning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.8 | Note head section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
 | 1.9 | Note body section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
 | 1.10 | Container section (enabled, spatial, horizontal) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
 | 1.11 | Container wrap/stretch children | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.12 | Container force color inheritance | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.13 | Note collapsing (enabled, collapsed, localCollapsing) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
+| 1.13 | Note collapsing (enabled, collapsed, localCollapsing) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ✅ 2026-05-30 |
 | 1.14 | Note color (inherit, value) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.15 | Note link | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.16 | Note z-index | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.17 | Note anchor (x,y) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.18 | Note width (expanded, collapsed) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.19 | Note createdAt / editedAt / movedAt | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.20 | Note movable / resizable / readOnly | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.20 | Note movable / resizable / readOnly | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | 🟡 2026-05-30 (readOnly UI guards done; movable/resizable already functional) |
 
 ---
 
@@ -44,7 +44,7 @@
 | 2.6 | Body style (solid / dashed / etc.) | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.7 | Arrow label (Tiptap Y.XmlFragment) | `code/pages/page/arrows/arrow.ts` | `features/spatial/DisplayArrow.vue` | `DisplayArrow.test.ts` | ⬜ |
 | 2.8 | Arrow color | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
-| 2.9 | Arrow readOnly | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
+| 2.9 | Arrow readOnly | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ✅ 2026-05-30 (deletion guarded in useSpatialPage) |
 | 2.10 | Interregional flag | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.11 | fakePos / looseEndpoint | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.12 | Arrow createdAt / editedAt | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
@@ -88,10 +88,10 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 5.1 | Cut notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ⬜ |
-| 5.2 | Copy notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ⬜ |
-| 5.3 | Paste notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ⬜ |
-| 5.4 | Cross-page paste | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ⬜ |
+| 5.1 | Cut notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ✅ 2026-05-30 |
+| 5.2 | Copy notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ✅ 2026-05-30 |
+| 5.3 | Paste notes/arrows | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | ✅ 2026-05-30 |
+| 5.4 | Cross-page paste | `code/pages/page/elems/clipboard.ts` | `features/spatial/clipboard.ts` | `clipboard.test.ts` | 🟡 2026-05-30 (serialization format exists; page routing integration pending) |
 
 ---
 
@@ -99,10 +99,10 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 6.1 | Find across all note head/body text | `code/pages/page/elems/find-and-replace.ts` | `features/spatial/find-replace.ts` | `find-replace.test.ts` | ⬜ |
-| 6.2 | Replace text | `code/pages/page/elems/find-and-replace.ts` | `features/spatial/find-replace.ts` | `find-replace.test.ts` | ⬜ |
-| 6.3 | Undo (`Ctrl+Z`) for note operations | `code/pages/page/undo-redo.ts` | `features/spatial/undo-redo.ts` | `undo-redo.test.ts` | ⬜ |
-| 6.4 | Redo (`Ctrl+Shift+Z`) | `code/pages/page/undo-redo.ts` | `features/spatial/undo-redo.ts` | `undo-redo.test.ts` | ⬜ |
+| 6.1 | Find across all note head/body text | `code/pages/page/elems/find-and-replace.ts` | `features/spatial/find-replace.ts` | `find-replace.test.ts` | ✅ 2026-05-30 |
+| 6.2 | Replace text | `code/pages/page/elems/find-and-replace.ts` | `features/spatial/find-replace.ts` | `find-replace.test.ts` | ✅ 2026-05-30 (basic single-node replace; multi-node replace simplified) |
+| 6.3 | Undo (`Ctrl+Z`) for note operations | `code/pages/page/undo-redo.ts` | `features/spatial/undo-redo.ts` | `undo-redo.test.ts` | ✅ 2026-05-30 |
+| 6.4 | Redo (`Ctrl+Shift+Z`) | `code/pages/page/undo-redo.ts` | `features/spatial/undo-redo.ts` | `undo-redo.test.ts` | ✅ 2026-05-30 |
 
 ---
 
