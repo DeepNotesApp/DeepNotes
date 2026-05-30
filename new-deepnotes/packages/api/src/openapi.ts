@@ -45,6 +45,7 @@ import {
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
   pageCollabUpdatesAppendRequestSchema,
+  pageCollabUpdatesGetQuerySchema,
   pageCollabUpdatesGetResponseSchema,
   pageMoveRequestSchema,
   pageIdPathSchema,
@@ -1403,8 +1404,8 @@ registry.registerPath({
   path: "/api/pages/{pageId}/collab-updates",
   summary: "List encrypted Yjs page updates (Postgres)",
   description:
-    "Bootstrap for the editor: returns all `page_updates` rows for the page, ordered by `index`. Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).",
-  request: { params: pageIdPathSchema },
+    "Bootstrap for the editor: returns `page_updates` rows for the page, ordered by `index`. Use `sinceIndex` to paginate incrementally (default limit 100, max 500). Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).",
+  request: { params: pageIdPathSchema, query: pageCollabUpdatesGetQuerySchema },
   responses: {
     200: {
       description: "Current ciphertext chain.",

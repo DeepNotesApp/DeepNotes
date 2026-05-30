@@ -179,6 +179,10 @@ export function useCollabWebSocket(opts: {
     };
   }
 
+  function getCollabWs() {
+    return collabWs;
+  }
+
   return {
     collabWsLive,
     collabWsError,
@@ -187,5 +191,6 @@ export function useCollabWebSocket(opts: {
     flushAwarenessWs,
     scheduleAwarenessPush,
     setRefreshYMetrics,
+    getCollabWs,
   };
 }

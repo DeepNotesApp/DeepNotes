@@ -18,6 +18,8 @@ export function useCollabPush(opts: {
   client: DeepnotesApiClient;
   collabWsLive: Ref<boolean>;
   getCollabWs: () => WebSocket | null;
+  serverDoc?: Y.Doc;
+  unackedUpdates?: Map<number, Uint8Array>;
 }) {
   const {
     ydoc,
@@ -32,8 +34,8 @@ export function useCollabPush(opts: {
 
   const pushError = ref<string | null>(null);
   const collabLastIndex = ref<number | null>(null);
-  const serverDoc = new Y.Doc();
-  const unackedUpdates = new Map<number, Uint8Array>();
+  const serverDoc = opts.serverDoc ?? new Y.Doc();
+  const unackedUpdates = opts.unackedUpdates ?? new Map<number, Uint8Array>();
   let collabClientUpdateId = 0;
   let pushTimer: ReturnType<typeof setTimeout> | null = null;
 

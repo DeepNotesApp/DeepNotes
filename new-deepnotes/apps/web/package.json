@@ -69,6 +69,7 @@
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^17.4.4",
     "msw": "^2.0.0",
+    "@playwright/test": "^1.52.0",
     "openapi-typescript": "^7.13.0",
     "tsx": "^4.21.0",
     "typescript": "^5.8.3",

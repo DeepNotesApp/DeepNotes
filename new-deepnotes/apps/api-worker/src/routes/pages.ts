@@ -3,6 +3,7 @@ import {
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
   pageCollabUpdatesAppendRequestSchema,
+  pageCollabUpdatesGetQuerySchema,
   pageIdPathSchema,
   pageMoveRequestSchema,
   pageSnapshotCreateResponseSchema,
@@ -421,6 +422,17 @@ app.get("/api/pages/:pageId/collab-updates", async (c) => {
   const db = getDbForConnectionString(hyper.connectionString);
   const cookieHeader = c.req.header("Cookie");
 
+  const qParams = pageCollabUpdatesGetQuerySchema.safeParse({
+    sinceIndex: c.req.query("sinceIndex"),
+    limit: c.req.query("limit"),
+  });
+  if (!qParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: qParams.error.message },
+      400,
+    );
+  }
+
   try {
     const { performGetPageCollabUpdates } = await import("@deepnotes/session");
     const out = await performGetPageCollabUpdates({
@@ -428,6 +440,12 @@ app.get("/api/pages/:pageId/collab-updates", async (c) => {
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
       pageId: pParams.data.pageId,
+      sinceIndex:
+        qParams.data.sinceIndex != null
+          ? Number(qParams.data.sinceIndex)
+          : null,
+      limit:
+        qParams.data.limit != null ? Number(qParams.data.limit) : undefined,
     });
     return c.json(
       {

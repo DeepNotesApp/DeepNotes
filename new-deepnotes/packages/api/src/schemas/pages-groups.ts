@@ -585,6 +585,24 @@ const pageCollabUpdateItemInputSchema = z
   })
   .openapi("PageCollabUpdateItemInput");
 
+export const pageCollabUpdatesGetQuerySchema = z
+  .object({
+    sinceIndex: z
+      .string()
+      .optional()
+      .openapi({
+        description:
+          "If provided, only returns updates with `index > sinceIndex` (exclusive). Used for incremental bootstrap after the first batch.",
+      }),
+    limit: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Max updates to return per request (default 100, max 500).",
+      }),
+  })
+  .openapi("PageCollabUpdatesGetQuery");
+
 export const pageCollabUpdatesAppendRequestSchema = z
   .object({
     expectedLastIndex: z

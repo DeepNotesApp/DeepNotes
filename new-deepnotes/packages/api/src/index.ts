@@ -53,6 +53,7 @@ export {
   pageBacklinkCreateRequestSchema,
   pageBumpRequestSchema,
   pageCollabUpdatesAppendRequestSchema,
+  pageCollabUpdatesGetQuerySchema,
   pageCollabUpdatesGetResponseSchema,
   pageMoveRequestSchema,
   pageIdPathSchema,

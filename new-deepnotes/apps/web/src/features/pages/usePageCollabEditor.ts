@@ -11,6 +11,7 @@ import type { ComputedRef, Ref } from "vue";
 import { onBeforeUnmount, ref, watch } from "vue";
 
 import type { DeepnotesApiClient } from "@/api/client";
+import type { components } from "@/api/api-types.generated";
 
 import { uint8ToBase64 } from "../auth/bytes";
 import { readSessionCrypto } from "../auth/crypto-storage";
@@ -101,6 +102,8 @@ export function usePageCollabEditor(opts: {
     getPageKeyring: () => pageKeyring.value,
     hydrating,
     collabLastIndex,
+    serverDoc: new Y.Doc(),
+    unackedUpdates: new Map<number, Uint8Array>(),
     serverStateVector,
     refreshYMetrics: (): void => {
       yStateBytes.value = Y.encodeStateAsUpdateV2(ydoc).byteLength;
@@ -302,6 +305,16 @@ export function usePageCollabEditor(opts: {
     editable: false,
   });
 
+  ydoc.on("updateV2", (_update: Uint8Array, origin: unknown) => {
+    if (origin === "collab-ws-remote" || origin === "collab-hydrate") {
+      return;
+    }
+    refreshYMetrics();
+    if (!hydrating.value) {
+      schedulePush();
+    }
+  });
+
   function setEditorEditable(on: boolean) {
     const ed = editor.value;
     if (ed != null && !ed.isDestroyed) {
@@ -492,27 +505,52 @@ export function usePageCollabEditor(opts: {
       collabLoading.value = true;
       pageKeyring.value = null;
       try {
-        const { data, error, response } = await client.GET(
-          "/api/pages/{pageId}/collab-updates",
-          { params: { path: { pageId: id } } },
-        );
-        if (response.status !== 200 || !data) {
-          if (error && typeof error === "object" && "message" in error) {
-            loadError.value = String((error as { message: string }).message);
-          } else {
-            loadError.value = "Could not load collab state.";
+        let sinceIndex: string | undefined = undefined;
+        const allUpdates: { index: number; encryptedData: string }[] = [];
+        let firstData: components["schemas"]["PageCollabUpdatesGetResponse"] | null = null;
+        while (true) {
+          const { data, error, response } = await client.GET(
+            "/api/pages/{pageId}/collab-updates",
+            {
+              params: {
+                path: { pageId: id },
+                query: { sinceIndex, limit: "100" } as any,
+              },
+            },
+          ) as { data: components["schemas"]["PageCollabUpdatesGetResponse"] | undefined; error: any; response: Response };
+          if (response.status !== 200 || !data) {
+            if (error && typeof error === "object" && "message" in error) {
+              loadError.value = String((error as { message: string }).message);
+            } else {
+              loadError.value = "Could not load collab state.";
+            }
+            return;
           }
+          if (firstData == null) {
+            firstData = data;
+          }
+          allUpdates.push(...data.updates);
+          if (data.updates.length === 0 || data.updates.length < 100) {
+            break;
+          }
+          sinceIndex = String(data.lastIndex ?? 0);
+        }
+        if (firstData == null) {
+          loadError.value = "Could not load collab state.";
           return;
         }
 
-        collabGroupId.value = data.groupId;
-        pageEncRelTitleB64.value = data.pageEncryptedRelativeTitle;
-        pageEncAbsTitleB64.value = data.pageEncryptedAbsoluteTitle;
-        collabEncryptedUpdatesForMove.value = data.updates.map((u) =>
+        collabGroupId.value = firstData.groupId;
+        pageEncRelTitleB64.value = firstData.pageEncryptedRelativeTitle;
+        pageEncAbsTitleB64.value = firstData.pageEncryptedAbsoluteTitle;
+        collabEncryptedUpdatesForMove.value = allUpdates.map((u) =>
           base64ToBytes(u.encryptedData),
         );
-        collabLastIndex.value = data.lastIndex;
-        updateCount.value = data.updates.length;
+        collabLastIndex.value =
+          allUpdates.length > 0
+            ? allUpdates[allUpdates.length - 1]!.index
+            : firstData.lastIndex;
+        updateCount.value = allUpdates.length;
 
         if (user.value?.demo === true) {
           cryptoError.value =
@@ -561,35 +599,35 @@ export function usePageCollabEditor(opts: {
         try {
           pageKeyring.value = await unlockPageCollabSymmetricKeyring({
             pageId: id,
-            groupId: data.groupId,
+            groupId: firstData.groupId,
             pageEncryptedSymmetricKeyring: base64ToBytes(
-              data.pageEncryptedSymmetricKeyring,
+              firstData.pageEncryptedSymmetricKeyring,
             ),
             groupEncryptedContentKeyring: base64ToBytes(
-              data.groupEncryptedContentKeyring,
+              firstData.groupEncryptedContentKeyring,
             ),
             memberEncryptedAccessKeyring:
-              data.memberEncryptedAccessKeyring != null
-                ? base64ToBytes(data.memberEncryptedAccessKeyring)
+              firstData.memberEncryptedAccessKeyring != null
+                ? base64ToBytes(firstData.memberEncryptedAccessKeyring)
                 : null,
             groupAccessKeyring:
-              data.groupAccessKeyring != null
-                ? base64ToBytes(data.groupAccessKeyring)
+              firstData.groupAccessKeyring != null
+                ? base64ToBytes(firstData.groupAccessKeyring)
                 : null,
             stored,
           });
           collabGroupCrypto.value = {
-            groupId: data.groupId,
+            groupId: firstData.groupId,
             groupEncryptedContentKeyring: base64ToBytes(
-              data.groupEncryptedContentKeyring,
+              firstData.groupEncryptedContentKeyring,
             ),
             memberEncryptedAccessKeyring:
-              data.memberEncryptedAccessKeyring != null
-                ? base64ToBytes(data.memberEncryptedAccessKeyring)
+              firstData.memberEncryptedAccessKeyring != null
+                ? base64ToBytes(firstData.memberEncryptedAccessKeyring)
                 : null,
             groupAccessKeyring:
-              data.groupAccessKeyring != null
-                ? base64ToBytes(data.groupAccessKeyring)
+              firstData.groupAccessKeyring != null
+                ? base64ToBytes(firstData.groupAccessKeyring)
                 : null,
           };
         } catch (e) {
@@ -632,7 +670,7 @@ export function usePageCollabEditor(opts: {
             Y_FRAG_PROSEMIRROR,
             Y_TEXT_DEFAULT,
           );
-          for (const u of data.updates) {
+          for (const u of allUpdates) {
             const plain = decryptPageDocUpdate({
               pageKeyring: pk,
               pageId: id,

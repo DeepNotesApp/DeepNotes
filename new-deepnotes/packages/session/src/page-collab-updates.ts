@@ -6,7 +6,7 @@ import {
   pages,
   users,
 } from "@deepnotes/db/schema";
-import { and, asc, eq, isNull, max } from "drizzle-orm";
+import { and, asc, eq, gt, isNull, max } from "drizzle-orm";
 
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
@@ -26,6 +26,8 @@ export async function performGetPageCollabUpdates(input: {
   env: SessionEnv;
   accessCookie: string | undefined;
   pageId: string;
+  sinceIndex?: number | null;
+  limit?: number;
 }): Promise<{
   lastIndex: number | null;
   updates: { index: number; encryptedData: Buffer }[];
@@ -97,14 +99,24 @@ export async function performGetPageCollabUpdates(input: {
     )
     .limit(1);
 
+  const effectiveLimit = Math.min(input.limit ?? 100, 500);
+
   const rows = await input.db
     .select({
       index: pageUpdates.index,
       encryptedData: pageUpdates.encryptedData,
     })
     .from(pageUpdates)
-    .where(eq(pageUpdates.pageId, input.pageId))
-    .orderBy(asc(pageUpdates.index));
+    .where(
+      and(
+        eq(pageUpdates.pageId, input.pageId),
+        input.sinceIndex != null
+          ? gt(pageUpdates.index, input.sinceIndex)
+          : undefined,
+      ),
+    )
+    .orderBy(asc(pageUpdates.index))
+    .limit(effectiveLimit);
 
   const cryptoOut = {
     groupId: pageRow.groupId,

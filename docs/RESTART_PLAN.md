@@ -26,6 +26,8 @@
 | **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
 | **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
 | **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **Stub only** | `SpatialWorldStubView` shows page pins on a pan/zoom canvas. **No interactive notes, arrows, or containers.** |
+| **Collab pagination** | `GET /api/pages/:pid/collab-updates` | Done | `?sinceIndex=` + `?limit=` (default 100, max 500). Client loops. |
+| **Playwright E2E** | `apps/web/playwright.config.ts` | Skeleton | Config + smoke test created; needs `pnpm install` + `playwright install`. |
 
 ### 0.2 Critical bugs that block everything else
 
@@ -302,29 +304,34 @@ Each phase has:
    - `main.ts` calls `createAppRouter()` on mount.
    - `app.test.ts` and `router.test.ts` call factory after DOM setup.
 
-5. **CI integration test wiring** ⏳
-   - Add `services: postgres` to GitHub Actions `test` job.
-   - Export `DATABASE_URL`, `DATABASE_ADMIN_URL`, `TEST_DB_TEMPLATE_NAME` so integration tests run instead of skipping.
+5. **CI integration test wiring** ✅
+   - `.github/workflows/new-deepnotes-ci.yml` already has `services: postgres` and exports `DATABASE_URL` + `DATABASE_ADMIN_URL`.
+   - Integration tests run in CI after `pnpm db:migrate`.
 
 6. **Refactor `usePageCollabEditor.ts` into focused composables** 🔄
-   - Split into `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`.
+   - Split files exist: `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`.
    - `CollabWsIncomingContext` updated to use `serverDoc` + `unackedUpdates` instead of `serverStateVector`.
    - **`single-update-ack` handler fixed:** advances `serverDoc` only with the acknowledged diff, not full `ydoc` state.
    - Remaining: rewrite `usePageCollabEditor.ts` as thin orchestrator calling the 4 composables, then wire `PageEditorView.vue`.
 
-7. **Add collab updates pagination to backend** ⏳
-   - Add `?sinceIndex=` query param to `GET /api/pages/:pageId/collab-updates`.
-   - `performGetPageCollabUpdates` must return at most 100 rows per request.
-   - Client bootstrap loop fetches incrementally until no more rows.
+7. **Add collab updates pagination to backend** ✅
+   - `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and `?limit=` (default 100, max 500).
+   - `performGetPageCollabUpdates` uses `gt(pageUpdates.index, sinceIndex)` with `.limit()`.
+   - Client bootstrap in `usePageCollabEditor.ts` loops until a batch returns < 100 rows.
 
 8. **Add root `vitest.workspace.ts` in `new-deepnotes`** ✅
    - File created and references all package/app configs.
    - `pnpm test` from `new-deepnotes/` root passes (apps/web: 18 files, 55 tests green; packages verified individually).
 
-9. **Add Playwright E2E skeleton** ⏳
-   - `pnpm add -D @playwright/test` in `apps/web`.
-   - Create `apps/web/playwright.config.ts` with a single smoke test.
-   - Add `pnpm exec playwright install` step to CI.
+9. **Add Playwright E2E skeleton** ✅
+   - `@playwright/test` added to `apps/web` devDependencies.
+   - `apps/web/playwright.config.ts` created with Chromium project and dev server wiring.
+   - `apps/web/e2e/smoke.spec.ts` created (home page renders test).
+   - Remaining: run `pnpm install` then `pnpm exec playwright install` locally; add CI step.
+
+10. **Add `ydoc.on('updateV2')` listener for non-Tiptap mutations** ✅
+   - `usePageCollabEditor.ts` now calls `schedulePush()` on any `updateV2` that isn't from remote collab or hydration.
+   - Required for spatial canvas to trigger collab push when notes/arrows mutate Yjs directly.
 
 **Verification:**
 ```bash
@@ -338,10 +345,10 @@ pnpm test
 - [ ] `pnpm test` from `new-deepnotes/` root passes with 0 failures.
 - [x] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
 - [x] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
-- [ ] CI test job runs integration tests against a real Postgres service.
+- [x] CI test job runs integration tests against a real Postgres service.
 - [ ] `usePageCollabEditor.ts` is split into composables ≤ 300 lines each.
 - [x] `router.ts` exports a factory and has zero module-load `window` access.
-- [ ] Collab updates endpoint supports `?sinceIndex=` and returns ≤ 100 rows.
+- [x] Collab updates endpoint supports `?sinceIndex=` and returns ≤ 100 rows.
 - [ ] Playwright smoke test passes locally (`pnpm exec playwright test`).
 
 ---
