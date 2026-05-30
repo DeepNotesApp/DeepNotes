@@ -42,6 +42,19 @@ describe("useSpatialPage", () => {
     expect(page.arrowList.value[0]!.model.target.value).toBe(n2);
   });
 
+  it("deletes an arrow", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const n1 = page.createNoteAt(0, 0);
+    const n2 = page.createNoteAt(100, 0);
+    const a1 = page.createArrow(n1, n2);
+    expect(page.arrowList.value.length).toBe(1);
+
+    page.deleteArrow(a1);
+    expect(page.arrowList.value.length).toBe(0);
+  });
+
   it("reacts to note position mutation", () => {
     const ydoc = createPageYDoc();
     const page = useSpatialPage(ydoc);

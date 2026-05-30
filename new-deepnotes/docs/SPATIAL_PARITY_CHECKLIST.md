@@ -22,9 +22,9 @@
 | 1.11 | Container wrap/stretch children | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.12 | Container force color inheritance | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.13 | Note collapsing (enabled, collapsed, localCollapsing) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
-| 1.14 | Note color (inherit, value) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.14 | Note color (inherit, value) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.15 | Note link | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.16 | Note z-index | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.16 | Note z-index | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.17 | Note anchor (x,y) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.18 | Note width (expanded, collapsed) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.19 | Note createdAt / editedAt / movedAt | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
@@ -37,7 +37,7 @@
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
 | 2.1 | Create arrow (drag from note edge) | `code/pages/page/arrows/arrow-creation.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | 🟡 2026-05-30 (Shift+click interaction; drag-from-edge in Phase 6) |
-| 2.2 | Delete arrow | `code/pages/page/elems/deleting.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
+| 2.2 | Delete arrow | `code/pages/page/elems/deleting.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ✅ 2026-05-30 |
 | 2.3 | Source / target anchors | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.4 | Source / target head styles | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.5 | Body type (curve / line) | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
@@ -65,7 +65,7 @@
 | 3.7 | World/client coordinate transforms | `code/pages/page/space/pos.ts` | `features/spatial/camera.ts` | `spatial-viewport-math.test.ts` (exists) | ⬜ |
 | 3.8 | Rect math (DOM/world) | `code/pages/page/space/rects.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
 | 3.9 | Size helpers | `code/pages/page/space/sizes.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
-| 3.10 | Grid background | `layouts/.../DisplayWorld/DisplayGrid.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
+| 3.10 | Grid background | `layouts/.../DisplayWorld/DisplayGrid.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ✅ 2026-05-30 |
 | 3.11 | Canvas background | `layouts/.../DisplayWorld/DisplayBackground.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
 | 3.12 | DOM + SVG rendering layers | `layouts/.../DisplayWorld/DOMDisplay.vue`, `SVGDisplay.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
 
@@ -75,12 +75,12 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 4.1 | Click to select note | `code/pages/page/selection/click-selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
-| 4.2 | Box selection (drag on empty canvas) | `code/pages/page/selection/box-selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
-| 4.3 | Multi-select (ctrl/cmd + click) | `code/pages/page/selection/selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
-| 4.4 | Select all (`Ctrl+A`) | `code/pages/page/selection/selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
-| 4.5 | Active element tracking | `code/pages/page/selection/active-elem.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
-| 4.6 | Active region tracking | `code/pages/page/selection/active-region.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ⬜ |
+| 4.1 | Click to select note | `code/pages/page/selection/click-selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ✅ 2026-05-30 |
+| 4.2 | Box selection (drag on empty canvas) | `code/pages/page/selection/box-selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ✅ 2026-05-30 |
+| 4.3 | Multi-select (ctrl/cmd + click) | `code/pages/page/selection/selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ✅ 2026-05-30 |
+| 4.4 | Select all (`Ctrl+A`) | `code/pages/page/selection/selection.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ✅ 2026-05-30 |
+| 4.5 | Active element tracking | `code/pages/page/selection/active-elem.ts` | `features/spatial/selection.ts` | `selection.test.ts` | ✅ 2026-05-30 |
+| 4.6 | Active region tracking | `code/pages/page/selection/active-region.ts` | `features/spatial/selection.ts` | `selection.test.ts` | 🟡 2026-05-30 (state exists; regions/containers pending) |
 
 ---
 

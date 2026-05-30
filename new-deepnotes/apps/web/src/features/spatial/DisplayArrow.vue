@@ -7,6 +7,12 @@ const props = defineProps<{
   model: ArrowModel;
   sourceModel?: NoteModel;
   targetModel?: NoteModel;
+  selected?: boolean;
+}>();
+
+const emit = defineEmits<{
+  select: [];
+  toggle: [];
 }>();
 
 const line = computed(() => {
@@ -19,13 +25,23 @@ const line = computed(() => {
   const y2 = t.pos.value.y;
   return { x1, y1, x2, y2 };
 });
+
+function onPointerDown(e: PointerEvent) {
+  if (e.button !== 0) return;
+  e.stopPropagation();
+  if (e.ctrlKey || e.metaKey) {
+    emit("toggle");
+  } else {
+    emit("select");
+  }
+}
 </script>
 
 <template>
   <svg
     v-if="line"
     data-testid="display-arrow"
-    class="pointer-events-none absolute top-0 left-0 overflow-visible"
+    class="absolute top-0 left-0 overflow-visible"
     :style="{
       width: '1px',
       height: '1px',
@@ -37,8 +53,11 @@ const line = computed(() => {
       :y1="line.y1 - Math.min(line.y1, line.y2)"
       :x2="line.x2 - Math.min(line.x1, line.x2)"
       :y2="line.y2 - Math.min(line.y1, line.y2)"
-      stroke="currentColor"
-      stroke-width="2"
+      :stroke="selected ? 'var(--primary)' : 'currentColor'"
+      :stroke-width="selected ? 3 : 2"
+      stroke-linecap="round"
+      class="cursor-pointer"
+      @pointerdown="onPointerDown"
     />
   </svg>
 </template>

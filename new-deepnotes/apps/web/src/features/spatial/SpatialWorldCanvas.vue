@@ -21,6 +21,7 @@ defineExpose({
   camX,
   camY,
   zoom,
+  rootEl: rootRef,
 });
 
 const worldTransform = computed(() => {

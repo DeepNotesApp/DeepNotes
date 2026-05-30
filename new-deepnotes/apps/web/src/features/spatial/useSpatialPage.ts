@@ -8,6 +8,7 @@ import {
   getArrowsMap,
   getArrowIds,
   removeNoteFromPage,
+  removeArrowFromPage,
   YPAGE_NOTE_KEY,
 } from "@deepnotes/collab-wire";
 
@@ -97,6 +98,12 @@ export function useSpatialPage(ydoc: Y.Doc) {
     refreshNoteIds();
   }
 
+  function deleteArrow(arrowId: string) {
+    removeArrowFromPage(ydoc, arrowId);
+    arrowModels.delete(arrowId);
+    refreshArrowIds();
+  }
+
   function createArrow(sourceId: string, targetId: string): string {
     const id = `arrow-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const arrow = addArrowToPage(ydoc, id);
@@ -114,6 +121,7 @@ export function useSpatialPage(ydoc: Y.Doc) {
     arrowList,
     createNoteAt,
     deleteNote,
+    deleteArrow,
     createArrow,
   };
 }

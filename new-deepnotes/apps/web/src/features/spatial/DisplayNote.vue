@@ -10,15 +10,43 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [];
+  toggle: [];
   shiftClick: [];
 }>();
 
+const noteColor = computed(() => {
+  const c = props.model.color.value;
+  if (c.inherit) return null;
+  // Simple legacy color mapping to CSS color values
+  const colorMap: Record<string, string> = {
+    grey: "#9ca3af",
+    red: "#ef4444",
+    green: "#22c55e",
+    blue: "#3b82f6",
+    yellow: "#eab308",
+    purple: "#a855f7",
+    orange: "#f97316",
+    pink: "#ec4899",
+    cyan: "#06b6d4",
+    black: "#171717",
+    white: "#f5f5f5",
+  };
+  return colorMap[c.value] ?? c.value;
+});
+
 const transform = computed(() => {
   const { x, y } = props.model.pos.value;
-  return {
+  const style: Record<string, string | number> = {
     transform: `translate(${x}px, ${y}px)`,
     width: props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`,
+    zIndex: props.model.zIndex.value,
   };
+  const color = noteColor.value;
+  if (color) {
+    style.borderColor = color;
+    style.backgroundColor = `${color}18`; // 10% opacity tint
+  }
+  return style;
 });
 
 const frameClasses = computed(() => {
@@ -39,13 +67,22 @@ let noteStartX = 0;
 let noteStartY = 0;
 
 function onPointerDown(e: PointerEvent) {
-  if (!props.model.movable.value || e.button !== 0) return;
+  if (e.button !== 0) return;
   e.stopPropagation();
-  emit("select");
+
   if (e.shiftKey) {
     emit("shiftClick");
     return;
   }
+
+  if (e.ctrlKey || e.metaKey) {
+    emit("toggle");
+  } else {
+    emit("select");
+  }
+
+  if (!props.model.movable.value) return;
+
   dragPointerId = e.pointerId;
   startX = e.clientX;
   startY = e.clientY;

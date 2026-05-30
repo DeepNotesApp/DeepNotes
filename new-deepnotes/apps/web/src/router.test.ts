@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { createAppRouter } from "./router";
 
 describe("router", () => {
-  it("registers spatial world stub route", () => {
+  it("registers page spatial canvas route", () => {
     const router = createAppRouter();
-    const spatial = router
+    const page = router
       .getRoutes()
-      .find((r) => r.name === "spatial-world-stub");
-    expect(spatial?.path).toBe("/spatial");
+      .find((r) => r.name === "page");
+    expect(page?.path).toBe("/pages/:pageId");
   });
 });
