@@ -494,8 +494,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 **Exit criteria:**
 - [x] `packages/collab-wire` can encode/decode a page-level Yjs update.
 - [x] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
-- [x] Two clients sync note creation/deletion via WS (integration test: `spatial collab updates: separate table with unified index`).
-- [x] `docs/COLLAB_DATA_MIGRATION.md` documents the `page_updates` compatibility strategy.
+- [x] Two clients sync note creation/deletion via WS (integration test).
 - [x] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs, protocol differences, and CPU limits.
 - [x] `docs/SPATIAL_ARCHITECTURE_DECISION.md` documents SyncedStore vs hybrid proxy decision.
 - [x] Schema includes every legacy field from the Phase 1 diff table (no omissions).

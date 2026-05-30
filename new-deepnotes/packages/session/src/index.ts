@@ -102,10 +102,8 @@ export {
 export {
   assertPageCollabWsConnectionAllowed,
   performAppendPageCollabUpdates,
-  performAppendPageSpatialCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
-  performTrustedAppendNextPageSpatialCollabUpdate,
 } from "./page-collab-updates.js";
 export {
   performPageMove,

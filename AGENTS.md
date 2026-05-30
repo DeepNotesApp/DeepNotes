@@ -3,5 +3,4 @@
     - Feature-based folder structure.
 - Do not try to use the Cwd or MatchPerLine parameters in tool calls, they don't work.
 - Run tests via `pnpm test` from the package root (e.g. `cd packages/session && pnpm test`). Do not use `vitest run --workspace` or `pnpm test --run`.
-- Collab wire has two message types: `DOC` (ProseMirror-only, legacy) and `PAGE_DOC` (page-level spatial). The DO routes them to `page_updates` vs `page_spatial_updates`, which share a unified index space.
 - A DeepNotes "page" is an infinite spatial canvas.

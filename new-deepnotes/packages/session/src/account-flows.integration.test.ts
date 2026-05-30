@@ -91,10 +91,8 @@ import {
   performPageSnapshotSave,
   performPageSoftDelete,
   performAppendPageCollabUpdates,
-  performAppendPageSpatialCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
-  performTrustedAppendNextPageSpatialCollabUpdate,
   resolveRealtimeHashFieldAccess,
 } from "./index.js";
 import {
@@ -1512,116 +1510,6 @@ describe.skipIf(resolveTemplateContext() == null)(
             updates: [{ index: 4, encryptedData: rand32() }],
           }),
         ).rejects.toMatchObject({ status: 400, code: "BAD_REQUEST" });
-      } finally {
-        await client.end({ timeout: 5 });
-        const admin2 = postgres(ctx.adminUrl, { max: 1 });
-        try {
-          await dropDatabaseIfExists(admin2, cloneName);
-        } finally {
-          await admin2.end({ timeout: 5 });
-        }
-      }
-    });
-
-    it("spatial collab updates: separate table with unified index", async () => {
-      const env = testSessionEnv();
-      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
-      const admin = postgres(ctx.adminUrl, { max: 1 });
-      try {
-        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
-      } finally {
-        await admin.end({ timeout: 5 });
-      }
-
-      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
-      const client = postgres(cloneUrl, { max: 1 });
-      const db = drizzle(client, { schema });
-      try {
-        const email = `spatial-${nanoid()}@example.com`;
-        const loginHash = rand32();
-        const reg = await buildRegisterBody(email, loginHash);
-        await performUserRegister({ db, env, body: reg });
-        const access = await signAccessToken({
-          secret: env.ACCESS_SECRET,
-          userId: reg.userId,
-          sessionId: nanoid(),
-        });
-
-        const empty = await performGetPageCollabUpdates({
-          db,
-          env,
-          accessCookie: access,
-          pageId: reg.pageId,
-        });
-        expect(empty.updates).toHaveLength(0);
-        expect(empty.lastIndex).toBeNull();
-
-        // Append prose update at index 0
-        const prose0 = rand32();
-        await performAppendPageCollabUpdates({
-          db,
-          env,
-          accessCookie: access,
-          pageId: reg.pageId,
-          expectedLastIndex: null,
-          updates: [{ index: 0, encryptedData: prose0 }],
-        });
-
-        // Append spatial update at index 1 (unified index)
-        const spatial1 = rand32();
-        await performAppendPageSpatialCollabUpdates({
-          db,
-          env,
-          accessCookie: access,
-          pageId: reg.pageId,
-          expectedLastIndex: 0,
-          updates: [{ index: 1, encryptedData: spatial1 }],
-        });
-
-        // Trusted spatial append at index 2
-        const trusted = await performTrustedAppendNextPageSpatialCollabUpdate({
-          db,
-          pageId: reg.pageId,
-          userId: reg.userId,
-          encryptedData: rand32(),
-        });
-        expect(trusted.newIndex).toBe(2);
-
-        // Trusted prose append at index 3
-        const trustedProse = await performTrustedAppendNextPageCollabUpdate({
-          db,
-          pageId: reg.pageId,
-          userId: reg.userId,
-          encryptedData: rand32(),
-        });
-        expect(trustedProse.newIndex).toBe(3);
-
-        // Bootstrap merges both tables in index order
-        const merged = await performGetPageCollabUpdates({
-          db,
-          env,
-          accessCookie: access,
-          pageId: reg.pageId,
-        });
-        expect(merged.updates).toHaveLength(4);
-        expect(merged.updates.map((u) => u.index)).toEqual([0, 1, 2, 3]);
-        expect(
-          merged.updates[0]!.encryptedData.toString("base64"),
-        ).toEqual(Buffer.from(prose0).toString("base64"));
-        expect(
-          merged.updates[1]!.encryptedData.toString("base64"),
-        ).toEqual(Buffer.from(spatial1).toString("base64"));
-
-        // Pagination works across merged tables
-        const since1 = await performGetPageCollabUpdates({
-          db,
-          env,
-          accessCookie: access,
-          pageId: reg.pageId,
-          sinceIndex: 1,
-          limit: 2,
-        });
-        expect(since1.updates.map((u) => u.index)).toEqual([2, 3]);
       } finally {
         await client.end({ timeout: 5 });
         const admin2 = postgres(ctx.adminUrl, { max: 1 });

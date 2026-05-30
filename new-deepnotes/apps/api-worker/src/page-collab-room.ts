@@ -2,8 +2,6 @@ import {
   decodeClientCollabBinaryMessage,
   encodeDocSingleUpdateAck,
   encodeDocSingleUpdateFromServer,
-  encodePageDocSingleUpdateAck,
-  encodePageDocSingleUpdateFromServer,
   uint8ToBase64Standard,
 } from "@deepnotes/collab-wire";
 
@@ -76,7 +74,6 @@ export class PageCollabRoom {
       return;
     }
 
-    const isPageDoc = decoded.kind === "page-doc-single";
     const encryptedUpdate = decoded.encryptedUpdate;
 
     const secret = this.env.COLLAB_INTERNAL_SECRET;
@@ -98,7 +95,6 @@ export class PageCollabRoom {
           body: JSON.stringify({
             userId: attachment.userId,
             encryptedDataBase64: uint8ToBase64Standard(encryptedUpdate),
-            type: isPageDoc ? "spatial" : "prosemirror",
           }),
         },
       ),
@@ -124,25 +120,14 @@ export class PageCollabRoom {
     }
     const dbIndex = (payload as { newIndex: number }).newIndex;
 
-    if (isPageDoc) {
-      const relay = encodePageDocSingleUpdateFromServer(encryptedUpdate, dbIndex);
-      this.broadcast(ws, relay);
-      ws.send(
-        encodePageDocSingleUpdateAck({
-          updateId: decoded.updateId,
-          dbIndex,
-        }),
-      );
-    } else {
-      const relay = encodeDocSingleUpdateFromServer(encryptedUpdate, dbIndex);
-      this.broadcast(ws, relay);
-      ws.send(
-        encodeDocSingleUpdateAck({
-          updateId: decoded.updateId,
-          dbIndex,
-        }),
-      );
-    }
+    const relay = encodeDocSingleUpdateFromServer(encryptedUpdate, dbIndex);
+    this.broadcast(ws, relay);
+    ws.send(
+      encodeDocSingleUpdateAck({
+        updateId: decoded.updateId,
+        dbIndex,
+      }),
+    );
   }
 
   private broadcast(exceptWs: WebSocket, data: Uint8Array): void {

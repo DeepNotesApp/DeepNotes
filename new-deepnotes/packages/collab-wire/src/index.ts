@@ -8,7 +8,6 @@ import * as encoding from "lib0/encoding";
 export const CollabMessageType = {
   DOC: 0,
   AWARENESS: 1,
-  PAGE_DOC: 2,
 } as const;
 
 export const CollabServerDocMessageType = {
@@ -63,46 +62,6 @@ export function encodeDocSingleUpdateAck(input: {
   return encoding.toUint8Array(enc);
 }
 
-export function encodePageDocSingleUpdateFromClient(input: {
-  updateId: number;
-  encryptedUpdate: Uint8Array;
-}): Uint8Array {
-  const enc = encoding.createEncoder();
-  encoding.writeVarUint(enc, CollabMessageType.PAGE_DOC);
-  encoding.writeVarUint(enc, CollabClientDocMessageType.SINGLE_UPDATE);
-  encoding.writeVarUint(enc, input.updateId);
-  encoding.writeVarUint8Array(enc, input.encryptedUpdate);
-  return encoding.toUint8Array(enc);
-}
-
-export function encodePageDocSingleUpdateFromServer(
-  encryptedUpdate: Uint8Array,
-  dbIndex?: number,
-): Uint8Array {
-  const enc = encoding.createEncoder();
-  encoding.writeVarUint(enc, CollabMessageType.PAGE_DOC);
-  encoding.writeVarUint(enc, CollabServerDocMessageType.SINGLE_UPDATE);
-  encoding.writeVarUint8Array(enc, encryptedUpdate);
-  if (dbIndex !== undefined) {
-    encoding.writeVarUint(enc, dbIndex);
-  }
-  return encoding.toUint8Array(enc);
-}
-
-export function encodePageDocSingleUpdateAck(input: {
-  updateId: number;
-  dbIndex?: number;
-}): Uint8Array {
-  const enc = encoding.createEncoder();
-  encoding.writeVarUint(enc, CollabMessageType.PAGE_DOC);
-  encoding.writeVarUint(enc, CollabServerDocMessageType.SINGLE_UPDATE_ACK);
-  encoding.writeVarUint(enc, input.updateId);
-  if (input.dbIndex !== undefined) {
-    encoding.writeVarUint(enc, input.dbIndex);
-  }
-  return encoding.toUint8Array(enc);
-}
-
 export function encodeAwarenessMessage(encryptedChunks: Uint8Array[]): Uint8Array {
   const enc = encoding.createEncoder();
   encoding.writeVarUint(enc, CollabMessageType.AWARENESS);
@@ -115,7 +74,6 @@ export function encodeAwarenessMessage(encryptedChunks: Uint8Array[]): Uint8Arra
 
 export type DecodedClientCollabMessage =
   | { kind: "doc-single"; updateId: number; encryptedUpdate: Uint8Array }
-  | { kind: "page-doc-single"; updateId: number; encryptedUpdate: Uint8Array }
   | { kind: "awareness"; raw: Uint8Array };
 
 export function decodeClientCollabBinaryMessage(message: Uint8Array): DecodedClientCollabMessage | null {
@@ -126,15 +84,6 @@ export function decodeClientCollabBinaryMessage(message: Uint8Array): DecodedCli
   const top = decoding.readVarUint(dec);
   if (top === CollabMessageType.AWARENESS) {
     return { kind: "awareness", raw: message };
-  }
-  if (top === CollabMessageType.PAGE_DOC) {
-    const docKind = decoding.readVarUint(dec);
-    if (docKind !== CollabClientDocMessageType.SINGLE_UPDATE) {
-      return null;
-    }
-    const updateId = decoding.readVarUint(dec);
-    const encryptedUpdate = decoding.readVarUint8Array(dec);
-    return { kind: "page-doc-single", updateId, encryptedUpdate };
   }
   if (top !== CollabMessageType.DOC) {
     return null;
@@ -152,15 +101,10 @@ export type DecodedServerDocMessage =
   | { kind: "single-update"; encryptedUpdate: Uint8Array; dbIndex: number | null }
   | { kind: "single-update-ack"; updateId: number; dbIndex: number | null };
 
-export type DecodedServerPageDocMessage =
-  | { kind: "page-single-update"; encryptedUpdate: Uint8Array; dbIndex: number | null }
-  | { kind: "page-single-update-ack"; updateId: number; dbIndex: number | null };
-
 /** Server/relay → client: awareness broadcast or doc message (legacy framing). */
 export type DecodedIncomingCollabMessage =
   | { kind: "awareness"; encryptedChunks: Uint8Array[] }
-  | DecodedServerDocMessage
-  | DecodedServerPageDocMessage;
+  | DecodedServerDocMessage;
 
 function decodeServerDocFromDocDecoder(
   dec: decoding.Decoder,
@@ -175,23 +119,6 @@ function decodeServerDocFromDocDecoder(
     const updateId = decoding.readVarUint(dec);
     const dbIndex = decoding.hasContent(dec) ? decoding.readVarUint(dec) : null;
     return { kind: "single-update-ack", updateId, dbIndex };
-  }
-  return null;
-}
-
-function decodeServerPageDocFromDecoder(
-  dec: decoding.Decoder,
-): DecodedServerPageDocMessage | null {
-  const docKind = decoding.readVarUint(dec);
-  if (docKind === CollabServerDocMessageType.SINGLE_UPDATE) {
-    const encryptedUpdate = decoding.readVarUint8Array(dec);
-    const dbIndex = decoding.hasContent(dec) ? decoding.readVarUint(dec) : null;
-    return { kind: "page-single-update", encryptedUpdate, dbIndex };
-  }
-  if (docKind === CollabServerDocMessageType.SINGLE_UPDATE_ACK) {
-    const updateId = decoding.readVarUint(dec);
-    const dbIndex = decoding.hasContent(dec) ? decoding.readVarUint(dec) : null;
-    return { kind: "page-single-update-ack", updateId, dbIndex };
   }
   return null;
 }
@@ -211,9 +138,6 @@ export function decodeIncomingCollabBinaryMessage(
       encryptedChunks.push(decoding.readVarUint8Array(dec));
     }
     return { kind: "awareness", encryptedChunks };
-  }
-  if (top === CollabMessageType.PAGE_DOC) {
-    return decodeServerPageDocFromDecoder(dec);
   }
   if (top !== CollabMessageType.DOC) {
     return null;
