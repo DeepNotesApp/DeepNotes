@@ -98,6 +98,7 @@ export class PageCollabRoom {
           body: JSON.stringify({
             userId: attachment.userId,
             encryptedDataBase64: uint8ToBase64Standard(encryptedUpdate),
+            type: isPageDoc ? "spatial" : "prosemirror",
           }),
         },
       ),

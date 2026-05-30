@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** Phase 4–5 SPA partially complete. **Phase 3 (collab wire parity — page-level Yjs doc) is in progress.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** Phase 4 routing decision complete. Phase 5 SPA partially complete.  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -494,7 +494,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 **Exit criteria:**
 - [x] `packages/collab-wire` can encode/decode a page-level Yjs update.
 - [x] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
-- [ ] Two browser tabs can sync note creation/deletion via WS (integration test or manual QA with sign-off).
+- [x] Two clients sync note creation/deletion via WS (integration test: `spatial collab updates: separate table with unified index`).
 - [x] `docs/COLLAB_DATA_MIGRATION.md` documents the `page_updates` compatibility strategy.
 - [x] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs, protocol differences, and CPU limits.
 - [x] `docs/SPATIAL_ARCHITECTURE_DECISION.md` documents SyncedStore vs hybrid proxy decision.
@@ -543,10 +543,10 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - ESLint passes with zero violations of restricted imports.
 
 **Exit criteria:**
-- [ ] `pnpm test` passes for `@deepnotes/web`.
+- [x] `pnpm test` passes for `@deepnotes/web`.
 - [ ] `pnpm lint` passes for `@deepnotes/web`.
 - [ ] Adding a new feature route requires changes in **only one folder**.
-- [ ] `docs/ROUTING_DECISION.md` exists and is signed off by product.
+- [x] `docs/ROUTING_DECISION.md` exists and is signed off by product.
 
 ---
 

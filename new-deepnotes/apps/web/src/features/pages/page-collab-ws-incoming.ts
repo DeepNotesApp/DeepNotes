@@ -86,5 +86,42 @@ export function applyIncomingCollabWsMessage(
     if (msg.dbIndex != null) {
       ctx.collabLastIndex.value = msg.dbIndex;
     }
+    return;
+  }
+
+  if (msg.kind === "page-single-update") {
+    if (pk == null || !id) {
+      return;
+    }
+    ctx.hydrating.value = true;
+    try {
+      const plain = decryptPageDocUpdate({
+        pageKeyring: pk,
+        pageId: id,
+        ciphertext: msg.encryptedUpdate,
+      });
+      Y.applyUpdateV2(ctx.ydoc, plain, "collab-ws-remote");
+      Y.applyUpdateV2(ctx.serverDoc, plain);
+      if (msg.dbIndex != null) {
+        ctx.collabLastIndex.value = msg.dbIndex;
+      }
+      ctx.refreshYMetrics();
+    } catch {
+      // ignore decrypt failures
+    } finally {
+      ctx.hydrating.value = false;
+    }
+    return;
+  }
+
+  if (msg.kind === "page-single-update-ack") {
+    const ackedDiff = ctx.unackedUpdates.get(msg.updateId);
+    if (ackedDiff) {
+      Y.applyUpdateV2(ctx.serverDoc, ackedDiff);
+      ctx.unackedUpdates.delete(msg.updateId);
+    }
+    if (msg.dbIndex != null) {
+      ctx.collabLastIndex.value = msg.dbIndex;
+    }
   }
 }

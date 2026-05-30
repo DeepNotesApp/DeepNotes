@@ -370,6 +370,23 @@ export const pageUpdates = pgTable(
   ],
 );
 
+export const pageSpatialUpdates = pgTable(
+  "page_spatial_updates",
+  {
+    pageId: char("page_id", { length: 21 })
+      .notNull()
+      .references(() => pages.id, { onDelete: "cascade" }),
+    index: bigint("index", { mode: "number" }).notNull(),
+    encryptedData: bytea("encrypted_data").notNull(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.pageId, t.index],
+      name: "page_spatial_updates_pkey",
+    }),
+  ],
+);
+
 export const usersNotifications = pgTable(
   "users_notifications",
   {

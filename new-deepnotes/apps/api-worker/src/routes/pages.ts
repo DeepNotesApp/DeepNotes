@@ -254,6 +254,9 @@ app.post("/api/internal/pages/:pageId/collab-ws-append", async (c) => {
     );
   }
 
+  const updateType =
+    (bodyJson as { type?: string }).type === "spatial" ? "spatial" : "prosemirror";
+
   const { base64ToUint8Standard } = await import("@deepnotes/collab-wire");
   const userId = (bodyJson as { userId: string }).userId;
   const encryptedData = base64ToUint8Standard(
@@ -263,6 +266,18 @@ app.post("/api/internal/pages/:pageId/collab-ws-append", async (c) => {
   const db = getDbForConnectionString(hyper.connectionString);
 
   try {
+    if (updateType === "spatial") {
+      const { performTrustedAppendNextPageSpatialCollabUpdate } =
+        await import("@deepnotes/session");
+      const { newIndex } = await performTrustedAppendNextPageSpatialCollabUpdate({
+        db,
+        pageId: pParams.data.pageId,
+        userId,
+        encryptedData,
+      });
+      return c.json({ newIndex }, 200);
+    }
+
     const { performTrustedAppendNextPageCollabUpdate } =
       await import("@deepnotes/session");
     const { newIndex } = await performTrustedAppendNextPageCollabUpdate({

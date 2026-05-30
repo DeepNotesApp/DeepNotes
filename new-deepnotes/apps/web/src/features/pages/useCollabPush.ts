@@ -1,4 +1,7 @@
-import { encodeDocSingleUpdateFromClient } from "@deepnotes/collab-wire";
+import {
+  encodeDocSingleUpdateFromClient,
+  encodePageDocSingleUpdateFromClient,
+} from "@deepnotes/collab-wire";
 import type { SymmetricKeyring } from "@deepnotes/e2ee";
 import type { ComputedRef, Ref } from "vue";
 import { ref } from "vue";
@@ -21,6 +24,8 @@ export function useCollabPush(opts: {
   serverDoc?: Y.Doc;
   unackedUpdates?: Map<number, Uint8Array>;
   collabLastIndex?: Ref<number | null>;
+  /** "doc" = ProseMirror-only (legacy), "page-doc" = page-level spatial updates */
+  messageType?: "doc" | "page-doc";
 }) {
   const {
     ydoc,
@@ -31,6 +36,7 @@ export function useCollabPush(opts: {
     client,
     collabWsLive,
     getCollabWs,
+    messageType = "doc",
   } = opts;
 
   const pushError = ref<string | null>(null);
@@ -103,12 +109,17 @@ export function useCollabPush(opts: {
       });
       const uid = collabClientUpdateId++;
       unackedUpdates.set(uid, diff);
-      ws.send(
-        encodeDocSingleUpdateFromClient({
-          updateId: uid,
-          encryptedUpdate: enc,
-        }),
-      );
+      const frame =
+        messageType === "page-doc"
+          ? encodePageDocSingleUpdateFromClient({
+              updateId: uid,
+              encryptedUpdate: enc,
+            })
+          : encodeDocSingleUpdateFromClient({
+              updateId: uid,
+              encryptedUpdate: enc,
+            });
+      ws.send(frame);
     } catch (e) {
       pushError.value =
         e instanceof Error ? e.message : "Could not send collab update.";
