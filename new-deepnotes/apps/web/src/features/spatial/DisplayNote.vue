@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { ChevronDown, ChevronRight } from "lucide-vue-next";
 import type { NoteModel } from "./note-model";
 
 const props = defineProps<{
+  id: string;
   model: NoteModel;
   zoom: number;
   selected?: boolean;
-  childModels?: NoteModel[];
+  childModels?: Array<{ id: string; model: NoteModel }>;
+  parentColor?: string | null;
 }>();
 
 const emit = defineEmits<{
   select: [];
   toggle: [];
   shiftClick: [];
+  dragend: [id: string];
 }>();
 
-const noteColor = computed(() => {
+const resolvedColor = computed(() => {
   const c = props.model.color.value;
-  if (c.inherit) return null;
+  if (c.inherit) return props.parentColor ?? null;
   // Simple legacy color mapping to CSS color values
   const colorMap: Record<string, string> = {
     grey: "#9ca3af",
@@ -42,7 +46,7 @@ const transform = computed(() => {
     width: props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`,
     zIndex: props.model.zIndex.value,
   };
-  const color = noteColor.value;
+  const color = resolvedColor.value;
   if (color) {
     style.borderColor = color;
     style.backgroundColor = `${color}18`; // 10% opacity tint
@@ -66,6 +70,7 @@ let startX = 0;
 let startY = 0;
 let noteStartX = 0;
 let noteStartY = 0;
+let hasDragged = false;
 
 function onPointerDown(e: PointerEvent) {
   if (e.button !== 0) return;
@@ -89,6 +94,7 @@ function onPointerDown(e: PointerEvent) {
   startY = e.clientY;
   noteStartX = props.model.pos.value.x;
   noteStartY = props.model.pos.value.y;
+  hasDragged = false;
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
   el.style.cursor = "grabbing";
@@ -98,6 +104,9 @@ function onPointerMove(e: PointerEvent) {
   if (dragPointerId !== e.pointerId) return;
   const dxScreen = e.clientX - startX;
   const dyScreen = e.clientY - startY;
+  if (dxScreen !== 0 || dyScreen !== 0) {
+    hasDragged = true;
+  }
   const z = props.zoom || 1;
   const noteMap = props.model.rawMap;
   const posMap = noteMap.get("pos") as import("yjs").Map<number>;
@@ -117,6 +126,10 @@ function onPointerUp(e: PointerEvent) {
     }
   }
   el.style.cursor = props.model.movable.value ? "grab" : "";
+  if (hasDragged) {
+    hasDragged = false;
+    emit("dragend", props.id);
+  }
 }
 
 // --- resize handle ---
@@ -156,6 +169,11 @@ function onResizePointerUp(e: PointerEvent) {
     }
   }
 }
+
+function toggleCollapsed() {
+  const collapsingMap = props.model.rawMap.get("collapsing") as import("yjs").Map<boolean>;
+  collapsingMap.set("collapsed", !props.model.collapsing.collapsed.value);
+}
 </script>
 
 <template>
@@ -168,16 +186,26 @@ function onResizePointerUp(e: PointerEvent) {
     @pointerup="onPointerUp"
     @pointercancel="onPointerUp"
   >
-    <div class="border-border border-b px-2 py-1 text-xs font-medium">
-      {{ model.head.enabled.value ? "Head" : "" }}
-      <span
-        v-if="model.body.enabled.value"
-        class="text-muted-foreground"
+    <div class="border-border flex items-center gap-1 border-b px-2 py-1 text-xs font-medium">
+      <button
+        v-if="model.collapsing.enabled.value"
+        class="text-muted-foreground hover:text-foreground focus:outline-none"
+        @pointerdown.stop="toggleCollapsed"
       >
-        / Body
+        <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-3 w-3" />
+        <ChevronRight v-else class="h-3 w-3" />
+      </button>
+      <span class="flex-1 truncate">
+        {{ model.head.enabled.value ? "Head" : "" }}
+        <span
+          v-if="model.body.enabled.value"
+          class="text-muted-foreground"
+        >
+          / Body
+        </span>
       </span>
     </div>
-    <div class="px-2 py-1">
+    <div v-if="!model.collapsing.collapsed.value" class="px-2 py-1">
       <p class="text-muted-foreground text-xs">
         pos: {{ model.pos.value.x.toFixed(0) }},{{ model.pos.value.y.toFixed(0) }} · z:
         {{ model.zIndex.value }}
@@ -195,16 +223,19 @@ function onResizePointerUp(e: PointerEvent) {
     />
 
     <!-- container children -->
-    <template v-if="model.container.enabled.value && childModels?.length">
+    <template v-if="model.container.enabled.value && childModels?.length && !model.collapsing.collapsed.value">
       <div
         class="border-border pointer-events-none absolute inset-x-0 bottom-0 border-t"
         style="top: 3rem"
       >
         <DisplayNote
-          v-for="(child, idx) in childModels"
-          :key="idx"
-          :model="child"
+          v-for="child in childModels"
+          :key="child.id"
+          :id="child.id"
+          :model="child.model"
           :zoom="zoom"
+          :parent-color="resolvedColor"
+          @dragend="$emit('dragend', $event)"
         />
       </div>
     </template>

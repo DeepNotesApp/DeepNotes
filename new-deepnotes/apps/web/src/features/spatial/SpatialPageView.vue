@@ -23,10 +23,13 @@ const {
   noteList,
   rootNoteList,
   arrowList,
+  parentOf,
   createNoteAt,
   deleteNote,
   deleteArrow,
   createArrow,
+  moveNoteIntoContainer,
+  moveNoteOutOfContainer,
 } = useSpatialPage(props.ydoc);
 
 const selection = useSpatialSelection();
@@ -169,6 +172,88 @@ function finalizeBoxSelect() {
   }
 }
 
+// --- drag into/out of container ---
+function getNoteEffectiveWorldPos(
+  noteId: string,
+): { x: number; y: number } | null {
+  const entry = noteList.value.find((n) => n.id === noteId);
+  if (!entry) return null;
+  const parentId = parentOf.value.get(noteId);
+  if (!parentId) {
+    return { x: entry.model.pos.value.x, y: entry.model.pos.value.y };
+  }
+  const parent = noteList.value.find((n) => n.id === parentId);
+  if (!parent) return { x: entry.model.pos.value.x, y: entry.model.pos.value.y };
+  return {
+    x: parent.model.pos.value.x + entry.model.pos.value.x,
+    y:
+      parent.model.pos.value.y +
+      entry.model.pos.value.y +
+      48 /* container content offset */,
+  };
+}
+
+function getNoteRect(noteId: string) {
+  const entry = noteList.value.find((n) => n.id === noteId);
+  if (!entry) return null;
+  const pos = getNoteEffectiveWorldPos(noteId);
+  if (!pos) return null;
+  const wStr = entry.model.width.value.expanded;
+  const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+  const h = 80;
+  return { x: pos.x, y: pos.y, width: w, height: h };
+}
+
+function onNoteDragEnd(noteId: string) {
+  const noteRect = getNoteRect(noteId);
+  if (!noteRect) return;
+
+  const currentParentId = parentOf.value.get(noteId);
+
+  // Find overlapping container notes (excluding self and descendants)
+  let bestContainerId: string | null = null;
+  let bestOverlapArea = 0;
+
+  for (const note of noteList.value) {
+    if (note.id === noteId) continue;
+    if (!note.model.container.enabled.value) continue;
+
+    // Prevent dropping into own descendants
+    const descendants = new Set<string>();
+    function collect(id: string) {
+      const m = noteById.value.get(id);
+      if (!m) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const childId of (m as any).container.children.value as string[]) {
+        descendants.add(childId);
+        collect(childId);
+      }
+    }
+    collect(noteId);
+    if (descendants.has(note.id)) continue;
+
+    const containerRect = getNoteRect(note.id);
+    if (!containerRect) continue;
+
+    const overlapX =
+      Math.max(0, Math.min(noteRect.x + noteRect.width, containerRect.x + containerRect.width) - Math.max(noteRect.x, containerRect.x));
+    const overlapY =
+      Math.max(0, Math.min(noteRect.y + noteRect.height, containerRect.y + containerRect.height) - Math.max(noteRect.y, containerRect.y));
+    const overlapArea = overlapX * overlapY;
+
+    if (overlapArea > bestOverlapArea) {
+      bestOverlapArea = overlapArea;
+      bestContainerId = note.id;
+    }
+  }
+
+  if (bestContainerId && bestContainerId !== currentParentId) {
+    moveNoteIntoContainer(noteId, bestContainerId);
+  } else if (!bestContainerId && currentParentId) {
+    moveNoteOutOfContainer(noteId);
+  }
+}
+
 // --- keyboard shortcuts ---
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -239,14 +324,18 @@ onUnmounted(() => {
         />
         <DisplayNote
           v-for="note in notesByZIndex"
+          :id="note.id"
           :key="note.id"
           :model="note.model"
           :zoom="canvasRef?.zoom ?? 1"
           :selected="selection.isSelected(note.id)"
           :child-models="
             note.model.container.children.value
-              .map((childId) => noteById.get(childId))
-              .filter((m): m is NonNullable<typeof m> => m !== undefined)
+              .map((childId) => {
+                const model = noteById.get(childId);
+                return model ? { id: childId, model } : null;
+              })
+              .filter((m): m is NonNullable<typeof m> => m !== null)
           "
           @select="selection.select(note.id, 'note')"
           @toggle="selection.toggle(note.id, 'note')"
@@ -255,6 +344,7 @@ onUnmounted(() => {
               ? createArrow(selection.activeId.value, note.id)
               : undefined
           "
+          @dragend="onNoteDragEnd"
         />
       </SpatialWorldCanvas>
 

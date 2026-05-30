@@ -6,11 +6,24 @@ import DisplayNote from "./DisplayNote.vue";
 import { useNoteModel } from "./note-model";
 import { addNoteToPage, createPageYDoc } from "@deepnotes/collab-wire";
 
-function createNoteModel(ydoc: Y.Doc, id: string, opts?: { containerEnabled?: boolean }) {
+function createNoteModel(
+  ydoc: Y.Doc,
+  id: string,
+  opts?: { containerEnabled?: boolean; collapsingEnabled?: boolean; colorInherit?: boolean; colorValue?: string },
+) {
   const noteMap = addNoteToPage(ydoc, id);
   if (opts?.containerEnabled) {
     const containerMap = noteMap.get("container") as Y.Map<unknown>;
     containerMap.set("enabled", true);
+  }
+  if (opts?.collapsingEnabled) {
+    const collapsingMap = noteMap.get("collapsing") as Y.Map<boolean>;
+    collapsingMap.set("enabled", true);
+  }
+  if (opts?.colorInherit !== undefined || opts?.colorValue !== undefined) {
+    const colorMap = noteMap.get("color") as Y.Map<unknown>;
+    if (opts.colorInherit !== undefined) colorMap.set("inherit", opts.colorInherit);
+    if (opts.colorValue !== undefined) colorMap.set("value", opts.colorValue);
   }
   return useNoteModel(noteMap);
 }
@@ -21,7 +34,7 @@ describe("DisplayNote", () => {
     const model = createNoteModel(ydoc, "note-1");
 
     const wrapper = mount(DisplayNote, {
-      props: { model, zoom: 1 },
+      props: { id: "note-1", model, zoom: 1 },
     });
 
     expect(wrapper.findAll('[data-testid="display-note"]')).toHaveLength(1);
@@ -33,7 +46,12 @@ describe("DisplayNote", () => {
     const childModel = createNoteModel(ydoc, "child-1");
 
     const wrapper = mount(DisplayNote, {
-      props: { model: parentModel, zoom: 1, childModels: [childModel] },
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
     });
 
     const notes = wrapper.findAll('[data-testid="display-note"]');
@@ -46,9 +64,62 @@ describe("DisplayNote", () => {
     const childModel = createNoteModel(ydoc, "child-1");
 
     const wrapper = mount(DisplayNote, {
-      props: { model: parentModel, zoom: 1, childModels: [childModel] },
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
     });
 
     expect(wrapper.findAll('[data-testid="display-note"]')).toHaveLength(1);
+  });
+
+  it("shows collapse button when collapsing is enabled", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { collapsingEnabled: true });
+
+    const wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    expect(wrapper.find("button").exists()).toBe(true);
+  });
+
+  it("hides collapse button when collapsing is disabled", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    const wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    expect(wrapper.find("button").exists()).toBe(false);
+  });
+
+  it("inherits parent color when color.inherit is true", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { colorInherit: true });
+
+    const wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    const style = el.attributes("style");
+    expect(style).toContain("border-color: #ef4444");
+  });
+
+  it("uses own color when color.inherit is false", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { colorInherit: false, colorValue: "blue" });
+
+    const wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    const style = el.attributes("style");
+    expect(style).toContain("border-color: #3b82f6");
   });
 });

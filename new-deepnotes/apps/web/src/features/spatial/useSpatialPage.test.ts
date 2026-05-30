@@ -107,4 +107,65 @@ describe("useSpatialPage", () => {
     expect(page.noteList.value.map((n) => n.id)).not.toContain(containerId);
     expect(page.noteList.value.map((n) => n.id)).not.toContain(childId);
   });
+
+  it("moves a note into a container with position conversion", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(100, 100);
+    const noteId = page.createNoteAt(200, 200);
+
+    page.moveNoteIntoContainer(noteId, containerId);
+
+    expect(page.parentOf.value.get(noteId)).toBe(containerId);
+    const noteEntry = page.noteList.value.find((n) => n.id === noteId);
+    expect(noteEntry!.model.pos.value).toEqual({ x: 100, y: 100 - 48 });
+  });
+
+  it("moves a note out of a container with position conversion", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(100, 100);
+    const noteId = page.createNoteAt(50, 50);
+    page.addChildToContainer(containerId, noteId);
+
+    // Verify child is inside container
+    expect(page.parentOf.value.get(noteId)).toBe(containerId);
+    const childEntryBefore = page.noteList.value.find((n) => n.id === noteId);
+    expect(childEntryBefore!.model.pos.value).toEqual({ x: 50, y: 50 });
+
+    page.moveNoteOutOfContainer(noteId);
+
+    expect(page.parentOf.value.has(noteId)).toBe(false);
+    const childEntryAfter = page.noteList.value.find((n) => n.id === noteId);
+    expect(childEntryAfter!.model.pos.value).toEqual({ x: 150, y: 150 + 48 });
+  });
+
+  it("prevents dropping a container into itself", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(0, 0);
+    page.moveNoteIntoContainer(containerId, containerId);
+
+    expect(page.parentOf.value.has(containerId)).toBe(false);
+  });
+
+  it("prevents dropping a container into its own descendant", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const grandparentId = page.createNoteAt(0, 0);
+    const parentId = page.createNoteAt(10, 10);
+    const childId = page.createNoteAt(20, 20);
+
+    page.moveNoteIntoContainer(parentId, grandparentId);
+    page.moveNoteIntoContainer(childId, parentId);
+
+    // Try to drop grandparent into its descendant childId
+    page.moveNoteIntoContainer(grandparentId, childId);
+
+    expect(page.parentOf.value.has(grandparentId)).toBe(false);
+  });
 });
