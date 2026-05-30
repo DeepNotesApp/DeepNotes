@@ -1,4 +1,3 @@
-import { computed } from "vue";
 import * as Y from "yjs";
 import { YPAGE_ARROW_KEY } from "@deepnotes/collab-wire";
 
@@ -10,7 +9,7 @@ import {
 
 export type ArrowModel = ReturnType<typeof useArrowModel>;
 
-export function useArrowModel(arrowMap: any) {
+export function useArrowModel(arrowMap: Y.Map<unknown>) {
   const source = useYMapString(arrowMap, YPAGE_ARROW_KEY.source, "");
   const target = useYMapString(arrowMap, YPAGE_ARROW_KEY.target, "");
 

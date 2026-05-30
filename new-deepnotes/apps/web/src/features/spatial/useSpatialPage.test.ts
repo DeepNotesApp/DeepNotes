@@ -46,7 +46,7 @@ describe("useSpatialPage", () => {
     const ydoc = createPageYDoc();
     const page = useSpatialPage(ydoc);
 
-    const id = page.createNoteAt(10, 20);
+    page.createNoteAt(10, 20);
     const model = page.noteList.value[0]!.model;
     expect(model.pos.value).toEqual({ x: 10, y: 20 });
 

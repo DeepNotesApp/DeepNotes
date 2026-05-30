@@ -16,7 +16,7 @@ export type NoteModel = ReturnType<typeof useNoteModel>;
  * Every property is a Vue ref backed by the Yjs observer so mutations
  * (local or remote) flow into the UI automatically.
  */
-export function useNoteModel(noteMap: any) {
+export function useNoteModel(noteMap: Y.Map<unknown>) {
   // --- pos ---
   const posMap = noteMap.get(YPAGE_NOTE_KEY.pos) as Y.Map<number>;
   const posX = useYMapNumber(posMap, "x", 0);

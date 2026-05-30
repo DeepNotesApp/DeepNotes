@@ -33,6 +33,15 @@ export function useSpatialViewport(
   let lastPanX = 0;
   let lastPanY = 0;
 
+  // pinch state
+  const activePointers = new Map<number, { x: number; y: number }>();
+  let pinchStartDist = 0;
+  let pinchStartZoom = 1;
+  let pinchCenterX = 0;
+  let pinchCenterY = 0;
+  let pinchCamX = 0;
+  let pinchCamY = 0;
+
   function getCenter(): { cx: number; cy: number; rect: DOMRect } | null {
     const el = rootRef.value;
     if (!el) {
@@ -106,6 +115,24 @@ export function useSpatialViewport(
     if (!el) {
       return;
     }
+
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // pinch: two touch pointers
+    if (activePointers.size === 2 && e.pointerType === "touch") {
+      const pts = Array.from(activePointers.values());
+      const dx = pts[1]!.x - pts[0]!.x;
+      const dy = pts[1]!.y - pts[0]!.y;
+      pinchStartDist = Math.hypot(dx, dy);
+      pinchStartZoom = zoom.value;
+      pinchCenterX = (pts[0]!.x + pts[1]!.x) / 2;
+      pinchCenterY = (pts[0]!.y + pts[1]!.y) / 2;
+      pinchCamX = camX.value;
+      pinchCamY = camY.value;
+      panPointerId = null;
+      return;
+    }
+
     const middle = e.button === 1;
     const spacePan = e.button === 0 && spaceDown.value;
     if (!middle && !spacePan) {
@@ -120,6 +147,44 @@ export function useSpatialViewport(
   }
 
   function onPointerMove(e: PointerEvent) {
+    if (!activePointers.has(e.pointerId)) {
+      return;
+    }
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // pinch zoom with two pointers
+    if (activePointers.size === 2) {
+      const pts = Array.from(activePointers.values());
+      const dx = pts[1]!.x - pts[0]!.x;
+      const dy = pts[1]!.y - pts[0]!.y;
+      const dist = Math.hypot(dx, dy);
+      if (pinchStartDist > 0) {
+        const ratio = dist / pinchStartDist;
+        const zNext = clampZoom(pinchStartZoom * ratio, minZoom, maxZoom);
+        if (zNext !== zoom.value) {
+          const c = getCenter();
+          if (c) {
+            const next = wheelZoomCameraTowardScreenPoint({
+              camX: pinchCamX,
+              camY: pinchCamY,
+              zoom: pinchStartZoom,
+              multiplier: zNext / pinchStartZoom,
+              screenX: pinchCenterX,
+              screenY: pinchCenterY,
+              centerX: c.cx,
+              centerY: c.cy,
+              minZoom,
+              maxZoom,
+            });
+            camX.value = next.camX;
+            camY.value = next.camY;
+            zoom.value = next.zoom;
+          }
+        }
+      }
+      return;
+    }
+
     if (panPointerId !== e.pointerId) {
       return;
     }
@@ -140,6 +205,10 @@ export function useSpatialViewport(
 
   function onPointerUp(e: PointerEvent) {
     const el = rootRef.value;
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) {
+      pinchStartDist = 0;
+    }
     if (panPointerId !== e.pointerId) {
       return;
     }

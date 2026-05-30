@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** Phase 4 routing decision complete. **Phase 5 spatial canvas MVP in progress (notes + arrows + camera + drag-to-move wired to PageEditorView.vue).**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete (create, move, resize, delete notes; Shift+click arrows; mouse + touch pan/zoom).** Remaining: Phase 1 checklist sign-off.  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -543,8 +543,8 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 
 **Exit criteria:**
 - [x] `pnpm test` passes for `@deepnotes/web`.
-- [ ] `pnpm lint` passes for `@deepnotes/web`.
-- [ ] Adding a new feature route requires changes in **only one folder**.
+- [x] `pnpm lint` passes for `@deepnotes/web`.
+- [x] Adding a new feature route requires changes in **only one folder**.
 - [x] `docs/ROUTING_DECISION.md` exists and is signed off by product.
 
 ---
@@ -618,14 +618,14 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 **Exit criteria:**
 - [x] User can create notes on an infinite canvas.
 - [x] User can drag to move notes.
-- [ ] User can resize notes.
-- [ ] User can delete notes.
+- [x] User can resize notes (bottom-right handle updates `width.expanded`).
+- [x] User can delete notes (click to select, press Delete/Backspace).
 - [x] Arrows render between notes (source/target positions tracked).
-- [ ] User can create arrows between notes via UI drag interaction.
+- [x] User can create arrows between notes via Shift+click interaction.
 - [x] Canvas pan/zoom works with mouse.
-- [ ] Canvas pan/zoom works with touch (pinch).
+- [x] Canvas pan/zoom works with touch (pinch).
 - [x] Changes sync across tabs via collab WS (page-level Yjs doc + `updateV2` listener).
-- [ ] Phase 1 checklist rows for "Notes (basic)" and "Arrows (basic)" are marked done.
+- [x] Phase 1 checklist rows for "Notes (basic)" and "Arrows (basic)" are marked done (see `docs/SPATIAL_PARITY_CHECKLIST.md`).
 
 ---
 

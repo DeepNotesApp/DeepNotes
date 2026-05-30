@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
@@ -13,7 +13,9 @@ const props = defineProps<{
 
 const canvasRef = ref<{ camX: number; camY: number; zoom: number } | null>(null);
 
-const { noteList, arrowList, createNoteAt } = useSpatialPage(props.ydoc);
+const { noteList, arrowList, createNoteAt, deleteNote, createArrow } = useSpatialPage(props.ydoc);
+
+const selectedNoteId = ref<string | null>(null);
 
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
@@ -43,15 +45,44 @@ function onCanvasDoubleClick(e: MouseEvent) {
 
   createNoteAt(world.x, world.y);
 }
+
+function onCanvasPointerDown(e: PointerEvent) {
+  // deselect when clicking empty canvas (not on a note or arrow)
+  if (e.target === e.currentTarget) {
+    selectedNoteId.value = null;
+  }
+}
+
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === "Delete" || e.key === "Backspace") {
+    if (selectedNoteId.value) {
+      deleteNote(selectedNoteId.value);
+      selectedNoteId.value = null;
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", onKeyDown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", onKeyDown);
+});
 </script>
 
 <template>
   <div class="space-y-2">
     <div class="text-muted-foreground text-xs">
       Double-click on the canvas to create a note. Scroll to pan, Ctrl+scroll to
-      zoom.
+      zoom. Click a note to select, then press Delete to remove it. Shift+click
+      another note to connect with an arrow.
     </div>
-    <SpatialWorldCanvas ref="canvasRef" @dblclick="onCanvasDoubleClick">
+    <SpatialWorldCanvas
+      ref="canvasRef"
+      @dblclick="onCanvasDoubleClick"
+      @pointerdown="onCanvasPointerDown"
+    >
       <DisplayArrow
         v-for="arrow in arrowList"
         :key="arrow.id"
@@ -64,7 +95,13 @@ function onCanvasDoubleClick(e: MouseEvent) {
         :key="note.id"
         :model="note.model"
         :zoom="canvasRef?.zoom ?? 1"
-      />
+        :selected="selectedNoteId === note.id"
+        @select="selectedNoteId = note.id"
+        @shift-click="
+          selectedNoteId && selectedNoteId !== note.id
+            ? createArrow(selectedNoteId, note.id)
+            : undefined
+        "
     </SpatialWorldCanvas>
   </div>
 </template>

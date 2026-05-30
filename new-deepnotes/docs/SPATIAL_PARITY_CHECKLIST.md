@@ -9,10 +9,10 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 1.1 | Create note (double-click / button) | `code/pages/page/notes/notes.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.2 | Delete note (`Delete` key) | `code/pages/page/elems/deleting.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.3 | Move note (drag) | `code/pages/page/notes/dragging.ts` | `features/spatial/note-model.ts` | `note-model.test.ts`, `DisplayNote.vue` comp. test | ⬜ |
-| 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.1 | Create note (double-click / button) | `code/pages/page/notes/notes.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
+| 1.2 | Delete note (`Delete` key) | `code/pages/page/elems/deleting.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
+| 1.3 | Move note (drag) | `code/pages/page/notes/dragging.ts` | `features/spatial/note-model.ts` | `note-model.test.ts`, `DisplayNote.vue` comp. test | ✅ 2026-05-30 |
+| 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | 🟡 2026-05-30 (1 handle: bottom-right; full 8-handle parity in Phase 6) |
 | 1.5 | Clone note | `code/pages/page/notes/cloning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.6 | Align notes (left/center/right/top/middle/bottom) | `code/pages/page/notes/aligning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
 | 1.7 | Distribute notes (horizontal/vertical) | `code/pages/page/notes/aligning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
@@ -36,7 +36,7 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 2.1 | Create arrow (drag from note edge) | `code/pages/page/arrows/arrow-creation.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
+| 2.1 | Create arrow (drag from note edge) | `code/pages/page/arrows/arrow-creation.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | 🟡 2026-05-30 (Shift+click interaction; drag-from-edge in Phase 6) |
 | 2.2 | Delete arrow | `code/pages/page/elems/deleting.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.3 | Source / target anchors | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.4 | Source / target head styles | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
@@ -56,11 +56,11 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 3.1 | Pan (wheel) | `code/pages/page/camera/panning.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
-| 3.2 | Pan (space + drag) | `code/pages/page/camera/panning.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
-| 3.3 | Pan (middle-drag) | `code/pages/page/camera/panning.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
-| 3.4 | Zoom (ctrl/cmd + wheel toward cursor) | `code/pages/page/camera/zooming.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
-| 3.5 | Pinch (touch) | `code/pages/page/camera/pinching.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
+| 3.1 | Pan (wheel) | `code/pages/page/camera/panning.ts` | `features/spatial/useSpatialViewport.ts` | `spatial-viewport-math.test.ts` | ✅ 2026-05-30 |
+| 3.2 | Pan (space + drag) | `code/pages/page/camera/panning.ts` | `features/spatial/useSpatialViewport.ts` | `spatial-viewport-math.test.ts` | ✅ 2026-05-30 |
+| 3.3 | Pan (middle-drag) | `code/pages/page/camera/panning.ts` | `features/spatial/useSpatialViewport.ts` | `spatial-viewport-math.test.ts` | ✅ 2026-05-30 |
+| 3.4 | Zoom (ctrl/cmd + wheel toward cursor) | `code/pages/page/camera/zooming.ts` | `features/spatial/useSpatialViewport.ts` | `spatial-viewport-math.test.ts` | ✅ 2026-05-30 |
+| 3.5 | Pinch (touch) | `code/pages/page/camera/pinching.ts` | `features/spatial/useSpatialViewport.ts` | `spatial-viewport-math.test.ts` | ✅ 2026-05-30 |
 | 3.6 | Fit-to-screen | `code/pages/page/camera/camera.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
 | 3.7 | World/client coordinate transforms | `code/pages/page/space/pos.ts` | `features/spatial/camera.ts` | `spatial-viewport-math.test.ts` (exists) | ⬜ |
 | 3.8 | Rect math (DOM/world) | `code/pages/page/space/rects.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |

@@ -1,5 +1,5 @@
 import { ref, type Ref } from "vue";
-import * as Y from "yjs";
+import type * as Y from "yjs";
 
 /**
  * Bridge Yjs Map mutations to a Vue ref.
@@ -7,7 +7,7 @@ import * as Y from "yjs";
  * Yjs type; the consumer can compose further reactivity on top.
  */
 export function useYMapValue<T>(
-  ymap: any,
+  ymap: Y.Map<unknown>,
   key: string,
 ): Ref<T | undefined> {
   const value = ref<T | undefined>(ymap.get(key) as T | undefined);
@@ -18,7 +18,7 @@ export function useYMapValue<T>(
 }
 
 export function useYMapNumber(
-  ymap: any,
+  ymap: Y.Map<unknown>,
   key: string,
   defaultValue = 0,
 ): Ref<number> {
@@ -30,7 +30,7 @@ export function useYMapNumber(
 }
 
 export function useYMapBoolean(
-  ymap: any,
+  ymap: Y.Map<unknown>,
   key: string,
   defaultValue = false,
 ): Ref<boolean> {
@@ -42,7 +42,7 @@ export function useYMapBoolean(
 }
 
 export function useYMapString(
-  ymap: any,
+  ymap: Y.Map<unknown>,
   key: string,
   defaultValue = "",
 ): Ref<string> {
@@ -53,10 +53,10 @@ export function useYMapString(
   return value;
 }
 
-export function useYArrayValues<T>(yarr: any): Ref<T[]> {
-  const value = ref<T[]>(yarr.toArray());
+export function useYArrayValues<T>(yarr: Y.Array<unknown>): Ref<T[]> {
+  const value = ref<T[]>(yarr.toArray() as T[]);
   yarr.observe(() => {
-    value.value = yarr.toArray();
+    value.value = yarr.toArray() as T[];
   });
   return value;
 }

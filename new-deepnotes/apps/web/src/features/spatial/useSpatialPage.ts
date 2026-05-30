@@ -1,4 +1,4 @@
-import { computed, ref, type Ref } from "vue";
+import { computed, ref } from "vue";
 import * as Y from "yjs";
 import {
   addNoteToPage,

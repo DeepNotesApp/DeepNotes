@@ -5,12 +5,19 @@ import type { NoteModel } from "./note-model";
 const props = defineProps<{
   model: NoteModel;
   zoom: number;
+  selected?: boolean;
+}>();
+
+const emit = defineEmits<{
+  select: [];
+  shiftClick: [];
 }>();
 
 const transform = computed(() => {
   const { x, y } = props.model.pos.value;
   return {
     transform: `translate(${x}px, ${y}px)`,
+    width: props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`,
   };
 });
 
@@ -21,6 +28,7 @@ const frameClasses = computed(() => {
     "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none",
     ro ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "",
+    props.selected ? "ring-2 ring-primary" : "",
   ];
 });
 
@@ -33,6 +41,11 @@ let noteStartY = 0;
 function onPointerDown(e: PointerEvent) {
   if (!props.model.movable.value || e.button !== 0) return;
   e.stopPropagation();
+  emit("select");
+  if (e.shiftKey) {
+    emit("shiftClick");
+    return;
+  }
   dragPointerId = e.pointerId;
   startX = e.clientX;
   startY = e.clientY;
@@ -67,6 +80,44 @@ function onPointerUp(e: PointerEvent) {
   }
   el.style.cursor = props.model.movable.value ? "grab" : "";
 }
+
+// --- resize handle ---
+let resizePointerId: number | null = null;
+let resizeStartX = 0;
+let resizeStartWidth = 0;
+
+function onResizePointerDown(e: PointerEvent) {
+  if (e.button !== 0) return;
+  e.stopPropagation();
+  resizePointerId = e.pointerId;
+  resizeStartX = e.clientX;
+  const w = props.model.width.value.expanded;
+  resizeStartWidth = w === "Auto" ? 160 : parseFloat(w);
+  const el = e.currentTarget as HTMLElement;
+  el.setPointerCapture(e.pointerId);
+}
+
+function onResizePointerMove(e: PointerEvent) {
+  if (resizePointerId !== e.pointerId) return;
+  const z = props.zoom || 1;
+  const dx = (e.clientX - resizeStartX) / z;
+  const next = Math.max(80, Math.round(resizeStartWidth + dx));
+  const widthMap = props.model.rawMap.get("width") as import("yjs").Map<string>;
+  widthMap.set("expanded", String(next));
+}
+
+function onResizePointerUp(e: PointerEvent) {
+  if (resizePointerId !== e.pointerId) return;
+  resizePointerId = null;
+  const el = e.currentTarget as HTMLElement;
+  if (el.releasePointerCapture) {
+    try {
+      el.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  }
+}
 </script>
 
 <template>
@@ -94,5 +145,15 @@ function onPointerUp(e: PointerEvent) {
         {{ model.zIndex.value }}
       </p>
     </div>
+
+    <!-- resize handle -->
+    <div
+      v-if="model.resizable.value"
+      class="bg-primary absolute -bottom-1.5 -right-1.5 h-3 w-3 cursor-nwse-resize rounded-full"
+      @pointerdown="onResizePointerDown"
+      @pointermove="onResizePointerMove"
+      @pointerup="onResizePointerUp"
+      @pointercancel="onResizePointerUp"
+    />
   </div>
 </template>
