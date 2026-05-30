@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 2–3 backend largely complete. Phase 4–5 SPA partially complete. **Foundation bugs and spatial canvas NOT started.**  
+> **Status:** Phase 0 foundation complete. Phase 2–3 backend largely complete. Phase 4–5 SPA partially complete. **Phase 1 (spatial checklist) is next.**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -308,11 +308,11 @@ Each phase has:
    - `.github/workflows/new-deepnotes-ci.yml` already has `services: postgres` and exports `DATABASE_URL` + `DATABASE_ADMIN_URL`.
    - Integration tests run in CI after `pnpm db:migrate`.
 
-6. **Refactor `usePageCollabEditor.ts` into focused composables** 🔄
+6. **Refactor `usePageCollabEditor.ts` into focused composables** ✅
    - Split files exist: `useCollabWebSocket.ts`, `useCollabPush.ts`, `useCollabCrypto.ts`, `usePageEditor.ts`.
    - `CollabWsIncomingContext` updated to use `serverDoc` + `unackedUpdates` instead of `serverStateVector`.
    - **`single-update-ack` handler fixed:** advances `serverDoc` only with the acknowledged diff, not full `ydoc` state.
-   - Remaining: rewrite `usePageCollabEditor.ts` as thin orchestrator calling the 4 composables, then wire `PageEditorView.vue`.
+   - `usePageCollabEditor.ts` rewritten as thin orchestrator (~280 lines) calling the 4 composables; `PageEditorView.vue` wired to new export.
 
 7. **Add collab updates pagination to backend** ✅
    - `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and `?limit=` (default 100, max 500).
@@ -342,14 +342,14 @@ pnpm test
 ```
 
 **Exit criteria (all must be yes):**
-- [ ] `pnpm test` from `new-deepnotes/` root passes with 0 failures.
+- [x] `pnpm test` from `new-deepnotes/` root passes with 0 failures.
 - [x] `apps/web` unit tests run in `happy-dom` and can mount `.vue` files.
 - [x] `useSession.test.ts` passes in isolation and in batch (`--run` 3 times).
 - [x] CI test job runs integration tests against a real Postgres service.
-- [ ] `usePageCollabEditor.ts` is split into composables ≤ 300 lines each.
+- [x] `usePageCollabEditor.ts` is split into composables ≤ 300 lines each.
 - [x] `router.ts` exports a factory and has zero module-load `window` access.
 - [x] Collab updates endpoint supports `?sinceIndex=` and returns ≤ 100 rows.
-- [ ] Playwright smoke test passes locally (`pnpm exec playwright test`).
+- [x] Playwright smoke test passes locally (`pnpm exec playwright test`).
 
 ---
 

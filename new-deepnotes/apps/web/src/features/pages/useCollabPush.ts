@@ -20,6 +20,7 @@ export function useCollabPush(opts: {
   getCollabWs: () => WebSocket | null;
   serverDoc?: Y.Doc;
   unackedUpdates?: Map<number, Uint8Array>;
+  collabLastIndex?: Ref<number | null>;
 }) {
   const {
     ydoc,
@@ -33,7 +34,7 @@ export function useCollabPush(opts: {
   } = opts;
 
   const pushError = ref<string | null>(null);
-  const collabLastIndex = ref<number | null>(null);
+  const collabLastIndex = opts.collabLastIndex ?? ref<number | null>(null);
   const serverDoc = opts.serverDoc ?? new Y.Doc();
   const unackedUpdates = opts.unackedUpdates ?? new Map<number, Uint8Array>();
   let collabClientUpdateId = 0;
@@ -176,6 +177,13 @@ export function useCollabPush(opts: {
     }
   }
 
+  function teardownPushTimers() {
+    if (pushTimer != null) {
+      clearTimeout(pushTimer);
+      pushTimer = null;
+    }
+  }
+
   return {
     pushError,
     collabLastIndex,
@@ -184,5 +192,6 @@ export function useCollabPush(opts: {
     schedulePush,
     flushPush,
     syncServerDocToYdoc,
+    teardownPushTimers,
   };
 }

@@ -18,15 +18,19 @@ export function useCollabWebSocket(opts: {
   collabAwareness: Awareness;
   serverDoc: Y.Doc;
   unackedUpdates: Map<number, Uint8Array>;
+  hydrating?: Ref<boolean>;
+  collabLastIndex?: Ref<number | null>;
+  collabWsLive?: Ref<boolean>;
+  collabWsError?: Ref<string | null>;
 }) {
   const { pageId, user, pageKeyring, collabAwareness, serverDoc, unackedUpdates } = opts;
 
-  const collabWsLive = ref(false);
-  const collabWsError = ref<string | null>(null);
+  const collabWsLive = opts.collabWsLive ?? ref(false);
+  const collabWsError = opts.collabWsError ?? ref<string | null>(null);
   let collabWs: WebSocket | null = null;
   let awarenessPushTimer: ReturnType<typeof setTimeout> | null = null;
 
-  const hydrating = ref(false);
+  const hydrating = opts.hydrating ?? ref(false);
 
   const wsIncomingCtx: CollabWsIncomingContext = {
     ydoc: collabAwareness.doc,
@@ -34,7 +38,7 @@ export function useCollabWebSocket(opts: {
     getPageId: () => pageId.value,
     getPageKeyring: () => pageKeyring.value,
     hydrating,
-    collabLastIndex: ref(null),
+    collabLastIndex: opts.collabLastIndex ?? ref<number | null>(null),
     serverDoc,
     unackedUpdates,
     refreshYMetrics: (): void => {
