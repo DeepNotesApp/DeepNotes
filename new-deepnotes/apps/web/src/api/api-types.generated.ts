@@ -3767,11 +3767,14 @@ export interface paths {
         };
         /**
          * List encrypted Yjs page updates (Postgres)
-         * @description Bootstrap for the editor: returns all `page_updates` rows for the page, ordered by `index`. Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).
+         * @description Bootstrap for the editor: returns `page_updates` rows for the page, ordered by `index`. Use `sinceIndex` to paginate incrementally (default limit 100, max 500). Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    sinceIndex?: string;
+                    limit?: string;
+                };
                 header?: never;
                 path: {
                     pageId: string;

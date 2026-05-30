@@ -136,12 +136,12 @@ export function usePageCollabEditor(opts: {
             {
               params: {
                 path: { pageId: id },
-                query: { sinceIndex, limit: "100" } as any,
+                query: { sinceIndex, limit: "100" },
               },
             },
           ) as {
             data: components["schemas"]["PageCollabUpdatesGetResponse"] | undefined;
-            error: any;
+            error: unknown;
             response: Response;
           };
           if (response.status !== 200 || !data) {

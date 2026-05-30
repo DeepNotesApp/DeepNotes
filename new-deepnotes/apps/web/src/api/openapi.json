@@ -5453,7 +5453,7 @@
     "/api/pages/{pageId}/collab-updates": {
       "get": {
         "summary": "List encrypted Yjs page updates (Postgres)",
-        "description": "Bootstrap for the editor: returns all `page_updates` rows for the page, ordered by `index`. Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).",
+        "description": "Bootstrap for the editor: returns `page_updates` rows for the page, ordered by `index`. Use `sinceIndex` to paginate incrementally (default limit 100, max 500). Does not use legacy Redis collab cache — Postgres only. Full duplex collab remains a separate WebSocket track (Phase 3).",
         "parameters": [
           {
             "schema": {
@@ -5465,6 +5465,24 @@
             "required": true,
             "name": "pageId",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "If provided, only returns updates with `index > sinceIndex` (exclusive). Used for incremental bootstrap after the first batch."
+            },
+            "required": false,
+            "name": "sinceIndex",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "description": "Max updates to return per request (default 100, max 500)."
+            },
+            "required": false,
+            "name": "limit",
+            "in": "query"
           }
         ],
         "responses": {
