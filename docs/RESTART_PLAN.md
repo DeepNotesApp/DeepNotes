@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 2–3 backend largely complete. Phase 4–5 SPA partially complete. **Phase 1 (spatial checklist) is next.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** Phase 4–5 SPA partially complete. **Phase 3 (collab wire parity — page-level Yjs doc) is in progress.**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -395,10 +395,10 @@ pnpm test
 - Schema diff table must cover every Zod field in `note-collab.ts` and `arrow.ts`.
 
 **Exit criteria:**
-- [ ] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed.
-- [ ] Every legacy `DisplayWorld` component has a corresponding row in the checklist.
-- [ ] No row is marked "done" unless the feature is actually implemented (not stubbed).
-- [ ] Schema diff table exists and is reviewed for completeness.
+- [x] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed.
+- [x] Every legacy `DisplayWorld` component has a corresponding row in the checklist.
+- [x] No row is marked "done" unless the feature is actually implemented (not stubbed).
+- [x] Schema diff table exists and is reviewed for completeness.
 
 ---
 
@@ -428,9 +428,9 @@ pnpm test
 | Collab WS (DO) | `GET /api/pages/:pid/collab-ws` | `collab-wire` unit tests | Verify green |
 
 **Exit criteria:**
-- [ ] Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing test in CI.
-- [ ] `api-worker` 503 matrix test (`index.test.ts`) passes (all routes return 503 when env is missing).
-- [ ] No backend route is "stubbed" (returns 501 or empty body) for a feature claimed as done.
+- [x] Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing test in CI.
+- [x] `api-worker` 503 matrix test (`index.test.ts`) passes (all routes return 503 when env is missing).
+- [x] No backend route is "stubbed" (returns 501 or empty body) for a feature claimed as done.
 
 ---
 
@@ -492,13 +492,13 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - Client bootstrap test: mock 250 updates across 3 pagination requests; assert doc state equals merged updates.
 
 **Exit criteria:**
-- [ ] `packages/collab-wire` can encode/decode a page-level Yjs update.
-- [ ] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
+- [x] `packages/collab-wire` can encode/decode a page-level Yjs update.
+- [x] `PageCollabRoom` persists and relays page-level updates (not just ProseMirror).
 - [ ] Two browser tabs can sync note creation/deletion via WS (integration test or manual QA with sign-off).
-- [ ] `docs/COLLAB_DATA_MIGRATION.md` documents the `page_updates` compatibility strategy.
-- [ ] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs, protocol differences, and CPU limits.
-- [ ] `docs/SPATIAL_ARCHITECTURE_DECISION.md` documents SyncedStore vs hybrid proxy decision.
-- [ ] Schema includes every legacy field from the Phase 1 diff table (no omissions).
+- [x] `docs/COLLAB_DATA_MIGRATION.md` documents the `page_updates` compatibility strategy.
+- [x] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs, protocol differences, and CPU limits.
+- [x] `docs/SPATIAL_ARCHITECTURE_DECISION.md` documents SyncedStore vs hybrid proxy decision.
+- [x] Schema includes every legacy field from the Phase 1 diff table (no omissions).
 
 ---
 

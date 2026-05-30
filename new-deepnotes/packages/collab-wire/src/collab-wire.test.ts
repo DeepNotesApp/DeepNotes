@@ -8,6 +8,9 @@ import {
   encodeDocSingleUpdateAck,
   encodeDocSingleUpdateFromClient,
   encodeDocSingleUpdateFromServer,
+  encodePageDocSingleUpdateFromClient,
+  encodePageDocSingleUpdateFromServer,
+  encodePageDocSingleUpdateAck,
   uint8ToBase64Standard,
   base64ToUint8Standard,
 } from "./index.js";
@@ -64,6 +67,40 @@ describe("@deepnotes/collab-wire", () => {
       kind: "single-update",
       encryptedUpdate: a,
       dbIndex: 3,
+    });
+  });
+
+  it("round-trips PAGE_DOC client SINGLE_UPDATE and server ACK with dbIndex", () => {
+    const enc = new Uint8Array([4, 5, 6]);
+    const bin = encodePageDocSingleUpdateFromClient({ updateId: 9, encryptedUpdate: enc });
+    const dec = decodeClientCollabBinaryMessage(bin);
+    expect(dec).toEqual({
+      kind: "page-doc-single",
+      updateId: 9,
+      encryptedUpdate: enc,
+    });
+
+    const ack = encodePageDocSingleUpdateAck({ updateId: 9, dbIndex: 55 });
+    const incoming = decodeIncomingCollabBinaryMessage(ack);
+    expect(incoming).toEqual({
+      kind: "page-single-update-ack",
+      updateId: 9,
+      dbIndex: 55,
+    });
+  });
+
+  it("PAGE_DOC server SINGLE_UPDATE decodes ciphertext and optional dbIndex", () => {
+    const enc = new Uint8Array([10, 11]);
+    const bin = encodePageDocSingleUpdateFromServer(enc, 6);
+    expect(decodeIncomingCollabBinaryMessage(bin)).toEqual({
+      kind: "page-single-update",
+      encryptedUpdate: enc,
+      dbIndex: 6,
+    });
+    expect(decodeIncomingCollabBinaryMessage(encodePageDocSingleUpdateFromServer(enc))).toEqual({
+      kind: "page-single-update",
+      encryptedUpdate: enc,
+      dbIndex: null,
     });
   });
 });

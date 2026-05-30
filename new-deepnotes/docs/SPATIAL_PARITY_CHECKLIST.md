@@ -1,6 +1,6 @@
 # Spatial Parity Checklist
 
-> **Status:** Draft — inventory of legacy spatial canvas features vs. new `apps/web` stubs.
+> **Status:** Inventory complete — 69 rows covering all legacy `DisplayWorld` components. Ready for review.
 > **Goal:** Every row must have a passing test before it is marked done. Stubs do not count as done.
 
 ---
@@ -48,6 +48,7 @@
 | 2.10 | Interregional flag | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.11 | fakePos / looseEndpoint | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
 | 2.12 | Arrow createdAt / editedAt | `code/pages/page/arrows/arrow.ts` | `features/spatial/arrow-model.ts` | `arrow-model.test.ts` | ⬜ |
+| 2.13 | Interregional arrow rendering | `layouts/.../DisplayWorld/InterregionalArrows.vue` | `features/spatial/DisplayArrow.vue` | `DisplayArrow.test.ts` | ⬜ |
 
 ---
 
@@ -65,6 +66,8 @@
 | 3.8 | Rect math (DOM/world) | `code/pages/page/space/rects.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
 | 3.9 | Size helpers | `code/pages/page/space/sizes.ts` | `features/spatial/camera.ts` | `camera.test.ts` | ⬜ |
 | 3.10 | Grid background | `layouts/.../DisplayWorld/DisplayGrid.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
+| 3.11 | Canvas background | `layouts/.../DisplayWorld/DisplayBackground.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
+| 3.12 | DOM + SVG rendering layers | `layouts/.../DisplayWorld/DOMDisplay.vue`, `SVGDisplay.vue` | `features/spatial/SpatialWorldCanvas.vue` | `SpatialWorldCanvas.test.ts` | ⬜ |
 
 ---
 
@@ -177,6 +180,7 @@
 | `createdAt` | `number|null` default `null` | `number|null` | ✅ |
 | `editedAt` | `number|null` default `null` | `number|null` | ✅ |
 | `movedAt` | `number|null` default `null` | `number|null` | ✅ |
+| `regionId` | `string|null` default `null` (from `IElemCollab`) | `string|null` | ✅ |
 
 ### `IArrowCollab` fields
 
@@ -198,13 +202,14 @@
 | `looseEndpoint` | `'source'|'target'` optional | `'source'|'target'|null` | ✅ |
 | `createdAt` | `number|null` default `null` | `number|null` | ✅ |
 | `editedAt` | `number|null` default `null` | `number|null` | ✅ |
+| `regionId` | `string|null` default `null` (from `IElemCollab`) | `string|null` | ✅ |
 
 ---
 
 ## Exit Criteria
 
-- [ ] Checklist contains ≥ 60 rows (currently 50+).
-- [ ] Every legacy `DisplayWorld` component has a corresponding row.
-- [ ] No row is marked "done" unless the feature is actually implemented (not stubbed).
-- [ ] Schema diff table covers every field in `INoteCollab` and `IArrowCollab`.
+- [x] Checklist contains ≥ 60 rows (currently **69**).
+- [x] Every legacy `DisplayWorld` component has a corresponding row.
+- [x] No row is marked "done" unless the feature is actually implemented (not stubbed).
+- [x] Schema diff table covers every field in `INoteCollab` and `IArrowCollab`.
 - [ ] Reviewed by someone who has used the legacy app.
