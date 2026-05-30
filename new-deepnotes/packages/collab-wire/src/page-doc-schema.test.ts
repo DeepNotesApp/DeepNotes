@@ -69,6 +69,7 @@ describe("page-doc-schema", () => {
     expect(container.get("wrapChildren")).toBe(false);
     expect(container.get("stretchChildren")).toBe(true);
     expect(container.get("forceColorInheritance")).toBe(false);
+    expect(container.get("children")).toBeInstanceOf(Y.Array);
 
     const collapsing = note.get(YPAGE_NOTE_KEY.collapsing) as Y.Map<boolean>;
     expect(collapsing.get("enabled")).toBe(false);

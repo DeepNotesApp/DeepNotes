@@ -19,8 +19,15 @@ const canvasRef = ref<{
   rootEl: HTMLElement | null;
 } | null>(null);
 
-const { noteList, arrowList, createNoteAt, deleteNote, deleteArrow, createArrow } =
-  useSpatialPage(props.ydoc);
+const {
+  noteList,
+  rootNoteList,
+  arrowList,
+  createNoteAt,
+  deleteNote,
+  deleteArrow,
+  createArrow,
+} = useSpatialPage(props.ydoc);
 
 const selection = useSpatialSelection();
 
@@ -33,7 +40,7 @@ const noteById = computed(() => {
 });
 
 const notesByZIndex = computed(() => {
-  return [...noteList.value].sort(
+  return [...rootNoteList.value].sort(
     (a, b) => a.model.zIndex.value - b.model.zIndex.value,
   );
 });
@@ -149,7 +156,7 @@ function finalizeBoxSelect() {
   const boxW = Math.max(w1.x, w2.x) - boxX;
   const boxH = Math.max(w1.y, w2.y) - boxY;
 
-  for (const note of noteList.value) {
+  for (const note of rootNoteList.value) {
     const nx = note.model.pos.value.x;
     const ny = note.model.pos.value.y;
     const nwStr = note.model.width.value.expanded;
@@ -190,7 +197,7 @@ function onKeyDown(e: KeyboardEvent) {
 
   if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
-    selection.selectAll(noteList.value.map((n) => n.id));
+    selection.selectAll(rootNoteList.value.map((n) => n.id));
     return;
   }
 }
@@ -236,6 +243,11 @@ onUnmounted(() => {
           :model="note.model"
           :zoom="canvasRef?.zoom ?? 1"
           :selected="selection.isSelected(note.id)"
+          :child-models="
+            note.model.container.children.value
+              .map((childId) => noteById.get(childId))
+              .filter((m): m is NonNullable<typeof m> => m !== undefined)
+          "
           @select="selection.select(note.id, 'note')"
           @toggle="selection.toggle(note.id, 'note')"
           @shift-click="

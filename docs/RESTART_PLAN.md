@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete (create, move, resize, delete notes; Shift+click arrows; mouse + touch pan/zoom).** **Phase 6 in progress: selection system complete (click, multi-select, box select, select all, active element); arrow click-to-select + deletion; note color + z-index rendering; grid background verified.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete (create, move, resize, delete notes; Shift+click arrows; mouse + touch pan/zoom).** **Phase 6 in progress: selection system complete (click, multi-select, box select, select all, active element); arrow click-to-select + deletion; note color + z-index rendering; grid background verified; container children schema, model, page tracking, and rendering complete; drag-into-container pending.**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -25,7 +25,7 @@
 | **Page management UI** | `apps/web/src/features/pages/*` | Partial | Bump, favorite, recent, snapshots, soft-delete, restore, purge, move, path breadcrumb. |
 | **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
 | **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
-| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, containers pending. |
+| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, container schema/model/rendering complete; drag-into-container pending. |
 | **Collab pagination** | `GET /api/pages/:pid/collab-updates` | Done | `?sinceIndex=` + `?limit=` (default 100, max 500). Client loops. |
 | **Playwright E2E** | `apps/web/playwright.config.ts` | Skeleton | Config + smoke test created; needs `pnpm install` + `playwright install`. |
 

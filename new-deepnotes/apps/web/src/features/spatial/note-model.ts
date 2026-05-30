@@ -7,6 +7,7 @@ import {
   useYMapNumber,
   useYMapString,
   useYMapValue,
+  useYArrayValues,
 } from "./yjs-reactivity";
 
 export type NoteModel = ReturnType<typeof useNoteModel>;
@@ -78,6 +79,8 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
     "forceColorInheritance",
     false,
   );
+  const containerChildrenArr = containerMap.get("children") as Y.Array<string>;
+  const containerChildren = useYArrayValues<string>(containerChildrenArr);
 
   // --- collapsing ---
   const collapsingMap = noteMap.get(
@@ -134,6 +137,7 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
       wrapChildren: containerWrapChildren,
       stretchChildren: containerStretchChildren,
       forceColorInheritance: containerForceColorInheritance,
+      children: containerChildren,
     },
     collapsing: {
       enabled: collapsingEnabled,

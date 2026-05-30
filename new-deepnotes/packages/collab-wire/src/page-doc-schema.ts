@@ -43,6 +43,7 @@ export const YPAGE_NOTE_KEY = {
   createdAt: "createdAt",
   editedAt: "editedAt",
   movedAt: "movedAt",
+  containerChildren: "containerChildren",
 } as const;
 
 export const YPAGE_ARROW_KEY = {
@@ -113,6 +114,7 @@ function createDefaultContainer(): Y.Map<unknown> {
   m.set("wrapChildren", false);
   m.set("stretchChildren", true);
   m.set("forceColorInheritance", false);
+  m.set("children", new Y.Array<string>());
   return m;
 }
 

@@ -67,4 +67,44 @@ describe("useSpatialPage", () => {
     posMap.set("x", 99);
     expect(model.pos.value).toEqual({ x: 99, y: 20 });
   });
+
+  it("adds a child to a container", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(0, 0);
+    const childId = page.createNoteAt(50, 50);
+
+    page.addChildToContainer(containerId, childId);
+    expect(page.parentOf.value.get(childId)).toBe(containerId);
+    expect(page.rootNoteList.value.map((n) => n.id)).not.toContain(childId);
+  });
+
+  it("removes a child from a container", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(0, 0);
+    const childId = page.createNoteAt(50, 50);
+
+    page.addChildToContainer(containerId, childId);
+    page.removeChildFromContainer(containerId, childId);
+
+    expect(page.parentOf.value.has(childId)).toBe(false);
+    expect(page.rootNoteList.value.map((n) => n.id)).toContain(childId);
+  });
+
+  it("deletes container children recursively", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(0, 0);
+    const childId = page.createNoteAt(50, 50);
+
+    page.addChildToContainer(containerId, childId);
+    page.deleteNote(containerId);
+
+    expect(page.noteList.value.map((n) => n.id)).not.toContain(containerId);
+    expect(page.noteList.value.map((n) => n.id)).not.toContain(childId);
+  });
 });

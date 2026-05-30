@@ -92,7 +92,59 @@ export function useSpatialPage(ydoc: Y.Doc) {
     return id;
   }
 
+  // --- container parent tracking ---
+  const parentOf = computed(() => {
+    const map = new Map<string, string>();
+    for (const { id, model } of noteList.value) {
+      for (const childId of model.container.children.value) {
+        map.set(childId, id);
+      }
+    }
+    return map;
+  });
+
+  const rootNoteList = computed(() =>
+    noteList.value.filter((n) => !parentOf.value.has(n.id)),
+  );
+
+  function addChildToContainer(containerId: string, childId: string) {
+    const containerNote = notesMap.get(containerId);
+    if (!containerNote) return;
+    const containerMap = containerNote.get(
+      YPAGE_NOTE_KEY.container,
+    ) as Y.Map<unknown>;
+    const childrenArr = containerMap.get("children") as Y.Array<string>;
+    if (!childrenArr.toArray().includes(childId)) {
+      childrenArr.push([childId]);
+    }
+  }
+
+  function removeChildFromContainer(containerId: string, childId: string) {
+    const containerNote = notesMap.get(containerId);
+    if (!containerNote) return;
+    const containerMap = containerNote.get(
+      YPAGE_NOTE_KEY.container,
+    ) as Y.Map<unknown>;
+    const childrenArr = containerMap.get("children") as Y.Array<string>;
+    const idx = childrenArr.toArray().indexOf(childId);
+    if (idx >= 0) {
+      childrenArr.delete(idx, 1);
+    }
+  }
+
   function deleteNote(noteId: string) {
+    // Remove from parent container if nested
+    const parentId = parentOf.value.get(noteId);
+    if (parentId) {
+      removeChildFromContainer(parentId, noteId);
+    }
+    // Delete children recursively
+    const model = noteModels.get(noteId);
+    if (model) {
+      for (const childId of [...model.container.children.value]) {
+        deleteNote(childId);
+      }
+    }
     removeNoteFromPage(ydoc, noteId);
     noteModels.delete(noteId);
     refreshNoteIds();
@@ -118,10 +170,14 @@ export function useSpatialPage(ydoc: Y.Doc) {
   return {
     noteIds,
     noteList,
+    rootNoteList,
     arrowList,
+    parentOf,
     createNoteAt,
     deleteNote,
     deleteArrow,
     createArrow,
+    addChildToContainer,
+    removeChildFromContainer,
   };
 }

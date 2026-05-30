@@ -6,6 +6,7 @@ const props = defineProps<{
   model: NoteModel;
   zoom: number;
   selected?: boolean;
+  childModels?: NoteModel[];
 }>();
 
 const emit = defineEmits<{
@@ -192,5 +193,20 @@ function onResizePointerUp(e: PointerEvent) {
       @pointerup="onResizePointerUp"
       @pointercancel="onResizePointerUp"
     />
+
+    <!-- container children -->
+    <template v-if="model.container.enabled.value && childModels?.length">
+      <div
+        class="border-border pointer-events-none absolute inset-x-0 bottom-0 border-t"
+        style="top: 3rem"
+      >
+        <DisplayNote
+          v-for="(child, idx) in childModels"
+          :key="idx"
+          :model="child"
+          :zoom="zoom"
+        />
+      </div>
+    </template>
   </div>
 </template>
