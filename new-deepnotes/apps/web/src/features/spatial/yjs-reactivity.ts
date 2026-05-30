@@ -7,10 +7,10 @@ import type * as Y from "yjs";
  * Yjs type; the consumer can compose further reactivity on top.
  */
 export function useYMapValue<T>(
-  ymap: Y.Map<unknown>,
+  ymap: Y.Map<any>,
   key: string,
 ): Ref<T | undefined> {
-  const value = ref<T | undefined>(ymap.get(key) as T | undefined);
+  const value = ref(ymap.get(key) as T | undefined) as Ref<T | undefined>;
   ymap.observe(() => {
     value.value = ymap.get(key) as T | undefined;
   });
@@ -18,7 +18,7 @@ export function useYMapValue<T>(
 }
 
 export function useYMapNumber(
-  ymap: Y.Map<unknown>,
+  ymap: Y.Map<any>,
   key: string,
   defaultValue = 0,
 ): Ref<number> {
@@ -30,7 +30,7 @@ export function useYMapNumber(
 }
 
 export function useYMapBoolean(
-  ymap: Y.Map<unknown>,
+  ymap: Y.Map<any>,
   key: string,
   defaultValue = false,
 ): Ref<boolean> {
@@ -42,7 +42,7 @@ export function useYMapBoolean(
 }
 
 export function useYMapString(
-  ymap: Y.Map<unknown>,
+  ymap: Y.Map<any>,
   key: string,
   defaultValue = "",
 ): Ref<string> {
@@ -53,8 +53,8 @@ export function useYMapString(
   return value;
 }
 
-export function useYArrayValues<T>(yarr: Y.Array<unknown>): Ref<T[]> {
-  const value = ref<T[]>(yarr.toArray() as T[]);
+export function useYArrayValues<T>(yarr: Y.Array<any>): Ref<T[]> {
+  const value = ref(yarr.toArray() as T[]) as Ref<T[]>;
   yarr.observe(() => {
     value.value = yarr.toArray() as T[];
   });

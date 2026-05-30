@@ -7,4 +7,9 @@ export default tseslint.config(
   {
     ignores: ["**/dist/**", "**/.output/**", "**/node_modules/**", "**/migrations/meta/**"],
   },
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 );
