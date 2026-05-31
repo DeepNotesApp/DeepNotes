@@ -24,6 +24,7 @@
     "drizzle-orm": "^0.41.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
