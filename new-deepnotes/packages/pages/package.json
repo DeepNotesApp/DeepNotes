@@ -18,6 +18,9 @@
     "@deepnotes/db": "workspace:*",
     "@deepnotes/session-core": "workspace:*",
     "@deepnotes/groups": "workspace:*",
+    "crypto-js": "^4.2.0",
+    "libsodium-wrappers-sumo": "^0.7.15",
+    "msgpackr": "^2.0.2",
     "drizzle-orm": "^0.41.0"
   },
   "devDependencies": {

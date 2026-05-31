@@ -11,7 +11,12 @@ export { decryptUserEmail, encryptUserEmail } from "./encrypt-user-email.js";
 export { userHasGroupPermission } from "./group-permissions.js";
 export { performSessionLogin } from "./login.js";
 export type { SessionLoginBody } from "./login.js";
+export {
+  checkFailedLoginAttempts,
+  incrementFailedLoginAttempts,
+} from "./login-rate-limit.js";
 export type { SessionRedisPort } from "./login-rate-limit.js";
+export { signAccessToken, signRefreshToken } from "./jwt.js";
 export { performSessionLogout } from "./logout.js";
 export { performSessionRefresh } from "./refresh.js";
 export { performSessionStartDemo } from "./start-demo.js";
@@ -62,4 +67,14 @@ export { performScheduledCleanup } from "./scheduled-cleanup.js";
 export { sendEmailChangeVerificationEmail } from "./send-email-change-code.js";
 export { sendRegistrationEmail } from "./send-registration-email.js";
 export { hashUserEmail } from "./email-hash.js";
-export { ensureSodiumReady } from "./crypto/session-crypto.js";
+export {
+  ensureSodiumReady,
+  decryptRecoveryCodes,
+  derivePasswordValues,
+  decryptUserRehashedLoginHash,
+} from "./crypto/session-crypto.js";
+export {
+  createPrivateKeyring,
+  createSymmetricKeyring,
+  getPasswordHashValues,
+} from "./crypto/index.js";

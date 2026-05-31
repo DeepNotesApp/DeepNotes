@@ -119,7 +119,7 @@ export function hashRecoveryCode(
   return concatUint8Arrays(
     salt,
     cryptoJsWordArrayToUint8Array(
-      CryptoJS.SHA256(sodium.to_hex(salt) + recoveryCode),
+      CryptoJS.SHA256(sodium.to_hex(salt!) + recoveryCode),
     ),
   );
 }

@@ -33,43 +33,50 @@ import {
   usersNotifications,
 } from "@deepnotes/db/schema";
 
-import { performUserPasswordChange } from "./change-user-password.js";
 import {
+  performUserPasswordChange,
   performUserEmailChangeConfirm,
   performUserEmailChangeRequest,
-} from "./change-user-email.js";
-import { performSessionLogin } from "./login.js";
-import { performSessionRefresh } from "./refresh.js";
-import {
+  performSessionLogin,
+  performSessionRefresh,
   performUserTwoFactorEnableFinish,
   performUserTwoFactorEnableRequest,
-} from "./user-two-factor-settings.js";
-import {
+  performUserRegister,
+  performGetUserGroupIds,
+  performAddFavoritePages,
+  performClearRecentPages,
+  performGetCurrentPath,
+  performGetFavoritePageIds,
+  performGetRecentPageIds,
+  performGetStartingPageId,
+  performLoadNotifications,
+  performMarkNotificationsRead,
+  performPatchDefaultNote,
+  performRemoveFavoritePages,
+  performRemoveRecentPages,
+  decryptUserEmail,
+  hashUserEmail,
+  type SessionEnv,
+  signAccessToken,
+  type UserRegisterInput,
   createPrivateKeyring,
   createSymmetricKeyring,
   getPasswordHashValues,
-} from "./crypto/index.js";
-import {
   decryptRecoveryCodes,
   derivePasswordValues,
   decryptUserRehashedLoginHash,
   ensureSodiumReady,
-} from "./crypto/session-crypto.js";
-import type { UserRegisterInput } from "./register-user.js";
+} from "@deepnotes/session-core";
 import {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
   performGetGroupMembersDetail,
-} from "./group-main-and-members.js";
-import {
   performGroupJoinInvitationSend,
   performGroupJoinInvitationAccept,
   performGroupJoinRequestAccept,
   performGroupJoinRequestSend,
   performGroupMemberRemove,
   performGroupMemberRoleChange,
-} from "./group-membership.js";
-import {
   performGroupPasswordChange,
   performGroupPasswordDisable,
   performGroupPasswordEnable,
@@ -79,6 +86,10 @@ import {
   performGroupPurge,
   performGroupRestore,
   performGroupSoftDelete,
+  performCreatePage,
+  performListGroupPages,
+} from "@deepnotes/groups";
+import {
   performPageBacklinkCreate,
   performPageBacklinkDelete,
   performPageBump,
@@ -93,31 +104,8 @@ import {
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
-  resolveRealtimeHashFieldAccess,
-} from "./index.js";
-import {
-  performCreatePage,
-  performListGroupPages,
-} from "./group-pages.js";
-import { performGetUserGroupIds } from "./user-group-ids.js";
-import {
-  performAddFavoritePages,
-  performClearRecentPages,
-  performGetCurrentPath,
-  performGetFavoritePageIds,
-  performGetRecentPageIds,
-  performGetStartingPageId,
-  performLoadNotifications,
-  performMarkNotificationsRead,
-  performPatchDefaultNote,
-  performRemoveFavoritePages,
-  performRemoveRecentPages,
-} from "./user-page-prefs.js";
-import { performUserRegister } from "./register-user.js";
-import { decryptUserEmail } from "./encrypt-user-email.js";
-import { hashUserEmail } from "./email-hash.js";
-import type { SessionEnv } from "./env.js";
-import { signAccessToken } from "./jwt.js";
+} from "@deepnotes/pages";
+import { resolveRealtimeHashFieldAccess } from "@deepnotes/realtime";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: join(__dirname, "../../../.env") });
