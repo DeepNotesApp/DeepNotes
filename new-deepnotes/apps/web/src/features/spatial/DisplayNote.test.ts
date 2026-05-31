@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import * as Y from "yjs";
 
@@ -29,11 +29,18 @@ function createNoteModel(
 }
 
 describe("DisplayNote", () => {
+  let wrapper: ReturnType<typeof mount> | undefined;
+
+  afterEach(() => {
+    wrapper?.unmount();
+    wrapper = undefined;
+  });
+
   it("renders a single note without children", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1");
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: { id: "note-1", model, zoom: 1 },
     });
 
@@ -45,7 +52,7 @@ describe("DisplayNote", () => {
     const parentModel = createNoteModel(ydoc, "parent", { containerEnabled: true });
     const childModel = createNoteModel(ydoc, "child-1");
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: {
         id: "parent",
         model: parentModel,
@@ -63,7 +70,7 @@ describe("DisplayNote", () => {
     const parentModel = createNoteModel(ydoc, "parent", { containerEnabled: false });
     const childModel = createNoteModel(ydoc, "child-1");
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: {
         id: "parent",
         model: parentModel,
@@ -79,7 +86,7 @@ describe("DisplayNote", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1", { collapsingEnabled: true });
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: { id: "note-1", model, zoom: 1 },
     });
 
@@ -90,7 +97,7 @@ describe("DisplayNote", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1");
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: { id: "note-1", model, zoom: 1 },
     });
 
@@ -101,7 +108,7 @@ describe("DisplayNote", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1", { colorInherit: true });
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
     });
 
@@ -114,7 +121,7 @@ describe("DisplayNote", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1", { colorInherit: false, colorValue: "blue" });
 
-    const wrapper = mount(DisplayNote, {
+    wrapper = mount(DisplayNote, {
       props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
     });
 
