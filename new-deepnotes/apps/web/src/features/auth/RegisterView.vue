@@ -26,6 +26,7 @@ import { buildUserRegisterRequest } from "./build-user-register";
 
 const router = useRouter();
 const { client, isAuthenticated } = useSession();
+const marketingUrl = import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/$/, "") || "https://deepnotes.app";
 
 const email = ref("");
 const displayName = ref("");
@@ -192,13 +193,13 @@ async function onSubmit() {
               Sign in
             </RouterLink>
           </div>
-          <RouterLink
+          <a
+            :href="marketingUrl"
             class="inline-flex items-center gap-1.5 text-xs underline underline-offset-4"
-            to="/"
           >
             <ArrowLeft class="size-3.5" />
             Back to home
-          </RouterLink>
+          </a>
         </CardFooter>
       </Card>
     </div>

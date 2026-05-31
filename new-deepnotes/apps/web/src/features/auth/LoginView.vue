@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { RouterLink, useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   ArrowLeft,
   Fingerprint,
@@ -26,6 +26,7 @@ import { useSession } from "./useSession";
 
 const router = useRouter();
 const route = useRoute();
+const marketingUrl = import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/$/, "") || "https://deepnotes.app";
 
 const {
   loading,
@@ -216,13 +217,13 @@ async function onSubmit() {
               Create one
             </RouterLink>
           </div>
-          <RouterLink
+          <a
+            :href="marketingUrl"
             class="inline-flex items-center gap-1.5 text-xs underline underline-offset-4"
-            to="/"
           >
             <ArrowLeft class="size-3.5" />
             Back to home
-          </RouterLink>
+          </a>
         </CardFooter>
       </Card>
     </div>
