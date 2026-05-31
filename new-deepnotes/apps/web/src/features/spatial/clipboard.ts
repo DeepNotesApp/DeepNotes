@@ -9,11 +9,13 @@ export interface ClipboardNote {
     enabled: boolean;
     wrap: boolean;
     height: { expanded: string; collapsed: string };
+    content: string; // Serialized Y.XmlFragment
   };
   body: {
     enabled: boolean;
     wrap: boolean;
     height: { expanded: string; collapsed: string };
+    content: string; // Serialized Y.XmlFragment
   };
   container: {
     enabled: boolean;
@@ -52,6 +54,7 @@ export interface ClipboardArrow {
   bodyType: string;
   bodyStyle: string;
   color: string;
+  label: string; // Serialized Y.XmlFragment
   readOnly: boolean;
   interregional: boolean;
   fakePos: { x: number; y: number } | null;
@@ -84,11 +87,13 @@ function serializeNote(model: NoteModel, id: string): ClipboardNote {
       enabled: model.head.enabled.value,
       wrap: model.head.wrap.value,
       height: model.head.height.value,
+      content: model.head.value.value?.toString() ?? '',
     },
     body: {
       enabled: model.body.enabled.value,
       wrap: model.body.wrap.value,
       height: model.body.height.value,
+      content: model.body.value.value?.toString() ?? '',
     },
     container: {
       enabled: model.container.enabled.value,
@@ -129,6 +134,7 @@ function serializeArrow(model: ArrowModel, id: string): ClipboardArrow {
     bodyType: model.bodyType.value,
     bodyStyle: model.bodyStyle.value,
     color: model.color.value,
+    label: model.label.value?.toString() ?? '',
     readOnly: model.readOnly.value,
     interregional: model.interregional.value,
     fakePos: model.fakePos.value ?? null,

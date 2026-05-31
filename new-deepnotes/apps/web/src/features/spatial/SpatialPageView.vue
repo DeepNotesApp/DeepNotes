@@ -7,6 +7,7 @@ import { Undo, Redo, RotateCcw } from "lucide-vue-next";
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
+import CanvasContextMenu from "./CanvasContextMenu.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialUndoRedo } from "./undo-redo";
@@ -28,6 +29,13 @@ const props = defineProps<{
   ydoc: any;
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
   defaultArrowTemplate?: Partial<ClipboardArrow> | null;
+}>();
+
+const emit = defineEmits<{
+  'select-note': [id: string | null, model: any]
+  'select-arrow': [id: string | null, model: any]
+  'note-drag-start': [id: string]
+  'note-drag-end': [id: string]
 }>();
 
 const canvasRef = ref<{
@@ -55,7 +63,50 @@ const {
 
 const selection = useSpatialSelection();
 
+// Emit selection changes for properties panel
+selection.selectedIds.watch((ids) => {
+  const noteIds = selection.selectedOfKind('note')
+  const arrowIds = selection.selectedOfKind('arrow')
+
+  if (noteIds.length === 1) {
+    const note = noteList.value.find(n => n.id === noteIds[0])
+    if (note) {
+      emit('select-note', note.id, note.model)
+    }
+  } else {
+    emit('select-note', null, null)
+  }
+
+  if (arrowIds.length === 1) {
+    const arrow = arrowList.value.find(a => a.id === arrowIds[0])
+    if (arrow) {
+      emit('select-arrow', arrow.id, arrow.model)
+    }
+  } else {
+    emit('select-arrow', null, null)
+  }
+})
+
 const pasteCount = ref(0);
+
+// --- context menu state ---
+const contextMenu = ref<{
+  open: boolean;
+  x: number;
+  y: number;
+}>({ open: false, x: 0, y: 0 });
+
+// --- teleport overlay state ---
+const draggingNoteId = ref<string | null>(null);
+const draggingNoteModel = ref<any>(null);
+const dragScreenX = ref(0);
+const dragScreenY = ref(0);
+const hoveredContainerId = ref<string | null>(null);
+
+// --- arrow reconnection state ---
+const reconnectingArrowId = ref<string | null>(null);
+const reconnectingFrom = ref<'source' | 'target' | null>(null);
+const hoveredNoteId = ref<string | null>(null);
 
 // --- arrow drag state ---
 const arrowDrag = ref<{
@@ -161,6 +212,32 @@ function onCanvasPointerDown(e: PointerEvent) {
   }
 }
 
+function onCanvasContextMenu(e: MouseEvent) {
+  e.preventDefault();
+  const canvas = canvasRef.value;
+  if (!canvas || !canvas.rootEl) return;
+
+  const rect = canvas.rootEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const world = screenToWorld(
+    e.clientX,
+    e.clientY,
+    cx,
+    cy,
+    canvas.camX,
+    canvas.camY,
+    canvas.zoom,
+  );
+
+  contextMenu.value = {
+    open: true,
+    x: e.clientX,
+    y: e.clientY,
+  };
+}
+
 function onCanvasPointerMove(e: PointerEvent) {
   if (!boxState) return;
 
@@ -188,6 +265,88 @@ function onCanvasPointerUp() {
   }
 
   boxState = null;
+}
+
+function handleContextMenuCreateNote(x: number, y: number) {
+  const canvas = canvasRef.value;
+  if (!canvas || !canvas.rootEl) return;
+
+  const rect = canvas.rootEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  const world = screenToWorld(
+    x,
+    y,
+    cx,
+    cy,
+    canvas.camX,
+    canvas.camY,
+    canvas.zoom,
+  );
+
+  createNoteAt(world.x, world.y, props.defaultNoteTemplate);
+}
+
+function handleContextMenuPaste(payload: { notes: ClipboardNote[]; arrows: ClipboardArrow[] }) {
+  const canvas = canvasRef.value;
+  const centerX = canvas?.camX ?? 0;
+  const centerY = canvas?.camY ?? 0;
+  const offset = pasteCount.value * 32;
+  pasteCount.value += 1;
+
+  const result = pastePayload(payload, {
+    createNote: createNoteAt,
+    createArrow: createArrow,
+    offsetX: centerX + offset,
+    offsetY: centerY + offset,
+  });
+
+  selection.clear();
+  for (const id of result.noteIds) {
+    selection.select(id, "note", true);
+  }
+}
+
+function handleContextMenuDeleteSelected() {
+  for (const id of selection.selectedOfKind("note")) {
+    deleteNote(id);
+  }
+  for (const id of selection.selectedOfKind("arrow")) {
+    deleteArrow(id);
+  }
+  selection.clear();
+}
+
+function handleContextMenuCopySelected() {
+  const selectedNotes = noteList.value.filter((n) =>
+    selection.isSelected(n.id),
+  );
+  const selectedArrows = arrowList.value.filter((a) =>
+    selection.isSelected(a.id),
+  );
+  if (selectedNotes.length > 0) {
+    copySelection(selectedNotes, selectedArrows);
+  }
+}
+
+function handleContextMenuCutSelected() {
+  const selectedNotes = noteList.value.filter((n) =>
+    selection.isSelected(n.id),
+  );
+  const selectedArrows = arrowList.value.filter((a) =>
+    selection.isSelected(a.id),
+  );
+  if (selectedNotes.length > 0) {
+    copySelection(selectedNotes, selectedArrows);
+    for (const id of selection.selectedOfKind("note")) {
+      deleteNote(id);
+    }
+    for (const id of selection.selectedOfKind("arrow")) {
+      deleteArrow(id);
+    }
+    selection.clear();
+  }
 }
 
 // --- arrow drag ---
@@ -302,7 +461,154 @@ function getNoteRect(noteId: string) {
   return { x: pos.x, y: pos.y, width: w, height: h };
 }
 
+function onNoteDragStart(noteId: string) {
+  const note = noteList.value.find(n => n.id === noteId);
+  if (note) {
+    draggingNoteId.value = noteId;
+    draggingNoteModel.value = note.model;
+    dragScreenX.value = 0;
+    dragScreenY.value = 0;
+    window.addEventListener('pointermove', onDragPointerMove);
+    window.addEventListener('pointerup', onDragPointerUp);
+  }
+}
+
+function onDragPointerMove(e: PointerEvent) {
+  dragScreenX.value = e.clientX;
+  dragScreenY.value = e.clientY;
+
+  // Detect container overlap for drop zone feedback
+  if (!draggingNoteId.value) return;
+
+  const canvas = canvasRef.value;
+  if (!canvas || !canvas.rootEl) return;
+
+  const rect = canvas.rootEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const z = canvas.zoom;
+  const camX = canvas.camX;
+  const camY = canvas.camY;
+
+  const world = screenToWorld(
+    e.clientX,
+    e.clientY,
+    cx,
+    cy,
+    camX,
+    camY,
+    z,
+  );
+
+  // Find container under cursor
+  let bestContainerId: string | null = null;
+  let bestOverlapArea = 0;
+
+  for (const note of noteList.value) {
+    if (note.id === draggingNoteId.value) continue;
+    if (!note.model.container.enabled.value) continue;
+
+    const containerRect = getNoteRect(note.id);
+    if (!containerRect) continue;
+
+    // Check if cursor is inside container
+    if (
+      world.x >= containerRect.x &&
+      world.x <= containerRect.x + containerRect.width &&
+      world.y >= containerRect.y &&
+      world.y <= containerRect.y + containerRect.height
+    ) {
+      bestContainerId = note.id;
+      break;
+    }
+  }
+
+  hoveredContainerId.value = bestContainerId;
+}
+
+function onDragPointerUp() {
+  window.removeEventListener('pointermove', onDragPointerMove);
+  window.removeEventListener('pointerup', onDragPointerUp);
+}
+
+function onArrowReconnectStart(arrowId: string, from: 'source' | 'target') {
+  reconnectingArrowId.value = arrowId;
+  reconnectingFrom.value = from;
+  window.addEventListener('pointermove', onReconnectPointerMove);
+  window.addEventListener('pointerup', onReconnectPointerUp);
+}
+
+function onReconnectPointerMove(e: PointerEvent) {
+  // Track cursor for reconnection line
+  if (!reconnectingArrowId.value) return;
+
+  const canvas = canvasRef.value;
+  if (!canvas || !canvas.rootEl) return;
+
+  const rect = canvas.rootEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const z = canvas.zoom;
+  const camX = canvas.camX;
+  const camY = canvas.camY;
+
+  const world = screenToWorld(
+    e.clientX,
+    e.clientY,
+    cx,
+    cy,
+    camX,
+    camY,
+    z,
+  );
+
+  // Find note under cursor
+  let bestNoteId: string | null = null;
+
+  for (const note of noteList.value) {
+    const noteRect = getNoteRect(note.id);
+    if (!noteRect) continue;
+
+    if (
+      world.x >= noteRect.x &&
+      world.x <= noteRect.x + noteRect.width &&
+      world.y >= noteRect.y &&
+      world.y <= noteRect.y + noteRect.height
+    ) {
+      bestNoteId = note.id;
+      break;
+    }
+  }
+
+  hoveredNoteId.value = bestNoteId;
+}
+
+function onReconnectPointerUp() {
+  window.removeEventListener('pointermove', onReconnectPointerMove);
+  window.removeEventListener('pointerup', onReconnectPointerUp);
+
+  if (reconnectingArrowId.value && hoveredNoteId.value && reconnectingFrom.value) {
+    const arrow = arrowList.value.find(a => a.id === reconnectingArrowId.value);
+    if (arrow) {
+      // Access the arrow's source/target through the model's reactive refs
+      if (reconnectingFrom.value === 'source') {
+        arrow.model.source.value = hoveredNoteId.value;
+      } else {
+        arrow.model.target.value = hoveredNoteId.value;
+      }
+    }
+  }
+
+  reconnectingArrowId.value = null;
+  reconnectingFrom.value = null;
+  hoveredNoteId.value = null;
+}
+
 function onNoteDragEnd(noteId: string) {
+  draggingNoteId.value = null;
+  draggingNoteModel.value = null;
+  hoveredContainerId.value = null;
+
   const noteRect = getNoteRect(noteId);
   if (!noteRect) return;
 
@@ -516,16 +822,19 @@ onUnmounted(() => {
       @pointerdown="onCanvasPointerDown"
       @pointermove="onCanvasPointerMove"
       @pointerup="onCanvasPointerUp"
+      @contextmenu="onCanvasContextMenu"
     >
       <DisplayArrow
         v-for="arrow in arrowList"
         :key="arrow.id"
+        :id="arrow.id"
         :model="arrow.model"
         :source-model="noteById.get(arrow.model.source.value)"
         :target-model="noteById.get(arrow.model.target.value)"
         :selected="selection.isSelected(arrow.id)"
         @select="selection.select(arrow.id, 'arrow')"
         @toggle="selection.toggle(arrow.id, 'arrow')"
+        @reconnect-start="onArrowReconnectStart"
       />
       <DisplayNote
         v-for="note in notesByZIndex"
@@ -534,6 +843,7 @@ onUnmounted(() => {
         :model="note.model"
         :zoom="canvasRef?.zoom ?? 1"
         :selected="selection.isSelected(note.id)"
+        :is-drop-target="hoveredContainerId === note.id"
         :child-models="
           note.model.container.children.value
             .map((childId) => {
@@ -550,6 +860,7 @@ onUnmounted(() => {
             : undefined
         "
         @arrow-drag-start="onArrowDragStart($event.noteId)"
+        @dragstart="onNoteDragStart"
         @dragend="onNoteDragEnd"
       />
     </SpatialWorldCanvas>
@@ -643,5 +954,40 @@ onUnmounted(() => {
         {{ selection.selected.value.length }} item{{ selection.selected.value.length === 1 ? "" : "s" }} selected
       </div>
     </div>
+
+    <!-- Canvas context menu -->
+    <CanvasContextMenu
+      :x="contextMenu.x"
+      :y="contextMenu.y"
+      :open="contextMenu.open"
+      :has-selection="selection.selected.value.length > 0"
+      @create-note="handleContextMenuCreateNote"
+      @paste="handleContextMenuPaste"
+      @delete-selected="handleContextMenuDeleteSelected"
+      @copy-selected="handleContextMenuCopySelected"
+      @cut-selected="handleContextMenuCutSelected"
+      @close="contextMenu.open = false"
+    />
+
+    <!-- Teleport overlay for dragged note -->
+    <Teleport to="body">
+      <div
+        v-if="draggingNoteId && draggingNoteModel"
+        class="pointer-events-none fixed z-[9999] opacity-70"
+        :style="{
+          left: `${dragScreenX}px`,
+          top: `${dragScreenY}px`,
+          transform: 'translate(-50%, -50%)',
+        }"
+      >
+        <DisplayNote
+          :id="draggingNoteId"
+          :model="draggingNoteModel"
+          :zoom="canvasRef?.zoom ?? 1"
+          :selected="false"
+          :child-models="[]"
+        />
+      </div>
+    </Teleport>
   </div>
 </template>

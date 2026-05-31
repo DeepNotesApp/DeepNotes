@@ -9,6 +9,7 @@ const props = defineProps<{
   model: NoteModel;
   zoom: number;
   selected?: boolean;
+  isDropTarget?: boolean;
   childModels?: Array<{ id: string; model: NoteModel }>;
   parentColor?: string | null;
 }>();
@@ -17,6 +18,7 @@ const emit = defineEmits<{
   select: [];
   toggle: [];
   shiftClick: [];
+  dragstart: [id: string];
   dragend: [id: string];
   arrowDragStart: [payload: { noteId: string }];
 }>();
@@ -59,6 +61,11 @@ const transform = computed(() => {
   return style;
 });
 
+const containerLayoutClass = computed(() => {
+  if (!props.model.container.enabled.value) return '';
+  return props.model.container.horizontal.value ? 'flex-row' : 'flex-col';
+});
+
 const isDragging = ref(false);
 
 const frameClasses = computed(() => {
@@ -70,6 +77,7 @@ const frameClasses = computed(() => {
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
     props.selected ? "ring-2 ring-primary" : "",
+    props.isDropTarget ? "ring-2 ring-accent ring-offset-2" : "",
     ro ? "ring-1 ring-destructive/30" : "",
   ];
 });
@@ -105,6 +113,7 @@ function onPointerDown(e: PointerEvent) {
   noteStartY = props.model.pos.value.y;
   hasDragged = false;
   isDragging.value = true;
+  emit("dragstart", props.id);
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
   el.style.cursor = "grabbing";
@@ -320,7 +329,8 @@ function toggleCollapsed() {
     <template v-if="model.container.enabled.value && childModels?.length && !model.collapsing.collapsed.value">
       <div
         class="border-border pointer-events-none absolute inset-x-0 bottom-0 border-t"
-        style="top: 3rem"
+        :class="model.container.horizontal.value ? 'left-0 right-0 top-0 bottom-0 border-t-0 border-l' : ''"
+        :style="model.container.horizontal.value ? 'left: 100%; top: 0; width: auto; height: 100%;' : 'top: 3rem'"
       >
         <DisplayNote
           v-for="child in childModels"

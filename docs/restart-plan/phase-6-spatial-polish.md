@@ -52,9 +52,9 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
 | `MainToolbar` (shadcn) | **Done** | Header with logo, breadcrumb path, global nav, sidebar toggles |
-| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar with path + collab status; Recent/Favorites/Selected sections pending |
-| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | Collapsible sidebar with snapshots, management, backlinks; Note/Arrow properties pending |
-| `TableContextMenu` (shadcn) — right-click on canvas | **Not started** | No context menu on canvas |
+| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Done** | Resizable collapsible sidebar with path + collab status; Recent/Favorites/Selected sections implemented |
+| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Done** | Collapsible sidebar with snapshots, management, backlinks; Note/Arrow/Page properties implemented |
+| `TableContextMenu` (shadcn) — right-click on canvas | **Done** | Canvas context menu with create note, paste, copy, cut, delete actions |
 | `LoadingOverlay` during page bootstrap | **Partial** | Inline loading text in cards only; state screens handle loading/error |
 | Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Done** | `PageLayout.vue` applies `select-none overflow-hidden` on the shell |
 | Remove `PageEditorTiptapCard.vue` from page route | **Done** | File deleted; no longer imported or rendered |
@@ -66,16 +66,16 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Background + border color from `note.color` | **Partial** | Hardcoded 10-color map with `/18` opacity tint |
 | Selection ring | **Partial** | `ring-2 ring-primary` exists, but not legacy blue `#2196f3` |
 | Drag opacity (`0.7`) | **Done** | `isDragging` ref toggles `opacity-70` during drag/resize |
-| `Teleport` to global overlay during drag/resize | **Not started** | Notes drag inside parent; no overlay portal |
-| `NoteDropZones` | **Not started** | No invisible drop zones on container notes |
+| `Teleport` to global overlay during drag/resize | **Done** | Teleport overlay during drag to avoid z-index clipping |
+| `NoteDropZones` | **Done** | Visual feedback when dragging over container |
 | `NoteArrowHandles` — 4 directional arrow handles | **Partial** | 4 small dots exist, but not full arrow-creation flow |
-| `ArrowLinkZones` | **Not started** | No edge zones for arrow reconnection |
+| `ArrowLinkZones` | **Done** | Connection zones at arrow endpoints for reconnection |
 | `NoteLinkIcon` (external link indicator) | **Done** | `ExternalLink` icon shown in header when `link.value` set |
 | `NoteResizeHandles` — 8 handles | **Done** | NW, N, NE, E, SE, S, SW, W with correct cursors |
 | Scrollbar handling in `NoteContent` | **Not started** | No pull-to-refresh prevention |
 | Note frame `border-radius`, shadow, min-width | **Partial** | `rounded-md border shadow-sm` used; exact pixel parity untested |
 | Container section — spatial layout | **Done** | Free child positioning inside parent |
-| Container section — horizontal layout | **Not started** | No row layout |
+| Container section — horizontal layout | **Done** | Container children can render horizontally or vertically |
 
 ### 8. Arrow visual parity (legacy style, no Quasar)
 | Item | Status | Notes |
@@ -83,9 +83,9 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Curve body (`CurveArrow.vue`) | **Done** | Quadratic bezier with perpendicular offset; `bodyType === 'curve'` |
 | Line body (`LineArrow.vue`) | **Done** | Straight line when `bodyType === 'line'` |
 | Arrow heads (`OpenHead.vue`) | **Done** | SVG `<marker>` chevron heads; `sourceHead`/`targetHead` supported |
-| Arrow label (editable `Y.XmlFragment`) | **Not started** | No label support |
+| Arrow label (editable `Y.XmlFragment`) | **Done** | Editable label at arrow midpoint using Y.XmlFragment |
 | Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
-| Drag-to-reconnect | **Not started** | No endpoint grabbing |
+| Drag-to-reconnect | **Done** | Connection zones at arrow endpoints for reconnection |
 | Color matching note color logic | **Done** | Arrow color mapped via same 10-color map as notes |
 
 ### 9. Find and replace

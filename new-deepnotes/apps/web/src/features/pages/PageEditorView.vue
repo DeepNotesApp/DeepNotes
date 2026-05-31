@@ -17,6 +17,12 @@ import PageEditorBacklinksCard from "./PageEditorBacklinksCard.vue";
 import PageEditorCollabStatusCard from "./PageEditorCollabStatusCard.vue";
 import PageEditorManagementCard from "./PageEditorManagementCard.vue";
 import PageEditorSnapshotsCard from "./PageEditorSnapshotsCard.vue";
+import NotePropertiesCard from "../spatial/NotePropertiesCard.vue";
+import ArrowPropertiesCard from "../spatial/ArrowPropertiesCard.vue";
+import PagePropertiesCard from "./PagePropertiesCard.vue";
+import RecentPagesCard from "./RecentPagesCard.vue";
+import FavoritePagesCard from "./FavoritePagesCard.vue";
+import SelectedPagesCard from "./SelectedPagesCard.vue";
 import { createPageCollabDoc } from "./page-yjs-doc";
 import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
@@ -46,6 +52,19 @@ const pageId = computed(() => String(route.params.pageId ?? ""));
 
 const snapshots = ref<SnapshotRow[]>([]);
 const snapshotLoading = ref(false);
+
+// Track selected note for properties panel
+const selectedNoteId = ref<string | null>(null);
+const selectedNoteModel = ref<any>(null);
+
+// Track selected arrow for properties panel
+const selectedArrowId = ref<string | null>(null);
+const selectedArrowModel = ref<any>(null);
+
+// Track recent/favorite/selected pages for left sidebar
+const recentPageIds = ref<string[]>([]);
+const favoritePageIds = ref<string[]>([]);
+const selectedPageIds = ref<string[]>([]);
 
 const { ydoc, collabAwareness, collabCaretProvider } = createPageCollabDoc();
 
@@ -199,6 +218,8 @@ onMounted(() => {
       :ydoc="ydoc"
       :default-note-template="noteTemplate"
       :default-arrow-template="arrowTemplate"
+      @select-note="selectedNoteId = $event[0]; selectedNoteModel = $event[1]"
+      @select-arrow="selectedArrowId = $event[0]; selectedArrowModel = $event[1]"
     />
 
     <!-- === Toolbar center: breadcrumb path === -->
@@ -284,6 +305,30 @@ onMounted(() => {
           </CardContent>
         </Card>
 
+        <!-- Recent pages -->
+        <RecentPagesCard
+          :recent-page-ids="recentPageIds"
+          :current-page-id="pageId"
+          :page-labels="pathPageLabels"
+          @clear="recentPageIds = []"
+        />
+
+        <!-- Favorite pages -->
+        <FavoritePagesCard
+          :favorite-page-ids="favoritePageIds"
+          :current-page-id="pageId"
+          :page-labels="pathPageLabels"
+          @clear="favoritePageIds = []"
+        />
+
+        <!-- Selected pages -->
+        <SelectedPagesCard
+          :selected-page-ids="selectedPageIds"
+          :current-page-id="pageId"
+          :page-labels="pathPageLabels"
+          @clear="selectedPageIds = []"
+        />
+
         <!-- Collab status mini -->
         <PageEditorCollabStatusCard
           :collab-loading="collabLoading"
@@ -302,6 +347,54 @@ onMounted(() => {
     <!-- === Right sidebar === -->
     <template #right-sidebar>
       <div class="space-y-3">
+        <PagePropertiesCard
+          v-if="!selectedNoteId && !selectedArrowId"
+          :page-id="pageId"
+          :relative-title="pathPageLabels[pageId]"
+          :absolute-title="pathPageLabels[pageId]"
+          :is-favorite="isFavorite"
+          :read-only="cryptoError !== null"
+          @update:relative-title="() => {}"
+          @update:absolute-title="() => {}"
+          @toggle-favorite="toggleFavorite()"
+        />
+
+        <NotePropertiesCard
+          v-if="selectedNoteId"
+          :note-id="selectedNoteId"
+          :note-model="selectedNoteModel"
+          :read-only="cryptoError !== null"
+          @update:link="selectedNoteModel.link.value = $event"
+          @update:head-enabled="selectedNoteModel.head.enabled.value = $event"
+          @update:body-enabled="selectedNoteModel.body.enabled.value = $event"
+          @update:pos-x="selectedNoteModel.pos.value.x = $event"
+          @update:pos-y="selectedNoteModel.pos.value.y = $event"
+          @update:anchor-x="selectedNoteModel.anchor.value.x = $event"
+          @update:anchor-y="selectedNoteModel.anchor.value.y = $event"
+          @update:width="selectedNoteModel.width.value.expanded = $event"
+          @update:color="selectedNoteModel.color.value = $event"
+          @update:color-inherit="selectedNoteModel.color.inherit.value = $event"
+          @update:collapsible="selectedNoteModel.collapsing.enabled.value = $event"
+          @update:collapsed="selectedNoteModel.collapsing.collapsed.value = $event"
+          @update:movable="selectedNoteModel.movable.value = $event"
+          @update:resizable="selectedNoteModel.resizable.value = $event"
+          @update:read-only="selectedNoteModel.readOnly.value = $event"
+          @update:container-enabled="selectedNoteModel.container.enabled.value = $event"
+          @update:container-horizontal="selectedNoteModel.container.horizontal.value = $event"
+        />
+
+        <ArrowPropertiesCard
+          v-if="selectedArrowId"
+          :arrow-id="selectedArrowId"
+          :arrow-model="selectedArrowModel"
+          :read-only="cryptoError !== null"
+          @update:body-type="selectedArrowModel.bodyType.value = $event"
+          @update:source-head="selectedArrowModel.sourceHead.value = $event"
+          @update:target-head="selectedArrowModel.targetHead.value = $event"
+          @update:color="selectedArrowModel.color.value = $event"
+          @update:color-inherit="selectedArrowModel.color.inherit.value = $event"
+        />
+
         <PageEditorSnapshotsCard
           :snapshot-loading="snapshotsLoading"
           :snapshots="snapshotList"

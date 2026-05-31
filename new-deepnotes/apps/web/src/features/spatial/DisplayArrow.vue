@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import * as Y from "yjs";
 import type { ArrowModel } from "./arrow-model";
 import type { NoteModel } from "./note-model";
 
 const props = defineProps<{
+  id: string;
   model: ArrowModel;
   sourceModel?: NoteModel;
   targetModel?: NoteModel;
@@ -13,7 +15,35 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [];
   toggle: [];
+  reconnectStart: [arrowId: string, from: 'source' | 'target']
 }>();
+
+const isEditingLabel = ref(false);
+const labelText = ref('');
+
+const labelContent = computed(() => {
+  const frag = props.model.label.value;
+  if (!frag) return '';
+  return frag.toString();
+});
+
+function startEditLabel() {
+  labelText.value = labelContent.value;
+  isEditingLabel.value = true;
+}
+
+function saveLabel() {
+  const frag = props.model.label.value;
+  if (frag) {
+    frag.delete(0, frag.length);
+    frag.insert(0, [new Y.XmlText(labelText.value)]);
+  }
+  isEditingLabel.value = false;
+}
+
+function cancelEditLabel() {
+  isEditingLabel.value = false;
+}
 
 const arrowColor = computed(() => {
   const c = props.model.color.value;
@@ -96,6 +126,10 @@ const geometry = computed(() => {
     pathD,
     angle,
     dist,
+    sourceX: x1,
+    sourceY: y1,
+    targetX: x2,
+    targetY: y2,
   };
 });
 
@@ -162,9 +196,59 @@ function onPointerDown(e: PointerEvent) {
       :stroke="selected ? 'var(--primary)' : arrowColor"
       :stroke-width="selected ? 3 : 2"
       stroke-linecap="round"
-      :stroke-dasharray="model.bodyStyle.value === 'dashed' ? '6 4' : undefined"
-      :marker-end="model.targetHead.value !== 'none' ? `url(#arrowhead-target-${model.source.value}-${model.target.value})` : undefined"
-      :marker-start="model.sourceHead.value !== 'none' ? `url(#arrowhead-source-${model.source.value}-${model.target.value})` : undefined"
+      :marker-end="model.targetHead.value ? `url(#arrowhead-target-${model.source.value}-${model.target.value})` : ''"
+      :marker-start="model.sourceHead.value ? `url(#arrowhead-source-${model.source.value}-${model.target.value})` : ''"
     />
+
+    <!-- Source connection zone -->
+    <circle
+      v-if="sourceModel"
+      :cx="geometry.localX1"
+      :cy="geometry.localY1"
+      r="8"
+      fill="transparent"
+      stroke="transparent"
+      class="pointer-events-auto cursor-crosshair hover:fill-primary/20"
+      @pointerdown.stop="emit('reconnectStart', id, 'source')"
+    />
+
+    <!-- Target connection zone -->
+    <circle
+      v-if="targetModel"
+      :cx="geometry.localX2"
+      :cy="geometry.localY2"
+      r="8"
+      fill="transparent"
+      stroke="transparent"
+      class="pointer-events-auto cursor-crosshair hover:fill-primary/20"
+      @pointerdown.stop="emit('reconnectStart', id, 'target')"
+    />
+
+    <!-- Arrow label at midpoint -->
+    <foreignObject
+      v-if="labelContent || isEditingLabel"
+      :x="(geometry.localX1 + geometry.localX2) / 2 - 40"
+      :y="(geometry.localY1 + geometry.localY2) / 2 - 12"
+      width="80"
+      height="24"
+      class="pointer-events-auto"
+    >
+      <div
+        v-if="!isEditingLabel"
+        class="flex items-center justify-center h-full text-xs bg-background border rounded px-2 cursor-text hover:bg-accent"
+        @click="startEditLabel"
+      >
+        {{ labelContent }}
+      </div>
+      <input
+        v-else
+        v-model="labelText"
+        class="w-full h-full text-xs bg-background border rounded px-2"
+        @blur="saveLabel"
+        @keydown.enter="saveLabel"
+        @keydown.esc="cancelEditLabel"
+        ref="labelInput"
+      />
+    </foreignObject>
   </svg>
 </template>
