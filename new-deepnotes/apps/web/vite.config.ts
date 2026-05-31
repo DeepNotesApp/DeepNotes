@@ -25,9 +25,6 @@ export default defineConfig({
       },
     },
   },
-  optimizeDeps: {
-    include: ["libsodium-wrappers-sumo"],
-  },
   test: {
     environment: "happy-dom",
     include: ["src/**/*.test.ts"],

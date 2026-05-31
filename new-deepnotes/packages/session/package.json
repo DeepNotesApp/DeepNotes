@@ -24,7 +24,6 @@
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.41.0",
     "jose": "^5.10.0",
-    "libsodium-wrappers-sumo": "^0.8.0",
     "msgpackr": "^1.11.2",
     "nanoid": "^5.1.5",
     "otplib": "^12.0.1",

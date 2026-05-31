@@ -1,14 +1,6 @@
 import { createDb, type DeepnotesDb } from "@deepnotes/db/client";
 
-let cachedConn: string | undefined;
-let cachedDb: DeepnotesDb | undefined;
-
-/** One Drizzle instance per isolate; Hyperdrive URL is stable for the binding. */
+/** Create a new Drizzle instance per request to avoid Cloudflare Workers I/O isolation issues. */
 export function getDbForConnectionString(connectionString: string): DeepnotesDb {
-  if (cachedDb != null && cachedConn === connectionString) {
-    return cachedDb;
-  }
-  cachedConn = connectionString;
-  cachedDb = createDb(connectionString);
-  return cachedDb;
+  return createDb(connectionString);
 }

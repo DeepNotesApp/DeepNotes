@@ -22,3 +22,4 @@ export { wrapPublicKey, type PublicKey } from "./public-key.js";
 export { wrapPrivateKey, type PrivateKey } from "./private-key.js";
 export { DataLayer } from "./wrapped-data.js";
 export { base64ToBytes, bytesToBase64, concatUint8Arrays } from "./bytes.js";
+export { getRandomBytes, generateKeyPair, pad, unpad, KEY_SIZE } from "./crypto-utils.js";

@@ -16,10 +16,13 @@
   },
   "dependencies": {
     "@deepnotes/db": "workspace:*",
+    "@deepnotes/e2ee": "workspace:*",
+    "@noble/ciphers": "^0.6.0",
+    "@noble/curves": "^1.8.0",
+    "@noble/hashes": "^1.7.0",
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.41.0",
     "jose": "^5.10.0",
-    "libsodium-wrappers-sumo": "^0.8.0",
     "msgpackr": "^1.10.2",
     "nanoid": "^5.1.5",
     "otplib": "^12.0.1"

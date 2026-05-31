@@ -11,6 +11,6 @@ export default defineConfig({
   schema: "./src/schema.ts",
   out: "./migrations",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgresql://deepnotes:deepnotes@127.0.0.1:5433/deepnotes",
+    url: process.env.DATABASE_URL ?? "postgresql://postgres:postgres@127.0.0.1:5432/deepnotes",
   },
 });

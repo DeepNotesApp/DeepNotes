@@ -15,6 +15,7 @@ export {
 } from "./schemas/session-responses.js";
 export {
   byteB64,
+  byteB64EmptyOk,
   sessionLoginEmailSchema,
   sessionLoginRequestSchema,
   userRegisterRequestSchema,

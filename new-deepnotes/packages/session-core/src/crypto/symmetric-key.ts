@@ -1,9 +1,12 @@
-import sodium from "libsodium-wrappers-sumo";
+import { xchacha20poly1305 } from "@noble/ciphers/chacha";
 
-import { concatUint8Arrays } from "./bytes.js";
+import { concatUint8Arrays, textToBytes } from "./bytes.js";
+import { getRandomBytes, pad, unpad, KEY_SIZE } from "@deepnotes/e2ee";
+
+const XCHACHA20_NONCE_SIZE = 24;
 
 export function wrapSymmetricKey(
-  value = sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
+  value = getRandomBytes(KEY_SIZE),
 ) {
   return new (class SymmetricKey {
     get value() {
@@ -20,27 +23,20 @@ export function wrapSymmetricKey(
       },
     ): Uint8Array {
       if (params?.padding) {
-        plaintext = sodium.pad(plaintext, 8);
+        plaintext = pad(plaintext, 8);
       }
 
       const nonce =
         params?.nonce ??
-        sodium.randombytes_buf(
-          sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
-        );
+        getRandomBytes(XCHACHA20_NONCE_SIZE);
 
       const associatedData = JSON.stringify({
         app: "DeepNotes",
         extra: params?.associatedData ?? {},
       });
 
-      const ciphertext = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
-        plaintext,
-        associatedData,
-        null,
-        nonce,
-        value,
-      );
+      const ad = textToBytes(associatedData);
+      const ciphertext = xchacha20poly1305(value, nonce, ad).encrypt(plaintext);
 
       if (params?.includeNonce === false) {
         return ciphertext;
@@ -63,13 +59,8 @@ export function wrapSymmetricKey(
         nonce = params.nonce;
         ciphertext = nonceAndCiphertext;
       } else {
-        nonce = nonceAndCiphertext.slice(
-          0,
-          sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
-        );
-        ciphertext = nonceAndCiphertext.slice(
-          sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
-        );
+        nonce = nonceAndCiphertext.slice(0, XCHACHA20_NONCE_SIZE);
+        ciphertext = nonceAndCiphertext.slice(XCHACHA20_NONCE_SIZE);
       }
 
       const associatedData = JSON.stringify({
@@ -77,16 +68,11 @@ export function wrapSymmetricKey(
         extra: params?.associatedData ?? {},
       });
 
-      let plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
-        null,
-        ciphertext,
-        associatedData,
-        nonce,
-        value,
-      );
+      const ad = textToBytes(associatedData);
+      let plaintext = xchacha20poly1305(value, nonce, ad).decrypt(ciphertext) as Uint8Array;
 
       if (params?.padding) {
-        plaintext = sodium.unpad(plaintext, 8);
+        plaintext = unpad(plaintext, 8);
       }
 
       return plaintext;

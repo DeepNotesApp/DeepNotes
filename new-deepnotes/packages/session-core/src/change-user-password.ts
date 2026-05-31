@@ -1,6 +1,5 @@
 import type { DeepnotesDb } from "@deepnotes/db/client";
 import { eq } from "drizzle-orm";
-import sodium from "libsodium-wrappers-sumo";
 
 import { sessions, users } from "@deepnotes/db/schema";
 
@@ -79,7 +78,7 @@ export async function performUserPasswordChange(input: {
     password: input.oldLoginHash,
     salt: passwordHashValues.saltBytes,
   });
-  if (!sodium.memcmp(passwordValues.hash, passwordHashValues.hashBytes)) {
+  if (!(require("node:crypto").timingSafeEqual(Buffer.from(passwordValues.hash),Buffer.from(passwordHashValues.hashBytes)))) {
     throw new SessionError(400, "BAD_REQUEST", "Password is incorrect.");
   }
 

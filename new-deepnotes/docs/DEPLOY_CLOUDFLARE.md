@@ -36,7 +36,7 @@ Typical pattern:
 
 ### Local
 
-See `template.env` and `docker-compose.yml`: Postgres on `5433`, Redis on `6380`, `DATABASE_URL`, optional `DATABASE_ADMIN_URL` for template DB tests.
+See `template.env` and `docker-compose.yml`: Postgres on `5432`, Redis on `6380`, `DATABASE_URL`, optional `DATABASE_ADMIN_URL` for template DB tests.
 
 ## CI
 

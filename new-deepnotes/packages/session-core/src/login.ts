@@ -5,7 +5,6 @@ import {
   createSymmetricKeyring,
   getPasswordHashValues,
 } from "./crypto/index.js";
-import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 
 import { devices, users } from "@deepnotes/db/schema";
@@ -126,7 +125,8 @@ export async function performSessionLogin(input: {
     salt: passwordHashValues.saltBytes,
   });
 
-  const passwordOk = sodium.memcmp(passwordValues.hash, passwordHashValues.hashBytes);
+  const { timingSafeEqual } = require('node:crypto');
+  const passwordOk = timingSafeEqual(Buffer.from(passwordValues.hash), Buffer.from(passwordHashValues.hashBytes));
   if (!passwordOk) {
     if (input.redis != null) {
       await incrementFailedLoginAttempts(

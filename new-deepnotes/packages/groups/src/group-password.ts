@@ -2,7 +2,7 @@ import type { DeepnotesDb } from "@deepnotes/db/client";
 import { groups } from "@deepnotes/db/schema";
 import { eq } from "drizzle-orm";
 import { Buffer } from "node:buffer";
-import sodium from "libsodium-wrappers-sumo";
+import { argon2id } from "@noble/hashes/argon2.js";
 
 import {
   computeGroupPasswordPhc,
@@ -41,10 +41,28 @@ async function assertGroupPasswordCorrect(input: {
     new Uint8Array(g.hash),
     input.env.GROUP_REHASHED_PASSWORD_HASH_ENCRYPTION_KEY,
   );
-  const ok = sodium.crypto_pwhash_str_verify(
-    phc,
-    input.groupPasswordHash,
-  );
+  
+  // Parse PHC string: $argon2id$v=19$m=32768,t=2,p=1$<salt>$<hash>
+  const parts = phc.split('$');
+  if (parts.length < 6 || parts[1] !== 'argon2id') {
+    throw new SessionError(500, "INTERNAL_ERROR", "Invalid PHC format");
+  }
+  
+  const salt = Buffer.from(parts[4]!, 'base64');
+  const expectedHash = Buffer.from(parts[5]!, 'base64');
+  
+  // Compute hash of provided password
+  const computedHash = argon2id(input.groupPasswordHash, salt, {
+    t: 2,
+    m: 32 * 1024,
+    p: 1,
+    dkLen: 32,
+  });
+  
+  // Constant-time comparison
+  const { timingSafeEqual } = require('node:crypto');
+  const ok = timingSafeEqual(Buffer.from(computedHash), expectedHash);
+  
   if (!ok) {
     throw new SessionError(400, "BAD_REQUEST", "Group password is incorrect.");
   }

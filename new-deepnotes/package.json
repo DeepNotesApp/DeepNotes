@@ -19,7 +19,6 @@
   },
   "pnpm": {
     "overrides": {
-      "libsodium-wrappers-sumo": "^0.8.0",
       "@tiptap/core": "3.22.4",
       "@tiptap/pm": "3.22.4",
       "@tiptap/extensions": "3.22.4",

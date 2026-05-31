@@ -47,9 +47,20 @@ export const byteB64 = z
   })
   .transform((s) => new Uint8Array(Buffer.from(s, "base64")));
 
+/** Base64 to bytes; allows empty string → zero-length `Uint8Array` (personal / empty ciphertext). */
+export const byteB64EmptyOk = z
+  .string()
+  .openapi({
+    format: "byte",
+    description: "Standard base64; empty string means zero-length binary.",
+  })
+  .transform((s) =>
+    s === "" ? new Uint8Array(0) : new Uint8Array(Buffer.from(s, "base64"))
+  );
+
 const userRegisterGroupCreationSchema = z
   .object({
-    groupEncryptedName: byteB64,
+    groupEncryptedName: byteB64EmptyOk,
     groupPasswordHash: byteB64.optional(),
     groupIsPublic: z.boolean(),
     groupAccessKeyring: byteB64,
@@ -57,7 +68,7 @@ const userRegisterGroupCreationSchema = z
     groupEncryptedContentKeyring: byteB64,
     groupPublicKeyring: byteB64,
     groupEncryptedPrivateKeyring: byteB64,
-    groupOwnerEncryptedName: byteB64,
+    groupOwnerEncryptedName: byteB64EmptyOk,
   })
   .openapi("UserRegisterGroupCreation");
 

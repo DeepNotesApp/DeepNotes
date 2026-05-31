@@ -4,7 +4,7 @@
  * so stored Postgres blobs remain compatible.
  */
 import CryptoJS from "crypto-js";
-import sodium from "libsodium-wrappers-sumo";
+import { argon2id } from "@noble/hashes/argon2.js";
 import { pack, unpack } from "msgpackr";
 
 import {
@@ -17,23 +17,32 @@ import { cryptoJsWordArrayToUint8Array } from "./crypto-js-wordarray.js";
 import { wrapSymmetricKey } from "./symmetric-key.js";
 
 export async function ensureSodiumReady(): Promise<void> {
-  await sodium.ready;
+  // No-op for noble - no async initialization needed
+}
+
+const SALT_SIZE = 16;
+
+function getRandomBytes(length: number): Uint8Array {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return crypto.getRandomValues(new Uint8Array(length));
+  }
+  // Fallback for Node.js environments
+  const { randomBytes } = require('node:crypto');
+  return new Uint8Array(randomBytes(length));
 }
 
 export function derivePasswordValues(input: {
   password: Uint8Array;
   salt?: Uint8Array;
 }) {
-  input.salt ??= sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
+  input.salt ??= getRandomBytes(SALT_SIZE);
 
-  const derivedKey = sodium.crypto_pwhash(
-    32 + 64,
-    input.password,
-    input.salt,
-    2,
-    32 * 1048576,
-    sodium.crypto_pwhash_ALG_ARGON2ID13,
-  );
+  const derivedKey = argon2id(input.password, input.salt, {
+    t: 2, // iterations
+    m: 32 * 1024, // memory in KB (32MB)
+    p: 1, // parallelism
+    dkLen: 32 + 64, // output length
+  });
 
   return {
     key: wrapSymmetricKey(derivedKey.slice(0, 32)),
@@ -114,12 +123,12 @@ export function hashRecoveryCode(
   recoveryCode: string,
   salt?: Uint8Array,
 ): Uint8Array {
-  salt ??= sodium.randombytes_buf(16);
+  salt ??= getRandomBytes(16);
 
   return concatUint8Arrays(
     salt,
     cryptoJsWordArrayToUint8Array(
-      CryptoJS.SHA256(sodium.to_hex(salt) + recoveryCode),
+      CryptoJS.SHA256(Buffer.from(salt).toString('hex') + recoveryCode),
     ),
   );
 }
@@ -129,20 +138,41 @@ export function verifyRecoveryCode(
   hashedRecoveryCode: Uint8Array,
 ): boolean {
   const salt = hashedRecoveryCode.slice(0, 16);
+  const computed = hashRecoveryCode(recoveryCode, salt).slice(16);
+  const expected = hashedRecoveryCode.slice(16);
 
-  return sodium.memcmp(
-    hashedRecoveryCode.slice(16),
-    hashRecoveryCode(recoveryCode, salt).slice(16),
-  );
+  if (computed.length !== expected.length) {
+    return false;
+  }
+
+  // Constant-time comparison
+  const { timingSafeEqual } = require('node:crypto');
+  try {
+    return timingSafeEqual(Buffer.from(computed), Buffer.from(expected));
+  } catch {
+    // Fallback for non-Node environments
+    let result = 0;
+    for (let i = 0; i < computed.length; i++) {
+      result |= computed[i]! ^ expected[i]!;
+    }
+    return result === 0;
+  }
 }
 
-/** PHC string for a group password (Argon2id, libsodium). Call after `ensureSodiumReady()`. */
+/** PHC string for a group password (Argon2id, noble). */
 export function computeGroupPasswordPhc(groupPasswordPrehash: Uint8Array): string {
-  return sodium.crypto_pwhash_str(
-    groupPasswordPrehash,
-    2,
-    32 * 1024 * 1024,
-  ) as string;
+  const salt = getRandomBytes(16);
+  const hash = argon2id(groupPasswordPrehash, salt, {
+    t: 2, // iterations
+    m: 32 * 1024, // memory in KB (32MB)
+    p: 1, // parallelism
+    dkLen: 32, // output length
+  });
+  
+  // Return in PHC format: $argon2id$v=19$m=32768,t=2,p=1$<salt>$<hash>
+  const saltB64 = Buffer.from(salt).toString('base64').replace(/=+$/, '');
+  const hashB64 = Buffer.from(hash).toString('base64').replace(/=+$/, '');
+  return `$argon2id$v=19$m=32768,t=2,p=1$${saltB64}$${hashB64}`;
 }
 
 export function encryptGroupRehashedPasswordHash(

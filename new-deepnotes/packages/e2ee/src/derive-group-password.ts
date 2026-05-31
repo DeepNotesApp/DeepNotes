@@ -1,4 +1,4 @@
-import sodium from "libsodium-wrappers-sumo";
+import { argon2id } from "@noble/hashes/argon2.js";
 
 import { wrapSymmetricKey } from "./symmetric-key.js";
 
@@ -53,14 +53,12 @@ export function deriveGroupPasswordValues(
 } {
   const salt = nanoidToBytes(groupId);
 
-  const derivedKey = sodium.crypto_pwhash(
-    32 + 64,
-    new TextEncoder().encode(password),
-    salt,
-    8,
-    32 * 1048576,
-    sodium.crypto_pwhash_ALG_ARGON2ID13,
-  );
+  const derivedKey = argon2id(new TextEncoder().encode(password), salt, {
+    t: 8, // iterations
+    m: 32 * 1024, // memory in KB (32MB)
+    p: 1, // parallelism
+    dkLen: 32 + 64, // output length
+  });
 
   return {
     passwordKey: wrapSymmetricKey(derivedKey.slice(0, 32)),

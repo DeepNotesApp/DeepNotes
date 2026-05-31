@@ -1,6 +1,5 @@
 import type { DeepnotesDb } from "@deepnotes/db/client";
 import { eq } from "drizzle-orm";
-import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 
 import { sessions } from "@deepnotes/db/schema";
@@ -10,6 +9,7 @@ import type { CookieBuildOptions } from "./cookies.js";
 import type { SessionEnv } from "./env.js";
 import { signAccessToken, signRefreshToken } from "./jwt.js";
 import { addDays } from "./datetime.js";
+import { getRandomBytes, KEY_SIZE } from "@deepnotes/e2ee";
 
 export async function createSessionRowAndCookies(input: {
   db: DeepnotesDb;
@@ -24,7 +24,7 @@ export async function createSessionRowAndCookies(input: {
   refreshCode: string;
   cookieLines: string[];
 }> {
-  const sessionKey = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
+  const sessionKey = getRandomBytes(KEY_SIZE);
   const refreshCode = nanoid();
   const expirationDate = addDays(new Date(), 7).toISOString();
 
@@ -72,7 +72,7 @@ export async function rotateSessionRowAndCookies(input: {
   cookieLines: string[];
   oldSessionKey: Uint8Array;
 }> {
-  const sessionKey = sodium.crypto_aead_xchacha20poly1305_ietf_keygen();
+  const sessionKey = getRandomBytes(KEY_SIZE);
   const refreshCode = nanoid();
   const expirationDate = addDays(new Date(), 7).toISOString();
 

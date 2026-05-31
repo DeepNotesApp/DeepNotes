@@ -47,7 +47,6 @@
     "clsx": "^2.1.1",
     "highlight.js": "^11.11.1",
     "katex": "0.16.22",
-    "libsodium-wrappers-sumo": "^0.8.0",
     "lowlight": "3.3.0",
     "lucide-vue-next": "^1.0.0",
     "msgpackr": "^1.11.2",

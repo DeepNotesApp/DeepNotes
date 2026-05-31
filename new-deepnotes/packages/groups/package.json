@@ -16,16 +16,18 @@
   },
   "dependencies": {
     "@deepnotes/db": "workspace:*",
+    "@deepnotes/e2ee": "workspace:*",
     "@deepnotes/session-core": "workspace:*",
     "@deepnotes/realtime": "workspace:*",
+    "@noble/ciphers": "^0.6.0",
+    "@noble/curves": "^1.8.0",
+    "@noble/hashes": "^1.7.0",
     "crypto-js": "^4.2.0",
-    "libsodium-wrappers-sumo": "^0.8.0",
     "msgpackr": "^1.11.2",
     "drizzle-orm": "^0.41.0"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
-    "@types/libsodium-wrappers-sumo": "^0.7.7",
     "@types/node": "^22.14.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

@@ -15,7 +15,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "libsodium-wrappers-sumo": "^0.8.0",
+    "@noble/ciphers": "^0.6.0",
+    "@noble/curves": "^1.8.0",
+    "@noble/hashes": "^1.7.0",
     "msgpackr": "^1.11.2"
   },
   "devDependencies": {

@@ -5,9 +5,9 @@ import {
   ensureSodiumReady,
   wrapKeyPair,
   type KeyPair,
+  generateKeyPair,
 } from "@deepnotes/e2ee";
 import { pack } from "msgpackr";
-import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 
 import type { components } from "../../api/api-types.generated";
@@ -41,7 +41,7 @@ function buildPersonalGroupCreation(input: {
   const internalKeyring = createSymmetricKeyring();
   const contentKeyring = createSymmetricKeyring();
 
-  const rawGroupKeys = sodium.crypto_box_keypair();
+  const rawGroupKeys = generateKeyPair();
   const groupPublicRing = createKeyring(rawGroupKeys.publicKey);
   const groupPrivateRing = createPrivateKeyring(rawGroupKeys.privateKey);
 
@@ -113,7 +113,7 @@ export async function buildUserRegisterRequest(input: {
   const pageId = nanoid();
   const displayName = input.displayName ?? "";
 
-  const rawUserKeys = sodium.crypto_box_keypair();
+  const rawUserKeys = generateKeyPair();
   const userPublicKeyring = createKeyring(rawUserKeys.publicKey);
   const userPrivateKeyring = createPrivateKeyring(rawUserKeys.privateKey);
   const userKeyPair = wrapKeyPair(userPublicKeyring, userPrivateKeyring);

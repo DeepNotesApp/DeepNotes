@@ -1,6 +1,5 @@
 import type { DeepnotesDb } from "@deepnotes/db/client";
 import { eq } from "drizzle-orm";
-import sodium from "libsodium-wrappers-sumo";
 import { authenticator } from "otplib";
 
 import { devices, users } from "@deepnotes/db/schema";
@@ -19,6 +18,7 @@ import {
 import type { SessionEnv } from "./env.js";
 import { SessionError } from "./errors.js";
 import { verifyAccessToken } from "./jwt.js";
+import { getRandomBytes } from "@deepnotes/e2ee";
 
 function toBuf(u: Uint8Array): Buffer {
   return Buffer.from(u);
@@ -73,7 +73,8 @@ async function assertPasswordAndLoadUser(input: {
     password: input.loginHash,
     salt: passwordHashValues.saltBytes,
   });
-  if (!sodium.memcmp(passwordValues.hash, passwordHashValues.hashBytes)) {
+  const { timingSafeEqual } = require('node:crypto');
+  if (!timingSafeEqual(Buffer.from(passwordValues.hash), Buffer.from(passwordHashValues.hashBytes))) {
     throw new SessionError(400, "BAD_REQUEST", "Password is incorrect.");
   }
   return userRow;
@@ -178,7 +179,7 @@ export async function performUserTwoFactorEnableFinish(input: {
 
   await ensureSodiumReady();
   const recoveryCodes = Array.from({ length: 6 }, () =>
-    sodium.to_hex(sodium.randombytes_buf(16)),
+    Buffer.from(getRandomBytes(16)).toString('hex'),
   );
   const hashed = recoveryCodes.map((c) => hashRecoveryCode(c));
   const encRecovery = encryptRecoveryCodes(
@@ -264,7 +265,7 @@ export async function performUserTwoFactorGenerateRecoveryCodes(input: {
 
   await ensureSodiumReady();
   const recoveryCodes = Array.from({ length: 6 }, () =>
-    sodium.to_hex(sodium.randombytes_buf(16)),
+    Buffer.from(getRandomBytes(16)).toString('hex'),
   );
   const encRecovery = encryptRecoveryCodes(
     recoveryCodes.map((c) => hashRecoveryCode(c)),

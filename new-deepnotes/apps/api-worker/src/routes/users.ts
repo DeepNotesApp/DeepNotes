@@ -50,10 +50,16 @@ app.post("/api/users", async (c) => {
 
   const parsed = userRegisterRequestSchema.safeParse(bodyJson);
   if (!parsed.success) {
+    const flattened = parsed.error.flatten();
+    const formErrors = flattened.formErrors.join("; ");
+    const fieldErrors = Object.entries(flattened.fieldErrors)
+      .map(([field, errors]) => `${field}: ${errors?.join(", ")}`)
+      .join("; ");
+    const message = [formErrors, fieldErrors].filter(Boolean).join("; ") || "Invalid request data";
     return c.json(
       {
         code: "VALIDATION_ERROR",
-        message: parsed.error.flatten().formErrors.join("; "),
+        message,
       },
       400,
     );

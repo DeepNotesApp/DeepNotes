@@ -7,8 +7,8 @@ import {
   ensureSodiumReady,
   wrapKeyPair,
   wrapSymmetricKey,
+  generateKeyPair,
 } from "@deepnotes/e2ee";
-import sodium from "libsodium-wrappers-sumo";
 
 import { uint8ToBase64 } from "../auth/bytes";
 import type { StoredSessionCrypto } from "../auth/crypto-storage";
@@ -122,7 +122,7 @@ export async function buildGroupPrivacyMakePrivateRequest(input: {
   const newGroupInternalKeyring = oldGroupInternalKeyring.addKey();
   const newGroupContentKeyring = oldGroupContentKeyring.addKey();
 
-  const newGroupRawKeypair = sodium.crypto_box_keypair();
+  const newGroupRawKeypair = generateKeyPair();
   const newGroupPublicKeyring = oldGroupPublicKeyring.addKey(
     newGroupRawKeypair.publicKey,
   );

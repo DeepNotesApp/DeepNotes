@@ -1,5 +1,3 @@
-import sodium from "libsodium-wrappers-sumo";
-
 import type { KeyPair } from "./key-pair.js";
 import type { PrivateKey } from "./private-key.js";
 import type { PublicKey } from "./public-key.js";
@@ -9,8 +7,19 @@ import type { IKeyring, KeyMetadata } from "./keyring.js";
 import { createKeyring } from "./keyring.js";
 import { DataLayer } from "./wrapped-data.js";
 
+const KEY_SIZE = 32;
+
+function getRandomBytes(length: number): Uint8Array {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    return crypto.getRandomValues(new Uint8Array(length));
+  }
+  // Fallback for Node.js environments
+  const { randomBytes } = require('node:crypto');
+  return new Uint8Array(randomBytes(length));
+}
+
 export function createSymmetricKeyring(
-  value = sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
+  value = getRandomBytes(KEY_SIZE),
   params?: { raw?: boolean; locked?: boolean },
 ): any {
   const _keyring = createKeyring(value, params);
@@ -22,7 +31,7 @@ export function createSymmetricKeyring(
       return this.keys[0]!;
     }
 
-    addKey(key = sodium.crypto_aead_xchacha20poly1305_ietf_keygen()) {
+    addKey(key = getRandomBytes(KEY_SIZE)) {
       return createSymmetricKeyring(_keyring.addKey(key).wrappedValue);
     }
 
