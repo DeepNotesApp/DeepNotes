@@ -8,6 +8,7 @@ import { defineConfig } from "vite";
 const appRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
+  envDir: '../..',
   plugins: [vue(), tailwindcss()],
   resolve: {
     alias: {

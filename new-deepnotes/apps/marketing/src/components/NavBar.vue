@@ -2,9 +2,14 @@
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
+import { useAuthHint } from "@/composables/useAuthHint";
 
 const route = useRoute();
-const appHref = computed(() => import.meta.env.VITE_WEB_APP_URL?.trim() || "/");
+const appBase = computed(() => import.meta.env.VITE_WEB_APP_URL?.trim().replace(/\/$/, "") || "/");
+const appHref = computed(() => appBase.value);
+const loginHref = computed(() => `${appBase.value}/login`);
+const registerHref = computed(() => `${appBase.value}/register`);
+const { isLoggedIn } = useAuthHint();
 
 const navLinks = [
   { to: "/pricing", label: "Pricing" },
@@ -109,9 +114,19 @@ function toggleTheme() {
           </svg>
         </button>
 
-        <Button as="a" :href="appHref" variant="default" size="sm">
-          Open app
-        </Button>
+        <template v-if="isLoggedIn">
+          <Button as="a" :href="appHref" variant="default" size="sm">
+            Open app
+          </Button>
+        </template>
+        <template v-else>
+          <Button as="a" :href="loginHref" variant="ghost" size="sm">
+            Log in
+          </Button>
+          <Button as="a" :href="registerHref" variant="default" size="sm">
+            Get started
+          </Button>
+        </template>
       </div>
     </div>
   </header>

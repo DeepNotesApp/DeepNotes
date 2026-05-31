@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useHead } from "@unhead/vue";
 import { Button } from "@/components/ui/button";
+import { useAuthHint } from "@/composables/useAuthHint";
 import {
   Card,
   CardContent,
@@ -10,7 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const appHref = computed(() => import.meta.env.VITE_WEB_APP_URL?.trim() || "/");
+const appBase = computed(() => import.meta.env.VITE_WEB_APP_URL?.trim().replace(/\/$/, "") || "/");
+const appHref = computed(() => appBase.value);
+const registerHref = computed(() => `${appBase.value}/register`);
+const { isLoggedIn } = useAuthHint();
 
 useHead({
   title: "DeepNotes — End-to-end encrypted notes",
@@ -105,8 +109,16 @@ const useCases = [
         infinite canvas tool with deep nesting and real-time collaboration.
       </p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <Button as="a" :href="appHref" size="lg"> Get started for free </Button>
-        <Button as="a" :href="appHref" variant="outline" size="lg">
+        <Button as="a" :href="registerHref" size="lg">
+          Get started for free
+        </Button>
+        <Button
+          v-if="isLoggedIn"
+          as="a"
+          :href="appHref"
+          variant="outline"
+          size="lg"
+        >
           Open app
         </Button>
       </div>
@@ -170,7 +182,7 @@ const useCases = [
         Start organizing your thoughts on an infinite canvas, encrypted end to
         end.
       </p>
-      <Button as="a" :href="appHref" size="lg" class="mt-8">
+      <Button as="a" :href="registerHref" size="lg" class="mt-8">
         Get started — It&apos;s free!
       </Button>
     </section>
