@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, RotateCcw, Search } from "lucide-vue-next";
+import { Undo, Redo, RotateCcw, Search, Maximize } from "lucide-vue-next";
 
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
@@ -46,6 +46,7 @@ const canvasRef = ref<{
   zoom: number;
   rootEl: HTMLElement | null;
   resetView: () => void;
+  fitToScreen: (bounds: { minX: number; minY: number; maxX: number; maxY: number }, padding?: number) => void;
 } | null>(null);
 
 const undoRedo = useSpatialUndoRedo(props.ydoc);
@@ -190,6 +191,37 @@ function onCanvasDoubleClick(e: MouseEvent) {
   );
 
   createNoteAt(world.x, world.y, props.defaultNoteTemplate);
+}
+
+function fitToScreen() {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+
+  // Calculate bounding box of all root notes
+  if (rootNoteList.value.length === 0) {
+    canvas.resetView();
+    return;
+  }
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  for (const note of rootNoteList.value) {
+    const wStr = note.model.width.value.expanded;
+    const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+    const h = 80; // Default height estimate
+    const x = note.model.pos.value.x;
+    const y = note.model.pos.value.y;
+
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x + w);
+    maxY = Math.max(maxY, y + h);
+  }
+
+  canvas.fitToScreen({ minX, minY, maxX, maxY }, 40);
 }
 
 // --- box selection state ---
@@ -930,6 +962,17 @@ onUnmounted(() => {
           @click="canvasRef?.resetView()"
         >
           <RotateCcw class="h-4 w-4" />
+        </Button>
+
+        <!-- Fit to screen -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Fit to screen"
+          @click="fitToScreen"
+        >
+          <Maximize class="h-4 w-4" />
         </Button>
 
         <!-- Find/Replace -->

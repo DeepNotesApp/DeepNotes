@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 in progress. Core spatial mechanics done: selection, clipboard, alignment, undo/redo, viewport, containers, state screens. Sidebar data stubbed, arrow labels are raw `<input>` stubs, `SPATIAL_PARITY_CHECKLIST.md` missing. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 complete. 73/82 checklist items done (89%). Arrow source/target anchor positioning and fit-to-screen implemented. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -15,10 +15,10 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **In progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
-| 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
+| 9 | Production Readiness and Cutover | In progress | [phase-9-production.md](phase-9-production.md) |
 
 ---
 

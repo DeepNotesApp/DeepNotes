@@ -231,6 +231,39 @@ export function useSpatialViewport(
     zoom.value = clampZoom(1, minZoom, maxZoom);
   }
 
+  function fitToScreen(bounds: { minX: number; minY: number; maxX: number; maxY: number }, padding = 40) {
+    const c = getCenter();
+    if (!c) return;
+
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
+
+    // If no content, reset to default
+    if (width === 0 && height === 0) {
+      resetView();
+      return;
+    }
+
+    const viewportWidth = c.rect.width;
+    const viewportHeight = c.rect.height;
+
+    // Calculate zoom to fit with padding
+    const zoomX = (viewportWidth - padding * 2) / width;
+    const zoomY = (viewportHeight - padding * 2) / height;
+    const targetZoom = clampZoom(Math.min(zoomX, zoomY), minZoom, maxZoom);
+
+    // Calculate center of bounds
+    const boundsCenterX = bounds.minX + width / 2;
+    const boundsCenterY = bounds.minY + height / 2;
+
+    // Calculate camera position to center bounds
+    // screenX = (worldX - camX) * zoom + centerX
+    // => camX = worldX - (screenX - centerX) / zoom
+    camX.value = boundsCenterX - (c.cx - c.rect.left) / targetZoom;
+    camY.value = boundsCenterY - (c.cy - c.rect.top) / targetZoom;
+    zoom.value = targetZoom;
+  }
+
   onMounted(() => {
     window.addEventListener("keydown", onKeyDown, { passive: false });
     window.addEventListener("keyup", onKeyUp);
@@ -252,5 +285,6 @@ export function useSpatialViewport(
     onPointerMove,
     onPointerUp,
     resetView,
+    fitToScreen,
   };
 }

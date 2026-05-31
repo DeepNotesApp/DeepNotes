@@ -22,6 +22,16 @@ export class PageCollabRoom {
     private readonly env: PageCollabRoomEnv,
   ) {}
 
+  private log(level: "info" | "warn" | "error", event: string, data: Record<string, unknown> = {}) {
+    console.log(JSON.stringify({
+      level,
+      event,
+      pageId: this.pageIdStr,
+      timestamp: Date.now(),
+      ...data,
+    }));
+  }
+
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const parts = url.pathname.split("/").filter(Boolean);
@@ -41,6 +51,7 @@ export class PageCollabRoom {
 
     const userId = request.headers.get("X-Verified-User-Id");
     if (userId == null || userId === "") {
+      this.log("warn", "ws_connection_rejected", { reason: "missing_user_id" });
       return new Response("Unauthorized", { status: 401 });
     }
 
@@ -49,6 +60,7 @@ export class PageCollabRoom {
     const server = webSocketPair[1];
     server.serializeAttachment({ userId });
     this.ctx.acceptWebSocket(server);
+    this.log("info", "ws_connection_accepted", { userId });
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -61,11 +73,13 @@ export class PageCollabRoom {
     }
     const attachment = ws.deserializeAttachment() as { userId: string } | null;
     if (attachment?.userId == null || attachment.userId === "") {
+      this.log("warn", "ws_message_rejected", { reason: "missing_user_attachment" });
       return;
     }
     const buf = new Uint8Array(message);
     const decoded = decodeClientCollabBinaryMessage(buf);
     if (decoded == null) {
+      this.log("warn", "ws_message_rejected", { reason: "decode_failed", userId: attachment.userId });
       return;
     }
 
@@ -79,10 +93,12 @@ export class PageCollabRoom {
     const secret = this.env.COLLAB_INTERNAL_SECRET;
     const self = this.env.WORKER_SELF;
     if (secret == null || secret === "" || self == null) {
+      this.log("error", "collab_misconfigured", { userId: attachment.userId });
       ws.close(1011, "Collab server misconfigured");
       return;
     }
 
+    const startTime = Date.now();
     const res = await self.fetch(
       new Request(
         `http://collab-internal/api/internal/pages/${this.pageIdStr}/collab-ws-append`,
@@ -99,8 +115,14 @@ export class PageCollabRoom {
         },
       ),
     );
+    const latency = Date.now() - startTime;
 
     if (!res.ok) {
+      this.log("error", "collab_append_failed", { 
+        userId: attachment.userId, 
+        status: res.status,
+        latency,
+      });
       return;
     }
 
@@ -108,6 +130,7 @@ export class PageCollabRoom {
     try {
       payload = await res.json();
     } catch {
+      this.log("error", "collab_parse_failed", { userId: attachment.userId, latency });
       return;
     }
     if (
@@ -116,9 +139,17 @@ export class PageCollabRoom {
       !("newIndex" in payload) ||
       typeof (payload as { newIndex: unknown }).newIndex !== "number"
     ) {
+      this.log("error", "collab_invalid_payload", { userId: attachment.userId, latency });
       return;
     }
     const dbIndex = (payload as { newIndex: number }).newIndex;
+
+    this.log("info", "collab_update_processed", { 
+      userId: attachment.userId, 
+      updateId: decoded.updateId,
+      dbIndex,
+      latency,
+    });
 
     const relay = encodeDocSingleUpdateFromServer(encryptedUpdate, dbIndex);
     this.broadcast(ws, relay);

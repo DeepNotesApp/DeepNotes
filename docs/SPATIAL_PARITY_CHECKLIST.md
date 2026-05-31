@@ -84,7 +84,7 @@
 | 3.16 | Arrow `fakePos` / `looseEndpoint` | `arrow.ts` | `arrow-model.ts:fakePos, looseEndpoint` | **Done** | `arrow-model.test.ts` |
 | 3.17 | Arrow `regionId` | `arrow.ts` | `arrow-model.ts:regionId` | **Done** | `arrow-model.test.ts` |
 | 3.18 | Arrow geometry reads actual note heights | `DisplayArrow/ArrowGeometry.ts` | `DisplayArrow.vue:noteHeights` | **Done** | — |
-| 3.19 | Arrow source/target anchor positioning | `arrow.ts` `sourceAnchor/targetAnchor` | `arrow-model.ts:sourceAnchor, targetAnchor` | **Not started** | — |
+| 3.19 | Arrow source/target anchor positioning | `arrow.ts` `sourceAnchor/targetAnchor` | `DisplayArrow.vue:geometry uses sourceAnchor/targetAnchor` | **Done** | — |
 
 ## 4. Camera / Viewport
 
@@ -96,7 +96,7 @@
 | 4.4 | Zoom (Ctrl+wheel toward cursor) | `camera/zoom.ts` | `useSpatialViewport.ts:onWheel` | **Done** | `spatial-viewport-math.test.ts` |
 | 4.5 | Zoom (pinch on touch) | `camera/zoom.ts` | `useSpatialViewport.ts:onPointerDown/Move` | **Done** | — |
 | 4.6 | Zoom reset button | `camera/zoom.ts` | `SpatialPageView.vue:resetView button` | **Done** | — |
-| 4.7 | Fit-to-screen | `camera/zoom.ts` | — | **Not started** | — |
+| 4.7 | Fit-to-screen | `camera/zoom.ts` | `useSpatialViewport.ts:fitToScreen + SpatialPageView.vue:fitToScreen button` | **Done** | — |
 | 4.8 | Zoom indicator (%) | `camera/zoom.ts` | `SpatialPageView.vue:zoom %` | **Done** | — |
 | 4.9 | Grid background | `camera/grid.ts` | `SpatialWorldCanvas.vue:linear-gradient` | **Done** | — |
 

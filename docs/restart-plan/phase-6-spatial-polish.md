@@ -51,7 +51,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
-| `MainToolbar` (shadcn) | **Partial** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. Still missing: page action buttons, insert dialogs, zoom other than reset, fit-to-screen |
+| `MainToolbar` (shadcn) | **Partial** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. Still missing: page action buttons, insert dialogs, zoom other than reset/fit-to-screen |
 | `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard` and `FavoritePagesCard` now load real data via `useUserPageLists` composable. `SelectedPagesCard` remains client-side only |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. No per-note context menu |
@@ -86,6 +86,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Arrow label (editable `Y.XmlFragment`) | **Done** | `NoteTiptapEditor` at midpoint. Proper collaborative rich-text editing on `Y.XmlFragment` |
 | Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
 | Drag-to-reconnect | **Done** | Connection zones + `onReconnectPointerMove/Up` in `SpatialPageView.vue` wired |
+| Arrow source/target anchor positioning | **Done** | `DisplayArrow.vue` geometry now uses `sourceAnchor`/`targetAnchor` when provided |
 | Color matching note color logic | **Partial** | Same hardcoded 10-color map used, but `inherit` logic may not cascade correctly for arrows |
 
 ### 9. Find and replace

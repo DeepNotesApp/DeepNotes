@@ -46,18 +46,30 @@ const geometry = computed(() => {
   const t = props.targetModel;
   if (!s || !t) return null;
 
-  // Note centers (legacy uses note center for arrow endpoints)
+  // Use anchor positions if provided, otherwise use note centers
   const w1 = s.width.value.expanded;
   const nw1 = w1 === "Auto" ? 160 : parseFloat(w1);
   const h1 = noteHeights.value.get(props.model.source.value) ?? 80;
-  const x1 = s.pos.value.x + nw1 / 2;
-  const y1 = s.pos.value.y + h1 / 2;
+  
+  const sourceAnchor = props.model.sourceAnchor.value;
+  const x1 = sourceAnchor 
+    ? s.pos.value.x + sourceAnchor.x 
+    : s.pos.value.x + nw1 / 2;
+  const y1 = sourceAnchor 
+    ? s.pos.value.y + sourceAnchor.y 
+    : s.pos.value.y + h1 / 2;
 
   const w2 = t.width.value.expanded;
   const nw2 = w2 === "Auto" ? 160 : parseFloat(w2);
   const h2 = noteHeights.value.get(props.model.target.value) ?? 80;
-  const x2 = t.pos.value.x + nw2 / 2;
-  const y2 = t.pos.value.y + h2 / 2;
+  
+  const targetAnchor = props.model.targetAnchor.value;
+  const x2 = targetAnchor 
+    ? t.pos.value.x + targetAnchor.x 
+    : t.pos.value.x + nw2 / 2;
+  const y2 = targetAnchor 
+    ? t.pos.value.y + targetAnchor.y 
+    : t.pos.value.y + h2 / 2;
 
   const minX = Math.min(x1, x2);
   const minY = Math.min(y1, y2);

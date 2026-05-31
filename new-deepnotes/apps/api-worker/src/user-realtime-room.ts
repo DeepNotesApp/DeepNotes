@@ -52,11 +52,22 @@ export class UserRealtimeRoom {
   private readonly _fieldSubs = new Map<string, Set<WebSocket>>();
   /** WebSocket → keys it subscribed to (cleanup on close) */
   private readonly _subsByWs = new Map<WebSocket, Set<string>>();
+  private userIdStr = "";
 
   constructor(
     private readonly ctx: DurableObjectState,
     private readonly env: UserRealtimeRoomEnv,
   ) {}
+
+  private log(level: "info" | "warn" | "error", event: string, data: Record<string, unknown> = {}) {
+    console.log(JSON.stringify({
+      level,
+      event,
+      userId: this.userIdStr,
+      timestamp: Date.now(),
+      ...data,
+    }));
+  }
 
   private getRedis(): Redis | null {
     if (this._redis !== undefined) {
@@ -327,14 +338,17 @@ export class UserRealtimeRoom {
 
     const userId = request.headers.get("X-Verified-User-Id");
     if (userId == null || userId === "") {
+      this.log("warn", "realtime_ws_connection_rejected", { reason: "missing_user_id" });
       return new Response("Unauthorized", { status: 401 });
     }
 
+    this.userIdStr = userId;
     const webSocketPair = new WebSocketPair();
     const client = webSocketPair[0];
     const server = webSocketPair[1];
     server.serializeAttachment({ userId });
     this.ctx.acceptWebSocket(server);
+    this.log("info", "realtime_ws_connection_accepted", { userId });
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -348,15 +362,18 @@ export class UserRealtimeRoom {
     const attachment = ws.deserializeAttachment() as { userId?: string } | null;
     const userId = attachment?.userId;
     if (userId == null || userId === "") {
+      this.log("warn", "realtime_ws_message_rejected", { reason: "missing_user_attachment" });
       return;
     }
 
     const decoded = decodeRealtimeClientBinaryMessage(new Uint8Array(message));
     if (decoded == null) {
+      this.log("warn", "realtime_ws_message_rejected", { reason: "decode_failed", userId });
       return;
     }
 
     try {
+      const startTime = Date.now();
       const hyper = this.env.HYPERDRIVE;
       const acl: RealtimeHashAclPort | null =
         hyper != null
@@ -383,6 +400,14 @@ export class UserRealtimeRoom {
             this.removeSubscription(fk, ws);
           },
         },
+      });
+
+      const latency = Date.now() - startTime;
+      this.log("info", "realtime_ws_batch_processed", { 
+        userId, 
+        latency,
+        responseSize: out.responseBytes?.length ?? 0,
+        hsetBroadcastCount: out.hsetBroadcastItems.length,
       });
 
       if (out.responseBytes != null) {
@@ -418,8 +443,8 @@ export class UserRealtimeRoom {
           }
         }
       }
-    } catch {
-      // ignore malformed/partial Redis failures
+    } catch (e) {
+      this.log("error", "realtime_ws_batch_failed", { userId, error: String(e) });
     }
   }
 
