@@ -77,12 +77,12 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **`docs/SPATIAL_PARITY_CHECKLIST.md` missing.** Phase 1 exit criterion requires this file; it was never created. Phase 6 cannot be declared done without it.
-- **Left sidebar panels exist but are data-stubbed.** `PageEditorView.vue` passes `recentPageIds`, `favoritePageIds`, `selectedPageIds` as empty `ref<string[]>([])` to `RecentPagesCard`, `FavoritePagesCard`, `SelectedPagesCard`. Panels render shells with no data.
-- **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, createdAt, editedAt, movedAt, etc.) are not exposed.
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82 rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete.
+- **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
+- **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, timestamps) are not exposed.
 - **Toolbar is inline markup, not a reusable component.** `PageLayout.vue` contains the header shell directly; there is no `MainToolbar.vue` component. Missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
-- **Arrow labels are raw `<input>` stubs, not Tiptap on `Y.XmlFragment`.** `DisplayArrow.vue` renders a plain `<input>` that deletes and re-inserts the entire `Y.XmlFragment` on blur. Legacy parity requires collaborative rich-text label editing.
-- **Arrow geometry hardcodes note height at `80px`.** `DisplayArrow.vue` uses `const h1 = 80; const h2 = 80;` for endpoint calculations. Notes with variable heights (containers, expanded text) will produce misaligned arrows.
+- **Arrow labels fixed.** `DisplayArrow.vue` now uses `NoteTiptapEditor` on `Y.XmlFragment` instead of raw `<input>`. Proper collaborative rich-text editing.
+- **Arrow geometry now reads actual note heights.** `DisplayNote.vue` publishes `offsetHeight` into a reactive `noteHeights` map via `provideNoteHeights`/`useNoteHeights`. `DisplayArrow.vue` reads heights from the map instead of hardcoding `80px`.
 - **Note drag uses `Teleport` overlay but position tracking is incomplete.** `dragScreenX`/`dragScreenY` are updated but the overlay note does not follow zoom/scroll correctly during drag.
 - **Page state screens exist but 4 states are indistinguishable.** `page-deleted`, `group-deleted`, `invited`, `rejected` all map to the same generic error UI because the API does not return distinct error codes.
 - **Context menu exists for canvas but not for individual notes.** `CanvasContextMenu.vue` (right-click on empty canvas) is implemented. No per-note context menu exists.

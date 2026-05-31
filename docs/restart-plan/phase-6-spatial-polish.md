@@ -52,7 +52,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
 | `MainToolbar` (shadcn) | **Partial** | `PageLayout.vue` inline header has logo, breadcrumb, global nav, sidebar toggles. No standalone `MainToolbar.vue`. Missing: page action buttons, insert dialogs, zoom other than reset, fit-to-screen |
-| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard`, `FavoritePagesCard`, `SelectedPagesCard` exist but receive empty stub arrays (`ref<string[]>([])`) — no actual data |
+| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard` and `FavoritePagesCard` now load real data via `useUserPageLists` composable. `SelectedPagesCard` remains client-side only |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. No per-note context menu |
 | `LoadingOverlay` during page bootstrap | **Partial** | `PageStateScreens.vue` handles loading/error. No dedicated `LoadingOverlay` component over the canvas |
@@ -83,7 +83,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Curve body (`CurveArrow.vue`) | **Done** | Quadratic bezier with perpendicular offset; `bodyType === 'curve'` |
 | Line body (`LineArrow.vue`) | **Done** | Straight line when `bodyType === 'line'` |
 | Arrow heads (`OpenHead.vue`) | **Done** | SVG `<marker>` chevron heads; `sourceHead`/`targetHead` supported |
-| Arrow label (editable `Y.XmlFragment`) | **Stub** | Plain `<input>` at midpoint. On blur, deletes entire `Y.XmlFragment` and inserts a single `Y.XmlText`. Not Tiptap. Not collaborative rich-text |
+| Arrow label (editable `Y.XmlFragment`) | **Done** | `NoteTiptapEditor` at midpoint. Proper collaborative rich-text editing on `Y.XmlFragment` |
 | Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
 | Drag-to-reconnect | **Done** | Connection zones + `onReconnectPointerMove/Up` in `SpatialPageView.vue` wired |
 | Color matching note color logic | **Partial** | Same hardcoded 10-color map used, but `inherit` logic may not cascade correctly for arrows |
@@ -108,20 +108,20 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 ## Verification
 
 - [ ] Each deliverable has a test (unit, component, or integration). (Missing: `DisplayNote.vue`, `DisplayArrow.vue`, `SpatialPageView.vue`, sidebar/toolbar integration tests.)
-- [ ] Phase 1 checklist is >80% marked done. (Blocked: `docs/SPATIAL_PARITY_CHECKLIST.md` does not exist.)
+- [ ] Phase 1 checklist is >80% marked done. (`docs/SPATIAL_PARITY_CHECKLIST.md` created with 82 rows; count Done vs Partial/Stub/Not started.)
 
 ---
 
 ## Exit criteria
 
-- [ ] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed for completeness.
+- [x] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed for completeness.
 - [ ] Phase 1 checklist ≥ 80% complete.
 - [ ] No "P1" checklist item remains open.
 - [ ] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
 - [ ] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
 - [ ] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring (`#2196f3` not `ring-primary`), drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
-- [ ] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels (**Tiptap on `Y.XmlFragment`**, not raw `<input>`), hitboxes, and drag-to-reconnect.
+- [x] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels (Tiptap on `Y.XmlFragment`), hitboxes, and drag-to-reconnect.
 - [ ] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
-- [ ] Sidebar panels (`RecentPages`, `FavoritePages`, `SelectedPages`) display real data from API.
-- [ ] Arrow geometry reads actual note heights instead of hardcoding `80px`.
+- [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
+- [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

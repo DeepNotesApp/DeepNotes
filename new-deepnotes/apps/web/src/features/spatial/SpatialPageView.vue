@@ -24,6 +24,7 @@ import {
   distributeVertically,
 } from "./alignment";
 import { screenToWorld, worldToScreen } from "./spatial-viewport-math";
+import { provideNoteHeights } from "./useNoteHeights";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
@@ -63,6 +64,9 @@ const {
 } = useSpatialPage(props.ydoc, undoRedo);
 
 const selection = useSpatialSelection();
+
+// Provide reactive note-height map so DisplayArrow can read actual rendered heights
+provideNoteHeights();
 
 // Emit selection changes for properties panel
 watch(() => selection.selectedIds.value, (ids: Set<string>) => {

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, onUpdated, ref } from "vue";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-vue-next";
 import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
+import { useNoteHeights } from "./useNoteHeights";
 
 const props = defineProps<{
   id: string;
@@ -22,6 +23,19 @@ const emit = defineEmits<{
   dragend: [id: string];
   arrowDragStart: [payload: { noteId: string }];
 }>();
+
+const rootRef = ref<HTMLElement | null>(null);
+const { heights: noteHeights } = useNoteHeights();
+
+function publishHeight() {
+  const el = rootRef.value;
+  if (el) {
+    noteHeights.value.set(props.id, el.offsetHeight);
+  }
+}
+
+onMounted(publishHeight);
+onUpdated(publishHeight);
 
 const resolvedColor = computed(() => {
   const c = props.model.color.value;
@@ -221,6 +235,7 @@ function toggleCollapsed() {
 
 <template>
   <div
+    ref="rootRef"
     data-testid="display-note"
     :data-note-id="id"
     :class="frameClasses"

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import * as Y from "yjs";
+import { computed } from "vue";
 import type { ArrowModel } from "./arrow-model";
 import type { NoteModel } from "./note-model";
+import NoteTiptapEditor from "./NoteTiptapEditor.vue";
+import { useNoteHeights } from "./useNoteHeights";
 
 const props = defineProps<{
   id: string;
@@ -18,32 +19,7 @@ const emit = defineEmits<{
   reconnectStart: [arrowId: string, from: 'source' | 'target']
 }>();
 
-const isEditingLabel = ref(false);
-const labelText = ref('');
-
-const labelContent = computed(() => {
-  const frag = props.model.label.value;
-  if (!frag) return '';
-  return frag.toString();
-});
-
-function startEditLabel() {
-  labelText.value = labelContent.value;
-  isEditingLabel.value = true;
-}
-
-function saveLabel() {
-  const frag = props.model.label.value;
-  if (frag) {
-    frag.delete(0, frag.length);
-    frag.insert(0, [new Y.XmlText(labelText.value)]);
-  }
-  isEditingLabel.value = false;
-}
-
-function cancelEditLabel() {
-  isEditingLabel.value = false;
-}
+const labelFragment = computed(() => props.model.label.value);
 
 const arrowColor = computed(() => {
   const c = props.model.color.value;
@@ -63,6 +39,8 @@ const arrowColor = computed(() => {
   return colorMap[c] ?? c ?? "currentColor";
 });
 
+const { heights: noteHeights } = useNoteHeights();
+
 const geometry = computed(() => {
   const s = props.sourceModel;
   const t = props.targetModel;
@@ -71,13 +49,13 @@ const geometry = computed(() => {
   // Note centers (legacy uses note center for arrow endpoints)
   const w1 = s.width.value.expanded;
   const nw1 = w1 === "Auto" ? 160 : parseFloat(w1);
-  const h1 = 80;
+  const h1 = noteHeights.value.get(props.model.source.value) ?? 80;
   const x1 = s.pos.value.x + nw1 / 2;
   const y1 = s.pos.value.y + h1 / 2;
 
   const w2 = t.width.value.expanded;
   const nw2 = w2 === "Auto" ? 160 : parseFloat(w2);
-  const h2 = 80;
+  const h2 = noteHeights.value.get(props.model.target.value) ?? 80;
   const x2 = t.pos.value.x + nw2 / 2;
   const y2 = t.pos.value.y + h2 / 2;
 
@@ -226,29 +204,20 @@ function onPointerDown(e: PointerEvent) {
 
     <!-- Arrow label at midpoint -->
     <foreignObject
-      v-if="labelContent || isEditingLabel"
-      :x="(geometry.localX1 + geometry.localX2) / 2 - 40"
-      :y="(geometry.localY1 + geometry.localY2) / 2 - 12"
-      width="80"
-      height="24"
+      v-if="labelFragment"
+      :x="(geometry.localX1 + geometry.localX2) / 2 - 60"
+      :y="(geometry.localY1 + geometry.localY2) / 2 - 16"
+      width="120"
+      height="32"
       class="pointer-events-auto"
     >
-      <div
-        v-if="!isEditingLabel"
-        class="flex items-center justify-center h-full text-xs bg-background border rounded px-2 cursor-text hover:bg-accent"
-        @click="startEditLabel"
-      >
-        {{ labelContent }}
+      <div class="h-full w-full">
+        <NoteTiptapEditor
+          :fragment="labelFragment"
+          :editable="!props.model.readOnly.value"
+          placeholder="Label…"
+        />
       </div>
-      <input
-        v-else
-        v-model="labelText"
-        class="w-full h-full text-xs bg-background border rounded px-2"
-        @blur="saveLabel"
-        @keydown.enter="saveLabel"
-        @keydown.esc="cancelEditLabel"
-        ref="labelInput"
-      />
     </foreignObject>
   </svg>
 </template>

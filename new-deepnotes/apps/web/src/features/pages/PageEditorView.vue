@@ -31,6 +31,7 @@ import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { usePageSnapshots } from "./usePageSnapshots";
 import PageStateScreens from "./screens/PageStateScreens.vue";
 import { usePageStatus } from "./usePageStatus";
+import { useUserPageLists } from "./useUserPageLists";
 
 import type { SnapshotRow } from "./page-snapshot-list";
 
@@ -62,8 +63,13 @@ const selectedArrowId = ref<string | null>(null);
 const selectedArrowModel = ref<any>(null);
 
 // Track recent/favorite/selected pages for left sidebar
-const recentPageIds = ref<string[]>([]);
-const favoritePageIds = ref<string[]>([]);
+const {
+  recentPageIds,
+  favoritePageIds,
+  load: loadUserPageLists,
+  clearRecent,
+  clearFavorites,
+} = useUserPageLists();
 const selectedPageIds = ref<string[]>([]);
 
 const { ydoc, collabAwareness, collabCaretProvider } = createPageCollabDoc();
@@ -194,7 +200,9 @@ onMounted(() => {
       name: "login",
       query: { redirect: route.fullPath },
     });
+    return;
   }
+  void loadUserPageLists();
 });
 </script>
 
@@ -218,8 +226,8 @@ onMounted(() => {
       :ydoc="ydoc"
       :default-note-template="noteTemplate"
       :default-arrow-template="arrowTemplate"
-      @select-note="selectedNoteId = $event[0]; selectedNoteModel = $event[1]"
-      @select-arrow="selectedArrowId = $event[0]; selectedArrowModel = $event[1]"
+      @select-note="selectedNoteId = $event?.[0] ?? null; selectedNoteModel = $event?.[1] ?? null"
+      @select-arrow="selectedArrowId = $event?.[0] ?? null; selectedArrowModel = $event?.[1] ?? null"
     />
 
     <!-- === Toolbar center: breadcrumb path === -->
@@ -310,7 +318,7 @@ onMounted(() => {
           :recent-page-ids="recentPageIds"
           :current-page-id="pageId"
           :page-labels="pathPageLabels"
-          @clear="recentPageIds = []"
+          @clear="void clearRecent()"
         />
 
         <!-- Favorite pages -->
@@ -318,7 +326,7 @@ onMounted(() => {
           :favorite-page-ids="favoritePageIds"
           :current-page-id="pageId"
           :page-labels="pathPageLabels"
-          @clear="favoritePageIds = []"
+          @clear="void clearFavorites()"
         />
 
         <!-- Selected pages -->
