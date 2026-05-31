@@ -21,7 +21,7 @@ All non-editor UX is polished and tested.
 2. **Group management parity**
    - Invite by user ID, accept invite, join request, member roles, remove member. ✅
    - Group settings: join policy, make public/private, soft-delete, purge. ✅
-   - **Group password enable / change / disable UI** — backend routes exist (`POST/PATCH/DELETE /api/groups/:groupId/password`), but `GroupDetailView.vue` contains no UI for these flows. ❌
+   - Group password enable / change / disable UI. ✅ — `GroupDetailView.vue` uses `useGroupMembersDetail` which calls `POST/PATCH/DELETE /api/groups/:groupId/password` via `group-password-crypto.ts` helpers; unit tests verify correct keyring wrapping.
 
 3. **Notifications**
    - Notifications list page with decrypt and mark-as-read. ✅
@@ -34,7 +34,7 @@ All non-editor UX is polished and tested.
 5. **Group password unlock**
    - `unlockPageCollabSymmetricKeyring` now accepts `groupPasswordKey` and is unit-tested. ✅
    - `useCollabCrypto` exposes `unlockKeyringWithPassword`. ✅
-   - **No UI calls `unlockKeyringWithPassword`** — if collab crypto throws for a password-protected group, the user has no entry point to enter the password. ❌
+   - `PageEditorCollabStatusCard.vue` detects password-protected errors and shows an unlock form; `PageEditorView.vue` wires `onUnlockWithPassword` to reload the collab doc after successful unlock. ✅
 
 6. **Scheduler / background cleanup**
    - Legacy `apps/scheduler` ran scheduled cleanup (purge soft-deleted data).
@@ -55,13 +55,13 @@ All non-editor UX is polished and tested.
    - Exit criteria: no extracted package exceeds 25 files; `@deepnotes/session` ≤ 20 files.
 
 8. **Code health lint-and-refactor audit**
-   - Run `pnpm lint` — 0 errors.
-   - Run `pnpm typecheck` — 0 errors.
-   - Run `pnpm test` — 0 failures, 0 skips.
+   - `pnpm lint` — 0 errors. ✅
+   - `pnpm typecheck` — 0 errors. ✅
+   - `pnpm test` — 0 failures, 0 skips (134 web + 48 session + 0 api-worker = 182). ✅
    - Check `apps/api-worker` bundle size (`wrangler build`) — alert if > 500KB.
-   - Count files in `@deepnotes/session` — alert if > 25 new files added since last audit.
-   - No composable in `apps/web` exceeds 300 lines.
-   - No `console.log` in production DO code; replace with structured logger or remove.
+   - Count files in `@deepnotes/session` — 71 files (no new files since last audit). ⚠️
+   - No composable in `apps/web` exceeds 300 lines. ⚠️ — `useGroupMembersDetail.ts` (785), `usePageCollabEditor.ts` (431), `useSpatialPage.ts` (414) still exceed; refactor deferred to post-Phase 8.
+   - No `console.log` in production DO code; replace with structured logger or remove. ✅
 
 ---
 
@@ -80,10 +80,10 @@ All non-editor UX is polished and tested.
 - [x] Scheduler implemented with Cron Trigger and integration test.
 - [x] E2E smoke test covers demo login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
 - [x] `TRPC_REST_MAP.md` route audit: every endpoint marked "implemented" has a registered Hono route in `apps/api-worker`.
-- [ ] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
+- [x] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
 - [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
-- [ ] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
+- [x] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
 - [ ] `@deepnotes/session` split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`; remaining `@deepnotes/session` ≤ 20 files.
 - [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass.
-- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass with 0 errors/failures.
+- [x] `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass with 0 errors/failures.
 - [ ] No composable in `apps/web` exceeds 300 lines; no `console.log` in DO production code.

@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31  
+> **Last updated:** 2026-05-31 (group password UI + unlock completed)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -16,7 +16,7 @@
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
 | 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
-| 7 | Account, billing, groups polish | Partial (see file) | [phase-7-account-polish.md](phase-7-account-polish.md) |
+| 7 | Account, billing, groups polish | Partial (password UI done; session split + composable size pending) | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | Not started | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
 
@@ -76,9 +76,9 @@ A criterion is **not met** until the verification command or check passes in CI.
 ## Current gaps (high-level)
 
 - **Marketing/help/pricing/whitepaper surfaces entirely missing** — `apps/marketing` is a single-card placeholder. Launch blocker, not polish.
-- **Group password unlock** — no UI calls `unlockKeyringWithPassword`.
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **`@deepnotes/session` god package** — 71 files, needs split.
+- **`@deepnotes/session` god package** — 71 files, needs split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`.
+- **Composable size** — `useGroupMembersDetail.ts` (785 lines), `usePageCollabEditor.ts` (431 lines), `useSpatialPage.ts` (414 lines) exceed 300-line limit.
 
 ---
 

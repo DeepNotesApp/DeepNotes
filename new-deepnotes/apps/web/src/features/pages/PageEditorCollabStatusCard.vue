@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +29,19 @@ const emit = defineEmits<{
 const passwordInput = ref("");
 const isUnlocking = ref(false);
 
-const isPasswordProtectedError = computed(() =>
-  props.cryptoError != null &&
-  props.cryptoError.toLowerCase().includes("password-protected"),
-);
+const isPasswordProtectedError = computed(() => {
+  if (props.cryptoError == null) return false;
+  const lower = props.cryptoError.toLowerCase();
+  return lower.includes("password-protected") || lower.includes("group password");
+});
+
+watch(() => props.cryptoError, () => {
+  isUnlocking.value = false;
+});
+
+watch(() => props.collabLoading, (loading) => {
+  if (loading) isUnlocking.value = false;
+});
 
 function onSubmit() {
   if (!passwordInput.value) return;

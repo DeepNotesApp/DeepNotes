@@ -60,6 +60,9 @@ const {
   makeGroupPublic,
   makeGroupPrivate,
   purgeGroup,
+  enableGroupPassword,
+  changeGroupPassword,
+  disableGroupPassword,
 } = useGroupMembersDetail(groupIdRef);
 
 const roleDraft = ref<Record<string, GroupMemberRole>>({});
@@ -69,6 +72,11 @@ const joinRequestsDraft = ref(false);
 const inviteeUserIdInput = ref("");
 const inviteeDisplayNameInput = ref("");
 const inviteRolePick = ref<GroupMemberRole>("member");
+
+const enablePasswordInput = ref("");
+const changeCurrentPasswordInput = ref("");
+const changeNewPasswordInput = ref("");
+const disablePasswordInput = ref("");
 
 const clientCryptoReady = () => readSessionCrypto() != null;
 
@@ -265,6 +273,36 @@ async function onMakeGroupPrivate() {
   }
   await makeGroupPrivate();
 }
+
+async function onEnablePassword() {
+  const pwd = enablePasswordInput.value.trim();
+  if (!pwd) return;
+  await enableGroupPassword(pwd);
+  if (error.value == null) {
+    enablePasswordInput.value = "";
+  }
+}
+
+async function onChangePassword() {
+  const current = changeCurrentPasswordInput.value;
+  const next = changeNewPasswordInput.value;
+  if (!current || !next) return;
+  await changeGroupPassword(current, next);
+  if (error.value == null) {
+    changeCurrentPasswordInput.value = "";
+    changeNewPasswordInput.value = "";
+  }
+}
+
+async function onDisablePassword() {
+  const pwd = disablePasswordInput.value;
+  if (!pwd) return;
+  if (!confirm("Remove password protection from this group?")) return;
+  await disableGroupPassword(pwd);
+  if (error.value == null) {
+    disablePasswordInput.value = "";
+  }
+}
 </script>
 
 <template>
@@ -407,6 +445,79 @@ async function onMakeGroupPrivate() {
             >
               Save join policy
             </Button>
+          </div>
+          <div class="border-border border-t pt-3 space-y-3">
+            <p class="text-muted-foreground text-xs">
+              Password protection requires Pro plan and client crypto. Members will need the password to decrypt pages in this group.
+            </p>
+            <div class="space-y-2">
+              <Label for="enable-pwd">Enable password protection</Label>
+              <div class="flex items-center gap-2">
+                <Input
+                  id="enable-pwd"
+                  v-model="enablePasswordInput"
+                  type="password"
+                  placeholder="New group password"
+                  class="h-8 text-sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                />
+                <Button
+                  size="sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !enablePasswordInput.trim()"
+                  @click="onEnablePassword"
+                >
+                  Enable
+                </Button>
+              </div>
+            </div>
+            <div class="space-y-2 border-border border-t pt-3">
+              <Label for="change-pwd">Change password</Label>
+              <div class="flex flex-wrap items-center gap-2">
+                <Input
+                  id="change-pwd"
+                  v-model="changeCurrentPasswordInput"
+                  type="password"
+                  placeholder="Current password"
+                  class="h-8 text-sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                />
+                <Input
+                  v-model="changeNewPasswordInput"
+                  type="password"
+                  placeholder="New password"
+                  class="h-8 text-sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                />
+                <Button
+                  size="sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !changeCurrentPasswordInput || !changeNewPasswordInput"
+                  @click="onChangePassword"
+                >
+                  Change
+                </Button>
+              </div>
+            </div>
+            <div class="space-y-2 border-border border-t pt-3">
+              <Label for="disable-pwd">Remove password protection</Label>
+              <div class="flex items-center gap-2">
+                <Input
+                  id="disable-pwd"
+                  v-model="disablePasswordInput"
+                  type="password"
+                  placeholder="Current password"
+                  class="h-8 text-sm"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                />
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !disablePasswordInput"
+                  @click="onDisablePassword"
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
           </div>
           <div class="border-border border-t pt-3 space-y-2">
             <Button
