@@ -77,7 +77,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 - **Marketing/help/pricing/whitepaper surfaces entirely missing** — `apps/marketing` is a single-card placeholder. Launch blocker, not polish.
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **Composable size** — `useGroupMembersDetail.ts` (785 lines), `usePageCollabEditor.ts` (431 lines), `useSpatialPage.ts` (414 lines) exceed 300-line limit.
+- **Composable size** — `useGroupMembersDetail.ts` (103 lines) and `usePageCollabEditor.ts` (238 lines) are now under the 300-line limit. `useSpatialPage.ts` (308 lines) still exceeds by a small margin.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 

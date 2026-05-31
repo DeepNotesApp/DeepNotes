@@ -59,8 +59,8 @@ All non-editor UX is polished and tested.
    - `pnpm typecheck` — 0 errors. ✅
    - `pnpm test` — 0 failures, 0 skips (134 web + 48 session + 0 api-worker = 182). ✅
    - Check `apps/api-worker` bundle size (`wrangler build`) — alert if > 500KB.
-   - Count files in `@deepnotes/session` — 71 files (no new files since last audit). ⚠️
-   - No composable in `apps/web` exceeds 300 lines. ⚠️ — `useGroupMembersDetail.ts` (785), `usePageCollabEditor.ts` (431), `useSpatialPage.ts` (414) still exceed; refactor deferred to post-Phase 8.
+   - Count files in `@deepnotes/session` — 8 facade files (re-exports from `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`). ✅
+   - No composable in `apps/web` exceeds 300 lines. ⚠️ — `useSpatialPage.ts` (308 lines) is the only remaining composable over the limit; the others were refactored. Deferred to post-Phase 8.
    - No `console.log` in production DO code; replace with structured logger or remove. ✅
 
 ---
@@ -94,9 +94,10 @@ A full evaluation of TOTP, password change, and email change migration is in [ap
 - [x] E2E smoke test covers demo login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
 - [x] `TRPC_REST_MAP.md` route audit: every endpoint marked "implemented" has a registered Hono route in `apps/api-worker`.
 - [x] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
-- [x] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
+- [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
 - [x] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
 - [x] `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`; remaining `@deepnotes/session` ≤ 20 files.
 - [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass (deferred to post-Phase 8).
 - [x] `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass with 0 errors/failures.
-- [x] No composable in `apps/web` exceeds 300 lines; no `console.log` in DO production code.
+- [x] No `console.log` in DO production code.
+- [ ] No composable in `apps/web` exceeds 300 lines — `useSpatialPage.ts` (308 lines) still slightly over.
