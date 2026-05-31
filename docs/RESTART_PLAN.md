@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-06-01  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group password unlock).** **Phase 7 account/billing/groups polish complete.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group password unlock).** **Phase 7 account/billing/groups polish partially complete (see §7 for open gaps).**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -691,29 +691,32 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 
 **Goal:** All non-editor UX is polished and tested.
 
+**Status:** Backend parity is complete; frontend has material gaps (see below).
+
 **Deliverables:**
 
 1. **Account page parity**
-   - Password change, email change/verify, 2FA management, raw keyrings display, account deletion.
-   - Stripe checkout + customer portal.
+   - Password change, email change/verify, 2FA management, account deletion. ✅
+   - Stripe checkout + customer portal. ✅
+   - Raw keyrings display / key rotation — **removed** per `TRPC_REST_MAP.md` (accepted regression).
 
 2. **Group management parity**
-   - Invite by user ID, accept invite, join request, member roles, remove member.
-   - Group settings: join policy, password, make public/private, soft-delete, purge.
+   - Invite by user ID, accept invite, join request, member roles, remove member. ✅
+   - Group settings: join policy, make public/private, soft-delete, purge. ✅
+   - **Group password enable / change / disable UI** — backend routes exist (`POST/PATCH/DELETE /api/groups/:groupId/password`), but `GroupDetailView.vue` contains no UI for these flows. ❌
 
 3. **Notifications**
-   - Realtime toast when invite received.
-   - Notifications list with decrypt.
-   - Mark as read.
+   - Notifications list page with decrypt and mark-as-read. ✅
+   - **Realtime toast / badge** when invite received — not implemented. The legacy app showed a toolbar badge + popup; the new SPA requires navigating to `/notifications`. ❌
 
 4. **Home / navigation**
-   - Recents, favorites, starting page, spatial defaults.
-   - Search (if legacy had it).
+   - Recents, favorites, starting page, spatial defaults. ✅
+   - Search — legacy had no global search; still not present (neutral).
 
 5. **Group password unlock**
-   - `unlockPageCollabSymmetricKeyring` currently throws for password-protected groups.
-   - Implement group password UI and key derivation so users can unlock password-protected groups.
-   - Add integration test for password-protected group join + page decrypt.
+   - `unlockPageCollabSymmetricKeyring` now accepts `groupPasswordKey` and is unit-tested. ✅
+   - `useCollabCrypto` exposes `unlockKeyringWithPassword`. ✅
+   - **No UI calls `unlockKeyringWithPassword`** — if collab crypto throws for a password-protected group, the user has no entry point to enter the password. ❌
 
 6. **Scheduler / background cleanup** ✅
    - Legacy `apps/scheduler` ran scheduled cleanup (purge soft-deleted data).
@@ -722,6 +725,10 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Cron trigger configured in `wrangler.toml` (`0 3 * * *`).
    - Documented in `docs/SCHEDULER.md`.
    - Integration test added: `packages/session/src/scheduled-cleanup.integration.test.ts`.
+
+7. **`@deepnotes/session` god package audit** ❌
+   - Plan recommended splitting if any subfolder exceeded 20 files before Phase 7 (`§0.4 gap 9`).
+   - Package still has 71 files mixing auth/users/groups/pages/billing/collab/realtime. Not split.
 
 **Verification:**
 - E2E smoke test: demo login → home → starting page → groups → logout.
@@ -734,6 +741,11 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [x] Scheduler implemented with Cron Trigger and integration test.
 - [x] E2E smoke test covers demo login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
 - [x] `TRPC_REST_MAP.md` route audit: every endpoint marked "implemented" has a registered Hono route in `apps/api-worker`.
+- [ ] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
+- [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
+- [ ] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
+- [ ] `@deepnotes/session` split into dedicated packages OR documented decision to defer.
+- [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass.
 
 ---
 
