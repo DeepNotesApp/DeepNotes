@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 complete. All spatial polish deliverables done: cross-page paste, scrollbar handling, find/replace UI, active region tracking, read-only styling. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 in progress. Core spatial mechanics done: selection, clipboard, alignment, undo/redo, viewport, containers, state screens. Sidebar data stubbed, arrow labels are raw `<input>` stubs, `SPATIAL_PARITY_CHECKLIST.md` missing. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -15,7 +15,7 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **In progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
@@ -59,7 +59,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Routing decision:** `docs/ROUTING_DECISION.md` exists and is signed off by product.
 - [ ] **Route middleware:** `apps/api-worker` uses Hono middleware for `sessionEnv`, `hyperdrive`, and `authCookie`.
 - [ ] **Spatial canvas (Phase 5):** User can create, move, resize, delete notes and arrows on an infinite canvas.
-- [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
+- [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done. (Checklist file itself is missing.)
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
 - [x] **Playwright:** E2E smoke test covers login → home → page → groups → logout.
@@ -77,14 +77,15 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **Left sidebar sections missing.** `CurrentPath` exists; `RecentPages`, `FavoritePages`, `SelectedPages` panels pending.
-- **Right sidebar properties missing.** Snapshots, management, backlinks exist. `NoteProperties` (24 files in legacy), `PageProperties`, `ArrowProperties` panels pending.
-- **Toolbar page actions missing.** `MainToolbar` shell exists with logo, breadcrumb, global nav. Missing: Basic/Formatting/Object/Alignment buttons, insert dialogs, page-specific actions.
-- **Floating UI overlays partial.** Zoom indicator, undo/redo, selection count exist. Missing: back/forward nav, screenshot, find/replace toggle, user avatars on canvas.
-- **Arrow rendering partial.** Curve + line bodies, arrow heads, hitboxes exist. Missing: labels (TipTap), drag-to-reconnect, interregional logic, anchor positioning.
-- **Note rendering partial.** Drag, resize, head/body editors, link icon exist. Missing: Teleport overlay during drag, drop zones, arrow link zones, read-only opacity states, scroll handling.
-- **Page state screens done.** `PageStateScreens.vue` switcher + 8 components created and wired. Some states (`page-deleted`, `group-deleted`, `invited`, `rejected`) require richer API error codes to be fully distinguishable.
-- **Context menu missing.** No `TableContextMenu` (right-click on canvas).
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` missing.** Phase 1 exit criterion requires this file; it was never created. Phase 6 cannot be declared done without it.
+- **Left sidebar panels exist but are data-stubbed.** `PageEditorView.vue` passes `recentPageIds`, `favoritePageIds`, `selectedPageIds` as empty `ref<string[]>([])` to `RecentPagesCard`, `FavoritePagesCard`, `SelectedPagesCard`. Panels render shells with no data.
+- **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, createdAt, editedAt, movedAt, etc.) are not exposed.
+- **Toolbar is inline markup, not a reusable component.** `PageLayout.vue` contains the header shell directly; there is no `MainToolbar.vue` component. Missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
+- **Arrow labels are raw `<input>` stubs, not Tiptap on `Y.XmlFragment`.** `DisplayArrow.vue` renders a plain `<input>` that deletes and re-inserts the entire `Y.XmlFragment` on blur. Legacy parity requires collaborative rich-text label editing.
+- **Arrow geometry hardcodes note height at `80px`.** `DisplayArrow.vue` uses `const h1 = 80; const h2 = 80;` for endpoint calculations. Notes with variable heights (containers, expanded text) will produce misaligned arrows.
+- **Note drag uses `Teleport` overlay but position tracking is incomplete.** `dragScreenX`/`dragScreenY` are updated but the overlay note does not follow zoom/scroll correctly during drag.
+- **Page state screens exist but 4 states are indistinguishable.** `page-deleted`, `group-deleted`, `invited`, `rejected` all map to the same generic error UI because the API does not return distinct error codes.
+- **Context menu exists for canvas but not for individual notes.** `CanvasContextMenu.vue` (right-click on empty canvas) is implemented. No per-note context menu exists.
 
 ### Other gaps
 

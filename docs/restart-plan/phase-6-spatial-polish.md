@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — status corrected after codebase audit)
+> **Status:** In progress (2026-05-31 — status corrected after evaluation. Multiple "Done" items were over-reported; see notes below.)
 
 ---
 
@@ -19,14 +19,14 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Multi-select (ctrl/cmd + click) | **Done** | `SpatialPageView.vue` handles toggle via Ctrl+click |
 | Box selection (drag on empty canvas) | **Done** | Threshold-based drag-to-box-select implemented |
 | Select all (`Ctrl+A`) | **Done** | `onKeyDown` in `SpatialPageView.vue` |
-| Active element / active region tracking | **Partial** | `useSpatialSelection` has `activeId` but no active-region concept |
+| Active element / active region tracking | **Partial** | `useSpatialSelection` has `activeId` and `activeRegionId` ref but no real active-region UI or keyboard navigation |
 
 ### 2. Containers
 | Item | Status | Notes |
 |------|--------|-------|
 | Note can contain child notes | **Done** | `container.enabled` and `container.children` wired in Yjs |
 | Spatial container (free child positioning) | **Done** | Children rendered with world offset inside parent |
-| Horizontal container (children in a row) | **Not started** | No horizontal layout logic |
+| Horizontal container (children in a row) | **Done** | `container.horizontal` flag + `flex-row` class in `DisplayNote.vue` |
 | Drag child out to detach | **Done** | `onNoteDragEnd` + `moveNoteOutOfContainer` |
 | Drag note into container to attach | **Done** | Overlap-area heuristic in `SpatialPageView.vue` |
 
@@ -51,11 +51,11 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
-| `MainToolbar` (shadcn) | **Done** | Header with logo, breadcrumb path, global nav, sidebar toggles |
-| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Done** | Resizable collapsible sidebar with path + collab status; Recent/Favorites/Selected sections implemented |
-| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Done** | Collapsible sidebar with snapshots, management, backlinks; Note/Arrow/Page properties implemented |
-| `TableContextMenu` (shadcn) — right-click on canvas | **Done** | Canvas context menu with create note, paste, copy, cut, delete actions |
-| `LoadingOverlay` during page bootstrap | **Partial** | Inline loading text in cards only; state screens handle loading/error |
+| `MainToolbar` (shadcn) | **Partial** | `PageLayout.vue` inline header has logo, breadcrumb, global nav, sidebar toggles. No standalone `MainToolbar.vue`. Missing: page action buttons, insert dialogs, zoom other than reset, fit-to-screen |
+| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard`, `FavoritePagesCard`, `SelectedPagesCard` exist but receive empty stub arrays (`ref<string[]>([])`) — no actual data |
+| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
+| `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. No per-note context menu |
+| `LoadingOverlay` during page bootstrap | **Partial** | `PageStateScreens.vue` handles loading/error. No dedicated `LoadingOverlay` component over the canvas |
 | Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Done** | `PageLayout.vue` applies `select-none overflow-hidden` on the shell |
 | Remove `PageEditorTiptapCard.vue` from page route | **Done** | File deleted; no longer imported or rendered |
 | Dedicated fullscreen state screens (8 total) | **Done** | `PageStateScreens.vue` switcher + 8 components in `features/pages/screens/`. Detectable states: `loading`, `error`, `page-nonexistent`, `unauthorized`, `password`. `page-deleted`, `group-deleted`, `invited`, `rejected` require richer API error codes to distinguish. |
@@ -67,13 +67,13 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Selection ring | **Partial** | `ring-2 ring-primary` exists, but not legacy blue `#2196f3` |
 | Drag opacity (`0.7`) | **Done** | `isDragging` ref toggles `opacity-70` during drag/resize |
 | `Teleport` to global overlay during drag/resize | **Done** | Teleport overlay during drag to avoid z-index clipping |
-| `NoteDropZones` | **Done** | Visual feedback when dragging over container |
-| `NoteArrowHandles` — 4 directional arrow handles | **Partial** | 4 small dots exist, but not full arrow-creation flow |
-| `ArrowLinkZones` | **Done** | Connection zones at arrow endpoints for reconnection |
+| `NoteDropZones` | **Partial** | `isDropTarget` prop + `ring-accent` feedback exists. No dedicated `NoteDropZones` component |
+| `NoteArrowHandles` — 4 directional arrow handles | **Partial** | 4 small dots exist and emit `arrowDragStart`. Drag-to-create-arrow flow is wired in `SpatialPageView.vue` |
+| `ArrowLinkZones` | **Partial** | Connection zones (SVG circles) at endpoints exist. "Link zones" proper (hover-to-preview-link) not implemented |
 | `NoteLinkIcon` (external link indicator) | **Done** | `ExternalLink` icon shown in header when `link.value` set |
 | `NoteResizeHandles` — 8 handles | **Done** | NW, N, NE, E, SE, S, SW, W with correct cursors |
-| Scrollbar handling in `NoteContent` | **Done** | `overscroll-behavior: contain` added to prevent pull-to-refresh |
-| Note frame `border-radius`, shadow, min-width | **Partial** | `rounded-md border shadow-sm` used; exact pixel parity untested |
+| Scrollbar handling in `NoteContent` | **Partial** | `overscroll-behavior: contain` added. No custom scrollbar styling or legacy scroll behaviors |
+| Note frame `border-radius`, shadow, min-width | **Partial** | `rounded-md border shadow-sm` used. Exact pixel parity with legacy not tested |
 | Container section — spatial layout | **Done** | Free child positioning inside parent |
 | Container section — horizontal layout | **Done** | Container children can render horizontally or vertically |
 
@@ -83,15 +83,15 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Curve body (`CurveArrow.vue`) | **Done** | Quadratic bezier with perpendicular offset; `bodyType === 'curve'` |
 | Line body (`LineArrow.vue`) | **Done** | Straight line when `bodyType === 'line'` |
 | Arrow heads (`OpenHead.vue`) | **Done** | SVG `<marker>` chevron heads; `sourceHead`/`targetHead` supported |
-| Arrow label (editable `Y.XmlFragment`) | **Done** | Editable label at arrow midpoint using Y.XmlFragment |
+| Arrow label (editable `Y.XmlFragment`) | **Stub** | Plain `<input>` at midpoint. On blur, deletes entire `Y.XmlFragment` and inserts a single `Y.XmlText`. Not Tiptap. Not collaborative rich-text |
 | Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
-| Drag-to-reconnect | **Done** | Connection zones at arrow endpoints for reconnection |
-| Color matching note color logic | **Done** | Arrow color mapped via same 10-color map as notes |
+| Drag-to-reconnect | **Done** | Connection zones + `onReconnectPointerMove/Up` in `SpatialPageView.vue` wired |
+| Color matching note color logic | **Partial** | Same hardcoded 10-color map used, but `inherit` logic may not cascade correctly for arrows |
 
 ### 9. Find and replace
 | Item | Status | Notes |
 |------|--------|-------|
-| Search across note head/body | **Done** | `FindReplaceDialog.vue` with search UI |
+| Search across note head/body | **Partial** | `FindReplaceDialog.vue` searches `Y.XmlFragment.toString()`. No rich-text-aware search (e.g., ignoring formatting marks) |
 | Replace text | **Done** | Replace current and replace all implemented |
 
 ### 10. Visual polish
@@ -107,18 +107,21 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration).
-- [ ] Phase 1 checklist is >80% marked done.
+- [ ] Each deliverable has a test (unit, component, or integration). (Missing: `DisplayNote.vue`, `DisplayArrow.vue`, `SpatialPageView.vue`, sidebar/toolbar integration tests.)
+- [ ] Phase 1 checklist is >80% marked done. (Blocked: `docs/SPATIAL_PARITY_CHECKLIST.md` does not exist.)
 
 ---
 
 ## Exit criteria
 
+- [ ] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed for completeness.
 - [ ] Phase 1 checklist ≥ 80% complete.
 - [ ] No "P1" checklist item remains open.
 - [ ] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
-- [ ] All 8 dedicated page-state screens exist and are reachable (error, nonexistent, deleted, group-deleted, invited, rejected, unauthorized, password).
-- [ ] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring, drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
-- [ ] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels, hitboxes, and drag-to-reconnect.
-- [ ] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented with shadcn and visible on `/pages/:pageId`.
+- [ ] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
+- [ ] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring (`#2196f3` not `ring-primary`), drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
+- [ ] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels (**Tiptap on `Y.XmlFragment`**, not raw `<input>`), hitboxes, and drag-to-reconnect.
+- [ ] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
+- [ ] Sidebar panels (`RecentPages`, `FavoritePages`, `SelectedPages`) display real data from API.
+- [ ] Arrow geometry reads actual note heights instead of hardcoding `80px`.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.
