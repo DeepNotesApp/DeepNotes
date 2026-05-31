@@ -20,10 +20,12 @@
     "drizzle-orm": "^0.41.0",
     "jose": "^5.10.0",
     "libsodium-wrappers-sumo": "^0.8.0",
+    "msgpackr": "^1.10.2",
     "nanoid": "^5.1.5",
     "otplib": "^12.0.1"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

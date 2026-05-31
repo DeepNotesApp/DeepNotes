@@ -4,7 +4,7 @@ import {
   checkFailedLoginAttempts,
   incrementFailedLoginAttempts,
   type SessionRedisPort,
-} from "./login-rate-limit.js";
+} from "@deepnotes/session-core";
 
 function createMemoryRedis(): SessionRedisPort & {
   store: Map<string, { value: string; ttlAt: number }>;

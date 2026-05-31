@@ -6,7 +6,7 @@ import type { DeepnotesDb } from "@deepnotes/db/client";
 import {
   parseStripeWebhookEvent,
   processStripeWebhookEvent,
-} from "./stripe-billing.js";
+} from "@deepnotes/billing";
 
 /** Test-only webhook secret (`whsec_…` shape not required for `constructEvent`). */
 const WEBHOOK_SECRET = "whsec_unit_test_secret_not_real";

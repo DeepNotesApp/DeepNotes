@@ -7,7 +7,7 @@ export {
 } from "./user-me.js";
 export type { AuthenticatedUserSummary } from "./user-me.js";
 export { assertUserProPlan } from "./user-plan.js";
-export { decryptUserEmail } from "./encrypt-user-email.js";
+export { decryptUserEmail, encryptUserEmail } from "./encrypt-user-email.js";
 export { userHasGroupPermission } from "./group-permissions.js";
 export { performSessionLogin } from "./login.js";
 export type { SessionLoginBody } from "./login.js";
@@ -62,3 +62,4 @@ export { performScheduledCleanup } from "./scheduled-cleanup.js";
 export { sendEmailChangeVerificationEmail } from "./send-email-change-code.js";
 export { sendRegistrationEmail } from "./send-registration-email.js";
 export { hashUserEmail } from "./email-hash.js";
+export { ensureSodiumReady } from "./crypto/session-crypto.js";

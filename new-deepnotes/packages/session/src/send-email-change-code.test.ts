@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { SessionEnv } from "./env.js";
-import { sendEmailChangeVerificationEmail } from "./send-email-change-code.js";
+import type { SessionEnv } from "@deepnotes/session-core";
+import { sendEmailChangeVerificationEmail } from "@deepnotes/session-core";
 
 function minimalEnv(
   overrides: Partial<Pick<SessionEnv, "SEND_EMAILS" | "RESEND_API_KEY">>,

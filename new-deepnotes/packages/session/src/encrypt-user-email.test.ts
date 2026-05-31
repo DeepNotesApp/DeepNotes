@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeAll } from "vitest";
 
-import { ensureSodiumReady } from "./crypto/session-crypto.js";
-import { decryptUserEmail, encryptUserEmail } from "./encrypt-user-email.js";
+import { ensureSodiumReady } from "@deepnotes/session-core";
+import { decryptUserEmail, encryptUserEmail } from "@deepnotes/session-core";
 
 /** 32-byte XChaCha key as standard base64 */
 const TEST_KEY_B64 = Buffer.alloc(32, 9).toString("base64");

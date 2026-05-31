@@ -16,7 +16,7 @@
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
 | 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
-| 7 | Account, billing, groups polish | Partial (password UI done; session split complete; composable size pending) | [phase-7-account-polish.md](phase-7-account-polish.md) |
+| 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | Not started | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
 

@@ -5,6 +5,7 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 
 import { useSession } from "./features/auth/useSession";
+import { unreadNotificationCount } from "./features/notifications/useNotificationBadge";
 import { realtimeToastMessage, useRealtimeUserChannel } from "./features/realtime/useRealtimeUserChannel";
 import ThemeSwitcher from "./features/theme/ThemeSwitcher.vue";
 
@@ -79,8 +80,17 @@ async function onLogout() {
               as-child
               size="sm"
               variant="ghost"
+              class="relative"
             >
-              <RouterLink to="/notifications">Notifications</RouterLink>
+              <RouterLink to="/notifications">
+                Notifications
+                <span
+                  v-if="unreadNotificationCount > 0"
+                  class="bg-primary text-primary-foreground absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold"
+                >
+                  {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
+                </span>
+              </RouterLink>
             </Button>
             <Button
               v-if="isAuthenticated"

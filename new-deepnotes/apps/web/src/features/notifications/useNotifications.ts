@@ -7,6 +7,7 @@ import {
   markAllNotificationsRead,
   type NotificationRow,
 } from "./notifications-list";
+import { resetUnreadCount, setUnreadCount } from "./useNotificationBadge";
 
 export function useNotifications() {
   const loading: Ref<boolean> = ref(false);
@@ -23,6 +24,7 @@ export function useNotifications() {
       rows.value = [];
       hasMore.value = false;
       lastReadCursor.value = null;
+      setUnreadCount(0);
       return;
     }
     loading.value = true;
@@ -36,6 +38,9 @@ export function useNotifications() {
           ? null
           : (out.lastNotificationRead ?? null);
       error.value = out.error;
+      // Update badge count from loaded notifications
+      const unreadCount = rows.value.filter((r) => r.unread).length;
+      setUnreadCount(unreadCount);
     } finally {
       loading.value = false;
     }
@@ -87,6 +92,7 @@ export function useNotifications() {
           : null;
       lastReadCursor.value = maxId;
       rows.value = rows.value.map((r) => ({ ...r, unread: false }));
+      resetUnreadCount();
     } finally {
       markingRead.value = false;
     }

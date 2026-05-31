@@ -7,16 +7,12 @@ import type { DeepnotesApiClient } from "@/api/client";
 import type { components } from "@/api/api-types.generated";
 
 import type { UserMe } from "../auth/useSession";
-import { readSessionCrypto } from "../auth/crypto-storage";
-import { clearRemoteCollabAwareness } from "./page-awareness-utils";
-import { decryptPageDocUpdate } from "./page-collab-crypto";
-import { clearYjsProseMirrorAndLegacyText } from "./page-collab-yjs-clear";
-import { Y_FRAG_PROSEMIRROR, Y_TEXT_DEFAULT } from "./page-editor-constants";
-import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
+import { loadCollabState } from "./usePageCollabEditor-bootstrap";
 import { useCollabCrypto } from "./useCollabCrypto";
 import { useCollabPush } from "./useCollabPush";
 import { useCollabWebSocket } from "./useCollabWebSocket";
 import { usePageEditor } from "./usePageEditor";
+import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
 
 export function usePageCollabEditor(opts: {
   ydoc: Y.Doc;
@@ -116,224 +112,35 @@ export function usePageCollabEditor(opts: {
         return;
       }
 
-      collabGroupId.value = null;
-      crypto.clearCrypto();
-      pageEncRelTitleB64.value = null;
-      pageEncAbsTitleB64.value = null;
-      collabEncryptedUpdatesForMove.value = [];
-      snapshots.value = [];
-      loadError.value = null;
       collabLoading.value = true;
-      push.collabLastIndex.value = null;
       ws.teardownCollabWebSocket();
 
-      try {
-        let sinceIndex: string | undefined = undefined;
-        const allUpdates: { index: number; encryptedData: string }[] = [];
-        let firstData: components["schemas"]["PageCollabUpdatesGetResponse"] | null = null;
-        while (true) {
-          const { data, error, response } = await client.GET(
-            "/api/pages/{pageId}/collab-updates",
-            {
-              params: {
-                path: { pageId: id },
-                query: { sinceIndex, limit: "100" },
-              },
-            },
-          ) as {
-            data: components["schemas"]["PageCollabUpdatesGetResponse"] | undefined;
-            error: unknown;
-            response: Response;
-          };
-          if (response.status !== 200 || !data) {
-            loadError.value =
-              error && typeof error === "object" && "message" in error
-                ? String(error.message)
-                : "Could not load collab state.";
-            return;
-          }
-          if (firstData == null) {
-            firstData = data;
-          }
-          allUpdates.push(...data.updates);
-          if (data.updates.length === 0 || data.updates.length < 100) {
-            break;
-          }
-          sinceIndex = String(data.lastIndex ?? 0);
-        }
-        if (firstData == null) {
-          loadError.value = "Could not load collab state.";
-          return;
-        }
+      const firstData = await loadCollabState({
+        pageId: id,
+        user,
+        client,
+        ydoc,
+        collabAwareness,
+        crypto,
+        push,
+        snapshots,
+        snapshotLoading,
+        setCollabGroupId: (v) => (collabGroupId.value = v),
+        setPageEncRelTitleB64: (v) => (pageEncRelTitleB64.value = v),
+        setPageEncAbsTitleB64: (v) => (pageEncAbsTitleB64.value = v),
+        setCollabEncryptedUpdatesForMove: (v) => (collabEncryptedUpdatesForMove.value = v),
+        setUpdateCount: (v) => (updateCount.value = v),
+        setLoadError: (v) => (loadError.value = v),
+        setHydrating: (v) => (hydrating.value = v),
+        refreshYMetrics,
+        legacyPlainToImport,
+      });
 
+      if (firstData) {
         lastCollabBootstrapData.value = firstData;
-        collabGroupId.value = firstData.groupId;
-        pageEncRelTitleB64.value = firstData.pageEncryptedRelativeTitle;
-        pageEncAbsTitleB64.value = firstData.pageEncryptedAbsoluteTitle;
-        collabEncryptedUpdatesForMove.value = allUpdates.map((u) =>
-          base64ToBytes(u.encryptedData),
-        );
-        updateCount.value = allUpdates.length;
-        push.collabLastIndex.value =
-          allUpdates.length > 0
-            ? allUpdates[allUpdates.length - 1]!.index
-            : firstData.lastIndex;
-
-        if (user.value?.demo === true) {
-          crypto.cryptoError.value =
-            "Demo sessions do not persist client crypto; sign in with a password account to decrypt page content.";
-          hydrating.value = true;
-          try {
-            clearYjsProseMirrorAndLegacyText(
-              ydoc,
-              Y_FRAG_PROSEMIRROR,
-              Y_TEXT_DEFAULT,
-            );
-          } finally {
-            hydrating.value = false;
-          }
-          push.syncServerDocToYdoc();
-          refreshYMetrics();
-          return;
-        }
-
-        const stored = readSessionCrypto();
-        if (stored == null) {
-          crypto.cryptoError.value =
-            "Missing session crypto (sign out and sign in again with your password on this device).";
-          void refreshSnapshotList({
-            client,
-            pageId: id,
-            user: user.value,
-            snapshots,
-            snapshotLoading,
-          });
-          hydrating.value = true;
-          try {
-            clearYjsProseMirrorAndLegacyText(
-              ydoc,
-              Y_FRAG_PROSEMIRROR,
-              Y_TEXT_DEFAULT,
-            );
-          } finally {
-            hydrating.value = false;
-          }
-          push.syncServerDocToYdoc();
-          refreshYMetrics();
-          return;
-        }
-
-        try {
-          const bootstrapData = {
-            groupId: firstData.groupId,
-            pageEncryptedSymmetricKeyring: base64ToBytes(
-              firstData.pageEncryptedSymmetricKeyring,
-            ),
-            groupEncryptedContentKeyring: base64ToBytes(
-              firstData.groupEncryptedContentKeyring,
-            ),
-            memberEncryptedAccessKeyring:
-              firstData.memberEncryptedAccessKeyring != null
-                ? base64ToBytes(firstData.memberEncryptedAccessKeyring)
-                : null,
-            groupAccessKeyring:
-              firstData.groupAccessKeyring != null
-                ? base64ToBytes(firstData.groupAccessKeyring)
-                : null,
-          };
-          const unlocked = await crypto.unlockKeyring(bootstrapData);
-          if (!unlocked) {
-            void refreshSnapshotList({
-              client,
-              pageId: id,
-              user: user.value,
-              snapshots,
-              snapshotLoading,
-            });
-            hydrating.value = true;
-            try {
-              clearYjsProseMirrorAndLegacyText(
-                ydoc,
-                Y_FRAG_PROSEMIRROR,
-                Y_TEXT_DEFAULT,
-              );
-            } finally {
-              hydrating.value = false;
-            }
-            push.syncServerDocToYdoc();
-            refreshYMetrics();
-            return;
-          }
-        } catch (e) {
-          crypto.cryptoError.value =
-            e instanceof Error
-              ? e.message
-              : "Could not unlock page encryption keys.";
-          void refreshSnapshotList({
-            client,
-            pageId: id,
-            user: user.value,
-            snapshots,
-            snapshotLoading,
-          });
-          hydrating.value = true;
-          try {
-            clearYjsProseMirrorAndLegacyText(
-              ydoc,
-              Y_FRAG_PROSEMIRROR,
-              Y_TEXT_DEFAULT,
-            );
-          } finally {
-            hydrating.value = false;
-          }
-          push.syncServerDocToYdoc();
-          refreshYMetrics();
-          return;
-        }
-
-        const pk = crypto.pageKeyring.value;
-        if (pk == null) {
-          return;
-        }
-
-        hydrating.value = true;
-        try {
-          clearRemoteCollabAwareness(collabAwareness);
-          clearYjsProseMirrorAndLegacyText(
-            ydoc,
-            Y_FRAG_PROSEMIRROR,
-            Y_TEXT_DEFAULT,
-          );
-          for (const u of allUpdates) {
-            const plain = decryptPageDocUpdate({
-              pageKeyring: pk,
-              pageId: id,
-              ciphertext: base64ToBytes(u.encryptedData),
-            });
-            Y.applyUpdateV2(ydoc, plain);
-          }
-          const legacyAfter = ydoc.getText(Y_TEXT_DEFAULT);
-          if (legacyAfter.length > 0) {
-            legacyPlainToImport.value = legacyAfter.toString();
-            ydoc.transact(() => {
-              legacyAfter.delete(0, legacyAfter.length);
-            });
-          }
-          push.syncServerDocToYdoc();
-          refreshYMetrics();
-        } finally {
-          hydrating.value = false;
-        }
-        void refreshSnapshotList({
-          client,
-          pageId: id,
-          user: user.value,
-          snapshots,
-          snapshotLoading,
-        });
-      } finally {
-        collabLoading.value = false;
       }
+
+      collabLoading.value = false;
     },
     { immediate: true },
   );

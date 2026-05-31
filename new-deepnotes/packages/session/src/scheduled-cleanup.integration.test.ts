@@ -20,14 +20,14 @@ import {
 import * as schema from "@deepnotes/db/schema";
 import { groups, pages } from "@deepnotes/db/schema";
 
-import { performCreatePage } from "./group-pages.js";
-import { performPageSoftDelete, performPagePurge } from "./page-operations.js";
-import { performGroupPurge } from "./group-deletion.js";
-import { performScheduledCleanup } from "./scheduled-cleanup.js";
-import { performUserRegister } from "./register-user.js";
-import type { SessionEnv } from "./env.js";
-import { ensureSodiumReady } from "./crypto/session-crypto.js";
-import { signAccessToken } from "./jwt.js";
+import { performCreatePage } from "@deepnotes/groups";
+import { performPageSoftDelete, performPagePurge } from "@deepnotes/pages";
+import { performGroupPurge } from "@deepnotes/groups";
+import { performScheduledCleanup } from "@deepnotes/session-core";
+import { performUserRegister } from "@deepnotes/session-core";
+import type { SessionEnv } from "@deepnotes/session-core";
+import { ensureSodiumReady } from "@deepnotes/session-core";
+import { signAccessToken } from "@deepnotes/session-core";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 loadEnv({ path: join(__dirname, "../../../.env") });

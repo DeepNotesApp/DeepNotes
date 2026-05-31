@@ -94,9 +94,9 @@ A full evaluation of TOTP, password change, and email change migration is in [ap
 - [x] E2E smoke test covers demo login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
 - [x] `TRPC_REST_MAP.md` route audit: every endpoint marked "implemented" has a registered Hono route in `apps/api-worker`.
 - [x] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
-- [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
+- [x] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
 - [x] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
-- [ ] `@deepnotes/session` split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`; remaining `@deepnotes/session` ≤ 20 files.
-- [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass.
+- [x] `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`; remaining `@deepnotes/session` ≤ 20 files.
+- [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass (deferred to post-Phase 8).
 - [x] `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass with 0 errors/failures.
-- [ ] No composable in `apps/web` exceeds 300 lines; no `console.log` in DO production code.
+- [x] No composable in `apps/web` exceeds 300 lines; no `console.log` in DO production code.

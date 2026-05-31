@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { hashUserEmail } from "./email-hash.js";
+import { hashUserEmail } from "@deepnotes/session-core";
 
 describe("hashUserEmail", () => {
   it("is stable for the same normalized email and secret", async () => {

@@ -5,6 +5,7 @@ import {
   formatNotificationPayload,
   tryDecryptNotificationBody,
 } from "../notifications/decrypt-notification-body";
+import { incrementUnreadCount } from "../notifications/useNotificationBadge";
 import {
   disconnectRealtimeUserWs,
   ensureRealtimeUserWs,
@@ -65,6 +66,7 @@ export function useRealtimeUserChannel(
     });
     if (decrypted != null) {
       showRealtimeToast(formatNotificationPayload(decrypted));
+      incrementUnreadCount();
     }
   });
 

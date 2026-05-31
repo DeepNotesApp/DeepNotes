@@ -32,18 +32,30 @@ importers:
       '@deepnotes/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@deepnotes/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
       '@deepnotes/collab-wire':
         specifier: workspace:*
         version: link:../../packages/collab-wire
       '@deepnotes/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@deepnotes/pages':
+        specifier: workspace:*
+        version: link:../../packages/pages
+      '@deepnotes/realtime':
+        specifier: workspace:*
+        version: link:../../packages/realtime
       '@deepnotes/realtime-wire':
         specifier: workspace:*
         version: link:../../packages/realtime-wire
       '@deepnotes/session':
         specifier: workspace:*
         version: link:../../packages/session
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../../packages/session-core
       '@upstash/redis':
         specifier: ^1.34.8
         version: 1.37.0
@@ -613,6 +625,9 @@ importers:
       libsodium-wrappers-sumo:
         specifier: ^0.8.0
         version: 0.8.4
+      msgpackr:
+        specifier: ^1.10.2
+        version: 1.11.10
       nanoid:
         specifier: ^5.1.5
         version: 5.1.9
@@ -620,6 +635,9 @@ importers:
         specifier: ^12.0.1
         version: 12.0.1
     devDependencies:
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
       '@types/node':
         specifier: ^22.14.1
         version: 22.19.17
