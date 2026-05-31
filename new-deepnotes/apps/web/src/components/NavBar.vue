@@ -9,6 +9,8 @@ import { isDark } from "@/features/theme/useThemePreference";
 
 const { isAuthenticated, bootstrapped, loading, logout } = useSession();
 
+const marketingUrl = import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/$/, "") || "https://deepnotes.app";
+
 async function onLogout() {
   await logout();
 }
@@ -22,8 +24,8 @@ async function onLogout() {
       class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 md:px-6"
     >
       <div class="flex items-center gap-6">
-        <RouterLink
-          to="/"
+        <a
+          :href="marketingUrl"
           class="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-80"
         >
           <img
@@ -32,7 +34,7 @@ async function onLogout() {
             class="h-7 w-7"
           />
           DeepNotes
-        </RouterLink>
+        </a>
 
         <nav
           v-if="bootstrapped && isAuthenticated"
