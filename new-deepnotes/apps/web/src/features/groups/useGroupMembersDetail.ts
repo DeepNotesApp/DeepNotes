@@ -3,7 +3,6 @@ import { ref, type Ref } from "vue";
 /** Route `params.groupId` may be undefined until matched. */
 export type GroupIdParamRef = Ref<string | string[] | undefined>;
 
-import type { components } from "../../api/api-types.generated";
 import { useSession } from "../auth/useSession";
 import {
   fetchGroupMembersDetail,
@@ -15,8 +14,6 @@ import { useGroupJoinRequestActions } from "./useGroupMembersDetail-join-request
 import { useGroupPrivacyActions } from "./useGroupMembersDetail-privacy";
 import { useGroupDeletionActions } from "./useGroupMembersDetail-deletion";
 import { useGroupPasswordActions } from "./useGroupMembersDetail-password";
-
-type GroupMemberRole = components["schemas"]["GroupMemberRole"];
 
 export function useGroupMembersDetail(groupId: GroupIdParamRef) {
   const loading: Ref<boolean> = ref(false);

@@ -7,10 +7,6 @@ import type { components } from "../../api/api-types.generated";
 import { readSessionCrypto } from "../auth/session-keyrings";
 import type { GroupMembersDetail } from "./group-members-detail";
 import {
-  fetchGroupMembersDetail,
-  type GroupMembersDetail as GroupMembersDetailType,
-} from "./group-members-detail";
-import {
   buildJoinInvitationSendBodies,
   type InviteCryptoBootstrapJson,
 } from "./group-membership-crypto";

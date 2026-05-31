@@ -3,7 +3,6 @@ import type { Ref } from "vue";
 import { base64ToBytes } from "@deepnotes/e2ee";
 
 import type { DeepnotesApiClient } from "../../api/client";
-import type { GroupMembersDetail } from "./group-members-detail";
 import {
   buildGroupPasswordEnableRequestBody,
   buildGroupPasswordChangeRequestBody,

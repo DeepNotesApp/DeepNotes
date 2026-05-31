@@ -12,7 +12,7 @@ import { useCollabCrypto } from "./useCollabCrypto";
 import { useCollabPush } from "./useCollabPush";
 import { useCollabWebSocket } from "./useCollabWebSocket";
 import { usePageEditor } from "./usePageEditor";
-import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
+import { type SnapshotRow } from "./page-snapshot-list";
 
 export function usePageCollabEditor(opts: {
   ydoc: Y.Doc;
