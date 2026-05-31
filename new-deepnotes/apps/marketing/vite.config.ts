@@ -16,5 +16,20 @@ export default defineConfig({
   },
   ssgOptions: {
     script: "async",
+    includedRoutes(paths) {
+      const staticPaths = paths.filter((path) => !path.includes(":"));
+      const helpSlugs = [
+        "what-is-deepnotes",
+        "getting-started",
+        "creating-notes",
+        "sharing-pages",
+        "billing-subscriptions",
+        "forgot-password",
+        "offline-usage",
+        "multi-page-search",
+      ];
+      const helpPaths = helpSlugs.map((slug) => `/help/${slug}`);
+      return [...staticPaths, ...helpPaths];
+    },
   },
 });

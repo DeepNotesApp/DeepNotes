@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (session package split completed; session-core, groups, pages, billing, realtime packages created)  
+> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 14 static HTML routes with vue-router + vite-ssg)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -17,7 +17,7 @@
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
 | 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
-| 8 | Marketing, Help, Pricing, and Legal Surfaces | Not started | [phase-8-marketing.md](phase-8-marketing.md) |
+| 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
 
 ---
@@ -64,7 +64,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
 - [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
 - [x] **Package split:** `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`. Session package now has 8 files (down from 57).
-- [ ] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`.
+- [x] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. Build outputs 14 static HTML files (including 8 help article sub-routes). `pnpm lint`, `pnpm typecheck`, `pnpm build` pass with 0 errors.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms, row rate ≤ 20/page.
 - [x] **Scheduler:** Cron Trigger wired to `performScheduledCleanup` with integration test.
 - [ ] **Rollback plan:** Documented and rehearsed. Feature flag for REST-only collab fallback exists.
@@ -75,7 +75,6 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ## Current gaps (high-level)
 
-- **Marketing/help/pricing/whitepaper surfaces entirely missing** — `apps/marketing` is a single-card placeholder. Launch blocker, not polish.
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
 - **Composable size** — `useGroupMembersDetail.ts` (103 lines) and `usePageCollabEditor.ts` (238 lines) are now under the 300-line limit. `useSpatialPage.ts` (308 lines) still exceeds by a small margin.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
