@@ -61,6 +61,15 @@ A rotated key must remain in the keyring for at least 24 hours to allow for a sm
 
 ## Encryption key hierarchy
 
+<figure class="mb-8 mt-6">
+  <a href="/whitepaper/key-hierarchy.webp" target="_blank">
+    <img src="/whitepaper/key-hierarchy.webp" alt="Encryption key hierarchy in DeepNotes" class="mx-auto rounded-lg border border-border/40" />
+  </a>
+  <figcaption class="mt-2 text-center text-sm text-muted-foreground">
+    Encryption key hierarchy in DeepNotes
+  </figcaption>
+</figure>
+
 Encryption in DeepNotes starts with the user's master key, which is derived from the user's password, using their email as salt.
 This master key encrypts the user's private key and symmetric key, which are stored encrypted in DeepNotes.
 
@@ -107,6 +116,15 @@ all page keys are set for rotation in the next page activity.
 
 ## Registering a user
 
+<figure class="mb-8 mt-6">
+  <a href="/whitepaper/registration.webp" target="_blank">
+    <img src="/whitepaper/registration.webp" alt="Registration process in DeepNotes" class="mx-auto rounded-lg border border-border/40" />
+  </a>
+  <figcaption class="mt-2 text-center text-sm text-muted-foreground">
+    Registration process in DeepNotes
+  </figcaption>
+</figure>
+
 In order to register a user, we first derive the master key and login hash from the password, using the email as salt.
 We then generate a new key pair and a symmetric key, and encrypt the private key and symmetric key with the master key.
 The login hash, public key and encrypted keys are then sent to the server.
@@ -117,6 +135,15 @@ The email, salt, rehashed login hash, and reencrypted keys are then stored in th
 
 ## Authenticating a user
 
+<figure class="mb-8 mt-6">
+  <a href="/whitepaper/authentication.webp" target="_blank">
+    <img src="/whitepaper/authentication.webp" alt="Authentication process in DeepNotes" class="mx-auto rounded-lg border border-border/40" />
+  </a>
+  <figcaption class="mt-2 text-center text-sm text-muted-foreground">
+    Authentication process in DeepNotes
+  </figcaption>
+</figure>
+
 For user authentication we repeat the same process as in user registration, but instead of storing
 those values, we use them to verify the user's identity and decrypt the user's private key and symmetric key.
 
@@ -126,6 +153,15 @@ and symmetric key encrypted with the session key in local storage.
 We also generate an access token and a refresh token, and store them in secure cookies.
 
 ## Refreshing a session
+
+<figure class="mb-8 mt-6">
+  <a href="/whitepaper/session-refresh.webp" target="_blank">
+    <img src="/whitepaper/session-refresh.webp" alt="Session refreshing in DeepNotes" class="mx-auto rounded-lg border border-border/40" />
+  </a>
+  <figcaption class="mt-2 text-center text-sm text-muted-foreground">
+    Session refreshing in DeepNotes
+  </figcaption>
+</figure>
 
 To refresh a session, we extract the refresh code from the refresh token,
 and use it to find the session in the database. If the session isn't found

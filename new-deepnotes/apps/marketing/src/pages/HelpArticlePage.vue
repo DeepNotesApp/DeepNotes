@@ -176,6 +176,63 @@ const articles: Record<
 <p>Search indexes are built client-side from decrypted content, so your search queries never leave your device.</p>
 `,
   },
+  "creating-group": {
+    title: "How to create a group?",
+    content: `
+<p>You can create private and public groups if you are <b>subscribed to the Pro plan</b>.</p>
+
+<p>In order to create a group you have to:</p>
+<ol>
+  <li><b>Open the New page dialog</b> by clicking on <b>Create new page</b> or <b>Create with options</b> on the expanded right sidebar.</li>
+  <li>Select <b>(New group)</b> as the target group of the new page.</li>
+  <li>Fill the group creation fields and click Ok.</li>
+</ol>
+`,
+  },
+  "inviting-users": {
+    title: "How to invite users to a group?",
+    content: `
+<ol>
+  <li>Go to a page of the group you want to add members to. Make sure there is nothing selected on the page.</li>
+  <li>On the right sidebar, click on <b>Group settings</b>.</li>
+  <li>Go to the <b>Join invitations</b> tab and click on <b>Invite new member</b>.</li>
+  <li>Fill the form fields and click <b>Ok</b> to invite the user.</li>
+  <li>Now the user decides if they want to <b>accept</b> or <b>reject</b> the invitation.</li>
+</ol>
+`,
+  },
+  "joining-group": {
+    title: "How to join a group?",
+    content: `
+<p>To send a request to join a group, a user has to:</p>
+<ol>
+  <li>Go to a page of the group they want to join and click on <b>Request access</b>.</li>
+  <li>Choose a name to use within the group and click <b>Ok</b>.</li>
+  <li>Now wait for the admins to <b>accept</b> or <b>reject</b> the request.</li>
+</ol>
+`,
+  },
+  "roadmap": {
+    title: "Is there a roadmap?",
+    content: `
+<p>Yes, it is available at:</p>
+<p><a href="https://deepnotes.app/pages/voEG2WDb5e2x1Ep6hjwVp" target="_blank">https://deepnotes.app/pages/voEG2WDb5e2x1Ep6hjwVp</a></p>
+`,
+  },
+  "refund-policy": {
+    title: "What is the refund policy on DeepNotes?",
+    content: `
+<p>We offer a <b>100% refund</b> within 7 days of your purchase. No questions asked.</p>
+
+<p>If you are not satisfied with DeepNotes, please reach out at <a href="mailto:contact@deepnotes.app?subject=Refund Request">contact@deepnotes.app</a>.</p>
+`,
+  },
+  "subscription-expiration": {
+    title: "What happens when my subscription expires?",
+    content: `
+<p>When your subscription expires, all pages created during your subscription becomes read-only. You will not be able to edit them, but you will still be able to view them.</p>
+`,
+  },
 };
 
 const article = computed(() => articles[slug.value]);

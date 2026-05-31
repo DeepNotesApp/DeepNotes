@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 14 static HTML routes with vue-router + vite-ssg)  
+> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 20 static HTML routes with vue-router + vite-ssg, theme toggle, restored legacy assets)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -64,7 +64,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
 - [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
 - [x] **Package split:** `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`. Session package now has 8 files (down from 57).
-- [x] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. Build outputs 14 static HTML files (including 8 help article sub-routes). `pnpm lint`, `pnpm typecheck`, `pnpm build` pass with 0 errors.
+- [x] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. Build outputs 20 static HTML files (including 14 help article sub-routes). `pnpm lint`, `pnpm typecheck`, `pnpm build` pass with 0 errors. Dark/light theme toggle, restored legacy assets (logo, whitepaper diagrams, use-case thumbnails), and Shadcn `Switch`/`Input` components integrated.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms, row rate ≤ 20/page.
 - [x] **Scheduler:** Cron Trigger wired to `performScheduledCleanup` with integration test.
 - [ ] **Rollback plan:** Documented and rehearsed. Feature flag for REST-only collab fallback exists.

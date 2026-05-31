@@ -61,7 +61,7 @@ The product has a public-facing marketing site with SEO, onboarding funnel, and 
 
 ## Exit criteria
 
-- [x] `apps/marketing` builds and outputs static HTML for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. (14 total routes including 8 help article sub-routes.)
+- [x] `apps/marketing` builds and outputs static HTML for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. (20 total routes including 14 help article sub-routes.)
 - [x] Pricing page has working Stripe CTA that initiates checkout session. (Links to `VITE_WEB_APP_URL` where authenticated checkout flow lives.)
 - [x] Lighthouse SEO score ≥ 90 on homepage. (`<meta name="description">`, `<title>`, semantic headings, static HTML output.)
 - [x] No route is a placeholder or stub ("Coming soon" is not acceptable). (All pages have full content mirroring legacy marketing text.)
@@ -72,15 +72,17 @@ The product has a public-facing marketing site with SEO, onboarding funnel, and 
 
 | Page | File | Notes |
 |------|------|-------|
-| `/` | `src/pages/HomePage.vue` | Hero, 3 feature cards, 8 use-case emojis, bottom CTA. Content mirrors legacy homepage. |
-| `/pricing` | `src/pages/PricingPage.vue` | Basic/Pro plan cards, monthly/yearly toggle, feature checklists, CTA links to web app. |
-| `/whitepaper` | `src/pages/WhitepaperPage.vue` | Full legacy whitepaper content rendered with `marked`. Sticky section sidebar. |
-| `/help` | `src/pages/HelpPage.vue` | Article index with client-side search. 8 articles listed. |
-| `/help/:slug` | `src/pages/HelpArticlePage.vue` | 8 articles with content from legacy help pages. Static HTML generated for each slug via `includedRoutes`. |
+| `/` | `src/pages/HomePage.vue` | Hero, 3 feature cards, 8 use-case thumbnails (restored from legacy), bottom CTA. Content mirrors legacy homepage. |
+| `/pricing` | `src/pages/PricingPage.vue` | Basic/Pro plan cards, monthly/yearly Shadcn `Switch`, feature checklists, CTA links to web app. |
+| `/whitepaper` | `src/pages/WhitepaperPage.vue` | Full legacy whitepaper content rendered with `marked`. Sticky section sidebar. 4 legacy diagrams restored. |
+| `/help` | `src/pages/HelpPage.vue` | Article index with client-side search (Shadcn `Input`). 14 articles listed (6 legacy missing articles restored). |
+| `/help/:slug` | `src/pages/HelpArticlePage.vue` | 14 articles with content from legacy help pages. Static HTML generated for each slug via `includedRoutes`. |
 | `/privacy-policy` | `src/pages/PrivacyPolicyPage.vue` | Legacy privacy policy text, sticky sidebar. |
 | `/terms-of-service` | `src/pages/TermsOfServicePage.vue` | Legacy ToS text, sticky sidebar. |
 
-**Shared components:** `NavBar.vue`, `Footer.vue`, `DefaultLayout.vue`.
+**Shared components:** `NavBar.vue` (logo + theme toggle), `Footer.vue` (logo + socials), `DefaultLayout.vue`.
 **Router:** `vue-router` configured via `vite-ssg` in `src/router/index.ts`.
-**Styling:** Shadcn-vue `Button`, `Card` primitives + Tailwind CSS. `@tailwindcss/typography` plugin for markdown pages.
+**Styling:** Shadcn-vue `Button`, `Card`, `Switch`, `Input` primitives + Tailwind CSS. `@tailwindcss/typography` plugin for markdown pages.
+**Theme:** Dark/light toggle with `localStorage` persistence and `prefers-color-scheme` default.
 **Dependencies added:** `vue-router`, `marked`, `@tailwindcss/typography`.
+**Assets copied from legacy:** `white-logo-outline.webp`, 4 whitepaper diagrams, 8 use-case thumbnails, `favicon.ico`.

@@ -42,14 +42,46 @@ const features = [
 ];
 
 const useCases = [
-  { title: "Mind maps", emoji: "🧠" },
-  { title: "Diagrams", emoji: "📐" },
-  { title: "Kanban boards", emoji: "📋" },
-  { title: "Database diagrams", emoji: "🗄️" },
-  { title: "Family trees", emoji: "🌳" },
-  { title: "Flashcards", emoji: "🎴" },
-  { title: "Cheat sheets", emoji: "📄" },
-  { title: "Studies", emoji: "📚" },
+  {
+    title: "Mind maps",
+    image: "/applications/mind-map.webp",
+    href: "https://deepnotes.app/pages/cMwNNxpa2jZKuP_0zzrMP",
+  },
+  {
+    title: "Diagrams",
+    image: "/applications/diagram-thumbnail.webp",
+    href: "https://deepnotes.app/pages/lZ0M_o6493_D2mqYe9AoY",
+  },
+  {
+    title: "Kanban boards",
+    image: "/applications/kanban-board-thumbnail.webp",
+    href: "https://deepnotes.app/pages/rUgBRksD5jyM6TDF_U_WN",
+  },
+  {
+    title: "Database diagrams",
+    image: "/applications/database-structure-thumbnail.webp",
+    href: "https://deepnotes.app/pages/Gl8IxI7j9mKUsWyKHkv3V",
+  },
+  {
+    title: "Family trees",
+    image: "/applications/family-tree-thumbnail.webp",
+    href: "https://deepnotes.app/pages/5QyqYGXVzHF_10dNC4uux",
+  },
+  {
+    title: "Flashcards",
+    image: "/applications/flashcards-thumbnail.webp",
+    href: "https://deepnotes.app/pages/CPvCy_IjiRWqQNBj0cikY",
+  },
+  {
+    title: "Cheat sheets",
+    image: "/applications/cheat-sheet-thumbnail.webp",
+    href: "https://deepnotes.app/pages/nRea-8JgIXvbIyEi0ONCN",
+  },
+  {
+    title: "Studies",
+    image: "/applications/history-study-thumbnail.webp",
+    href: "https://deepnotes.app/pages/soL5nZWNv_elUnh78iVsN",
+  },
 ];
 </script>
 
@@ -104,16 +136,26 @@ const useCases = [
         Use cases
       </h2>
       <div class="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card
+        <a
           v-for="useCase in useCases"
           :key="useCase.title"
-          class="flex flex-col items-center justify-center border-border/60 py-8 text-center"
+          :href="useCase.href"
+          target="_blank"
+          class="block transition-opacity hover:opacity-90"
         >
-          <CardContent class="pb-0">
-            <span class="text-4xl">{{ useCase.emoji }}</span>
-            <p class="mt-3 font-medium">{{ useCase.title }}</p>
-          </CardContent>
-        </Card>
+          <Card
+            class="flex flex-col items-center justify-center overflow-hidden border-border/60 text-center"
+          >
+            <img
+              :src="useCase.image"
+              :alt="useCase.title"
+              class="aspect-[4/3] w-full object-cover"
+            />
+            <CardContent class="py-4">
+              <p class="font-medium">{{ useCase.title }}</p>
+            </CardContent>
+          </Card>
+        </a>
       </div>
     </section>
 

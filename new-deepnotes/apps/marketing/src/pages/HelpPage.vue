@@ -2,6 +2,7 @@
 import { ref, computed } from "vue";
 import { useHead } from "@unhead/vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 useHead({
   title: "Help — DeepNotes",
@@ -47,6 +48,24 @@ const articles = [
       "How DeepNotes billing works, upgrading to Pro, and managing your subscription.",
   },
   {
+    slug: "creating-group",
+    title: "How to create a group?",
+    excerpt:
+      "You can create private and public groups if you are subscribed to the Pro plan.",
+  },
+  {
+    slug: "inviting-users",
+    title: "How to invite users to a group?",
+    excerpt:
+      "Go to a page of the group, open Group settings, and send a join invitation.",
+  },
+  {
+    slug: "joining-group",
+    title: "How to join a group?",
+    excerpt:
+      "Go to a page of the group you want to join and click Request access.",
+  },
+  {
     slug: "forgot-password",
     title: "I've forgotten my password. What can I do?",
     excerpt:
@@ -63,6 +82,24 @@ const articles = [
     title: "Can I search text across multiple pages?",
     excerpt:
       "Multi-page text search is available on the Pro plan. Learn how to use it effectively.",
+  },
+  {
+    slug: "roadmap",
+    title: "Is there a roadmap?",
+    excerpt:
+      "Yes, our public roadmap is available on DeepNotes.",
+  },
+  {
+    slug: "refund-policy",
+    title: "What is the refund policy on DeepNotes?",
+    excerpt:
+      "We offer a 100% refund within 7 days of your purchase. No questions asked.",
+  },
+  {
+    slug: "subscription-expiration",
+    title: "What happens when my subscription expires?",
+    excerpt:
+      "When your subscription expires, all pages created during your subscription become read-only.",
   },
 ];
 
@@ -84,11 +121,11 @@ const filteredArticles = computed(() => {
 
     <!-- Search -->
     <div class="mt-10">
-      <input
+      <Input
         v-model="searchQuery"
         type="text"
         placeholder="Search articles..."
-        class="w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+        class="w-full"
       />
     </div>
 

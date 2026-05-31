@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 useHead({
   title: "Pricing — DeepNotes",
   meta: [
@@ -100,19 +101,12 @@ function periodLabel() {
         ]"
         >Monthly</span
       >
-      <button
-        type="button"
-        role="switch"
-        :aria-checked="billingFrequency === 'yearly'"
-        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        :class="{ 'bg-primary': billingFrequency === 'yearly' }"
-        @click="billingFrequency = billingFrequency === 'yearly' ? 'monthly' : 'yearly'"
-      >
-        <span
-          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out"
-          :class="{ 'translate-x-5': billingFrequency === 'yearly', 'translate-x-0': billingFrequency === 'monthly' }"
-        />
-      </button>
+      <Switch
+        :model-value="billingFrequency === 'yearly'"
+        @update:model-value="
+          (v) => (billingFrequency = v ? 'yearly' : 'monthly')
+        "
+      />
       <span
         :class="[
           'text-sm font-medium',

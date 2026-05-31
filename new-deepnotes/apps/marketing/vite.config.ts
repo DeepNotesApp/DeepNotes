@@ -24,9 +24,15 @@ export default defineConfig({
         "creating-notes",
         "sharing-pages",
         "billing-subscriptions",
+        "creating-group",
+        "inviting-users",
+        "joining-group",
         "forgot-password",
         "offline-usage",
         "multi-page-search",
+        "roadmap",
+        "refund-policy",
+        "subscription-expiration",
       ];
       const helpPaths = helpSlugs.map((slug) => `/help/${slug}`);
       return [...staticPaths, ...helpPaths];
