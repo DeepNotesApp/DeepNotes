@@ -28,7 +28,6 @@ export default {
   async scheduled(
     _event: ScheduledEvent,
     env: Bindings,
-    _ctx: ExecutionContext,
   ) {
     const hyper = env.HYPERDRIVE;
     if (hyper == null) {
