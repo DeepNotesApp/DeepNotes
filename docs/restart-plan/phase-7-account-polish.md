@@ -65,6 +65,19 @@ All non-editor UX is polished and tested.
 
 ---
 
+## Auth migration evaluation
+
+A full evaluation of TOTP, password change, and email change migration is in [appendix-auth-migration-evaluation.md](appendix-auth-migration-evaluation.md).
+
+**Verdict:** High-quality migration. Security model is preserved; architectural simplifications (collapsing two-step WebSocket unwrap/rewrap into single client-side HTTP calls) are improvements.
+
+**Open gaps identified:**
+
+1. **`rememberDevice` UI missing in login** — `LoginView.vue` has fields for `authenticatorToken` and `recoveryCode` but no `rememberDevice` checkbox. The API schema supports it, but `useSession.ts` never sends it. Users are prompted for 2FA on every login from the same browser. **Severity:** low UX regression.
+2. **No distributed locking for account mutations** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on Postgres row-level locking via Drizzle transactions. For single-row updates this is sufficient, but concurrent mutations could race across instances. **Severity:** low–medium.
+
+---
+
 ## Verification
 
 - E2E smoke test: demo login → home → starting page → groups → logout.

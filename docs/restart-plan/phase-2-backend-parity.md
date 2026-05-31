@@ -20,6 +20,8 @@ Confirm all non-spatial backend features are implemented and tested.
 | Refresh | `POST /api/sessions/refresh` | `account-flows.integration.test.ts` | Verify green |
 | Logout | `POST /api/sessions/logout` | `account-flows.integration.test.ts` | Verify green |
 | 2FA enable/load/disable | `POST /api/users/me/2fa/*` | `account-flows.integration.test.ts` | Verify green |
+| Password change | `POST /api/users/me/password` | `account-flows.integration.test.ts` | Verify green |
+| Email change request/confirm | `POST /api/users/me/email-change` + `/confirm` | `account-flows.integration.test.ts` | Verify green |
 | Page CRUD | `POST /api/groups/:gid/pages`, `DELETE /api/pages/:pid` | `account-flows.integration.test.ts` | Verify green |
 | Page move/reencrypt | `POST /api/pages/:pid/move` | `account-flows.integration.test.ts` | Verify green |
 | Snapshots | `GET/POST/DELETE /api/pages/:pid/snapshots` | `account-flows.integration.test.ts` | Verify green |
@@ -37,3 +39,9 @@ Confirm all non-spatial backend features are implemented and tested.
 - [x] Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing test in CI.
 - [x] `api-worker` 503 matrix test (`index.test.ts`) passes (all routes return 503 when env is missing).
 - [x] No backend route is "stubbed" (returns 501 or empty body) for a feature claimed as done.
+
+---
+
+## References
+
+- Detailed auth migration evaluation (TOTP, password change, email change): [appendix-auth-migration-evaluation.md](appendix-auth-migration-evaluation.md)

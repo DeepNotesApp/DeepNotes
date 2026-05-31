@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (group password UI + unlock completed)  
+> **Last updated:** 2026-05-31 (group password UI + unlock completed; auth migration evaluation documented)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -79,6 +79,8 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
 - **`@deepnotes/session` god package** — 71 files, needs split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`.
 - **Composable size** — `useGroupMembersDetail.ts` (785 lines), `usePageCollabEditor.ts` (431 lines), `useSpatialPage.ts` (414 lines) exceed 300-line limit.
+- **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
+- **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 
 ---
 
@@ -86,6 +88,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 - **Legacy spatial reference:** [appendix-legacy-inventory.md](appendix-legacy-inventory.md)
 - **Risk table:** [appendix-risks.md](appendix-risks.md)
+- **Auth migration evaluation (TOTP, password change, email change):** [appendix-auth-migration-evaluation.md](appendix-auth-migration-evaluation.md)
 - **Archived monolith:** `docs/RESTART_PLAN_v4.1_archive.md` (superseded by this directory)
 
 ---
