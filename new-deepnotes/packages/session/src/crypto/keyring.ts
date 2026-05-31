@@ -24,7 +24,6 @@ export interface IKeyring extends Wrappable {
 export function createKeyring(
   value: Uint8Array,
   params?: { raw?: boolean; locked?: boolean },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- factory object matches legacy `createKeyring` shape
 ): any {
   const raw = params?.raw ?? value.length <= 32;
 

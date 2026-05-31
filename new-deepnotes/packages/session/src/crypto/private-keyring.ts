@@ -9,7 +9,6 @@ import { DataLayer } from "./wrapped-data.js";
 export function createPrivateKeyring(
   value: Uint8Array,
   params?: { raw?: boolean },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   const _keyring = createKeyring(value, params);
 

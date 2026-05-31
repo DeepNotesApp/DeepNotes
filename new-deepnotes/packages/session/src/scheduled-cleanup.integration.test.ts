@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
-import { and, eq, isNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
@@ -22,10 +22,7 @@ import { groups, pages } from "@deepnotes/db/schema";
 
 import { performCreatePage } from "./group-pages.js";
 import { performPageSoftDelete, performPagePurge } from "./page-operations.js";
-import {
-  performGroupSoftDelete,
-  performGroupPurge,
-} from "./group-deletion.js";
+import { performGroupPurge } from "./group-deletion.js";
 import { performScheduledCleanup } from "./scheduled-cleanup.js";
 import { performUserRegister } from "./register-user.js";
 import type { SessionEnv } from "./env.js";

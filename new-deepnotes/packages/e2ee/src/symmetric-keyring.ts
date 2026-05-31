@@ -12,7 +12,6 @@ import { DataLayer } from "./wrapped-data.js";
 export function createSymmetricKeyring(
   value = sodium.crypto_aead_xchacha20poly1305_ietf_keygen(),
   params?: { raw?: boolean; locked?: boolean },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   const _keyring = createKeyring(value, params);
 
