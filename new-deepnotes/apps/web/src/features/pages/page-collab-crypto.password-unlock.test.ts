@@ -1,7 +1,6 @@
 import { randomBytes } from "node:crypto";
 
 import {
-  base64ToBytes,
   bytesToBase64,
   createKeyring,
   createPrivateKeyring,
@@ -64,7 +63,7 @@ describe("page-collab-crypto password unlock", () => {
 
     // Password-protect the group content keyring (legacy enable flow)
     const { passwordKey } = deriveGroupPasswordValues(groupId, password);
-    let encryptedGroupContent = groupContentKeyring
+    const encryptedGroupContent = groupContentKeyring
       .wrapSymmetric(passwordKey, {
         associatedData: {
           context: "GroupContentKeyringPasswordProtection",
@@ -152,7 +151,7 @@ describe("page-collab-crypto password unlock", () => {
     const groupContentKeyring = createSymmetricKeyring();
 
     const { passwordKey } = deriveGroupPasswordValues(groupId, password);
-    let encryptedGroupContent = groupContentKeyring
+    const encryptedGroupContent = groupContentKeyring
       .wrapSymmetric(passwordKey, {
         associatedData: {
           context: "GroupContentKeyringPasswordProtection",
