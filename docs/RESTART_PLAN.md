@@ -170,6 +170,11 @@ These were found during the v3–v4 analysis and must be addressed in the phases
     - **Impact:** Zero public marketing surface. No SEO, no onboarding funnel, no trust signals, no conversion path. The homepage is not a landing page; `HomeView.vue` is an authenticated app dashboard.
     - **Fix:** Add Vue Router to `apps/marketing` and create page components for homepage, pricing, whitepaper, help index + articles, privacy policy, and terms of service. Migrate whitepaper markdown into static files. Add plan cards and Stripe CTA to pricing. Add legal pages before any public deployment. This is not a "polish" task — it is a missing product surface that blocks launch.
 
+16. **`PageEditorView.vue` is a scrolling admin page, not an immersive spatial canvas**
+    - The legacy `PagesLayout.vue` is a full-screen `q-layout` with `user-select: none`, `overflow: hidden`, persistent `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu`. The new `PageEditorView.vue` renders a vertical stack of Shadcn cards on a standard scrolling page (`PageEditorPathCard`, `PageEditorSnapshotsCard`, `PageEditorManagementCard`, `PageEditorBacklinksCard`, `SpatialPageView`, `PageEditorCollabStatusCard`, `PageEditorTiptapCard`). This destroys the spatial-native experience.
+    - **Notes and arrows must retain legacy rendering style** (background/border colors, selection ring, drag opacity, drop zones, arrow handles, link icons, resize handles, arrow curves/heads/labels, hitboxes) but implemented without Quasar classes (Tailwind + shadcn primitives only). The rest of the app shell (sidebar, toolbar, admin cards, state screens) uses shadcn.
+    - **Fix:** Rebuild `PageEditorView.vue` as an immersive full-screen spatial shell. Move admin cards into a collapsible `RightSidebar` (shadcn). Move path navigation into a `MainToolbar` breadcrumb (shadcn). The canvas (`SpatialPageView`) must occupy the full viewport. Add dedicated fullscreen state screens for `page-nonexistent`, `page-deleted`, `group-deleted`, `invited`, `rejected`, `unauthorized`, `password`. Remove `PageEditorTiptapCard.vue` from the page route; Tiptap lives only inside `DisplayNote.vue`.
+
 ---
 
 ## 1. What "restart" should mean (revised)
@@ -669,16 +674,53 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - `Ctrl+Z` / `Ctrl+Shift+Z` for note operations (move, create, delete, resize).
    - Must integrate with Yjs undo manager or a custom command stack.
 
-6. **Find and replace**
+6. **Immersive page layout and state screens**
+   - Rebuild `PageEditorView.vue` as a full-screen spatial shell (no scrolling card stack):
+     - `MainToolbar` (shadcn): breadcrumb path, zoom controls, undo/redo, share, find/replace toggle.
+     - `LeftSidebar` (shadcn): Recent pages, Favorites, Selected elements, Current path.
+     - `RightSidebar` (shadcn): Page properties, Snapshots, Management, Backlinks, Collab status — collapsible panels.
+     - `TableContextMenu` (shadcn): right-click context menu on canvas.
+     - `LoadingOverlay`: centered spinner during page bootstrap.
+   - Global CSS for spatial routes: `user-select: none`, `overflow: hidden`, `touch-action: none`, `position: fixed` on body.
+   - Dedicated fullscreen state screens replacing inline error cards:
+     - `DisplayErrorScreen`, `DisplayNonExistentScreen`, `DisplayPageDeletedScreen`, `DisplayGroupDeletedScreen`, `DisplayInvitedScreen`, `DisplayRejectedScreen`, `DisplayUnauthorizedScreen`, `DisplayPasswordScreen`.
+   - Remove `PageEditorTiptapCard.vue` from the page route. The Tiptap rich-text editor becomes the head/body editing surface inside `DisplayNote.vue` only.
+
+7. **Note visual parity (legacy style, no Quasar)**
+   - `DisplayNote.vue` must match legacy visual behavior using Tailwind/shadcn primitives:
+     - Background color + border color from `note.color` (or hardcoded legacy color map), with subtle transparency (`/10` tint or legacy equivalent).
+     - Selection ring: `ring-2 ring-primary` or legacy blue `#2196f3`.
+     - Drag opacity: `0.7` during drag/resize.
+     - `Teleport` to a global `.display-overlay` during drag/resize to avoid parent clipping.
+     - `NoteDropZones`: invisible zones on container notes for drag-to-attach.
+     - `NoteArrowHandles`: 4 directional handles on selected notes to initiate arrow creation.
+     - `ArrowLinkZones`: zones on note edges for arrow reconnection.
+     - `NoteLinkIcon`: external-link indicator when `link.url` is set.
+     - `NoteResizeHandles`: 8 handles (nw, n, ne, e, se, s, sw, w) with correct cursors.
+     - Scrollbar handling in `NoteContent`: allow touch scroll inside notes, prevent pull-to-refresh on body.
+     - Note frame `border-radius` (`rounded-md` or legacy `7px`), shadow, and min-width matching legacy.
+   - Container section: spatial and horizontal layouts with correct child note positioning and offset math.
+
+8. **Arrow visual parity (legacy style, no Quasar)**
+   - `DisplayArrow.vue` must support:
+     - **Curve body** (`CurveArrow.vue`) and **line body** (`LineArrow.vue`).
+     - **Arrow heads**: `OpenHead.vue` at source/target with rotation.
+     - **Arrow label**: editable `Y.XmlFragment` rendered as an SVG `foreignObject` or HTML overlay positioned along the curve.
+     - **Hitbox**: invisible thick stroke (`stroke-width: 20`, `stroke-opacity: 0`) for easy grabbing.
+     - Drag-to-reconnect: grab an arrow endpoint and drop it onto another note.
+     - Color matching note color logic.
+   - All arrow SVG must use `overflow: visible` and absolute positioning within the world coordinate system.
+
+9. **Find and replace**
    - Search across all note head/body text.
    - Replace text.
 
-7. **Visual polish**
-   - Grid background.
-   - Note color inheritance.
-   - Collapsing notes.
-   - Z-index ordering.
-   - Read-only notes.
+10. **Visual polish**
+    - Grid background.
+    - Note color inheritance.
+    - Collapsing notes.
+    - Z-index ordering.
+    - Read-only notes.
 
 **Verification:**
 - Each deliverable has a test (unit, component, or integration).
@@ -687,6 +729,11 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 **Exit criteria:**
 - [ ] Phase 1 checklist ≥ 80% complete.
 - [ ] No "P1" checklist item remains open.
+- [ ] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
+- [ ] All 8 dedicated page-state screens exist and are reachable (error, nonexistent, deleted, group-deleted, invited, rejected, unauthorized, password).
+- [ ] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring, drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
+- [ ] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels, hitboxes, and drag-to-reconnect.
+- [ ] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented with shadcn and visible on `/pages/:pageId`.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.
 
 ---
@@ -910,7 +957,7 @@ What must happen now:
 2. **Inventory spatial features (Phase 1).** Produce a checklist **and a complete schema diff table** that prevents misreporting stubs as done.
 3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike and incremental bootstrap.
 4. **Resolve routing divergence (Phase 4).** Make `/pages/:pageId` the spatial canvas and integrate the Tiptap editor as a note component.
-5. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo).
+5. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo). **Phase 6 must also rebuild the immersive layout shell and restore legacy note/arrow visual parity** (colors, borders, selection rings, arrow curves/heads/labels, drop zones, etc.) using shadcn primitives instead of Quasar.
 6. **Build marketing/help/pricing/whitepaper surfaces.** Add Vue Router to `apps/marketing`, migrate content from legacy, and create static routable pages. This is a launch blocker, not polish.
 7. **Verify everything with automated tests.** Every phase has objective exit criteria.
 
