@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
-import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 import { authenticator } from "otplib";
 import postgres from "postgres";
@@ -130,7 +129,7 @@ function testSessionEnv(): SessionEnv {
 }
 
 function rand32(): Uint8Array {
-  return sodium.randombytes_buf(32);
+  return new Uint8Array(randomBytes(32));
 }
 
 /** First `name=value` segment from `Set-Cookie` lines (values are URI-encoded). */
@@ -468,7 +467,7 @@ describe.skipIf(resolveTemplateContext() == null)(
           password: newLogin,
           salt: phcVals.saltBytes,
         });
-        expect(sodium.memcmp(derived.hash, phcVals.hashBytes)).toBe(true);
+        expect(Buffer.from(derived.hash).equals(Buffer.from(phcVals.hashBytes))).toBe(true);
 
         const unwrapKey = derived.key;
         const privUnwrapped = createPrivateKeyring(new Uint8Array(u!.encPriv)).unwrapSymmetric(

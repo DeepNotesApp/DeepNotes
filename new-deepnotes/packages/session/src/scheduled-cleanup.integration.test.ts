@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
-import sodium from "libsodium-wrappers-sumo";
 import { nanoid } from "nanoid";
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -51,7 +50,7 @@ function testSessionEnv(): SessionEnv {
 }
 
 function rand32(): Uint8Array {
-  return sodium.randombytes_buf(32);
+  return new Uint8Array(randomBytes(32));
 }
 
 async function buildRegisterBody(email: string, loginHash: Uint8Array) {

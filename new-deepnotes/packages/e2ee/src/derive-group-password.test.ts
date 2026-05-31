@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import sodium from "libsodium-wrappers-sumo";
 import { deriveGroupPasswordValues, nanoidToBytes } from "./derive-group-password.js";
 
 describe("deriveGroupPasswordValues", () => {
-  it("produces deterministic output for a known group id and password", async () => {
-    await sodium.ready;
+  it("produces deterministic output for a known group id and password", () => {
     const groupId = "V1StGXR8_Z5jdHi6B-myT";
     const password = "test-password-123";
 
@@ -19,8 +17,7 @@ describe("deriveGroupPasswordValues", () => {
     expect(result1.passwordKey.value).toEqual(result2.passwordKey.value);
   });
 
-  it("uses nanoidToBytes for salt", async () => {
-    await sodium.ready;
+  it("uses nanoidToBytes for salt", () => {
     const groupId = "V1StGXR8_Z5jdHi6B-myT";
     const password = "any-password";
 
