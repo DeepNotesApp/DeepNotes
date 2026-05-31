@@ -622,9 +622,6 @@ importers:
       '@deepnotes/db':
         specifier: workspace:*
         version: link:../db
-      '@deepnotes/e2ee':
-        specifier: workspace:*
-        version: link:../e2ee
       '@deepnotes/groups':
         specifier: workspace:*
         version: link:../groups
@@ -637,15 +634,6 @@ importers:
       '@deepnotes/session-core':
         specifier: workspace:*
         version: link:../session-core
-      '@noble/ciphers':
-        specifier: ^0.6.0
-        version: 0.6.0
-      '@noble/curves':
-        specifier: ^1.8.0
-        version: 1.9.7
-      '@noble/hashes':
-        specifier: ^1.7.0
-        version: 1.8.0
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
@@ -685,7 +673,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^3.2.4
-        version: 3.2.4(@types/node@22.19.19)(happy-dom@17.6.3)(jiti@2.7.0)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(stylus@0.57.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
+        version: 3.2.4(@types/node@22.19.19)(happy-dom@17.6.3)(jiti@2.7.0)(jsdom@28.1.0(@noble/hashes@2.2.0))(lightningcss@1.32.0)(msw@2.14.6(@types/node@22.19.19)(typescript@5.9.3))(stylus@0.57.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   packages/session-core:
     dependencies:
