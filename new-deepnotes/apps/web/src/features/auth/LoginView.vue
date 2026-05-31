@@ -83,9 +83,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="flex flex-1 flex-col items-center justify-center px-4 py-12">
-    <div class="w-full max-w-sm">
-      <Card>
+  <div class="w-full max-w-sm">
+    <Card>
         <CardHeader class="pb-4">
           <CardTitle class="text-lg">Sign in</CardTitle>
           <CardDescription>
@@ -257,5 +256,4 @@ async function onSubmit() {
         </CardFooter>
       </Card>
     </div>
-  </div>
 </template>
