@@ -328,6 +328,59 @@ importers:
         specifier: ^3.1.1
         version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/billing:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../session-core
+      crypto-js:
+        specifier: ^4.2.0
+        version: 4.2.0
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+      stripe:
+        specifier: 17.7.0
+        version: 17.7.0
+    devDependencies:
+      '@types/crypto-js':
+        specifier: ^4.2.2
+        version: 4.2.2
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/collab:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      '@deepnotes/session':
+        specifier: workspace:*
+        version: link:../session
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/collab-wire:
     dependencies:
       lib0:
@@ -388,6 +441,81 @@ importers:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/groups:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      '@deepnotes/realtime':
+        specifier: workspace:*
+        version: link:../realtime
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../session-core
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/pages:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      '@deepnotes/groups':
+        specifier: workspace:*
+        version: link:../groups
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../session-core
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/realtime:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../session-core
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+      msgpackr:
+        specifier: ^1.11.2
+        version: 1.11.10
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
   packages/realtime-wire:
     dependencies:
       lib0:
@@ -406,9 +534,24 @@ importers:
 
   packages/session:
     dependencies:
+      '@deepnotes/billing':
+        specifier: workspace:*
+        version: link:../billing
       '@deepnotes/db':
         specifier: workspace:*
         version: link:../db
+      '@deepnotes/groups':
+        specifier: workspace:*
+        version: link:../groups
+      '@deepnotes/pages':
+        specifier: workspace:*
+        version: link:../pages
+      '@deepnotes/realtime':
+        specifier: workspace:*
+        version: link:../realtime
+      '@deepnotes/session-core':
+        specifier: workspace:*
+        version: link:../session-core
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
@@ -446,6 +589,40 @@ importers:
       postgres:
         specifier: ^3.4.5
         version: 3.4.9
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/node@22.19.17)(happy-dom@17.6.3)(jiti@2.6.1)(jsdom@28.1.0(@noble/hashes@1.8.0))(lightningcss@1.32.0)(msw@2.13.6(@types/node@22.19.17)(typescript@5.9.3))(stylus@0.57.0)(terser@5.46.2)(tsx@4.21.0)(yaml@2.8.3)
+
+  packages/session-core:
+    dependencies:
+      '@deepnotes/db':
+        specifier: workspace:*
+        version: link:../db
+      crypto-js:
+        specifier: ^4.2.0
+        version: 4.2.0
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260426.1)(gel@2.2.0)(postgres@3.4.9)
+      jose:
+        specifier: ^5.10.0
+        version: 5.10.0
+      libsodium-wrappers-sumo:
+        specifier: ^0.8.0
+        version: 0.8.4
+      nanoid:
+        specifier: ^5.1.5
+        version: 5.1.9
+      otplib:
+        specifier: ^12.0.1
+        version: 12.0.1
+    devDependencies:
+      '@types/node':
+        specifier: ^22.14.1
+        version: 22.19.17
       typescript:
         specifier: ^5.8.3
         version: 5.9.3

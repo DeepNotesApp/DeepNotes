@@ -1,6 +1,6 @@
 import { Redis } from "@upstash/redis";
 
-import type { SessionRedisPort } from "@deepnotes/session";
+import type { SessionRedisPort } from "@deepnotes/session-core";
 
 import type { WorkerSessionBindings } from "./session-env.js";
 

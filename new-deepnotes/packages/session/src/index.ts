@@ -1,52 +1,54 @@
-export type { SessionEnv } from "./env.js";
-export { isDev } from "./env.js";
-export { SessionError } from "./errors.js";
-export { performSessionLogin } from "./login.js";
-export type { SessionLoginBody } from "./login.js";
-export type { SessionRedisPort } from "./login-rate-limit.js";
-export { performSessionLogout } from "./logout.js";
-export { performSessionRefresh } from "./refresh.js";
-export { performSessionStartDemo } from "./start-demo.js";
+export type { SessionEnv } from "@deepnotes/session-core";
+export { isDev } from "@deepnotes/session-core";
+export { SessionError } from "@deepnotes/session-core";
+export { performSessionLogin } from "@deepnotes/session-core";
+export type { SessionLoginBody } from "@deepnotes/session-core";
+export type { SessionRedisPort } from "@deepnotes/session-core";
+export { performSessionLogout } from "@deepnotes/session-core";
+export { performSessionRefresh } from "@deepnotes/session-core";
+export { performSessionStartDemo } from "@deepnotes/session-core";
 export type {
   SessionStartDemoGroupCreation,
   SessionStartDemoInput,
   SessionStartDemoPageCreation,
-} from "./start-demo.js";
-export { performUserRegister } from "./register-user.js";
-export type { UserRegisterInput } from "./register-user.js";
-export { performUserAccountDelete } from "./delete-user-account.js";
-export { performUserPasswordChange } from "./change-user-password.js";
+} from "@deepnotes/session-core";
+export { performUserRegister } from "@deepnotes/session-core";
+export type { UserRegisterInput } from "@deepnotes/session-core";
+export { performUserAccountDelete } from "@deepnotes/session-core";
+export { performUserPasswordChange } from "@deepnotes/session-core";
 export {
   performUserEmailChangeConfirm,
   performUserEmailChangeRequest,
-} from "./change-user-email.js";
+} from "@deepnotes/session-core";
+export { decryptUserEmail } from "@deepnotes/session-core";
 export {
   performConfirmEmailVerification,
   performResendEmailVerification,
-} from "./email-verification.js";
+} from "@deepnotes/session-core";
 export {
   getAuthenticatedUserSummary,
   tryGetAuthenticatedUserSummary,
-} from "./user-me.js";
-export type { AuthenticatedUserSummary } from "./user-me.js";
+} from "@deepnotes/session-core";
+export type { AuthenticatedUserSummary } from "@deepnotes/session-core";
+export { userHasGroupPermission } from "@deepnotes/session-core";
 export {
   performCreatePage,
   performListGroupPages,
-} from "./group-pages.js";
-export type { CreatePageBody } from "./group-pages.js";
+} from "@deepnotes/groups";
+export type { CreatePageBody } from "@deepnotes/groups";
 export {
   performGetGroupMainPageId,
   performGetGroupMemberUserIds,
   performGetGroupMembersDetail,
-} from "./group-main-and-members.js";
+} from "@deepnotes/groups";
 export {
   performGetGroupInviteCryptoBootstrap,
   performGetGroupPublicKeyringForMessaging,
-} from "./group-invite-crypto-bootstrap.js";
-export { performGetGroupCollabCryptoContext } from "./group-collab-crypto-context.js";
-export { performGetGroupPrivacyMakePrivateBootstrap } from "./group-privacy-make-private-bootstrap.js";
-export { performGetUserPublicKeyring } from "./user-public-keyring.js";
-export { performGetUserGroupIds } from "./user-group-ids.js";
+} from "@deepnotes/groups";
+export { performGetGroupCollabCryptoContext } from "@deepnotes/pages";
+export { performGetGroupPrivacyMakePrivateBootstrap } from "@deepnotes/groups";
+export { performGetUserPublicKeyring } from "@deepnotes/session-core";
+export { performGetUserGroupIds } from "@deepnotes/session-core";
 export {
   performAddFavoritePages,
   performClearFavoritePages,
@@ -61,8 +63,8 @@ export {
   performPatchDefaultNote,
   performRemoveFavoritePages,
   performRemoveRecentPages,
-} from "./user-page-prefs.js";
-export type { UserNotificationItemDto } from "./user-page-prefs.js";
+} from "@deepnotes/session-core";
+export type { UserNotificationItemDto } from "@deepnotes/session-core";
 export {
   performUserTwoFactorDisable,
   performUserTwoFactorEnableFinish,
@@ -70,24 +72,24 @@ export {
   performUserTwoFactorForgetDevices,
   performUserTwoFactorGenerateRecoveryCodes,
   performUserTwoFactorLoad,
-} from "./user-two-factor-settings.js";
+} from "@deepnotes/session-core";
 export {
   performGroupPasswordChange,
   performGroupPasswordDisable,
   performGroupPasswordEnable,
-} from "./group-password.js";
+} from "@deepnotes/groups";
 export {
   performGroupPurge,
   performGroupRestore,
   performGroupSoftDelete,
-} from "./group-deletion.js";
-export { performScheduledCleanup } from "./scheduled-cleanup.js";
+} from "@deepnotes/groups";
+export { performScheduledCleanup } from "@deepnotes/session-core";
 export {
   performGroupPrivacyMakePrivate,
   performGroupPrivacyMakePublic,
   performGroupPrivacySetJoinRequestsAllowed,
-} from "./group-privacy.js";
-export type { GroupPrivacyPrivatePayload } from "./group-privacy.js";
+} from "@deepnotes/groups";
+export type { GroupPrivacyPrivatePayload } from "@deepnotes/groups";
 export {
   performPageBacklinkCreate,
   performPageBacklinkDelete,
@@ -100,21 +102,21 @@ export {
   performPageSnapshotLoad,
   performPageSnapshotSave,
   performPageSoftDelete,
-} from "./page-operations.js";
+} from "@deepnotes/pages";
 export {
   assertPageCollabWsConnectionAllowed,
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
-} from "./page-collab-updates.js";
+} from "@deepnotes/pages";
 export {
   performPageMove,
-} from "./page-move.js";
+} from "@deepnotes/pages";
 export type {
   PageMoveBody,
   PageMoveGroupCreation,
   PageMoveReencrypt,
-} from "./page-move.js";
+} from "@deepnotes/pages";
 export {
   performGroupJoinInvitationAccept,
   performGroupJoinInvitationCancel,
@@ -126,19 +128,19 @@ export {
   performGroupJoinRequestSend,
   performGroupMemberRemove,
   performGroupMemberRoleChange,
-} from "./group-membership.js";
-export { performNotifyUsers } from "./notify-users.js";
+} from "@deepnotes/groups";
+export { performNotifyUsers } from "@deepnotes/realtime";
 export type {
   NotifyUsersItem,
   RealtimeNotificationDelivery,
-} from "./notify-users.js";
-export { resolveRealtimeHashFieldAccess } from "./realtime-hash-acl.js";
-export type { RealtimeHashAccessNeeds } from "./realtime-hash-acl.js";
-export type { StripeBillingEnv } from "./stripe-billing.js";
+} from "@deepnotes/realtime";
+export { resolveRealtimeHashFieldAccess } from "@deepnotes/realtime";
+export type { RealtimeHashAccessNeeds } from "@deepnotes/realtime";
+export type { StripeBillingEnv } from "@deepnotes/billing";
 export {
   findUserIdByStripeCustomerId,
   parseStripeWebhookEvent,
   performStripeCreateCheckoutSession,
   performStripeCreatePortalSession,
   processStripeWebhookEvent,
-} from "./stripe-billing.js";
+} from "@deepnotes/billing";

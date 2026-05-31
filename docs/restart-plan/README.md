@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (group password UI + unlock completed; auth migration evaluation documented)  
+> **Last updated:** 2026-05-31 (session package split completed; session-core, groups, pages, billing, realtime packages created)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -16,7 +16,7 @@
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
 | 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
-| 7 | Account, billing, groups polish | Partial (password UI done; session split + composable size pending) | [phase-7-account-polish.md](phase-7-account-polish.md) |
+| 7 | Account, billing, groups polish | Partial (password UI done; session split complete; composable size pending) | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | Not started | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
 
@@ -63,7 +63,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
 - [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
-- [ ] **Package split:** `@deepnotes/session` split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`.
+- [x] **Package split:** `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`. Session package now has 8 files (down from 57).
 - [ ] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms, row rate ≤ 20/page.
 - [x] **Scheduler:** Cron Trigger wired to `performScheduledCleanup` with integration test.
@@ -77,7 +77,6 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 - **Marketing/help/pricing/whitepaper surfaces entirely missing** — `apps/marketing` is a single-card placeholder. Launch blocker, not polish.
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **`@deepnotes/session` god package** — 71 files, needs split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`.
 - **Composable size** — `useGroupMembersDetail.ts` (785 lines), `usePageCollabEditor.ts` (431 lines), `useSpatialPage.ts` (414 lines) exceed 300-line limit.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.

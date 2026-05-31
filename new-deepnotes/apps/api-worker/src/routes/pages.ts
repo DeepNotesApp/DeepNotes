@@ -10,7 +10,7 @@ import {
   pageSnapshotListResponseSchema,
   pageSnapshotSaveRequestSchema,
 } from "@deepnotes/api";
-import type { PageMoveBody } from "@deepnotes/session";
+import type { PageMoveBody } from "@deepnotes/pages";
 
 import type { ApiHono } from "../api-hono.js";
 import { readCookieHeader } from "../cookies.js";

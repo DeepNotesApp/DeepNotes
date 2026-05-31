@@ -1,4 +1,5 @@
-import type { SessionEnv, StripeBillingEnv } from "@deepnotes/session";
+import type { SessionEnv } from "@deepnotes/session-core";
+import type { StripeBillingEnv } from "@deepnotes/billing";
 
 export type WorkerSessionBindings = {
   ACCESS_SECRET?: string;

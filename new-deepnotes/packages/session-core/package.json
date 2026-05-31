@@ -1,5 +1,5 @@
 {
-  "name": "@deepnotes/session",
+  "name": "@deepnotes/session-core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -16,25 +16,15 @@
   },
   "dependencies": {
     "@deepnotes/db": "workspace:*",
-    "@deepnotes/session-core": "workspace:*",
-    "@deepnotes/billing": "workspace:*",
-    "@deepnotes/realtime": "workspace:*",
-    "@deepnotes/groups": "workspace:*",
-    "@deepnotes/pages": "workspace:*",
     "crypto-js": "^4.2.0",
     "drizzle-orm": "^0.41.0",
     "jose": "^5.10.0",
     "libsodium-wrappers-sumo": "^0.8.0",
-    "msgpackr": "^1.11.2",
     "nanoid": "^5.1.5",
-    "otplib": "^12.0.1",
-    "stripe": "17.7.0"
+    "otplib": "^12.0.1"
   },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.14.1",
-    "dotenv": "^16.5.0",
-    "postgres": "^3.4.5",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

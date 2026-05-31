@@ -4,7 +4,7 @@ import {
   encodeRealtimeServerDataNotification,
   encodeUserNotificationServerMessage,
 } from "@deepnotes/realtime-wire";
-import { resolveRealtimeHashFieldAccess } from "@deepnotes/session";
+import { resolveRealtimeHashFieldAccess } from "@deepnotes/realtime";
 
 import {
   executeRealtimeWsBatch,
