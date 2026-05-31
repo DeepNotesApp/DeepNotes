@@ -377,13 +377,25 @@
           },
           "personalGroupId": {
             "type": "string"
+          },
+          "encryptedDefaultNote": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 ciphertext of the user's default note template (msgpack)."
+          },
+          "encryptedDefaultArrow": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64 ciphertext of the user's default arrow template (msgpack)."
           }
         },
         "required": [
           "userId",
           "emailVerified",
           "demo",
-          "personalGroupId"
+          "personalGroupId",
+          "encryptedDefaultNote",
+          "encryptedDefaultArrow"
         ]
       },
       "UserPublicKeyringResponse": {
@@ -1708,6 +1720,21 @@
         },
         "required": [
           "sourcePageId"
+        ]
+      },
+      "PageBacklinkListResponse": {
+        "type": "object",
+        "properties": {
+          "sourcePageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Page IDs that link to this page, ordered by most recent activity."
+          }
+        },
+        "required": [
+          "sourcePageIds"
         ]
       },
       "PageSnapshotListItem": {
@@ -5666,6 +5693,75 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials, token, or session state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Action not allowed for this account (e.g. demo user).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Required auth environment variables are not configured (local: copy template.env / .dev.vars).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List backlinks pointing to this page",
+        "description": "Returns source page IDs that link to this page, ordered by most recent activity.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]{21}$",
+              "description": "21-character nanoid (URL-safe alphabet).",
+              "example": "V1StGXR8_Z5jdHi6B-myT"
+            },
+            "required": true,
+            "name": "pageId",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backlink source page IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBacklinkListResponse"
                 }
               }
             }

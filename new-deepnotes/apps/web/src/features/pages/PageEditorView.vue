@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 
 import { useSession } from "../auth/useSession";
 import SpatialPageView from "../spatial/SpatialPageView.vue";
+import { useUserTemplates } from "../spatial/useUserTemplates";
+import PageEditorBacklinksCard from "./PageEditorBacklinksCard.vue";
 import PageEditorCollabStatusCard from "./PageEditorCollabStatusCard.vue";
 import PageEditorManagementCard from "./PageEditorManagementCard.vue";
 import PageEditorPathCard from "./PageEditorPathCard.vue";
@@ -24,6 +26,7 @@ import type { SnapshotRow } from "./page-snapshot-list";
 const route = useRoute();
 const router = useRouter();
 const { client, isAuthenticated, user, bootstrapped } = useSession();
+const { noteTemplate, arrowTemplate } = useUserTemplates(user);
 
 const pageId = computed(() => String(route.params.pageId ?? ""));
 
@@ -222,7 +225,13 @@ onMounted(() => {
       @purge="management.purgeThisPagePermanently()"
     />
 
-    <SpatialPageView :ydoc="ydoc" />
+    <PageEditorBacklinksCard v-if="!isDemoSession" :page-id="pageId" />
+
+    <SpatialPageView
+      :ydoc="ydoc"
+      :default-note-template="noteTemplate"
+      :default-arrow-template="arrowTemplate"
+    />
 
     <PageEditorCollabStatusCard
       :collab-loading="collabLoading"

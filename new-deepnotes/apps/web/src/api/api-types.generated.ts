@@ -3926,7 +3926,68 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List backlinks pointing to this page
+         * @description Returns source page IDs that link to this page, ordered by most recent activity.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    pageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Backlink source page IDs. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PageBacklinkListResponse"];
+                    };
+                };
+                /** @description Invalid credentials, token, or session state. */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Action not allowed for this account (e.g. demo user). */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Resource not found. */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SessionErrorResponse"];
+                    };
+                };
+                /** @description Required auth environment variables are not configured (local: copy template.env / .dev.vars). */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ServiceUnavailableResponse"];
+                    };
+                };
+            };
+        };
         put?: never;
         /**
          * Create page backlink (source → this page as target)
@@ -6093,6 +6154,16 @@ export interface components {
             emailVerified: boolean;
             demo: boolean;
             personalGroupId: string;
+            /**
+             * Format: byte
+             * @description Base64 ciphertext of the user's default note template (msgpack).
+             */
+            encryptedDefaultNote: string;
+            /**
+             * Format: byte
+             * @description Base64 ciphertext of the user's default arrow template (msgpack).
+             */
+            encryptedDefaultArrow: string;
         };
         UserPublicKeyringResponse: {
             /**
@@ -6708,6 +6779,10 @@ export interface components {
              * @example V1StGXR8_Z5jdHi6B-myT
              */
             sourcePageId: string;
+        };
+        PageBacklinkListResponse: {
+            /** @description Page IDs that link to this page, ordered by most recent activity. */
+            sourcePageIds: string[];
         };
         PageSnapshotListItem: {
             snapshotId: string;

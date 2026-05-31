@@ -1,7 +1,7 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-05-30  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows).** Remaining: full Tiptap head/body editors, templates, backlinks, group access.**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks).** Remaining: group access.**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
 > **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
 
@@ -25,7 +25,7 @@
 | **Page management UI** | `apps/web/src/features/pages/*` | Partial | Bump, favorite, recent, snapshots, soft-delete, restore, purge, move, path breadcrumb. |
 | **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
 | **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
-| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, container schema/model/rendering complete; drag-into-container pending. |
+| **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, container schema/model/rendering complete, drag-into-container complete. |
 | **Collab pagination** | `GET /api/pages/:pid/collab-updates` | Done | `?sinceIndex=` + `?limit=` (default 100, max 500). Client loops. |
 | **Playwright E2E** | `apps/web/playwright.config.ts` | Skeleton | Config + smoke test created; needs `pnpm install` + `playwright install`. |
 
@@ -124,9 +124,9 @@ These were found during the v3–v4 analysis and must be addressed in the phases
    - `unlockPageCollabSymmetricKeyring` throws when a group requires a password. The comment says "Unlock is not implemented in the web MVP."
    - **Fix:** Add to Phase 7 (group/account polish) or document as v2 scope.
 
-6. **`page_links` / backlink UI is missing**
-   - The backend has `pageLinks` table and routes (`POST /api/pages/:pageId/backlinks`). No SPA UI exposes backlinks.
-   - **Fix:** Add backlink display to Phase 7.
+6. **`page_links` / backlink UI** ✅
+   - Backend has `pageLinks` table and routes (`POST/GET/DELETE /api/pages/:pageId/backlinks`).
+   - `PageEditorBacklinksCard.vue` displays incoming backlinks with delete action. `usePageBacklinks` composable fetches via typed OpenAPI client.
 
 7. **No scheduler / manager CLI replacement**
    - Legacy had `apps/scheduler` (cleanup) and `apps/manager` (ops CLI). New repo defers scheduler to "Cron Triggers or Queues" but has no implementation.
@@ -574,12 +574,12 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Reads/writes to the page Yjs doc via hybrid reactive proxy.
    - Tested in `note-model.test.ts`.
 
-3. **Note rendering (`features/spatial/DisplayNote.vue`)** ✅ (partial)
+3. **Note rendering (`features/spatial/DisplayNote.vue`)** ✅
    - Render note frame at `(note.pos.x, note.pos.y)` — done.
    - Drag to move — done (zoom-aware pointer capture).
-   - Head/body Tiptap editor — pending (requires inline editor component).
-   - Container section with child notes — pending.
-   - Resize handles — pending.
+   - Head/body Tiptap editor — done (`NoteTiptapEditor.vue`, `useNoteEditor.ts`).
+   - Container section with child notes — done (children rendered inside parent note).
+   - Resize handles — done (8-handle resize, drag-to-edge arrows).
 
 4. **Arrow model (`features/spatial/arrow-model.ts`)** ✅
    - Composable `useArrowModel` with all legacy properties.
@@ -603,10 +603,10 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - `screenToWorld`, `worldToScreen`, `wheelZoomCameraTowardScreenPoint`, `panCameraByScreenDelta` — done in `spatial-viewport-math.ts`.
    - `getContainerWorldRect`, `getOriginWorldPos` for containers — pending.
 
-9. **Default note / arrow templates** ⬜
-   - On creation, new notes must use the user's `encrypted_default_note` column (decrypted via session keyrings).
-   - New arrows must use `encrypted_default_arrow`.
-   - These set default colors, widths, head/body enabled states, and arrow styles.
+9. **Default note / arrow templates** ✅
+   - `useUserTemplates` decrypts templates via session keyring and maps legacy packed shapes to `ClipboardNote`/`ClipboardArrow` partials.
+   - `SpatialPageView` passes templates to `createNoteAt` and `createArrow` (double-click, shift-click, arrow-drag).
+   - Backend returns encrypted templates in `GET /api/users/me`; DB schema and API routes already existed.
 
 **Verification:**
 - Unit tests for camera math (world ↔ screen transforms).
@@ -812,7 +812,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Spatial canvas (Phase 5):** User can create, move, resize, delete notes and arrows on an infinite canvas. Changes sync via WS.
 - [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
-- [ ] **Backlinks:** SPA displays incoming page backlinks with decrypted titles.
+- [x] **Backlinks:** SPA displays incoming page backlinks (`PageEditorBacklinksCard.vue`). Titles are encrypted; UI shows page IDs with links and delete action.
 - [ ] **Playwright:** E2E smoke test covers register → create page → edit → invite → logout in < 60 seconds.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms.
 - [ ] **Scheduler:** Cron Trigger or Queue cleanup job purges soft-deleted data periodically.

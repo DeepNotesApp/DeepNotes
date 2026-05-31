@@ -268,6 +268,51 @@ export async function performPageBacklinkCreate(input: {
     });
 }
 
+export async function performPageBacklinkList(input: {
+  db: DeepnotesDb;
+  env: SessionEnv;
+  accessCookie: string | undefined;
+  pageId: string;
+}): Promise<{ sourcePageIds: string[] }> {
+  const { userId } = await getAuthenticatedUserSummary({
+    db: input.db,
+    env: input.env,
+    accessCookie: input.accessCookie,
+  });
+
+  const [pageRow] = await input.db
+    .select({ groupId: pages.groupId })
+    .from(pages)
+    .where(
+      and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
+    )
+    .limit(1);
+  if (pageRow == null) {
+    throw new SessionError(404, "NOT_FOUND", "Page not found.");
+  }
+
+  const can = await userHasGroupPermission({
+    db: input.db,
+    userId,
+    groupId: pageRow.groupId,
+    permission: "viewGroupPages",
+  });
+  if (!can) {
+    throw new SessionError(403, "FORBIDDEN", "Insufficient permissions.");
+  }
+
+  const rows = await input.db
+    .select({ sourcePageId: pageLinks.sourcePageId })
+    .from(pageLinks)
+    .where(eq(pageLinks.targetPageId, input.pageId))
+    .orderBy(desc(pageLinks.lastActivityDate))
+    .limit(100);
+
+  return {
+    sourcePageIds: rows.map((r) => r.sourcePageId),
+  };
+}
+
 export async function performPageBacklinkDelete(input: {
   db: DeepnotesDb;
   env: SessionEnv;

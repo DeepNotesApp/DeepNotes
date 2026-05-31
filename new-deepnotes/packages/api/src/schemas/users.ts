@@ -11,6 +11,20 @@ export const userMeResponseSchema = z
     emailVerified: z.boolean(),
     demo: z.boolean(),
     personalGroupId: z.string(),
+    encryptedDefaultNote: z
+      .string()
+      .openapi({
+        format: "byte",
+        description:
+          "Base64 ciphertext of the user's default note template (msgpack).",
+      }),
+    encryptedDefaultArrow: z
+      .string()
+      .openapi({
+        format: "byte",
+        description:
+          "Base64 ciphertext of the user's default arrow template (msgpack).",
+      }),
   })
   .openapi("UserMeResponse");
 

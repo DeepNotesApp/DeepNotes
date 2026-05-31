@@ -43,6 +43,7 @@ import {
   groupPrivacyPublicRequestSchema,
   groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
+  pageBacklinkListResponseSchema,
   pageBumpRequestSchema,
   pageCollabUpdatesAppendRequestSchema,
   pageCollabUpdatesGetQuerySchema,
@@ -1474,6 +1475,27 @@ registry.registerPath({
     400: {
       description: "Source and target identical.",
       content: { "application/json": { schema: sessionErrorResponseSchema } },
+    },
+    401: sessionUnauthorized401,
+    403: sessionForbidden403,
+    404: sessionNotFound404,
+    503: sessionServiceUnavailable503,
+  },
+});
+
+registry.registerPath({
+  method: "get",
+  path: "/api/pages/{pageId}/backlinks",
+  summary: "List backlinks pointing to this page",
+  description:
+    "Returns source page IDs that link to this page, ordered by most recent activity.",
+  request: { params: pageIdPathSchema },
+  responses: {
+    200: {
+      description: "Backlink source page IDs.",
+      content: {
+        "application/json": { schema: pageBacklinkListResponseSchema },
+      },
     },
     401: sessionUnauthorized401,
     403: sessionForbidden403,

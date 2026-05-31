@@ -91,7 +91,7 @@ export function useSpatialPage(ydoc: Y.Doc, undoRedo?: SpatialUndoRedo) {
   function createNoteAt(
     worldX: number,
     worldY: number,
-    template?: Partial<ClipboardNote>,
+    template?: Partial<ClipboardNote> | null,
   ): string {
     const id = `note-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const note = addNoteToPage(ydoc, id);
@@ -254,7 +254,7 @@ export function useSpatialPage(ydoc: Y.Doc, undoRedo?: SpatialUndoRedo) {
   function createArrow(
     sourceId: string,
     targetId: string,
-    template?: Partial<ClipboardArrow>,
+    template?: Partial<ClipboardArrow> | null,
   ): string {
     const id = `arrow-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const arrow = addArrowToPage(ydoc, id);

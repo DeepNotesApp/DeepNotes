@@ -19,9 +19,12 @@ import {
   distributeVertically,
 } from "./alignment";
 import { screenToWorld, worldToScreen } from "./spatial-viewport-math";
+import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
   ydoc: any;
+  defaultNoteTemplate?: Partial<ClipboardNote> | null;
+  defaultArrowTemplate?: Partial<ClipboardArrow> | null;
 }>();
 
 const canvasRef = ref<{
@@ -123,7 +126,7 @@ function onCanvasDoubleClick(e: MouseEvent) {
     canvas.zoom,
   );
 
-  createNoteAt(world.x, world.y);
+  createNoteAt(world.x, world.y, props.defaultNoteTemplate);
 }
 
 // --- box selection state ---
@@ -214,7 +217,7 @@ function onArrowDragEnd(e: PointerEvent) {
   const targetId = noteEl.dataset.noteId;
   if (!targetId || targetId === sourceId) return;
 
-  createArrow(sourceId, targetId);
+  createArrow(sourceId, targetId, props.defaultArrowTemplate);
 }
 
 function rectsIntersect(
@@ -547,7 +550,7 @@ onUnmounted(() => {
           @toggle="selection.toggle(note.id, 'note')"
           @shift-click="
             selection.activeId.value && selection.activeId.value !== note.id
-              ? createArrow(selection.activeId.value, note.id)
+              ? createArrow(selection.activeId.value, note.id, props.defaultArrowTemplate)
               : undefined
           "
           @arrow-drag-start="onArrowDragStart($event.noteId)"

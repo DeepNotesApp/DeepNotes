@@ -90,6 +90,7 @@ export type { GroupPrivacyPrivatePayload } from "./group-privacy.js";
 export {
   performPageBacklinkCreate,
   performPageBacklinkDelete,
+  performPageBacklinkList,
   performPageBump,
   performPagePurge,
   performPageRestore,

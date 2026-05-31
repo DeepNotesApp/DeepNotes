@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { ChevronDown, ChevronRight } from "lucide-vue-next";
 import type { NoteModel } from "./note-model";
+import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 
 const props = defineProps<{
   id: string;
@@ -39,6 +40,9 @@ const resolvedColor = computed(() => {
   };
   return colorMap[c.value] ?? c.value;
 });
+
+const headFrag = computed(() => props.model.head.value.value);
+const bodyFrag = computed(() => props.model.body.value.value);
 
 const transform = computed(() => {
   const { x, y } = props.model.pos.value;
@@ -218,21 +222,35 @@ function toggleCollapsed() {
         <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-3 w-3" />
         <ChevronRight v-else class="h-3 w-3" />
       </button>
-      <span class="flex-1 truncate">
-        {{ model.head.enabled.value ? "Head" : "" }}
-        <span
-          v-if="model.body.enabled.value"
-          class="text-muted-foreground"
-        >
-          / Body
-        </span>
+      <span v-if="!model.head.enabled.value" class="text-muted-foreground flex-1 truncate">
+        Note
       </span>
     </div>
-    <div v-if="!model.collapsing.collapsed.value" class="px-2 py-1">
-      <p class="text-muted-foreground text-xs">
-        pos: {{ model.pos.value.x.toFixed(0) }},{{ model.pos.value.y.toFixed(0) }} · z:
-        {{ model.zIndex.value }}
-      </p>
+
+    <!-- head editor -->
+    <div
+      v-if="model.head.enabled.value && !model.collapsing.collapsed.value"
+      class="px-2 pt-1"
+      @pointerdown.stop
+    >
+      <NoteTiptapEditor
+        :fragment="headFrag!"
+        :editable="!model.readOnly.value"
+        placeholder="Head…"
+      />
+    </div>
+
+    <!-- body editor -->
+    <div
+      v-if="model.body.enabled.value && !model.collapsing.collapsed.value"
+      class="px-2 pb-1"
+      @pointerdown.stop
+    >
+      <NoteTiptapEditor
+        :fragment="bodyFrag!"
+        :editable="!model.readOnly.value"
+        placeholder="Body…"
+      />
     </div>
 
     <!-- 8 resize handles -->

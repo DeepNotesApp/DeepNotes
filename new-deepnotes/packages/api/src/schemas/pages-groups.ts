@@ -532,6 +532,17 @@ export const pageBacklinkCreateRequestSchema = z
   })
   .openapi("PageBacklinkCreateRequest");
 
+export const pageBacklinkListResponseSchema = z
+  .object({
+    sourcePageIds: z
+      .array(z.string())
+      .openapi({
+        description:
+          "Page IDs that link to this page, ordered by most recent activity.",
+      }),
+  })
+  .openapi("PageBacklinkListResponse");
+
 export const pageSnapshotSaveRequestSchema = z
   .object({
     encryptedSymmetricKey: byteB64,

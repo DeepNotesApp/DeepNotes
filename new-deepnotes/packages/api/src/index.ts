@@ -51,6 +51,7 @@ export {
   groupPublicKeyringResponseSchema,
   groupUserIdPathSchema,
   pageBacklinkCreateRequestSchema,
+  pageBacklinkListResponseSchema,
   pageBumpRequestSchema,
   pageCollabUpdatesAppendRequestSchema,
   pageCollabUpdatesGetQuerySchema,
