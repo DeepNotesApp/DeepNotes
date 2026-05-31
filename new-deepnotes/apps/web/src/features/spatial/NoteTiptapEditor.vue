@@ -30,6 +30,14 @@ const { editor } = useNoteEditor({
 </template>
 
 <style scoped>
+:deep(.note-tiptap-editor) {
+  overscroll-behavior: contain;
+}
+
+:deep(.note-tiptap-editor .ProseMirror) {
+  overscroll-behavior: contain;
+}
+
 :deep(.note-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before) {
   color: var(--muted-foreground);
   content: attr(data-placeholder);

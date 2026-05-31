@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Plus, Clipboard, Trash2, Copy, Scissors } from 'lucide-vue-next'
 import type { ClipboardNote, ClipboardArrow } from './clipboard'
-import { getClipboardBuffer, pastePayload } from './clipboard'
+import { readClipboardPayload } from './clipboard'
 
 const props = defineProps<{
   x: number
@@ -38,8 +38,8 @@ function handleCreateNote() {
   emit('close')
 }
 
-function handlePaste() {
-  const payload = getClipboardBuffer()
+async function handlePaste() {
+  const payload = await readClipboardPayload()
   if (payload && payload.notes.length > 0) {
     props.onPaste(payload)
   }

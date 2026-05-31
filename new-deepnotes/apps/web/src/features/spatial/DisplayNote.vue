@@ -73,7 +73,7 @@ const frameClasses = computed(() => {
   const movable = props.model.movable.value && !ro;
   return [
     "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none transition-opacity",
-    ro ? "opacity-60" : "",
+    ro ? "opacity-60 cursor-not-allowed" : "",
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
     props.selected ? "ring-2 ring-primary" : "",

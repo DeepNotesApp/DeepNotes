@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 8 complete. Phase 6 state screens + layout cleanup done; sidebars, toolbar, and floating UI exist. Remaining: TableContextMenu, Note/Arrow properties panels, Teleport overlay, horizontal containers, arrow labels, drag-to-reconnect.)  
+> **Last updated:** 2026-05-31 (Phase 6 complete. All spatial polish deliverables done: cross-page paste, scrollbar handling, find/replace UI, active region tracking, read-only styling. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -15,7 +15,7 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **In progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |

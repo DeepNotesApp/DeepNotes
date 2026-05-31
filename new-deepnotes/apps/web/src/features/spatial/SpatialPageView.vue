@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, RotateCcw } from "lucide-vue-next";
+import { Undo, Redo, RotateCcw, Search } from "lucide-vue-next";
 
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
 import CanvasContextMenu from "./CanvasContextMenu.vue";
+import FindReplaceDialog from "./FindReplaceDialog.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialUndoRedo } from "./undo-redo";
-import { copySelection, pastePayload, getClipboardBuffer } from "./clipboard";
+import { copySelection, pastePayload, getClipboardBuffer, readClipboardPayload } from "./clipboard";
 import {
   alignLeft,
   alignCenter,
@@ -64,7 +65,7 @@ const {
 const selection = useSpatialSelection();
 
 // Emit selection changes for properties panel
-selection.selectedIds.watch((ids) => {
+watch(() => selection.selectedIds.value, (ids: Set<string>) => {
   const noteIds = selection.selectedOfKind('note')
   const arrowIds = selection.selectedOfKind('arrow')
 
@@ -88,6 +89,9 @@ selection.selectedIds.watch((ids) => {
 })
 
 const pasteCount = ref(0);
+
+// --- find/replace dialog state ---
+const findReplaceOpen = ref(false);
 
 // --- context menu state ---
 const contextMenu = ref<{
@@ -288,7 +292,7 @@ function handleContextMenuCreateNote(x: number, y: number) {
   createNoteAt(world.x, world.y, props.defaultNoteTemplate);
 }
 
-function handleContextMenuPaste(payload: { notes: ClipboardNote[]; arrows: ClipboardArrow[] }) {
+async function handleContextMenuPaste(payload: { notes: ClipboardNote[]; arrows: ClipboardArrow[] }) {
   const canvas = canvasRef.value;
   const centerX = canvas?.camX ?? 0;
   const centerY = canvas?.camY ?? 0;
@@ -318,7 +322,7 @@ function handleContextMenuDeleteSelected() {
   selection.clear();
 }
 
-function handleContextMenuCopySelected() {
+async function handleContextMenuCopySelected() {
   const selectedNotes = noteList.value.filter((n) =>
     selection.isSelected(n.id),
   );
@@ -326,11 +330,11 @@ function handleContextMenuCopySelected() {
     selection.isSelected(a.id),
   );
   if (selectedNotes.length > 0) {
-    copySelection(selectedNotes, selectedArrows);
+    await copySelection(selectedNotes, selectedArrows);
   }
 }
 
-function handleContextMenuCutSelected() {
+async function handleContextMenuCutSelected() {
   const selectedNotes = noteList.value.filter((n) =>
     selection.isSelected(n.id),
   );
@@ -338,7 +342,7 @@ function handleContextMenuCutSelected() {
     selection.isSelected(a.id),
   );
   if (selectedNotes.length > 0) {
-    copySelection(selectedNotes, selectedArrows);
+    await copySelection(selectedNotes, selectedArrows);
     for (const id of selection.selectedOfKind("note")) {
       deleteNote(id);
     }
@@ -668,7 +672,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
 }
 
-function onKeyDown(e: KeyboardEvent) {
+async function onKeyDown(e: KeyboardEvent) {
   if (isTypingTarget(e.target)) return;
 
   if (e.key === "Delete" || e.key === "Backspace") {
@@ -709,7 +713,7 @@ function onKeyDown(e: KeyboardEvent) {
       selection.isSelected(a.id),
     );
     if (selectedNotes.length > 0) {
-      copySelection(selectedNotes, selectedArrows);
+      await copySelection(selectedNotes, selectedArrows);
     }
     return;
   }
@@ -723,7 +727,7 @@ function onKeyDown(e: KeyboardEvent) {
       selection.isSelected(a.id),
     );
     if (selectedNotes.length > 0) {
-      copySelection(selectedNotes, selectedArrows);
+      await copySelection(selectedNotes, selectedArrows);
       for (const id of selection.selectedOfKind("note")) {
         deleteNote(id);
       }
@@ -737,7 +741,7 @@ function onKeyDown(e: KeyboardEvent) {
 
   if (e.key === "v" && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
-    const payload = getClipboardBuffer();
+    const payload = await readClipboardPayload();
     if (payload && payload.notes.length > 0) {
       const canvas = canvasRef.value;
       const centerX = canvas?.camX ?? 0;
@@ -757,6 +761,12 @@ function onKeyDown(e: KeyboardEvent) {
         selection.select(id, "note", true);
       }
     }
+    return;
+  }
+
+  if (e.key === "f" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    findReplaceOpen.value = true;
     return;
   }
 
@@ -918,6 +928,17 @@ onUnmounted(() => {
           <RotateCcw class="h-4 w-4" />
         </Button>
 
+        <!-- Find/Replace -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Find and Replace (Ctrl+F)"
+          @click="findReplaceOpen = true"
+        >
+          <Search class="h-4 w-4" />
+        </Button>
+
         <!-- Undo -->
         <Button
           variant="secondary"
@@ -967,6 +988,13 @@ onUnmounted(() => {
       @copy-selected="handleContextMenuCopySelected"
       @cut-selected="handleContextMenuCutSelected"
       @close="contextMenu.open = false"
+    />
+
+    <!-- Find/Replace dialog -->
+    <FindReplaceDialog
+      :open="findReplaceOpen"
+      :notes="noteList"
+      @close="findReplaceOpen = false"
     />
 
     <!-- Teleport overlay for dragged note -->

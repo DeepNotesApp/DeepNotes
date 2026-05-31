@@ -68,6 +68,9 @@ export interface ClipboardPayload {
   arrows: ClipboardArrow[];
 }
 
+const CLIPBOARD_MIME_TYPE = 'application/vnd.deepnotes.clipboard';
+const STORAGE_KEY = 'deepnotes-clipboard';
+
 let internalBuffer: ClipboardPayload | null = null;
 
 export function getClipboardBuffer(): ClipboardPayload | null {
@@ -76,6 +79,55 @@ export function getClipboardBuffer(): ClipboardPayload | null {
 
 export function setClipboardBuffer(payload: ClipboardPayload | null): void {
   internalBuffer = payload;
+}
+
+async function writeToClipboard(payload: ClipboardPayload): Promise<void> {
+  try {
+    const json = JSON.stringify(payload);
+    const clipboardItem = new ClipboardItem({
+      [CLIPBOARD_MIME_TYPE]: new Blob([json], { type: CLIPBOARD_MIME_TYPE }),
+      'text/plain': new Blob([json], { type: 'text/plain' }),
+    });
+    await navigator.clipboard.write([clipboardItem]);
+  } catch (e) {
+    // Fallback to localStorage if clipboard API fails
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (storageError) {
+      console.error('Failed to write to clipboard and localStorage:', storageError);
+    }
+  }
+}
+
+async function readFromClipboard(): Promise<ClipboardPayload | null> {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const item of items) {
+      const type = item.types.find(t => t === CLIPBOARD_MIME_TYPE || t === 'text/plain');
+      if (type) {
+        const blob = await item.getType(type);
+        const text = await blob.text();
+        const parsed = JSON.parse(text);
+        if (parsed.notes && parsed.arrows) {
+          return parsed as ClipboardPayload;
+        }
+      }
+    }
+  } catch (e) {
+    // Fallback to localStorage if clipboard API fails
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.notes && parsed.arrows) {
+          return parsed as ClipboardPayload;
+        }
+      }
+    } catch (storageError) {
+      console.error('Failed to read from clipboard and localStorage:', storageError);
+    }
+  }
+  return null;
 }
 
 function serializeNote(model: NoteModel, id: string): ClipboardNote {
@@ -144,10 +196,10 @@ function serializeArrow(model: ArrowModel, id: string): ClipboardArrow {
   };
 }
 
-export function copySelection(
+export async function copySelection(
   noteEntries: { id: string; model: NoteModel }[],
   arrowEntries: { id: string; model: ArrowModel }[],
-): ClipboardPayload {
+): Promise<ClipboardPayload> {
   const noteIds = new Set(noteEntries.map((n) => n.id));
 
   // Only include arrows whose both source and target are in the copied note set
@@ -161,7 +213,23 @@ export function copySelection(
 
   const payload = { notes, arrows };
   internalBuffer = payload;
+  
+  // Write to system clipboard for cross-page paste
+  await writeToClipboard(payload);
+  
   return payload;
+}
+
+export async function readClipboardPayload(): Promise<ClipboardPayload | null> {
+  // First try system clipboard for cross-page paste
+  const systemPayload = await readFromClipboard();
+  if (systemPayload) {
+    internalBuffer = systemPayload;
+    return systemPayload;
+  }
+  
+  // Fall back to internal buffer
+  return internalBuffer;
 }
 
 export function pastePayload(

@@ -16,6 +16,12 @@ export function useSpatialSelection() {
   const activeId = computed(() => active.value?.id ?? null);
   const hasSelection = computed(() => selected.value.length > 0);
 
+  // Active region tracking - for accessibility and keyboard navigation
+  // The active region represents the container or area that currently has focus
+  function setActiveRegion(regionId: string | null) {
+    activeRegionId.value = regionId;
+  }
+
   function isSelected(id: string) {
     return selected.value.some((s) => s.id === id);
   }
@@ -113,5 +119,6 @@ export function useSpatialSelection() {
     startBoxSelect,
     updateBoxSelect,
     endBoxSelect,
+    setActiveRegion,
   };
 }

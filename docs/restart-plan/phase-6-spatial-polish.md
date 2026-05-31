@@ -34,7 +34,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Cut / copy / paste notes and arrows | **Done** | `copySelection`, `pastePayload` implemented |
-| Cross-page paste | **Not started** | Needs serialization format + clipboard persistence |
+| Cross-page paste | **Done** | System clipboard API with localStorage fallback |
 
 ### 4. Alignment + distribution
 | Item | Status | Notes |
@@ -72,7 +72,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | `ArrowLinkZones` | **Done** | Connection zones at arrow endpoints for reconnection |
 | `NoteLinkIcon` (external link indicator) | **Done** | `ExternalLink` icon shown in header when `link.value` set |
 | `NoteResizeHandles` — 8 handles | **Done** | NW, N, NE, E, SE, S, SW, W with correct cursors |
-| Scrollbar handling in `NoteContent` | **Not started** | No pull-to-refresh prevention |
+| Scrollbar handling in `NoteContent` | **Done** | `overscroll-behavior: contain` added to prevent pull-to-refresh |
 | Note frame `border-radius`, shadow, min-width | **Partial** | `rounded-md border shadow-sm` used; exact pixel parity untested |
 | Container section — spatial layout | **Done** | Free child positioning inside parent |
 | Container section — horizontal layout | **Done** | Container children can render horizontally or vertically |
@@ -91,8 +91,8 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 ### 9. Find and replace
 | Item | Status | Notes |
 |------|--------|-------|
-| Search across note head/body | **Partial** | `find-replace.ts` exists but no UI triggered from page editor |
-| Replace text | **Partial** | Logic exists but no UI in page editor |
+| Search across note head/body | **Done** | `FindReplaceDialog.vue` with search UI |
+| Replace text | **Done** | Replace current and replace all implemented |
 
 ### 10. Visual polish
 | Item | Status | Notes |
@@ -101,7 +101,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Note color inheritance | **Done** | `inherit` flag + parent color cascade |
 | Collapsing notes | **Done** | Chevron toggle + collapsed state wired |
 | Z-index ordering | **Done** | `notesByZIndex` computed sort |
-| Read-only notes | **Partial** | `opacity-70` class, but no full read-only styling |
+| Read-only notes | **Done** | `opacity-60 cursor-not-allowed` styling added |
 
 ---
 
