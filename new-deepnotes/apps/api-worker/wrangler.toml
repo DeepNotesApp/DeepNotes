@@ -29,3 +29,7 @@ service = "deepnotes-api"
 binding = "HYPERDRIVE"
 id = "00000000-0000-0000-0000-000000000000"
 localConnectionString = "postgresql://deepnotes:deepnotes@127.0.0.1:5433/deepnotes"
+
+# Daily cleanup of soft-deleted pages and groups past their grace period.
+[[triggers.crons]]
+cron = "0 3 * * *"

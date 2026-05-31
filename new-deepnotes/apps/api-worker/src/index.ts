@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import type { Bindings } from "./bindings.js";
+import { getDbForConnectionString } from "./db-pool.js";
 import { registerBillingRoutes } from "./routes/billing.js";
 import { registerGroupRoutes } from "./routes/groups.js";
 import { registerMetaRoutes } from "./routes/meta.js";
@@ -21,4 +22,22 @@ registerRealtimeRoutes(app);
 
 export { PageCollabRoom } from "./page-collab-room.js";
 export { UserRealtimeRoom } from "./user-realtime-room.js";
-export default app;
+
+export default {
+  fetch: app.fetch,
+  async scheduled(
+    _event: ScheduledEvent,
+    env: Bindings,
+    _ctx: ExecutionContext,
+  ) {
+    const hyper = env.HYPERDRIVE;
+    if (hyper == null) {
+      console.error("HYPERDRIVE binding missing; skipping scheduled cleanup.");
+      return;
+    }
+    const db = getDbForConnectionString(hyper.connectionString);
+    const { performScheduledCleanup } = await import("@deepnotes/session");
+    const result = await performScheduledCleanup({ db });
+    console.log("Scheduled cleanup completed:", result);
+  },
+};

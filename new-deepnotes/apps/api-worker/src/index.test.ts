@@ -4,7 +4,7 @@ import app from "./index.js";
 
 describe("api-worker", () => {
   it("GET /api/health", async () => {
-    const res = await app.request("http://test/api/health");
+    const res = await app.fetch(new Request("http://test/api/health"));
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toMatchObject({
       status: "ok",
@@ -13,7 +13,7 @@ describe("api-worker", () => {
   });
 
   it("GET /api/openapi.json", async () => {
-    const res = await app.request("http://test/api/openapi.json");
+    const res = await app.fetch(new Request("http://test/api/openapi.json"));
     expect(res.status).toBe(200);
     const json: unknown = await res.json();
     expect(json).toMatchObject({
@@ -192,7 +192,7 @@ describe("api-worker", () => {
     ["POST", "/api/billing/stripe/portal-session"],
     ["POST", "/api/webhooks/stripe"],
   ] as const)("returns 503 for %s %s when auth env is not configured", async (method, path) => {
-    const res = await app.request(`http://test${path}`, { method });
+    const res = await app.fetch(new Request(`http://test${path}`, { method }));
     expect(res.status).toBe(503);
     await expect(res.json()).resolves.toMatchObject({
       code: "SERVICE_UNAVAILABLE",
@@ -200,13 +200,12 @@ describe("api-worker", () => {
   });
 
   it("returns 503 for POST /api/users/email-verification/confirm when hyperdrive is not bound", async () => {
-    const res = await app.request(
-      "http://test/api/users/email-verification/confirm",
-      {
+    const res = await app.fetch(
+      new Request("http://test/api/users/email-verification/confirm", {
         method: "POST",
         body: JSON.stringify({ emailVerificationCode: "a".repeat(21) }),
         headers: { "Content-Type": "application/json" },
-      },
+      }),
     );
     expect(res.status).toBe(503);
     await expect(res.json()).resolves.toMatchObject({

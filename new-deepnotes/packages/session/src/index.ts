@@ -81,6 +81,7 @@ export {
   performGroupRestore,
   performGroupSoftDelete,
 } from "./group-deletion.js";
+export { performScheduledCleanup } from "./scheduled-cleanup.js";
 export {
   performGroupPrivacyMakePrivate,
   performGroupPrivacyMakePublic,
