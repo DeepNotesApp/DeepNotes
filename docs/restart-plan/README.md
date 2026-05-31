@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 20 static HTML routes with vue-router + vite-ssg, theme toggle, restored legacy assets)  
+> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 20 static HTML routes with vue-router + vite-ssg, theme toggle, restored legacy assets. **Phase 6 status corrected: spatial canvas polish is NOT complete.**)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -15,7 +15,7 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **In progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | Not started | [phase-9-production.md](phase-9-production.md) |
@@ -74,6 +74,20 @@ A criterion is **not met** until the verification command or check passes in CI.
 ---
 
 ## Current gaps (high-level)
+
+### Phase 6 — Spatial canvas polish (NOT complete)
+
+- **Page editor layout is a card stack, not an immersive shell.** `PageEditorView.vue` is rendered inside `DefaultLayout.vue` (`max-w-3xl` centered column). It must become a fullscreen `q-layout`-style shell with sidebars, toolbar, and floating overlays. No sidebars, no toolbar, no floating buttons exist today.
+- **Left sidebar missing.** No `CurrentPath`, `RecentPages`, `FavoritePages`, or `SelectedPages` panels on `/pages/:pageId`.
+- **Right sidebar missing.** No `NoteProperties` (24 files in legacy), `PageProperties`, or `ArrowProperties` panels. Context-aware editing is impossible.
+- **Toolbar missing.** No `MainToolbar` with Basic/Formatting/Object/Alignment buttons, insert dialogs, or page-specific actions.
+- **Floating UI overlays missing.** No zoom indicator, undo/redo buttons, back/forward nav, screenshot, find/replace toggle, selection count, or user avatars on the canvas.
+- **Arrow rendering is a stub.** `DisplayArrow.vue` draws a single SVG line between note centers. Missing: curve/line body styles, arrow heads (`OpenHead`), labels (TipTap), hitboxes, drag-to-reconnect, interregional logic, anchor positioning.
+- **Note rendering is partial.** `DisplayNote.vue` has basic drag, resize, and head/body editors. Missing: Teleport overlay during drag, drop zones, arrow link zones, link icon, read-only opacity states, scroll handling, and advanced visual parity.
+- **Page state screens missing.** No dedicated `DisplayErrorScreen`, `DisplayNonExistentScreen`, `DisplayPageDeletedScreen`, etc. Inline error cards only.
+- **Context menu missing.** No `TableContextMenu` (right-click on canvas).
+
+### Other gaps
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
 - **Composable size** — `useGroupMembersDetail.ts` (103 lines) and `usePageCollabEditor.ts` (238 lines) are now under the 300-line limit. `useSpatialPage.ts` (308 lines) still exceeds by a small margin.
