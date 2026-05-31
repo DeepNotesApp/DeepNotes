@@ -1,9 +1,10 @@
-# DeepNotes — Restart (greenfield) plan — v4
+# DeepNotes — Restart (greenfield) plan — v4.1
 
-> **Last updated:** 2026-06-01  
+> **Last updated:** 2026-05-31  
 > **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group password unlock).** **Phase 7 account/billing/groups polish partially complete (see §7 for open gaps).** **Marketing/help/pricing/whitepaper surfaces entirely missing (see §0.4 gap 15).**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
-> **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap, routing/product-model divergence, and **complete absence of marketing/help/pricing/whitepaper surfaces** newly documented.
+> **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap, routing/product-model divergence, and **complete absence of marketing/help/pricing/whitepaper surfaces** newly documented.  
+> **v4.1 changes:** Added §0.5 (ADR requirements), new gap 20 (route boilerplate), Phase 4 middleware deliverable, Phase 3 broadcast backpressure + DO testing strategy, Phase 7 package split + code health audit, dedicated Phase 8 (marketing), Phase 9 (production readiness), updated risks and success criteria.
 
 ---
 
@@ -131,7 +132,7 @@ These were found during the v3–v4 analysis and must be addressed in the phases
 
 7. **No scheduler / manager CLI replacement**
    - Legacy had `apps/scheduler` (cleanup) and `apps/manager` (ops CLI). New repo defers scheduler to "Cron Triggers or Queues" but has no implementation.
-   - **Fix:** Add deferred scheduler task to Phase 7 or Phase 8.
+   - **Fix:** Add deferred scheduler task to Phase 7 or Phase 9.
 
 8. **Collab protocol is narrower than legacy; missing bootstrap-over-WS and unacked-buffer retry**
    - Legacy client maintains `_unackedUpdates: Map<number, Uint8Array>` and re-sends on reconnect. New client has `collabClientUpdateId` but no `_unackedUpdates` buffer. Legacy collab-server sends `ALL_UPDATES_UNMERGED` on connect. New DO sends nothing — client must `GET /collab-updates` via REST.
@@ -194,6 +195,26 @@ These were found during the v3–v4 analysis and must be addressed in the phases
     - **Notes and arrows must retain legacy rendering style** (background/border colors, selection ring, drag opacity, drop zones, arrow handles, link icons, resize handles, arrow curves/heads/labels, hitboxes) but implemented without Quasar classes (Tailwind + shadcn primitives only). The rest of the app shell (sidebar, toolbar, admin cards, state screens) uses shadcn.
     - **Fix:** Rebuild `PageEditorView.vue` as an immersive full-screen spatial shell. Move admin cards into a collapsible `RightSidebar` (shadcn). Move path navigation into a `MainToolbar` breadcrumb (shadcn). The canvas (`SpatialPageView`) must occupy the full viewport. Add dedicated fullscreen state screens for `page-nonexistent`, `page-deleted`, `group-deleted`, `invited`, `rejected`, `unauthorized`, `password`. Remove `PageEditorTiptapCard.vue` from the page route; Tiptap lives only inside `DisplayNote.vue`.
 
+20. **Route boilerplate repetition in `apps/api-worker`**
+    - Every route repeats ~15 lines of `getSessionEnv`, `HYPERDRIVE` null-check, `getDbForConnectionString`, `readCookieHeader`. This is copy-paste heavy and already contains inconsistencies (`c.env?.HYPERDRIVE` in billing vs `c.env.HYPERDRIVE` elsewhere).
+    - **Fix:** Introduce Hono middleware (`requireSessionEnv`, `requireHyperdrive`, `requireAuthCookie`) that attaches `c.get("sessionEnv")`, `c.get("db")`, and `c.get("accessCookie")` before the handler. Refactor all route files to use middleware instead of inline checks.
+
+---
+
+## 0.5 Pending architectural decisions (require ADR before coding)
+
+The following decisions must be documented in `docs/adr/` with a deadline. An ADR is a short markdown file: status (proposed/accepted), context, decision, and consequences.
+
+| Decision | Deadline | Owner | ADR file |
+|----------|----------|-------|----------|
+| Collab update squashing strategy (DO alarm vs Redis vs Postgres-only) | Start of Phase 3 | TBD | `adr-001-collab-update-squashing.md` |
+| `page_updates` backward compatibility (new table vs version column) | Start of Phase 3 | TBD | `adr-002-page-updates-schema-versioning.md` |
+| SyncedStore vs hybrid reactive proxy for Vue | Start of Phase 3 | TBD | `adr-003-spatial-reactivity.md` |
+| Marketing scope and launch blocker priority | Start of Phase 8 | TBD | `adr-004-launch-marketing-scope.md` |
+| SSR/i18n recovery or accepted regression | Start of Phase 8 | TBD | `adr-005-ssr-i18n-scope.md` |
+
+**Rule:** No agent may begin coding a Phase 3+ deliverable affected by these decisions until the corresponding ADR is marked `accepted` in `docs/adr/`.
+
 ---
 
 ## 1. What "restart" should mean (revised)
@@ -223,10 +244,11 @@ These were found during the v3–v4 analysis and must be addressed in the phases
 ### 2.2 New (`new-deepnotes`)
 
 - **Client:** Vue 3.5 + Vite 6 + plain `fetch` + `openapi-fetch` + Tiptap/Yjs (ProseMirror-only) + custom WS (collab + realtime).
-- **Server:** Hono on Cloudflare Workers + Drizzle + Postgres via Hyperdrive + Upstash Redis.
-- **Collab:** `PageCollabRoom` Durable Object. Yjs updates persisted to Postgres `page_updates`. **Only ProseMirror content is synced.**
+- **Server:** Hono on Cloudflare Workers + Drizzle + Postgres via Hyperdrive + Upstash Redis. Route boilerplate refactored into reusable middleware in Phase 4.
+- **Collab:** `PageCollabRoom` Durable Object. Yjs updates persisted to Postgres `page_updates`. **Only ProseMirror content is synced.** Broadcast backpressure and per-message auth revocation added in Phase 3.
 - **Realtime:** `UserRealtimeRoom` Durable Object. Hash HGET/HSET + pub/sub via Upstash.
-- **Scheduler:** Cron Triggers or Queues (not yet implemented; deferred).
+- **Scheduler:** Cron Triggers (`0 3 * * *`) wired to `performScheduledCleanup`.
+- **Packages:** `@deepnotes/session` (71 files) split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime` in Phase 7.
 - **Routing decision:** `/pages/:pageId` will be the spatial canvas. The Tiptap editor becomes the head/body editing component inside a note. Legacy divergence resolved in Phase 4.
 
 ---
@@ -306,6 +328,17 @@ Each phase has:
 - **Deliverables:** files, functions, routes, or components that must exist.
 - **Verification:** exact test commands or checklist items that must pass.
 - **Exit criteria:** objective yes/no questions. A phase is **not done** until every exit criterion is green.
+
+**Every phase must end with a code health audit:**
+```
+□ pnpm lint — 0 errors
+□ pnpm typecheck — 0 errors  
+□ pnpm test — 0 failures, 0 skips
+□ No new composable > 300 lines
+□ No console.log in DO production code
+□ apps/api-worker bundle ≤ 500KB (wrangler build)
+```
+A phase is **not signed off** until this checklist is green.
 
 ---
 
@@ -530,6 +563,16 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - On failure, close the socket with code `1008` and log the revocation reason.
    - Unit test: simulate WS connect → mock auth success → emit update → mock auth failure → assert socket closed.
 
+9. **DO broadcast backpressure / chunking**
+   - `PageCollabRoom.broadcast()` must chunk socket iteration into batches (e.g., 10 sockets per `Promise.all`) to stay under Cloudflare DO CPU limits.
+   - Document the recommended max concurrent editors per page (e.g., 50) in `docs/COLLAB_DO_ARCHITECTURE.md`.
+   - Unit test: mock 20 sockets, verify `send()` is chunked into two batches.
+
+10. **DO testing strategy**
+    - Extract DO logic into pure functions where possible (e.g., `handleCollabMessage(sockets, message) → actions[]`) so the core logic can be unit-tested in Vitest without Cloudflare DO mocking.
+    - For WS lifecycle tests, use `workerd` / `miniflare` to spin up `PageCollabRoom` and `UserRealtimeRoom` in-process.
+    - If DO mocking is too complex for the current tooling, document the gap in `docs/COLLAB_DO_ARCHITECTURE.md` and require that all non-WS-glue logic have ≥ 80% unit test coverage.
+
 **Verification:**
 - Unit test: create a `YPageDoc`, add a note with full field set, encode state, decode state, assert every field matches.
 - Integration test: two clients connect to `PageCollabRoom` via WS; client A creates a note; client B receives the update and the note appears in its Yjs doc within 2 seconds.
@@ -544,6 +587,8 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [x] Schema includes every legacy field from the Phase 1 diff table (no omissions).
 - [ ] Update squashing mechanism implemented and tested: 50 rapid edits produce ≤ 2 `page_updates` rows.
 - [ ] `PageCollabRoom` closes socket (code `1008`) when auth is revoked mid-session (unit test).
+- [ ] `PageCollabRoom` broadcast chunks into batches of ≤ 10 sockets (unit test).
+- [ ] DO logic extracted into pure functions with ≥ 80% unit test coverage, or gap documented with `workerd` / `miniflare` spike.
 
 ---
 
@@ -568,16 +613,21 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
      - `features/spatial/spatial-routes.ts`
    - No route definition lives outside its feature.
 
-3. **ESLint import restriction**
+3. **Route middleware refactoring in `apps/api-worker`**
+   - Create Hono middleware `requireSessionEnv()`, `requireHyperdrive()`, `requireAuthCookie()` in a new file (e.g., `src/middleware.ts`).
+   - Refactor all route files (`sessions.ts`, `users.ts`, `groups.ts`, `pages.ts`, `billing.ts`, `realtime.ts`) to use middleware instead of repeating inline null-checks.
+   - Goal: no route handler exceeds 30 lines of boilerplate; shared logic lives in middleware.
+
+4. **ESLint import restriction**
    - Add `import/no-restricted-paths` rule (or `dependency-cruiser`) enforcing:
      - `apps/web` may NOT import from `apps/api-worker`, `@deepnotes/db`, `drizzle-orm`.
      - Features may only import from `src/shared/ui`, `src/api`, `src/lib`, and themselves.
 
-4. **Test infrastructure hardening**
+5. **Test infrastructure hardening**
    - Every feature has a co-located `__tests__` folder or `*.test.ts` files.
    - `pnpm --filter @deepnotes/web test` runs in < 30 seconds.
 
-5. **Route consolidation decision**
+6. **Route consolidation decision**
    - Resolve the §0.3 routing divergence: make `/pages/:pageId` the spatial canvas. The Tiptap editor becomes the head/body editing component inside a note.
    - Document the decision in `docs/ROUTING_DECISION.md`.
    - Create a migration plan for existing page bookmarks and shared links if URLs change.
@@ -592,6 +642,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [x] `pnpm lint` passes for `@deepnotes/web`.
 - [x] Adding a new feature route requires changes in **only one folder**.
 - [x] `docs/ROUTING_DECISION.md` exists and is signed off by product.
+- [x] `apps/api-worker` route files use middleware for `sessionEnv`, `hyperdrive`, and `authCookie` checks; no route repeats > 10 lines of boilerplate.
 
 ---
 
@@ -813,9 +864,24 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Documented in `docs/SCHEDULER.md`.
    - Integration test added: `packages/session/src/scheduled-cleanup.integration.test.ts`.
 
-7. **`@deepnotes/session` god package audit** ❌
-   - Plan recommended splitting if any subfolder exceeded 20 files before Phase 7 (`§0.4 gap 9`).
-   - Package still has 71 files mixing auth/users/groups/pages/billing/collab/realtime. Not split.
+7. **`@deepnotes/session` package split** ❌
+   - The package has 71 files mixing auth, users, groups, pages, billing, collab, and realtime. This violates the feature-based vertical-slice principle.
+   - **Extract into dedicated packages before Phase 8:**
+     - `@deepnotes/billing` — Stripe checkout, portal, webhook processing (`stripe-billing.ts`, `stripe-billing.test.ts`).
+     - `@deepnotes/collab` — Page collab updates, collab crypto context, snapshots (`page-collab-updates.ts`, `group-collab-crypto-context.ts`).
+     - `@deepnotes/realtime` — Hash ACL, notify-users (`realtime-hash-acl.ts`, `notify-users.ts`).
+     - Keep `@deepnotes/session` for auth, login, refresh, register, 2FA, logout, demo, tokens only.
+   - Add ESLint rule: `apps/api-worker` route files may import from ≤ 2 domain packages each.
+   - Exit criteria: no extracted package exceeds 25 files; `@deepnotes/session` ≤ 20 files.
+
+8. **Code health lint-and-refactor audit**
+   - Run `pnpm lint` — 0 errors.
+   - Run `pnpm typecheck` — 0 errors.
+   - Run `pnpm test` — 0 failures, 0 skips.
+   - Check `apps/api-worker` bundle size (`wrangler build`) — alert if > 500KB.
+   - Count files in `@deepnotes/session` — alert if > 25 new files added since last audit.
+   - No composable in `apps/web` exceeds 300 lines.
+   - No `console.log` in production DO code; replace with structured logger or remove.
 
 **Verification:**
 - E2E smoke test: demo login → home → starting page → groups → logout.
@@ -831,45 +897,114 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [ ] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
 - [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).
 - [ ] Group password unlock is wired into the collab flow so users can enter a password when a protected group page is opened.
-- [ ] `@deepnotes/session` split into dedicated packages OR documented decision to defer.
+- [ ] `@deepnotes/session` split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`; remaining `@deepnotes/session` ≤ 20 files.
 - [ ] Component-level tests for `AccountView.vue` and `GroupDetailView.vue` pass.
+- [ ] `pnpm lint`, `pnpm typecheck`, `pnpm test` all pass with 0 errors/failures.
+- [ ] No composable in `apps/web` exceeds 300 lines; no `console.log` in DO production code.
 
 ---
 
-### Phase 8: Mobile shells and cutover (2 weeks)
+### Phase 8: Marketing, Help, Pricing, and Legal Surfaces (2 weeks)
 
-**Prerequisites:** Phase 6 and Phase 7 done.
+**Prerequisites:** Phase 6 and Phase 7 done. `adr-004-launch-marketing-scope.md` accepted.
 
-**Goal:** Prepare for production cutover.
+**Goal:** The product has a public-facing marketing site with SEO, onboarding funnel, and legal pages. This is a **launch blocker**, not polish.
 
 **Deliverables:**
 
-1. **Staging topology**
-   - Cloudflare Workers + Pages preview branch.
-   - Hyperdrive connected to staging Postgres.
-   - Upstash Redis staging instance.
-   - Load test: 50 concurrent collab pages, verify WS latency < 200 ms p95.
-   - **Load test must also monitor `page_updates` row creation rate.** During sustained editing (5 users × 60 WPM × 10 minutes), assert that squashing keeps new rows ≤ 20 per page. If > 1000 rows/hour, the squashing mechanism is insufficient.
+1. **Vue Router in `apps/marketing`**
+   - Install and configure `vue-router` in `apps/marketing`.
+   - Static route generation (`vite-ssg` or `prerender`) so each page outputs independent HTML for SEO.
 
-2. **Mobile shells (deferred from original plan)**
+2. **Homepage (`/`)**
+   - Hero section with product value proposition.
+   - Feature sections (spatial canvas, real-time collab, end-to-end encryption).
+   - Use-case thumbnails (personal knowledge base, team wiki, whiteboarding).
+   - CTA to "Open app" and "Get started".
+
+3. **Pricing page (`/pricing`)**
+   - Plan comparison cards (Free / Pro).
+   - Monthly/annual billing toggle.
+   - Stripe checkout CTA buttons linking to `POST /api/billing/stripe/checkout-session`.
+   - Feature checklist per plan.
+
+4. **Whitepaper page (`/whitepaper`)**
+   - Markdown-rendered technical document.
+   - Sticky navigation sidebar for sections.
+   - Diagrams (SVG or static images).
+   - Source markdown files stored in `apps/marketing/src/content/whitepaper/`.
+
+5. **Help center (`/help`)**
+   - Help index page with article cards.
+   - At least 5 help articles covering: getting started, creating notes, creating arrows, sharing pages, billing & subscriptions.
+   - Searchable (client-side search is acceptable for MVP).
+
+6. **Legal pages**
+   - `/privacy-policy` — static content, linked from footer.
+   - `/terms-of-service` — static content, linked from footer.
+
+7. **Shared shell**
+   - Consistent nav bar with logo, app link, pricing link, help link.
+   - Footer with legal links and copyright.
+   - Responsive layout (mobile + desktop).
+
+**Verification:**
+- `pnpm --filter @deepnotes/marketing build` produces static HTML for every route with zero build errors.
+- Each page renders without JS enabled (verify static HTML output).
+- Lighthouse audit: performance ≥ 60, accessibility ≥ 90, SEO ≥ 90 on homepage.
+
+**Exit criteria:**
+- [ ] `apps/marketing` builds and outputs static HTML for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`.
+- [ ] Pricing page has working Stripe CTA that initiates checkout session.
+- [ ] Lighthouse SEO score ≥ 90 on homepage.
+- [ ] No route is a placeholder or stub ("Coming soon" is not acceptable).
+
+---
+
+### Phase 9: Production Readiness and Cutover (2 weeks)
+
+**Prerequisites:** Phase 6, Phase 7, and Phase 8 done.
+
+**Goal:** Prepare for production cutover with observability, load testing, and a rollback plan.
+
+**Deliverables:**
+
+1. **Observability**
+   - Replace `console.log` in `PageCollabRoom` and `UserRealtimeRoom` with structured logging (e.g., `console.log(JSON.stringify({ level, event, pageId, userId, ... }))`).
+   - Add metrics: WS connection duration, DB query latency, collab push latency, realtime hash HSET latency.
+   - Document monitoring dashboard queries in `docs/OBSERVABILITY.md`.
+
+2. **Load testing**
+   - Target: 50 concurrent collab pages, verify WS latency < 200 ms p95.
+   - **Collab row creation rate test:** 5 users × 60 WPM × 10 minutes per page. Assert squashing keeps new `page_updates` rows ≤ 20 per page. If > 1000 rows/hour, the squashing mechanism is insufficient — block cutover.
+   - **Auth revocation test:** revoke a user's group membership during active collab session; assert socket closes within 30 seconds.
+   - **Broadcast backpressure test:** 50 sockets on one page; assert no `1011` closes from DO CPU limit.
+
+3. **Rollback plan**
+   - Document how to revert traffic to legacy `/trpc` stack without data loss.
+   - Verify encrypted blob compatibility: random sample of 100 legacy pages decrypt correctly in new stack.
+   - Feature flag: ability to disable `PageCollabRoom` WS and fall back to REST-only collab push.
+
+4. **Mobile shells (deferred from original plan)**
    - Capacitor for iOS/Android (if product requires it).
    - Tauri v2 for desktop (if product requires it).
-   - **Decision:** If product is web-first, document that mobile shells are v2 scope.
+   - **Decision:** If product is web-first, document that mobile shells are v2 scope in `adr-004-launch-marketing-scope.md`.
 
-3. **Data migration runbook**
+5. **Data migration runbook**
    - Step-by-step to migrate existing Postgres data to new schema (if any schema changes required).
    - Encrypted blob compatibility check: random sample of 100 pages decrypted successfully.
 
-4. **Cutover**
+6. **Cutover**
    - Canary redirect: 5% of traffic to new stack.
    - Monitor error rates, collab latency, Stripe webhooks.
    - Full cutover when 24-hour error rate < 0.1%.
 
 **Exit criteria:**
-- [ ] Staging load test passes.
+- [ ] Staging load test passes (WS p95 < 200 ms, row rate ≤ 20/page, auth revocation < 30 s).
 - [ ] 100 random legacy pages decrypt correctly in new stack.
+- [ ] Rollback plan documented and rehearsed (team can execute revert in < 15 minutes).
 - [ ] 24-hour canary error rate < 0.1%.
-- [ ] Old `/trpc` stack receives zero requests for 48 hours.
+- [ ] Old `/trpc` stack receives zero requests for 48 hours after full cutover.
 
 ---
 
@@ -883,23 +1018,26 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 | **Collab protocol mismatch** | Medium | Data corruption | Version the collab protocol (`v1` = ProseMirror-only, `v2` = page-level). Reject unknown message types gracefully. |
 | **Performance: many notes on one page** | Medium | Laggy canvas | Set a soft limit (e.g., 200 notes) and benchmark. Use virtual rendering or canvas-based rendering if DOM scales poorly. |
 | **Stripe-only after dropping RevenueCat** | Low | User churn | Communicate to IAP users before cutover. Offer migration grace period. |
-| **Worker CPU limits under collab load** | Medium | Dropped connections | Load test early (Phase 8 staging). If DO CPU is the bottleneck, shard `PageCollabRoom` by page ID prefix. |
+| **Worker CPU limits under collab load** | Medium | Dropped connections | Load test early (Phase 9 staging). If DO CPU is the bottleneck, shard `PageCollabRoom` by page ID prefix. |
 | **God-object state returns** | Medium | Unmaintainable code | Cap composable size at 300 lines. If `useSpatialViewport.ts` grows beyond that, split into `useCamera`, `usePanning`, `useZooming`. |
 | **`page_updates` format migration** | Medium | Data corruption or unreadable legacy pages | Decide Option A/B in Phase 3 before any spatial collab code. Test decrypt of 100 random legacy pages after migration. |
-| **`page_updates` row explosion (no squashing)** | **High** | Table bloat, slow bootstrap, expensive storage | Implement buffering/squashing in Phase 3 (gap 15). Monitor `page_updates` row count per page in staging load test. Alert if > 1000 new rows/hour. |
+| **`page_updates` row explosion (no squashing)** | **High** | Table bloat, slow bootstrap, expensive storage | Implement buffering/squashing in Phase 3 (gap 15). Monitor `page_updates` row count per page in staging load test. Alert if > 1000 new rows/hour. Block cutover if exceeded. |
 | **Stale auth sessions in collab DO** | Medium | Revoked users continue editing; security gap | Implement per-message `checkStillAllowed` with 30s TTL cache in Phase 3 (gap 16). Unit test revocation mid-session. |
+| **DO broadcast backpressure under load** | Medium | Dropped connections, CPU limit exceeded | Chunk broadcast into batches of ≤ 10 sockets in Phase 3. Document max editors per page. Load test in Phase 9. |
 | **Realtime SSE bridge missed updates** | Medium | Cross-isolate subscribers see stale data for 1–3s | Add sequence numbers to `DATA_NOTIFICATION` or switch to Redis pub/sub. Document in `docs/REALTIME_BRIDGE_ARCHITECTURE.md`. |
 | **DO hibernation drops WS state** | Medium | Users see collab reconnects | `PageCollabRoom` is stateless relay, so hibernation is safe. Document in `docs/COLLAB_DO_ARCHITECTURE.md`. If stateful DO chosen later, implement reconnect protocol. |
-| **i18n / SSR regressions** | Low | Accessibility, SEO, share-ability loss | Document as accepted v2 regressions or schedule recovery. |
+| **i18n / SSR regressions** | Low | Accessibility, SEO, share-ability loss | Document as accepted v2 regressions or schedule recovery in `adr-005-ssr-i18n-scope.md`. |
 | **Group password not implemented** | Low | Users cannot access password-protected groups in new app | Add to Phase 7. If deferred, document v2 scope. |
-| **No scheduler = soft-deleted data accumulates** | Medium | DB bloat | Add Cron Trigger or Queue cleanup to Phase 7/8. |
+| **No scheduler = soft-deleted data accumulates** | Medium | DB bloat | Add Cron Trigger or Queue cleanup to Phase 7/9. |
 | **Collab protocol narrower than legacy** | Medium | Slower reconnects, lost ACK edge cases | Document in `docs/COLLAB_PROTOCOL_PARITY.md`. Monitor unacked-update metrics. |
-| **`@deepnotes/session` god package** | Medium | Cross-domain coupling, slow test feedback | Audit and split into dedicated packages before Phase 7. |
+| **`@deepnotes/session` god package** | Medium | Cross-domain coupling, slow test feedback | Split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime` in Phase 7. Enforce with ESLint. |
+| **Route boilerplate accumulation** | Medium | Inconsistent error handling, copy-paste bugs, inflated bundle | Refactor into Hono middleware in Phase 4. ESLint rule to prevent inline repetition. |
 | **`page_updates` no pagination** | Medium | OOM on large page bootstrap | Fixed in Phase 0 with `?sinceIndex=`. Monitor max response size in production. |
 | **Routing divergence (page vs spatial)** | Medium | User confusion, broken bookmarks | Decide in Phase 4. Communicate clearly if URLs change. |
 | **No Playwright = no E2E gate** | Medium | Regressions slip into production | Add skeleton in Phase 0; build smoke test in Phase 7. |
 | **Legacy schema fields omitted in new model** | Medium | Subtle data-loss or UI bugs | Enforce Phase 1 schema diff table as a hard gate before Phase 3 coding. |
-| **Marketing/help/pricing pages missing** | **High** | **No public onboarding, no SEO, no conversion, blocks launch** | Add as a dedicated deliverable before Phase 8 cutover. Do not treat as "polish." |
+| **Marketing/help/pricing pages missing** | **High** | **No public onboarding, no SEO, no conversion, blocks launch** | Dedicated Phase 8 with Lighthouse SEO gate. Do not treat as "polish." |
+| **ADR deadlines missed** | Medium | Agents code against unmade decisions; rework | §0.5 gates: no coding on affected deliverables until ADR is `accepted`. |
 
 ---
 
@@ -918,20 +1056,25 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Collab pagination:** `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and returns ≤ 100 rows.
 - [ ] **Collab update squashing:** 50 rapid edits from a single client produce ≤ 2 `page_updates` rows. Staging load test monitors row creation rate per page.
 - [ ] **Collab auth revocation:** `PageCollabRoom` closes socket (code `1008`) when a user's session is invalidated or group membership is revoked mid-session. Unit test covers this flow.
+- [ ] **Collab broadcast backpressure:** `PageCollabRoom` chunks broadcast into batches of ≤ 10 sockets. Unit test covers this.
 - [ ] **Collab data migration:** `docs/COLLAB_DATA_MIGRATION.md` exists and explains how legacy `page_updates` rows remain compatible.
 - [ ] **Postgres tests:** Integration tests use template DB clones (§5.7). No test re-migrates from empty DB.
 - [ ] **Auth + crypto:** 2FA enable/disable flow tested end-to-end. Password change invalidates all sessions.
 - [ ] **No banned tech:** No tRPC, no `superjson`, no RevenueCat, no key rotation code paths. Enforced by ESLint `no-restricted-imports`.
 - [ ] **Routing decision:** `docs/ROUTING_DECISION.md` exists and is signed off.
+- [ ] **Route middleware:** `apps/api-worker` uses Hono middleware for `sessionEnv`, `hyperdrive`, and `authCookie`. No route repeats > 10 lines of boilerplate.
 - [ ] **Spatial canvas (Phase 5):** User can create, move, resize, delete notes and arrows on an infinite canvas. Changes sync via WS.
 - [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks (`PageEditorBacklinksCard.vue`). Titles are encrypted; UI shows page IDs with links and delete action.
 - [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
-- [ ] **Marketing site:** `apps/marketing` has routable pages for `/` (homepage with hero + features), `/pricing` (plan cards + Stripe CTA), `/whitepaper` (markdown content), `/help` (index + articles), `/privacy-policy`, `/terms-of-service`. Build outputs static HTML for each route.
-- [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms.
+- [ ] **Package split:** `@deepnotes/session` split into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`. Remaining `@deepnotes/session` ≤ 20 files.
+- [ ] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. Build outputs static HTML. Lighthouse SEO ≥ 90.
+- [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms, row rate ≤ 20/page.
 - [x] **Scheduler:** Cron Trigger (`0 3 * * *`) wired to `performScheduledCleanup` with integration test.
+- [ ] **Rollback plan:** Documented and rehearsed. Feature flag for REST-only collab fallback exists.
 - [ ] **Cutover:** 100 random legacy pages decrypt correctly. 24-hour canary error < 0.1%.
+- [ ] **Code health:** `pnpm lint`, `pnpm typecheck`, `pnpm test` pass with 0 errors/failures. No composable > 300 lines. No `console.log` in DO production code. `apps/api-worker` bundle ≤ 500KB.
 
 ---
 
@@ -997,10 +1140,15 @@ What v4 adds beyond v3:
 What must happen now:
 1. **Fix the test foundation (Phase 0).** No agent should add features while tests are broken. Split `usePageCollabEditor`, fix ACK logic, add `updateV2` listener, add pagination, add Playwright.
 2. **Inventory spatial features (Phase 1).** Produce a checklist **and a complete schema diff table** that prevents misreporting stubs as done.
-3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike, incremental bootstrap, update squashing mechanism, and per-message auth revocation check.
-4. **Resolve routing divergence (Phase 4).** Make `/pages/:pageId` the spatial canvas and integrate the Tiptap editor as a note component.
-5. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo). **Phase 6 must also rebuild the immersive layout shell and restore legacy note/arrow visual parity** (colors, borders, selection rings, arrow curves/heads/labels, drop zones, etc.) using shadcn primitives instead of Quasar.
-6. **Build marketing/help/pricing/whitepaper surfaces.** Add Vue Router to `apps/marketing`, migrate content from legacy, and create static routable pages. This is a launch blocker, not polish.
-7. **Verify everything with automated tests.** Every phase has objective exit criteria.
+3. **Accept or write ADRs (§0.5) before Phase 3 coding.** Collab squashing strategy, `page_updates` compatibility, and SyncedStore vs proxy must be decided and documented. No agent may code affected deliverables against an unmade decision.
+4. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike, incremental bootstrap, update squashing mechanism, per-message auth revocation, broadcast backpressure chunking, and DO testing strategy.
+5. **Resolve routing divergence + route middleware (Phase 4).** Make `/pages/:pageId` the spatial canvas. Refactor `apps/api-worker` route boilerplate into Hono middleware. Integrate the Tiptap editor as a note component.
+6. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo). **Phase 6 must also rebuild the immersive layout shell and restore legacy note/arrow visual parity** (colors, borders, selection rings, arrow curves/heads/labels, drop zones, etc.) using shadcn primitives instead of Quasar.
+7. **Account/billing/groups polish + package split (Phase 7).** Group password UI, realtime notification toasts, and split `@deepnotes/session` into `@deepnotes/billing`, `@deepnotes/collab`, `@deepnotes/realtime`. Run code health audit.
+8. **Build marketing/help/pricing/whitepaper surfaces (Phase 8).** Add Vue Router to `apps/marketing`, migrate content from legacy, and create static routable pages. Lighthouse SEO ≥ 90. This is a launch blocker, not polish.
+9. **Production readiness and cutover (Phase 9).** Observability, load testing (row rate, auth revocation, broadcast backpressure), rollback plan, data migration runbook. Block cutover if load tests fail.
+10. **Verify everything with automated tests.** Every phase has objective exit criteria. Retire the legacy repo only when spatial parity, marketing surfaces, auth smoke, data checks, and load tests are proven.
 
-Retire the legacy repo only when spatial parity, marketing surfaces, auth smoke, and data checks are proven.
+---
+
+*End of plan v4.1*
