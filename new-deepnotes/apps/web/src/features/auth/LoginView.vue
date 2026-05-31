@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
+import {
+  ArrowLeft,
+  Fingerprint,
+  KeyRound,
+  Mail,
+  Sparkles,
+} from "lucide-vue-next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -76,135 +83,179 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-md">
-    <Card>
-      <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>
-          Use your account email and password, or start a local demo session.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Alert
-          v-if="registeredOk"
-          class="mb-4"
-          role="status"
-        >
-          <AlertDescription>
-            Account created. Sign in with the same email and password.
-          </AlertDescription>
-        </Alert>
+  <div class="flex flex-1 flex-col items-center justify-center px-4 py-12">
+    <div class="w-full max-w-sm">
+      <Card>
+        <CardHeader class="pb-4">
+          <CardTitle class="text-lg">Sign in</CardTitle>
+          <CardDescription>
+            Use your email and password, or start a local demo.
+          </CardDescription>
+        </CardHeader>
 
-        <Alert
-          v-if="lastError"
-          class="mb-4"
-          role="alert"
-          variant="destructive"
-        >
-          <AlertDescription>
-            {{ lastError }}
-          </AlertDescription>
-        </Alert>
-
-        <form class="space-y-4" @submit.prevent="onSubmit">
-          <div class="space-y-2">
-            <Label for="login-email">Email</Label>
-            <Input
-              id="login-email"
-              v-model="email"
-              autocomplete="username"
-              :disabled="loading"
-              name="email"
-              required
-              type="email"
-            />
-          </div>
-          <div class="space-y-2">
-            <Label for="login-password">Password</Label>
-            <Input
-              id="login-password"
-              v-model="password"
-              autocomplete="current-password"
-              :disabled="loading"
-              name="password"
-              required
-              type="password"
-            />
-          </div>
-          <div class="flex items-center gap-2">
-            <Checkbox
-              id="remember"
-              v-model:checked="rememberSession"
-              :disabled="loading"
-            />
-            <Label
-              class="text-muted-foreground font-normal"
-              for="remember"
-            >
-              Remember this device
-            </Label>
-          </div>
-
-          <div
-            v-if="twoFactorRequired"
-            class="border-border space-y-3 border-t pt-4"
+        <CardContent class="space-y-4">
+          <Alert
+            v-if="registeredOk"
+            class="border-emerald-500/20 bg-emerald-500/10 text-emerald-700"
+            role="status"
           >
-            <p class="text-muted-foreground text-sm">
-              Enter a 6-digit code from your authenticator app, or a recovery
-              code.
-            </p>
-            <div class="space-y-2">
-              <Label for="login-otp">Authenticator code</Label>
-              <Input
-                id="login-otp"
-                v-model="authenticatorToken"
-                autocomplete="one-time-code"
-                :disabled="loading"
-                inputmode="numeric"
-                maxlength="6"
-                pattern="[0-9]*"
-                placeholder="000000"
-                type="text"
-              />
+            <AlertDescription>
+              Account created successfully. Sign in with the same email and
+              password.
+            </AlertDescription>
+          </Alert>
+
+          <Alert
+            v-if="lastError"
+            class="border-destructive/20 bg-destructive/10 text-destructive"
+            role="alert"
+          >
+            <AlertDescription>{{ lastError }}</AlertDescription>
+          </Alert>
+
+          <Button
+            class="w-full"
+            :disabled="loading"
+            type="button"
+            variant="outline"
+            @click="onDemo"
+          >
+            <Sparkles class="mr-2 size-4" />
+            Try the demo
+          </Button>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t"></span>
             </div>
-            <div class="space-y-2">
-              <Label for="login-recovery">Recovery code (optional)</Label>
-              <Input
-                id="login-recovery"
-                v-model="recoveryCode"
-                :disabled="loading"
-                inputmode="text"
-                maxlength="32"
-                placeholder="32 hex characters"
-                spellcheck="false"
-                type="text"
-              />
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-card text-muted-foreground px-2">
+                or continue with email
+              </span>
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-2">
-            <Button :disabled="loading" type="submit" variant="default">
+          <form class="space-y-4" @submit.prevent="onSubmit">
+            <div class="space-y-2">
+              <Label for="login-email">Email</Label>
+              <div class="relative">
+                <Mail
+                  class="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2"
+                />
+                <Input
+                  id="login-email"
+                  v-model="email"
+                  autocomplete="username"
+                  class="pl-9"
+                  :disabled="loading"
+                  name="email"
+                  placeholder="you@example.com"
+                  required
+                  type="email"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <Label for="login-password">Password</Label>
+              <div class="relative">
+                <KeyRound
+                  class="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2"
+                />
+                <Input
+                  id="login-password"
+                  v-model="password"
+                  autocomplete="current-password"
+                  class="pl-9"
+                  :disabled="loading"
+                  name="password"
+                  placeholder="••••••••"
+                  required
+                  type="password"
+                />
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <Checkbox
+                id="remember"
+                v-model:checked="rememberSession"
+                :disabled="loading"
+              />
+              <Label
+                class="text-muted-foreground text-sm font-normal"
+                for="remember"
+              >
+                Remember this device
+              </Label>
+            </div>
+
+            <div
+              v-if="twoFactorRequired"
+              class="border-border space-y-3 border-t pt-4"
+            >
+              <p class="text-muted-foreground flex items-center gap-2 text-sm">
+                <Fingerprint class="size-4" />
+                Enter a 6-digit code from your authenticator app, or a recovery
+                code.
+              </p>
+              <div class="space-y-2">
+                <Label for="login-otp">Authenticator code</Label>
+                <Input
+                  id="login-otp"
+                  v-model="authenticatorToken"
+                  autocomplete="one-time-code"
+                  :disabled="loading"
+                  inputmode="numeric"
+                  maxlength="6"
+                  pattern="[0-9]*"
+                  placeholder="000000"
+                  type="text"
+                />
+              </div>
+              <div class="space-y-2">
+                <Label for="login-recovery">Recovery code (optional)</Label>
+                <Input
+                  id="login-recovery"
+                  v-model="recoveryCode"
+                  :disabled="loading"
+                  inputmode="text"
+                  maxlength="32"
+                  placeholder="32 hex characters"
+                  spellcheck="false"
+                  type="text"
+                />
+              </div>
+            </div>
+
+            <Button :disabled="loading" class="w-full" type="submit">
+              <LogIn class="mr-2 size-4" />
               {{ loading ? "Signing in…" : "Sign in" }}
             </Button>
-            <Button
-              :disabled="loading"
-              type="button"
-              variant="secondary"
-              @click="onDemo"
+          </form>
+        </CardContent>
+
+        <CardFooter
+          class="text-muted-foreground flex flex-col items-center gap-3 text-sm"
+        >
+          <div>
+            Don't have an account?
+            <RouterLink
+              class="text-primary hover:text-primary/80 font-medium underline underline-offset-4"
+              to="/register"
             >
-              Try demo
-            </Button>
+              Create one
+            </RouterLink>
           </div>
-        </form>
-      </CardContent>
-      <CardFooter class="flex flex-col items-start gap-2">
-        <Button as-child class="p-0" size="sm" variant="link">
-          <RouterLink to="/register">Create an account</RouterLink>
-        </Button>
-        <Button as-child class="p-0" size="sm" variant="link">
-          <RouterLink to="/">← Home</RouterLink>
-        </Button>
-      </CardFooter>
-    </Card>
+          <RouterLink
+            class="inline-flex items-center gap-1.5 text-xs underline underline-offset-4"
+            to="/"
+          >
+            <ArrowLeft class="size-3.5" />
+            Back to home
+          </RouterLink>
+        </CardFooter>
+      </Card>
+    </div>
   </div>
 </template>
