@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useSession } from "@/features/auth/useSession";
 import { unreadNotificationCount } from "@/features/notifications/useNotificationBadge";
 import ThemeSwitcher from "@/features/theme/ThemeSwitcher.vue";
+import { isDark } from "@/features/theme/useThemePreference";
 
 const { isAuthenticated, bootstrapped, loading, logout } = useSession();
 
@@ -26,7 +27,7 @@ async function onLogout() {
           class="flex items-center gap-2 text-lg font-semibold tracking-tight transition-opacity hover:opacity-80"
         >
           <img
-            src="/white-logo-outline.webp"
+            :src="isDark ? '/white-logo-outline.webp' : '/black-logo.png'"
             alt="DeepNotes"
             class="h-7 w-7"
           />

@@ -53,7 +53,7 @@ function toggleTheme() {
           class="flex items-center gap-2 text-lg font-semibold tracking-tight hover:opacity-80 transition-opacity"
         >
           <img
-            src="/white-logo-outline.webp"
+            :src="isDark ? '/white-logo-outline.webp' : '/black-logo.png'"
             alt="DeepNotes"
             class="h-7 w-7"
           />
