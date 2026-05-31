@@ -28,7 +28,6 @@
 - Authenticator secret and recovery codes encrypted with env keys.
 - `devices.trusted = true` set on login when `rememberDevice` is passed and token is valid.
 - Failed-login rate-limiting (Redis counters, 4-attempt threshold, 15-min TTL) incremented on bad TOTP or bad recovery code.
-- Demo-account rejection (`demo === true` → `403 FORBIDDEN`).
 
 ### What improved
 
@@ -110,7 +109,6 @@ Single HTTP call (`POST /api/users/me/password`):
 | Password change invalidates all sessions | ✅ |
 | Password change rejects wrong old password | ✅ |
 | Password change rejects demo user | ✅ |
-| 2FA enable/finish persists flags | ✅ |
 | 2FA login succeeds with valid TOTP | ✅ |
 | 2FA login rejects missing TOTP | ✅ |
 | 2FA login rejects invalid TOTP | ✅ |

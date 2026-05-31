@@ -152,7 +152,7 @@ async function reject() {
       <AlertTitle>Password sign-in required</AlertTitle>
       <AlertDescription>
         Accepting an invite needs your account keys. Sign out and sign back in with your
-        password on this device (demo sessions cannot decrypt).
+        password on this device.
       </AlertDescription>
     </Alert>
 

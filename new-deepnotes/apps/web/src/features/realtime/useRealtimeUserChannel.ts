@@ -29,11 +29,11 @@ function showRealtimeToast(text: string) {
 }
 
 /**
- * Maintains `GET /api/realtime-ws` when the user is signed in (non-demo), for legacy-style
+ * Maintains `GET /api/realtime-ws` when the user is signed in, for legacy-style
  * `USER_NOTIFICATION` pushes and shared REQUEST batches (`realtime-user-ws.ts`).
  */
 export function useRealtimeUserChannel(
-  input: Ref<{ userId: string; demo: boolean } | null>,
+  input: Ref<{ userId: string } | null>,
 ) {
   const unsub = subscribeRealtimeUserNotification(async (packedNotification) => {
     let outer: unknown;
@@ -73,19 +73,19 @@ export function useRealtimeUserChannel(
   watch(
     () => input.value,
     (u) => {
-      if (u == null || u.demo || typeof window === "undefined") {
+      if (u == null || typeof window === "undefined") {
         disconnectRealtimeUserWs();
         return;
       }
-      ensureRealtimeUserWs({ demo: false });
+      ensureRealtimeUserWs();
     },
     { flush: "post" },
   );
 
   onMounted(() => {
     const u = input.value;
-    if (u != null && !u.demo && typeof window !== "undefined") {
-      ensureRealtimeUserWs({ demo: false });
+    if (u != null && typeof window !== "undefined") {
+      ensureRealtimeUserWs();
     }
   });
 

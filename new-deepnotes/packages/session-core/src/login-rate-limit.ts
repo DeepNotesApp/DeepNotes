@@ -1,7 +1,7 @@
 /**
  * Failed-login rate limiting (legacy `sessions.login` parity).
  * Keys: `email-failed-login-attempts:${email}`, `ip-failed-login-attempts:${ip}`.
- * Threshold 4 failures / 15 minutes; literal email `demo` skips email-side counter.
+ * Threshold 4 failures / 15 minutes.
  */
 
 export type SessionRedisPort = {
@@ -20,10 +20,8 @@ export async function checkFailedLoginAttempts(
   ip: string,
 ): Promise<{ excessive: boolean; loginBlockTTLMinutes: number }> {
   const [emailStr, emailTtl, ipStr, ipTtl] = await Promise.all([
-    email === "demo"
-      ? Promise.resolve("0")
-      : redis.get(`email-failed-login-attempts:${email}`),
-    email === "demo" ? Promise.resolve(0) : redis.ttl(`email-failed-login-attempts:${email}`),
+    redis.get(`email-failed-login-attempts:${email}`),
+    redis.ttl(`email-failed-login-attempts:${email}`),
     redis.get(`ip-failed-login-attempts:${ip}`),
     redis.ttl(`ip-failed-login-attempts:${ip}`),
   ]);

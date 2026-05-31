@@ -1,3 +1,8 @@
 import base from "../../eslint.config.js";
 
-export default [...base];
+export default [
+  {
+    ignores: ["dist/**"],
+  },
+  ...base,
+];

@@ -20,7 +20,6 @@ import {
   encryptUserRehashedLoginHash,
   ensureSodiumReady,
 } from "./crypto/session-crypto.js";
-import type { SessionStartDemoInput } from "./start-demo.js";
 import { addHours } from "./datetime.js";
 import type { SessionEnv } from "./env.js";
 import { encryptUserEmail } from "./encrypt-user-email.js";
@@ -31,7 +30,32 @@ import {
   sendRegistrationEmail,
 } from "./send-registration-email.js";
 
-export type UserRegisterInput = SessionStartDemoInput & {
+export type UserRegisterInput = {
+  userId: string;
+  groupId: string;
+  pageId: string;
+  userPublicKeyring: Uint8Array;
+  userEncryptedPrivateKeyring: Uint8Array;
+  userEncryptedSymmetricKeyring: Uint8Array;
+  userEncryptedName: Uint8Array;
+  userEncryptedDefaultNote: Uint8Array;
+  userEncryptedDefaultArrow: Uint8Array;
+  groupCreation: {
+    groupEncryptedName: Uint8Array;
+    groupPasswordHash?: Uint8Array;
+    groupIsPublic: boolean;
+    groupAccessKeyring: Uint8Array;
+    groupEncryptedInternalKeyring: Uint8Array;
+    groupEncryptedContentKeyring: Uint8Array;
+    groupPublicKeyring: Uint8Array;
+    groupEncryptedPrivateKeyring: Uint8Array;
+    groupOwnerEncryptedName: Uint8Array;
+  };
+  pageCreation: {
+    pageEncryptedSymmetricKeyring: Uint8Array;
+    pageEncryptedRelativeTitle: Uint8Array;
+    pageEncryptedAbsoluteTitle: Uint8Array;
+  };
   email: string;
   loginHash: Uint8Array;
 };

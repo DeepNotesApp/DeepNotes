@@ -6,7 +6,6 @@ import {
   Fingerprint,
   KeyRound,
   Mail,
-  Sparkles,
 } from "lucide-vue-next";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -33,7 +32,6 @@ const {
   lastError,
   twoFactorRequired,
   isAuthenticated,
-  loginWithDemo,
   loginWithPassword,
   clearError,
 } = useSession();
@@ -51,12 +49,6 @@ onMounted(() => {
     void router.replace({ name: "home" });
   }
 });
-
-async function onDemo() {
-  clearError();
-  const { ok } = await loginWithDemo();
-  if (ok) await router.push({ name: "home" });
-}
 
 async function onSubmit() {
   clearError();
@@ -88,7 +80,7 @@ async function onSubmit() {
         <CardHeader class="pb-4">
           <CardTitle class="text-lg">Sign in</CardTitle>
           <CardDescription>
-            Use your email and password, or start a local demo.
+            Use your email and password to sign in.
           </CardDescription>
         </CardHeader>
 
@@ -111,28 +103,6 @@ async function onSubmit() {
           >
             <AlertDescription>{{ lastError }}</AlertDescription>
           </Alert>
-
-          <Button
-            class="w-full"
-            :disabled="loading"
-            type="button"
-            variant="outline"
-            @click="onDemo"
-          >
-            <Sparkles class="mr-2 size-4" />
-            Try the demo
-          </Button>
-
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <span class="w-full border-t"></span>
-            </div>
-            <div class="relative flex justify-center text-xs uppercase">
-              <span class="bg-card text-muted-foreground px-2">
-                or continue with email
-              </span>
-            </div>
-          </div>
 
           <form class="space-y-4" @submit.prevent="onSubmit">
             <div class="space-y-2">

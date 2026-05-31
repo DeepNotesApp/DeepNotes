@@ -29,7 +29,7 @@ function toBuf(u: Uint8Array): Buffer {
 }
 
 /**
- * `users.account.emailChange.request` (tRPC): password check, non-demo, new email
+ * `users.account.emailChange.request` (tRPC): password check, new email
  * not in use, stores `encrypted_new_email` + 6-digit `email_verification_code`, sends email.
  */
 export async function performUserEmailChangeRequest(input: {
@@ -56,7 +56,6 @@ export async function performUserEmailChangeRequest(input: {
   const userRows = await input.db
     .select({
       id: users.id,
-      demo: users.demo,
       encryptedRehashedLoginHash: users.encryptedRehashedLoginHash,
     })
     .from(users)
@@ -66,13 +65,6 @@ export async function performUserEmailChangeRequest(input: {
   const userRow = userRows[0];
   if (userRow == null) {
     throw new SessionError(404, "NOT_FOUND", "User not found.");
-  }
-  if (userRow.demo === true) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is unavailable for demo accounts.",
-    );
   }
 
   const passwordHashValues = getPasswordHashValues(
@@ -184,7 +176,6 @@ export async function performUserEmailChangeConfirm(input: {
   const userRows = await input.db
     .select({
       id: users.id,
-      demo: users.demo,
       customerId: users.customerId,
       emailVerificationCode: users.emailVerificationCode,
       encryptedNewEmail: users.encryptedNewEmail,
@@ -197,13 +188,6 @@ export async function performUserEmailChangeConfirm(input: {
   const u = userRows[0];
   if (u == null) {
     throw new SessionError(404, "NOT_FOUND", "User not found.");
-  }
-  if (u.demo === true) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is unavailable for demo accounts.",
-    );
   }
   if (u.emailVerificationCode !== input.emailVerificationCode) {
     throw new SessionError(

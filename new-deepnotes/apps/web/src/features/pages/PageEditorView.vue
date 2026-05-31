@@ -93,24 +93,19 @@ const {
   bootstrapped,
   isAuthenticated,
   client,
-  user,
 });
-
-const isDemoSession = computed(() => user.value?.demo === true);
 
 const { pathPageLabels } = usePagePathRealtimeTitles({
   pathPageIds,
   collabGroupCrypto,
   bootstrapped,
   isAuthenticated,
-  demo: isDemoSession,
   collabLoading,
   cryptoError,
 });
 
 const snapshotsApi = usePageSnapshots({
   pageId,
-  user,
   client,
   ydoc,
   pageKeyring,
@@ -122,7 +117,6 @@ const snapshotsApi = usePageSnapshots({
 
 const management = usePageManagement({
   pageId,
-  user,
   client,
   router,
   collabGroupId,
@@ -195,7 +189,6 @@ onMounted(() => {
       :is-favorite="isFavorite"
       :bump-message="bumpMessage"
       :favorite-message="favoriteMessage"
-      :is-demo="isDemoSession"
       @bump-as-starting="bumpAsStarting()"
       @toggle-favorite="toggleFavorite()"
       @remove-from-recent="removeThisFromRecent()"
@@ -209,7 +202,6 @@ onMounted(() => {
     </p>
 
     <PageEditorSnapshotsCard
-      v-if="!isDemoSession"
       :snapshot-loading="snapshotsLoading"
       :snapshots="snapshotList"
       :collab-loading="collabLoading"
@@ -221,7 +213,6 @@ onMounted(() => {
     />
 
     <PageEditorManagementCard
-      v-if="!isDemoSession"
       v-model:move-dest-group-id="moveDestGroupId"
       :collab-loading="collabLoading"
       :load-error="loadError"
@@ -233,7 +224,7 @@ onMounted(() => {
       @purge="management.purgeThisPagePermanently()"
     />
 
-    <PageEditorBacklinksCard v-if="!isDemoSession" :page-id="pageId" />
+    <PageEditorBacklinksCard :page-id="pageId" />
 
     <SpatialPageView
       :ydoc="ydoc"

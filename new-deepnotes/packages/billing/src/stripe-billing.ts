@@ -63,18 +63,11 @@ export async function performStripeCreateCheckoutSession(input: {
   /** Defaults to monthly when omitted (legacy). */
   billingFrequency?: "monthly" | "yearly";
 }): Promise<{ checkoutSessionUrl: string }> {
-  const { userId, demo, emailVerified } = await getAuthenticatedUserSummary({
+  const { userId, emailVerified } = await getAuthenticatedUserSummary({
     db: input.db,
     env: input.env,
     accessCookie: input.accessCookie,
   });
-  if (demo) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is not available for demo accounts.",
-    );
-  }
   if (!emailVerified) {
     throw new SessionError(
       400,
@@ -178,18 +171,11 @@ export async function performStripeCreatePortalSession(input: {
   billing: StripeBillingEnv;
   accessCookie: string | undefined;
 }): Promise<{ portalSessionUrl: string }> {
-  const { userId, demo } = await getAuthenticatedUserSummary({
+  const { userId } = await getAuthenticatedUserSummary({
     db: input.db,
     env: input.env,
     accessCookie: input.accessCookie,
   });
-  if (demo) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is not available for demo accounts.",
-    );
-  }
 
   const [row] = await input.db
     .select({ customerId: users.customerId })

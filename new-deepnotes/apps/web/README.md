@@ -14,7 +14,7 @@ Vue 3 SPA for the greenfield stack. The bundle talks to the API only through [`s
 ## Layout
 
 - `src/api/` — `createDeepnotesApiClient`, generated types (`pnpm run generate:api-types` when `packages/api` changes).
-- `src/features/auth/` — session bootstrap (`/api/sessions/refresh` + `GET /api/users/me` when the `loggedIn` cookie is set), demo login, email/password + 2FA step, shared helpers.
+- `src/features/auth/` — session bootstrap (`/api/sessions/refresh` + `GET /api/users/me` when the `loggedIn` cookie is set), email/password + 2FA step, shared helpers.
 - `src/features/home/` — first shell screen after auth.
 - `src/features/groups/` — `GET /api/users/me/groups` plus per-group `main-page`, `members`, and `pages` (first window) for a read-only [Groups](src/features/groups/GroupsView.vue) screen (`/groups`, signed-in only).
 - `src/features/notifications/` — `GET /api/users/me/notifications` and `POST …/notifications/read` for [Notifications](src/features/notifications/NotificationsView.vue) (`/notifications`, signed-in only; list shows `type` + time, bodies stay encrypted in this MVP).
@@ -28,7 +28,6 @@ Vue 3 SPA for the greenfield stack. The bundle talks to the API only through [`s
 ## Sign-in contract
 
 - **Password login** sends `loginHash` as standard base64 over the UTF-8 bytes of the password. Any future `POST /api/users` registration UI must use the same preimage so Argon2 verification matches.
-- **Demo** uses `POST /api/sessions/demo` with random ciphertext-shaped payloads (see `build-demo-session.ts`).
 
 See also [../docs/AUTH_AND_CORS.md](../docs/AUTH_AND_CORS.md).
 

@@ -61,7 +61,6 @@ export function usePageCollabEditor(opts: {
   const push = useCollabPush({
     ydoc,
     pageId,
-    user,
     isAuthenticated,
     pageKeyring: crypto.pageKeyring,
     client,
@@ -73,7 +72,6 @@ export function usePageCollabEditor(opts: {
 
   const ws = useCollabWebSocket({
     pageId,
-    user,
     pageKeyring: crypto.pageKeyring,
     collabAwareness,
     serverDoc,
@@ -117,7 +115,6 @@ export function usePageCollabEditor(opts: {
 
       const firstData = await loadCollabState({
         pageId: id,
-        user,
         client,
         ydoc,
         collabAwareness,
@@ -146,13 +143,12 @@ export function usePageCollabEditor(opts: {
   );
 
   watch(
-    [collabLoading, loadError, () => crypto.cryptoError.value, pageId, () => user.value?.demo],
+    [collabLoading, loadError, () => crypto.cryptoError.value, pageId],
     () => {
       if (
         collabLoading.value ||
         loadError.value ||
         crypto.cryptoError.value ||
-        user.value?.demo === true ||
         pageId.value === ""
       ) {
         ws.teardownCollabWebSocket();
@@ -169,8 +165,7 @@ export function usePageCollabEditor(opts: {
       const canEdit =
         !collabLoading.value &&
         loadError.value == null &&
-        crypto.cryptoError.value == null &&
-        user.value?.demo !== true;
+        crypto.cryptoError.value == null;
       editorApi.setEditorEditable(canEdit);
     },
     { immediate: true, flush: "post" },

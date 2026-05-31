@@ -36,9 +36,6 @@ export function deepnotesSessionContractHandlers(): RequestHandler[] {
         newSessionKey: stubB64b,
       }),
     ),
-    http.post(`${contractApiBaseUrl}/api/sessions/demo`, async () =>
-      HttpResponse.json({ ...mswSessionLoginSuccess }),
-    ),
     http.post(`${contractApiBaseUrl}/api/sessions/login`, async () =>
       HttpResponse.json({ ...mswSessionLoginSuccess }),
     ),
@@ -54,7 +51,6 @@ export const deepnotesDefaultHandlers = [
     HttpResponse.json({
       userId: "u_msw",
       emailVerified: true,
-      demo: false,
       personalGroupId: "g_msw",
     }),
   ),

@@ -58,7 +58,6 @@ export function usePagePathRealtimeTitles(input: {
   collabGroupCrypto: Ref<CollabGroupCryptoMaterial | null>;
   bootstrapped: Ref<boolean>;
   isAuthenticated: Ref<boolean>;
-  demo: Ref<boolean>;
   collabLoading: Ref<boolean>;
   cryptoError: Ref<string | null>;
 }) {
@@ -73,7 +72,6 @@ export function usePagePathRealtimeTitles(input: {
       () => input.collabGroupCrypto.value,
       () => input.bootstrapped.value,
       () => input.isAuthenticated.value,
-      () => input.demo.value,
       () => input.collabLoading.value,
       () => input.cryptoError.value,
       realtimeUserWsConnected,
@@ -102,7 +100,6 @@ export function usePagePathRealtimeTitles(input: {
       if (
         !input.bootstrapped.value ||
         !input.isAuthenticated.value ||
-        input.demo.value ||
         input.collabLoading.value ||
         input.cryptoError.value != null
       ) {
@@ -119,7 +116,7 @@ export function usePagePathRealtimeTitles(input: {
         return;
       }
 
-      ensureRealtimeUserWs({ demo: input.demo.value });
+      ensureRealtimeUserWs();
       if (!realtimeUserWsConnected.value) {
         return;
       }

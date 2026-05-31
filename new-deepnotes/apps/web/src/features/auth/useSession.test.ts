@@ -6,7 +6,6 @@ const stubB64b = "dGVzdGI=";
 const userMe = {
   userId: "u_test",
   emailVerified: true,
-  demo: false,
   personalGroupId: "g_test",
 };
 
@@ -108,24 +107,6 @@ describe("useSession", () => {
     expect(result).toEqual({ ok: false, needTwoFactor: true });
     expect(twoFactorRequired.value).toBe(true);
     expect(lastError.value).toBe(TWO_FACTOR_MESSAGE);
-  });
-
-  it("loginWithDemo calls demo then loads /me", async () => {
-    mockPost.mockImplementation((path: string) => {
-      if (path === "/api/sessions/demo") {
-        return okFetch(200, loginSuccessNoSalt);
-      }
-      return okFetch(404, undefined as never);
-    });
-    mockGet.mockImplementation((path: string) => {
-      if (path === "/api/users/me") return okFetch(200, { ...userMe, demo: true });
-      return okFetch(404, undefined as never);
-    });
-
-    const { loginWithDemo, user } = useSession();
-    const { ok } = await loginWithDemo();
-    expect(ok).toBe(true);
-    expect(user.value?.demo).toBe(true);
   });
 
   it("logout clears user on 204", async () => {

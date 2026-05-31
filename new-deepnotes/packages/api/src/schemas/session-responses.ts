@@ -25,7 +25,7 @@ export const sessionLoginSuccessSchema = z
     /**
      * Argon2 salt (base64) from the user’s stored password hash so the SPA can
      * derive the same `passwordValues.key` as the server for `UserPrivateKeyring` /
-     * `UserSymmetricKeyring` unwrap. Omitted for `POST /api/sessions/demo`.
+     * `UserSymmetricKeyring` unwrap.
      */
     passwordSalt: z
       .string()

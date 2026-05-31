@@ -11,7 +11,6 @@ import { bytesToBase64 } from "./crypto/bytes.js";
 export type AuthenticatedUserSummary = {
   userId: string;
   emailVerified: boolean;
-  demo: boolean;
   personalGroupId: string;
   encryptedDefaultNote: string;
   encryptedDefaultArrow: string;
@@ -38,7 +37,6 @@ export async function getAuthenticatedUserSummary(input: {
     .select({
       id: users.id,
       emailVerified: users.emailVerified,
-      demo: users.demo,
       personalGroupId: users.personalGroupId,
       encryptedDefaultNote: users.encryptedDefaultNote,
       encryptedDefaultArrow: users.encryptedDefaultArrow,
@@ -55,7 +53,6 @@ export async function getAuthenticatedUserSummary(input: {
   return {
     userId: row.id,
     emailVerified: row.emailVerified,
-    demo: row.demo ?? false,
     personalGroupId: row.personalGroupId,
     encryptedDefaultNote: bytesToBase64(
       new Uint8Array(row.encryptedDefaultNote),
@@ -91,7 +88,6 @@ export async function tryGetAuthenticatedUserSummary(input: {
     .select({
       id: users.id,
       emailVerified: users.emailVerified,
-      demo: users.demo,
       personalGroupId: users.personalGroupId,
       encryptedDefaultNote: users.encryptedDefaultNote,
       encryptedDefaultArrow: users.encryptedDefaultArrow,
@@ -108,7 +104,6 @@ export async function tryGetAuthenticatedUserSummary(input: {
   return {
     userId: row.id,
     emailVerified: row.emailVerified,
-    demo: row.demo ?? false,
     personalGroupId: row.personalGroupId,
     encryptedDefaultNote: bytesToBase64(
       new Uint8Array(row.encryptedDefaultNote),

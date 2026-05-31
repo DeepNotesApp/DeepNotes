@@ -62,13 +62,4 @@ describe("login-rate-limit", () => {
     s = await checkFailedLoginAttempts(redis, email, ip);
     expect(s.excessive).toBe(true);
   });
-
-  it("ignores email counter for literal demo login email (IP must stay low)", async () => {
-    const redis = createMemoryRedis();
-    for (let i = 0; i < 10; i++) {
-      await incrementFailedLoginAttempts(redis, "demo", `10.0.0.${String(i)}`);
-    }
-    const s = await checkFailedLoginAttempts(redis, "demo", "10.0.0.99");
-    expect(s.excessive).toBe(false);
-  });
 });

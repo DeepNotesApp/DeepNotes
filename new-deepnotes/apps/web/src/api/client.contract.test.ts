@@ -48,7 +48,6 @@ describe("createDeepnotesApiClient (MSW contract)", () => {
     expect(data).toMatchObject({
       userId: "u_msw",
       emailVerified: true,
-      demo: false,
       personalGroupId: "g_msw",
     });
   });
@@ -101,21 +100,6 @@ describe("createDeepnotesApiClient (MSW contract)", () => {
       expect(data).toMatchObject({
         oldSessionKey: "dGVzdA==",
         newSessionKey: "dGVzdGI=",
-      });
-    });
-
-    it("POST /api/sessions/demo returns 200 and SessionLoginSuccess", async () => {
-      const client = createDeepnotesApiClient(contractApiBaseUrl);
-      const body = await import("../features/auth/build-demo-session").then((m) =>
-        m.buildSessionDemoRequest(),
-      );
-      const { data, error, response } = await client.POST("/api/sessions/demo", {
-        body,
-      });
-      expect(response.status).toBe(200);
-      expect(error).toBeUndefined();
-      expect(data).toMatchObject({
-        ...mswSessionLoginSuccess,
       });
     });
 

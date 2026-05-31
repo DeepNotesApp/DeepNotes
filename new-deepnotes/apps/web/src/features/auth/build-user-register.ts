@@ -36,7 +36,7 @@ function defaultArrowPacked(): Uint8Array {
 function buildPersonalGroupCreation(input: {
   userKeyPair: KeyPair;
   groupId: string;
-}): components["schemas"]["SessionDemoGroupCreation"] {
+}): UserRegisterRequest["groupCreation"] {
   const accessKeyring = createSymmetricKeyring();
   const internalKeyring = createSymmetricKeyring();
   const contentKeyring = createSymmetricKeyring();

@@ -10,7 +10,7 @@ export type UserEmailChangeConfirmRequest =
   components["schemas"]["UserEmailChangeConfirmRequest"];
 
 function requireSessionKeyringsMessage(): string {
-  return "No keyrings in this browser session. Sign in with email and password (not demo) to use this action.";
+  return "No keyrings in this browser session. Sign in with email and password to use this action.";
 }
 
 export async function buildPasswordChangePayload(input: {

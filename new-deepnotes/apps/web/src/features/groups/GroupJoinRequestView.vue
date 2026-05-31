@@ -128,7 +128,7 @@ async function submit() {
       <AlertTitle>Password sign-in required</AlertTitle>
       <AlertDescription>
         Join requests encrypt your name to the group key. Sign in with your password on
-        this device (demo sessions cannot).
+        this device.
       </AlertDescription>
     </Alert>
 

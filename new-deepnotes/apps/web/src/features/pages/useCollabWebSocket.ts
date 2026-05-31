@@ -13,7 +13,6 @@ import { applyIncomingCollabWsMessage, type CollabWsIncomingContext } from "./pa
 
 export function useCollabWebSocket(opts: {
   pageId: ComputedRef<string>;
-  user: Ref<{ demo?: boolean; userId: string } | null>;
   pageKeyring: Ref<SymmetricKeyring | null>;
   collabAwareness: Awareness;
   serverDoc: Y.Doc;
@@ -23,7 +22,7 @@ export function useCollabWebSocket(opts: {
   collabWsLive?: Ref<boolean>;
   collabWsError?: Ref<string | null>;
 }) {
-  const { pageId, user, pageKeyring, collabAwareness, serverDoc, unackedUpdates } = opts;
+  const { pageId, pageKeyring, collabAwareness, serverDoc, unackedUpdates } = opts;
 
   const collabWsLive = opts.collabWsLive ?? ref(false);
   const collabWsError = opts.collabWsError ?? ref<string | null>(null);
@@ -51,9 +50,6 @@ export function useCollabWebSocket(opts: {
   }
 
   function scheduleAwarenessPush() {
-    if (user.value?.demo === true) {
-      return;
-    }
     if (
       !collabWsLive.value ||
       collabWs == null ||
@@ -146,7 +142,6 @@ export function useCollabWebSocket(opts: {
     const id = pageId.value;
     if (
       !id ||
-      user.value?.demo === true ||
       pageKeyring.value == null ||
       typeof window === "undefined"
     ) {

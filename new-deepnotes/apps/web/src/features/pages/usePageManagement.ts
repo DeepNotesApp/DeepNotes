@@ -4,7 +4,6 @@ import type { DeepnotesApiClient } from "@/api/client";
 import type { Router } from "vue-router";
 
 import { readSessionCrypto } from "../auth/crypto-storage";
-import type { UserMe } from "../auth/useSession";
 import { buildCrossGroupPageMoveReencrypt } from "./page-move-crypto";
 import type { SnapshotRow } from "./page-snapshot-list";
 
@@ -12,7 +11,6 @@ import type { SymmetricKeyring } from "@deepnotes/e2ee";
 
 export function usePageManagement(opts: {
   pageId: ComputedRef<string>;
-  user: Ref<UserMe | null>;
   client: DeepnotesApiClient;
   router: Router;
   collabGroupId: Ref<string | null>;
@@ -29,7 +27,6 @@ export function usePageManagement(opts: {
 }) {
   const {
     pageId,
-    user,
     client,
     router,
     collabGroupId,
@@ -49,7 +46,7 @@ export function usePageManagement(opts: {
     pageOpsMessage.value = null;
     const id = pageId.value;
     const gid = collabGroupId.value;
-    if (!id || gid == null || user.value?.demo === true) {
+    if (!id || gid == null) {
       return;
     }
     if (
@@ -80,7 +77,7 @@ export function usePageManagement(opts: {
   async function softDeleteThisPage() {
     pageOpsMessage.value = null;
     const id = pageId.value;
-    if (!id || user.value?.demo === true) {
+    if (!id) {
       return;
     }
     if (
@@ -106,7 +103,7 @@ export function usePageManagement(opts: {
   async function purgeThisPagePermanently() {
     pageOpsMessage.value = null;
     const id = pageId.value;
-    if (!id || user.value?.demo === true) {
+    if (!id) {
       return;
     }
     if (
@@ -137,7 +134,7 @@ export function usePageManagement(opts: {
     const rel = pageEncRelTitleB64.value;
     const abs = pageEncAbsTitleB64.value;
     const pk = pageKeyring.value;
-    if (!id || srcG == null || user.value?.demo === true) {
+    if (!id || srcG == null) {
       return;
     }
     if (!/^[A-Za-z0-9_-]{21}$/.test(dest)) {

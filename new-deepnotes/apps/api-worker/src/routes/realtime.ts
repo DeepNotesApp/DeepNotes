@@ -42,7 +42,7 @@ app.get("/api/realtime-ws", async (c) => {
   const db = getDbForConnectionString(hyper.connectionString);
   const cookieHeader = c.req.header("Cookie");
 
-  let summary: { userId: string; demo: boolean };
+  let summary: { userId: string };
   try {
     const { getAuthenticatedUserSummary } = await import("@deepnotes/session");
     summary = await getAuthenticatedUserSummary({
@@ -50,15 +50,6 @@ app.get("/api/realtime-ws", async (c) => {
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
     });
-    if (summary.demo) {
-      return c.json(
-        {
-          code: "FORBIDDEN",
-          message: "Demo sessions cannot use realtime WebSocket.",
-        },
-        403,
-      );
-    }
   } catch (e) {
     const { SessionError } = await import("@deepnotes/session");
     if (e instanceof SessionError) {

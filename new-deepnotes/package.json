@@ -19,7 +19,24 @@
   },
   "pnpm": {
     "overrides": {
-      "libsodium-wrappers-sumo": "^0.8.0"
+      "libsodium-wrappers-sumo": "^0.8.0",
+      "@tiptap/core": "3.22.4",
+      "@tiptap/pm": "3.22.4",
+      "@tiptap/extensions": "3.22.4",
+      "@tiptap/extension-bold": "3.22.4",
+      "@tiptap/extension-code": "3.22.4",
+      "@tiptap/extension-text": "3.22.4",
+      "@tiptap/extension-strike": "3.22.4",
+      "@tiptap/extension-italic": "3.22.4",
+      "@tiptap/extension-document": "3.22.4",
+      "@tiptap/extension-paragraph": "3.22.4",
+      "@tiptap/extension-hard-break": "3.22.4",
+      "@tiptap/extension-heading": "3.22.4",
+      "@tiptap/extension-blockquote": "3.22.4",
+      "@tiptap/extension-code-block": "3.22.4",
+      "@tiptap/extension-list": "3.22.4",
+      "@tiptap/extension-bubble-menu": "3.22.4",
+      "@tiptap/extension-floating-menu": "3.22.4"
     }
   },
   "devDependencies": {

@@ -19,12 +19,6 @@ export type { SessionRedisPort } from "./login-rate-limit.js";
 export { signAccessToken, signRefreshToken } from "./jwt.js";
 export { performSessionLogout } from "./logout.js";
 export { performSessionRefresh } from "./refresh.js";
-export { performSessionStartDemo } from "./start-demo.js";
-export type {
-  SessionStartDemoGroupCreation,
-  SessionStartDemoInput,
-  SessionStartDemoPageCreation,
-} from "./start-demo.js";
 export { performUserRegister } from "./register-user.js";
 export type { UserRegisterInput } from "./register-user.js";
 export { performUserAccountDelete } from "./delete-user-account.js";

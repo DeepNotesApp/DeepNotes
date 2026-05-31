@@ -6,7 +6,6 @@ Working checklist for Phase 0 of [docs/RESTART_PLAN.md](../../docs/RESTART_PLAN.
 
 | Legacy procedure | Proposed REST / notes |
 |------------------|----------------------|
-| `sessions.startDemo` | `POST /api/sessions/demo` |
 | `sessions.login` | `POST /api/sessions/login` |
 | `sessions.refresh` | `POST /api/sessions/refresh` |
 | `sessions.logout` | `POST /api/sessions/logout` |

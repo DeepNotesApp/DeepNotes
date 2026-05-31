@@ -5,7 +5,6 @@ import { base64ToBytes } from "@deepnotes/e2ee";
 import type { DeepnotesApiClient } from "@/api/client";
 import type { components } from "@/api/api-types.generated";
 
-import type { UserMe } from "../auth/useSession";
 import { readSessionCrypto } from "../auth/crypto-storage";
 import { clearRemoteCollabAwareness } from "./page-awareness-utils";
 import { decryptPageDocUpdate } from "./page-collab-crypto";
@@ -19,7 +18,6 @@ import { refreshSnapshotList, type SnapshotRow } from "./page-snapshot-list";
  */
 export async function loadCollabState({
   pageId,
-  user,
   client,
   ydoc,
   collabAwareness,
@@ -38,7 +36,6 @@ export async function loadCollabState({
   legacyPlainToImport,
 }: {
   pageId: string;
-  user: Ref<UserMe | null>;
   client: DeepnotesApiClient;
   ydoc: Y.Doc;
   collabAwareness: any;
@@ -115,20 +112,6 @@ export async function loadCollabState({
         ? allUpdates[allUpdates.length - 1]!.index
         : firstData.lastIndex;
 
-    if (user.value?.demo === true) {
-      crypto.cryptoError.value =
-        "Demo sessions do not persist client crypto; sign in with a password account to decrypt page content.";
-      setHydrating(true);
-      try {
-        clearYjsProseMirrorAndLegacyText(ydoc, Y_FRAG_PROSEMIRROR, Y_TEXT_DEFAULT);
-      } finally {
-        setHydrating(false);
-      }
-      push.syncServerDocToYdoc();
-      refreshYMetrics();
-      return firstData;
-    }
-
     const stored = readSessionCrypto();
     if (stored == null) {
       crypto.cryptoError.value =
@@ -136,7 +119,6 @@ export async function loadCollabState({
       void refreshSnapshotList({
         client,
         pageId,
-        user: user.value,
         snapshots,
         snapshotLoading,
       });
@@ -174,7 +156,6 @@ export async function loadCollabState({
         void refreshSnapshotList({
           client,
           pageId,
-          user: user.value,
           snapshots,
           snapshotLoading,
         });
@@ -196,7 +177,6 @@ export async function loadCollabState({
       void refreshSnapshotList({
         client,
         pageId,
-        user: user.value,
         snapshots,
         snapshotLoading,
       });
@@ -243,7 +223,6 @@ export async function loadCollabState({
     void refreshSnapshotList({
       client,
       pageId,
-      user: user.value,
       snapshots,
       snapshotLoading,
     });

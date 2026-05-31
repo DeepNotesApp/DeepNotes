@@ -4,12 +4,9 @@ import { z } from "zod";
 extendZodWithOpenApi(z);
 
 /**
- * Login email: normal address or literal `demo` (legacy `sessions.login` parity).
+ * Login email: normal address.
  */
-export const sessionLoginEmailSchema = z.union([
-  z.string().email(),
-  z.literal("demo"),
-]);
+export const sessionLoginEmailSchema = z.string().email();
 
 /**
  * JSON body for `POST /api/sessions/login`.
@@ -50,7 +47,7 @@ export const byteB64 = z
   })
   .transform((s) => new Uint8Array(Buffer.from(s, "base64")));
 
-const sessionDemoGroupCreationSchema = z
+const userRegisterGroupCreationSchema = z
   .object({
     groupEncryptedName: byteB64,
     groupPasswordHash: byteB64.optional(),
@@ -62,20 +59,20 @@ const sessionDemoGroupCreationSchema = z
     groupEncryptedPrivateKeyring: byteB64,
     groupOwnerEncryptedName: byteB64,
   })
-  .openapi("SessionDemoGroupCreation");
+  .openapi("UserRegisterGroupCreation");
 
-const sessionDemoPageCreationSchema = z
+const userRegisterPageCreationSchema = z
   .object({
     pageEncryptedSymmetricKeyring: byteB64,
     pageEncryptedRelativeTitle: byteB64,
     pageEncryptedAbsoluteTitle: byteB64,
   })
-  .openapi("SessionDemoPageCreation");
+  .openapi("UserRegisterPageCreation");
 
 /**
- * Demo session creation mirrors legacy `sessions.startDemo` input (crypto material + ids).
+ * `POST /api/users` — registration with crypto material + ids.
  */
-export const sessionDemoRequestSchema = z
+export const userRegisterRequestSchema = z
   .object({
     userId: nanoidId,
     groupId: nanoidId,
@@ -86,18 +83,8 @@ export const sessionDemoRequestSchema = z
     userEncryptedName: byteB64,
     userEncryptedDefaultNote: byteB64,
     userEncryptedDefaultArrow: byteB64,
-    groupCreation: sessionDemoGroupCreationSchema,
-    pageCreation: sessionDemoPageCreationSchema,
-  })
-  .openapi("SessionDemoRequest");
-
-export type SessionDemoRequest = z.infer<typeof sessionDemoRequestSchema>;
-
-/**
- * `POST /api/users` — same crypto payload as demo registration plus email and login hash.
- */
-export const userRegisterRequestSchema = sessionDemoRequestSchema
-  .extend({
+    groupCreation: userRegisterGroupCreationSchema,
+    pageCreation: userRegisterPageCreationSchema,
     email: z
       .string()
       .email()

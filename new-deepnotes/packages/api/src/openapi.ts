@@ -12,7 +12,6 @@ import {
   sessionRefreshSuccessSchema,
 } from "./schemas/session-responses.js";
 import {
-  sessionDemoRequestSchema,
   sessionLoginRequestSchema,
   userRegisterRequestSchema,
 } from "./schemas/sessions.js";
@@ -141,7 +140,7 @@ const sessionNotFound404 = {
 } as const;
 
 const sessionForbidden403 = {
-  description: "Action not allowed for this account (e.g. demo user).",
+  description: "Action not allowed for this account.",
   content: {
     "application/json": {
       schema: sessionErrorResponseSchema,
@@ -2135,46 +2134,10 @@ registry.registerPath({
 
 registry.registerPath({
   method: "post",
-  path: "/api/sessions/demo",
-  summary: "Create demo user and session",
-  description:
-    "Replaces legacy `sessions.startDemo`. Request body will match registration key material once defined.",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: sessionDemoRequestSchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      description: "Demo user created; same response shape as login.",
-      content: {
-        "application/json": {
-          schema: sessionLoginSuccessSchema,
-        },
-      },
-    },
-    400: {
-      description: "Validation error (e.g. unsupported group password on demo).",
-      content: {
-        "application/json": {
-          schema: sessionErrorResponseSchema,
-        },
-      },
-    },
-    503: sessionServiceUnavailable503,
-  },
-});
-
-registry.registerPath({
-  method: "post",
   path: "/api/billing/stripe/checkout-session",
   summary: "Create Stripe Checkout (subscription) session",
   description:
-    "Replaces legacy `users.account.stripe.createCheckoutSession`. Resolves or creates a Stripe customer from `users.customer_id` and decrypted account email, then returns a hosted Checkout URL. Requires verified email. Demo accounts receive **403**.",
+    "Replaces legacy `users.account.stripe.createCheckoutSession`. Resolves or creates a Stripe customer from `users.customer_id` and decrypted account email, then returns a hosted Checkout URL. Requires verified email.",
   request: {
     body: {
       content: {

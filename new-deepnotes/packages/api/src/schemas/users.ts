@@ -9,7 +9,6 @@ export const userMeResponseSchema = z
   .object({
     userId: z.string(),
     emailVerified: z.boolean(),
-    demo: z.boolean(),
     personalGroupId: z.string(),
     encryptedDefaultNote: z
       .string()

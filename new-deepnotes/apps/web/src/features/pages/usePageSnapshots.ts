@@ -4,7 +4,6 @@ import type { ComputedRef, Ref } from "vue";
 import { ref } from "vue";
 
 import type { DeepnotesApiClient } from "@/api/client";
-import type { UserMe } from "../auth/useSession";
 import {
   applyYjsFullStateSnapshot,
   buildPageSnapshotSaveBodies,
@@ -17,7 +16,6 @@ export type { SnapshotRow } from "./page-snapshot-list";
 
 export function usePageSnapshots(opts: {
   pageId: ComputedRef<string>;
-  user: Ref<UserMe | null>;
   client: DeepnotesApiClient;
   ydoc: Doc;
   pageKeyring: Ref<SymmetricKeyring | null>;
@@ -28,7 +26,6 @@ export function usePageSnapshots(opts: {
 }) {
   const {
     pageId,
-    user,
     client,
     ydoc,
     pageKeyring,
@@ -45,7 +42,6 @@ export function usePageSnapshots(opts: {
     await refreshSnapshotList({
       client,
       pageId: pageId.value,
-      user: user.value,
       snapshots,
       snapshotLoading,
     });
@@ -55,7 +51,7 @@ export function usePageSnapshots(opts: {
     pageOpsMessage.value = null;
     const id = pageId.value;
     const pk = pageKeyring.value;
-    if (!id || pk == null || user.value?.demo === true) {
+    if (!id || pk == null) {
       return;
     }
     const bodies = buildPageSnapshotSaveBodies({
@@ -85,7 +81,7 @@ export function usePageSnapshots(opts: {
     pageOpsMessage.value = null;
     const id = pageId.value;
     const pk = pageKeyring.value;
-    if (!id || pk == null || user.value?.demo === true) {
+    if (!id || pk == null) {
       return;
     }
     if (
@@ -163,7 +159,7 @@ export function usePageSnapshots(opts: {
   async function deleteSnapshot(snapshotId: string) {
     pageOpsMessage.value = null;
     const id = pageId.value;
-    if (!id || user.value?.demo === true) {
+    if (!id) {
       return;
     }
     if (!confirm("Delete this snapshot permanently?")) {

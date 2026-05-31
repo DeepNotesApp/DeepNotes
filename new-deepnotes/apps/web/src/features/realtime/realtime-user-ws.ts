@@ -145,12 +145,10 @@ function teardownSocket(): void {
 }
 
 /**
- * Ensures the realtime WebSocket is open (cookie-auth upgrade). No-op for demo / SSR.
+ * Ensures the realtime WebSocket is open (cookie-auth upgrade). No-op for SSR.
  */
-export function ensureRealtimeUserWs(input: {
-  demo: boolean;
-}): void {
-  if (input.demo || typeof window === "undefined") {
+export function ensureRealtimeUserWs(): void {
+  if (typeof window === "undefined") {
     teardownSocket();
     return;
   }

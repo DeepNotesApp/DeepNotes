@@ -6,12 +6,6 @@ export type { SessionLoginBody } from "@deepnotes/session-core";
 export type { SessionRedisPort } from "@deepnotes/session-core";
 export { performSessionLogout } from "@deepnotes/session-core";
 export { performSessionRefresh } from "@deepnotes/session-core";
-export { performSessionStartDemo } from "@deepnotes/session-core";
-export type {
-  SessionStartDemoGroupCreation,
-  SessionStartDemoInput,
-  SessionStartDemoPageCreation,
-} from "@deepnotes/session-core";
 export { performUserRegister } from "@deepnotes/session-core";
 export type { UserRegisterInput } from "@deepnotes/session-core";
 export { performUserAccountDelete } from "@deepnotes/session-core";

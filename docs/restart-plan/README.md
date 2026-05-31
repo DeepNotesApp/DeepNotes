@@ -62,7 +62,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done.
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
-- [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
+- [x] **Playwright:** E2E smoke test covers login → home → page → groups → logout.
 - [x] **Package split:** `@deepnotes/session` split into `@deepnotes/session-core`, `@deepnotes/groups`, `@deepnotes/pages`, `@deepnotes/billing`, `@deepnotes/realtime`. Session package now has 8 files (down from 57).
 - [x] **Marketing site:** `apps/marketing` has routable pages for `/`, `/pricing`, `/whitepaper`, `/help`, `/privacy-policy`, `/terms-of-service`. Build outputs 20 static HTML files (including 14 help article sub-routes). `pnpm lint`, `pnpm typecheck`, `pnpm build` pass with 0 errors. Dark/light theme toggle, restored legacy assets (logo, whitepaper diagrams, use-case thumbnails), and Shadcn `Switch`/`Input` components integrated.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms, row rate ≤ 20/page.

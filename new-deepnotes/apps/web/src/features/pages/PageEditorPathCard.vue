@@ -20,7 +20,6 @@ const props = defineProps<{
   isFavorite: boolean;
   bumpMessage: string | null;
   favoriteMessage: string | null;
-  isDemo: boolean;
 }>();
 
 function pagePathLabel(pid: string): string {
@@ -66,7 +65,7 @@ defineEmits<{
         <Button
           size="sm"
           variant="secondary"
-          :disabled="isDemo || pagePrefsLoading"
+          :disabled="pagePrefsLoading"
           @click="$emit('bumpAsStarting')"
         >
           Make starting page
@@ -74,7 +73,7 @@ defineEmits<{
         <Button
           size="sm"
           variant="outline"
-          :disabled="isDemo || pagePrefsLoading"
+          :disabled="pagePrefsLoading"
           @click="$emit('toggleFavorite')"
         >
           {{ isFavorite ? "Remove favorite" : "Add favorite" }}
@@ -90,9 +89,6 @@ defineEmits<{
       </div>
       <p v-if="bumpMessage" class="text-muted-foreground text-xs">{{ bumpMessage }}</p>
       <p v-if="favoriteMessage" class="text-amber-800 dark:text-amber-200 text-xs">{{ favoriteMessage }}</p>
-      <p v-if="isDemo" class="text-muted-foreground text-xs">
-        Demo accounts cannot bump starting page or favorites.
-      </p>
     </CardContent>
   </Card>
 </template>

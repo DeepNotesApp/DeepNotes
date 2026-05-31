@@ -57,10 +57,6 @@ watch(isAuthenticated, (ok) => {
 
 async function applyBuiltInDefaults() {
   defaultsMessage.value = null;
-  if (user.value?.demo === true) {
-    defaultsMessage.value = "Sign in with a password account to update encrypted defaults.";
-    return;
-  }
   defaultsLoading.value = true;
   try {
     const enc = await buildEncryptedUserDefaultTemplatesB64();
@@ -125,10 +121,6 @@ async function applyBuiltInDefaults() {
           <div>
             <dt>Email verified</dt>
             <dd>{{ user.emailVerified ? "yes" : "no" }}</dd>
-          </div>
-          <div>
-            <dt>Demo</dt>
-            <dd>{{ user.demo ? "yes" : "no" }}</dd>
           </div>
           <div>
             <dt>Personal group</dt>
@@ -245,14 +237,11 @@ async function applyBuiltInDefaults() {
           <Button
             size="sm"
             variant="secondary"
-            :disabled="defaultsLoading || user.demo === true"
+            :disabled="defaultsLoading"
             @click="applyBuiltInDefaults()"
           >
             {{ defaultsLoading ? "Saving…" : "Restore built-in defaults" }}
           </Button>
-          <p v-if="user.demo" class="text-muted-foreground text-xs">
-            Demo sessions cannot change encrypted defaults.
-          </p>
           <p v-if="defaultsMessage" class="text-sm" :class="defaultsMessage.startsWith('Default ') ? 'text-muted-foreground' : 'text-amber-800 dark:text-amber-200'">
             {{ defaultsMessage }}
           </p>

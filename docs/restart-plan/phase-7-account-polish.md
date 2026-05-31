@@ -50,7 +50,7 @@ All non-editor UX is polished and tested.
      - `@deepnotes/billing` — Stripe checkout, portal, webhook processing (`stripe-billing.ts`, `stripe-billing.test.ts`).
      - `@deepnotes/collab` — Page collab updates, collab crypto context, snapshots (`page-collab-updates.ts`, `group-collab-crypto-context.ts`).
      - `@deepnotes/realtime` — Hash ACL, notify-users (`realtime-hash-acl.ts`, `notify-users.ts`).
-     - Keep `@deepnotes/session` for auth, login, refresh, register, 2FA, logout, demo, tokens only.
+     - Keep `@deepnotes/session` for auth, login, refresh, register, 2FA, logout, tokens only.
    - Add ESLint rule: `apps/api-worker` route files may import from ≤ 2 domain packages each.
    - Exit criteria: no extracted package exceeds 25 files; `@deepnotes/session` ≤ 20 files.
 
@@ -80,8 +80,8 @@ A full evaluation of TOTP, password change, and email change migration is in [ap
 
 ## Verification
 
-- E2E smoke test: demo login → home → starting page → groups → logout.
-  - `apps/web/e2e/smoke.spec.ts` covers demo login, home page, page editor load, groups list, and logout.
+- E2E smoke test: login → home → starting page → groups → logout.
+  - `apps/web/e2e/smoke.spec.ts` covers login, home page, page editor load, groups list, and logout.
   - Full flow (register → create group → create page → invite member → member joins → both edit page → logout) requires group/page creation UI which is not yet implemented in the SPA.
 - Playwright config updated to start both `api-worker` and `web` dev servers.
 - Integration test: `scheduled-cleanup.integration.test.ts` verifies soft-deleted pages and groups are purged.
@@ -91,7 +91,7 @@ A full evaluation of TOTP, password change, and email change migration is in [ap
 ## Exit criteria
 
 - [x] Scheduler implemented with Cron Trigger and integration test.
-- [x] E2E smoke test covers demo login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
+- [x] E2E smoke test covers login → home → page → groups → logout (full register → create group → invite → edit flow requires group/page creation UI, which is not in Phase 7 scope).
 - [x] `TRPC_REST_MAP.md` route audit: every endpoint marked "implemented" has a registered Hono route in `apps/api-worker`.
 - [x] Group password management UI (enable/change/disable) exists in `GroupDetailView.vue`.
 - [ ] Realtime notification toast or badge surfaces in the app shell (not just the `/notifications` page).

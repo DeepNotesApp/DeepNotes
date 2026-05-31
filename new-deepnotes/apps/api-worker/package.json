@@ -6,7 +6,7 @@
   "scripts": {
     "build": "wrangler build",
     "dev": "wrangler dev",
-    "lint": "eslint .",
+    "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },

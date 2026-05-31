@@ -12,7 +12,6 @@ import { encryptPageDocUpdate } from "./page-collab-crypto";
 export function useCollabPush(opts: {
   ydoc: Y.Doc;
   pageId: ComputedRef<string>;
-  user: Ref<{ demo?: boolean } | null>;
   isAuthenticated: Ref<boolean>;
   pageKeyring: Ref<SymmetricKeyring | null>;
   client: DeepnotesApiClient;
@@ -25,7 +24,6 @@ export function useCollabPush(opts: {
   const {
     ydoc,
     pageId,
-    user,
     isAuthenticated,
     pageKeyring,
     client,
@@ -49,9 +47,6 @@ export function useCollabPush(opts: {
 
   function schedulePush() {
     if (pageKeyring.value == null) {
-      return;
-    }
-    if (user.value?.demo === true) {
       return;
     }
     if (pushTimer != null) {

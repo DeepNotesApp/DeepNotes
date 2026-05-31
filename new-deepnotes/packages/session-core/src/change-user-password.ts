@@ -58,7 +58,6 @@ export async function performUserPasswordChange(input: {
   const userRows = await input.db
     .select({
       id: users.id,
-      demo: users.demo,
       encryptedRehashedLoginHash: users.encryptedRehashedLoginHash,
     })
     .from(users)
@@ -68,14 +67,6 @@ export async function performUserPasswordChange(input: {
   const userRow = userRows[0];
   if (userRow == null) {
     throw new SessionError(404, "NOT_FOUND", "User not found.");
-  }
-
-  if (userRow.demo === true) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is unavailable for demo accounts.",
-    );
   }
 
   const passwordHashValues = getPasswordHashValues(

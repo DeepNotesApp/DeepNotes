@@ -878,52 +878,6 @@ describe.skipIf(resolveTemplateContext() == null)(
       }
     });
 
-    it("password change rejects demo-flagged user", async () => {
-      const env = testSessionEnv();
-      const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;
-      const admin = postgres(ctx.adminUrl, { max: 1 });
-      try {
-        await createDatabaseFromTemplate(admin, cloneName, ctx.templateName);
-      } finally {
-        await admin.end({ timeout: 5 });
-      }
-
-      const cloneUrl = withDatabaseName(baseCtx.appBaseUrl, cloneName);
-      const client = postgres(cloneUrl, { max: 1 });
-      const db = drizzle(client, { schema });
-      try {
-        const email = `d-${nanoid()}@example.com`;
-        const loginHash = rand32();
-        const reg = await buildRegisterBody(email, loginHash);
-        await performUserRegister({ db, env, body: reg });
-        await db.update(users).set({ demo: true }).where(eq(users.id, reg.userId));
-        const access = await signAccessToken({
-          secret: env.ACCESS_SECRET,
-          userId: reg.userId,
-          sessionId: nanoid(),
-        });
-        await expect(
-          performUserPasswordChange({
-            db,
-            env,
-            accessCookie: access,
-            oldLoginHash: loginHash,
-            newLoginHash: rand32(),
-            newEncryptedPrivateKeyring: rand32(),
-            newEncryptedSymmetricKeyring: rand32(),
-          }),
-        ).rejects.toMatchObject({ status: 403, code: "FORBIDDEN" });
-      } finally {
-        await client.end({ timeout: 5 });
-        const admin2 = postgres(ctx.adminUrl, { max: 1 });
-        try {
-          await dropDatabaseIfExists(admin2, cloneName);
-        } finally {
-          await admin2.end({ timeout: 5 });
-        }
-      }
-    });
-
     it("2FA enable/finish persists flags; login succeeds with TOTP", async () => {
       const env = testSessionEnv();
       const cloneName = `dn_test_${randomBytes(8).toString("hex")}`;

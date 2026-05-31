@@ -369,7 +369,7 @@ async function onDisablePassword() {
             </RouterLink>.
           </p>
           <p v-if="!clientCryptoReady()" class="text-amber-800 dark:text-amber-200">
-            Encrypted actions require signing in with your password on this browser (not demo).
+            Encrypted actions require signing in with your password on this browser.
           </p>
         </AlertDescription>
       </Alert>
@@ -401,7 +401,7 @@ async function onDisablePassword() {
             <Button
               size="sm"
               variant="secondary"
-              :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+              :disabled="actionLoading || !clientCryptoReady()"
               @click="onMakeGroupPrivate"
             >
               Make group private…
@@ -418,7 +418,7 @@ async function onDisablePassword() {
             <Button
               size="sm"
               variant="secondary"
-              :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+              :disabled="actionLoading || !clientCryptoReady()"
               @click="onMakeGroupPublic"
             >
               Make group public…
@@ -459,11 +459,11 @@ async function onDisablePassword() {
                   type="password"
                   placeholder="New group password"
                   class="h-8 text-sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                  :disabled="actionLoading || !clientCryptoReady()"
                 />
                 <Button
                   size="sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !enablePasswordInput.trim()"
+                  :disabled="actionLoading || !clientCryptoReady() || !enablePasswordInput.trim()"
                   @click="onEnablePassword"
                 >
                   Enable
@@ -479,18 +479,18 @@ async function onDisablePassword() {
                   type="password"
                   placeholder="Current password"
                   class="h-8 text-sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                  :disabled="actionLoading || !clientCryptoReady()"
                 />
                 <Input
                   v-model="changeNewPasswordInput"
                   type="password"
                   placeholder="New password"
                   class="h-8 text-sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                  :disabled="actionLoading || !clientCryptoReady()"
                 />
                 <Button
                   size="sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !changeCurrentPasswordInput || !changeNewPasswordInput"
+                  :disabled="actionLoading || !clientCryptoReady() || !changeCurrentPasswordInput || !changeNewPasswordInput"
                   @click="onChangePassword"
                 >
                   Change
@@ -506,12 +506,12 @@ async function onDisablePassword() {
                   type="password"
                   placeholder="Current password"
                   class="h-8 text-sm"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true"
+                  :disabled="actionLoading || !clientCryptoReady()"
                 />
                 <Button
                   size="sm"
                   variant="destructive"
-                  :disabled="actionLoading || !clientCryptoReady() || user?.demo === true || !disablePasswordInput"
+                  :disabled="actionLoading || !clientCryptoReady() || !disablePasswordInput"
                   @click="onDisablePassword"
                 >
                   Remove
@@ -523,7 +523,7 @@ async function onDisablePassword() {
             <Button
               size="sm"
               variant="destructive"
-              :disabled="actionLoading || user?.demo === true"
+              :disabled="actionLoading"
               @click="onSoftDeleteGroup"
             >
               Schedule group deletion…
@@ -532,13 +532,13 @@ async function onDisablePassword() {
               size="sm"
               variant="destructive"
               class="ml-0 sm:ml-2"
-              :disabled="actionLoading || user?.demo === true"
+              :disabled="actionLoading"
               @click="onPurgeGroup"
             >
               Purge group permanently…
             </Button>
             <p class="text-muted-foreground text-xs">
-              Soft-deletes the group (grace period). Purge forces permanent deletion when allowed. Demo sessions cannot delete groups.
+              Soft-deletes the group (grace period). Purge forces permanent deletion when allowed.
             </p>
           </div>
         </CardContent>

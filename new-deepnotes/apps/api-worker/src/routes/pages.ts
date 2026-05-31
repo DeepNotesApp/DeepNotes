@@ -344,7 +344,7 @@ app.get("/api/pages/:pageId/collab-ws", async (c) => {
   const db = getDbForConnectionString(hyper.connectionString);
   const cookieHeader = c.req.header("Cookie");
 
-  let summary: { userId: string; demo: boolean };
+  let summary: { userId: string };
   try {
     const { getAuthenticatedUserSummary, assertPageCollabWsConnectionAllowed } =
       await import("@deepnotes/session");
@@ -353,15 +353,6 @@ app.get("/api/pages/:pageId/collab-ws", async (c) => {
       env: sessionEnv,
       accessCookie: readCookieHeader(cookieHeader, "accessToken"),
     });
-    if (summary.demo) {
-      return c.json(
-        {
-          code: "FORBIDDEN",
-          message: "Demo sessions cannot use live collab WebSocket.",
-        },
-        403,
-      );
-    }
     await assertPageCollabWsConnectionAllowed({
       db,
       userId: summary.userId,

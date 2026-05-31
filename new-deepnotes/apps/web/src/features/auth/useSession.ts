@@ -2,7 +2,6 @@ import { computed, ref, type Ref } from "vue";
 
 import { createDeepnotesApiClient } from "../../api/client";
 import type { components } from "../../api/api-types.generated";
-import { buildSessionDemoRequest } from "./build-demo-session";
 import { loginPreimageFromPassword, uint8ToBase64 } from "./bytes";
 import { readDocumentCookie } from "./cookies";
 import {
@@ -122,33 +121,6 @@ export function useSession() {
     await bootstrapInFlight;
   }
 
-  async function loginWithDemo() {
-    loading.value = true;
-    twoFactorRequired.value = false;
-    lastError.value = null;
-    try {
-      const body = await buildSessionDemoRequest();
-      const { data, error, response } = await client.POST(
-        "/api/sessions/demo",
-        { body },
-      );
-      if (response.status === 200 && data) {
-        user.value = null;
-        clearSessionCrypto();
-        await fetchMe();
-        return { ok: true as const };
-      }
-      if (error != null) {
-        setErrorFromBody(error, "Demo session could not be created.");
-      } else {
-        lastError.value = "Demo session could not be created.";
-      }
-      return { ok: false as const };
-    } finally {
-      loading.value = false;
-    }
-  }
-
   async function loginWithPassword(input: {
     email: string;
     password: string;
@@ -236,7 +208,6 @@ export function useSession() {
     loggedInHint,
     bootstrap,
     fetchMe,
-    loginWithDemo,
     loginWithPassword,
     logout,
     clearError: () => {

@@ -431,16 +431,7 @@ async function forgetTrustedDevices() {
       </p>
     </div>
 
-    <Card v-if="user?.demo === true">
-      <CardHeader class="pb-2">
-        <CardTitle class="text-base">Demo account</CardTitle>
-        <CardDescription>
-          Password-backed actions (Stripe, rotate password, encrypted email change confirmation, notifications decrypt) require a registered account signed in from this browser.
-        </CardDescription>
-      </CardHeader>
-    </Card>
-
-    <Card v-if="user && !user.demo">
+    <Card>
       <CardHeader class="pb-2">
         <CardTitle class="text-base">Subscription</CardTitle>
         <CardDescription>
@@ -451,7 +442,7 @@ async function forgetTrustedDevices() {
       <CardContent class="flex flex-wrap gap-2">
         <Button
           :disabled="
-            stripeBusy || !user.emailVerified || loading
+            stripeBusy || !user?.emailVerified || loading
           "
           size="sm"
           variant="secondary"
@@ -461,7 +452,7 @@ async function forgetTrustedDevices() {
         </Button>
         <Button
           :disabled="
-            stripeBusy || !user.emailVerified || loading
+            stripeBusy || !user?.emailVerified || loading
           "
           size="sm"
           variant="secondary"
@@ -479,7 +470,7 @@ async function forgetTrustedDevices() {
         </Button>
       </CardContent>
       <CardFooter class="flex flex-col gap-2 border-t pt-4">
-        <p v-if="!user.emailVerified" class="text-muted-foreground text-xs">
+        <p v-if="user && !user?.emailVerified" class="text-muted-foreground text-xs">
           Verify email first to start checkout (<code class="rounded bg-muted px-1">emailVerified</code>).
         </p>
         <p v-if="stripeError" class="text-destructive text-sm">
@@ -503,7 +494,6 @@ async function forgetTrustedDevices() {
             v-model="pwdCurrent"
             type="password"
             autocomplete="current-password"
-            :disabled="user?.demo ?? true"
           />
         </div>
         <div class="space-y-2">
@@ -513,12 +503,11 @@ async function forgetTrustedDevices() {
             v-model="pwdNext"
             type="password"
             autocomplete="new-password"
-            :disabled="user?.demo ?? true"
           />
         </div>
         <Button
           :disabled="
-            pwdBusy || !(pwdCurrent && pwdNext) || user?.demo !== false || loading
+            pwdBusy || !(pwdCurrent && pwdNext) || loading
           "
           size="sm"
           @click="changePasswordSubmit"
@@ -580,7 +569,7 @@ async function forgetTrustedDevices() {
       </CardContent>
     </Card>
 
-    <Card v-if="user && !user.demo">
+    <Card>
       <CardHeader class="pb-2">
         <CardTitle class="text-base">Change login email</CardTitle>
         <CardDescription>
@@ -624,7 +613,7 @@ async function forgetTrustedDevices() {
       </CardContent>
     </Card>
 
-    <Card v-if="user && !user.demo">
+    <Card>
       <CardHeader class="pb-2">
         <CardTitle class="text-base">Confirm email change</CardTitle>
         <CardDescription>
@@ -687,7 +676,6 @@ async function forgetTrustedDevices() {
             v-model="tfaPwd"
             type="password"
             autocomplete="current-password"
-            :disabled="user?.demo ?? true"
           />
         </div>
         <div class="flex flex-wrap gap-2">
@@ -696,7 +684,6 @@ async function forgetTrustedDevices() {
             :disabled="
               tfaBusy
                 || !tfaPwd
-                || user?.demo
             "
             variant="outline"
             @click="twoFaEnableRequest"
@@ -708,7 +695,6 @@ async function forgetTrustedDevices() {
             :disabled="
               tfaBusy
                 || !tfaPwd
-                || user?.demo
             "
             variant="outline"
             @click="twoFaLoadSecrets"
@@ -718,7 +704,7 @@ async function forgetTrustedDevices() {
           <Button
             size="sm"
             :disabled="
-              tfaRecoveryBusy || !tfaPwd || user?.demo
+              tfaRecoveryBusy || !tfaPwd
             "
             variant="outline"
             @click="regenerateRecoveryCodes"
@@ -728,7 +714,7 @@ async function forgetTrustedDevices() {
           <Button
             size="sm"
             :disabled="
-              tfaBusy || !tfaPwd || user?.demo
+              tfaBusy || !tfaPwd
             "
             variant="outline"
             @click="forgetTrustedDevices"
@@ -738,7 +724,7 @@ async function forgetTrustedDevices() {
           <Button
             size="sm"
             :disabled="
-              tfaBusy || !tfaPwd || user?.demo
+              tfaBusy || !tfaPwd
             "
             variant="destructive"
             @click="twoFaDisable"
@@ -807,7 +793,7 @@ async function forgetTrustedDevices() {
       </CardContent>
     </Card>
 
-    <Card v-if="user && !user.demo">
+    <Card>
       <CardHeader class="pb-2">
         <CardTitle class="text-base text-red-700 dark:text-red-300">Delete account</CardTitle>
         <CardDescription>

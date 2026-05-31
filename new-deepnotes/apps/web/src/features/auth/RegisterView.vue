@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Lock,
   Mail,
-  Sparkles,
   User,
 } from "lucide-vue-next";
 
@@ -26,7 +25,7 @@ import { useSession } from "./useSession";
 import { buildUserRegisterRequest } from "./build-user-register";
 
 const router = useRouter();
-const { client, isAuthenticated, loginWithDemo } = useSession();
+const { client, isAuthenticated } = useSession();
 
 const email = ref("");
 const displayName = ref("");
@@ -40,12 +39,6 @@ onMounted(() => {
     void router.replace({ name: "home" });
   }
 });
-
-async function onDemo() {
-  formError.value = null;
-  const { ok } = await loginWithDemo();
-  if (ok) await router.push({ name: "home" });
-}
 
 async function onSubmit() {
   formError.value = null;
@@ -94,28 +87,6 @@ async function onSubmit() {
           >
             <AlertDescription>{{ formError }}</AlertDescription>
           </Alert>
-
-          <Button
-            class="w-full"
-            :disabled="submitting"
-            type="button"
-            variant="outline"
-            @click="onDemo"
-          >
-            <Sparkles class="mr-2 size-4" />
-            Try the demo
-          </Button>
-
-          <div class="relative">
-            <div class="absolute inset-0 flex items-center">
-              <span class="w-full border-t"></span>
-            </div>
-            <div class="relative flex justify-center text-xs uppercase">
-              <span class="bg-card text-muted-foreground px-2">
-                or sign up with email
-              </span>
-            </div>
-          </div>
 
           <form class="space-y-4" @submit.prevent="onSubmit">
             <div class="space-y-2">

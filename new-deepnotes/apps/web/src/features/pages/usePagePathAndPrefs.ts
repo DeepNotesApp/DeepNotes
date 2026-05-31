@@ -3,7 +3,6 @@ import { computed, ref, watch } from "vue";
 
 import type { DeepnotesApiClient } from "@/api/client";
 
-import type { UserMe } from "../auth/useSession";
 import { useUserPageLists } from "./useUserPageLists";
 
 export function usePagePathAndPrefs(opts: {
@@ -11,9 +10,8 @@ export function usePagePathAndPrefs(opts: {
   bootstrapped: Ref<boolean>;
   isAuthenticated: Ref<boolean>;
   client: DeepnotesApiClient;
-  user: Ref<UserMe | null>;
 }) {
-  const { pageId, bootstrapped, isAuthenticated, client, user } = opts;
+  const { pageId, bootstrapped, isAuthenticated, client } = opts;
 
   const pathPageIds = ref<string[]>([]);
   const pathError = ref<string | null>(null);
@@ -80,7 +78,7 @@ export function usePagePathAndPrefs(opts: {
 
   async function bumpAsStarting() {
     const id = pageId.value;
-    if (!id || user.value?.demo === true) {
+    if (!id) {
       return;
     }
     bumpMessage.value = null;
@@ -101,7 +99,7 @@ export function usePagePathAndPrefs(opts: {
 
   async function toggleFavorite() {
     const id = pageId.value;
-    if (!id || user.value?.demo === true) {
+    if (!id) {
       return;
     }
     favoriteMessage.value = null;

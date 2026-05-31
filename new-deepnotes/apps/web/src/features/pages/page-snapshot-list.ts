@@ -3,19 +3,16 @@ import type { Ref } from "vue";
 import type { DeepnotesApiClient } from "@/api/client";
 import type { components } from "@/api/api-types.generated";
 
-import type { UserMe } from "../auth/useSession";
-
 export type SnapshotRow = components["schemas"]["PageSnapshotListItem"];
 
 export async function refreshSnapshotList(opts: {
   client: DeepnotesApiClient;
   pageId: string;
-  user: UserMe | null;
   snapshots: Ref<SnapshotRow[]>;
   snapshotLoading: Ref<boolean>;
 }): Promise<void> {
-  const { client, pageId, user, snapshots, snapshotLoading } = opts;
-  if (!pageId || user?.demo === true) {
+  const { client, pageId, snapshots, snapshotLoading } = opts;
+  if (!pageId) {
     snapshots.value = [];
     return;
   }

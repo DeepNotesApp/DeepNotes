@@ -77,7 +77,7 @@ export function useGroupInvitationActions({
     const stored = readSessionCrypto();
     if (stored == null) {
       error.value =
-        "Client crypto is not unlocked. Sign in with your account password (not demo) on this device.";
+        "Client crypto is not unlocked. Sign in with your account password on this device.";
       return;
     }
     actionLoading.value = true;

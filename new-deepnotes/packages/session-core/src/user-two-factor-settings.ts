@@ -48,7 +48,6 @@ async function assertPasswordAndLoadUser(input: {
   const userRows = await input.db
     .select({
       id: users.id,
-      demo: users.demo,
       twoFactorAuthEnabled: users.twoFactorAuthEnabled,
       encryptedAuthenticatorSecret: users.encryptedAuthenticatorSecret,
       encryptedRecoveryCodes: users.encryptedRecoveryCodes,
@@ -62,14 +61,6 @@ async function assertPasswordAndLoadUser(input: {
   const userRow = userRows[0];
   if (userRow == null) {
     throw new SessionError(404, "NOT_FOUND", "User not found.");
-  }
-
-  if (userRow.demo === true) {
-    throw new SessionError(
-      403,
-      "FORBIDDEN",
-      "This action is unavailable for demo accounts.",
-    );
   }
 
   const passwordHashValues = getPasswordHashValues(
