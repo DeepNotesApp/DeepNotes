@@ -1,86 +1,45 @@
-import { computed } from "vue";
-import { createSharedComposable } from "@vueuse/shared";
-import { useColorMode } from "@vueuse/core";
+import { ref } from "vue";
 
-const STORAGE_KEY = "deepnotes.theme";
+const STORAGE_KEY = "deepnotes-theme";
+const LEGACY_KEY = "deepnotes.theme";
 
-export type ThemePreference = "light" | "dark" | "system";
-
-/** Map legacy value before VueUse hydration / useColorMode reads storage. */
-export function migrateStoredThemeKey(): void {
+/** One-time migration from the old `deepnotes.theme` key. */
+export function migrateLegacyTheme(): void {
   if (typeof localStorage === "undefined") {
     return;
   }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw === "system") {
-      localStorage.setItem(STORAGE_KEY, "auto");
-    }
-  } catch {
-    /* ignore */
-  }
-}
-
-/**
- * Apply `.dark` from localStorage + `prefers-color-scheme` before `createApp`
- * to reduce incorrect-theme flash.
- */
-export function hydrateThemeFromStorage(): void {
-  if (typeof document === "undefined") {
-    return;
-  }
-  migrateStoredThemeKey();
-
-  let stored: "light" | "dark" | "auto" = "auto";
-  try {
-    if (typeof localStorage !== "undefined") {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw === "light" || raw === "dark") {
-        stored = raw;
-      } else if (raw === "auto") {
-        stored = "auto";
+    const old = localStorage.getItem(LEGACY_KEY);
+    if (old) {
+      if (old === "dark") {
+        localStorage.setItem(STORAGE_KEY, "dark");
       }
+      localStorage.removeItem(LEGACY_KEY);
     }
   } catch {
     /* ignore */
   }
-
-  let prefersDark = false;
-  try {
-    prefersDark =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-  } catch {
-    /* ignore */
-  }
-
-  const dark =
-    stored === "dark" || (stored === "auto" && prefersDark);
-  document.documentElement.classList.toggle("dark", dark);
 }
 
-const useThemePreferenceBase = () => {
-  migrateStoredThemeKey();
+const _isDark = ref(
+  typeof document !== "undefined" &&
+    document.documentElement.classList.contains("dark")
+);
 
-  const colorMode = useColorMode({
-    storageKey: STORAGE_KEY,
-    selector: "html",
-    attribute: "class",
-  });
+/** Reactive dark-mode state. */
+export const isDark = _isDark;
 
-  const preference = computed({
-    get(): ThemePreference {
-      const s = colorMode.store.value;
-      return s === "auto" ? "system" : (s as "light" | "dark");
-    },
-    set(next: ThemePreference) {
-      colorMode.store.value = next === "system" ? "auto" : next;
-    },
-  });
-
-  const resolvedDark = computed(() => colorMode.state.value === "dark");
-
-  return { preference, resolvedDark, colorMode };
-};
-
-export const useThemePreference = createSharedComposable(useThemePreferenceBase);
+/** Toggle dark mode and persist to localStorage. */
+export function toggleTheme(): void {
+  migrateLegacyTheme();
+  const html = document.documentElement;
+  const next = !html.classList.contains("dark");
+  if (next) {
+    html.classList.add("dark");
+    localStorage.setItem(STORAGE_KEY, "dark");
+  } else {
+    html.classList.remove("dark");
+    localStorage.removeItem(STORAGE_KEY);
+  }
+  _isDark.value = next;
+}

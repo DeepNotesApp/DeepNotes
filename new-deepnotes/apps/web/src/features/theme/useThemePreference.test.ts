@@ -6,9 +6,10 @@ import {
   it,
   vi,
 } from "vitest";
-import { hydrateThemeFromStorage, migrateStoredThemeKey } from "./useThemePreference";
+import { migrateLegacyTheme, toggleTheme } from "./useThemePreference";
 
-const KEY = "deepnotes.theme";
+const NEW_KEY = "deepnotes-theme";
+const OLD_KEY = "deepnotes.theme";
 
 describe("theme preference", () => {
   beforeEach(() => {
@@ -20,31 +21,31 @@ describe("theme preference", () => {
     vi.unstubAllGlobals();
   });
 
-  it("migrates legacy system value to auto", () => {
-    localStorage.setItem(KEY, "system");
-    migrateStoredThemeKey();
-    expect(localStorage.getItem(KEY)).toBe("auto");
+  it("migrates legacy dark value to new key", () => {
+    localStorage.setItem(OLD_KEY, "dark");
+    migrateLegacyTheme();
+    expect(localStorage.getItem(NEW_KEY)).toBe("dark");
+    expect(localStorage.getItem(OLD_KEY)).toBeNull();
   });
 
-  it("hydrate applies dark when stored dark", () => {
-    localStorage.setItem(KEY, "dark");
-    hydrateThemeFromStorage();
-    expect(document.documentElement.classList.contains("dark")).toBe(true);
+  it("migrates legacy non-dark value by removing old key only", () => {
+    localStorage.setItem(OLD_KEY, "light");
+    migrateLegacyTheme();
+    expect(localStorage.getItem(NEW_KEY)).toBeNull();
+    expect(localStorage.getItem(OLD_KEY)).toBeNull();
   });
 
-  it("hydrate follows prefers-color-scheme when auto", () => {
-    localStorage.setItem(KEY, "auto");
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn().mockImplementation((q: string) => ({
-        matches: q.includes("dark"),
-        media: q,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    );
-
-    hydrateThemeFromStorage();
+  it("toggle applies dark and persists", () => {
+    toggleTheme();
     expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(localStorage.getItem(NEW_KEY)).toBe("dark");
+  });
+
+  it("toggle removes dark and clears storage", () => {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem(NEW_KEY, "dark");
+    toggleTheme();
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(localStorage.getItem(NEW_KEY)).toBeNull();
   });
 });
