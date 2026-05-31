@@ -140,7 +140,7 @@
 
 | # | Feature | Legacy file(s) | New file(s) | Test file(s) | Status |
 |---|---------|---------------|-------------|--------------|--------|
-| 10.1 | Password-protected group unlock flow | `packages/session/src/group-password.ts` | `features/groups/group-password-unlock.ts` | `group-password.integration.test.ts` | ⬜ |
+| 10.1 | Password-protected group unlock flow | `packages/session/src/group-password.ts` | `features/pages/page-collab-crypto.ts`, `features/pages/useCollabCrypto.ts` | `page-collab-crypto.password-unlock.test.ts` | ✅ |
 
 ---
 

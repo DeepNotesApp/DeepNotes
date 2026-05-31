@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
+
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,8 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-defineProps<{
+const props = defineProps<{
   collabLoading: boolean;
   loadError: string | null;
   cryptoError: string | null;
@@ -17,6 +21,24 @@ defineProps<{
   collabLastIndex: number | null;
   pushError: string | null;
 }>();
+
+const emit = defineEmits<{
+  (e: "unlock-with-password", password: string): void;
+}>();
+
+const passwordInput = ref("");
+const isUnlocking = ref(false);
+
+const isPasswordProtectedError = computed(() =>
+  props.cryptoError != null &&
+  props.cryptoError.toLowerCase().includes("password-protected"),
+);
+
+function onSubmit() {
+  if (!passwordInput.value) return;
+  isUnlocking.value = true;
+  emit("unlock-with-password", passwordInput.value);
+}
 </script>
 
 <template>
@@ -41,6 +63,26 @@ defineProps<{
         <p v-if="loadError" class="text-destructive">
           {{ loadError }}
         </p>
+        <template v-else-if="isPasswordProtectedError">
+          <p class="text-amber-700 dark:text-amber-400">
+            This group is password protected.
+          </p>
+          <form class="flex items-center gap-2" @submit.prevent="onSubmit">
+            <Input
+              v-model="passwordInput"
+              type="password"
+              placeholder="Group password"
+              class="h-8 text-sm"
+              :disabled="isUnlocking"
+            />
+            <Button size="sm" type="submit" :disabled="isUnlocking || !passwordInput">
+              Unlock
+            </Button>
+          </form>
+          <p v-if="cryptoError && !isPasswordProtectedError" class="text-amber-700 dark:text-amber-400">
+            {{ cryptoError }}
+          </p>
+        </template>
         <p v-else-if="cryptoError" class="text-amber-700 dark:text-amber-400">
           {{ cryptoError }}
         </p>

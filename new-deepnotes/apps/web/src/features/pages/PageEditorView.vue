@@ -73,6 +73,7 @@ const {
   pushError,
   yStateBytes,
   flushPush,
+  unlockKeyringWithPassword,
 } = collab;
 
 const {
@@ -144,6 +145,13 @@ const {
   deleteSnapshot,
   saveSnapshotManual,
 } = snapshotsApi;
+
+async function onUnlockWithPassword(password: string) {
+  const ok = await unlockKeyringWithPassword(password);
+  if (ok) {
+    collabReloadNonce.value++;
+  }
+}
 
 onMounted(() => {
   if (!isAuthenticated.value) {
@@ -242,6 +250,7 @@ onMounted(() => {
       :update-count="updateCount"
       :collab-last-index="collabLastIndex"
       :push-error="pushError"
+      @unlock-with-password="onUnlockWithPassword($event)"
     />
 
     <PageEditorTiptapCard

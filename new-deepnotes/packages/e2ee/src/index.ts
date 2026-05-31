@@ -4,6 +4,10 @@
  */
 export { derivePasswordValues, ensureSodiumReady } from "./derive-password.js";
 export {
+  deriveGroupPasswordValues,
+  nanoidToBytes,
+} from "./derive-group-password.js";
+export {
   createPrivateKeyring,
   type PrivateKeyring,
 } from "./private-keyring.js";

@@ -53,6 +53,7 @@ export function usePageCollabEditor(opts: {
   const pageEncAbsTitleB64 = ref<string | null>(null);
   const collabEncryptedUpdatesForMove = ref<Uint8Array[]>([]);
   const collabGroupId = ref<string | null>(null);
+  const lastCollabBootstrapData = ref<components["schemas"]["PageCollabUpdatesGetResponse"] | null>(null);
 
   const serverDoc = new Y.Doc();
   const unackedUpdates = new Map<number, Uint8Array>();
@@ -165,6 +166,7 @@ export function usePageCollabEditor(opts: {
           return;
         }
 
+        lastCollabBootstrapData.value = firstData;
         collabGroupId.value = firstData.groupId;
         pageEncRelTitleB64.value = firstData.pageEncryptedRelativeTitle;
         pageEncAbsTitleB64.value = firstData.pageEncryptedAbsoluteTitle;
@@ -222,7 +224,7 @@ export function usePageCollabEditor(opts: {
         }
 
         try {
-          const unlocked = await crypto.unlockKeyring({
+          const bootstrapData = {
             groupId: firstData.groupId,
             pageEncryptedSymmetricKeyring: base64ToBytes(
               firstData.pageEncryptedSymmetricKeyring,
@@ -238,7 +240,8 @@ export function usePageCollabEditor(opts: {
               firstData.groupAccessKeyring != null
                 ? base64ToBytes(firstData.groupAccessKeyring)
                 : null,
-          });
+          };
+          const unlocked = await crypto.unlockKeyring(bootstrapData);
           if (!unlocked) {
             void refreshSnapshotList({
               client,
@@ -366,6 +369,33 @@ export function usePageCollabEditor(opts: {
     { immediate: true, flush: "post" },
   );
 
+  async function unlockKeyringWithPassword(password: string): Promise<boolean> {
+    const data = lastCollabBootstrapData.value;
+    if (data == null) {
+      return false;
+    }
+    return crypto.unlockKeyringWithPassword(
+      {
+        groupId: data.groupId,
+        pageEncryptedSymmetricKeyring: base64ToBytes(
+          data.pageEncryptedSymmetricKeyring,
+        ),
+        groupEncryptedContentKeyring: base64ToBytes(
+          data.groupEncryptedContentKeyring,
+        ),
+        memberEncryptedAccessKeyring:
+          data.memberEncryptedAccessKeyring != null
+            ? base64ToBytes(data.memberEncryptedAccessKeyring)
+            : null,
+        groupAccessKeyring:
+          data.groupAccessKeyring != null
+            ? base64ToBytes(data.groupAccessKeyring)
+            : null,
+      },
+      password,
+    );
+  }
+
   onBeforeUnmount(() => {
     ws.teardownCollabWebSocket();
     push.teardownPushTimers();
@@ -396,5 +426,6 @@ export function usePageCollabEditor(opts: {
     schedulePush: push.schedulePush,
     flushPush: push.flushPush,
     refreshYMetrics: editorApi.refreshYMetrics,
+    unlockKeyringWithPassword,
   };
 }

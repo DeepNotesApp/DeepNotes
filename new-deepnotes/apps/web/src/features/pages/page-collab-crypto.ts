@@ -7,6 +7,7 @@ import {
   ensureSodiumReady,
   wrapKeyPair,
   wrapSymmetricKey,
+  type SymmetricKey,
   type SymmetricKeyring,
 } from "@deepnotes/e2ee";
 
@@ -37,6 +38,7 @@ export async function unlockPageCollabSymmetricKeyring(input: {
   memberEncryptedAccessKeyring: Uint8Array | null;
   groupAccessKeyring: Uint8Array | null;
   stored: StoredSessionCrypto;
+  groupPasswordKey?: SymmetricKey;
 }): Promise<SymmetricKeyring> {
   await ensureSodiumReady();
   const sessionKey = wrapSymmetricKey(
@@ -81,6 +83,14 @@ export async function unlockPageCollabSymmetricKeyring(input: {
       },
     });
   }
+  if (groupContent.topLayer === DataLayer.Symmetric && input.groupPasswordKey != null) {
+    groupContent = groupContent.unwrapSymmetric(input.groupPasswordKey, {
+      associatedData: {
+        context: "GroupContentKeyringPasswordProtection",
+        groupId: input.groupId,
+      },
+    });
+  }
   if (groupContent.topLayer !== DataLayer.Raw) {
     throw new Error(
       "Group content keyring could not be fully unwrapped (password-protected group?).",
@@ -111,6 +121,7 @@ export async function unwrapGroupContentSymmetricKeyring(input: {
   memberEncryptedAccessKeyring: Uint8Array | null;
   groupAccessKeyring: Uint8Array | null;
   stored: StoredSessionCrypto;
+  groupPasswordKey?: SymmetricKey;
 }): Promise<SymmetricKeyring> {
   await ensureSodiumReady();
   const sessionKey = wrapSymmetricKey(
@@ -151,6 +162,14 @@ export async function unwrapGroupContentSymmetricKeyring(input: {
     groupContent = groupContent.unwrapSymmetric(accessRing, {
       associatedData: {
         context: "GroupContentKeyring",
+        groupId: input.groupId,
+      },
+    });
+  }
+  if (groupContent.topLayer === DataLayer.Symmetric && input.groupPasswordKey != null) {
+    groupContent = groupContent.unwrapSymmetric(input.groupPasswordKey, {
+      associatedData: {
+        context: "GroupContentKeyringPasswordProtection",
         groupId: input.groupId,
       },
     });

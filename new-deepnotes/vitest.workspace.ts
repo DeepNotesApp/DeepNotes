@@ -11,4 +11,5 @@ export default defineWorkspace([
   "packages/session/vitest.config.ts",
   "packages/collab-wire/vitest.config.ts",
   "packages/realtime-wire/vitest.config.ts",
+  "packages/e2ee/vitest.config.ts",
 ]);
