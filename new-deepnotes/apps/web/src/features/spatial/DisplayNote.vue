@@ -13,6 +13,7 @@ const props = defineProps<{
   isDropTarget?: boolean;
   childModels?: Array<{ id: string; model: NoteModel }>;
   parentColor?: string | null;
+  posOverride?: { x: number; y: number };
 }>();
 
 const emit = defineEmits<{
@@ -61,9 +62,9 @@ const headFrag = computed(() => props.model.head.value.value);
 const bodyFrag = computed(() => props.model.body.value.value);
 
 const transform = computed(() => {
-  const { x, y } = props.model.pos.value;
+  const pos = props.posOverride ?? props.model.pos.value;
   const style: Record<string, string | number> = {
-    transform: `translate(${x}px, ${y}px)`,
+    transform: `translate(${pos.x}px, ${pos.y}px)`,
     width: props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`,
     zIndex: props.model.zIndex.value,
   };
@@ -90,7 +91,7 @@ const frameClasses = computed(() => {
     ro ? "opacity-60 cursor-not-allowed" : "",
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
-    props.selected ? "ring-2 ring-primary" : "",
+    props.selected ? "ring-2 ring-[#2196f3]" : "",
     props.isDropTarget ? "ring-2 ring-accent ring-offset-2" : "",
     ro ? "ring-1 ring-destructive/30" : "",
   ];

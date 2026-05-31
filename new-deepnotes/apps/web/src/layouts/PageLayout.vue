@@ -1,26 +1,7 @@
 <script setup lang="ts">
-import { computed, provide, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { provide, ref } from "vue";
 
-import { Button } from "@/components/ui/button";
-import { useSession } from "@/features/auth/useSession";
-import { unreadNotificationCount } from "@/features/notifications/useNotificationBadge";
-import ThemeSwitcher from "@/features/theme/ThemeSwitcher.vue";
-import { isDark } from "@/features/theme/useThemePreference";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  Menu,
-  PanelLeft,
-  PanelRight,
-} from "lucide-vue-next";
-
-const { isAuthenticated, bootstrapped, loading, logout, user } = useSession();
-
-const marketingUrl =
-  import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/$/, "") ||
-  "https://deepnotes.app";
+import MainToolbar from "@/features/spatial/MainToolbar.vue";
 
 // --- sidebar state ---
 const leftExpanded = ref(true);
@@ -64,13 +45,6 @@ function onResizePointerUp(e: PointerEvent) {
     /* ignore */
   }
 }
-
-async function onLogout() {
-  await logout();
-}
-
-const headerHeightClass = "h-11";
-const headerHeightPx = 44;
 </script>
 
 <template>
@@ -78,96 +52,14 @@ const headerHeightPx = 44;
     class="bg-background text-foreground fixed inset-0 z-0 flex flex-col overflow-hidden select-none"
   >
     <!-- === Header toolbar === -->
-    <header
-      class="border-border/40 bg-background/95 flex flex-none items-center border-b backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      :class="headerHeightClass"
+    <MainToolbar
+      :left-expanded="leftExpanded"
+      :right-expanded="rightExpanded"
+      @toggle-left="toggleLeft"
+      @toggle-right="toggleRight"
     >
-      <!-- Left: sidebar toggle + logo -->
-      <div class="flex flex-none items-center gap-1 pl-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          class="h-8 w-8 shrink-0"
-          @click="toggleLeft"
-        >
-          <PanelLeft v-if="leftExpanded" class="h-4 w-4" />
-          <ChevronRight v-else class="h-4 w-4" />
-        </Button>
-
-        <a
-          :href="marketingUrl"
-          class="flex items-center gap-2 text-sm font-semibold tracking-tight transition-opacity hover:opacity-80"
-        >
-          <img
-            :src="isDark ? '/white-logo-outline.webp' : '/black-logo.png'"
-            alt="DeepNotes"
-            class="h-5 w-5"
-          />
-          <span class="hidden sm:inline">DeepNotes</span>
-        </a>
-      </div>
-
-      <!-- Center: breadcrumb path (slot) -->
-      <div class="flex min-w-0 flex-1 items-center justify-center px-2">
-        <slot name="toolbar-center" />
-      </div>
-
-      <!-- Right: global nav + theme + sidebar toggle -->
-      <div class="flex flex-none items-center gap-1 pr-1">
-        <nav v-if="bootstrapped && isAuthenticated" class="hidden items-center gap-1 md:flex">
-          <Button as-child size="sm" variant="ghost">
-            <RouterLink to="/pages">Pages</RouterLink>
-          </Button>
-          <Button as-child size="sm" variant="ghost">
-            <RouterLink to="/groups">Groups</RouterLink>
-          </Button>
-          <Button as-child size="sm" variant="ghost" class="relative">
-            <RouterLink to="/notifications">
-              Notifications
-              <span
-                v-if="unreadNotificationCount > 0"
-                class="bg-primary text-primary-foreground absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold"
-              >
-                {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
-              </span>
-            </RouterLink>
-          </Button>
-          <Button as-child size="sm" variant="ghost">
-            <RouterLink to="/account">Account</RouterLink>
-          </Button>
-        </nav>
-
-        <ThemeSwitcher />
-
-        <template v-if="bootstrapped">
-          <template v-if="!isAuthenticated">
-            <Button as-child variant="ghost" size="sm">
-              <RouterLink to="/login">Sign in</RouterLink>
-            </Button>
-          </template>
-          <template v-else>
-            <Button
-              :disabled="loading"
-              size="sm"
-              variant="ghost"
-              @click="onLogout"
-            >
-              Sign out
-            </Button>
-          </template>
-        </template>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          class="h-8 w-8 shrink-0"
-          @click="toggleRight"
-        >
-          <PanelRight v-if="rightExpanded" class="h-4 w-4" />
-          <ChevronLeft v-else class="h-4 w-4" />
-        </Button>
-      </div>
-    </header>
+      <slot name="toolbar-center" />
+    </MainToolbar>
 
     <!-- === Body: sidebars + canvas === -->
     <div class="flex flex-1 overflow-hidden">

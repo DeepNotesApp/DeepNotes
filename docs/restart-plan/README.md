@@ -80,17 +80,17 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82 rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete.
 - **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
 - **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, timestamps) are not exposed.
-- **Toolbar is inline markup, not a reusable component.** `PageLayout.vue` contains the header shell directly; there is no `MainToolbar.vue` component. Missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
+- **`MainToolbar.vue` extracted as standalone component.** `PageLayout.vue` now delegates to `MainToolbar.vue` for the header shell. Still missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
 - **Arrow labels fixed.** `DisplayArrow.vue` now uses `NoteTiptapEditor` on `Y.XmlFragment` instead of raw `<input>`. Proper collaborative rich-text editing.
 - **Arrow geometry now reads actual note heights.** `DisplayNote.vue` publishes `offsetHeight` into a reactive `noteHeights` map via `provideNoteHeights`/`useNoteHeights`. `DisplayArrow.vue` reads heights from the map instead of hardcoding `80px`.
-- **Note drag uses `Teleport` overlay but position tracking is incomplete.** `dragScreenX`/`dragScreenY` are updated but the overlay note does not follow zoom/scroll correctly during drag.
+- **Note drag `Teleport` overlay fixed.** Overlay now applies `scale(zoom)` and uses `posOverride` so the preview tracks the cursor correctly at all zoom levels.
 - **Page state screens exist but 4 states are indistinguishable.** `page-deleted`, `group-deleted`, `invited`, `rejected` all map to the same generic error UI because the API does not return distinct error codes.
 - **Context menu exists for canvas but not for individual notes.** `CanvasContextMenu.vue` (right-click on empty canvas) is implemented. No per-note context menu exists.
 
 ### Other gaps
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **Composable size** — `useGroupMembersDetail.ts` (103 lines) and `usePageCollabEditor.ts` (238 lines) are now under the 300-line limit. `useSpatialPage.ts` (308 lines) still exceeds by a small margin.
+- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 

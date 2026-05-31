@@ -1009,7 +1009,7 @@ onUnmounted(() => {
         :style="{
           left: `${dragScreenX}px`,
           top: `${dragScreenY}px`,
-          transform: 'translate(-50%, -50%)',
+          transform: `translate(-50%, -50%) scale(${canvasRef?.zoom ?? 1})`,
         }"
       >
         <DisplayNote
@@ -1018,6 +1018,7 @@ onUnmounted(() => {
           :zoom="canvasRef?.zoom ?? 1"
           :selected="false"
           :child-models="[]"
+          :pos-override="{ x: 0, y: 0 }"
         />
       </div>
     </Teleport>

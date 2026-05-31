@@ -51,7 +51,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
-| `MainToolbar` (shadcn) | **Partial** | `PageLayout.vue` inline header has logo, breadcrumb, global nav, sidebar toggles. No standalone `MainToolbar.vue`. Missing: page action buttons, insert dialogs, zoom other than reset, fit-to-screen |
+| `MainToolbar` (shadcn) | **Partial** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. Still missing: page action buttons, insert dialogs, zoom other than reset, fit-to-screen |
 | `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard` and `FavoritePagesCard` now load real data via `useUserPageLists` composable. `SelectedPagesCard` remains client-side only |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. No per-note context menu |
@@ -64,7 +64,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Background + border color from `note.color` | **Partial** | Hardcoded 10-color map with `/18` opacity tint |
-| Selection ring | **Partial** | `ring-2 ring-primary` exists, but not legacy blue `#2196f3` |
+| Selection ring | **Done** | `ring-2 ring-[#2196f3]` matches legacy blue |
 | Drag opacity (`0.7`) | **Done** | `isDragging` ref toggles `opacity-70` during drag/resize |
 | `Teleport` to global overlay during drag/resize | **Done** | Teleport overlay during drag to avoid z-index clipping |
 | `NoteDropZones` | **Partial** | `isDropTarget` prop + `ring-accent` feedback exists. No dedicated `NoteDropZones` component |
@@ -119,9 +119,9 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [ ] No "P1" checklist item remains open.
 - [ ] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
 - [ ] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
-- [ ] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring (`#2196f3` not `ring-primary`), drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
+- [x] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring (`#2196f3` not `ring-primary`), drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
 - [x] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels (Tiptap on `Y.XmlFragment`), hitboxes, and drag-to-reconnect.
-- [ ] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
+- [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
 - [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

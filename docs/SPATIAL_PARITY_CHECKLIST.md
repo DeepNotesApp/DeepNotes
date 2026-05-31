@@ -33,9 +33,9 @@
 | 1.10 | Head/body height tracking (expanded/collapsed) | `note-collab.ts` | `note-model.ts:head.height, body.height` | **Done** | `note-model.test.ts` |
 | 1.11 | Note color mapping (10-color hardcoded map) | `DisplayNote/NoteColor.ts` | `DisplayNote.vue:resolvedColor` | **Partial** | — |
 | 1.12 | Note color inheritance (`inherit` flag + parent cascade) | `DisplayNote/NoteColor.ts` | `DisplayNote.vue:resolvedColor` | **Done** | — |
-| 1.13 | Selection ring (`ring-2 ring-primary`) | `DisplayNote/NoteSelection.ts` | `DisplayNote.vue:frameClasses` | **Partial** | — |
+| 1.13 | Selection ring (`ring-2 ring-[#2196f3]`) | `DisplayNote/NoteSelection.ts` | `DisplayNote.vue:frameClasses` | **Done** | — |
 | 1.14 | Drag opacity (`0.7`) | `DisplayNote/NoteDrag.ts` | `DisplayNote.vue:isDragging` | **Done** | — |
-| 1.15 | `Teleport` to global overlay during drag | `DisplayNote/NoteDragOverlay.ts` | `SpatialPageView.vue:Teleport overlay` | **Partial** | — |
+| 1.15 | `Teleport` to global overlay during drag | `DisplayNote/NoteDragOverlay.ts` | `SpatialPageView.vue:Teleport overlay` | **Done** | — |
 | 1.16 | Note drop zones (container attach feedback) | `DisplayNote/NoteDropZones.ts` | `DisplayNote.vue:isDropTarget` | **Partial** | — |
 | 1.17 | Arrow handles (4 directional dots) | `DisplayNote/ArrowHandles.ts` | `DisplayNote.vue:arrow handles` | **Partial** | — |
 | 1.18 | Link icon (external link indicator) | `DisplayNote/NoteLinkIcon.vue` | `DisplayNote.vue:ExternalLink icon` | **Done** | — |
@@ -171,7 +171,7 @@
 | # | Feature | Legacy reference | New file(s) | Status | Test file |
 |---|---------|------------------|-------------|--------|-----------|
 | 12.1 | Fullscreen immersive shell | `PagesLayout.vue` | `PageLayout.vue` | **Done** | — |
-| 12.2 | Main toolbar (logo, breadcrumb, global nav) | `MainToolbar.vue` | `PageLayout.vue:inline header` | **Partial** | — |
+| 12.2 | Main toolbar (logo, breadcrumb, global nav) | `MainToolbar.vue` | `MainToolbar.vue` | **Done** | — |
 | 12.3 | Toolbar page action buttons | `MainToolbar/Actions.vue` | — | **Not started** | — |
 | 12.4 | Left sidebar (resizable, collapsible) | `LeftSidebar.vue` | `PageLayout.vue:left aside` | **Done** | — |
 | 12.5 | Left sidebar — Current path | `LeftSidebar/CurrentPath.vue` | `PageEditorView.vue:Path card` | **Done** | — |
