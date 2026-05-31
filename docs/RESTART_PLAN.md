@@ -1,9 +1,9 @@
 # DeepNotes — Restart (greenfield) plan — v4
 
 > **Last updated:** 2026-06-01  
-> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group password unlock).** **Phase 7 account/billing/groups polish partially complete (see §7 for open gaps).**  
+> **Status:** Phase 0 foundation complete. Phase 1 spatial checklist complete. **Phase 2 backend parity verified.** **Phase 3 collab wire parity complete.** **Phase 4 SPA routing + lint complete.** **Phase 5 spatial canvas MVP core interactions complete.** **Phase 6 spatial canvas polish complete (selection, clipboard, alignment, distribution, undo/redo, find/replace, read-only UI, collapsing notes, color inheritance, drag-into-container, 8-handle resize, drag-from-edge arrows, full Tiptap head/body editors, templates, backlinks, group password unlock).** **Phase 7 account/billing/groups polish partially complete (see §7 for open gaps).** **Marketing/help/pricing/whitepaper surfaces entirely missing (see §0.4 gap 15).**  
 > **This document replaces all prior restart plan versions.** If a prior statement conflicts with this one, this version wins.  
-> **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap and routing/product-model divergence newly documented.
+> **Analyzed:** 2026-05-30 — additional gaps identified in §0.2–0.4, §3, §4, §6–8. Collab protocol gap, routing/product-model divergence, and **complete absence of marketing/help/pricing/whitepaper surfaces** newly documented.
 
 ---
 
@@ -24,7 +24,7 @@
 | **SPA auth + routing** | `apps/web/src/features/auth/*`, `router.ts` | Done | Login, register, demo, logout, 2FA UI, account page, group pages, notifications. |
 | **Page management UI** | `apps/web/src/features/pages/*` | Partial | Bump, favorite, recent, snapshots, soft-delete, restore, purge, move, path breadcrumb. |
 | **Rich-text editor** | `apps/web/src/features/pages/PageEditorTiptapCard.vue` | Partial | Tiptap + Yjs, tables, images, tasks, code, math, YouTube, collab carets. |
-| **Marketing site** | `apps/marketing/` | Done | `vite-ssg` placeholder. |
+| **Marketing site** | `apps/marketing/` | **Placeholder only** | `vite-ssg` single-page shell. No homepage, pricing, whitepaper, help, or legal pages. |
 | **Spatial / world canvas** | `apps/web/src/features/spatial/*` | **In progress** | Drag-to-move notes, double-click create, arrows rendered, page-level Yjs doc wired. Tiptap editors inside notes, resize, arrow creation UI, container schema/model/rendering complete, drag-into-container complete. |
 | **Collab pagination** | `GET /api/pages/:pid/collab-updates` | Done | `?sinceIndex=` + `?limit=` (default 100, max 500). Client loops. |
 | **Scheduler / cleanup** | `packages/session/src/scheduled-cleanup.ts` | Done | Cron Trigger (`0 3 * * *`) + integration test. |
@@ -163,6 +163,12 @@ These were found during the v3–v4 analysis and must be addressed in the phases
 14. **`PageCollabRoom` broadcast has no backpressure throttling**
     - The DO calls `this.broadcast()` synchronously for every connected socket. Under high load (many clients, rapid edits), DO CPU time could exceed Cloudflare limits.
     - **Fix:** Add a simple broadcast queue or at least document the limit in `docs/COLLAB_DO_ARCHITECTURE.md`.
+
+15. **Marketing/help/pricing/whitepaper/legal pages are entirely missing**
+    - Legacy `apps/client` embedded a full public-facing site within the Quasar SPA: homepage (hero video, feature sections, use-case thumbnails, pricing teaser), dedicated `/pricing` page (plan comparison, billing toggle, Stripe + RevenueCat purchase flows), `/whitepaper` (markdown-rendered technical document with sticky nav and diagrams), `/help` index + 10 articles, `/privacy-policy`, `/terms-of-service`, `/articles/comparing-obsidian`, and `/download`.
+    - New `apps/marketing` is a single static `App.vue` card with one sentence of copy and an "Open app" button. `apps/web` has no routes for `/pricing`, `/help`, `/whitepaper`, `/privacy-policy`, `/terms-of-service`, or `/articles`.
+    - **Impact:** Zero public marketing surface. No SEO, no onboarding funnel, no trust signals, no conversion path. The homepage is not a landing page; `HomeView.vue` is an authenticated app dashboard.
+    - **Fix:** Add Vue Router to `apps/marketing` and create page components for homepage, pricing, whitepaper, help index + articles, privacy policy, and terms of service. Migrate whitepaper markdown into static files. Add plan cards and Stripe CTA to pricing. Add legal pages before any public deployment. This is not a "polish" task — it is a missing product surface that blocks launch.
 
 ---
 
@@ -808,6 +814,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 | **Routing divergence (page vs spatial)** | Medium | User confusion, broken bookmarks | Decide in Phase 4. Communicate clearly if URLs change. |
 | **No Playwright = no E2E gate** | Medium | Regressions slip into production | Add skeleton in Phase 0; build smoke test in Phase 7. |
 | **Legacy schema fields omitted in new model** | Medium | Subtle data-loss or UI bugs | Enforce Phase 1 schema diff table as a hard gate before Phase 3 coding. |
+| **Marketing/help/pricing pages missing** | **High** | **No public onboarding, no SEO, no conversion, blocks launch** | Add as a dedicated deliverable before Phase 8 cutover. Do not treat as "polish." |
 
 ---
 
@@ -834,6 +841,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks (`PageEditorBacklinksCard.vue`). Titles are encrypted; UI shows page IDs with links and delete action.
 - [x] **Playwright:** E2E smoke test covers demo login → home → page → groups → logout.
+- [ ] **Marketing site:** `apps/marketing` has routable pages for `/` (homepage with hero + features), `/pricing` (plan cards + Stripe CTA), `/whitepaper` (markdown content), `/help` (index + articles), `/privacy-policy`, `/terms-of-service`. Build outputs static HTML for each route.
 - [ ] **Staging:** Hyperdrive + Postgres + Redis + WS proven in staging. Load test: 50 concurrent pages, p95 latency < 200 ms.
 - [x] **Scheduler:** Cron Trigger (`0 3 * * *`) wired to `performScheduledCleanup` with integration test.
 - [ ] **Cutover:** 100 random legacy pages decrypt correctly. 24-hour canary error < 0.1%.
@@ -895,6 +903,7 @@ What v4 adds beyond v3:
 - **Routing/product-model divergence.** `/pages/:pageId` will become the spatial canvas; `/spatial` stub is removed. Legacy has no such split. Phase 4 must resolve this before Phase 5.
 - **Schema incompleteness risk.** The proposed Phase 3 schema omitted ~10 legacy fields. Phase 1 now requires a complete diff table as a hard gate.
 - **Missing infrastructure.** No `vitest.workspace.ts`, no Playwright, no collab pagination, no `ydoc.on('updateV2')` listener. Phase 0 now includes all of these.
+- **Marketing/help/pricing/whitepaper surfaces entirely missing.** `apps/marketing` is a single-card placeholder. No public onboarding, SEO, or conversion path exists. This is a launch-blocking gap, not polish.
 
 What must happen now:
 1. **Fix the test foundation (Phase 0).** No agent should add features while tests are broken. Split `usePageCollabEditor`, fix ACK logic, add `updateV2` listener, add pagination, add Playwright.
@@ -902,6 +911,7 @@ What must happen now:
 3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike and incremental bootstrap.
 4. **Resolve routing divergence (Phase 4).** Make `/pages/:pageId` the spatial canvas and integrate the Tiptap editor as a note component.
 5. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo).
-6. **Verify everything with automated tests.** Every phase has objective exit criteria.
+6. **Build marketing/help/pricing/whitepaper surfaces.** Add Vue Router to `apps/marketing`, migrate content from legacy, and create static routable pages. This is a launch blocker, not polish.
+7. **Verify everything with automated tests.** Every phase has objective exit criteria.
 
-Retire the legacy repo only when spatial parity, auth smoke, and data checks are proven.
+Retire the legacy repo only when spatial parity, marketing surfaces, auth smoke, and data checks are proven.
