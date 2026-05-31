@@ -272,10 +272,10 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 ## Verification
 
-- [x] Checklist contains ≥ 60 rows. (Current count: **82 rows**)
+- [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. (Many UI items still lack component tests.)
-- [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~40+ UI/interaction rows marked "Done" have "—" in the Test file column. These must be downgraded to "Partial" or tests must be added.
+- [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---
 

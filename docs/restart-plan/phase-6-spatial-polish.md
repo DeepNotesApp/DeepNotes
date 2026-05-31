@@ -108,21 +108,24 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). (Missing: `DisplayNote.vue`, `DisplayArrow.vue`, `SpatialPageView.vue`, sidebar/toolbar integration tests.)
-- [ ] Phase 1 checklist is >80% marked done. (`docs/SPATIAL_PARITY_CHECKLIST.md` created with 82 rows; count Done vs Partial/Stub/Not started.)
+- [ ] Each deliverable has a test (unit, component, or integration). **Major gaps remain:** `DisplayNote.vue` (only basic render tests), `DisplayArrow.vue` (no tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction tests, box selection tests, arrow creation/reconnection tests, sidebar/toolbar integration tests.
+- [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
 
 ## Exit criteria
 
 - [x] `docs/SPATIAL_PARITY_CHECKLIST.md` exists and is reviewed for completeness.
-- [ ] Phase 1 checklist ≥ 80% complete.
+- [ ] Phase 1 checklist ≥ 80% complete. **NOT MET.**
 - [ ] No "P1" checklist item remains open.
-- [ ] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
-- [ ] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
-- [x] `DisplayNote.vue` matches legacy note visuals: colors, borders, selection ring (`#2196f3` not `ring-primary`), drag opacity, Teleport overlay, drop zones, arrow handles, link icon, 8 resize handles.
-- [x] `DisplayArrow.vue` supports curve + line bodies, arrow heads, labels (Tiptap on `Y.XmlFragment`), hitboxes, and drag-to-reconnect.
+- [x] `PageEditorView.vue` renders as a full-screen immersive shell (no scrolling card page).
+- [x] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
+- [ ] `DisplayNote.vue` matches legacy note visuals. **PARTIAL.** Colors use hardcoded 10-color map instead of legacy `colorNameToColorHex` with `lightenByRatio`. Drop zones, arrow handles, and frame styling are simplified. No custom scrollbar handling.
+- [ ] `DisplayArrow.vue` supports full legacy arrow behavior. **PARTIAL.** Curve/line bodies and heads work, but line body lacks rectangle-edge intersection, interregional arrows don't transform coordinate spaces, and `fakePos`/`looseEndpoint` are not rendered.
 - [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
 - [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
+- [ ] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Currently 1,070 lines.
+- [ ] Selection implements `bringToTop`, formatting integration, and active element/region navigation.
+- [ ] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

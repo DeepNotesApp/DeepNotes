@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 complete. 73/82 checklist items done (89%). Arrow source/target anchor positioning and fit-to-screen implemented. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 re-evaluated. Status corrected from "Complete" to "In Progress". See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -15,7 +15,7 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **In Progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | In progress | [phase-9-production.md](phase-9-production.md) |
@@ -77,7 +77,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82 rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete.
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete. **Many rows marked "Done" lack automated tests**, violating the checklist's own rule. Strict enforcement would reduce the effective completion rate significantly.
 - **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
 - **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, timestamps) are not exposed.
 - **`MainToolbar.vue` extracted as standalone component.** `PageLayout.vue` now delegates to `MainToolbar.vue` for the header shell. Still missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
@@ -86,11 +86,18 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **Note drag `Teleport` overlay fixed.** Overlay now applies `scale(zoom)` and uses `posOverride` so the preview tracks the cursor correctly at all zoom levels.
 - **Page state screens exist but 4 states are indistinguishable.** `page-deleted`, `group-deleted`, `invited`, `rejected` all map to the same generic error UI because the API does not return distinct error codes.
 - **Context menu exists for canvas but not for individual notes.** `CanvasContextMenu.vue` (right-click on empty canvas) is implemented. No per-note context menu exists.
+- **Arrow geometry is oversimplified.** New `DisplayArrow.vue` uses center-point math. Legacy had rectangle-edge intersection for `bodyType === 'line'`, interregional coordinate transforms, and `fakePos`/`looseEndpoint` rendering.
+- **No `PageElem` abstraction.** Legacy notes and arrows inherit from `PageElem`, sharing selected/active/editing/visible/region state. New code treats them as completely separate types.
+- **No `editing` state management.** Legacy tracks which element is being edited, stopping editing when clicking elsewhere. New relies on Tiptap's internal focus, which can lead to conflicting edits.
+- **Container rendering lacks legacy depth.** `stretchChildren`, `wrapChildren`, `originOffset`, and overflow detection are in the model but not enforced in rendering. Spatial vs non-spatial container distinction is not fully implemented.
+- **`SpatialPageView.vue` is a 1,070-line god component.** Legacy distributed responsibility across `Page`, `PageNotes`, `PageArrows`, `PageSelection`, `PageCamera`, `NoteDragging`, `NoteResizing`, etc. The monolithic component violates the spirit of the "No composable > 300 lines" success criterion.
+- **Selection lacks legacy depth.** No `bringToTop` on selection, no formatting integration across selected editors, no active element/region meaningful UI or keyboard navigation. `selectAll` only selects root notes, not descendant arrows.
+- **Missing floating UI:** back/forward nav, screenshot, user avatars on canvas.
 
 ### Other gaps
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`.
+- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`. **However, `SpatialPageView.vue` is a 1,070-line god component that violates the spirit of this criterion.**
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 
