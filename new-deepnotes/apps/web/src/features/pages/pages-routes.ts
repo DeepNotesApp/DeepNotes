@@ -9,6 +9,7 @@ export const pagesRoutes: RouteRecordRaw[] = [
   {
     path: "/pages/:pageId",
     name: "page",
+    meta: { layout: "page" },
     component: () => import("./PageEditorView.vue"),
   },
   {

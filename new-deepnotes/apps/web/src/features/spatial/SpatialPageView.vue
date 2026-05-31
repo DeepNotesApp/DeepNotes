@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
+import { Button } from "@/components/ui/button";
+import { Undo, Redo, RotateCcw } from "lucide-vue-next";
+
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
@@ -32,6 +35,7 @@ const canvasRef = ref<{
   camY: number;
   zoom: number;
   rootEl: HTMLElement | null;
+  resetView: () => void;
 } | null>(null);
 
 const undoRedo = useSpatialUndoRedo(props.ydoc);
@@ -504,88 +508,140 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-2">
-    <div class="text-muted-foreground text-xs">
-      Double-click on the canvas to create a note. Scroll to pan, Ctrl+scroll to
-      zoom. Click a note to select, Ctrl+click to multi-select, drag on empty
-      canvas to box-select, Ctrl+A to select all, then press Delete to remove.
-      Shift+click another note to connect with an arrow, or drag the small
-      handles that appear on selected note edges to draw an arrow.
-      Ctrl+Shift+L/C/R/T/M/B aligns selected notes; H/V distributes them.
-    </div>
-    <div class="relative">
-      <SpatialWorldCanvas
-        ref="canvasRef"
-        @dblclick="onCanvasDoubleClick"
-        @pointerdown="onCanvasPointerDown"
-        @pointermove="onCanvasPointerMove"
-        @pointerup="onCanvasPointerUp"
-      >
-        <DisplayArrow
-          v-for="arrow in arrowList"
-          :key="arrow.id"
-          :model="arrow.model"
-          :source-model="noteById.get(arrow.model.source.value)"
-          :target-model="noteById.get(arrow.model.target.value)"
-          :selected="selection.isSelected(arrow.id)"
-          @select="selection.select(arrow.id, 'arrow')"
-          @toggle="selection.toggle(arrow.id, 'arrow')"
-        />
-        <DisplayNote
-          v-for="note in notesByZIndex"
-          :id="note.id"
-          :key="note.id"
-          :model="note.model"
-          :zoom="canvasRef?.zoom ?? 1"
-          :selected="selection.isSelected(note.id)"
-          :child-models="
-            note.model.container.children.value
-              .map((childId) => {
-                const model = noteById.get(childId);
-                return model ? { id: childId, model } : null;
-              })
-              .filter((m): m is NonNullable<typeof m> => m !== null)
-          "
-          @select="selection.select(note.id, 'note')"
-          @toggle="selection.toggle(note.id, 'note')"
-          @shift-click="
-            selection.activeId.value && selection.activeId.value !== note.id
-              ? createArrow(selection.activeId.value, note.id, props.defaultArrowTemplate)
-              : undefined
-          "
-          @arrow-drag-start="onArrowDragStart($event.noteId)"
-          @dragend="onNoteDragEnd"
-        />
-      </SpatialWorldCanvas>
-
-      <!-- box selection overlay -->
-      <div
-        v-if="selection.boxSelecting.value && selection.boxRect.value"
-        class="pointer-events-none absolute z-50 border border-primary bg-primary/10"
-        :style="{
-          left: `${selection.boxRect.value.x}px`,
-          top: `${selection.boxRect.value.y}px`,
-          width: `${selection.boxRect.value.width}px`,
-          height: `${selection.boxRect.value.height}px`,
-        }"
+  <div class="relative flex h-full w-full flex-col">
+    <SpatialWorldCanvas
+      ref="canvasRef"
+      class="flex-1"
+      @dblclick="onCanvasDoubleClick"
+      @pointerdown="onCanvasPointerDown"
+      @pointermove="onCanvasPointerMove"
+      @pointerup="onCanvasPointerUp"
+    >
+      <DisplayArrow
+        v-for="arrow in arrowList"
+        :key="arrow.id"
+        :model="arrow.model"
+        :source-model="noteById.get(arrow.model.source.value)"
+        :target-model="noteById.get(arrow.model.target.value)"
+        :selected="selection.isSelected(arrow.id)"
+        @select="selection.select(arrow.id, 'arrow')"
+        @toggle="selection.toggle(arrow.id, 'arrow')"
       />
+      <DisplayNote
+        v-for="note in notesByZIndex"
+        :id="note.id"
+        :key="note.id"
+        :model="note.model"
+        :zoom="canvasRef?.zoom ?? 1"
+        :selected="selection.isSelected(note.id)"
+        :child-models="
+          note.model.container.children.value
+            .map((childId) => {
+              const model = noteById.get(childId);
+              return model ? { id: childId, model } : null;
+            })
+            .filter((m): m is NonNullable<typeof m> => m !== null)
+        "
+        @select="selection.select(note.id, 'note')"
+        @toggle="selection.toggle(note.id, 'note')"
+        @shift-click="
+          selection.activeId.value && selection.activeId.value !== note.id
+            ? createArrow(selection.activeId.value, note.id, props.defaultArrowTemplate)
+            : undefined
+        "
+        @arrow-drag-start="onArrowDragStart($event.noteId)"
+        @dragend="onNoteDragEnd"
+      />
+    </SpatialWorldCanvas>
 
-      <!-- arrow drag preview line -->
-      <svg
-        v-if="previewLine"
-        class="pointer-events-none absolute inset-0 z-50 overflow-visible"
+    <!-- box selection overlay -->
+    <div
+      v-if="selection.boxSelecting.value && selection.boxRect.value"
+      class="pointer-events-none absolute z-50 border border-primary bg-primary/10"
+      :style="{
+        left: `${selection.boxRect.value.x}px`,
+        top: `${selection.boxRect.value.y}px`,
+        width: `${selection.boxRect.value.width}px`,
+        height: `${selection.boxRect.value.height}px`,
+      }"
+    />
+
+    <!-- arrow drag preview line -->
+    <svg
+      v-if="previewLine"
+      class="pointer-events-none absolute inset-0 z-50 overflow-visible"
+    >
+      <line
+        :x1="previewLine.x1"
+        :y1="previewLine.y1"
+        :x2="previewLine.x2"
+        :y2="previewLine.y2"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-dasharray="4 4"
+        class="text-primary"
+      />
+    </svg>
+
+    <!-- === Floating UI === -->
+    <!-- Right-side camera + undo/redo buttons -->
+    <div
+      class="pointer-events-none absolute top-14 right-3 bottom-3 z-20 flex flex-col items-end justify-start gap-1.5"
+    >
+      <div class="pointer-events-auto flex flex-col items-end gap-1.5">
+        <!-- Zoom % -->
+        <div
+          class="bg-card border-border flex h-8 items-center justify-center rounded-md border px-2 text-xs font-medium shadow-sm"
+        >
+          {{ Math.round((canvasRef?.zoom ?? 1) * 100) }}%
+        </div>
+
+        <!-- Reset zoom -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Reset zoom"
+          @click="canvasRef?.resetView()"
+        >
+          <RotateCcw class="h-4 w-4" />
+        </Button>
+
+        <!-- Undo -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Undo (Ctrl+Z)"
+          :disabled="!undoRedo.canUndo()"
+          @click="undoRedo.undo()"
+        >
+          <Undo class="h-4 w-4" />
+        </Button>
+
+        <!-- Redo -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Redo (Ctrl+Shift+Z)"
+          :disabled="!undoRedo.canRedo()"
+          @click="undoRedo.redo()"
+        >
+          <Redo class="h-4 w-4" />
+        </Button>
+      </div>
+
+      <!-- Spacer pushes bottom items down -->
+      <div class="flex-1" />
+
+      <!-- Bottom-right: selection count -->
+      <div
+        v-if="selection.selected.value.length > 0"
+        class="bg-card border-border pointer-events-auto rounded-md border px-2 py-1 text-xs shadow-sm"
       >
-        <line
-          :x1="previewLine.x1"
-          :y1="previewLine.y1"
-          :x2="previewLine.x2"
-          :y2="previewLine.y2"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-dasharray="4 4"
-          class="text-primary"
-        />
-      </svg>
+        {{ selection.selected.value.length }} item{{ selection.selected.value.length === 1 ? "" : "s" }} selected
+      </div>
     </div>
   </div>
 </template>

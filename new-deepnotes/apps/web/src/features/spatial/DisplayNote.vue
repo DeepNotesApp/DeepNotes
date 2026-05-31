@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { ChevronDown, ChevronRight } from "lucide-vue-next";
+import { ChevronDown, ChevronRight, ExternalLink } from "lucide-vue-next";
 import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 
@@ -59,14 +59,18 @@ const transform = computed(() => {
   return style;
 });
 
+const isDragging = ref(false);
+
 const frameClasses = computed(() => {
   const ro = props.model.readOnly.value;
   const movable = props.model.movable.value && !ro;
   return [
-    "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none",
-    ro ? "opacity-70" : "",
+    "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none transition-opacity",
+    ro ? "opacity-60" : "",
+    isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
     props.selected ? "ring-2 ring-primary" : "",
+    ro ? "ring-1 ring-destructive/30" : "",
   ];
 });
 
@@ -100,6 +104,7 @@ function onPointerDown(e: PointerEvent) {
   noteStartX = props.model.pos.value.x;
   noteStartY = props.model.pos.value.y;
   hasDragged = false;
+  isDragging.value = true;
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
   el.style.cursor = "grabbing";
@@ -131,6 +136,7 @@ function onPointerUp(e: PointerEvent) {
     }
   }
   el.style.cursor = props.model.movable.value ? "grab" : "";
+  isDragging.value = false;
   if (hasDragged) {
     hasDragged = false;
     emit("dragend", props.id);
@@ -158,6 +164,7 @@ function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   const w = props.model.width.value.expanded;
   resizeStartWidth = w === "Auto" ? 160 : parseFloat(w);
   resizeStartPosX = props.model.pos.value.x;
+  isDragging.value = true;
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
 }
@@ -186,6 +193,7 @@ function onResizePointerUp(e: PointerEvent) {
   if (resizePointerId !== e.pointerId) return;
   resizePointerId = null;
   resizeHandle = null;
+  isDragging.value = false;
   const el = e.currentTarget as HTMLElement;
   if (el.releasePointerCapture) {
     try {
@@ -225,6 +233,20 @@ function toggleCollapsed() {
       <span v-if="!model.head.enabled.value" class="text-muted-foreground flex-1 truncate">
         Note
       </span>
+      <span v-else class="flex-1" />
+
+      <!-- Link icon -->
+      <a
+        v-if="model.link.value"
+        :href="model.link.value"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-muted-foreground hover:text-primary pointer-events-auto ml-auto"
+        title="Open link"
+        @pointerdown.stop
+      >
+        <ExternalLink class="h-3 w-3" />
+      </a>
     </div>
 
     <!-- head editor -->

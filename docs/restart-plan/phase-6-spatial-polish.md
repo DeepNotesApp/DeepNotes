@@ -50,10 +50,10 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 ### 6. Immersive page layout and state screens
 | Item | Status | Notes |
 |------|--------|-------|
-| Fullscreen `PageEditorView.vue` shell | **Not started** | Still a `max-w-3xl` card stack in `DefaultLayout.vue` |
-| `MainToolbar` (shadcn) | **Not started** | No page-specific toolbar exists |
-| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Not started** | Zero sidebar infrastructure on page route |
-| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Not started** | No property panels exist |
+| Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
+| `MainToolbar` (shadcn) | **Done** | Header with logo, breadcrumb path, global nav, sidebar toggles |
+| `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar with path + collab status; Recent/Favorites/Selected sections pending |
+| `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | Collapsible sidebar with snapshots, management, backlinks; Note/Arrow properties pending |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Not started** | No context menu on canvas |
 | `LoadingOverlay` during page bootstrap | **Partial** | Inline loading text in cards only |
 | Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Not started** | `DefaultLayout.vue` does the opposite |
@@ -65,12 +65,12 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 |------|--------|-------|
 | Background + border color from `note.color` | **Partial** | Hardcoded 10-color map with `/18` opacity tint |
 | Selection ring | **Partial** | `ring-2 ring-primary` exists, but not legacy blue `#2196f3` |
-| Drag opacity (`0.7`) | **Not started** | No opacity change during drag |
+| Drag opacity (`0.7`) | **Done** | `isDragging` ref toggles `opacity-70` during drag/resize |
 | `Teleport` to global overlay during drag/resize | **Not started** | Notes drag inside parent; no overlay portal |
 | `NoteDropZones` | **Not started** | No invisible drop zones on container notes |
 | `NoteArrowHandles` — 4 directional arrow handles | **Partial** | 4 small dots exist, but not full arrow-creation flow |
 | `ArrowLinkZones` | **Not started** | No edge zones for arrow reconnection |
-| `NoteLinkIcon` (external link indicator) | **Not started** | No link icon when `link.url` set |
+| `NoteLinkIcon` (external link indicator) | **Done** | `ExternalLink` icon shown in header when `link.value` set |
 | `NoteResizeHandles` — 8 handles | **Done** | NW, N, NE, E, SE, S, SW, W with correct cursors |
 | Scrollbar handling in `NoteContent` | **Not started** | No pull-to-refresh prevention |
 | Note frame `border-radius`, shadow, min-width | **Partial** | `rounded-md border shadow-sm` used; exact pixel parity untested |
@@ -80,13 +80,13 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 ### 8. Arrow visual parity (legacy style, no Quasar)
 | Item | Status | Notes |
 |------|--------|-------|
-| Curve body (`CurveArrow.vue`) | **Not started** | Only straight SVG `<line>` exists |
-| Line body (`LineArrow.vue`) | **Partial** | Straight line is default, but no `bodyType` switching |
-| Arrow heads (`OpenHead.vue`) | **Not started** | No arrowheads rendered |
+| Curve body (`CurveArrow.vue`) | **Done** | Quadratic bezier with perpendicular offset; `bodyType === 'curve'` |
+| Line body (`LineArrow.vue`) | **Done** | Straight line when `bodyType === 'line'` |
+| Arrow heads (`OpenHead.vue`) | **Done** | SVG `<marker>` chevron heads; `sourceHead`/`targetHead` supported |
 | Arrow label (editable `Y.XmlFragment`) | **Not started** | No label support |
-| Hitbox (thick invisible stroke) | **Not started** | Thin `cursor-pointer` line only |
+| Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
 | Drag-to-reconnect | **Not started** | No endpoint grabbing |
-| Color matching note color logic | **Not started** | Stroke uses `currentColor` or `var(--primary)` |
+| Color matching note color logic | **Done** | Arrow color mapped via same 10-color map as notes |
 
 ### 9. Find and replace
 | Item | Status | Notes |

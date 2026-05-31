@@ -4,6 +4,7 @@ import { RouterView, useRoute } from "vue-router";
 
 import AuthLayout from "@/layouts/AuthLayout.vue";
 import DefaultLayout from "@/layouts/DefaultLayout.vue";
+import PageLayout from "@/layouts/PageLayout.vue";
 
 import { useSession } from "./features/auth/useSession";
 import {
@@ -17,6 +18,7 @@ const route = useRoute();
 
 const layout = computed(() => {
   if (route.meta.layout === "auth") return AuthLayout;
+  if (route.meta.layout === "page") return PageLayout;
   return DefaultLayout;
 });
 

@@ -51,7 +51,7 @@ function onAuxClick(e: MouseEvent) {
   <div
     ref="rootRef"
     data-testid="spatial-world-canvas"
-    class="border-border bg-muted/15 touch-none relative isolate min-h-[min(60vh,520px)] overflow-hidden rounded-md border select-none"
+    class="border-border bg-muted/15 touch-none relative isolate h-full overflow-hidden rounded-md border select-none"
     :class="rootCursorClass"
     @wheel.prevent="onWheel"
     @pointerdown="onPointerDown"
