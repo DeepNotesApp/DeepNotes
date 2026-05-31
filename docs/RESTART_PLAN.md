@@ -162,15 +162,34 @@ These were found during the v3–v4 analysis and must be addressed in the phases
 
 14. **`PageCollabRoom` broadcast has no backpressure throttling**
     - The DO calls `this.broadcast()` synchronously for every connected socket. Under high load (many clients, rapid edits), DO CPU time could exceed Cloudflare limits.
-    - **Fix:** Add a simple broadcast queue or at least document the limit in `docs/COLLAB_DO_ARCHITECTURE.md`.
+    - **Fix:** Chunk broadcast into batches of 10 sockets with `Promise.all`, or add a `maxConnections` guard. Document the limit and recommended max concurrent editors per page in `docs/COLLAB_DO_ARCHITECTURE.md`.
 
-15. **Marketing/help/pricing/whitepaper/legal pages are entirely missing**
+15. **No update squashing / buffering in new collab server**
+    - Legacy `collab-server` used Redis Lua scripts (`bufferizePageUpdate`, `flushPageUpdateBuffer`, `squashPageUpdates`) to buffer high-frequency edits and squash them into fewer Postgres rows. The new `collab-ws-append` route inserts **one row per keystroke** with no buffering layer.
+    - **Impact:** At 60 WPM with 5 concurrent editors, a page generates ~18,000 `page_updates` rows per hour. Over months this creates severe table bloat, slow bootstrap, and expensive storage.
+    - **Fix:** Add a `page_updates_buffer` mechanism. Options:
+      - **Option A (DO alarm):** `PageCollabRoom` buffers updates in DO `storage` and flushes/squashes via `alarm()` every 30–60s.
+      - **Option B (Redis):** Reintroduce Upstash Redis hash per page; batch-insert on flush.
+      - **Option C (Postgres-only):** `performTrustedAppendNextPageCollabUpdate` accumulates N updates into one squashed row before insert.
+    - **Decision required before Phase 3 coding.** Document in `docs/COLLAB_DO_ARCHITECTURE.md`.
+
+16. **No per-message auth revocation check in `PageCollabRoom`**
+    - Legacy `collab-server` re-validated session and group membership on **every incoming message** (`_handleDocSingleUpdateMessage` checks `sessionInvalidated`, `role`, `plan`). The new DO only validates auth once at WS upgrade time (`assertPageCollabWsConnectionAllowed` in the HTTP route).
+    - **Impact:** If a user's session is invalidated or they are removed from a group **after** WS connect, the DO continues relaying their edits indefinitely. This is a security gap.
+    - **Fix:** Add a lightweight `checkStillAllowed(userId, pageId)` call inside `PageCollabRoom` before processing `SINGLE_UPDATE` messages. Cache the result in DO state with a 30-second TTL to avoid a DB round-trip per keystroke. Close the socket with code `1008` if auth is revoked.
+
+17. **Realtime SSE bridge disconnect causes missed `DATA_NOTIFICATION`s**
+    - `UserRealtimeRoom` subscribes to Upstash Redis via an SSE loop (`_dataUpdateBridgeAborters`). If the SSE connection drops, subscribers in that DO miss updates until the 1.5s backoff reconnect completes.
+    - **Impact:** Cross-isolate realtime subscribers (e.g., user B in another DO) may observe stale hash data for 1–3 seconds after an HSET. For collaborative UI state (selection, presence) this causes visible inconsistency.
+    - **Fix:** Add a sequence number to `DATA_NOTIFICATION` messages so clients can detect gaps and re-SUBSCRIBE. Alternatively, switch from SSE polling to Redis pub/sub (Upstash supports `SUBSCRIBE`) for lower-latency delivery.
+
+18. **Marketing/help/pricing/whitepaper/legal pages are entirely missing**
     - Legacy `apps/client` embedded a full public-facing site within the Quasar SPA: homepage (hero video, feature sections, use-case thumbnails, pricing teaser), dedicated `/pricing` page (plan comparison, billing toggle, Stripe + RevenueCat purchase flows), `/whitepaper` (markdown-rendered technical document with sticky nav and diagrams), `/help` index + 10 articles, `/privacy-policy`, `/terms-of-service`, `/articles/comparing-obsidian`, and `/download`.
     - New `apps/marketing` is a single static `App.vue` card with one sentence of copy and an "Open app" button. `apps/web` has no routes for `/pricing`, `/help`, `/whitepaper`, `/privacy-policy`, `/terms-of-service`, or `/articles`.
     - **Impact:** Zero public marketing surface. No SEO, no onboarding funnel, no trust signals, no conversion path. The homepage is not a landing page; `HomeView.vue` is an authenticated app dashboard.
     - **Fix:** Add Vue Router to `apps/marketing` and create page components for homepage, pricing, whitepaper, help index + articles, privacy policy, and terms of service. Migrate whitepaper markdown into static files. Add plan cards and Stripe CTA to pricing. Add legal pages before any public deployment. This is not a "polish" task — it is a missing product surface that blocks launch.
 
-16. **`PageEditorView.vue` is a scrolling admin page, not an immersive spatial canvas**
+19. **`PageEditorView.vue` is a scrolling admin page, not an immersive spatial canvas**
     - The legacy `PagesLayout.vue` is a full-screen `q-layout` with `user-select: none`, `overflow: hidden`, persistent `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu`. The new `PageEditorView.vue` renders a vertical stack of Shadcn cards on a standard scrolling page (`PageEditorPathCard`, `PageEditorSnapshotsCard`, `PageEditorManagementCard`, `PageEditorBacklinksCard`, `SpatialPageView`, `PageEditorCollabStatusCard`, `PageEditorTiptapCard`). This destroys the spatial-native experience.
     - **Notes and arrows must retain legacy rendering style** (background/border colors, selection ring, drag opacity, drop zones, arrow handles, link icons, resize handles, arrow curves/heads/labels, hitboxes) but implemented without Quasar classes (Tailwind + shadcn primitives only). The rest of the app shell (sidebar, toolbar, admin cards, state screens) uses shadcn.
     - **Fix:** Rebuild `PageEditorView.vue` as an immersive full-screen spatial shell. Move admin cards into a collapsible `RightSidebar` (shadcn). Move path navigation into a `MainToolbar` breadcrumb (shadcn). The canvas (`SpatialPageView`) must occupy the full viewport. Add dedicated fullscreen state screens for `page-nonexistent`, `page-deleted`, `group-deleted`, `invited`, `rejected`, `unauthorized`, `password`. Remove `PageEditorTiptapCard.vue` from the page route; Tiptap lives only inside `DisplayNote.vue`.
@@ -498,6 +517,19 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - If it bundles and re-renders correctly when Yjs maps change, document Option A in `docs/SPATIAL_ARCHITECTURE_DECISION.md`.
    - If it fails, spike Option C (hybrid reactive proxy) and document the decision.
 
+7. **Update squashing / buffering mechanism**
+   - Select and implement one of the options from §0.4 gap 15 (DO alarm, Redis buffer, or Postgres batching).
+   - If using DO alarm: `PageCollabRoom` stores updates in `this.ctx.storage`, calls `this.ctx.storage.setAlarm()` after first buffered update, and flushes on alarm callback. Flush merges all buffered updates into one squashed `page_updates` row and clears the buffer.
+   - If using Postgres batching: `performTrustedAppendNextPageCollabUpdate` accumulates N updates or waits T seconds before inserting.
+   - **Goal:** Reduce row creation rate from one-per-keystroke to one-per-30–60-seconds of sustained editing.
+   - Document the chosen strategy in `docs/COLLAB_DO_ARCHITECTURE.md`.
+
+8. **Per-message auth revocation check in `PageCollabRoom`**
+   - Before processing any `SINGLE_UPDATE`, call a lightweight auth check: `assertStillAllowed(userId, pageId)`.
+   - Cache the result in DO state with a 30-second TTL to avoid DB round-trips per keystroke.
+   - On failure, close the socket with code `1008` and log the revocation reason.
+   - Unit test: simulate WS connect → mock auth success → emit update → mock auth failure → assert socket closed.
+
 **Verification:**
 - Unit test: create a `YPageDoc`, add a note with full field set, encode state, decode state, assert every field matches.
 - Integration test: two clients connect to `PageCollabRoom` via WS; client A creates a note; client B receives the update and the note appears in its Yjs doc within 2 seconds.
@@ -510,6 +542,8 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 - [x] `docs/COLLAB_DO_ARCHITECTURE.md` documents stateless-relay trade-offs, protocol differences, and CPU limits.
 - [x] `docs/SPATIAL_ARCHITECTURE_DECISION.md` documents SyncedStore vs hybrid proxy decision.
 - [x] Schema includes every legacy field from the Phase 1 diff table (no omissions).
+- [ ] Update squashing mechanism implemented and tested: 50 rapid edits produce ≤ 2 `page_updates` rows.
+- [ ] `PageCollabRoom` closes socket (code `1008`) when auth is revoked mid-session (unit test).
 
 ---
 
@@ -815,6 +849,7 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
    - Hyperdrive connected to staging Postgres.
    - Upstash Redis staging instance.
    - Load test: 50 concurrent collab pages, verify WS latency < 200 ms p95.
+   - **Load test must also monitor `page_updates` row creation rate.** During sustained editing (5 users × 60 WPM × 10 minutes), assert that squashing keeps new rows ≤ 20 per page. If > 1000 rows/hour, the squashing mechanism is insufficient.
 
 2. **Mobile shells (deferred from original plan)**
    - Capacitor for iOS/Android (if product requires it).
@@ -851,6 +886,9 @@ The new `usePageCollabEditor` only syncs a ProseMirror `Y.XmlFragment`. We need 
 | **Worker CPU limits under collab load** | Medium | Dropped connections | Load test early (Phase 8 staging). If DO CPU is the bottleneck, shard `PageCollabRoom` by page ID prefix. |
 | **God-object state returns** | Medium | Unmaintainable code | Cap composable size at 300 lines. If `useSpatialViewport.ts` grows beyond that, split into `useCamera`, `usePanning`, `useZooming`. |
 | **`page_updates` format migration** | Medium | Data corruption or unreadable legacy pages | Decide Option A/B in Phase 3 before any spatial collab code. Test decrypt of 100 random legacy pages after migration. |
+| **`page_updates` row explosion (no squashing)** | **High** | Table bloat, slow bootstrap, expensive storage | Implement buffering/squashing in Phase 3 (gap 15). Monitor `page_updates` row count per page in staging load test. Alert if > 1000 new rows/hour. |
+| **Stale auth sessions in collab DO** | Medium | Revoked users continue editing; security gap | Implement per-message `checkStillAllowed` with 30s TTL cache in Phase 3 (gap 16). Unit test revocation mid-session. |
+| **Realtime SSE bridge missed updates** | Medium | Cross-isolate subscribers see stale data for 1–3s | Add sequence numbers to `DATA_NOTIFICATION` or switch to Redis pub/sub. Document in `docs/REALTIME_BRIDGE_ARCHITECTURE.md`. |
 | **DO hibernation drops WS state** | Medium | Users see collab reconnects | `PageCollabRoom` is stateless relay, so hibernation is safe. Document in `docs/COLLAB_DO_ARCHITECTURE.md`. If stateful DO chosen later, implement reconnect protocol. |
 | **i18n / SSR regressions** | Low | Accessibility, SEO, share-ability loss | Document as accepted v2 regressions or schedule recovery. |
 | **Group password not implemented** | Low | Users cannot access password-protected groups in new app | Add to Phase 7. If deferred, document v2 scope. |
@@ -878,6 +916,8 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Backend parity:** Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing automated test (unit or integration).
 - [ ] **Collab:** `PageCollabRoom` integration test: two clients sync note creation via WS within 2 seconds.
 - [ ] **Collab pagination:** `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and returns ≤ 100 rows.
+- [ ] **Collab update squashing:** 50 rapid edits from a single client produce ≤ 2 `page_updates` rows. Staging load test monitors row creation rate per page.
+- [ ] **Collab auth revocation:** `PageCollabRoom` closes socket (code `1008`) when a user's session is invalidated or group membership is revoked mid-session. Unit test covers this flow.
 - [ ] **Collab data migration:** `docs/COLLAB_DATA_MIGRATION.md` exists and explains how legacy `page_updates` rows remain compatible.
 - [ ] **Postgres tests:** Integration tests use template DB clones (§5.7). No test re-migrates from empty DB.
 - [ ] **Auth + crypto:** 2FA enable/disable flow tested end-to-end. Password change invalidates all sessions.
@@ -947,6 +987,8 @@ What was wrong: the original plan **catastrophically underestimated the spatial 
 
 What v4 adds beyond v3:
 - **Collab protocol gap is wider than described.** The new protocol lacks bootstrap-over-WS, unacked-update retry, and the ACK handler has a logic error. These must be fixed in Phase 0 before spatial work touches Yjs.
+- **Collab server removes intentional safety mechanisms.** Legacy buffered and squashed updates in Redis; the new DO inserts one Postgres row per keystroke, causing table bloat. Legacy re-validated auth on every message; the new DO only checks at WS upgrade. These are operational and security risks that must be addressed in Phase 3.
+- **Realtime SSE bridge adds latency and drop risk.** The legacy realtime server used in-process listeners for instant delivery. The new `UserRealtimeRoom` relies on an SSE loop to Upstash Redis; disconnects cause 1–3 second stale-data windows for cross-isolate subscribers.
 - **Routing/product-model divergence.** `/pages/:pageId` will become the spatial canvas; `/spatial` stub is removed. Legacy has no such split. Phase 4 must resolve this before Phase 5.
 - **Schema incompleteness risk.** The proposed Phase 3 schema omitted ~10 legacy fields. Phase 1 now requires a complete diff table as a hard gate.
 - **Missing infrastructure.** No `vitest.workspace.ts`, no Playwright, no collab pagination, no `ydoc.on('updateV2')` listener. Phase 0 now includes all of these.
@@ -955,7 +997,7 @@ What v4 adds beyond v3:
 What must happen now:
 1. **Fix the test foundation (Phase 0).** No agent should add features while tests are broken. Split `usePageCollabEditor`, fix ACK logic, add `updateV2` listener, add pagination, add Playwright.
 2. **Inventory spatial features (Phase 1).** Produce a checklist **and a complete schema diff table** that prevents misreporting stubs as done.
-3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike and incremental bootstrap.
+3. **Extend collab to page-level Yjs (Phase 3).** The current ProseMirror-only collab cannot support spatial notes. Include SyncedStore spike, incremental bootstrap, update squashing mechanism, and per-message auth revocation check.
 4. **Resolve routing divergence (Phase 4).** Make `/pages/:pageId` the spatial canvas and integrate the Tiptap editor as a note component.
 5. **Build the spatial canvas incrementally (Phases 5–6).** MVP first (create/move/resize/delete notes + arrows), then polish (selection, containers, clipboard, undo). **Phase 6 must also rebuild the immersive layout shell and restore legacy note/arrow visual parity** (colors, borders, selection rings, arrow curves/heads/labels, drop zones, etc.) using shadcn primitives instead of Quasar.
 6. **Build marketing/help/pricing/whitepaper surfaces.** Add Vue Router to `apps/marketing`, migrate content from legacy, and create static routable pages. This is a launch blocker, not polish.
