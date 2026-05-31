@@ -55,10 +55,10 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar with path + collab status; Recent/Favorites/Selected sections pending |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | Collapsible sidebar with snapshots, management, backlinks; Note/Arrow properties pending |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Not started** | No context menu on canvas |
-| `LoadingOverlay` during page bootstrap | **Partial** | Inline loading text in cards only |
-| Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Not started** | `DefaultLayout.vue` does the opposite |
-| Remove `PageEditorTiptapCard.vue` from page route | **Not started** | Still rendered at bottom of card stack |
-| Dedicated fullscreen state screens (8 total) | **Not started** | No `DisplayErrorScreen`, `DisplayNonExistentScreen`, etc. |
+| `LoadingOverlay` during page bootstrap | **Partial** | Inline loading text in cards only; state screens handle loading/error |
+| Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Done** | `PageLayout.vue` applies `select-none overflow-hidden` on the shell |
+| Remove `PageEditorTiptapCard.vue` from page route | **Done** | File deleted; no longer imported or rendered |
+| Dedicated fullscreen state screens (8 total) | **Done** | `PageStateScreens.vue` switcher + 8 components in `features/pages/screens/`. Detectable states: `loading`, `error`, `page-nonexistent`, `unauthorized`, `password`. `page-deleted`, `group-deleted`, `invited`, `rejected` require richer API error codes to distinguish. |
 
 ### 7. Note visual parity (legacy style, no Quasar)
 | Item | Status | Notes |

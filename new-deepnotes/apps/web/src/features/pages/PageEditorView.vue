@@ -23,6 +23,8 @@ import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
 import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { usePageSnapshots } from "./usePageSnapshots";
+import PageStateScreens from "./screens/PageStateScreens.vue";
+import { usePageStatus } from "./usePageStatus";
 
 import type { SnapshotRow } from "./page-snapshot-list";
 
@@ -88,6 +90,13 @@ const {
   unlockKeyringWithPassword,
 } = collab;
 
+const { status: pageStatus } = usePageStatus({
+  collabLoading,
+  loadError,
+  cryptoError,
+  pageId,
+});
+
 const {
   pathPageIds,
   pathError,
@@ -152,11 +161,12 @@ const {
   saveSnapshotManual,
 } = snapshotsApi;
 
-async function onUnlockWithPassword(password: string) {
+async function onUnlockWithPassword(password: string): Promise<boolean> {
   const ok = await unlockKeyringWithPassword(password);
   if (ok) {
     collabReloadNonce.value++;
   }
+  return ok;
 }
 
 onMounted(() => {
@@ -174,7 +184,18 @@ onMounted(() => {
 
   <template v-else>
     <!-- === Main canvas slot === -->
+    <PageStateScreens
+      v-if="pageStatus !== 'success'"
+      :status="pageStatus"
+      :page-id="pageId"
+      :group-id="collabGroupId"
+      :client="client"
+      :load-error="loadError"
+      :crypto-error="cryptoError"
+      :on-unlock-password="onUnlockWithPassword"
+    />
     <SpatialPageView
+      v-else
       :ydoc="ydoc"
       :default-note-template="noteTemplate"
       :default-arrow-template="arrowTemplate"

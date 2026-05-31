@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 8 complete; marketing site builds 20 static HTML routes with vue-router + vite-ssg, theme toggle, restored legacy assets. **Phase 6 status corrected: spatial canvas polish is NOT complete.**)  
+> **Last updated:** 2026-05-31 (Phase 8 complete. Phase 6 state screens + layout cleanup done; sidebars, toolbar, and floating UI exist. Remaining: TableContextMenu, Note/Arrow properties panels, Teleport overlay, horizontal containers, arrow labels, drag-to-reconnect.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -75,16 +75,15 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ## Current gaps (high-level)
 
-### Phase 6 — Spatial canvas polish (NOT complete)
+### Phase 6 — Spatial canvas polish (in progress)
 
-- **Page editor layout is a card stack, not an immersive shell.** `PageEditorView.vue` is rendered inside `DefaultLayout.vue` (`max-w-3xl` centered column). It must become a fullscreen `q-layout`-style shell with sidebars, toolbar, and floating overlays. No sidebars, no toolbar, no floating buttons exist today.
-- **Left sidebar missing.** No `CurrentPath`, `RecentPages`, `FavoritePages`, or `SelectedPages` panels on `/pages/:pageId`.
-- **Right sidebar missing.** No `NoteProperties` (24 files in legacy), `PageProperties`, or `ArrowProperties` panels. Context-aware editing is impossible.
-- **Toolbar missing.** No `MainToolbar` with Basic/Formatting/Object/Alignment buttons, insert dialogs, or page-specific actions.
-- **Floating UI overlays missing.** No zoom indicator, undo/redo buttons, back/forward nav, screenshot, find/replace toggle, selection count, or user avatars on the canvas.
-- **Arrow rendering is a stub.** `DisplayArrow.vue` draws a single SVG line between note centers. Missing: curve/line body styles, arrow heads (`OpenHead`), labels (TipTap), hitboxes, drag-to-reconnect, interregional logic, anchor positioning.
-- **Note rendering is partial.** `DisplayNote.vue` has basic drag, resize, and head/body editors. Missing: Teleport overlay during drag, drop zones, arrow link zones, link icon, read-only opacity states, scroll handling, and advanced visual parity.
-- **Page state screens missing.** No dedicated `DisplayErrorScreen`, `DisplayNonExistentScreen`, `DisplayPageDeletedScreen`, etc. Inline error cards only.
+- **Left sidebar sections missing.** `CurrentPath` exists; `RecentPages`, `FavoritePages`, `SelectedPages` panels pending.
+- **Right sidebar properties missing.** Snapshots, management, backlinks exist. `NoteProperties` (24 files in legacy), `PageProperties`, `ArrowProperties` panels pending.
+- **Toolbar page actions missing.** `MainToolbar` shell exists with logo, breadcrumb, global nav. Missing: Basic/Formatting/Object/Alignment buttons, insert dialogs, page-specific actions.
+- **Floating UI overlays partial.** Zoom indicator, undo/redo, selection count exist. Missing: back/forward nav, screenshot, find/replace toggle, user avatars on canvas.
+- **Arrow rendering partial.** Curve + line bodies, arrow heads, hitboxes exist. Missing: labels (TipTap), drag-to-reconnect, interregional logic, anchor positioning.
+- **Note rendering partial.** Drag, resize, head/body editors, link icon exist. Missing: Teleport overlay during drag, drop zones, arrow link zones, read-only opacity states, scroll handling.
+- **Page state screens done.** `PageStateScreens.vue` switcher + 8 components created and wired. Some states (`page-deleted`, `group-deleted`, `invited`, `rejected`) require richer API error codes to be fully distinguishable.
 - **Context menu missing.** No `TableContextMenu` (right-click on canvas).
 
 ### Other gaps
