@@ -4,6 +4,7 @@ import type { SpatialEditing } from "./useSpatialEditing";
 import type { SpatialUndoRedo } from "./undo-redo";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 import { copySelection, pastePayload, readClipboardPayload } from "./clipboard";
+import { getNoteEditors } from "./note-editor-registry";
 import {
   alignLeft,
   alignCenter,
@@ -154,6 +155,63 @@ export function useSpatialKeyboard(input: UseSpatialKeyboardInput) {
       e.preventDefault();
       input.screenshotOpen.value = true;
       return;
+    }
+
+    // Active element navigation: Tab cycles selected notes, Enter starts editing
+    if (e.key === "Tab" && input.selection.selected.value.length > 1) {
+      e.preventDefault();
+      const selected = input.selection.selected.value;
+      const currentIndex = selected.findIndex(
+        (s) => s.id === input.selection.activeId.value,
+      );
+      const nextIndex = e.shiftKey
+        ? (currentIndex - 1 + selected.length) % selected.length
+        : (currentIndex + 1) % selected.length;
+      const next = selected[nextIndex];
+      if (next) {
+        input.selection.select(next.id, next.kind);
+      }
+      return;
+    }
+
+    if (e.key === "Enter" && input.selection.activeId.value && !input.editing.editingId.value) {
+      e.preventDefault();
+      const active = input.selection.active.value;
+      if (active) {
+        input.editing.startEditing(active.id, active.kind);
+      }
+      return;
+    }
+
+    // Selection formatting shortcuts (Ctrl+B/I/U) — apply across all selected note editors
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      const selectedNoteIds = Array.from(input.selection.selectedOfKind("note"));
+      if (selectedNoteIds.length > 0) {
+        let command: ((editor: any) => void) | null = null;
+        switch (e.key) {
+          case "b":
+            e.preventDefault();
+            command = (ed) => ed.chain().focus().toggleBold().run();
+            break;
+          case "i":
+            e.preventDefault();
+            command = (ed) => ed.chain().focus().toggleItalic().run();
+            break;
+          case "u":
+            e.preventDefault();
+            command = (ed) => ed.chain().focus().toggleUnderline().run();
+            break;
+        }
+        if (command) {
+          for (const noteId of selectedNoteIds) {
+            const editors = getNoteEditors(noteId);
+            for (const ed of editors) {
+              command(ed);
+            }
+          }
+          return;
+        }
+      }
     }
 
     // Alignment shortcuts (Ctrl+Shift+...)

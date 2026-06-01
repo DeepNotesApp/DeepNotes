@@ -5,6 +5,7 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { CONTAINER_CONTENT_OFFSET_Y } from "./spatial-constants";
+import { resolveNoteColorVariants } from "./color-utils";
 
 const props = defineProps<{
   id: string;
@@ -42,24 +43,14 @@ function publishHeight() {
 onMounted(publishHeight);
 onUpdated(publishHeight);
 
-const resolvedColor = computed(() => {
+const colorVariants = computed(() => {
   const c = props.model.color.value;
-  if (c.inherit) return props.parentColor ?? null;
-  // Simple legacy color mapping to CSS color values
-  const colorMap: Record<string, string> = {
-    grey: "#9ca3af",
-    red: "#ef4444",
-    green: "#22c55e",
-    blue: "#3b82f6",
-    yellow: "#eab308",
-    purple: "#a855f7",
-    orange: "#f97316",
-    pink: "#ec4899",
-    cyan: "#06b6d4",
-    black: "#171717",
-    white: "#f5f5f5",
-  };
-  return colorMap[c.value] ?? c.value;
+  const baseColor = c.inherit ? props.parentColor : null;
+  if (baseColor) {
+    // When inheriting, resolve variants from the parent color directly
+    return resolveNoteColorVariants(baseColor);
+  }
+  return resolveNoteColorVariants(c.value);
 });
 
 const headFrag = computed(() => props.model.head.value.value);
@@ -73,10 +64,10 @@ const transform = computed(() => {
     style.zIndex = props.model.zIndex.value;
   }
   style.width = props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`;
-  const color = resolvedColor.value;
-  if (color) {
-    style.borderColor = color;
-    style.backgroundColor = `${color}18`; // 10% opacity tint
+  const cv = colorVariants.value;
+  if (cv) {
+    style.borderColor = cv.base;
+    style.backgroundColor = `${cv.light}40`; // ~25% opacity light variant
   }
   return style;
 });
@@ -298,6 +289,8 @@ function onContextMenu(e: MouseEvent) {
         :fragment="headFrag!"
         :editable="!model.readOnly.value"
         placeholder="Head…"
+        :note-id="id"
+        section="head"
       />
     </div>
 
@@ -312,6 +305,8 @@ function onContextMenu(e: MouseEvent) {
         :fragment="bodyFrag!"
         :editable="!model.readOnly.value"
         placeholder="Body…"
+        :note-id="id"
+        section="body"
       />
     </div>
 
@@ -378,7 +373,7 @@ function onContextMenu(e: MouseEvent) {
           :id="child.id"
           :model="child.model"
           :zoom="zoom"
-          :parent-color="resolvedColor"
+          :parent-color="colorVariants.base"
           :is-flex-child="!containerSpatial"
           @dragend="$emit('dragend', $event)"
         />

@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 205 tests passing across 28 test files. Key findings: `note-geometry.ts` still hardcodes `80px` note height (affects box selection and container overlap); interregional arrows are schema-only; selection formatting integration missing. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed and 5 of 7 gaps fixed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 220 tests passing across 30 test files. Fixed: hardcoded note heights, fitToScreen selection-first, color variants, selection formatting (`Ctrl+B/I/U`), active element keyboard nav (`Tab`/`Enter`). Remaining: interregional arrows, container layout simplification. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -83,11 +83,15 @@ All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECK
 1. ~~**`note-geometry.ts` hardcodes note height as `80px`**~~ `getNoteRect` now accepts `heights` from `useNoteHeights`. All callers (`useBoxSelection`, `useNoteDrag`, `useArrowReconnect`) pass actual rendered heights. `useArrowDrag.ts` no longer hardcodes `sourceNote.pos.y + 40`.
 2. ~~**`fitToScreen` only uses `rootNoteList` bounds**~~ `useCanvasActions` now accepts `selectedNoteIds`; `fitToScreen` prioritizes selected notes, falling back to all root notes.
 
+**Fixed (2026-06-01):**
+3. ~~**Color system is simplified.**~~ Added `color-utils.ts` with `lightenColor` / `resolveNoteColorVariants`. `DisplayNote.vue` and `DisplayArrow.vue` now use `base`/`light`/`highlight` color variants.
+4. ~~**Selection formatting integration is missing.**~~ Created `note-editor-registry.ts`. `Ctrl+B/I/U` applies bold/italic/underline across all selected note editors (head + body).
+5. ~~**Active region tracking is partial.**~~ `Tab`/`Shift+Tab` cycles selected notes as active element. `Enter` starts editing the active note.
+
 **Remaining (non-blocking):**
-3. **Interregional arrows are schema-only.** `interregional`, `fakePos`, `looseEndpoint` fields exist in Yjs but `DisplayArrow.vue` does not render cross-region arrows with fake endpoints.
-4. **Selection formatting integration is missing.** Legacy `PageSelection.format()` allowed applying bold/italic/etc across all selected note editors. No equivalent in new code.
-5. **Color system is simplified.** Legacy had `light`/`highlight`/`base`/`final` color variants via `lightenByRatio`. New code uses flat 10-color map with `/18` opacity tint only.
-6. **Active region tracking (5.6) and loading overlay polish (12.20)** remain partial/non-blocking.
+6. **Interregional arrows are schema-only.** `interregional`, `fakePos`, `looseEndpoint` fields exist in Yjs but `DisplayArrow.vue` does not render cross-region arrows with fake endpoints.
+7. **Container layout is functional but simplified.** Missing legacy `originOffset`, `overflow`, island region tracking, and `relativeRect`/`islandRect` computations.
+8. **Loading overlay polish (12.20)** remains partial.
 
 ### Phase 9 — Production Readiness (in progress)
 

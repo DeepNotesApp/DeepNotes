@@ -5,6 +5,7 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { computeArrowEndpoints } from "./arrow-geometry";
+import { resolveNoteColorVariants } from "./color-utils";
 
 const props = defineProps<{
   id: string;
@@ -23,22 +24,9 @@ const emit = defineEmits<{
 
 const labelFragment = computed(() => props.model.label.value);
 
-const arrowColor = computed(() => {
+const colorVariants = computed(() => {
   const c = props.model.color.value;
-  const colorMap: Record<string, string> = {
-    grey: "#9ca3af",
-    red: "#ef4444",
-    green: "#22c55e",
-    blue: "#3b82f6",
-    yellow: "#eab308",
-    purple: "#a855f7",
-    orange: "#f97316",
-    pink: "#ec4899",
-    cyan: "#06b6d4",
-    black: "#171717",
-    white: "#f5f5f5",
-  };
-  return colorMap[c] ?? c ?? "currentColor";
+  return resolveNoteColorVariants(c ?? "currentColor");
 });
 
 const { heights: noteHeights } = useNoteHeights();
@@ -177,7 +165,7 @@ function onPointerDown(e: PointerEvent) {
         refY="5"
         orient="auto-start-reverse"
       >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
+        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="colorVariants.base" stroke-width="1.5" />
       </marker>
       <marker
         :id="`arrowhead-source-${model.source.value}-${model.target.value}`"
@@ -187,7 +175,7 @@ function onPointerDown(e: PointerEvent) {
         refY="5"
         orient="auto-start-reverse"
       >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
+        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="colorVariants.base" stroke-width="1.5" />
       </marker>
     </defs>
 
@@ -205,7 +193,7 @@ function onPointerDown(e: PointerEvent) {
     <path
       :d="geometry.pathD"
       fill="none"
-      :stroke="selected ? 'var(--primary)' : arrowColor"
+      :stroke="selected ? 'var(--primary)' : colorVariants.base"
       :stroke-width="selected ? 3 : 2"
       stroke-linecap="round"
       :marker-end="model.targetHead.value ? `url(#arrowhead-target-${model.source.value}-${model.target.value})` : ''"
@@ -250,6 +238,8 @@ function onPointerDown(e: PointerEvent) {
           :fragment="labelFragment"
           :editable="!props.model.readOnly.value"
           placeholder="Label…"
+          :note-id="id"
+          section="label"
         />
       </div>
     </foreignObject>

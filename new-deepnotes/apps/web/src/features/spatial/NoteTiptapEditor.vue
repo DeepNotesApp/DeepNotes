@@ -8,12 +8,16 @@ const props = defineProps<{
   fragment: Y.XmlFragment;
   editable?: boolean;
   placeholder?: string;
+  noteId?: string;
+  section?: "head" | "body" | "label";
 }>();
 
 const { editor } = useNoteEditor({
   fragment: props.fragment,
   editable: props.editable,
   placeholder: props.placeholder,
+  noteId: props.noteId,
+  section: props.section,
 });
 </script>
 
