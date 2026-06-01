@@ -4,6 +4,7 @@ import type { ArrowModel } from "./arrow-model";
 import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
+import { computeArrowEndpoints } from "./arrow-geometry";
 
 const props = defineProps<{
   id: string;
@@ -17,6 +18,7 @@ const emit = defineEmits<{
   select: [];
   toggle: [];
   reconnectStart: [arrowId: string, from: 'source' | 'target']
+  "edit-start": [];
 }>();
 
 const labelFragment = computed(() => props.model.label.value);
@@ -46,30 +48,50 @@ const geometry = computed(() => {
   const t = props.targetModel;
   if (!s || !t) return null;
 
-  // Use anchor positions if provided, otherwise use note centers
   const w1 = s.width.value.expanded;
   const nw1 = w1 === "Auto" ? 160 : parseFloat(w1);
   const h1 = noteHeights.value.get(props.model.source.value) ?? 80;
-  
-  const sourceAnchor = props.model.sourceAnchor.value;
-  const x1 = sourceAnchor 
-    ? s.pos.value.x + sourceAnchor.x 
-    : s.pos.value.x + nw1 / 2;
-  const y1 = sourceAnchor 
-    ? s.pos.value.y + sourceAnchor.y 
-    : s.pos.value.y + h1 / 2;
 
   const w2 = t.width.value.expanded;
   const nw2 = w2 === "Auto" ? 160 : parseFloat(w2);
   const h2 = noteHeights.value.get(props.model.target.value) ?? 80;
-  
+
+  const sourceAnchor = props.model.sourceAnchor.value;
   const targetAnchor = props.model.targetAnchor.value;
-  const x2 = targetAnchor 
-    ? t.pos.value.x + targetAnchor.x 
-    : t.pos.value.x + nw2 / 2;
-  const y2 = targetAnchor 
-    ? t.pos.value.y + targetAnchor.y 
-    : t.pos.value.y + h2 / 2;
+
+  let x1 = s.pos.value.x + nw1 / 2;
+  let y1 = s.pos.value.y + h1 / 2;
+  let x2 = t.pos.value.x + nw2 / 2;
+  let y2 = t.pos.value.y + h2 / 2;
+
+  if (sourceAnchor) {
+    x1 = s.pos.value.x + sourceAnchor.x;
+    y1 = s.pos.value.y + sourceAnchor.y;
+  }
+
+  if (targetAnchor) {
+    x2 = t.pos.value.x + targetAnchor.x;
+    y2 = t.pos.value.y + targetAnchor.y;
+  } else if (props.model.bodyType.value === "line") {
+    // For line body, use rectangle-edge intersection
+    const endpoints = computeArrowEndpoints(
+      s.pos.value,
+      t.pos.value,
+      nw1,
+      h1,
+      nw2,
+      h2,
+      true,
+    );
+    if (!sourceAnchor) {
+      x1 = endpoints.x1;
+      y1 = endpoints.y1;
+    }
+    if (!targetAnchor) {
+      x2 = endpoints.x2;
+      y2 = endpoints.y2;
+    }
+  }
 
   const minX = Math.min(x1, x2);
   const minY = Math.min(y1, y2);
@@ -223,7 +245,7 @@ function onPointerDown(e: PointerEvent) {
       height="32"
       class="pointer-events-auto"
     >
-      <div class="h-full w-full">
+      <div class="h-full w-full" @focusin="emit('edit-start')">
         <NoteTiptapEditor
           :fragment="labelFragment"
           :editable="!props.model.readOnly.value"

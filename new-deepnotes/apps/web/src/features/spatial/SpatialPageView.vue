@@ -11,18 +11,9 @@ import CanvasContextMenu from "./CanvasContextMenu.vue";
 import FindReplaceDialog from "./FindReplaceDialog.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
+import { useSpatialEditing } from "./useSpatialEditing";
 import { useSpatialUndoRedo } from "./undo-redo";
-import { copySelection, pastePayload, getClipboardBuffer, readClipboardPayload } from "./clipboard";
-import {
-  alignLeft,
-  alignCenter,
-  alignRight,
-  alignTop,
-  alignMiddle,
-  alignBottom,
-  distributeHorizontally,
-  distributeVertically,
-} from "./alignment";
+import { useSpatialKeyboard } from "./useSpatialKeyboard";
 import { screenToWorld, worldToScreen } from "./spatial-viewport-math";
 import { provideNoteHeights } from "./useNoteHeights";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
@@ -64,7 +55,25 @@ const {
   moveNoteOutOfContainer,
 } = useSpatialPage(props.ydoc, undoRedo);
 
-const selection = useSpatialSelection();
+function getNoteZIndex(id: string): number {
+  const note = noteList.value.find((n) => n.id === id);
+  return note?.model.zIndex.value ?? 0;
+}
+
+function setNoteZIndex(id: string, z: number) {
+  const note = noteList.value.find((n) => n.id === id);
+  if (note) {
+    const zMap = note.model.rawMap.get("zIndex") as import("yjs").Map<number>;
+    if (zMap) zMap.set("value", z);
+  }
+}
+
+const selection = useSpatialSelection({
+  getNoteZIndex,
+  setNoteZIndex,
+});
+
+const editing = useSpatialEditing();
 
 // Provide reactive note-height map so DisplayArrow can read actual rendered heights
 provideNoteHeights();
@@ -239,6 +248,8 @@ function onCanvasPointerDown(e: PointerEvent) {
   // so we skip if default is prevented to avoid fighting pan.
   if (e.target !== e.currentTarget || e.button !== 0 || e.defaultPrevented)
     return;
+
+  editing.stopEditing();
 
   boxState = {
     active: false,
@@ -699,156 +710,26 @@ function onNoteDragEnd(noteId: string) {
 }
 
 // --- keyboard shortcuts ---
-function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  if (target.isContentEditable) return true;
-  if (target.closest("[contenteditable='true'], [contenteditable='']"))
-    return true;
-  const tag = target.tagName;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT";
-}
-
-async function onKeyDown(e: KeyboardEvent) {
-  if (isTypingTarget(e.target)) return;
-
-  if (e.key === "Delete" || e.key === "Backspace") {
-    if (selection.selectedIds.value.size > 0) {
-      for (const id of selection.selectedOfKind("note")) {
-        deleteNote(id);
-      }
-      for (const id of selection.selectedOfKind("arrow")) {
-        deleteArrow(id);
-      }
-      selection.clear();
-    }
-    return;
-  }
-
-  if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    selection.selectAll(rootNoteList.value.map((n) => n.id));
-    return;
-  }
-
-  if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    if (e.shiftKey) {
-      undoRedo.redo();
-    } else {
-      undoRedo.undo();
-    }
-    return;
-  }
-
-  if (e.key === "c" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    const selectedNotes = noteList.value.filter((n) =>
-      selection.isSelected(n.id),
-    );
-    const selectedArrows = arrowList.value.filter((a) =>
-      selection.isSelected(a.id),
-    );
-    if (selectedNotes.length > 0) {
-      await copySelection(selectedNotes, selectedArrows);
-    }
-    return;
-  }
-
-  if (e.key === "x" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    const selectedNotes = noteList.value.filter((n) =>
-      selection.isSelected(n.id),
-    );
-    const selectedArrows = arrowList.value.filter((a) =>
-      selection.isSelected(a.id),
-    );
-    if (selectedNotes.length > 0) {
-      await copySelection(selectedNotes, selectedArrows);
-      for (const id of selection.selectedOfKind("note")) {
-        deleteNote(id);
-      }
-      for (const id of selection.selectedOfKind("arrow")) {
-        deleteArrow(id);
-      }
-      selection.clear();
-    }
-    return;
-  }
-
-  if (e.key === "v" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    const payload = await readClipboardPayload();
-    if (payload && payload.notes.length > 0) {
-      const canvas = canvasRef.value;
-      const centerX = canvas?.camX ?? 0;
-      const centerY = canvas?.camY ?? 0;
-      const offset = pasteCount.value * 32;
-      pasteCount.value += 1;
-
-      const result = pastePayload(payload, {
-        createNote: createNoteAt,
-        createArrow: createArrow,
-        offsetX: centerX + offset,
-        offsetY: centerY + offset,
-      });
-
-      selection.clear();
-      for (const id of result.noteIds) {
-        selection.select(id, "note", true);
-      }
-    }
-    return;
-  }
-
-  if (e.key === "f" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    findReplaceOpen.value = true;
-    return;
-  }
-
-  // Alignment shortcuts (Ctrl+Shift+...)
-  if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
-    const selectedNotes = noteList.value.filter((n) =>
-      selection.isSelected(n.id),
-    );
-    if (selectedNotes.length >= 2) {
-      switch (e.key) {
-        case "l":
-          e.preventDefault();
-          alignLeft(selectedNotes);
-          return;
-        case "c":
-          e.preventDefault();
-          alignCenter(selectedNotes);
-          return;
-        case "r":
-          e.preventDefault();
-          alignRight(selectedNotes);
-          return;
-        case "t":
-          e.preventDefault();
-          alignTop(selectedNotes);
-          return;
-        case "m":
-          e.preventDefault();
-          alignMiddle(selectedNotes);
-          return;
-        case "b":
-          e.preventDefault();
-          alignBottom(selectedNotes);
-          return;
-        case "h":
-          e.preventDefault();
-          distributeHorizontally(selectedNotes);
-          return;
-        case "v":
-          e.preventDefault();
-          distributeVertically(selectedNotes);
-          return;
-      }
-    }
-  }
-}
+const { onKeyDown } = useSpatialKeyboard({
+  selection,
+  editing,
+  undoRedo,
+  noteList,
+  arrowList,
+  rootNoteList,
+  deleteNote,
+  deleteArrow,
+  createNoteAt,
+  createArrow,
+  defaultNoteTemplate: props.defaultNoteTemplate,
+  defaultArrowTemplate: props.defaultArrowTemplate,
+  findReplaceOpen,
+  pasteCount,
+  getCamPos: () => ({
+    x: canvasRef.value?.camX ?? 0,
+    y: canvasRef.value?.camY ?? 0,
+  }),
+});
 
 onMounted(() => {
   window.addEventListener("keydown", onKeyDown);
@@ -881,6 +762,7 @@ onUnmounted(() => {
         @select="selection.select(arrow.id, 'arrow')"
         @toggle="selection.toggle(arrow.id, 'arrow')"
         @reconnect-start="onArrowReconnectStart"
+        @edit-start="editing.startEditing(arrow.id, 'arrow')"
       />
       <DisplayNote
         v-for="note in notesByZIndex"
@@ -908,6 +790,7 @@ onUnmounted(() => {
         @arrow-drag-start="onArrowDragStart($event.noteId)"
         @dragstart="onNoteDragStart"
         @dragend="onNoteDragEnd"
+        @edit-start="editing.startEditing(note.id, 'note')"
       />
     </SpatialWorldCanvas>
 

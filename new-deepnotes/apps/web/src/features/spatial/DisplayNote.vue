@@ -23,6 +23,7 @@ const emit = defineEmits<{
   dragstart: [id: string];
   dragend: [id: string];
   arrowDragStart: [payload: { noteId: string }];
+  "edit-start": [];
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
@@ -279,6 +280,7 @@ function toggleCollapsed() {
       v-if="model.head.enabled.value && !model.collapsing.collapsed.value"
       class="px-2 pt-1"
       @pointerdown.stop
+      @focusin="emit('edit-start')"
     >
       <NoteTiptapEditor
         :fragment="headFrag!"
@@ -292,6 +294,7 @@ function toggleCollapsed() {
       v-if="model.body.enabled.value && !model.collapsing.collapsed.value"
       class="px-2 pb-1"
       @pointerdown.stop
+      @focusin="emit('edit-start')"
     >
       <NoteTiptapEditor
         :fragment="bodyFrag!"

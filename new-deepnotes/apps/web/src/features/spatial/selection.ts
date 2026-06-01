@@ -1,10 +1,16 @@
 import { computed, ref } from "vue";
+import type * as Y from "yjs";
 
 export type ElemKind = "note" | "arrow";
 export type SelectedElem = { id: string; kind: ElemKind };
 export type SpatialSelection = ReturnType<typeof useSpatialSelection>;
 
-export function useSpatialSelection() {
+export function useSpatialSelection(
+  opts?: {
+    getNoteZIndex?: (id: string) => number;
+    setNoteZIndex?: (id: string, z: number) => void;
+  },
+) {
   const selected = ref<SelectedElem[]>([]);
   const active = ref<SelectedElem | null>(null);
   const activeRegionId = ref<string | null>(null);
@@ -26,15 +32,34 @@ export function useSpatialSelection() {
     return selected.value.some((s) => s.id === id);
   }
 
+  function bringToTop(id: string) {
+    if (!opts?.getNoteZIndex || !opts?.setNoteZIndex) return;
+    const currentZ = opts.getNoteZIndex(id);
+    const maxZ = Math.max(
+      0,
+      ...selected.value
+        .filter((s) => s.kind === "note" && s.id !== id)
+        .map((s) => opts.getNoteZIndex!(s.id)),
+    );
+    if (currentZ <= maxZ) {
+      opts.setNoteZIndex(id, maxZ + 1);
+    }
+  }
+
   function select(id: string, kind: ElemKind, multi = false) {
     if (!multi) {
       selected.value = [{ id, kind }];
       active.value = { id, kind };
+      if (kind === "note") bringToTop(id);
     } else {
+      const wasSelected = selected.value.some((s) => s.id === id);
       const next = selected.value.filter((s) => s.id !== id);
-      next.push({ id, kind });
+      if (!wasSelected) {
+        next.push({ id, kind });
+        if (kind === "note") bringToTop(id);
+      }
       selected.value = next;
-      active.value = { id, kind };
+      active.value = next.length > 0 ? next[next.length - 1]! : null;
     }
   }
 

@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 re-evaluated. Status corrected from "Complete" to "In Progress". See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 in progress. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` extracted. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -86,12 +86,12 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **Note drag `Teleport` overlay fixed.** Overlay now applies `scale(zoom)` and uses `posOverride` so the preview tracks the cursor correctly at all zoom levels.
 - **Page state screens exist but 4 states are indistinguishable.** `page-deleted`, `group-deleted`, `invited`, `rejected` all map to the same generic error UI because the API does not return distinct error codes.
 - **Context menu exists for canvas but not for individual notes.** `CanvasContextMenu.vue` (right-click on empty canvas) is implemented. No per-note context menu exists.
-- **Arrow geometry is oversimplified.** New `DisplayArrow.vue` uses center-point math. Legacy had rectangle-edge intersection for `bodyType === 'line'`, interregional coordinate transforms, and `fakePos`/`looseEndpoint` rendering.
+- **Arrow geometry partially fixed.** `DisplayArrow.vue` now uses rectangle-edge intersection for `bodyType === 'line'` via `arrow-geometry.ts`. Interregional coordinate transforms and `fakePos`/`looseEndpoint` rendering remain missing.
 - **No `PageElem` abstraction.** Legacy notes and arrows inherit from `PageElem`, sharing selected/active/editing/visible/region state. New code treats them as completely separate types.
-- **No `editing` state management.** Legacy tracks which element is being edited, stopping editing when clicking elsewhere. New relies on Tiptap's internal focus, which can lead to conflicting edits.
+- **`editing` state management implemented.** `useSpatialEditing.ts` tracks which note/arrow is being edited. Escape stops editing; canvas click stops editing; Delete/Backspace is suppressed while editing to avoid deleting selected elements.
 - **Container rendering lacks legacy depth.** `stretchChildren`, `wrapChildren`, `originOffset`, and overflow detection are in the model but not enforced in rendering. Spatial vs non-spatial container distinction is not fully implemented.
-- **`SpatialPageView.vue` is a 1,070-line god component.** Legacy distributed responsibility across `Page`, `PageNotes`, `PageArrows`, `PageSelection`, `PageCamera`, `NoteDragging`, `NoteResizing`, etc. The monolithic component violates the spirit of the "No composable > 300 lines" success criterion.
-- **Selection lacks legacy depth.** No `bringToTop` on selection, no formatting integration across selected editors, no active element/region meaningful UI or keyboard navigation. `selectAll` only selects root notes, not descendant arrows.
+- **`SpatialPageView.vue` partially refactored.** Keyboard shortcuts (~150 lines) extracted to `useSpatialKeyboard.ts`. Still a large component; further extraction needed for drag, resize, box-select, and arrow-reconnection logic.
+- **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
 - **Missing floating UI:** back/forward nav, screenshot, user avatars on canvas.
 
 ### Other gaps
