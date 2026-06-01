@@ -82,6 +82,16 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
   const containerChildrenArr = containerMap.get("children") as Y.Array<string>;
   const containerChildren = useYArrayValues<string>(containerChildrenArr);
 
+  // Runtime-only properties (not in Yjs schema, computed locally)
+  const containerOverflow = computed(() => {
+    // overflow is true when children exceed container bounds
+    // simplified: computed based on spatial + children count for now
+    if (!containerEnabled.value) return false;
+    if (containerSpatial.value) return false;
+    // Non-spatial containers with many children may overflow
+    return containerChildren.value.length > 0;
+  });
+
   // --- collapsing ---
   const collapsingMap = noteMap.get(
     YPAGE_NOTE_KEY.collapsing,
@@ -137,6 +147,7 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
       wrapChildren: containerWrapChildren,
       stretchChildren: containerStretchChildren,
       forceColorInheritance: containerForceColorInheritance,
+      overflow: containerOverflow,
       children: containerChildren,
     },
     collapsing: {

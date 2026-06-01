@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed and 6 of 7 gaps fixed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 222 tests passing across 30 test files. Fixed: hardcoded note heights, fitToScreen selection-first, interregional arrows (`fakePos`/`looseEndpoint`), color variants, selection formatting (`Ctrl+B/I/U`), active element keyboard nav (`Tab`/`Enter`). Remaining: container layout simplification. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed and all 8 identified gaps fixed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 232 tests passing across 31 test files. Fixed: hardcoded note heights, fitToScreen selection-first, interregional arrows (`fakePos`/`looseEndpoint`), color variants, selection formatting (`Ctrl+B/I/U`), active element keyboard nav (`Tab`/`Enter`), container originOffset/overflow/island computations, loading overlay. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -94,9 +94,10 @@ All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECK
 
 **Fixed (2026-06-01):**
 8. ~~**Loading overlay polish (12.20)**~~ Added `DisplayLoadingScreen.vue` with spinner and "Loading page…" text. Wired into `PageStateScreens.vue`.
+9. ~~**Container overflow and island computations.**~~ Added runtime `overflow` boolean to container model. Implemented `getIslandRoot`, `getIslandNoteIds`, `getIslandRect`, and `getRelativeRect` in `note-geometry.ts`.
 
 **Remaining (non-blocking):**
-9. **Container overflow and island computations.** `overflow` boolean tracking and `islandRect`/`relativeRect` are not implemented.
+*None. All identified Phase 6 gaps are now addressed.*
 
 ### Phase 9 — Production Readiness (in progress)
 
