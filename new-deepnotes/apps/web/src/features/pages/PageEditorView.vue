@@ -29,6 +29,7 @@ import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
 import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { usePageSnapshots } from "./usePageSnapshots";
+import PageLayout from "@/layouts/PageLayout.vue";
 import PageStateScreens from "./screens/PageStateScreens.vue";
 import { usePageStatus } from "./usePageStatus";
 import { useUserPageLists } from "./useUserPageLists";
@@ -225,7 +226,7 @@ onMounted(() => {
 <template>
   <div v-if="!isAuthenticated" class="text-muted-foreground text-sm" />
 
-  <template v-else>
+  <PageLayout v-else>
     <!-- === Main canvas slot === -->
     <PageStateScreens
       v-if="pageStatus !== 'success'"
@@ -489,5 +490,5 @@ onMounted(() => {
         {{ pageOpsMessage }}
       </div>
     </template>
-  </template>
+  </PageLayout>
 </template>
