@@ -24,6 +24,7 @@ const emit = defineEmits<{
   dragend: [id: string];
   arrowDragStart: [payload: { noteId: string }];
   "edit-start": [];
+  "context-menu": [e: MouseEvent];
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
@@ -233,6 +234,12 @@ function toggleCollapsed() {
   const collapsingMap = props.model.rawMap.get("collapsing") as import("yjs").Map<boolean>;
   collapsingMap.set("collapsed", !props.model.collapsing.collapsed.value);
 }
+
+function onContextMenu(e: MouseEvent) {
+  if (props.model.readOnly.value) return;
+  e.stopPropagation();
+  emit("context-menu", e);
+}
 </script>
 
 <template>
@@ -246,6 +253,7 @@ function toggleCollapsed() {
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
     @pointercancel="onPointerUp"
+    @contextmenu="onContextMenu"
   >
     <div class="border-border flex items-center gap-1 border-b px-2 py-1 text-xs font-medium">
       <button

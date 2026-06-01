@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` further refactored. Canvas actions (double-click, fit-to-screen) extracted to `useCanvasActions.ts`; context menu handlers extracted to `useCanvasContextMenu.ts`. Box selection, arrow drag, arrow reconnect, and note drag previously extracted. `useCanvasActions.test.ts` (3 tests) and `useCanvasContextMenu.test.ts` (6 tests) added. `note-geometry.ts` and `useBoxSelection.test.ts` added in prior work. `DisplayArrow.test.ts` (12 tests) and `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` covers `bringToTop`.)
+> **Status:** In progress (2026-05-31 — **New this session:** `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5) added. `DisplayNote.test.ts` expanded to 21 tests. `fitToScreen` now reads actual note heights from reactive map. **Per-note context menu implemented:** `NoteContextMenu.vue` + `useNoteContextMenu.ts` composable wired into `DisplayNote.vue` and `SpatialPageView.vue`. `SpatialPageView.vue` previously refactored. Canvas actions, box selection, arrow drag, arrow reconnect, note drag previously extracted into composables.)
 
 ---
 
@@ -56,7 +56,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | `MainToolbar` (shadcn) | **Partial** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. Still missing: page action buttons, insert dialogs, zoom other than reset/fit-to-screen |
 | `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard` and `FavoritePagesCard` now load real data via `useUserPageLists` composable. `SelectedPagesCard` remains client-side only |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
-| `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. No per-note context menu |
+| `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. Per-note context menu (`NoteContextMenu.vue`) implemented and tested. |
 | `LoadingOverlay` during page bootstrap | **Partial** | `PageStateScreens.vue` handles loading/error. No dedicated `LoadingOverlay` component over the canvas |
 | Global CSS for spatial routes (`user-select: none`, `overflow: hidden`, `touch-action: none`) | **Done** | `PageLayout.vue` applies `select-none overflow-hidden` on the shell |
 | Remove `PageEditorTiptapCard.vue` from page route | **Done** | File deleted; no longer imported or rendered |
@@ -110,7 +110,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `useCanvasActions.test.ts` (3 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests), `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (19 tests). Major gaps remain: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction tests, arrow creation flow tests, sidebar/toolbar integration tests.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests this session: `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (21), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12). Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
@@ -126,8 +126,9 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [ ] `DisplayArrow.vue` supports full legacy arrow behavior. **PARTIAL.** Curve/line bodies and heads work; line body now has rectangle-edge intersection. Interregional arrows don't transform coordinate spaces; `fakePos`/`looseEndpoint` are not rendered.
 - [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
-- [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
-- [x] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`; canvas actions extracted to `useCanvasActions.ts`; context menu handlers extracted to `useCanvasContextMenu.ts`. Component reduced from ~740 to ~260 lines.
+- [x] Arrow geometry and `fitToScreen` read actual note heights instead of hardcoding `80px`.
+- [x] Per-note context menu (`NoteContextMenu.vue`) implemented with bring-to-front, send-to-back, and delete actions. Tested via `useNoteContextMenu.test.ts` (5 tests).
+- [x] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`; canvas actions extracted to `useCanvasActions.ts`; canvas context menu handlers extracted to `useCanvasContextMenu.ts`; per-note context menu handlers extracted to `useNoteContextMenu.ts`. Component reduced from ~740 to ~260 lines.
 - [x] Selection implements `bringToTop`. Formatting integration and active element/region navigation remain missing.
 - [ ] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

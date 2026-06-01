@@ -309,4 +309,30 @@ describe("DisplayNote", () => {
     const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
     expect(handles.length).toBe(0);
   });
+
+  it("emits context-menu on right-click", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    await el.trigger('contextmenu');
+    expect(wrapper.emitted('context-menu')).toHaveLength(1);
+  });
+
+  it("does not emit context-menu when readOnly", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { readOnly: true });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    await el.trigger('contextmenu');
+    expect(wrapper.emitted('context-menu')).toBeUndefined();
+  });
 });

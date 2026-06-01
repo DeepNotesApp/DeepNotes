@@ -1,5 +1,6 @@
 import { type Ref } from "vue";
 import { screenToWorld } from "./spatial-viewport-math";
+import { useNoteHeights } from "./useNoteHeights";
 import type { ClipboardNote } from "./clipboard";
 import type { NoteModel } from "./note-model";
 
@@ -20,6 +21,8 @@ export interface UseCanvasActionsInput {
 }
 
 export function useCanvasActions(input: UseCanvasActionsInput) {
+  const { heights: noteHeights } = useNoteHeights();
+
   function onCanvasDoubleClick(e: MouseEvent) {
     const canvas = input.canvasRef.value;
     if (!canvas || !canvas.rootEl) return;
@@ -58,7 +61,7 @@ export function useCanvasActions(input: UseCanvasActionsInput) {
     for (const note of input.rootNoteList.value) {
       const wStr = note.model.width.value.expanded;
       const w = wStr === "Auto" ? 160 : parseFloat(wStr);
-      const h = 80; // Default height estimate
+      const h = noteHeights.value.get(note.id) ?? 80;
       const x = note.model.pos.value.x;
       const y = note.model.pos.value.y;
 

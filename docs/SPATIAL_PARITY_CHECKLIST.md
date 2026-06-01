@@ -21,7 +21,7 @@
 
 | # | Feature | Legacy reference | New file(s) | Status | Test file |
 |---|---------|------------------|-------------|--------|-----------|
-| 1.1 | Create note (double-click canvas) | `DisplayPage/DisplayWorld/DisplayNote/CreateNote.ts` | `useCanvasActions.ts:onCanvasDoubleClick` | **Done** | `useCanvasActions.test.ts` |
+| 1.1 | Create note (double-click canvas) | `DisplayPage/DisplayWorld/DisplayNote/CreateNote.ts` | `useCanvasActions.ts:onCanvasDoubleClick` | **Done** | `useCanvasActions.test.ts` (5 tests) |
 | 1.2 | Delete note (Delete key) | `DisplayPage/DisplayWorld/DisplayNote/DeleteNote.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
 | 1.3 | Move note (drag) | `space/pos.ts`, `DisplayNote/DragNote.ts` | `DisplayNote.vue:onPointerDown/Move/Up` | **Done** | `DisplayNote.test.ts` |
 | 1.4 | Resize note (8 handles) | `DisplayNote/ResizeNote.ts` | `DisplayNote.vue:8-handle resize` | **Done** | `DisplayNote.test.ts` |
@@ -96,7 +96,7 @@
 | 4.4 | Zoom (Ctrl+wheel toward cursor) | `camera/zoom.ts` | `useSpatialViewport.ts:onWheel` | **Done** | `spatial-viewport-math.test.ts` |
 | 4.5 | Zoom (pinch on touch) | `camera/zoom.ts` | `useSpatialViewport.ts:onPointerDown/Move` | **Done** | — |
 | 4.6 | Zoom reset button | `camera/zoom.ts` | `SpatialPageView.vue:resetView button` | **Done** | — |
-| 4.7 | Fit-to-screen | `camera/zoom.ts` | `useSpatialViewport.ts:fitToScreen + SpatialPageView.vue:fitToScreen button` | **Done** | — |
+| 4.7 | Fit-to-screen | `camera/zoom.ts` | `useSpatialViewport.ts:fitToScreen + SpatialPageView.vue:fitToScreen button` | **Done** | `useCanvasActions.test.ts` |
 | 4.8 | Zoom indicator (%) | `camera/zoom.ts` | `SpatialPageView.vue:zoom %` | **Done** | — |
 | 4.9 | Grid background | `camera/grid.ts` | `SpatialWorldCanvas.vue:linear-gradient` | **Done** | — |
 
@@ -172,14 +172,14 @@
 
 | # | Feature | Legacy reference | New file(s) | Status | Test file |
 |---|---------|------------------|-------------|--------|-----------|
-| 12.1 | Fullscreen immersive shell | `PagesLayout.vue` | `PageLayout.vue` | **Done** | — |
-| 12.2 | Main toolbar (logo, breadcrumb, global nav) | `MainToolbar.vue` | `MainToolbar.vue` | **Done** | — |
+| 12.1 | Fullscreen immersive shell | `PagesLayout.vue` | `PageLayout.vue` | **Done** | `PageLayout.test.ts` (10 tests) |
+| 12.2 | Main toolbar (logo, breadcrumb, global nav) | `MainToolbar.vue` | `MainToolbar.vue` | **Done** | `MainToolbar.test.ts` (7 tests) |
 | 12.3 | Toolbar page action buttons | `MainToolbar/Actions.vue` | — | **Not started** | — |
-| 12.4 | Left sidebar (resizable, collapsible) | `LeftSidebar.vue` | `PageLayout.vue:left aside` | **Done** | — |
+| 12.4 | Left sidebar (resizable, collapsible) | `LeftSidebar.vue` | `PageLayout.vue:left aside` | **Done** | `PageLayout.test.ts` |
 | 12.5 | Left sidebar — Current path | `LeftSidebar/CurrentPath.vue` | `PageEditorView.vue:Path card` | **Done** | — |
-| 12.6 | Left sidebar — Recent pages | `LeftSidebar/RecentPages.vue` | `RecentPagesCard.vue` | **Done** | — |
-| 12.7 | Left sidebar — Favorite pages | `LeftSidebar/FavoritePages.vue` | `FavoritePagesCard.vue` | **Done** | — |
-| 12.8 | Left sidebar — Selected pages | `LeftSidebar/SelectedPages.vue` | `SelectedPagesCard.vue` | **Done** | — |
+| 12.6 | Left sidebar — Recent pages | `LeftSidebar/RecentPages.vue` | `RecentPagesCard.vue` | **Done** | `RecentPagesCard.test.ts` (5 tests) |
+| 12.7 | Left sidebar — Favorite pages | `LeftSidebar/FavoritePages.vue` | `FavoritePagesCard.vue` | **Done** | `FavoritePagesCard.test.ts` (5 tests) |
+| 12.8 | Left sidebar — Selected pages | `LeftSidebar/SelectedPages.vue` | `SelectedPagesCard.vue` | **Done** | `SelectedPagesCard.test.ts` (5 tests) |
 | 12.9 | Left sidebar — Collab status | `LeftSidebar/CollabStatus.vue` | `PageEditorCollabStatusCard.vue` | **Done** | — |
 | 12.10 | Right sidebar (collapsible) | `RightSidebar.vue` | `PageLayout.vue:right aside` | **Done** | — |
 | 12.11 | Right sidebar — Note properties | `RightSidebar/NoteProperties.vue` | `NotePropertiesCard.vue` | **Partial** | — |
@@ -189,7 +189,7 @@
 | 12.15 | Right sidebar — Management | `RightSidebar/Management.vue` | `PageEditorManagementCard.vue` | **Done** | — |
 | 12.16 | Right sidebar — Backlinks | `RightSidebar/Backlinks.vue` | `PageEditorBacklinksCard.vue` | **Done** | — |
 | 12.17 | Canvas context menu | `TableContextMenu.vue` | `CanvasContextMenu.vue` + `useCanvasContextMenu.ts` | **Partial** | `useCanvasContextMenu.test.ts` |
-| 12.18 | Per-note context menu | `NoteContextMenu.vue` | — | **Not started** | — |
+| 12.18 | Per-note context menu | `NoteContextMenu.vue` | `NoteContextMenu.vue` + `useNoteContextMenu.ts` | **Done** | `useNoteContextMenu.test.ts` (5 tests) |
 | 12.19 | Page state screens (8 total) | `DisplayScreens/*.vue` | `PageStateScreens.vue` + 8 components | **Done** | — |
 | 12.20 | Loading overlay | `LoadingOverlay.vue` | `PageStateScreens.vue` (inline) | **Partial** | — |
 | 12.21 | Floating UI — zoom indicator | `FloatingUI/Zoom.vue` | `SpatialPageView.vue:zoom %` | **Done** | — |
@@ -276,7 +276,7 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 - [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~30+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `useCanvasActions.test.ts` (3 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. `DisplayArrow.test.ts` (12 tests) and `DisplayNote.test.ts` (19 tests) also added. Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, arrow creation/reconnection, sidebar/toolbar integration.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~15 UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `useCanvasActions.test.ts` (5 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (10 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (21 tests), `MainToolbar.test.ts` (7 tests), `PageLayout.test.ts` (10 tests), `RecentPagesCard.test.ts` (5 tests), `FavoritePagesCard.test.ts` (5 tests), `SelectedPagesCard.test.ts` (5 tests), `useNoteContextMenu.test.ts` (5 tests) also added. Per-note context menu (12.18) implemented and tested. Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
 - [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---

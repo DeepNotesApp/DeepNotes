@@ -8,6 +8,7 @@ import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
 import CanvasContextMenu from "./CanvasContextMenu.vue";
+import NoteContextMenu from "./NoteContextMenu.vue";
 import FindReplaceDialog from "./FindReplaceDialog.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
@@ -21,6 +22,7 @@ import { useArrowReconnect } from "./useArrowReconnect";
 import { useNoteDrag } from "./useNoteDrag";
 import { useCanvasActions } from "./useCanvasActions";
 import { useCanvasContextMenu } from "./useCanvasContextMenu";
+import { useNoteContextMenu } from "./useNoteContextMenu";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
@@ -195,6 +197,18 @@ const {
   pasteCount,
 });
 
+// --- note context menu ---
+const {
+  contextMenu: noteContextMenu,
+  onNoteContextMenu,
+  handleNoteContextMenuDelete,
+  handleNoteContextMenuBringToFront,
+  handleNoteContextMenuSendToBack,
+} = useNoteContextMenu({
+  noteList,
+  deleteNote,
+});
+
 // --- keyboard shortcuts ---
 const { onKeyDown } = useSpatialKeyboard({
   selection,
@@ -277,6 +291,7 @@ onUnmounted(() => {
         @dragstart="onNoteDragStart"
         @dragend="onNoteDragEnd"
         @edit-start="editing.startEditing(note.id, 'note')"
+        @context-menu="onNoteContextMenu(note.id, $event)"
       />
     </SpatialWorldCanvas>
 
@@ -404,6 +419,17 @@ onUnmounted(() => {
       @copy-selected="handleContextMenuCopySelected"
       @cut-selected="handleContextMenuCutSelected"
       @close="contextMenu.open = false"
+    />
+
+    <!-- Note context menu -->
+    <NoteContextMenu
+      :x="noteContextMenu.x"
+      :y="noteContextMenu.y"
+      :open="noteContextMenu.open"
+      @close="noteContextMenu.open = false"
+      @delete="handleNoteContextMenuDelete"
+      @bring-to-front="handleNoteContextMenuBringToFront"
+      @send-to-back="handleNoteContextMenuSendToBack"
     />
 
     <!-- Find/Replace dialog -->

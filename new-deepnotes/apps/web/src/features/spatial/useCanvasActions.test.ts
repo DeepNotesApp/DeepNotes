@@ -1,8 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import { ref } from "vue";
 import { useCanvasActions, type CanvasRef } from "./useCanvasActions";
+import { useNoteHeights } from "./useNoteHeights";
+
+vi.mock("./useNoteHeights", () => ({
+  useNoteHeights: vi.fn(),
+}));
 
 describe("useCanvasActions", () => {
+  function mockNoteHeights(heights: Map<string, number>) {
+    (useNoteHeights as ReturnType<typeof vi.fn>).mockReturnValue({
+      heights: ref(heights),
+    });
+  }
+
   function makeCanvasRef(overrides?: Partial<CanvasRef>): CanvasRef {
     return {
       camX: 0,
@@ -16,6 +27,7 @@ describe("useCanvasActions", () => {
   }
 
   it("onCanvasDoubleClick creates a note at world coordinates", () => {
+    mockNoteHeights(new Map());
     const canvasRef = ref(makeCanvasRef());
     const createNoteAt = vi.fn();
     const defaultNoteTemplate = { color: { value: "red", inherit: false } };
@@ -38,6 +50,7 @@ describe("useCanvasActions", () => {
   });
 
   it("fitToScreen calls resetView when no root notes", () => {
+    mockNoteHeights(new Map());
     const canvasRef = ref(makeCanvasRef());
     const { fitToScreen } = useCanvasActions({
       canvasRef,
@@ -51,6 +64,7 @@ describe("useCanvasActions", () => {
   });
 
   it("fitToScreen calculates bounds and calls canvas.fitToScreen", () => {
+    mockNoteHeights(new Map());
     const canvasRef = ref(makeCanvasRef());
     const rootNoteList = ref([
       {
@@ -85,5 +99,73 @@ describe("useCanvasActions", () => {
     expect(bounds.maxX).toBe(50 + 160); // Auto width defaults to 160
     expect(bounds.maxY).toBe(60 + 80);  // Default height estimate is 80
     expect(padding).toBe(40);
+  });
+
+  it("fitToScreen uses actual note heights when available", () => {
+    const heights = new Map<string, number>([
+      ["n1", 120],
+      ["n2", 200],
+    ]);
+    mockNoteHeights(heights);
+
+    const canvasRef = ref(makeCanvasRef());
+    const rootNoteList = ref([
+      {
+        id: "n1",
+        model: {
+          pos: { value: { x: 10, y: 20 } },
+          width: { value: { expanded: "100px", collapsed: "80px" } },
+        },
+      },
+      {
+        id: "n2",
+        model: {
+          pos: { value: { x: 50, y: 60 } },
+          width: { value: { expanded: "Auto", collapsed: "80px" } },
+        },
+      },
+    ] as any);
+
+    const { fitToScreen } = useCanvasActions({
+      canvasRef,
+      rootNoteList,
+      createNoteAt: vi.fn(),
+    });
+
+    fitToScreen();
+    const fitToScreenMock = canvasRef.value.fitToScreen as ReturnType<typeof vi.fn>;
+    const [bounds] = fitToScreenMock.mock.calls[0]!;
+    expect(bounds.maxY).toBe(60 + 200); // n2 height from map
+  });
+
+  it("onCanvasDoubleClick at zoom=2 scales world coordinates correctly", () => {
+    mockNoteHeights(new Map());
+    const canvasRef = ref(
+      makeCanvasRef({
+        zoom: 2,
+        camX: 10,
+        camY: 20,
+      }),
+    );
+    const createNoteAt = vi.fn();
+
+    const { onCanvasDoubleClick } = useCanvasActions({
+      canvasRef,
+      rootNoteList: ref([]),
+      createNoteAt,
+    });
+
+    const rect = canvasRef.value.rootEl!.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const event = new MouseEvent("dblclick", { clientX: cx + 100, clientY: cy + 200 });
+    onCanvasDoubleClick(event);
+
+    expect(createNoteAt).toHaveBeenCalledOnce();
+    const [x, y] = createNoteAt.mock.calls[0]!;
+    // At zoom=2, screen offset (100, 200) -> world offset (50, 100)
+    // Plus camX=10, camY=20 -> world position (60, 120)
+    expect(x).toBeCloseTo(10 + 100 / 2, 5);
+    expect(y).toBeCloseTo(20 + 200 / 2, 5);
   });
 });
