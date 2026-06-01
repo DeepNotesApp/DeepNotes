@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import * as Y from "yjs";
 
@@ -9,7 +9,15 @@ import { addNoteToPage, createPageYDoc } from "@deepnotes/collab-wire";
 function createNoteModel(
   ydoc: Y.Doc,
   id: string,
-  opts?: { containerEnabled?: boolean; collapsingEnabled?: boolean; colorInherit?: boolean; colorValue?: string },
+  opts?: {
+    containerEnabled?: boolean;
+    collapsingEnabled?: boolean;
+    colorInherit?: boolean;
+    colorValue?: string;
+    readOnly?: boolean;
+    movable?: boolean;
+    resizable?: boolean;
+  },
 ) {
   const noteMap = addNoteToPage(ydoc, id);
   if (opts?.containerEnabled) {
@@ -24,6 +32,15 @@ function createNoteModel(
     const colorMap = noteMap.get("color") as Y.Map<unknown>;
     if (opts.colorInherit !== undefined) colorMap.set("inherit", opts.colorInherit);
     if (opts.colorValue !== undefined) colorMap.set("value", opts.colorValue);
+  }
+  if (opts?.readOnly !== undefined) {
+    noteMap.set("readOnly", opts.readOnly);
+  }
+  if (opts?.movable !== undefined) {
+    noteMap.set("movable", opts.movable);
+  }
+  if (opts?.resizable !== undefined) {
+    noteMap.set("resizable", opts.resizable);
   }
   return useNoteModel(noteMap);
 }
@@ -128,5 +145,168 @@ describe("DisplayNote", () => {
     const el = wrapper.find('[data-testid="display-note"]');
     const style = el.attributes("style");
     expect(style).toContain("border-color: #3b82f6");
+  });
+
+  function mockPointerCapture(el: { element: Element }) {
+    const htmlEl = el.element as HTMLDivElement;
+    htmlEl.setPointerCapture = vi.fn();
+    htmlEl.releasePointerCapture = vi.fn();
+  }
+
+  it("emits select on pointer down", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0 });
+    expect(wrapper.emitted('select')).toHaveLength(1);
+  });
+
+  it("emits toggle on ctrl+pointer down", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0, ctrlKey: true });
+    expect(wrapper.emitted('toggle')).toHaveLength(1);
+  });
+
+  it("emits shiftClick on shift+pointer down", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0, shiftKey: true });
+    expect(wrapper.emitted('shiftClick')).toHaveLength(1);
+    expect(wrapper.emitted('select')).toBeUndefined();
+  });
+
+  it("emits dragstart when movable and not readOnly", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { movable: true, readOnly: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0 });
+    expect(wrapper.emitted('dragstart')).toHaveLength(1);
+  });
+
+  it("does not emit dragstart when readOnly", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { readOnly: true });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0 });
+    expect(wrapper.emitted('dragstart')).toBeUndefined();
+  });
+
+  it("does not emit dragstart when not movable", async () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { movable: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const el = wrapper.find('[data-testid="display-note"]');
+    mockPointerCapture(el);
+    await el.trigger('pointerdown', { button: 0 });
+    expect(wrapper.emitted('dragstart')).toBeUndefined();
+  });
+
+  it("renders 8 resize handles when resizable and not readOnly", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { resizable: true, readOnly: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
+    expect(handles.length).toBe(8);
+  });
+
+  it("hides resize handles when not resizable", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { resizable: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
+    expect(handles.length).toBe(0);
+  });
+
+  it("hides resize handles when readOnly", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { resizable: true, readOnly: true });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1 },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
+    expect(handles.length).toBe(0);
+  });
+
+  it("renders 4 arrow handles when selected and not readOnly", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { readOnly: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, selected: true },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    expect(handles.length).toBe(4);
+  });
+
+  it("hides arrow handles when not selected", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1");
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, selected: false },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    expect(handles.length).toBe(0);
+  });
+
+  it("hides arrow handles when readOnly", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { readOnly: true });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, selected: true },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    expect(handles.length).toBe(0);
   });
 });

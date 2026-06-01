@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` refactored. Box selection, arrow drag, arrow reconnect, and note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` were extracted in prior work.)
+> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` refactored. Box selection, arrow drag, arrow reconnect, and note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` were extracted in prior work. **New:** `DisplayArrow.test.ts` (12 tests) and expanded `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` now covers `bringToTop` explicitly.)
 
 ---
 
@@ -110,7 +110,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests). Major gaps remain: `DisplayNote.vue` (only basic render tests), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction tests, arrow creation/reconnection tests, sidebar/toolbar integration tests.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests), `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (19 tests). Major gaps remain: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction tests, arrow creation flow tests, sidebar/toolbar integration tests.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---

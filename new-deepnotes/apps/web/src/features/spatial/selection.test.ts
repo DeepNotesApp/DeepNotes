@@ -85,4 +85,47 @@ describe("useSpatialSelection", () => {
     expect(s.selectedOfKind("note")).toEqual(["n1"]);
     expect(s.selectedOfKind("arrow")).toEqual(["a1"]);
   });
+
+  it("bringToTop bumps zIndex above other selected notes", () => {
+    const zMap = new Map<string, number>();
+    const s = useSpatialSelection({
+      getNoteZIndex: (id) => zMap.get(id) ?? 0,
+      setNoteZIndex: (id, z) => zMap.set(id, z),
+    });
+
+    zMap.set("a", 1);
+    zMap.set("b", 3);
+    zMap.set("c", 2);
+
+    s.select("a", "note");
+    s.select("b", "note", true);
+    s.select("c", "note", true);
+
+    // When selecting c (last), bringToTop should bump c above b (max of others = 3)
+    expect(zMap.get("c")).toBe(4);
+  });
+
+  it("bringToTop does nothing when already highest", () => {
+    const zMap = new Map<string, number>();
+    const s = useSpatialSelection({
+      getNoteZIndex: (id) => zMap.get(id) ?? 0,
+      setNoteZIndex: (id, z) => zMap.set(id, z),
+    });
+
+    zMap.set("a", 5);
+    zMap.set("b", 2);
+
+    s.select("a", "note");
+    s.select("b", "note", true);
+
+    // a is already highest among selected; bringToTop should not change it
+    expect(zMap.get("a")).toBe(5);
+  });
+
+  it("bringToTop is skipped when no callbacks provided", () => {
+    const s = useSpatialSelection();
+    // Should not throw
+    s.select("a", "note");
+    expect(s.isSelected("a")).toBe(true);
+  });
 });

@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 in progress. `SpatialPageView.vue` god-component refactored — box selection, arrow drag, arrow reconnect, note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 in progress. `SpatialPageView.vue` god-component refactored — box selection, arrow drag, arrow reconnect, note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. **New:** `DisplayArrow.test.ts` (12 tests) and expanded `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` now covers `bringToTop` explicitly. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -77,7 +77,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete. **Many rows marked "Done" lack automated tests**, violating the checklist's own rule. Strict enforcement would reduce the effective completion rate significantly.
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete. **Test coverage improved:** `DisplayArrow.test.ts` (12 tests) and expanded `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` now covers `bringToTop`. Many rows still lack tests.
 - **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
 - **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, timestamps) are not exposed.
 - **`MainToolbar.vue` extracted as standalone component.** `PageLayout.vue` now delegates to `MainToolbar.vue` for the header shell. Still missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
@@ -91,7 +91,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **`editing` state management implemented.** `useSpatialEditing.ts` tracks which note/arrow is being edited. Escape stops editing; canvas click stops editing; Delete/Backspace is suppressed while editing to avoid deleting selected elements.
 - **Container rendering lacks legacy depth.** `stretchChildren`, `wrapChildren`, `originOffset`, and overflow detection are in the model but not enforced in rendering. Spatial vs non-spatial container distinction is not fully implemented.
 - **`SpatialPageView.vue` partially refactored.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`. Box selection, arrow drag, arrow reconnect, and note drag extracted to dedicated composables (`useBoxSelection.ts`, `useArrowDrag.ts`, `useArrowReconnect.ts`, `useNoteDrag.ts`). Note geometry utilities extracted to `note-geometry.ts`. Component reduced from ~740 lines to ~365 lines. Remaining inline logic: context menu handlers, canvas double-click, fit-to-screen.
-- **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
+- **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented and tested. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
 - **Missing floating UI:** back/forward nav, screenshot, user avatars on canvas.
 
 ### Other gaps

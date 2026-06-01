@@ -23,8 +23,8 @@
 |---|---------|------------------|-------------|--------|-----------|
 | 1.1 | Create note (double-click canvas) | `DisplayPage/DisplayWorld/DisplayNote/CreateNote.ts` | `SpatialPageView.vue:onCanvasDoubleClick` | **Done** | — |
 | 1.2 | Delete note (Delete key) | `DisplayPage/DisplayWorld/DisplayNote/DeleteNote.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
-| 1.3 | Move note (drag) | `space/pos.ts`, `DisplayNote/DragNote.ts` | `DisplayNote.vue:onPointerDown/Move/Up` | **Done** | — |
-| 1.4 | Resize note (8 handles) | `DisplayNote/ResizeNote.ts` | `DisplayNote.vue:8-handle resize` | **Done** | — |
+| 1.3 | Move note (drag) | `space/pos.ts`, `DisplayNote/DragNote.ts` | `DisplayNote.vue:onPointerDown/Move/Up` | **Done** | `DisplayNote.test.ts` |
+| 1.4 | Resize note (8 handles) | `DisplayNote/ResizeNote.ts` | `DisplayNote.vue:8-handle resize` | **Done** | `DisplayNote.test.ts` |
 | 1.5 | Note width modes (Auto / fixed px) | `note-collab.ts` `width` | `note-model.ts:width` | **Done** | `note-model.test.ts` |
 | 1.6 | Note head section (Tiptap on `Y.XmlFragment`) | `DisplayNote/NoteHead.vue` | `DisplayNote.vue:head editor` | **Done** | `NoteTiptapEditor.test.ts` |
 | 1.7 | Note body section (Tiptap on `Y.XmlFragment`) | `DisplayNote/NoteBody.vue` | `DisplayNote.vue:body editor` | **Done** | `NoteTiptapEditor.test.ts` |
@@ -33,16 +33,16 @@
 | 1.10 | Head/body height tracking (expanded/collapsed) | `note-collab.ts` | `note-model.ts:head.height, body.height` | **Done** | `note-model.test.ts` |
 | 1.11 | Note color mapping (10-color hardcoded map) | `DisplayNote/NoteColor.ts` | `DisplayNote.vue:resolvedColor` | **Partial** | — |
 | 1.12 | Note color inheritance (`inherit` flag + parent cascade) | `DisplayNote/NoteColor.ts` | `DisplayNote.vue:resolvedColor` | **Done** | — |
-| 1.13 | Selection ring (`ring-2 ring-[#2196f3]`) | `DisplayNote/NoteSelection.ts` | `DisplayNote.vue:frameClasses` | **Done** | — |
-| 1.14 | Drag opacity (`0.7`) | `DisplayNote/NoteDrag.ts` | `DisplayNote.vue:isDragging` | **Done** | — |
+| 1.13 | Selection ring (`ring-2 ring-[#2196f3]`) | `DisplayNote/NoteSelection.ts` | `DisplayNote.vue:frameClasses` | **Done** | `DisplayNote.test.ts` |
+| 1.14 | Drag opacity (`0.7`) | `DisplayNote/NoteDrag.ts` | `DisplayNote.vue:isDragging` | **Done** | `DisplayNote.test.ts` |
 | 1.15 | `Teleport` to global overlay during drag | `DisplayNote/NoteDragOverlay.ts` | `SpatialPageView.vue:Teleport overlay` | **Done** | — |
 | 1.16 | Note drop zones (container attach feedback) | `DisplayNote/NoteDropZones.ts` | `DisplayNote.vue:isDropTarget` | **Partial** | — |
-| 1.17 | Arrow handles (4 directional dots) | `DisplayNote/ArrowHandles.ts` | `DisplayNote.vue:arrow handles` | **Partial** | — |
+| 1.17 | Arrow handles (4 directional dots) | `DisplayNote/ArrowHandles.ts` | `DisplayNote.vue:arrow handles` | **Partial** | `DisplayNote.test.ts` |
 | 1.18 | Link icon (external link indicator) | `DisplayNote/NoteLinkIcon.vue` | `DisplayNote.vue:ExternalLink icon` | **Done** | — |
-| 1.19 | Note frame border-radius, shadow, min-width | `DisplayNote/NoteFrame.vue` | `DisplayNote.vue:frameClasses` | **Partial** | — |
-| 1.20 | Note collapsing (chevron toggle) | `DisplayNote/NoteCollapsing.ts` | `DisplayNote.vue:toggleCollapsed` | **Done** | — |
+| 1.19 | Note frame border-radius, shadow, min-width | `DisplayNote/NoteFrame.vue` | `DisplayNote.vue:frameClasses` | **Partial** | `DisplayNote.test.ts` |
+| 1.20 | Note collapsing (chevron toggle) | `DisplayNote/NoteCollapsing.ts` | `DisplayNote.vue:toggleCollapsed` | **Done** | `DisplayNote.test.ts` |
 | 1.21 | Note z-index ordering | `DisplayNote/NoteZIndex.ts` | `SpatialPageView.vue:notesByZIndex` | **Done** | — |
-| 1.22 | Read-only note styling (`opacity-60`) | `DisplayNote/NoteReadOnly.ts` | `DisplayNote.vue:read-only classes` | **Done** | — |
+| 1.22 | Read-only note styling (`opacity-60`) | `DisplayNote/NoteReadOnly.ts` | `DisplayNote.vue:read-only classes` | **Done** | `DisplayNote.test.ts` |
 | 1.23 | Scrollbar handling (`overscroll-behavior: contain`) | `DisplayNote/NoteScroll.ts` | `NoteTiptapEditor.vue:overscroll-behavior` | **Partial** | — |
 | 1.24 | Note anchor positioning | `note-collab.ts` `anchor` | `note-model.ts:anchor` | **Done** | — |
 | 1.25 | Note timestamps (`createdAt`, `editedAt`, `movedAt`) | `note-collab.ts` | `note-model.ts:createdAt, editedAt, movedAt` | **Done** | — |
@@ -68,16 +68,16 @@
 |---|---------|------------------|-------------|--------|-----------|
 | 3.1 | Create arrow (drag from note handle to target) | `DisplayArrow/CreateArrow.ts` | `useArrowDrag.ts` | **Done** | — |
 | 3.2 | Delete arrow (Delete key) | `DisplayArrow/DeleteArrow.ts` | `useSpatialKeyboard.ts:onKeyDown` | **Done** | — |
-| 3.3 | Curve body (quadratic bezier) | `DisplayArrow/CurveArrow.vue` | `DisplayArrow.vue:pathD` | **Done** | — |
-| 3.4 | Line body (straight line) | `DisplayArrow/LineArrow.vue` | `DisplayArrow.vue:pathD` + `arrow-geometry.ts` | **Done** | `arrow-geometry.test.ts` |
-| 3.5 | Arrow heads (open chevron SVG markers) | `DisplayArrow/OpenHead.vue` | `DisplayArrow.vue:marker` | **Done** | — |
+| 3.3 | Curve body (quadratic bezier) | `DisplayArrow/CurveArrow.vue` | `DisplayArrow.vue:pathD` | **Done** | `DisplayArrow.test.ts` |
+| 3.4 | Line body (straight line) | `DisplayArrow/LineArrow.vue` | `DisplayArrow.vue:pathD` + `arrow-geometry.ts` | **Done** | `arrow-geometry.test.ts`, `DisplayArrow.test.ts` |
+| 3.5 | Arrow heads (open chevron SVG markers) | `DisplayArrow/OpenHead.vue` | `DisplayArrow.vue:marker` | **Done** | `DisplayArrow.test.ts` |
 | 3.6 | Source/target head toggles | `arrow.ts` `sourceHead/targetHead` | `arrow-model.ts:sourceHead, targetHead` | **Done** | `arrow-model.test.ts` |
 | 3.7 | Body type toggle (`curve`/`line`) | `arrow.ts` `bodyType` | `arrow-model.ts:bodyType` | **Done** | `arrow-model.test.ts` |
 | 3.8 | Body style toggle (`solid`/etc.) | `arrow.ts` `bodyStyle` | `arrow-model.ts:bodyStyle` | **Done** | `arrow-model.test.ts` |
-| 3.9 | Arrow label (Tiptap on `Y.XmlFragment`) | `DisplayArrow/ArrowLabel.vue` | `DisplayArrow.vue:NoteTiptapEditor` | **Done** | — |
-| 3.10 | Hitbox (thick invisible stroke) | `DisplayArrow/ArrowHitbox.vue` | `DisplayArrow.vue:transparent stroke` | **Done** | — |
-| 3.11 | Drag-to-reconnect | `DisplayArrow/Reconnect.ts` | `useArrowReconnect.ts` | **Done** | — |
-| 3.12 | Arrow color matching note logic | `DisplayArrow/ArrowColor.ts` | `DisplayArrow.vue:arrowColor` | **Partial** | — |
+| 3.9 | Arrow label (Tiptap on `Y.XmlFragment`) | `DisplayArrow/ArrowLabel.vue` | `DisplayArrow.vue:NoteTiptapEditor` | **Done** | `DisplayArrow.test.ts` |
+| 3.10 | Hitbox (thick invisible stroke) | `DisplayArrow/ArrowHitbox.vue` | `DisplayArrow.vue:transparent stroke` | **Done** | `DisplayArrow.test.ts` |
+| 3.11 | Drag-to-reconnect | `DisplayArrow/Reconnect.ts` | `useArrowReconnect.ts` | **Done** | `DisplayArrow.test.ts` |
+| 3.12 | Arrow color matching note logic | `DisplayArrow/ArrowColor.ts` | `DisplayArrow.vue:arrowColor` | **Partial** | `DisplayArrow.test.ts` |
 | 3.13 | Arrow read-only state | `arrow.ts` `readOnly` | `arrow-model.ts:readOnly` | **Done** | `arrow-model.test.ts` |
 | 3.14 | Arrow timestamps (`createdAt`, `editedAt`) | `arrow.ts` | `arrow-model.ts:createdAt, editedAt` | **Done** | `arrow-model.test.ts` |
 | 3.15 | Arrow `interregional` flag | `arrow.ts` | `arrow-model.ts:interregional` | **Done** | `arrow-model.test.ts` |
@@ -111,7 +111,7 @@
 | 5.5 | Active element tracking | `selection/active.ts` | `useSpatialSelection.ts:activeId` | **Partial** | `selection.test.ts` |
 | 5.6 | Active region tracking | `selection/activeRegion.ts` | `useSpatialSelection.ts:activeRegionId` | **Partial** | — |
 | 5.7 | Selection count badge | `selection/select.ts` | `SpatialPageView.vue:selection count` | **Done** | — |
-| 5.8 | `bringToTop` on selection | `selection/bringToTop.ts` | `useSpatialSelection.ts:bringToTop` | **Partial** | `selection.test.ts` (core selection only; no explicit zIndex bump test) |
+| 5.8 | `bringToTop` on selection | `selection/bringToTop.ts` | `useSpatialSelection.ts:bringToTop` | **Done** | `selection.test.ts` |
 
 ## 6. Clipboard
 
