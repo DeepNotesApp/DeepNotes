@@ -31,7 +31,8 @@ const emit = defineEmits<{
 }>();
 
 const rootRef = ref<HTMLElement | null>(null);
-const { heights: noteHeights } = useNoteHeights();
+const containerChildrenRef = ref<HTMLElement | null>(null);
+const { heights: noteHeights, originOffsets: noteOriginOffsets } = useNoteHeights();
 
 function publishHeight() {
   const el = rootRef.value;
@@ -40,8 +41,23 @@ function publishHeight() {
   }
 }
 
-onMounted(publishHeight);
-onUpdated(publishHeight);
+function publishOriginOffset() {
+  const root = rootRef.value;
+  const children = containerChildrenRef.value;
+  if (root && children && props.model.container.enabled.value) {
+    const offset = children.offsetTop - root.offsetTop;
+    noteOriginOffsets.value.set(props.id, offset);
+  }
+}
+
+onMounted(() => {
+  publishHeight();
+  publishOriginOffset();
+});
+onUpdated(() => {
+  publishHeight();
+  publishOriginOffset();
+});
 
 const colorVariants = computed(() => {
   const c = props.model.color.value;
@@ -354,6 +370,7 @@ function onContextMenu(e: MouseEvent) {
     <!-- container children -->
     <template v-if="model.container.enabled.value && childModels?.length && !model.collapsing.collapsed.value">
       <div
+        ref="containerChildrenRef"
         data-testid="container-children"
         class="absolute inset-x-0 bottom-0 overflow-visible"
         :class="[

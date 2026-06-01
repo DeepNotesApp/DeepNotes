@@ -90,10 +90,11 @@ All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECK
 
 **Fixed (2026-06-01):**
 6. ~~**Interregional arrows are schema-only.**~~ `DisplayArrow.vue` now renders arrows with `fakePos` fallback when `sourceModel`/`targetModel` is missing. `looseEndpoint` indicators shown as endpoint circles.
+7. ~~**Container layout is functional but simplified.**~~ `useNoteHeights` now tracks dynamic `originOffsets` per note. `DisplayNote.vue` measures actual container content area offset; `getNoteEffectiveWorldPos` uses it instead of hardcoded 48px.
 
 **Remaining (non-blocking):**
-7. **Container layout is functional but simplified.** Missing legacy `originOffset`/`overflow`/`islandRect` computations.
-8. **Loading overlay polish (12.20)** remains partial.
+8. **Container overflow and island computations.** `overflow` boolean tracking and `islandRect`/`relativeRect` are not implemented.
+9. **Loading overlay polish (12.20)** remains partial.
 
 ### Phase 9 — Production Readiness (in progress)
 

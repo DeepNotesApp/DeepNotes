@@ -8,9 +8,10 @@ vi.mock("./useNoteHeights", () => ({
 }));
 
 describe("useCanvasActions", () => {
-  function mockNoteHeights(heights: Map<string, number>) {
+  function mockNoteHeights(heights: Map<string, number>, originOffsets?: Map<string, number>) {
     (useNoteHeights as ReturnType<typeof vi.fn>).mockReturnValue({
       heights: ref(heights),
+      originOffsets: ref(originOffsets ?? new Map<string, number>()),
     });
   }
 

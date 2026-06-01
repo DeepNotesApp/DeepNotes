@@ -24,6 +24,7 @@ export function getNoteEffectiveWorldPos(
   noteId: string,
   noteList: { id: string; model: NoteModel }[],
   parentOf: Map<string, string>,
+  originOffsets?: Map<string, number>,
 ): { x: number; y: number } | null {
   const entry = noteList.find((n) => n.id === noteId);
   if (!entry) return null;
@@ -33,12 +34,10 @@ export function getNoteEffectiveWorldPos(
   }
   const parent = noteList.find((n) => n.id === parentId);
   if (!parent) return { x: entry.model.pos.value.x, y: entry.model.pos.value.y };
+  const offset = originOffsets?.get(parentId) ?? 48;
   return {
     x: parent.model.pos.value.x + entry.model.pos.value.x,
-    y:
-      parent.model.pos.value.y +
-      entry.model.pos.value.y +
-      48 /* container content offset */,
+    y: parent.model.pos.value.y + entry.model.pos.value.y + offset,
   };
 }
 
@@ -47,10 +46,11 @@ export function getNoteRect(
   noteList: { id: string; model: NoteModel }[],
   parentOf: Map<string, string>,
   heights?: Map<string, number>,
+  originOffsets?: Map<string, number>,
 ): NoteRect | null {
   const entry = noteList.find((n) => n.id === noteId);
   if (!entry) return null;
-  const pos = getNoteEffectiveWorldPos(noteId, noteList, parentOf);
+  const pos = getNoteEffectiveWorldPos(noteId, noteList, parentOf, originOffsets);
   if (!pos) return null;
   const wStr = entry.model.width.value.expanded;
   const w = wStr === "Auto" ? 160 : parseFloat(wStr);

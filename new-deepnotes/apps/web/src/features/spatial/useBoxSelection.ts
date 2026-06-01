@@ -30,7 +30,7 @@ export interface UseBoxSelectionInput {
 }
 
 export function useBoxSelection(input: UseBoxSelectionInput) {
-  const { heights: noteHeights } = useNoteHeights();
+  const { heights: noteHeights, originOffsets: noteOriginOffsets } = useNoteHeights();
   let boxState: BoxSelectionState | null = null;
 
   function onCanvasPointerDown(e: PointerEvent) {
@@ -98,7 +98,7 @@ export function useBoxSelection(input: UseBoxSelectionInput) {
     const boxH = Math.max(w1.y, w2.y) - boxY;
 
     for (const note of input.rootNoteList.value) {
-      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value);
+      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value, noteOriginOffsets.value);
       if (!noteRect) continue;
 
       if (

@@ -20,7 +20,7 @@ export interface UseNoteDragInput {
 }
 
 export function useNoteDrag(input: UseNoteDragInput) {
-  const { heights: noteHeights } = useNoteHeights();
+  const { heights: noteHeights, originOffsets: noteOriginOffsets } = useNoteHeights();
   const draggingNoteId = ref<string | null>(null);
   const draggingNoteModel = ref<any>(null);
   const dragScreenX = ref(0);
@@ -71,7 +71,7 @@ export function useNoteDrag(input: UseNoteDragInput) {
       if (note.id === draggingNoteId.value) continue;
       if (!note.model.container.enabled.value) continue;
 
-      const containerRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value);
+      const containerRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value, noteOriginOffsets.value);
       if (!containerRect) continue;
 
       if (
@@ -99,7 +99,7 @@ export function useNoteDrag(input: UseNoteDragInput) {
     const targetContainer = hoveredContainerId.value;
     hoveredContainerId.value = null;
 
-    const noteRect = getNoteRect(noteId, input.noteList.value, input.parentOf.value, noteHeights.value);
+    const noteRect = getNoteRect(noteId, input.noteList.value, input.parentOf.value, noteHeights.value, noteOriginOffsets.value);
     if (!noteRect) return;
 
     const currentParentId = input.parentOf.value.get(noteId);
@@ -124,7 +124,7 @@ export function useNoteDrag(input: UseNoteDragInput) {
         collect(noteId);
         if (descendants.has(note.id)) continue;
 
-        const containerRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value);
+        const containerRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value, noteOriginOffsets.value);
         if (!containerRect) continue;
 
         const overlapX =

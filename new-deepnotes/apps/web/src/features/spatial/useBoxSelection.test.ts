@@ -14,6 +14,7 @@ describe("useBoxSelection", () => {
   beforeEach(() => {
     (useNoteHeights as ReturnType<typeof vi.fn>).mockReturnValue({
       heights: ref(new Map<string, number>()),
+      originOffsets: ref(new Map<string, number>()),
     });
   });
 

@@ -35,7 +35,7 @@ describe("note-geometry", () => {
       expect(getNoteEffectiveWorldPos("n1", noteList, parentOf)).toEqual({ x: 10, y: 20 });
     });
 
-    it("returns offset position when note is inside a container", () => {
+    it("returns offset position when note is inside a container (default 48)", () => {
       const noteList = [
         {
           id: "parent",
@@ -54,6 +54,29 @@ describe("note-geometry", () => {
       expect(getNoteEffectiveWorldPos("child", noteList, parentOf)).toEqual({
         x: 110,
         y: 200 + 20 + 48,
+      });
+    });
+
+    it("uses custom originOffset when provided", () => {
+      const noteList = [
+        {
+          id: "parent",
+          model: {
+            pos: { value: { x: 100, y: 200 } },
+          } as unknown as NoteModel,
+        },
+        {
+          id: "child",
+          model: {
+            pos: { value: { x: 10, y: 20 } },
+          } as unknown as NoteModel,
+        },
+      ];
+      const parentOf = new Map<string, string>([["child", "parent"]]);
+      const originOffsets = new Map([["parent", 72]]);
+      expect(getNoteEffectiveWorldPos("child", noteList, parentOf, originOffsets)).toEqual({
+        x: 110,
+        y: 200 + 20 + 72,
       });
     });
 

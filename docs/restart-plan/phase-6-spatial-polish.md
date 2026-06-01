@@ -131,13 +131,13 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 4. ~~**Color system is simplified.**~~ **FIXED (2026-06-01).** Added `color-utils.ts` with `lightenColor` and `resolveNoteColorVariants` functions that replicate legacy `lightenByRatio` behavior. `DisplayNote.vue` and `DisplayArrow.vue` now use `base`/`light`/`highlight` variants instead of flat 10-color map.
 5. ~~**Selection formatting integration is missing.**~~ **FIXED (2026-06-01).** Created `note-editor-registry.ts` for tracking Tiptap editors per note. `Ctrl+B/I/U` now applies bold/italic/underline across all selected note editors (head + body). `NoteTiptapEditor.vue` registers its editor on mount.
 6. ~~**Active region tracking is partial.**~~ **FIXED (2026-06-01).** `Tab`/`Shift+Tab` now cycles through selected notes as the active element. `Enter` starts editing the active note. Basic keyboard navigation wired in `useSpatialKeyboard.ts`.
-7. **Container layout is functional but simplified.** Legacy containers have `originOffset`, `overflow`, island region tracking, and complex `relativeRect`/`islandRect` computations. New containers handle `spatial` vs `horizontal`/`flex` + `wrap`/`stretch` but lack the recursive spatial origin system.
+7. ~~**Container layout is functional but simplified.**~~ **PARTIALLY FIXED (2026-06-01).** `useNoteHeights` now tracks dynamic `originOffsets` per note. `DisplayNote.vue` measures and publishes the actual container content area offset instead of hardcoding 48px. `getNoteEffectiveWorldPos` and all geometry callers (`useBoxSelection`, `useNoteDrag`, `useArrowReconnect`) use the dynamic offset. Remaining: `overflow` boolean tracking and `islandRect`/`relativeRect` computations are not implemented.
 
 ---
 
 ## Verification
 
-- [x] Each deliverable has a test (unit, component, or integration). **Met.** 222 tests passing across 30 test files in `features/spatial/`.
+- [x] Each deliverable has a test (unit, component, or integration). **Met.** 223 tests passing across 30 test files in `features/spatial/`.
 - [x] Phase 1 checklist is >80% marked done. **MET.** 72 of 82 rows (88%) are Done.
 
 ---
