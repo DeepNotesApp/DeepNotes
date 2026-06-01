@@ -21,13 +21,13 @@ jobs:
       postgres:
         image: postgres:16-alpine
         env:
-          POSTGRES_USER: deepnotes
-          POSTGRES_PASSWORD: deepnotes
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: deepnotes
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U deepnotes -d deepnotes"
+          --health-cmd "pg_isready -U postgres -d deepnotes"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
