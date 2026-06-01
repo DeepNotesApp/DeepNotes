@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "wrangler build",
+    "predev": "node -e \"const fs=require('fs'),s='../../.dev.vars',d='.dev.vars'; if(fs.existsSync(s)) fs.copyFileSync(s,d);\"",
     "dev": "wrangler dev",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",

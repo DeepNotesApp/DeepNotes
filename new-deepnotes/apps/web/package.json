@@ -6,6 +6,7 @@
   "scripts": {
     "generate:api-types": "tsx scripts/generate-api-types.mts",
     "build": "vite build",
+    "predev": "node -e \"const fs=require('fs'),s='../../.env',d='.env'; if(fs.existsSync(s)) fs.copyFileSync(s,d);\"",
     "dev": "vite",
     "lint": "eslint vite.config.ts \"src/**/*.ts\"",
     "test": "vitest run",
