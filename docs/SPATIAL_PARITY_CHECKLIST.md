@@ -157,8 +157,8 @@
 | 10.4 | Awareness / remote cursors | `collab/awareness.ts` | `usePageCollabEditor.ts` | **Partial** | — |
 | 10.5 | Collab update squashing | `collab/squash.ts` | `usePageCollabEditor.ts` | **Not started** | — |
 | 10.6 | Collab pagination (`?sinceIndex=`) | `collab/pagination.ts` | — | **Not started** | — |
-| 10.7 | Collab auth revocation (socket close `1008`) | `collab/auth.ts` | — | **Not started** | — |
-| 10.8 | Collab broadcast backpressure | `collab/backpressure.ts` | — | **Not started** | — |
+| 10.7 | Collab auth revocation (socket close `1008`) | `collab/auth.ts` | `PageCollabRoom.ts` `alarm()` + `collab-ws-verify` endpoint | **Done** | `page-collab-room.test.ts` |
+| 10.8 | Collab broadcast backpressure | `collab/backpressure.ts` | `PageCollabRoom.ts:broadcast()` | **Done** | `page-collab-room.test.ts` |
 
 ## 11. Templates
 

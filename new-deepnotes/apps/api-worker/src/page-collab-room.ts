@@ -61,6 +61,10 @@ export class PageCollabRoom {
     server.serializeAttachment({ userId });
     this.ctx.acceptWebSocket(server);
     this.log("info", "ws_connection_accepted", { userId });
+    const existingAlarm = await this.ctx.storage.getAlarm();
+    if (existingAlarm == null) {
+      this.ctx.storage.setAlarm(Date.now() + 30000);
+    }
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -84,7 +88,7 @@ export class PageCollabRoom {
     }
 
     if (decoded.kind === "awareness") {
-      this.broadcast(ws, buf);
+      await this.broadcast(ws, buf);
       return;
     }
 
@@ -123,6 +127,9 @@ export class PageCollabRoom {
         status: res.status,
         latency,
       });
+      if (res.status === 401 || res.status === 403) {
+        ws.close(1008, "Auth revoked");
+      }
       return;
     }
 
@@ -152,7 +159,7 @@ export class PageCollabRoom {
     });
 
     const relay = encodeDocSingleUpdateFromServer(encryptedUpdate, dbIndex);
-    this.broadcast(ws, relay);
+    await this.broadcast(ws, relay);
     ws.send(
       encodeDocSingleUpdateAck({
         updateId: decoded.updateId,
@@ -161,14 +168,75 @@ export class PageCollabRoom {
     );
   }
 
-  private broadcast(exceptWs: WebSocket, data: Uint8Array): void {
-    for (const w of this.ctx.getWebSockets()) {
-      if (w !== exceptWs) {
+  async alarm(): Promise<void> {
+    const sockets = this.ctx.getWebSockets();
+    if (sockets.length === 0) {
+      return;
+    }
+    const secret = this.env.COLLAB_INTERNAL_SECRET;
+    const self = this.env.WORKER_SELF;
+    if (secret == null || secret === "" || self == null) {
+      this.log("error", "alarm_misconfigured");
+      this.ctx.storage.setAlarm(Date.now() + 30000);
+      return;
+    }
+
+    for (const ws of sockets) {
+      const attachment = ws.deserializeAttachment() as { userId?: string } | null;
+      const userId = attachment?.userId;
+      if (userId == null || userId === "") {
+        ws.close(1008, "Missing user attachment");
+        continue;
+      }
+      try {
+        const res = await self.fetch(
+          new Request(
+            `http://collab-internal/api/internal/pages/${this.pageIdStr}/collab-ws-verify?userId=${encodeURIComponent(userId)}`,
+            {
+              headers: {
+                "X-Collab-Internal-Secret": secret,
+              },
+            },
+          ),
+        );
+        if (!res.ok) {
+          ws.close(1008, "Auth revoked");
+          continue;
+        }
+        const payload = await res.json() as unknown;
+        if (
+          payload == null ||
+          typeof payload !== "object" ||
+          !("allowed" in payload) ||
+          !(payload as { allowed: boolean }).allowed
+        ) {
+          ws.close(1008, "Auth revoked");
+        }
+      } catch {
+        // Skip on transient errors; next alarm will retry
+      }
+    }
+
+    if (this.ctx.getWebSockets().length > 0) {
+      this.ctx.storage.setAlarm(Date.now() + 30000);
+    }
+  }
+
+  private async broadcast(exceptWs: WebSocket, data: Uint8Array): Promise<void> {
+    const targets = this.ctx.getWebSockets().filter((w) => w !== exceptWs);
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < targets.length; i += BATCH_SIZE) {
+      const batch = targets.slice(i, i + BATCH_SIZE);
+      for (const w of batch) {
         try {
           w.send(data);
         } catch {
           // ignore broken peers
         }
+      }
+      if (i + BATCH_SIZE < targets.length) {
+        // Yield to event loop between batches to avoid DO CPU limit
+        await new Promise((r) => setTimeout(r, 0));
       }
     }
   }

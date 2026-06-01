@@ -314,6 +314,56 @@ export async function performTrustedAppendNextPageCollabUpdate(input: {
   });
 }
 
+/**
+ * Lightweight trusted check for whether a user may still edit a page.
+ * For DO alarm-based auth revocation checks (no session cookie required).
+ */
+export async function performTrustedVerifyPageCollabAccess(input: {
+  db: DeepnotesDb;
+  userId: string;
+  pageId: string;
+}): Promise<{ allowed: boolean }> {
+  const [pageRow] = await input.db
+    .select({
+      id: pages.id,
+      groupId: pages.groupId,
+      free: pages.free,
+    })
+    .from(pages)
+    .where(
+      and(eq(pages.id, input.pageId), isNull(pages.permanentDeletionDate)),
+    )
+    .limit(1);
+
+  if (pageRow == null) {
+    return { allowed: false };
+  }
+
+  const canEdit = await userHasGroupPermission({
+    db: input.db,
+    userId: input.userId,
+    groupId: pageRow.groupId,
+    permission: "editGroupPages",
+  });
+  if (!canEdit) {
+    return { allowed: false };
+  }
+
+  const [userRow] = await input.db
+    .select({ plan: users.plan })
+    .from(users)
+    .where(eq(users.id, input.userId))
+    .limit(1);
+
+  const isPro = userRow?.plan === "pro";
+  const pageFree = pageRow.free === true;
+  if (!isPro && !pageFree) {
+    return { allowed: false };
+  }
+
+  return { allowed: true };
+}
+
 /** HTTP + WS gate: authenticated editor, Pro-or-free-page (matches legacy collab publish rules). */
 export async function assertPageCollabWsConnectionAllowed(input: {
   db: DeepnotesDb;

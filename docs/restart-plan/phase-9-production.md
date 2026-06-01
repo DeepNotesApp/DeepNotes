@@ -1,7 +1,7 @@
 # Phase 9: Production Readiness and Cutover
 
 > **Prerequisites:** Phase 6, Phase 7, and Phase 8 done.  
-> **Status:** Not started
+> **Status:** In progress (2026-06-01 — Broadcast backpressure and auth revocation implemented in `PageCollabRoom`. Structured logging already present.)
 
 ---
 
@@ -14,15 +14,15 @@ Prepare for production cutover with observability, load testing, and a rollback 
 ## Deliverables
 
 1. **Observability**
-   - Replace `console.log` in `PageCollabRoom` and `UserRealtimeRoom` with structured logging (e.g., `console.log(JSON.stringify({ level, event, pageId, userId, ... }))`).
-   - Add metrics: WS connection duration, DB query latency, collab push latency, realtime hash HSET latency.
+   - Replace `console.log` in `PageCollabRoom` and `UserRealtimeRoom` with structured logging (e.g., `console.log(JSON.stringify({ level, event, pageId, userId, ... }))`). **Done for `PageCollabRoom`.**
+   - Add metrics: WS connection duration, DB query latency, collab push latency, realtime hash HSET latency. **Partial — collab push latency already logged in `PageCollabRoom`.**
    - Document monitoring dashboard queries in `docs/OBSERVABILITY.md`.
 
 2. **Load testing**
    - Target: 50 concurrent collab pages, verify WS latency < 200 ms p95.
    - **Collab row creation rate test:** 5 users × 60 WPM × 10 minutes per page. Assert squashing keeps new `page_updates` rows ≤ 20 per page. If > 1000 rows/hour, the squashing mechanism is insufficient — block cutover.
-   - **Auth revocation test:** revoke a user's group membership during active collab session; assert socket closes within 30 seconds.
-   - **Broadcast backpressure test:** 50 sockets on one page; assert no `1011` closes from DO CPU limit.
+   - **Auth revocation test:** revoke a user's group membership during active collab session; assert socket closes within 30 seconds. **Implementation done — `PageCollabRoom.alarm()` re-verifies every 30 s and closes with code `1008`.**
+   - **Broadcast backpressure test:** 50 sockets on one page; assert no `1011` closes from DO CPU limit. **Implementation done — `broadcast()` yields between batches of ≤ 10 sockets.**
 
 3. **Rollback plan**
    - Document how to revert traffic to legacy `/trpc` stack without data loss.

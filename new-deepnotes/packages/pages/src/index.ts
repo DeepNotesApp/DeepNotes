@@ -22,5 +22,6 @@ export {
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
+  performTrustedVerifyPageCollabAccess,
 } from "./page-collab-updates.js";
 export { performGetGroupCollabCryptoContext } from "./group-collab-crypto-context.js";

@@ -284,6 +284,74 @@ app.post("/api/internal/pages/:pageId/collab-ws-append", async (c) => {
   }
 });
 
+app.get("/api/internal/pages/:pageId/collab-ws-verify", async (c) => {
+  const secretConfigured = c.env.COLLAB_INTERNAL_SECRET;
+  if (secretConfigured == null || secretConfigured === "") {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "Collab internal secret is not configured.",
+      },
+      503,
+    );
+  }
+  if (c.req.header("X-Collab-Internal-Secret") !== secretConfigured) {
+    return c.json(
+      { code: "UNAUTHORIZED", message: "Invalid collab internal secret." },
+      401,
+    );
+  }
+
+  const hyper = c.env.HYPERDRIVE;
+  if (hyper == null) {
+    return c.json(
+      {
+        code: "SERVICE_UNAVAILABLE" as const,
+        message: "HYPERDRIVE binding is not configured.",
+      },
+      503,
+    );
+  }
+
+  const pParams = pageIdPathSchema.safeParse({ pageId: c.req.param("pageId") });
+  if (!pParams.success) {
+    return c.json(
+      { code: "VALIDATION_ERROR", message: pParams.error.message },
+      400,
+    );
+  }
+
+  const userId = c.req.query("userId");
+  if (userId == null || userId === "") {
+    return c.json(
+      { code: "BAD_REQUEST", message: "Expected userId query parameter." },
+      400,
+    );
+  }
+
+  const db = getDbForConnectionString(hyper.connectionString);
+
+  try {
+    const { performTrustedVerifyPageCollabAccess } =
+      await import("@deepnotes/session");
+    const { allowed } = await performTrustedVerifyPageCollabAccess({
+      db,
+      pageId: pParams.data.pageId,
+      userId,
+    });
+    return c.json({ allowed }, 200);
+  } catch (e) {
+    const { SessionError } = await import("@deepnotes/session");
+    if (e instanceof SessionError) {
+      return c.json(
+        { code: e.code, message: e.message },
+        e.status as ContentfulStatusCode,
+      );
+    }
+    throw e;
+  }
+});
+
 app.get("/api/pages/:pageId/collab-ws", async (c) => {
   const sessionEnv = getSessionEnv(c.env);
   if (sessionEnv == null) {

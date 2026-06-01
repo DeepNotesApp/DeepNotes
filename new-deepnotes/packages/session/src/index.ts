@@ -102,6 +102,7 @@ export {
   performAppendPageCollabUpdates,
   performGetPageCollabUpdates,
   performTrustedAppendNextPageCollabUpdate,
+  performTrustedVerifyPageCollabAccess,
 } from "@deepnotes/pages";
 export {
   performPageMove,

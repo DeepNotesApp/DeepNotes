@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 in progress. **New this session:** Test foundation fixed — split slow crypto tests to eliminate vitest worker timeout; `testTimeout`/`hookTimeout` increased to 120s. `NotePropertiesCard.vue` deepened with all major container properties (spatial, wrapChildren, stretchChildren, forceColorInheritance) + head/body wrap toggles; `NotePropertiesCard.test.ts` (5 tests). `ArrowPropertiesCard.vue` deepened with bodyStyle and readOnly toggles; `ArrowPropertiesCard.test.ts` (6 tests). `SpatialPageView.vue` added back/forward nav buttons; `SpatialPageView.test.ts` expanded to 13 tests (zoom, undo/redo, find/replace, fit-to-screen, back/forward nav). Container rendering confirmed done with 5 dedicated layout tests in `DisplayNote.test.ts`. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
+> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -50,8 +50,8 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Collab:** `PageCollabRoom` integration test: two clients sync note creation via WS within 2 seconds.
 - [ ] **Collab pagination:** `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and returns ≤ 100 rows.
 - [ ] **Collab update squashing:** 50 rapid edits from a single client produce ≤ 2 `page_updates` rows.
-- [ ] **Collab auth revocation:** `PageCollabRoom` closes socket (code `1008`) when a user's session is invalidated mid-session.
-- [ ] **Collab broadcast backpressure:** `PageCollabRoom` chunks broadcast into batches of ≤ 10 sockets.
+- [x] **Collab auth revocation:** `PageCollabRoom` closes socket (code `1008`) when a user's session is invalidated mid-session.
+- [x] **Collab broadcast backpressure:** `PageCollabRoom` chunks broadcast into batches of ≤ 10 sockets.
 - [ ] **Collab data migration:** `docs/COLLAB_DATA_MIGRATION.md` exists and explains legacy compatibility.
 - [ ] **Postgres tests:** Integration tests use template DB clones. No test re-migrates from empty DB.
 - [ ] **Auth + crypto:** 2FA enable/disable flow tested end-to-end. Password change invalidates all sessions.
