@@ -1,5 +1,3 @@
-import { randomBytes } from "node:crypto";
-
 import {
   createSymmetricKeyring,
   DataLayer,
