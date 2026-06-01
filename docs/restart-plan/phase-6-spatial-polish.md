@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — **New this session:** `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5) added. `DisplayNote.test.ts` expanded to 21 tests. `fitToScreen` now reads actual note heights from reactive map. **Per-note context menu implemented:** `NoteContextMenu.vue` + `useNoteContextMenu.ts` composable wired into `DisplayNote.vue` and `SpatialPageView.vue`. `SpatialPageView.vue` previously refactored. Canvas actions, box selection, arrow drag, arrow reconnect, note drag previously extracted into composables.)
+> **Status:** In progress (2026-05-31 — **New this session:** Container rendering in `DisplayNote.vue` now enforces `spatial` vs non-spatial layout, `stretchChildren`, and `wrapChildren`. `DisplayNote.test.ts` expanded to 26 tests with 5 new container layout tests. **Toolbar page action buttons started:** `MainToolbar.vue` gained `actions` slot; `PageEditorView.vue` wires "Insert Note" button that calls `SpatialPageView.insertNoteAtCenter()`. **Bug fix:** `SpatialPageView.vue` `setNoteZIndex` corrected to set primitive `zIndex` instead of treating it as nested `Y.Map`. **New tests:** `SpatialPageView.test.ts` added with 5 tests covering rendering, double-click creation, Ctrl+A+Delete, and exposed method.)
 
 ---
 

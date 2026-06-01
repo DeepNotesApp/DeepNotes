@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Plus } from "lucide-vue-next";
 
 import { useSession } from "../auth/useSession";
 import SpatialPageView from "../spatial/SpatialPageView.vue";
@@ -53,6 +54,8 @@ const pageId = computed(() => String(route.params.pageId ?? ""));
 
 const snapshots = ref<SnapshotRow[]>([]);
 const snapshotLoading = ref(false);
+
+const spatialViewRef = ref<any>(null);
 
 // Track selected note for properties panel
 const selectedNoteId = ref<string | null>(null);
@@ -222,6 +225,7 @@ onMounted(() => {
       :on-unlock-password="onUnlockWithPassword"
     />
     <SpatialPageView
+      ref="spatialViewRef"
       v-else
       :ydoc="ydoc"
       :default-note-template="noteTemplate"
@@ -229,6 +233,19 @@ onMounted(() => {
       @select-note="selectedNoteId = $event?.[0] ?? null; selectedNoteModel = $event?.[1] ?? null"
       @select-arrow="selectedArrowId = $event?.[0] ?? null; selectedArrowModel = $event?.[1] ?? null"
     />
+
+    <!-- === Toolbar actions === -->
+    <template #toolbar-actions>
+      <Button
+        variant="ghost"
+        size="sm"
+        class="gap-1"
+        @click="spatialViewRef?.insertNoteAtCenter()"
+      >
+        <Plus class="h-4 w-4" />
+        <span class="hidden sm:inline">Note</span>
+      </Button>
+    </template>
 
     <!-- === Toolbar center: breadcrumb path === -->
     <template #toolbar-center>

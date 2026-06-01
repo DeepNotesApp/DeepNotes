@@ -138,4 +138,16 @@ describe("MainToolbar", () => {
 
     expect(wrapper.find('[data-testid="center-slot"]').exists()).toBe(true);
   });
+
+  it("renders actions slot content", () => {
+    mockSession();
+    wrapper = mount(MainToolbar, {
+      props: { leftExpanded: true, rightExpanded: true },
+      slots: {
+        actions: h("button", { "data-testid": "action-btn" }, "Action"),
+      },
+    });
+
+    expect(wrapper.find('[data-testid="action-btn"]').exists()).toBe(true);
+  });
 });

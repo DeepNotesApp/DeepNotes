@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight, ExternalLink } from "lucide-vue-next";
 import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
+import { CONTAINER_CONTENT_OFFSET_Y } from "./spatial-constants";
 
 const props = defineProps<{
   id: string;
@@ -14,6 +15,7 @@ const props = defineProps<{
   childModels?: Array<{ id: string; model: NoteModel }>;
   parentColor?: string | null;
   posOverride?: { x: number; y: number };
+  isFlexChild?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -64,12 +66,13 @@ const headFrag = computed(() => props.model.head.value.value);
 const bodyFrag = computed(() => props.model.body.value.value);
 
 const transform = computed(() => {
-  const pos = props.posOverride ?? props.model.pos.value;
-  const style: Record<string, string | number> = {
-    transform: `translate(${pos.x}px, ${pos.y}px)`,
-    width: props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`,
-    zIndex: props.model.zIndex.value,
-  };
+  const style: Record<string, string | number> = {};
+  if (!props.isFlexChild) {
+    const pos = props.posOverride ?? props.model.pos.value;
+    style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+    style.zIndex = props.model.zIndex.value;
+  }
+  style.width = props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`;
   const color = resolvedColor.value;
   if (color) {
     style.borderColor = color;
@@ -78,10 +81,10 @@ const transform = computed(() => {
   return style;
 });
 
-const containerLayoutClass = computed(() => {
-  if (!props.model.container.enabled.value) return '';
-  return props.model.container.horizontal.value ? 'flex-row' : 'flex-col';
-});
+const containerSpatial = computed(() => props.model.container.spatial.value);
+const containerHorizontal = computed(() => props.model.container.horizontal.value);
+const containerWrapChildren = computed(() => props.model.container.wrapChildren.value);
+const containerStretchChildren = computed(() => props.model.container.stretchChildren.value);
 
 const isDragging = ref(false);
 
@@ -89,7 +92,8 @@ const frameClasses = computed(() => {
   const ro = props.model.readOnly.value;
   const movable = props.model.movable.value && !ro;
   return [
-    "border-border bg-card text-card-foreground pointer-events-auto absolute top-0 left-0 rounded-md border shadow-sm select-none transition-opacity",
+    "border-border bg-card text-card-foreground pointer-events-auto rounded-md border shadow-sm select-none transition-opacity",
+    props.isFlexChild ? "relative flex-none" : "absolute top-0 left-0",
     ro ? "opacity-60 cursor-not-allowed" : "",
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
@@ -355,9 +359,18 @@ function onContextMenu(e: MouseEvent) {
     <!-- container children -->
     <template v-if="model.container.enabled.value && childModels?.length && !model.collapsing.collapsed.value">
       <div
-        class="border-border pointer-events-none absolute inset-x-0 bottom-0 border-t"
-        :class="model.container.horizontal.value ? 'left-0 right-0 top-0 bottom-0 border-t-0 border-l' : ''"
-        :style="model.container.horizontal.value ? 'left: 100%; top: 0; width: auto; height: 100%;' : 'top: 3rem'"
+        data-testid="container-children"
+        class="absolute inset-x-0 bottom-0 overflow-visible"
+        :class="[
+          containerSpatial
+            ? ''
+            : [
+                containerHorizontal ? 'flex flex-row' : 'flex flex-col',
+                containerWrapChildren ? 'flex-wrap' : 'flex-nowrap',
+                containerStretchChildren ? 'items-stretch' : 'items-start',
+              ],
+        ]"
+        :style="{ top: `${CONTAINER_CONTENT_OFFSET_Y}px` }"
       >
         <DisplayNote
           v-for="child in childModels"
@@ -366,6 +379,7 @@ function onContextMenu(e: MouseEvent) {
           :model="child.model"
           :zoom="zoom"
           :parent-color="resolvedColor"
+          :is-flex-child="!containerSpatial"
           @dragend="$emit('dragend', $event)"
         />
       </div>

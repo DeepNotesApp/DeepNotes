@@ -68,6 +68,11 @@ async function onLogout() {
       <slot />
     </div>
 
+    <!-- Page actions -->
+    <div class="hidden flex-none items-center gap-1 pr-1 md:flex">
+      <slot name="actions" />
+    </div>
+
     <!-- Right: global nav + theme + sidebar toggle -->
     <div class="flex flex-none items-center gap-1 pr-1">
       <nav

@@ -70,8 +70,7 @@ function getNoteZIndex(id: string): number {
 function setNoteZIndex(id: string, z: number) {
   const note = noteList.value.find((n) => n.id === id);
   if (note) {
-    const zMap = note.model.rawMap.get("zIndex") as import("yjs").Map<number>;
-    if (zMap) zMap.set("value", z);
+    note.model.rawMap.set("zIndex", z);
   }
 }
 
@@ -174,6 +173,16 @@ const { onCanvasDoubleClick, fitToScreen } = useCanvasActions({
   rootNoteList,
   createNoteAt,
   defaultNoteTemplate: props.defaultNoteTemplate,
+});
+
+function insertNoteAtCenter() {
+  const camX = canvasRef.value?.camX ?? 0;
+  const camY = canvasRef.value?.camY ?? 0;
+  createNoteAt(camX, camY, props.defaultNoteTemplate);
+}
+
+defineExpose({
+  insertNoteAtCenter,
 });
 
 const {

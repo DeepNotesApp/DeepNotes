@@ -59,6 +59,9 @@ function onResizePointerUp(e: PointerEvent) {
       @toggle-right="toggleRight"
     >
       <slot name="toolbar-center" />
+      <template #actions>
+        <slot name="toolbar-actions" />
+      </template>
     </MainToolbar>
 
     <!-- === Body: sidebars + canvas === -->

@@ -11,6 +11,10 @@ function createNoteModel(
   id: string,
   opts?: {
     containerEnabled?: boolean;
+    containerSpatial?: boolean;
+    containerHorizontal?: boolean;
+    containerWrapChildren?: boolean;
+    containerStretchChildren?: boolean;
     collapsingEnabled?: boolean;
     colorInherit?: boolean;
     colorValue?: string;
@@ -23,6 +27,10 @@ function createNoteModel(
   if (opts?.containerEnabled) {
     const containerMap = noteMap.get("container") as Y.Map<unknown>;
     containerMap.set("enabled", true);
+    if (opts.containerSpatial !== undefined) containerMap.set("spatial", opts.containerSpatial);
+    if (opts.containerHorizontal !== undefined) containerMap.set("horizontal", opts.containerHorizontal);
+    if (opts.containerWrapChildren !== undefined) containerMap.set("wrapChildren", opts.containerWrapChildren);
+    if (opts.containerStretchChildren !== undefined) containerMap.set("stretchChildren", opts.containerStretchChildren);
   }
   if (opts?.collapsingEnabled) {
     const collapsingMap = noteMap.get("collapsing") as Y.Map<boolean>;
@@ -334,5 +342,124 @@ describe("DisplayNote", () => {
     const el = wrapper.find('[data-testid="display-note"]');
     await el.trigger('contextmenu');
     expect(wrapper.emitted('context-menu')).toBeUndefined();
+  });
+
+  it("renders spatial container children with absolute positioning", () => {
+    const ydoc = createPageYDoc();
+    const parentModel = createNoteModel(ydoc, "parent", { containerEnabled: true, containerSpatial: true });
+    const childModel = createNoteModel(ydoc, "child-1");
+
+    wrapper = mount(DisplayNote, {
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
+    });
+
+    const container = wrapper.find('[data-testid="container-children"]');
+    expect(container.exists()).toBe(true);
+    expect(container.classes()).not.toContain("flex");
+
+    const child = container.find('[data-testid="display-note"]');
+    expect(child.classes()).toContain("absolute");
+    expect(child.classes()).not.toContain("relative");
+  });
+
+  it("renders non-spatial horizontal container with flex row", () => {
+    const ydoc = createPageYDoc();
+    const parentModel = createNoteModel(ydoc, "parent", {
+      containerEnabled: true,
+      containerSpatial: false,
+      containerHorizontal: true,
+    });
+    const childModel = createNoteModel(ydoc, "child-1");
+
+    wrapper = mount(DisplayNote, {
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
+    });
+
+    const container = wrapper.find('[data-testid="container-children"]');
+    expect(container.classes()).toContain("flex");
+    expect(container.classes()).toContain("flex-row");
+
+    const child = container.find('[data-testid="display-note"]');
+    expect(child.classes()).toContain("relative");
+    expect(child.classes()).not.toContain("absolute");
+  });
+
+  it("renders non-spatial vertical container with flex col", () => {
+    const ydoc = createPageYDoc();
+    const parentModel = createNoteModel(ydoc, "parent", {
+      containerEnabled: true,
+      containerSpatial: false,
+      containerHorizontal: false,
+    });
+    const childModel = createNoteModel(ydoc, "child-1");
+
+    wrapper = mount(DisplayNote, {
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
+    });
+
+    const container = wrapper.find('[data-testid="container-children"]');
+    expect(container.classes()).toContain("flex");
+    expect(container.classes()).toContain("flex-col");
+  });
+
+  it("applies flex-wrap when wrapChildren is true", () => {
+    const ydoc = createPageYDoc();
+    const parentModel = createNoteModel(ydoc, "parent", {
+      containerEnabled: true,
+      containerSpatial: false,
+      containerHorizontal: true,
+      containerWrapChildren: true,
+    });
+    const childModel = createNoteModel(ydoc, "child-1");
+
+    wrapper = mount(DisplayNote, {
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
+    });
+
+    const container = wrapper.find('[data-testid="container-children"]');
+    expect(container.classes()).toContain("flex-wrap");
+  });
+
+  it("applies items-stretch when stretchChildren is true", () => {
+    const ydoc = createPageYDoc();
+    const parentModel = createNoteModel(ydoc, "parent", {
+      containerEnabled: true,
+      containerSpatial: false,
+      containerHorizontal: true,
+      containerStretchChildren: true,
+    });
+    const childModel = createNoteModel(ydoc, "child-1");
+
+    wrapper = mount(DisplayNote, {
+      props: {
+        id: "parent",
+        model: parentModel,
+        zoom: 1,
+        childModels: [{ id: "child-1", model: childModel }],
+      },
+    });
+
+    const container = wrapper.find('[data-testid="container-children"]');
+    expect(container.classes()).toContain("items-stretch");
   });
 });
