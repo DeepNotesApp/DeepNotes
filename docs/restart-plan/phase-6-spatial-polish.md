@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` extracted since last evaluation. Multiple "Done" items were over-reported; see notes below.)
+> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` refactored. Box selection, arrow drag, arrow reconnect, and note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` were extracted in prior work.)
 
 ---
 
@@ -17,7 +17,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Multi-select (ctrl/cmd + click) | **Done** | `SpatialPageView.vue` handles toggle via Ctrl+click |
-| Box selection (drag on empty canvas) | **Done** | Threshold-based drag-to-box-select implemented |
+| Box selection (drag on empty canvas) | **Done** | Extracted to `useBoxSelection.ts`; threshold-based drag-to-box-select with world-space intersection. Tested in `useBoxSelection.test.ts`. |
 | Select all (`Ctrl+A`) | **Done** | `onKeyDown` in `SpatialPageView.vue` |
 | Active element / active region tracking | **Partial** | `useSpatialSelection` has `activeId` and `activeRegionId` ref but no real active-region UI or keyboard navigation |
 | `bringToTop` on selection | **Done** | `useSpatialSelection` bumps selected note `zIndex` above other selected notes |
@@ -29,8 +29,8 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Note can contain child notes | **Done** | `container.enabled` and `container.children` wired in Yjs |
 | Spatial container (free child positioning) | **Done** | Children rendered with world offset inside parent |
 | Horizontal container (children in a row) | **Done** | `container.horizontal` flag + `flex-row` class in `DisplayNote.vue` |
-| Drag child out to detach | **Done** | `onNoteDragEnd` + `moveNoteOutOfContainer` |
-| Drag note into container to attach | **Done** | Overlap-area heuristic in `SpatialPageView.vue` |
+| Drag child out to detach | **Done** | `useNoteDrag.ts:onNoteDragEnd` + `moveNoteOutOfContainer` |
+| Drag note into container to attach | **Done** | Overlap-area heuristic in `useNoteDrag.ts` |
 
 ### 3. Clipboard
 | Item | Status | Notes |
@@ -87,7 +87,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Arrow heads (`OpenHead.vue`) | **Done** | SVG `<marker>` chevron heads; `sourceHead`/`targetHead` supported |
 | Arrow label (editable `Y.XmlFragment`) | **Done** | `NoteTiptapEditor` at midpoint. Proper collaborative rich-text editing on `Y.XmlFragment` |
 | Hitbox (thick invisible stroke) | **Done** | `stroke="transparent" stroke-width="20"` pointer-events-auto hitbox |
-| Drag-to-reconnect | **Done** | Connection zones + `onReconnectPointerMove/Up` in `SpatialPageView.vue` wired |
+| Drag-to-reconnect | **Done** | Extracted to `useArrowReconnect.ts`. Connection zones + world-space note detection on pointer move. |
 | Arrow source/target anchor positioning | **Done** | `DisplayArrow.vue` geometry uses `sourceAnchor`/`targetAnchor` when provided; line body falls back to rectangle-edge intersection |
 | Color matching note color logic | **Partial** | Same hardcoded 10-color map used, but `inherit` logic may not cascade correctly for arrows |
 
@@ -110,7 +110,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests). Major gaps remain: `DisplayNote.vue` (only basic render tests), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction tests, box selection tests, arrow creation/reconnection tests, sidebar/toolbar integration tests.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests). Major gaps remain: `DisplayNote.vue` (only basic render tests), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction tests, arrow creation/reconnection tests, sidebar/toolbar integration tests.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
@@ -127,7 +127,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
 - [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
-- [ ] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; drag, resize, box-select, and arrow-reconnection logic still inline.
+- [ ] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. **Partial.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`. Component reduced from ~740 to ~365 lines. Remaining inline: context menu handlers, fit-to-screen, canvas double-click.
 - [x] Selection implements `bringToTop`. Formatting integration and active element/region navigation remain missing.
 - [ ] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

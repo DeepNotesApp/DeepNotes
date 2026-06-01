@@ -55,8 +55,8 @@
 | 2.1 | Container enabled toggle | `note-collab.ts` `container.enabled` | `note-model.ts:container.enabled` | **Done** | `note-model.test.ts` |
 | 2.2 | Spatial container (free child positioning) | `DisplayNote/Container/Spatial.vue` | `DisplayNote.vue:container children` | **Done** | — |
 | 2.3 | Horizontal container (children in a row) | `note-collab.ts` `container.horizontal` | `DisplayNote.vue:flex-row` | **Done** | — |
-| 2.4 | Drag child out to detach | `DisplayNote/Container/Detach.ts` | `useSpatialPage.ts:moveNoteOutOfContainer` | **Done** | — |
-| 2.5 | Drag note into container to attach | `DisplayNote/Container/Attach.ts` | `SpatialPageView.vue:overlap heuristic` | **Done** | — |
+| 2.4 | Drag child out to detach | `DisplayNote/Container/Detach.ts` | `useNoteDrag.ts:onNoteDragEnd` + `useSpatialPage.ts:moveNoteOutOfContainer` | **Done** | — |
+| 2.5 | Drag note into container to attach | `DisplayNote/Container/Attach.ts` | `useNoteDrag.ts:overlap heuristic` | **Done** | — |
 | 2.6 | Container wrap children toggle | `note-collab.ts` `container.wrapChildren` | `note-model.ts:container.wrapChildren` | **Done** | `note-model.test.ts` |
 | 2.7 | Container stretch children toggle | `note-collab.ts` `container.stretchChildren` | `note-model.ts:container.stretchChildren` | **Done** | `note-model.test.ts` |
 | 2.8 | Container force color inheritance toggle | `note-collab.ts` `container.forceColorInheritance` | `note-model.ts:container.forceColorInheritance` | **Done** | `note-model.test.ts` |
@@ -66,8 +66,8 @@
 
 | # | Feature | Legacy reference | New file(s) | Status | Test file |
 |---|---------|------------------|-------------|--------|-----------|
-| 3.1 | Create arrow (drag from note handle to target) | `DisplayArrow/CreateArrow.ts` | `SpatialPageView.vue:onArrowDragStart/End` | **Done** | — |
-| 3.2 | Delete arrow (Delete key) | `DisplayArrow/DeleteArrow.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
+| 3.1 | Create arrow (drag from note handle to target) | `DisplayArrow/CreateArrow.ts` | `useArrowDrag.ts` | **Done** | — |
+| 3.2 | Delete arrow (Delete key) | `DisplayArrow/DeleteArrow.ts` | `useSpatialKeyboard.ts:onKeyDown` | **Done** | — |
 | 3.3 | Curve body (quadratic bezier) | `DisplayArrow/CurveArrow.vue` | `DisplayArrow.vue:pathD` | **Done** | — |
 | 3.4 | Line body (straight line) | `DisplayArrow/LineArrow.vue` | `DisplayArrow.vue:pathD` + `arrow-geometry.ts` | **Done** | `arrow-geometry.test.ts` |
 | 3.5 | Arrow heads (open chevron SVG markers) | `DisplayArrow/OpenHead.vue` | `DisplayArrow.vue:marker` | **Done** | — |
@@ -76,7 +76,7 @@
 | 3.8 | Body style toggle (`solid`/etc.) | `arrow.ts` `bodyStyle` | `arrow-model.ts:bodyStyle` | **Done** | `arrow-model.test.ts` |
 | 3.9 | Arrow label (Tiptap on `Y.XmlFragment`) | `DisplayArrow/ArrowLabel.vue` | `DisplayArrow.vue:NoteTiptapEditor` | **Done** | — |
 | 3.10 | Hitbox (thick invisible stroke) | `DisplayArrow/ArrowHitbox.vue` | `DisplayArrow.vue:transparent stroke` | **Done** | — |
-| 3.11 | Drag-to-reconnect | `DisplayArrow/Reconnect.ts` | `SpatialPageView.vue:onReconnectPointerMove/Up` | **Done** | — |
+| 3.11 | Drag-to-reconnect | `DisplayArrow/Reconnect.ts` | `useArrowReconnect.ts` | **Done** | — |
 | 3.12 | Arrow color matching note logic | `DisplayArrow/ArrowColor.ts` | `DisplayArrow.vue:arrowColor` | **Partial** | — |
 | 3.13 | Arrow read-only state | `arrow.ts` `readOnly` | `arrow-model.ts:readOnly` | **Done** | `arrow-model.test.ts` |
 | 3.14 | Arrow timestamps (`createdAt`, `editedAt`) | `arrow.ts` | `arrow-model.ts:createdAt, editedAt` | **Done** | `arrow-model.test.ts` |
@@ -106,7 +106,7 @@
 |---|---------|------------------|-------------|--------|-----------|
 | 5.1 | Click to select note | `selection/select.ts` | `DisplayNote.vue:onPointerDown` | **Done** | — |
 | 5.2 | Ctrl+click to toggle selection | `selection/select.ts` | `DisplayNote.vue:onPointerDown` | **Done** | — |
-| 5.3 | Box selection (drag on empty canvas) | `selection/boxSelect.ts` | `SpatialPageView.vue:box selection` | **Done** | — |
+| 5.3 | Box selection (drag on empty canvas) | `selection/boxSelect.ts` | `useBoxSelection.ts` | **Done** | `useBoxSelection.test.ts` |
 | 5.4 | Select all (`Ctrl+A`) | `selection/selectAll.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
 | 5.5 | Active element tracking | `selection/active.ts` | `useSpatialSelection.ts:activeId` | **Partial** | `selection.test.ts` |
 | 5.6 | Active region tracking | `selection/activeRegion.ts` | `useSpatialSelection.ts:activeRegionId` | **Partial** | — |
@@ -276,7 +276,7 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 - [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~35+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. Remaining gaps: `DisplayNote.vue` (basic render tests only), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, box selection, arrow creation/reconnection, sidebar/toolbar integration.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~30+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. Remaining gaps: `DisplayNote.vue` (basic render tests only), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, arrow creation/reconnection, sidebar/toolbar integration.
 - [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---

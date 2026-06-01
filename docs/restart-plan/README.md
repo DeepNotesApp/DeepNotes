@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-05-31 (Phase 6 in progress. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` extracted. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
+> **Last updated:** 2026-05-31 (Phase 6 in progress. `SpatialPageView.vue` god-component refactored — box selection, arrow drag, arrow reconnect, note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 pending.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -90,14 +90,14 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **No `PageElem` abstraction.** Legacy notes and arrows inherit from `PageElem`, sharing selected/active/editing/visible/region state. New code treats them as completely separate types.
 - **`editing` state management implemented.** `useSpatialEditing.ts` tracks which note/arrow is being edited. Escape stops editing; canvas click stops editing; Delete/Backspace is suppressed while editing to avoid deleting selected elements.
 - **Container rendering lacks legacy depth.** `stretchChildren`, `wrapChildren`, `originOffset`, and overflow detection are in the model but not enforced in rendering. Spatial vs non-spatial container distinction is not fully implemented.
-- **`SpatialPageView.vue` partially refactored.** Keyboard shortcuts (~150 lines) extracted to `useSpatialKeyboard.ts`. Still a large component; further extraction needed for drag, resize, box-select, and arrow-reconnection logic.
+- **`SpatialPageView.vue` partially refactored.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`. Box selection, arrow drag, arrow reconnect, and note drag extracted to dedicated composables (`useBoxSelection.ts`, `useArrowDrag.ts`, `useArrowReconnect.ts`, `useNoteDrag.ts`). Note geometry utilities extracted to `note-geometry.ts`. Component reduced from ~740 lines to ~365 lines. Remaining inline logic: context menu handlers, canvas double-click, fit-to-screen.
 - **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
 - **Missing floating UI:** back/forward nav, screenshot, user avatars on canvas.
 
 ### Other gaps
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`. **However, `SpatialPageView.vue` is a 1,070-line god component that violates the spirit of this criterion.**
+- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`. `SpatialPageView.vue` script section reduced from ~740 lines to ~365 lines after extracting `useSpatialKeyboard.ts`, `useBoxSelection.ts`, `useArrowDrag.ts`, `useArrowReconnect.ts`, `useNoteDrag.ts`, and `note-geometry.ts`.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 

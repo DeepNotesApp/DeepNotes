@@ -14,8 +14,13 @@ import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
 import { useSpatialUndoRedo } from "./undo-redo";
 import { useSpatialKeyboard } from "./useSpatialKeyboard";
-import { screenToWorld, worldToScreen } from "./spatial-viewport-math";
+import { screenToWorld } from "./spatial-viewport-math";
 import { provideNoteHeights } from "./useNoteHeights";
+import { useBoxSelection } from "./useBoxSelection";
+import { useArrowDrag } from "./useArrowDrag";
+import { useArrowReconnect } from "./useArrowReconnect";
+import { useNoteDrag } from "./useNoteDrag";
+import { copySelection, pastePayload } from "./clipboard";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
@@ -114,25 +119,6 @@ const contextMenu = ref<{
   y: number;
 }>({ open: false, x: 0, y: 0 });
 
-// --- teleport overlay state ---
-const draggingNoteId = ref<string | null>(null);
-const draggingNoteModel = ref<any>(null);
-const dragScreenX = ref(0);
-const dragScreenY = ref(0);
-const hoveredContainerId = ref<string | null>(null);
-
-// --- arrow reconnection state ---
-const reconnectingArrowId = ref<string | null>(null);
-const reconnectingFrom = ref<'source' | 'target' | null>(null);
-const hoveredNoteId = ref<string | null>(null);
-
-// --- arrow drag state ---
-const arrowDrag = ref<{
-  sourceId: string;
-  endX: number;
-  endY: number;
-} | null>(null);
-
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
   for (const n of noteList.value) {
@@ -147,38 +133,45 @@ const notesByZIndex = computed(() => {
   );
 });
 
-const previewLine = computed(() => {
-  if (!arrowDrag.value || !canvasRef.value?.rootEl) return null;
-  const sourceNote = noteList.value.find(
-    (n) => n.id === arrowDrag.value!.sourceId,
-  );
-  if (!sourceNote) return null;
+// --- extracted composables ---
+const { onCanvasPointerDown, onCanvasPointerMove, onCanvasPointerUp } = useBoxSelection({
+  canvasRef,
+  selection,
+  editing,
+  rootNoteList,
+  noteList,
+  parentOf,
+});
 
-  const rect = canvasRef.value.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const z = canvasRef.value.zoom;
-  const camX = canvasRef.value.camX;
-  const camY = canvasRef.value.camY;
+const { arrowDrag, previewLine, onArrowDragStart } = useArrowDrag({
+  canvasRef,
+  noteList,
+  createArrow,
+  defaultArrowTemplate: props.defaultArrowTemplate,
+});
 
-  const wStr = sourceNote.model.width.value.expanded;
-  const w = wStr === "Auto" ? 160 : parseFloat(wStr);
-  const sourceScreen = worldToScreen(
-    sourceNote.model.pos.value.x + w / 2,
-    sourceNote.model.pos.value.y + 40,
-    cx,
-    cy,
-    camX,
-    camY,
-    z,
-  );
+const { reconnectingArrowId, reconnectingFrom, hoveredNoteId, onArrowReconnectStart } = useArrowReconnect({
+  canvasRef,
+  arrowList,
+  noteList,
+  parentOf,
+});
 
-  return {
-    x1: sourceScreen.x,
-    y1: sourceScreen.y,
-    x2: arrowDrag.value.endX,
-    y2: arrowDrag.value.endY,
-  };
+const {
+  draggingNoteId,
+  draggingNoteModel,
+  dragScreenX,
+  dragScreenY,
+  hoveredContainerId,
+  onNoteDragStart,
+  onNoteDragEnd,
+} = useNoteDrag({
+  canvasRef,
+  noteList,
+  noteById,
+  parentOf,
+  moveNoteIntoContainer,
+  moveNoteOutOfContainer,
 });
 
 function onCanvasDoubleClick(e: MouseEvent) {
@@ -233,36 +226,6 @@ function fitToScreen() {
   canvas.fitToScreen({ minX, minY, maxX, maxY }, 40);
 }
 
-// --- box selection state ---
-const DRAG_THRESHOLD = 4;
-let boxState: {
-  active: boolean;
-  startX: number;
-  startY: number;
-  ctrl: boolean;
-} | null = null;
-
-function onCanvasPointerDown(e: PointerEvent) {
-  // Only handle left-click on the canvas background (not notes/arrows).
-  // SpatialWorldCanvas calls preventDefault() when panning (space/middle),
-  // so we skip if default is prevented to avoid fighting pan.
-  if (e.target !== e.currentTarget || e.button !== 0 || e.defaultPrevented)
-    return;
-
-  editing.stopEditing();
-
-  boxState = {
-    active: false,
-    startX: e.clientX,
-    startY: e.clientY,
-    ctrl: e.ctrlKey || e.metaKey,
-  };
-
-  if (!boxState.ctrl) {
-    selection.clear();
-  }
-}
-
 function onCanvasContextMenu(e: MouseEvent) {
   e.preventDefault();
   const canvas = canvasRef.value;
@@ -287,35 +250,6 @@ function onCanvasContextMenu(e: MouseEvent) {
     x: e.clientX,
     y: e.clientY,
   };
-}
-
-function onCanvasPointerMove(e: PointerEvent) {
-  if (!boxState) return;
-
-  const dx = e.clientX - boxState.startX;
-  const dy = e.clientY - boxState.startY;
-
-  if (!boxState.active && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
-    boxState.active = true;
-    selection.startBoxSelect(boxState.startX, boxState.startY);
-  }
-
-  if (boxState.active) {
-    selection.updateBoxSelect(e.clientX, e.clientY);
-  }
-}
-
-function onCanvasPointerUp() {
-  if (!boxState) return;
-
-  if (boxState.active) {
-    finalizeBoxSelect();
-  } else {
-    // Click on empty canvas without drag: already cleared in pointerdown
-    // unless Ctrl was held, in which case we do nothing.
-  }
-
-  boxState = null;
 }
 
 function handleContextMenuCreateNote(x: number, y: number) {
@@ -397,315 +331,6 @@ async function handleContextMenuCutSelected() {
       deleteArrow(id);
     }
     selection.clear();
-  }
-}
-
-// --- arrow drag ---
-function onArrowDragStart(sourceId: string) {
-  arrowDrag.value = { sourceId, endX: 0, endY: 0 };
-  window.addEventListener("pointermove", onArrowDragMove);
-  window.addEventListener("pointerup", onArrowDragEnd);
-}
-
-function onArrowDragMove(e: PointerEvent) {
-  if (!arrowDrag.value) return;
-  arrowDrag.value.endX = e.clientX;
-  arrowDrag.value.endY = e.clientY;
-}
-
-function onArrowDragEnd(e: PointerEvent) {
-  window.removeEventListener("pointermove", onArrowDragMove);
-  window.removeEventListener("pointerup", onArrowDragEnd);
-
-  if (!arrowDrag.value) return;
-  const sourceId = arrowDrag.value.sourceId;
-  arrowDrag.value = null;
-
-  // Find target note under cursor
-  const targetEl = document.elementFromPoint(e.clientX, e.clientY);
-  if (!targetEl) return;
-
-  const noteEl = targetEl.closest("[data-note-id]") as HTMLElement | null;
-  if (!noteEl) return;
-
-  const targetId = noteEl.dataset.noteId;
-  if (!targetId || targetId === sourceId) return;
-
-  createArrow(sourceId, targetId, props.defaultArrowTemplate);
-}
-
-function rectsIntersect(
-  ax: number,
-  ay: number,
-  aw: number,
-  ah: number,
-  bx: number,
-  by: number,
-  bw: number,
-  bh: number,
-) {
-  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
-}
-
-function finalizeBoxSelect() {
-  const result = selection.endBoxSelect();
-  const canvas = canvasRef.value;
-  if (!result.start || !result.end || !canvas || !canvas.rootEl) return;
-
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const z = canvas.zoom;
-  const camX = canvas.camX;
-  const camY = canvas.camY;
-
-  const w1 = screenToWorld(result.start.x, result.start.y, cx, cy, camX, camY, z);
-  const w2 = screenToWorld(result.end.x, result.end.y, cx, cy, camX, camY, z);
-
-  const boxX = Math.min(w1.x, w2.x);
-  const boxY = Math.min(w1.y, w2.y);
-  const boxW = Math.max(w1.x, w2.x) - boxX;
-  const boxH = Math.max(w1.y, w2.y) - boxY;
-
-  for (const note of rootNoteList.value) {
-    const nx = note.model.pos.value.x;
-    const ny = note.model.pos.value.y;
-    const nwStr = note.model.width.value.expanded;
-    const nw = nwStr === "Auto" ? 160 : parseFloat(nwStr);
-    const nh = 80; // approximate note height for box-select
-
-    if (rectsIntersect(boxX, boxY, boxW, boxH, nx, ny, nw, nh)) {
-      selection.select(note.id, "note", true);
-    }
-  }
-}
-
-// --- drag into/out of container ---
-function getNoteEffectiveWorldPos(
-  noteId: string,
-): { x: number; y: number } | null {
-  const entry = noteList.value.find((n) => n.id === noteId);
-  if (!entry) return null;
-  const parentId = parentOf.value.get(noteId);
-  if (!parentId) {
-    return { x: entry.model.pos.value.x, y: entry.model.pos.value.y };
-  }
-  const parent = noteList.value.find((n) => n.id === parentId);
-  if (!parent) return { x: entry.model.pos.value.x, y: entry.model.pos.value.y };
-  return {
-    x: parent.model.pos.value.x + entry.model.pos.value.x,
-    y:
-      parent.model.pos.value.y +
-      entry.model.pos.value.y +
-      48 /* container content offset */,
-  };
-}
-
-function getNoteRect(noteId: string) {
-  const entry = noteList.value.find((n) => n.id === noteId);
-  if (!entry) return null;
-  const pos = getNoteEffectiveWorldPos(noteId);
-  if (!pos) return null;
-  const wStr = entry.model.width.value.expanded;
-  const w = wStr === "Auto" ? 160 : parseFloat(wStr);
-  const h = 80;
-  return { x: pos.x, y: pos.y, width: w, height: h };
-}
-
-function onNoteDragStart(noteId: string) {
-  const note = noteList.value.find(n => n.id === noteId);
-  if (note) {
-    draggingNoteId.value = noteId;
-    draggingNoteModel.value = note.model;
-    dragScreenX.value = 0;
-    dragScreenY.value = 0;
-    window.addEventListener('pointermove', onDragPointerMove);
-    window.addEventListener('pointerup', onDragPointerUp);
-  }
-}
-
-function onDragPointerMove(e: PointerEvent) {
-  dragScreenX.value = e.clientX;
-  dragScreenY.value = e.clientY;
-
-  // Detect container overlap for drop zone feedback
-  if (!draggingNoteId.value) return;
-
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.rootEl) return;
-
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const z = canvas.zoom;
-  const camX = canvas.camX;
-  const camY = canvas.camY;
-
-  const world = screenToWorld(
-    e.clientX,
-    e.clientY,
-    cx,
-    cy,
-    camX,
-    camY,
-    z,
-  );
-
-  // Find container under cursor
-  let bestContainerId: string | null = null;
-  let bestOverlapArea = 0;
-
-  for (const note of noteList.value) {
-    if (note.id === draggingNoteId.value) continue;
-    if (!note.model.container.enabled.value) continue;
-
-    const containerRect = getNoteRect(note.id);
-    if (!containerRect) continue;
-
-    // Check if cursor is inside container
-    if (
-      world.x >= containerRect.x &&
-      world.x <= containerRect.x + containerRect.width &&
-      world.y >= containerRect.y &&
-      world.y <= containerRect.y + containerRect.height
-    ) {
-      bestContainerId = note.id;
-      break;
-    }
-  }
-
-  hoveredContainerId.value = bestContainerId;
-}
-
-function onDragPointerUp() {
-  window.removeEventListener('pointermove', onDragPointerMove);
-  window.removeEventListener('pointerup', onDragPointerUp);
-}
-
-function onArrowReconnectStart(arrowId: string, from: 'source' | 'target') {
-  reconnectingArrowId.value = arrowId;
-  reconnectingFrom.value = from;
-  window.addEventListener('pointermove', onReconnectPointerMove);
-  window.addEventListener('pointerup', onReconnectPointerUp);
-}
-
-function onReconnectPointerMove(e: PointerEvent) {
-  // Track cursor for reconnection line
-  if (!reconnectingArrowId.value) return;
-
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.rootEl) return;
-
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const z = canvas.zoom;
-  const camX = canvas.camX;
-  const camY = canvas.camY;
-
-  const world = screenToWorld(
-    e.clientX,
-    e.clientY,
-    cx,
-    cy,
-    camX,
-    camY,
-    z,
-  );
-
-  // Find note under cursor
-  let bestNoteId: string | null = null;
-
-  for (const note of noteList.value) {
-    const noteRect = getNoteRect(note.id);
-    if (!noteRect) continue;
-
-    if (
-      world.x >= noteRect.x &&
-      world.x <= noteRect.x + noteRect.width &&
-      world.y >= noteRect.y &&
-      world.y <= noteRect.y + noteRect.height
-    ) {
-      bestNoteId = note.id;
-      break;
-    }
-  }
-
-  hoveredNoteId.value = bestNoteId;
-}
-
-function onReconnectPointerUp() {
-  window.removeEventListener('pointermove', onReconnectPointerMove);
-  window.removeEventListener('pointerup', onReconnectPointerUp);
-
-  if (reconnectingArrowId.value && hoveredNoteId.value && reconnectingFrom.value) {
-    const arrow = arrowList.value.find(a => a.id === reconnectingArrowId.value);
-    if (arrow) {
-      // Access the arrow's source/target through the model's reactive refs
-      if (reconnectingFrom.value === 'source') {
-        arrow.model.source.value = hoveredNoteId.value;
-      } else {
-        arrow.model.target.value = hoveredNoteId.value;
-      }
-    }
-  }
-
-  reconnectingArrowId.value = null;
-  reconnectingFrom.value = null;
-  hoveredNoteId.value = null;
-}
-
-function onNoteDragEnd(noteId: string) {
-  draggingNoteId.value = null;
-  draggingNoteModel.value = null;
-  hoveredContainerId.value = null;
-
-  const noteRect = getNoteRect(noteId);
-  if (!noteRect) return;
-
-  const currentParentId = parentOf.value.get(noteId);
-
-  // Find overlapping container notes (excluding self and descendants)
-  let bestContainerId: string | null = null;
-  let bestOverlapArea = 0;
-
-  for (const note of noteList.value) {
-    if (note.id === noteId) continue;
-    if (!note.model.container.enabled.value) continue;
-
-    // Prevent dropping into own descendants
-    const descendants = new Set<string>();
-    function collect(id: string) {
-      const m = noteById.value.get(id);
-      if (!m) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const childId of (m as any).container.children.value as string[]) {
-        descendants.add(childId);
-        collect(childId);
-      }
-    }
-    collect(noteId);
-    if (descendants.has(note.id)) continue;
-
-    const containerRect = getNoteRect(note.id);
-    if (!containerRect) continue;
-
-    const overlapX =
-      Math.max(0, Math.min(noteRect.x + noteRect.width, containerRect.x + containerRect.width) - Math.max(noteRect.x, containerRect.x));
-    const overlapY =
-      Math.max(0, Math.min(noteRect.y + noteRect.height, containerRect.y + containerRect.height) - Math.max(noteRect.y, containerRect.y));
-    const overlapArea = overlapX * overlapY;
-
-    if (overlapArea > bestOverlapArea) {
-      bestOverlapArea = overlapArea;
-      bestContainerId = note.id;
-    }
-  }
-
-  if (bestContainerId && bestContainerId !== currentParentId) {
-    moveNoteIntoContainer(noteId, bestContainerId);
-  } else if (!bestContainerId && currentParentId) {
-    moveNoteOutOfContainer(noteId);
   }
 }
 
