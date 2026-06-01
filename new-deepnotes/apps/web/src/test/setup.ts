@@ -17,5 +17,11 @@ vi.mock("vue-router", async (importOriginal) => {
   };
 });
 
-// Set up proper HTML doctype for KaTeX
-document.documentElement.innerHTML = "<!DOCTYPE html><html><head></head><body></body></html>";
+// Suppress KaTeX quirks mode warning (happy-dom doesn't support doctype properly)
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('KaTeX doesn\'t work in quirks mode')) {
+    return;
+  }
+  originalWarn(...args);
+};

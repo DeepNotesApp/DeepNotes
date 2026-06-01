@@ -24,8 +24,8 @@ const emit = defineEmits({
 
 const bodyType = computed(() => props.arrowModel?.bodyType?.value ?? 'curve')
 const bodyStyle = computed(() => props.arrowModel?.bodyStyle?.value ?? 'solid')
-const sourceHead = computed(() => props.arrowModel?.sourceHead?.value ?? false)
-const targetHead = computed(() => props.arrowModel?.targetHead?.value ?? true)
+const sourceHead = computed(() => props.arrowModel?.sourceHead?.value !== 'none')
+const targetHead = computed(() => props.arrowModel?.targetHead?.value !== 'none')
 const color = computed(() => props.arrowModel?.color?.value ?? 0)
 const colorInherit = computed(() => props.arrowModel?.color?.inherit?.value ?? false)
 const readOnlyArrow = computed(() => props.arrowModel?.readOnly?.value ?? false)

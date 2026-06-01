@@ -27,6 +27,15 @@ export default defineConfig({
   },
   test: {
     environment: "happy-dom",
+    environmentOptions: {
+      happyDOM: {
+        settings: {
+          disableJavaScriptFileLoading: true,
+          disableCSSFileLoading: true,
+          disableErrorCapturing: true,
+        },
+      },
+    },
     include: ["src/**/*.test.ts"],
     setupFiles: ["./src/test/setup.ts"],
     testTimeout: 120000,
