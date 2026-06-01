@@ -389,6 +389,8 @@ onMounted(() => {
           @update:link="selectedNoteModel.link.value = $event"
           @update:head-enabled="selectedNoteModel.head.enabled.value = $event"
           @update:body-enabled="selectedNoteModel.body.enabled.value = $event"
+          @update:head-wrap="selectedNoteModel.head.wrap.value = $event"
+          @update:body-wrap="selectedNoteModel.body.wrap.value = $event"
           @update:pos-x="selectedNoteModel.pos.value.x = $event"
           @update:pos-y="selectedNoteModel.pos.value.y = $event"
           @update:anchor-x="selectedNoteModel.anchor.value.x = $event"
@@ -403,6 +405,10 @@ onMounted(() => {
           @update:read-only="selectedNoteModel.readOnly.value = $event"
           @update:container-enabled="selectedNoteModel.container.enabled.value = $event"
           @update:container-horizontal="selectedNoteModel.container.horizontal.value = $event"
+          @update:container-spatial="selectedNoteModel.container.spatial.value = $event"
+          @update:container-wrap-children="selectedNoteModel.container.wrapChildren.value = $event"
+          @update:container-stretch-children="selectedNoteModel.container.stretchChildren.value = $event"
+          @update:container-force-color-inheritance="selectedNoteModel.container.forceColorInheritance.value = $event"
         />
 
         <ArrowPropertiesCard
@@ -411,10 +417,12 @@ onMounted(() => {
           :arrow-model="selectedArrowModel"
           :read-only="cryptoError !== null"
           @update:body-type="selectedArrowModel.bodyType.value = $event"
+          @update:body-style="selectedArrowModel.bodyStyle.value = $event"
           @update:source-head="selectedArrowModel.sourceHead.value = $event"
           @update:target-head="selectedArrowModel.targetHead.value = $event"
           @update:color="selectedArrowModel.color.value = $event"
           @update:color-inherit="selectedArrowModel.color.inherit.value = $event"
+          @update:read-only="selectedArrowModel.readOnly.value = $event"
         />
 
         <PageEditorSnapshotsCard

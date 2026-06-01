@@ -12,19 +12,23 @@ const props = defineProps<{
   readOnly?: boolean
 }>()
 
-const emit = defineEmits<{
-  'update:body-type': [value: 'curve' | 'line']
-  'update:source-head': [value: boolean]
-  'update:target-head': [value: boolean]
-  'update:color': [value: number]
-  'update:color-inherit': [value: boolean]
-}>()
+const emit = defineEmits({
+  'update:body-type': (value: 'curve' | 'line') => true,
+  'update:body-style': (value: string) => true,
+  'update:source-head': (value: boolean) => true,
+  'update:target-head': (value: boolean) => true,
+  'update:color': (value: number) => true,
+  'update:color-inherit': (value: boolean) => true,
+  'update:read-only': (value: boolean) => true,
+})
 
 const bodyType = computed(() => props.arrowModel?.bodyType?.value ?? 'curve')
+const bodyStyle = computed(() => props.arrowModel?.bodyStyle?.value ?? 'solid')
 const sourceHead = computed(() => props.arrowModel?.sourceHead?.value ?? false)
 const targetHead = computed(() => props.arrowModel?.targetHead?.value ?? true)
 const color = computed(() => props.arrowModel?.color?.value ?? 0)
 const colorInherit = computed(() => props.arrowModel?.color?.inherit?.value ?? false)
+const readOnlyArrow = computed(() => props.arrowModel?.readOnly?.value ?? false)
 
 const colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -35,7 +39,7 @@ function handleColorSelect(colorIndex: number) {
 </script>
 
 <template>
-  <Card v-if="arrowId">
+  <Card v-if="arrowId" data-testid="arrow-properties-card">
     <CardHeader class="pb-2">
       <CardTitle class="text-sm">Arrow Properties</CardTitle>
     </CardHeader>
@@ -75,7 +79,7 @@ function handleColorSelect(colorIndex: number) {
             <Switch
               :model-value="sourceHead"
               :disabled="readOnly"
-              @update:model-value="emit('update:source-head', $event)"
+              @update:model-value="emit('update:source-head', Boolean($event))"
             />
             <Label>Source</Label>
           </div>
@@ -83,10 +87,47 @@ function handleColorSelect(colorIndex: number) {
             <Switch
               :model-value="targetHead"
               :disabled="readOnly"
-              @update:model-value="emit('update:target-head', $event)"
+              @update:model-value="emit('update:target-head', Boolean($event))"
             />
             <Label>Target</Label>
           </div>
+        </div>
+      </div>
+
+      <!-- Body Style -->
+      <div class="space-y-2">
+        <Label>Body Style</Label>
+        <div class="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-1"
+            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'solid' }"
+            :disabled="readOnly"
+            @click="emit('update:body-style', 'solid')"
+          >
+            Solid
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-1"
+            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'dashed' }"
+            :disabled="readOnly"
+            @click="emit('update:body-style', 'dashed')"
+          >
+            Dashed
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-1"
+            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'dotted' }"
+            :disabled="readOnly"
+            @click="emit('update:body-style', 'dotted')"
+          >
+            Dotted
+          </Button>
         </div>
       </div>
 
@@ -98,7 +139,7 @@ function handleColorSelect(colorIndex: number) {
             <Switch
               :model-value="colorInherit"
               :disabled="readOnly"
-              @update:model-value="emit('update:color-inherit', $event)"
+              @update:model-value="emit('update:color-inherit', Boolean($event))"
             />
             <Label class="text-[10px]">Inherit</Label>
           </div>
@@ -118,6 +159,16 @@ function handleColorSelect(colorIndex: number) {
             @click="handleColorSelect(c)"
           />
         </div>
+      </div>
+
+      <!-- Read-only -->
+      <div class="flex items-center gap-2">
+        <Switch
+          :model-value="readOnlyArrow"
+          :disabled="readOnly"
+          @update:model-value="emit('update:read-only', Boolean($event))"
+        />
+        <Label>Read-only</Label>
       </div>
     </CardContent>
   </Card>

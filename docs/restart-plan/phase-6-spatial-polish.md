@@ -130,5 +130,5 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [x] Per-note context menu (`NoteContextMenu.vue`) implemented with bring-to-front, send-to-back, and delete actions. Tested via `useNoteContextMenu.test.ts` (5 tests).
 - [x] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`; canvas actions extracted to `useCanvasActions.ts`; canvas context menu handlers extracted to `useCanvasContextMenu.ts`; per-note context menu handlers extracted to `useNoteContextMenu.ts`. Component reduced from ~740 to ~260 lines.
 - [x] Selection implements `bringToTop`. Formatting integration and active element/region navigation remain missing.
-- [ ] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes.
+- [x] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes. (`DisplayNote.vue` + `DisplayNote.test.ts` 5 container layout tests)
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.

@@ -182,8 +182,8 @@
 | 12.8 | Left sidebar — Selected pages | `LeftSidebar/SelectedPages.vue` | `SelectedPagesCard.vue` | **Done** | `SelectedPagesCard.test.ts` (5 tests) |
 | 12.9 | Left sidebar — Collab status | `LeftSidebar/CollabStatus.vue` | `PageEditorCollabStatusCard.vue` | **Done** | — |
 | 12.10 | Right sidebar (collapsible) | `RightSidebar.vue` | `PageLayout.vue:right aside` | **Done** | — |
-| 12.11 | Right sidebar — Note properties | `RightSidebar/NoteProperties.vue` | `NotePropertiesCard.vue` | **Partial** | — |
-| 12.12 | Right sidebar — Arrow properties | `RightSidebar/ArrowProperties.vue` | `ArrowPropertiesCard.vue` | **Partial** | — |
+| 12.11 | Right sidebar — Note properties | `RightSidebar/NoteProperties.vue` | `NotePropertiesCard.vue` | **Partial** | `NotePropertiesCard.test.ts` (5 tests) |
+| 12.12 | Right sidebar — Arrow properties | `RightSidebar/ArrowProperties.vue` | `ArrowPropertiesCard.vue` | **Partial** | `ArrowPropertiesCard.test.ts` (6 tests) |
 | 12.13 | Right sidebar — Page properties | `RightSidebar/PageProperties.vue` | `PagePropertiesCard.vue` | **Partial** | — |
 | 12.14 | Right sidebar — Snapshots | `RightSidebar/Snapshots.vue` | `PageEditorSnapshotsCard.vue` | **Done** | — |
 | 12.15 | Right sidebar — Management | `RightSidebar/Management.vue` | `PageEditorManagementCard.vue` | **Done** | — |
@@ -192,11 +192,11 @@
 | 12.18 | Per-note context menu | `NoteContextMenu.vue` | `NoteContextMenu.vue` + `useNoteContextMenu.ts` | **Done** | `useNoteContextMenu.test.ts` (5 tests) |
 | 12.19 | Page state screens (8 total) | `DisplayScreens/*.vue` | `PageStateScreens.vue` + 8 components | **Done** | — |
 | 12.20 | Loading overlay | `LoadingOverlay.vue` | `PageStateScreens.vue` (inline) | **Partial** | — |
-| 12.21 | Floating UI — zoom indicator | `FloatingUI/Zoom.vue` | `SpatialPageView.vue:zoom %` | **Done** | — |
-| 12.22 | Floating UI — undo/redo buttons | `FloatingUI/UndoRedo.vue` | `SpatialPageView.vue:Undo/Redo` | **Done** | — |
-| 12.23 | Floating UI — selection count | `FloatingUI/SelectionCount.vue` | `SpatialPageView.vue:selection count` | **Done** | — |
-| 12.24 | Floating UI — find/replace toggle | `FloatingUI/FindReplace.vue` | `SpatialPageView.vue:Search button` | **Done** | — |
-| 12.25 | Floating UI — back/forward nav | `FloatingUI/HistoryNav.vue` | — | **Not started** | — |
+| 12.21 | Floating UI — zoom indicator | `FloatingUI/Zoom.vue` | `SpatialPageView.vue:zoom %` | **Done** | `SpatialPageView.test.ts` |
+| 12.22 | Floating UI — undo/redo buttons | `FloatingUI/UndoRedo.vue` | `SpatialPageView.vue:Undo/Redo` | **Done** | `SpatialPageView.test.ts` |
+| 12.23 | Floating UI — selection count | `FloatingUI/SelectionCount.vue` | `SpatialPageView.vue:selection count` | **Done** | `SpatialPageView.test.ts` |
+| 12.24 | Floating UI — find/replace toggle | `FloatingUI/FindReplace.vue` | `SpatialPageView.vue:Search button` | **Done** | `SpatialPageView.test.ts` |
+| 12.25 | Floating UI — back/forward nav | `FloatingUI/HistoryNav.vue` | `SpatialPageView.vue:router back/forward buttons` | **Done** | `SpatialPageView.test.ts` |
 | 12.26 | Floating UI — screenshot | `FloatingUI/Screenshot.vue` | — | **Not started** | — |
 | 12.27 | Floating UI — user avatars on canvas | `FloatingUI/Avatars.vue` | — | **Not started** | — |
 
@@ -276,7 +276,7 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 - [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~15 UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `useCanvasActions.test.ts` (5 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (10 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (21 tests), `MainToolbar.test.ts` (7 tests), `PageLayout.test.ts` (10 tests), `RecentPagesCard.test.ts` (5 tests), `FavoritePagesCard.test.ts` (5 tests), `SelectedPagesCard.test.ts` (5 tests), `useNoteContextMenu.test.ts` (5 tests) also added. Per-note context menu (12.18) implemented and tested. Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~8 UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `useCanvasActions.test.ts` (5 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (10 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests), `NotePropertiesCard.test.ts` (5 tests), `ArrowPropertiesCard.test.ts` (6 tests) added. `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (26 tests), `MainToolbar.test.ts` (8 tests), `PageLayout.test.ts` (10 tests), `RecentPagesCard.test.ts` (5 tests), `FavoritePagesCard.test.ts` (5 tests), `SelectedPagesCard.test.ts` (5 tests), `useNoteContextMenu.test.ts` (5 tests), `SpatialPageView.test.ts` (13 tests) also added. Per-note context menu (12.18) implemented and tested. Note/Arrow properties cards (12.11/12.12) now expose all major editable fields with tests. Floating UI back/forward nav (12.25) implemented and tested. Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, screenshot/user avatars floating UI.
 - [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---

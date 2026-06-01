@@ -2,7 +2,8 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, RotateCcw, Search, Maximize } from "lucide-vue-next";
+import { Undo, Redo, RotateCcw, Search, Maximize, ArrowLeft, ArrowRight } from "lucide-vue-next";
+import { useRouter } from "vue-router";
 
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
@@ -30,6 +31,8 @@ const props = defineProps<{
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
   defaultArrowTemplate?: Partial<ClipboardArrow> | null;
 }>();
+
+const router = useRouter();
 
 const emit = defineEmits<{
   'select-note': [id: string | null, model: any]
@@ -389,6 +392,26 @@ onUnmounted(() => {
           @click="fitToScreen"
         >
           <Maximize class="h-4 w-4" />
+        </Button>
+
+        <!-- Back/Forward nav -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Back"
+          @click="router.back()"
+        >
+          <ArrowLeft class="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Forward"
+          @click="router.forward()"
+        >
+          <ArrowRight class="h-4 w-4" />
         </Button>
 
         <!-- Find/Replace -->
