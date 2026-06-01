@@ -28,6 +28,7 @@ export default defineConfig({
   test: {
     environment: "happy-dom",
     include: ["src/**/*.test.ts"],
+    setupFiles: ["./src/test/setup.ts"],
     testTimeout: 120000,
     hookTimeout: 120000,
     pool: "forks",
