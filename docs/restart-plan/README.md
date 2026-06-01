@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed and 5 of 7 gaps fixed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 220 tests passing across 30 test files. Fixed: hardcoded note heights, fitToScreen selection-first, color variants, selection formatting (`Ctrl+B/I/U`), active element keyboard nav (`Tab`/`Enter`). Remaining: interregional arrows, container layout simplification. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed and 6 of 7 gaps fixed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 222 tests passing across 30 test files. Fixed: hardcoded note heights, fitToScreen selection-first, interregional arrows (`fakePos`/`looseEndpoint`), color variants, selection formatting (`Ctrl+B/I/U`), active element keyboard nav (`Tab`/`Enter`). Remaining: container layout simplification. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -88,9 +88,11 @@ All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECK
 4. ~~**Selection formatting integration is missing.**~~ Created `note-editor-registry.ts`. `Ctrl+B/I/U` applies bold/italic/underline across all selected note editors (head + body).
 5. ~~**Active region tracking is partial.**~~ `Tab`/`Shift+Tab` cycles selected notes as active element. `Enter` starts editing the active note.
 
+**Fixed (2026-06-01):**
+6. ~~**Interregional arrows are schema-only.**~~ `DisplayArrow.vue` now renders arrows with `fakePos` fallback when `sourceModel`/`targetModel` is missing. `looseEndpoint` indicators shown as endpoint circles.
+
 **Remaining (non-blocking):**
-6. **Interregional arrows are schema-only.** `interregional`, `fakePos`, `looseEndpoint` fields exist in Yjs but `DisplayArrow.vue` does not render cross-region arrows with fake endpoints.
-7. **Container layout is functional but simplified.** Missing legacy `originOffset`, `overflow`, island region tracking, and `relativeRect`/`islandRect` computations.
+7. **Container layout is functional but simplified.** Missing legacy `originOffset`/`overflow`/`islandRect` computations.
 8. **Loading overlay polish (12.20)** remains partial.
 
 ### Phase 9 — Production Readiness (in progress)

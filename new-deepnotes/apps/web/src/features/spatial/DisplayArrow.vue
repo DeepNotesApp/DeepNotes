@@ -31,37 +31,70 @@ const colorVariants = computed(() => {
 
 const { heights: noteHeights } = useNoteHeights();
 
+const isLooseSource = computed(() =>
+  props.model.looseEndpoint.value === "source" || !props.sourceModel,
+);
+const isLooseTarget = computed(() =>
+  props.model.looseEndpoint.value === "target" || !props.targetModel,
+);
+
 const geometry = computed(() => {
   const s = props.sourceModel;
   const t = props.targetModel;
-  if (!s || !t) return null;
+  const fake = props.model.fakePos.value;
 
-  const w1 = s.width.value.expanded;
-  const nw1 = w1 === "Auto" ? 160 : parseFloat(w1);
-  const h1 = noteHeights.value.get(props.model.source.value) ?? 80;
+  // Need at least one real endpoint or a fakePos to render
+  if (!s && !t && !fake) return null;
 
-  const w2 = t.width.value.expanded;
-  const nw2 = w2 === "Auto" ? 160 : parseFloat(w2);
-  const h2 = noteHeights.value.get(props.model.target.value) ?? 80;
+  const w1 = s?.width.value.expanded;
+  const nw1 = w1 === "Auto" ? 160 : w1 ? parseFloat(w1) : 0;
+  const h1 = s ? (noteHeights.value.get(props.model.source.value) ?? 80) : 0;
+
+  const w2 = t?.width.value.expanded;
+  const nw2 = w2 === "Auto" ? 160 : w2 ? parseFloat(w2) : 0;
+  const h2 = t ? (noteHeights.value.get(props.model.target.value) ?? 80) : 0;
 
   const sourceAnchor = props.model.sourceAnchor.value;
   const targetAnchor = props.model.targetAnchor.value;
 
-  let x1 = s.pos.value.x + nw1 / 2;
-  let y1 = s.pos.value.y + h1 / 2;
-  let x2 = t.pos.value.x + nw2 / 2;
-  let y2 = t.pos.value.y + h2 / 2;
+  // Determine endpoint positions
+  let x1: number;
+  let y1: number;
+  let x2: number;
+  let y2: number;
 
-  if (sourceAnchor) {
-    x1 = s.pos.value.x + sourceAnchor.x;
-    y1 = s.pos.value.y + sourceAnchor.y;
+  if (s) {
+    x1 = s.pos.value.x + nw1 / 2;
+    y1 = s.pos.value.y + h1 / 2;
+    if (sourceAnchor) {
+      x1 = s.pos.value.x + sourceAnchor.x;
+      y1 = s.pos.value.y + sourceAnchor.y;
+    }
+  } else if (fake) {
+    x1 = fake.x;
+    y1 = fake.y;
+  } else {
+    // No source and no fakePos — can't render this end
+    return null;
   }
 
-  if (targetAnchor) {
-    x2 = t.pos.value.x + targetAnchor.x;
-    y2 = t.pos.value.y + targetAnchor.y;
-  } else if (props.model.bodyType.value === "line") {
-    // For line body, use rectangle-edge intersection
+  if (t) {
+    x2 = t.pos.value.x + nw2 / 2;
+    y2 = t.pos.value.y + h2 / 2;
+    if (targetAnchor) {
+      x2 = t.pos.value.x + targetAnchor.x;
+      y2 = t.pos.value.y + targetAnchor.y;
+    }
+  } else if (fake) {
+    x2 = fake.x;
+    y2 = fake.y;
+  } else {
+    // No target and no fakePos — can't render this end
+    return null;
+  }
+
+  // Apply rectangle-edge intersection for line body when both notes are present
+  if (s && t && props.model.bodyType.value === "line" && !sourceAnchor && !targetAnchor) {
     const endpoints = computeArrowEndpoints(
       s.pos.value,
       t.pos.value,
@@ -71,14 +104,10 @@ const geometry = computed(() => {
       h2,
       true,
     );
-    if (!sourceAnchor) {
-      x1 = endpoints.x1;
-      y1 = endpoints.y1;
-    }
-    if (!targetAnchor) {
-      x2 = endpoints.x2;
-      y2 = endpoints.y2;
-    }
+    x1 = endpoints.x1;
+    y1 = endpoints.y1;
+    x2 = endpoints.x2;
+    y2 = endpoints.y2;
   }
 
   const minX = Math.min(x1, x2);
@@ -222,6 +251,26 @@ function onPointerDown(e: PointerEvent) {
       stroke="transparent"
       class="pointer-events-auto cursor-crosshair hover:fill-primary/20"
       @pointerdown.stop="emit('reconnectStart', id, 'target')"
+    />
+
+    <!-- Loose endpoint indicators -->
+    <circle
+      v-if="isLooseSource"
+      :cx="geometry.localX1"
+      :cy="geometry.localY1"
+      r="4"
+      :fill="colorVariants.base"
+      stroke="white"
+      stroke-width="1.5"
+    />
+    <circle
+      v-if="isLooseTarget"
+      :cx="geometry.localX2"
+      :cy="geometry.localY2"
+      r="4"
+      :fill="colorVariants.base"
+      stroke="white"
+      stroke-width="1.5"
     />
 
     <!-- Arrow label at midpoint -->

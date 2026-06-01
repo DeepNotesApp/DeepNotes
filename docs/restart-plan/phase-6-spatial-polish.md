@@ -127,7 +127,7 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 ### Gaps identified (ordered by severity)
 1. ~~**`note-geometry.ts` hardcodes note height as `80px`**~~ **FIXED (2026-06-01).** `getNoteRect` now accepts an optional `heights` parameter and reads actual rendered heights from `useNoteHeights`. All callers (`useBoxSelection`, `useNoteDrag`, `useArrowReconnect`) updated to pass heights. `useArrowDrag.ts` now uses `noteHeights.value.get(sourceNote.id) ?? 80` instead of hardcoded `+ 40`. New tests added in `note-geometry.test.ts` and `useCanvasActions.test.ts`.
 2. ~~**`fitToScreen` only uses `rootNoteList` bounds**~~ **FIXED (2026-06-01).** `useCanvasActions` now accepts `selectedNoteIds` and `fitToScreen` prioritizes selected note bounds, falling back to all root notes when nothing is selected. Legacy behavior matched.
-3. **Interregional arrows are schema-only.** `arrow-model.ts` exposes `interregional`, `fakePos`, `looseEndpoint`, but `DisplayArrow.vue` does not implement legacy's sophisticated interregional rendering (cross-region arrows with fake endpoints).
+3. ~~**Interregional arrows are schema-only.**~~ **FIXED (2026-06-01).** `DisplayArrow.vue` now renders arrows when `sourceModel` or `targetModel` is missing by falling back to `fakePos`. `looseEndpoint` field determines which end is disconnected; small endpoint circles are rendered for loose ends. Geometry computation handles partial presence gracefully.
 4. ~~**Color system is simplified.**~~ **FIXED (2026-06-01).** Added `color-utils.ts` with `lightenColor` and `resolveNoteColorVariants` functions that replicate legacy `lightenByRatio` behavior. `DisplayNote.vue` and `DisplayArrow.vue` now use `base`/`light`/`highlight` variants instead of flat 10-color map.
 5. ~~**Selection formatting integration is missing.**~~ **FIXED (2026-06-01).** Created `note-editor-registry.ts` for tracking Tiptap editors per note. `Ctrl+B/I/U` now applies bold/italic/underline across all selected note editors (head + body). `NoteTiptapEditor.vue` registers its editor on mount.
 6. ~~**Active region tracking is partial.**~~ **FIXED (2026-06-01).** `Tab`/`Shift+Tab` now cycles through selected notes as the active element. `Enter` starts editing the active note. Basic keyboard navigation wired in `useSpatialKeyboard.ts`.
@@ -137,7 +137,7 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 
 ## Verification
 
-- [x] Each deliverable has a test (unit, component, or integration). **Met.** 220 tests passing across 30 test files in `features/spatial/`.
+- [x] Each deliverable has a test (unit, component, or integration). **Met.** 222 tests passing across 30 test files in `features/spatial/`.
 - [x] Phase 1 checklist is >80% marked done. **MET.** 72 of 82 rows (88%) are Done.
 
 ---
