@@ -9,9 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus } from "lucide-vue-next";
-
 import { useSession } from "../auth/useSession";
+import PageToolbarActions from "../spatial/PageToolbarActions.vue";
 import SpatialPageView from "../spatial/SpatialPageView.vue";
 import { useUserTemplates } from "../spatial/useUserTemplates";
 import PageEditorBacklinksCard from "./PageEditorBacklinksCard.vue";
@@ -236,15 +235,13 @@ onMounted(() => {
 
     <!-- === Toolbar actions === -->
     <template #toolbar-actions>
-      <Button
-        variant="ghost"
-        size="sm"
-        class="gap-1"
-        @click="spatialViewRef?.insertNoteAtCenter()"
-      >
-        <Plus class="h-4 w-4" />
-        <span class="hidden sm:inline">Note</span>
-      </Button>
+      <PageToolbarActions
+        @insert-note="spatialViewRef?.insertNoteAtCenter()"
+        @insert-arrow="spatialViewRef?.insertArrowBetweenSelected()"
+        @zoom-in="spatialViewRef?.zoomIn()"
+        @zoom-out="spatialViewRef?.zoomOut()"
+        @fit-to-screen="spatialViewRef?.fitToScreen()"
+      />
     </template>
 
     <!-- === Toolbar center: breadcrumb path === -->

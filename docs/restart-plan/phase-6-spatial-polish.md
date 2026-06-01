@@ -53,7 +53,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Item | Status | Notes |
 |------|--------|-------|
 | Fullscreen `PageEditorView.vue` shell | **Done** | `PageLayout.vue` replaces `DefaultLayout.vue` for `/pages/:pageId` via route meta |
-| `MainToolbar` (shadcn) | **Partial** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. Still missing: page action buttons, insert dialogs, zoom other than reset/fit-to-screen |
+| `MainToolbar` (shadcn) | **Done** | Standalone `MainToolbar.vue` extracted from `PageLayout.vue`. `PageToolbarActions.vue` component provides insert note, insert arrow, zoom in/out, and fit-to-screen buttons. 7 tests in `PageToolbarActions.test.ts`. |
 | `LeftSidebar` (shadcn) — Recent, Favorites, Selected, Current path | **Partial** | Resizable collapsible sidebar shell exists. `CurrentPath` and `CollabStatus` wired. `RecentPagesCard` and `FavoritePagesCard` now load real data via `useUserPageLists` composable. `SelectedPagesCard` remains client-side only |
 | `RightSidebar` (shadcn) — Note/Page/Arrow properties | **Partial** | `NotePropertiesCard`, `ArrowPropertiesCard`, `PagePropertiesCard` are wired and visible. Many legacy fields (wrap, anchor, z-index, timestamps) not exposed. Snapshots, management, backlinks exist |
 | `TableContextMenu` (shadcn) — right-click on canvas | **Partial** | `CanvasContextMenu.vue` exists for canvas background. Per-note context menu (`NoteContextMenu.vue`) implemented and tested. |
@@ -110,7 +110,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests this session: `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (21), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12). Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests this session: `PageToolbarActions.test.ts` (7), `SpatialPageView.test.ts` (8), `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (21), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12). Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
@@ -124,7 +124,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [x] All 8 dedicated page-state screens exist and are reachable. (`page-deleted`/`group-deleted`/`invited`/`rejected` are indistinguishable without richer API error codes.)
 - [ ] `DisplayNote.vue` matches legacy note visuals. **PARTIAL.** Colors use hardcoded 10-color map instead of legacy `colorNameToColorHex` with `lightenByRatio`. Drop zones, arrow handles, and frame styling are simplified. No custom scrollbar handling.
 - [ ] `DisplayArrow.vue` supports full legacy arrow behavior. **PARTIAL.** Curve/line bodies and heads work; line body now has rectangle-edge intersection. Interregional arrows don't transform coordinate spaces; `fakePos`/`looseEndpoint` are not rendered.
-- [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
+- [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`. `PageToolbarActions.vue` (insert note/arrow, zoom in/out, fit-to-screen) is wired into the toolbar actions slot.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
 - [x] Arrow geometry and `fitToScreen` read actual note heights instead of hardcoding `80px`.
 - [x] Per-note context menu (`NoteContextMenu.vue`) implemented with bring-to-front, send-to-back, and delete actions. Tested via `useNoteContextMenu.test.ts` (5 tests).

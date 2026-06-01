@@ -1,4 +1,3 @@
-import { ref } from "vue";
 import type { Ref } from "vue";
 import type { SpatialSelection } from "./selection";
 import type { SpatialEditing } from "./useSpatialEditing";

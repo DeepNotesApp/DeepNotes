@@ -1,5 +1,4 @@
 import { computed, ref } from "vue";
-import type * as Y from "yjs";
 
 export type ElemKind = "note" | "arrow";
 export type SelectedElem = { id: string; kind: ElemKind };

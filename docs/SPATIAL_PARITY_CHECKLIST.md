@@ -174,7 +174,7 @@
 |---|---------|------------------|-------------|--------|-----------|
 | 12.1 | Fullscreen immersive shell | `PagesLayout.vue` | `PageLayout.vue` | **Done** | `PageLayout.test.ts` (10 tests) |
 | 12.2 | Main toolbar (logo, breadcrumb, global nav) | `MainToolbar.vue` | `MainToolbar.vue` | **Done** | `MainToolbar.test.ts` (7 tests) |
-| 12.3 | Toolbar page action buttons | `MainToolbar/Actions.vue` | — | **Not started** | — |
+| 12.3 | Toolbar page action buttons | `MainToolbar/Actions.vue` | `PageToolbarActions.vue` | **Done** | `PageToolbarActions.test.ts` (7 tests) |
 | 12.4 | Left sidebar (resizable, collapsible) | `LeftSidebar.vue` | `PageLayout.vue:left aside` | **Done** | `PageLayout.test.ts` |
 | 12.5 | Left sidebar — Current path | `LeftSidebar/CurrentPath.vue` | `PageEditorView.vue:Path card` | **Done** | — |
 | 12.6 | Left sidebar — Recent pages | `LeftSidebar/RecentPages.vue` | `RecentPagesCard.vue` | **Done** | `RecentPagesCard.test.ts` (5 tests) |

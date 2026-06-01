@@ -2,7 +2,7 @@ import { ref } from "vue";
 import type { Ref } from "vue";
 import type { NoteModel } from "./note-model";
 import { screenToWorld } from "./spatial-viewport-math";
-import { getNoteRect, rectsIntersect } from "./note-geometry";
+import { getNoteRect } from "./note-geometry";
 
 export interface UseNoteDragInput {
   canvasRef: Ref<{

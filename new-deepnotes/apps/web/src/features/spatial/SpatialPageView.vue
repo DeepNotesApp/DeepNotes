@@ -44,6 +44,8 @@ const canvasRef = ref<{
   zoom: number;
   rootEl: HTMLElement | null;
   resetView: () => void;
+  zoomIn: () => void;
+  zoomOut: () => void;
   fitToScreen: (bounds: { minX: number; minY: number; maxX: number; maxY: number }, padding?: number) => void;
 } | null>(null);
 
@@ -181,8 +183,29 @@ function insertNoteAtCenter() {
   createNoteAt(camX, camY, props.defaultNoteTemplate);
 }
 
+function insertArrowBetweenSelected() {
+  const noteIds = selection.selectedOfKind('note');
+  if (noteIds.length === 2) {
+    createArrow(noteIds[0]!, noteIds[1]!, props.defaultArrowTemplate);
+    return true;
+  }
+  return false;
+}
+
+function zoomIn() {
+  canvasRef.value?.zoomIn();
+}
+
+function zoomOut() {
+  canvasRef.value?.zoomOut();
+}
+
 defineExpose({
   insertNoteAtCenter,
+  insertArrowBetweenSelected,
+  zoomIn,
+  zoomOut,
+  fitToScreen,
 });
 
 const {

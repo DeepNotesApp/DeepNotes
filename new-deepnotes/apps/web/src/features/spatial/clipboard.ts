@@ -89,7 +89,7 @@ async function writeToClipboard(payload: ClipboardPayload): Promise<void> {
       'text/plain': new Blob([json], { type: 'text/plain' }),
     });
     await navigator.clipboard.write([clipboardItem]);
-  } catch (e) {
+  } catch {
     // Fallback to localStorage if clipboard API fails
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -113,7 +113,7 @@ async function readFromClipboard(): Promise<ClipboardPayload | null> {
         }
       }
     }
-  } catch (e) {
+  } catch {
     // Fallback to localStorage if clipboard API fails
     try {
       const stored = localStorage.getItem(STORAGE_KEY);

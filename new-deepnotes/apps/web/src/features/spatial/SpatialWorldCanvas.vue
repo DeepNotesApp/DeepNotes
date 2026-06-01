@@ -14,12 +14,16 @@ const {
   onPointerMove,
   onPointerUp,
   resetView,
+  zoomIn,
+  zoomOut,
   fitToScreen,
 } = useSpatialViewport(rootRef);
 
 defineExpose({
   resetView,
   fitToScreen,
+  zoomIn,
+  zoomOut,
   camX,
   camY,
   zoom,

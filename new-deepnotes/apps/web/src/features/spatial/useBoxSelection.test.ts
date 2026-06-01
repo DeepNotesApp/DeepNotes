@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ref } from "vue";
 import { useBoxSelection } from "./useBoxSelection";
 import { useSpatialSelection } from "./selection";

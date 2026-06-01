@@ -231,6 +231,46 @@ export function useSpatialViewport(
     zoom.value = clampZoom(1, minZoom, maxZoom);
   }
 
+  function zoomIn() {
+    const c = getCenter();
+    if (!c) return;
+    const next = wheelZoomCameraTowardScreenPoint({
+      camX: camX.value,
+      camY: camY.value,
+      zoom: zoom.value,
+      multiplier: 1.2,
+      screenX: c.cx,
+      screenY: c.cy,
+      centerX: c.cx,
+      centerY: c.cy,
+      minZoom,
+      maxZoom,
+    });
+    camX.value = next.camX;
+    camY.value = next.camY;
+    zoom.value = next.zoom;
+  }
+
+  function zoomOut() {
+    const c = getCenter();
+    if (!c) return;
+    const next = wheelZoomCameraTowardScreenPoint({
+      camX: camX.value,
+      camY: camY.value,
+      zoom: zoom.value,
+      multiplier: 1 / 1.2,
+      screenX: c.cx,
+      screenY: c.cy,
+      centerX: c.cx,
+      centerY: c.cy,
+      minZoom,
+      maxZoom,
+    });
+    camX.value = next.camX;
+    camY.value = next.camY;
+    zoom.value = next.zoom;
+  }
+
   function fitToScreen(bounds: { minX: number; minY: number; maxX: number; maxY: number }, padding = 40) {
     const c = getCenter();
     if (!c) return;
@@ -285,6 +325,8 @@ export function useSpatialViewport(
     onPointerMove,
     onPointerUp,
     resetView,
+    zoomIn,
+    zoomOut,
     fitToScreen,
   };
 }

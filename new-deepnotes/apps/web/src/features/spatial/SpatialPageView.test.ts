@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import * as Y from "yjs";
 
@@ -18,11 +18,6 @@ function setupDocWithNotes(...positions: { x: number; y: number }[]) {
   return { ydoc, ids };
 }
 
-function mockPointerCapture(el: Element) {
-  const htmlEl = el as HTMLDivElement;
-  htmlEl.setPointerCapture = vi.fn();
-  htmlEl.releasePointerCapture = vi.fn();
-}
 
 describe("SpatialPageView", () => {
   let wrapper: ReturnType<typeof mount> | undefined;
@@ -97,5 +92,35 @@ describe("SpatialPageView", () => {
     });
 
     expect(typeof (wrapper.vm as any).insertNoteAtCenter).toBe("function");
+  });
+
+  it("exposes zoomIn method", () => {
+    const { ydoc } = setupDocWithNotes();
+    wrapper = mount(SpatialPageView, {
+      props: { ydoc },
+      global: { stubs: { Teleport: true } },
+    });
+
+    expect(typeof (wrapper.vm as any).zoomIn).toBe("function");
+  });
+
+  it("exposes zoomOut method", () => {
+    const { ydoc } = setupDocWithNotes();
+    wrapper = mount(SpatialPageView, {
+      props: { ydoc },
+      global: { stubs: { Teleport: true } },
+    });
+
+    expect(typeof (wrapper.vm as any).zoomOut).toBe("function");
+  });
+
+  it("exposes insertArrowBetweenSelected method", () => {
+    const { ydoc } = setupDocWithNotes();
+    wrapper = mount(SpatialPageView, {
+      props: { ydoc },
+      global: { stubs: { Teleport: true } },
+    });
+
+    expect(typeof (wrapper.vm as any).insertArrowBetweenSelected).toBe("function");
   });
 });
