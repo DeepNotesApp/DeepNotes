@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Fingerprint,
   KeyRound,
+  LogIn,
   Mail,
 } from "lucide-vue-next";
 

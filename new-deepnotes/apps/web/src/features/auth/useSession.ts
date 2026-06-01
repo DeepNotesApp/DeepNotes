@@ -106,10 +106,16 @@ export function useSession() {
           return;
         }
         if (refRes.response.status === 200 && refRes.data) {
-          await applyRefreshToStoredKeyrings({
-            oldSessionKey: refRes.data.oldSessionKey,
-            newSessionKey: refRes.data.newSessionKey,
-          });
+          try {
+            await applyRefreshToStoredKeyrings({
+              oldSessionKey: refRes.data.oldSessionKey,
+              newSessionKey: refRes.data.newSessionKey,
+            });
+          } catch {
+            user.value = null;
+            clearSessionCrypto();
+            return;
+          }
         }
         await fetchMe();
       } finally {

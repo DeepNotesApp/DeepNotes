@@ -43,6 +43,8 @@ export function createPageEditorTipTapExtensions(opts: {
       heading: {
         levels: [1, 2, 3],
       },
+      link: false,
+      underline: false,
     }),
     HorizontalRule.configure({
       HTMLAttributes: {
