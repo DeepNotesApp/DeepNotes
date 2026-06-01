@@ -29,6 +29,7 @@ export interface UseSpatialKeyboardInput {
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
   defaultArrowTemplate?: Partial<ClipboardArrow> | null;
   findReplaceOpen: Ref<boolean>;
+  screenshotOpen: Ref<boolean>;
   pasteCount: Ref<number>;
   getCamPos: () => { x: number; y: number };
 }
@@ -146,6 +147,12 @@ export function useSpatialKeyboard(input: UseSpatialKeyboardInput) {
     if (e.key === "f" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       input.findReplaceOpen.value = true;
+      return;
+    }
+
+    if (e.altKey && e.shiftKey && e.key === "S") {
+      e.preventDefault();
+      input.screenshotOpen.value = true;
       return;
     }
 

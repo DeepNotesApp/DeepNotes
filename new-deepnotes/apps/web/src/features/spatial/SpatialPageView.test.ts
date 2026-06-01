@@ -172,6 +172,18 @@ describe("SpatialPageView", () => {
     expect(titles).toContain("Find and Replace (Ctrl+F)");
   });
 
+  it("renders screenshot toggle button", () => {
+    const { ydoc } = setupDocWithNotes();
+    wrapper = mount(SpatialPageView, {
+      props: { ydoc },
+      global: { stubs: { Teleport: true } },
+    });
+
+    const buttons = wrapper.findAll("button");
+    const titles = buttons.map((b) => b.attributes("title"));
+    expect(titles).toContain("Take Screenshot (Alt+Shift+S)");
+  });
+
   it("renders reset zoom and fit-to-screen buttons", () => {
     const { ydoc } = setupDocWithNotes();
     wrapper = mount(SpatialPageView, {

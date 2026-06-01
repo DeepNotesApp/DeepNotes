@@ -197,7 +197,7 @@
 | 12.23 | Floating UI — selection count | `FloatingUI/SelectionCount.vue` | `SpatialPageView.vue:selection count` | **Done** | `SpatialPageView.test.ts` |
 | 12.24 | Floating UI — find/replace toggle | `FloatingUI/FindReplace.vue` | `SpatialPageView.vue:Search button` | **Done** | `SpatialPageView.test.ts` |
 | 12.25 | Floating UI — back/forward nav | `FloatingUI/HistoryNav.vue` | `SpatialPageView.vue:router back/forward buttons` | **Done** | `SpatialPageView.test.ts` |
-| 12.26 | Floating UI — screenshot | `FloatingUI/Screenshot.vue` | — | **Not started** | — |
+| 12.26 | Floating UI — screenshot | `FloatingUI/Screenshot.vue` | `ScreenshotDialog.vue` | **Done** | `ScreenshotDialog.test.ts` (4 tests) |
 | 12.27 | Floating UI — user avatars on canvas | `FloatingUI/Avatars.vue` | — | **Not started** | — |
 
 ## 13. Backlinks

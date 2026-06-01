@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** Collab update squashing implemented in `useCollabPush.ts` (adaptive 1500ms debounce) with `useCollabPush.test.ts` (5 tests). Collab pagination limit capped at 100 rows. `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** Screenshot floating UI implemented: `ScreenshotDialog.vue` with html2canvas (margin/scale options, `Alt+Shift+S` shortcut), `ScreenshotDialog.test.ts` (4 tests), and `SpatialPageView.test.ts` updated. Also includes prior session: Collab update squashing implemented in `useCollabPush.ts` (adaptive 1500ms debounce) with `useCollabPush.test.ts` (5 tests). Collab pagination limit capped at 100 rows. `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -92,7 +92,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **Container rendering fully implemented.** `DisplayNote.vue` enforces spatial vs non-spatial layout, `stretchChildren`, and `wrapChildren`. `DisplayNote.test.ts` includes 5 dedicated container layout tests.
 - **`SpatialPageView.vue` refactored.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`. Box selection, arrow drag, arrow reconnect, and note drag extracted to dedicated composables. Note geometry utilities extracted to `note-geometry.ts`. Canvas actions (double-click, fit-to-screen) extracted to `useCanvasActions.ts`. Context menu handlers extracted to `useCanvasContextMenu.ts`. Component reduced from ~740 lines to ~260 lines.
 - **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented and tested. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
-- **Floating UI partially improved.** Back/forward nav buttons added to `SpatialPageView.vue`. Still missing: screenshot, user avatars on canvas.
+- **Floating UI partially improved.** Back/forward nav buttons and screenshot dialog added to `SpatialPageView.vue`. Still missing: user avatars on canvas.
 
 ### Other gaps
 

@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { Button } from "@/components/ui/button";
-import { Undo, Redo, RotateCcw, Search, Maximize, ArrowLeft, ArrowRight } from "lucide-vue-next";
+import { Undo, Redo, RotateCcw, Search, Maximize, ArrowLeft, ArrowRight, Camera } from "lucide-vue-next";
 import { useRouter } from "vue-router";
 
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
@@ -11,6 +11,7 @@ import DisplayArrow from "./DisplayArrow.vue";
 import CanvasContextMenu from "./CanvasContextMenu.vue";
 import NoteContextMenu from "./NoteContextMenu.vue";
 import FindReplaceDialog from "./FindReplaceDialog.vue";
+import ScreenshotDialog from "./ScreenshotDialog.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
@@ -117,6 +118,9 @@ const pasteCount = ref(0);
 
 // --- find/replace dialog state ---
 const findReplaceOpen = ref(false);
+
+// --- screenshot dialog state ---
+const screenshotOpen = ref(false);
 
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
@@ -259,6 +263,7 @@ const { onKeyDown } = useSpatialKeyboard({
   defaultNoteTemplate: props.defaultNoteTemplate,
   defaultArrowTemplate: props.defaultArrowTemplate,
   findReplaceOpen,
+  screenshotOpen,
   pasteCount,
   getCamPos: () => ({
     x: canvasRef.value?.camX ?? 0,
@@ -425,6 +430,17 @@ onUnmounted(() => {
           <Search class="h-4 w-4" />
         </Button>
 
+        <!-- Screenshot -->
+        <Button
+          variant="secondary"
+          size="icon"
+          class="h-8 w-8 shadow-sm"
+          title="Take Screenshot (Alt+Shift+S)"
+          @click="screenshotOpen = true"
+        >
+          <Camera class="h-4 w-4" />
+        </Button>
+
         <!-- Undo -->
         <Button
           variant="secondary"
@@ -492,6 +508,18 @@ onUnmounted(() => {
       :open="findReplaceOpen"
       :notes="noteList"
       @close="findReplaceOpen = false"
+    />
+
+    <!-- Screenshot dialog -->
+    <ScreenshotDialog
+      :open="screenshotOpen"
+      :canvas-element="canvasRef?.rootEl ?? null"
+      :selected-note-ids="Array.from(selection.selectedIds.value)"
+      :notes="noteList"
+      :zoom="canvasRef?.zoom ?? 1"
+      :cam-x="canvasRef?.camX ?? 0"
+      :cam-y="canvasRef?.camY ?? 0"
+      @close="screenshotOpen = false"
     />
 
     <!-- Teleport overlay for dragged note -->

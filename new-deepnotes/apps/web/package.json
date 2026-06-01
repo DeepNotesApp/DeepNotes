@@ -46,6 +46,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "highlight.js": "^11.11.1",
+    "html2canvas": "^1.4.1",
     "katex": "0.16.22",
     "lowlight": "3.3.0",
     "lucide-vue-next": "^1.0.0",

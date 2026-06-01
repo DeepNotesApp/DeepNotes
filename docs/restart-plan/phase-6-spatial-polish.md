@@ -105,12 +105,13 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 | Collapsing notes | **Done** | Chevron toggle + collapsed state wired |
 | Z-index ordering | **Done** | `notesByZIndex` computed sort |
 | Read-only notes | **Done** | `opacity-60 cursor-not-allowed` styling added |
+| Screenshot floating UI | **Done** | `ScreenshotDialog.vue` with html2canvas, margin/scale options, and `Alt+Shift+S` shortcut. `ScreenshotDialog.test.ts` (4 tests). |
 
 ---
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests this session: `PageToolbarActions.test.ts` (7), `SpatialPageView.test.ts` (8), `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (21), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12), `useCollabPush.test.ts` (5). Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests this session: `PageToolbarActions.test.ts` (7), `SpatialPageView.test.ts` (8), `MainToolbar.test.ts` (7), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (21), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12), `useCollabPush.test.ts` (5), `ScreenshotDialog.test.ts` (4). Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, sidebar properties cards, user avatars on canvas.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
