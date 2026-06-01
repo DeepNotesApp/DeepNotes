@@ -77,7 +77,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete. **Test coverage improved:** `DisplayArrow.test.ts` (12 tests) and expanded `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` now covers `bringToTop`. Many rows still lack tests.
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows covering notes, arrows, camera, selection, clipboard, editing, collab, templates, UI, backlinks, group access. Schema diff table complete. **Test coverage improved:** `useCanvasActions.test.ts` (3 tests), `useCanvasContextMenu.test.ts` (6 tests), `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` covers `bringToTop`. Many rows still lack tests.
 - **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
 - **Right sidebar properties panels exist but lack depth.** `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue` are wired and visible, but many legacy properties (wrap, anchor, z-index, timestamps) are not exposed.
 - **`MainToolbar.vue` extracted as standalone component.** `PageLayout.vue` now delegates to `MainToolbar.vue` for the header shell. Still missing: page action buttons (insert note/arrow, alignment, formatting), zoom controls other than reset, fit-to-screen, screenshot.
@@ -90,14 +90,14 @@ A criterion is **not met** until the verification command or check passes in CI.
 - **No `PageElem` abstraction.** Legacy notes and arrows inherit from `PageElem`, sharing selected/active/editing/visible/region state. New code treats them as completely separate types.
 - **`editing` state management implemented.** `useSpatialEditing.ts` tracks which note/arrow is being edited. Escape stops editing; canvas click stops editing; Delete/Backspace is suppressed while editing to avoid deleting selected elements.
 - **Container rendering lacks legacy depth.** `stretchChildren`, `wrapChildren`, `originOffset`, and overflow detection are in the model but not enforced in rendering. Spatial vs non-spatial container distinction is not fully implemented.
-- **`SpatialPageView.vue` partially refactored.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`. Box selection, arrow drag, arrow reconnect, and note drag extracted to dedicated composables (`useBoxSelection.ts`, `useArrowDrag.ts`, `useArrowReconnect.ts`, `useNoteDrag.ts`). Note geometry utilities extracted to `note-geometry.ts`. Component reduced from ~740 lines to ~365 lines. Remaining inline logic: context menu handlers, canvas double-click, fit-to-screen.
+- **`SpatialPageView.vue` refactored.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`. Box selection, arrow drag, arrow reconnect, and note drag extracted to dedicated composables. Note geometry utilities extracted to `note-geometry.ts`. Canvas actions (double-click, fit-to-screen) extracted to `useCanvasActions.ts`. Context menu handlers extracted to `useCanvasContextMenu.ts`. Component reduced from ~740 lines to ~260 lines.
 - **Selection partially improved.** `bringToTop` zIndex bump on selection is now implemented and tested. Formatting integration across selected editors, active element/region keyboard navigation, and `selectAll` including descendant arrows remain missing.
 - **Missing floating UI:** back/forward nav, screenshot, user avatars on canvas.
 
 ### Other gaps
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
-- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`. `SpatialPageView.vue` script section reduced from ~740 lines to ~365 lines after extracting `useSpatialKeyboard.ts`, `useBoxSelection.ts`, `useArrowDrag.ts`, `useArrowReconnect.ts`, `useNoteDrag.ts`, and `note-geometry.ts`.
+- **Composable size** — `useGroupMembersDetail.ts` (103 lines), `usePageCollabEditor.ts` (238 lines), and `useSpatialPage.ts` (195 lines) are all under the 300-line limit. Container logic extracted to `container-ops.ts`. `SpatialPageView.vue` script section reduced from ~740 lines to ~260 lines after extracting keyboard, box selection, arrow drag, arrow reconnect, note drag, note geometry, canvas actions, and context menu handlers into dedicated composables.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 

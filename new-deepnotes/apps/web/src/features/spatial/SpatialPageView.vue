@@ -14,13 +14,13 @@ import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
 import { useSpatialUndoRedo } from "./undo-redo";
 import { useSpatialKeyboard } from "./useSpatialKeyboard";
-import { screenToWorld } from "./spatial-viewport-math";
 import { provideNoteHeights } from "./useNoteHeights";
 import { useBoxSelection } from "./useBoxSelection";
 import { useArrowDrag } from "./useArrowDrag";
 import { useArrowReconnect } from "./useArrowReconnect";
 import { useNoteDrag } from "./useNoteDrag";
-import { copySelection, pastePayload } from "./clipboard";
+import { useCanvasActions } from "./useCanvasActions";
+import { useCanvasContextMenu } from "./useCanvasContextMenu";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
@@ -112,13 +112,6 @@ const pasteCount = ref(0);
 // --- find/replace dialog state ---
 const findReplaceOpen = ref(false);
 
-// --- context menu state ---
-const contextMenu = ref<{
-  open: boolean;
-  x: number;
-  y: number;
-}>({ open: false, x: 0, y: 0 });
-
 const noteById = computed(() => {
   const map = new Map<string, (typeof noteList.value)[0]["model"]>();
   for (const n of noteList.value) {
@@ -174,165 +167,33 @@ const {
   moveNoteOutOfContainer,
 });
 
-function onCanvasDoubleClick(e: MouseEvent) {
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.rootEl) return;
+const { onCanvasDoubleClick, fitToScreen } = useCanvasActions({
+  canvasRef,
+  rootNoteList,
+  createNoteAt,
+  defaultNoteTemplate: props.defaultNoteTemplate,
+});
 
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-
-  const world = screenToWorld(
-    e.clientX,
-    e.clientY,
-    cx,
-    cy,
-    canvas.camX,
-    canvas.camY,
-    canvas.zoom,
-  );
-
-  createNoteAt(world.x, world.y, props.defaultNoteTemplate);
-}
-
-function fitToScreen() {
-  const canvas = canvasRef.value;
-  if (!canvas) return;
-
-  // Calculate bounding box of all root notes
-  if (rootNoteList.value.length === 0) {
-    canvas.resetView();
-    return;
-  }
-
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-
-  for (const note of rootNoteList.value) {
-    const wStr = note.model.width.value.expanded;
-    const w = wStr === "Auto" ? 160 : parseFloat(wStr);
-    const h = 80; // Default height estimate
-    const x = note.model.pos.value.x;
-    const y = note.model.pos.value.y;
-
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x + w);
-    maxY = Math.max(maxY, y + h);
-  }
-
-  canvas.fitToScreen({ minX, minY, maxX, maxY }, 40);
-}
-
-function onCanvasContextMenu(e: MouseEvent) {
-  e.preventDefault();
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.rootEl) return;
-
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-
-  const world = screenToWorld(
-    e.clientX,
-    e.clientY,
-    cx,
-    cy,
-    canvas.camX,
-    canvas.camY,
-    canvas.zoom,
-  );
-
-  contextMenu.value = {
-    open: true,
-    x: e.clientX,
-    y: e.clientY,
-  };
-}
-
-function handleContextMenuCreateNote(x: number, y: number) {
-  const canvas = canvasRef.value;
-  if (!canvas || !canvas.rootEl) return;
-
-  const rect = canvas.rootEl.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-
-  const world = screenToWorld(
-    x,
-    y,
-    cx,
-    cy,
-    canvas.camX,
-    canvas.camY,
-    canvas.zoom,
-  );
-
-  createNoteAt(world.x, world.y, props.defaultNoteTemplate);
-}
-
-async function handleContextMenuPaste(payload: { notes: ClipboardNote[]; arrows: ClipboardArrow[] }) {
-  const canvas = canvasRef.value;
-  const centerX = canvas?.camX ?? 0;
-  const centerY = canvas?.camY ?? 0;
-  const offset = pasteCount.value * 32;
-  pasteCount.value += 1;
-
-  const result = pastePayload(payload, {
-    createNote: createNoteAt,
-    createArrow: createArrow,
-    offsetX: centerX + offset,
-    offsetY: centerY + offset,
-  });
-
-  selection.clear();
-  for (const id of result.noteIds) {
-    selection.select(id, "note", true);
-  }
-}
-
-function handleContextMenuDeleteSelected() {
-  for (const id of selection.selectedOfKind("note")) {
-    deleteNote(id);
-  }
-  for (const id of selection.selectedOfKind("arrow")) {
-    deleteArrow(id);
-  }
-  selection.clear();
-}
-
-async function handleContextMenuCopySelected() {
-  const selectedNotes = noteList.value.filter((n) =>
-    selection.isSelected(n.id),
-  );
-  const selectedArrows = arrowList.value.filter((a) =>
-    selection.isSelected(a.id),
-  );
-  if (selectedNotes.length > 0) {
-    await copySelection(selectedNotes, selectedArrows);
-  }
-}
-
-async function handleContextMenuCutSelected() {
-  const selectedNotes = noteList.value.filter((n) =>
-    selection.isSelected(n.id),
-  );
-  const selectedArrows = arrowList.value.filter((a) =>
-    selection.isSelected(a.id),
-  );
-  if (selectedNotes.length > 0) {
-    await copySelection(selectedNotes, selectedArrows);
-    for (const id of selection.selectedOfKind("note")) {
-      deleteNote(id);
-    }
-    for (const id of selection.selectedOfKind("arrow")) {
-      deleteArrow(id);
-    }
-    selection.clear();
-  }
-}
+const {
+  contextMenu,
+  onCanvasContextMenu,
+  handleContextMenuCreateNote,
+  handleContextMenuPaste,
+  handleContextMenuDeleteSelected,
+  handleContextMenuCopySelected,
+  handleContextMenuCutSelected,
+} = useCanvasContextMenu({
+  canvasRef,
+  selection,
+  noteList,
+  arrowList,
+  createNoteAt,
+  createArrow,
+  deleteNote,
+  deleteArrow,
+  defaultNoteTemplate: props.defaultNoteTemplate,
+  pasteCount,
+});
 
 // --- keyboard shortcuts ---
 const { onKeyDown } = useSpatialKeyboard({

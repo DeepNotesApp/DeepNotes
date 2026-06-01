@@ -21,7 +21,7 @@
 
 | # | Feature | Legacy reference | New file(s) | Status | Test file |
 |---|---------|------------------|-------------|--------|-----------|
-| 1.1 | Create note (double-click canvas) | `DisplayPage/DisplayWorld/DisplayNote/CreateNote.ts` | `SpatialPageView.vue:onCanvasDoubleClick` | **Done** | — |
+| 1.1 | Create note (double-click canvas) | `DisplayPage/DisplayWorld/DisplayNote/CreateNote.ts` | `useCanvasActions.ts:onCanvasDoubleClick` | **Done** | `useCanvasActions.test.ts` |
 | 1.2 | Delete note (Delete key) | `DisplayPage/DisplayWorld/DisplayNote/DeleteNote.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
 | 1.3 | Move note (drag) | `space/pos.ts`, `DisplayNote/DragNote.ts` | `DisplayNote.vue:onPointerDown/Move/Up` | **Done** | `DisplayNote.test.ts` |
 | 1.4 | Resize note (8 handles) | `DisplayNote/ResizeNote.ts` | `DisplayNote.vue:8-handle resize` | **Done** | `DisplayNote.test.ts` |
@@ -188,7 +188,7 @@
 | 12.14 | Right sidebar — Snapshots | `RightSidebar/Snapshots.vue` | `PageEditorSnapshotsCard.vue` | **Done** | — |
 | 12.15 | Right sidebar — Management | `RightSidebar/Management.vue` | `PageEditorManagementCard.vue` | **Done** | — |
 | 12.16 | Right sidebar — Backlinks | `RightSidebar/Backlinks.vue` | `PageEditorBacklinksCard.vue` | **Done** | — |
-| 12.17 | Canvas context menu | `TableContextMenu.vue` | `CanvasContextMenu.vue` | **Partial** | — |
+| 12.17 | Canvas context menu | `TableContextMenu.vue` | `CanvasContextMenu.vue` + `useCanvasContextMenu.ts` | **Partial** | `useCanvasContextMenu.test.ts` |
 | 12.18 | Per-note context menu | `NoteContextMenu.vue` | — | **Not started** | — |
 | 12.19 | Page state screens (8 total) | `DisplayScreens/*.vue` | `PageStateScreens.vue` + 8 components | **Done** | — |
 | 12.20 | Loading overlay | `LoadingOverlay.vue` | `PageStateScreens.vue` (inline) | **Partial** | — |
@@ -276,7 +276,7 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 - [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~30+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. Remaining gaps: `DisplayNote.vue` (basic render tests only), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, arrow creation/reconnection, sidebar/toolbar integration.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~30+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `useCanvasActions.test.ts` (3 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. `DisplayArrow.test.ts` (12 tests) and `DisplayNote.test.ts` (19 tests) also added. Remaining gaps: `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, arrow creation/reconnection, sidebar/toolbar integration.
 - [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---

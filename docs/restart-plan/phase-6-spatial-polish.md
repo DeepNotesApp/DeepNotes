@@ -1,7 +1,7 @@
 # Phase 6: Spatial canvas polish
 
 > **Prerequisites:** Phase 5 done.  
-> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` refactored. Box selection, arrow drag, arrow reconnect, and note drag extracted into dedicated composables. `note-geometry.ts` and `useBoxSelection.test.ts` added. `useSpatialEditing`, `bringToTop`, line-body arrow geometry, and `useSpatialKeyboard` were extracted in prior work. **New:** `DisplayArrow.test.ts` (12 tests) and expanded `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` now covers `bringToTop` explicitly.)
+> **Status:** In progress (2026-05-31 — `SpatialPageView.vue` further refactored. Canvas actions (double-click, fit-to-screen) extracted to `useCanvasActions.ts`; context menu handlers extracted to `useCanvasContextMenu.ts`. Box selection, arrow drag, arrow reconnect, and note drag previously extracted. `useCanvasActions.test.ts` (3 tests) and `useCanvasContextMenu.test.ts` (6 tests) added. `note-geometry.ts` and `useBoxSelection.test.ts` added in prior work. `DisplayArrow.test.ts` (12 tests) and `DisplayNote.test.ts` (19 tests) added. `selection.test.ts` covers `bringToTop`.)
 
 ---
 
@@ -110,7 +110,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 
 ## Verification
 
-- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests), `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (19 tests). Major gaps remain: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction tests, arrow creation flow tests, sidebar/toolbar integration tests.
+- [ ] Each deliverable has a test (unit, component, or integration). **Partially improved.** New tests: `useCanvasActions.test.ts` (3 tests), `useCanvasContextMenu.test.ts` (6 tests), `note-geometry.test.ts` (8 tests), `useBoxSelection.test.ts` (6 tests), `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests), `DisplayArrow.test.ts` (12 tests), `DisplayNote.test.ts` (19 tests). Major gaps remain: `SpatialPageView.vue` (no component/integration tests), drag/resize end-to-end interaction tests, arrow creation flow tests, sidebar/toolbar integration tests.
 - [ ] Phase 1 checklist is >80% marked done. **NOT MET.** Strict enforcement of the checklist's "Done = implemented + passing test" rule drops the true completion rate well below 80%.
 
 ---
@@ -127,7 +127,7 @@ Achieve parity with the legacy `/pages/:pageId` immersive spatial canvas experie
 - [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
 - [x] Arrow geometry reads actual note heights instead of hardcoding `80px`.
-- [ ] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. **Partial.** Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`. Component reduced from ~740 to ~365 lines. Remaining inline: context menu handlers, fit-to-screen, canvas double-click.
+- [x] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`; canvas actions extracted to `useCanvasActions.ts`; context menu handlers extracted to `useCanvasContextMenu.ts`. Component reduced from ~740 to ~260 lines.
 - [x] Selection implements `bringToTop`. Formatting integration and active element/region navigation remain missing.
 - [ ] Container rendering enforces `stretchChildren`, `wrapChildren`, and spatial vs non-spatial layout modes.
 - [ ] Manual QA session with 3+ users finds no blocking usability issues.
