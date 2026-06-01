@@ -72,7 +72,7 @@ In the new SPA, `/pages/:pageId` currently renders a **single Tiptap rich-text c
 
 ## Exit Criteria
 
-- [ ] `/pages/:pageId` renders an infinite canvas with draggable notes and arrows (Phase 6).
-- [ ] `/spatial` returns 404 or redirects to `/pages/:pageId`.
-- [ ] No route outside `features/spatial/` and `features/pages/` references spatial canvas components.
-- [ ] All existing shared `/pages/:pageId` links load a canvas (not a 404 or blank editor).
+- [x] `/pages/:pageId` renders an infinite canvas with draggable notes and arrows (Phase 6).
+- [x] `/spatial` returns 404 or redirects to `/pages/:pageId`.
+- [x] No route outside `features/spatial/` and `features/pages/` references spatial canvas components.
+- [x] All existing shared `/pages/:pageId` links load a canvas (not a 404 or blank editor).

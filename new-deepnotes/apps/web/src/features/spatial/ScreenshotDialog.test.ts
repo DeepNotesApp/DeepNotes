@@ -11,24 +11,6 @@ vi.mock("html2canvas", () => ({
   ),
 }));
 
-function createMockNote(id: string, x: number, y: number) {
-  return {
-    id,
-    model: {
-      pos: { value: { x, y } },
-      width: { value: { expanded: "200px", collapsed: "Auto" } },
-      head: {
-        enabled: { value: true },
-        height: { value: { expanded: "Auto", collapsed: "Auto" } },
-      },
-      body: {
-        enabled: { value: false },
-        height: { value: { expanded: "Auto", collapsed: "Auto" } },
-      },
-    },
-  };
-}
-
 describe("ScreenshotDialog", () => {
   afterEach(() => {
     document.querySelectorAll("[data-testid='screenshot-margin']").forEach((el) => el.remove());

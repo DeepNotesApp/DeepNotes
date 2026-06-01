@@ -31,12 +31,12 @@ export default {
   ) {
     const hyper = env.HYPERDRIVE;
     if (hyper == null) {
-      console.error("HYPERDRIVE binding missing; skipping scheduled cleanup.");
+      console.error(JSON.stringify({ level: "error", event: "scheduled.cleanup skipped", reason: "HYPERDRIVE binding missing" }));
       return;
     }
     const db = getDbForConnectionString(hyper.connectionString);
     const { performScheduledCleanup } = await import("@deepnotes/session");
     const result = await performScheduledCleanup({ db });
-    console.log("Scheduled cleanup completed:", result);
+    console.log(JSON.stringify({ level: "info", event: "scheduled.cleanup completed", result }));
   },
 };

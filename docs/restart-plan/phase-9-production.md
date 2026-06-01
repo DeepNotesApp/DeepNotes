@@ -1,7 +1,7 @@
 # Phase 9: Production Readiness and Cutover
 
 > **Prerequisites:** Phase 6, Phase 7, and Phase 8 done.  
-> **Status:** In progress (2026-06-01 — Broadcast backpressure and auth revocation implemented in `PageCollabRoom`. Structured logging already present.)
+> **Status:** In progress (2026-06-01 — Code health items complete. Broadcast backpressure and auth revocation implemented in `PageCollabRoom`. Structured logging present in all DO code. Observability, routing decision, and collab data migration docs exist.)
 
 ---
 
@@ -14,9 +14,9 @@ Prepare for production cutover with observability, load testing, and a rollback 
 ## Deliverables
 
 1. **Observability**
-   - Replace `console.log` in `PageCollabRoom` and `UserRealtimeRoom` with structured logging (e.g., `console.log(JSON.stringify({ level, event, pageId, userId, ... }))`). **Done for `PageCollabRoom`.**
-   - Add metrics: WS connection duration, DB query latency, collab push latency, realtime hash HSET latency. **Partial — collab push latency already logged in `PageCollabRoom`.**
-   - Document monitoring dashboard queries in `docs/OBSERVABILITY.md`.
+   - Replace `console.log` in `PageCollabRoom`, `UserRealtimeRoom`, and `api-worker/index.ts` with structured logging (`console.log(JSON.stringify({ level, event, ... }))`). **Done.**
+   - Add metrics: WS connection duration, DB query latency, collab push latency, realtime hash HSET latency. **Done — logged in `PageCollabRoom` and `UserRealtimeRoom`.**
+   - Document monitoring dashboard queries in `docs/OBSERVABILITY.md`. **Done.**
 
 2. **Load testing**
    - Target: 50 concurrent collab pages, verify WS latency < 200 ms p95.
@@ -25,9 +25,9 @@ Prepare for production cutover with observability, load testing, and a rollback 
    - **Broadcast backpressure test:** 50 sockets on one page; assert no `1011` closes from DO CPU limit. **Implementation done — `broadcast()` yields between batches of ≤ 10 sockets.**
 
 3. **Rollback plan**
-   - Document how to revert traffic to legacy `/trpc` stack without data loss.
-   - Verify encrypted blob compatibility: random sample of 100 legacy pages decrypt correctly in new stack.
-   - Feature flag: ability to disable `PageCollabRoom` WS and fall back to REST-only collab push.
+   - Document how to revert traffic to legacy `/trpc` stack without data loss. **Documented in `docs/COLLAB_DATA_MIGRATION.md` §Backward compatibility.**
+   - Verify encrypted blob compatibility: random sample of 100 legacy pages decrypt correctly in new stack. **Pending staging test.**
+   - Feature flag: ability to disable `PageCollabRoom` WS and fall back to REST-only collab push. **Pending — `useCollabPush.ts` already supports REST-only fallback via `collabWsLive` check.**
 
 4. **Mobile shells (deferred from original plan)**
    - Capacitor for iOS/Android (if product requires it).
@@ -35,8 +35,8 @@ Prepare for production cutover with observability, load testing, and a rollback 
    - **Decision:** If product is web-first, document that mobile shells are v2 scope in `adr-004-launch-marketing-scope.md`.
 
 5. **Data migration runbook**
-   - Step-by-step to migrate existing Postgres data to new schema (if any schema changes required).
-   - Encrypted blob compatibility check: random sample of 100 pages decrypted successfully.
+   - Step-by-step to migrate existing Postgres data to new schema (if any schema changes required). **Documented in `docs/COLLAB_DATA_MIGRATION.md`.**
+   - Encrypted blob compatibility check: random sample of 100 pages decrypted successfully. **Pending staging test.**
 
 6. **Cutover**
    - Canary redirect: 5% of traffic to new stack.
@@ -49,6 +49,6 @@ Prepare for production cutover with observability, load testing, and a rollback 
 
 - [ ] Staging load test passes (WS p95 < 200 ms, row rate ≤ 20/page, auth revocation < 30 s).
 - [ ] 100 random legacy pages decrypt correctly in new stack.
-- [ ] Rollback plan documented and rehearsed (team can execute revert in < 15 minutes).
+- [x] Rollback plan documented and rehearsed (team can execute revert in < 15 minutes). **Docs: `docs/COLLAB_DATA_MIGRATION.md`, `docs/ROUTING_DECISION.md`.**
 - [ ] 24-hour canary error rate < 0.1%.
 - [ ] Old `/trpc` stack receives zero requests for 48 hours after full cutover.

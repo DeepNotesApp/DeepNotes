@@ -105,3 +105,49 @@ export function panCameraByScreenDelta(input: {
 export function clampZoom(zoom: number, minZoom: number, maxZoom: number): number {
   return Math.min(maxZoom, Math.max(minZoom, zoom));
 }
+
+/** Compute camera position and zoom to fit world bounds inside a viewport. */
+export function fitCameraToBounds(input: {
+  bounds: { minX: number; minY: number; maxX: number; maxY: number };
+  viewportWidth: number;
+  viewportHeight: number;
+  centerScreenX: number;
+  centerScreenY: number;
+  screenLeft: number;
+  screenTop: number;
+  minZoom: number;
+  maxZoom: number;
+  padding?: number;
+}): { camX: number; camY: number; zoom: number } {
+  const {
+    bounds,
+    viewportWidth,
+    viewportHeight,
+    centerScreenX,
+    centerScreenY,
+    screenLeft,
+    screenTop,
+    minZoom,
+    maxZoom,
+    padding = 40,
+  } = input;
+
+  const width = bounds.maxX - bounds.minX;
+  const height = bounds.maxY - bounds.minY;
+
+  if (width === 0 && height === 0) {
+    return { camX: 0, camY: 0, zoom: clampZoom(1, minZoom, maxZoom) };
+  }
+
+  const zoomX = (viewportWidth - padding * 2) / width;
+  const zoomY = (viewportHeight - padding * 2) / height;
+  const targetZoom = clampZoom(Math.min(zoomX, zoomY), minZoom, maxZoom);
+
+  const boundsCenterX = bounds.minX + width / 2;
+  const boundsCenterY = bounds.minY + height / 2;
+
+  const camX = boundsCenterX - (centerScreenX - screenLeft) / targetZoom;
+  const camY = boundsCenterY - (centerScreenY - screenTop) / targetZoom;
+
+  return { camX, camY, zoom: targetZoom };
+}
