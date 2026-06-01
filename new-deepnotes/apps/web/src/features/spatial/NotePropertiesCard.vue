@@ -14,31 +14,31 @@ const props = defineProps<{
   readOnly?: boolean
 }>()
 
-const emit = defineEmits({
-  'update:link': (value: string) => true,
-  'update:head-enabled': (value: boolean) => true,
-  'update:body-enabled': (value: boolean) => true,
-  'update:head-wrap': (value: boolean) => true,
-  'update:body-wrap': (value: boolean) => true,
-  'update:pos-x': (value: number) => true,
-  'update:pos-y': (value: number) => true,
-  'update:anchor-x': (value: number) => true,
-  'update:anchor-y': (value: number) => true,
-  'update:width': (value: string) => true,
-  'update:color': (value: number) => true,
-  'update:color-inherit': (value: boolean) => true,
-  'update:collapsible': (value: boolean) => true,
-  'update:collapsed': (value: boolean) => true,
-  'update:movable': (value: boolean) => true,
-  'update:resizable': (value: boolean) => true,
-  'update:read-only': (value: boolean) => true,
-  'update:container-enabled': (value: boolean) => true,
-  'update:container-horizontal': (value: boolean) => true,
-  'update:container-spatial': (value: boolean) => true,
-  'update:container-wrap-children': (value: boolean) => true,
-  'update:container-stretch-children': (value: boolean) => true,
-  'update:container-force-color-inheritance': (value: boolean) => true,
-})
+const emit = defineEmits<{
+  'update:link': [value: string]
+  'update:head-enabled': [value: boolean]
+  'update:body-enabled': [value: boolean]
+  'update:head-wrap': [value: boolean]
+  'update:body-wrap': [value: boolean]
+  'update:pos-x': [value: number]
+  'update:pos-y': [value: number]
+  'update:anchor-x': [value: number]
+  'update:anchor-y': [value: number]
+  'update:width': [value: string]
+  'update:color': [value: number]
+  'update:color-inherit': [value: boolean]
+  'update:collapsible': [value: boolean]
+  'update:collapsed': [value: boolean]
+  'update:movable': [value: boolean]
+  'update:resizable': [value: boolean]
+  'update:read-only': [value: boolean]
+  'update:container-enabled': [value: boolean]
+  'update:container-horizontal': [value: boolean]
+  'update:container-spatial': [value: boolean]
+  'update:container-wrap-children': [value: boolean]
+  'update:container-stretch-children': [value: boolean]
+  'update:container-force-color-inheritance': [value: boolean]
+}>()
 
 const link = computed(() => props.noteModel?.link?.value ?? '')
 const headEnabled = computed(() => props.noteModel?.head?.enabled?.value ?? true)
@@ -93,7 +93,7 @@ function handleColorSelect(colorIndex: number) {
             placeholder="https://..."
             class="h-8 text-xs"
             :disabled="readOnly"
-            @update:model-value="emit('update:link', $event)"
+            @update:model-value="emit('update:link', $event as string)"
           />
           <Button
             variant="outline"
@@ -113,7 +113,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="headEnabled"
             :disabled="readOnly"
-            @update:model-value="emit('update:head-enabled', $event)"
+            @update:model-value="emit('update:head-enabled', $event as boolean)"
           />
           <Label>Head</Label>
         </div>
@@ -121,7 +121,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="bodyEnabled"
             :disabled="readOnly"
-            @update:model-value="emit('update:body-enabled', $event)"
+            @update:model-value="emit('update:body-enabled', $event as boolean)"
           />
           <Label>Body</Label>
         </div>
@@ -133,7 +133,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="headWrap"
             :disabled="readOnly"
-            @update:model-value="emit('update:head-wrap', Boolean($event))"
+            @update:model-value="emit('update:head-wrap', $event as boolean)"
           />
           <Label>Head wrap</Label>
         </div>
@@ -141,7 +141,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="bodyWrap"
             :disabled="readOnly"
-            @update:model-value="emit('update:body-wrap', Boolean($event))"
+            @update:model-value="emit('update:body-wrap', $event as boolean)"
           />
           <Label>Body wrap</Label>
         </div>
@@ -157,7 +157,7 @@ function handleColorSelect(colorIndex: number) {
               :model-value="posX"
               class="h-8 text-xs"
               :disabled="readOnly"
-              @update:model-value="emit('update:pos-x', parseFloat(String($event)) || 0)"
+              @update:model-value="emit('update:pos-x', Number($event) || 0)"
             />
           </div>
           <div class="flex-1">
@@ -166,7 +166,7 @@ function handleColorSelect(colorIndex: number) {
               :model-value="posY"
               class="h-8 text-xs"
               :disabled="readOnly"
-              @update:model-value="emit('update:pos-y', parseFloat(String($event)) || 0)"
+              @update:model-value="emit('update:pos-y', Number($event) || 0)"
             />
           </div>
         </div>
@@ -181,7 +181,7 @@ function handleColorSelect(colorIndex: number) {
               :value="anchorX"
               class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
               :disabled="readOnly"
-              @change="emit('update:anchor-x', parseFloat(($event.target as HTMLSelectElement).value))"
+              @change="emit('update:anchor-x', Number(($event.target as HTMLSelectElement).value))"
             >
               <option value="0">Left</option>
               <option value="0.5">Center</option>
@@ -193,7 +193,7 @@ function handleColorSelect(colorIndex: number) {
               :value="anchorY"
               class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
               :disabled="readOnly"
-              @change="emit('update:anchor-y', parseFloat(($event.target as HTMLSelectElement).value))"
+              @change="emit('update:anchor-y', Number(($event.target as HTMLSelectElement).value))"
             >
               <option value="0">Top</option>
               <option value="0.5">Center</option>
@@ -210,7 +210,7 @@ function handleColorSelect(colorIndex: number) {
           :value="width"
           class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
           :disabled="readOnly"
-          @change="emit('update:width', ($event.target as HTMLSelectElement).value)"
+          @change="emit('update:width', ($event.target as HTMLSelectElement).value as string)"
         >
           <option value="Auto">Auto</option>
           <option value="Minimum">Minimum</option>
@@ -225,7 +225,7 @@ function handleColorSelect(colorIndex: number) {
             <Switch
               :model-value="colorInherit"
               :disabled="readOnly"
-              @update:model-value="emit('update:color-inherit', $event)"
+              @update:model-value="emit('update:color-inherit', $event as boolean)"
             />
             <Label class="text-[10px]">Inherit</Label>
           </div>
@@ -253,7 +253,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="collapsible"
             :disabled="readOnly"
-            @update:model-value="emit('update:collapsible', $event)"
+            @update:model-value="emit('update:collapsible', $event as boolean)"
           />
           <Label>Collapsible</Label>
         </div>
@@ -261,7 +261,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="collapsed"
             :disabled="readOnly || !collapsible"
-            @update:model-value="emit('update:collapsed', $event)"
+            @update:model-value="emit('update:collapsed', $event as boolean)"
           />
           <Label>Collapsed</Label>
         </div>
@@ -273,7 +273,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerEnabled"
             :disabled="readOnly"
-            @update:model-value="emit('update:container-enabled', $event)"
+            @update:model-value="emit('update:container-enabled', $event as boolean)"
           />
           <Label>Container</Label>
         </div>
@@ -281,7 +281,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerSpatial"
             :disabled="readOnly || !containerEnabled"
-            @update:model-value="emit('update:container-spatial', $event)"
+            @update:model-value="emit('update:container-spatial', $event as boolean)"
           />
           <Label>Spatial</Label>
         </div>
@@ -289,7 +289,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerHorizontal"
             :disabled="readOnly || !containerEnabled"
-            @update:model-value="emit('update:container-horizontal', $event)"
+            @update:model-value="emit('update:container-horizontal', $event as boolean)"
           />
           <Label>Horizontal layout</Label>
         </div>
@@ -297,7 +297,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerWrapChildren"
             :disabled="readOnly || !containerEnabled"
-            @update:model-value="emit('update:container-wrap-children', $event)"
+            @update:model-value="emit('update:container-wrap-children', $event as boolean)"
           />
           <Label>Wrap children</Label>
         </div>
@@ -305,7 +305,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerStretchChildren"
             :disabled="readOnly || !containerEnabled"
-            @update:model-value="emit('update:container-stretch-children', $event)"
+            @update:model-value="emit('update:container-stretch-children', $event as boolean)"
           />
           <Label>Stretch children</Label>
         </div>
@@ -313,7 +313,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="containerForceColorInheritance"
             :disabled="readOnly || !containerEnabled"
-            @update:model-value="emit('update:container-force-color-inheritance', $event)"
+            @update:model-value="emit('update:container-force-color-inheritance', $event as boolean)"
           />
           <Label>Force color inheritance</Label>
         </div>
@@ -325,7 +325,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="movable"
             :disabled="readOnly"
-            @update:model-value="emit('update:movable', $event)"
+            @update:model-value="emit('update:movable', $event as boolean)"
           />
           <Label>Movable</Label>
         </div>
@@ -333,7 +333,7 @@ function handleColorSelect(colorIndex: number) {
           <Switch
             :model-value="resizable"
             :disabled="readOnly"
-            @update:model-value="emit('update:resizable', $event)"
+            @update:model-value="emit('update:resizable', $event as boolean)"
           />
           <Label>Resizable</Label>
         </div>
@@ -344,7 +344,7 @@ function handleColorSelect(colorIndex: number) {
         <Switch
           :model-value="readOnly"
           :disabled="readOnly"
-          @update:model-value="emit('update:read-only', $event)"
+          @update:model-value="emit('update:read-only', $event as boolean)"
         />
         <Label>Read-only</Label>
       </div>

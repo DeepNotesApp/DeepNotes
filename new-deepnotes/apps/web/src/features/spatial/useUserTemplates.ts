@@ -56,6 +56,7 @@ function legacyNoteToClipboard(
     result.head = {
       enabled: (h.enabled as boolean) ?? true,
       wrap: (h.wrap as boolean) ?? true,
+      content: (h.content as string) ?? "",
       height: (h.height as { expanded: string; collapsed: string }) ?? {
         expanded: "Auto",
         collapsed: "Auto",
@@ -68,6 +69,7 @@ function legacyNoteToClipboard(
     result.body = {
       enabled: (b.enabled as boolean) ?? false,
       wrap: (b.wrap as boolean) ?? true,
+      content: (b.content as string) ?? "",
       height: (b.height as { expanded: string; collapsed: string }) ?? {
         expanded: "Auto",
         collapsed: "Auto",
