@@ -16,6 +16,7 @@ export interface CanvasRef {
 export interface UseCanvasActionsInput {
   canvasRef: Ref<CanvasRef | null>;
   rootNoteList: Ref<{ id: string; model: NoteModel }[]>;
+  selectedNoteIds?: Ref<Set<string>>;
   createNoteAt: (x: number, y: number, template?: Partial<ClipboardNote> | null) => string;
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
 }
@@ -48,7 +49,14 @@ export function useCanvasActions(input: UseCanvasActionsInput) {
     const canvas = input.canvasRef.value;
     if (!canvas) return;
 
-    if (input.rootNoteList.value.length === 0) {
+    const selectedIds = input.selectedNoteIds?.value;
+    const hasSelection = selectedIds && selectedIds.size > 0;
+
+    const notesToFit = hasSelection
+      ? input.rootNoteList.value.filter((n) => selectedIds.has(n.id))
+      : input.rootNoteList.value;
+
+    if (notesToFit.length === 0) {
       canvas.resetView();
       return;
     }
@@ -58,7 +66,7 @@ export function useCanvasActions(input: UseCanvasActionsInput) {
     let maxX = -Infinity;
     let maxY = -Infinity;
 
-    for (const note of input.rootNoteList.value) {
+    for (const note of notesToFit) {
       const wStr = note.model.width.value.expanded;
       const w = wStr === "Auto" ? 160 : parseFloat(wStr);
       const h = noteHeights.value.get(note.id) ?? 80;

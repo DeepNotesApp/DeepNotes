@@ -99,6 +99,43 @@ describe("note-geometry", () => {
       });
     });
 
+    it("reads actual height from heights map when provided", () => {
+      const noteList = [
+        {
+          id: "n1",
+          model: {
+            pos: { value: { x: 0, y: 0 } },
+            width: { value: { expanded: "Auto" } },
+          } as unknown as NoteModel,
+        },
+      ];
+      const heights = new Map([["n1", 120]]);
+      expect(getNoteRect("n1", noteList, new Map(), heights)).toEqual({
+        x: 0,
+        y: 0,
+        width: 160,
+        height: 120,
+      });
+    });
+
+    it("falls back to 80 when heights map is missing the note", () => {
+      const noteList = [
+        {
+          id: "n1",
+          model: {
+            pos: { value: { x: 0, y: 0 } },
+            width: { value: { expanded: "Auto" } },
+          } as unknown as NoteModel,
+        },
+      ];
+      expect(getNoteRect("n1", noteList, new Map(), new Map())).toEqual({
+        x: 0,
+        y: 0,
+        width: 160,
+        height: 80,
+      });
+    });
+
     it("returns null for missing note", () => {
       expect(getNoteRect("missing", [], new Map())).toBeNull();
     });

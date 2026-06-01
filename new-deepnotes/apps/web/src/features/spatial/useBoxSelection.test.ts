@@ -1,11 +1,22 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ref } from "vue";
 import { useBoxSelection } from "./useBoxSelection";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
 import type { NoteModel } from "./note-model";
+import { useNoteHeights } from "./useNoteHeights";
+
+vi.mock("./useNoteHeights", () => ({
+  useNoteHeights: vi.fn(),
+}));
 
 describe("useBoxSelection", () => {
+  beforeEach(() => {
+    (useNoteHeights as ReturnType<typeof vi.fn>).mockReturnValue({
+      heights: ref(new Map<string, number>()),
+    });
+  });
+
   function setup() {
     const selection = useSpatialSelection();
     const editing = useSpatialEditing();

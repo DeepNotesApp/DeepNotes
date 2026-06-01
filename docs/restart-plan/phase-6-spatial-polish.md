@@ -125,8 +125,8 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 4. **Test coverage is strong.** 205 tests across 28 files using real Yjs documents (not mocks).
 
 ### Gaps identified (ordered by severity)
-1. **`note-geometry.ts` hardcodes note height as `80px`** (`getNoteRect`). This affects box selection accuracy and container overlap detection. `DisplayNote.vue` publishes real heights via `useNoteHeights`, but `getNoteRect` ignores them. Similarly, `useArrowDrag.ts` hardcodes `sourceNote.pos.y + 40` for arrow drag origin. **Functional bug — should be fixed before cutover.**
-2. **`fitToScreen` only uses `rootNoteList` bounds.** Legacy `PageCamera.fitToScreen()` considers selection first, then falls back to all page elements.
+1. ~~**`note-geometry.ts` hardcodes note height as `80px`**~~ **FIXED (2026-06-01).** `getNoteRect` now accepts an optional `heights` parameter and reads actual rendered heights from `useNoteHeights`. All callers (`useBoxSelection`, `useNoteDrag`, `useArrowReconnect`) updated to pass heights. `useArrowDrag.ts` now uses `noteHeights.value.get(sourceNote.id) ?? 80` instead of hardcoded `+ 40`. New tests added in `note-geometry.test.ts` and `useCanvasActions.test.ts`.
+2. ~~**`fitToScreen` only uses `rootNoteList` bounds**~~ **FIXED (2026-06-01).** `useCanvasActions` now accepts `selectedNoteIds` and `fitToScreen` prioritizes selected note bounds, falling back to all root notes when nothing is selected. Legacy behavior matched.
 3. **Interregional arrows are schema-only.** `arrow-model.ts` exposes `interregional`, `fakePos`, `looseEndpoint`, but `DisplayArrow.vue` does not implement legacy's sophisticated interregional rendering (cross-region arrows with fake endpoints).
 4. **Selection formatting integration is missing.** Legacy `PageSelection.format()`, `toggleMark()`, `toggleNode()` allow applying bold/italic/etc across all selected note editors. New selection has no equivalent.
 5. **Color system is simplified.** Legacy uses `colorNameToColorHex` with `light`/`highlight`/`base`/`final` variants (`lightenByRatio`). New code uses a flat hardcoded 10-color map with a single `/18` opacity tint.
@@ -137,7 +137,7 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 
 ## Verification
 
-- [x] Each deliverable has a test (unit, component, or integration). **Met.** 205 tests passing across 28 test files in `features/spatial/`.
+- [x] Each deliverable has a test (unit, component, or integration). **Met.** 208 tests passing across 28 test files in `features/spatial/`.
 - [x] Phase 1 checklist is >80% marked done. **MET.** 72 of 82 rows (88%) are Done.
 
 ---
@@ -153,7 +153,7 @@ An independent codebase audit compared legacy (`apps/client/src/code/pages/page/
 - [x] `DisplayArrow.vue` supports full legacy arrow behavior. **Done.** Curve/line bodies and heads work; line body has rectangle-edge intersection; arrow color matching is implemented and tested. Interregional coordinate transforms and `fakePos`/`looseEndpoint` rendering remain minor gaps.
 - [x] `MainToolbar`, `LeftSidebar`, `RightSidebar`, and `TableContextMenu` are implemented as standalone shadcn components and visible on `/pages/:pageId`. `PageToolbarActions.vue` (insert note/arrow, zoom in/out, fit-to-screen) is wired into the toolbar actions slot.
 - [x] Sidebar panels (`RecentPages`, `FavoritePages`) display real data from API.
-- [ ] Arrow geometry and `fitToScreen` read actual note heights instead of hardcoding `80px`. **NOT MET.** `note-geometry.ts:getNoteRect` still hardcodes `const h = 80;`. `useArrowDrag.ts` hardcodes `sourceNote.pos.y + 40` for arrow drag origin. These should read actual rendered heights via `useNoteHeights` before cutover.
+- [x] Arrow geometry and `fitToScreen` read actual note heights instead of hardcoding `80px`. **MET (2026-06-01).** `note-geometry.ts:getNoteRect` now accepts optional `heights` parameter and falls back to `80` only when height is unavailable. `useArrowDrag.ts` uses `noteHeights.value.get(sourceNote.id) ?? 80` for source origin. `useCanvasActions.fitToScreen` already used heights correctly; now also considers selection bounds first.
 - [x] Per-note context menu (`NoteContextMenu.vue`) implemented with bring-to-front, send-to-back, and delete actions. Tested via `useNoteContextMenu.test.ts` (5 tests).
 - [x] `SpatialPageView.vue` is refactored to avoid god-component anti-pattern. Keyboard shortcuts extracted to `useSpatialKeyboard.ts`; box selection extracted to `useBoxSelection.ts`; arrow drag extracted to `useArrowDrag.ts`; arrow reconnect extracted to `useArrowReconnect.ts`; note drag extracted to `useNoteDrag.ts`; note geometry extracted to `note-geometry.ts`; canvas actions extracted to `useCanvasActions.ts`; canvas context menu handlers extracted to `useCanvasContextMenu.ts`; per-note context menu handlers extracted to `useNoteContextMenu.ts`. Component reduced from ~740 to ~260 lines.
 - [x] Selection implements `bringToTop`. Formatting integration and active element/region navigation remain missing.

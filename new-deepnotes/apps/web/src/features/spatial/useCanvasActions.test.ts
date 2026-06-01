@@ -138,6 +138,52 @@ describe("useCanvasActions", () => {
     expect(bounds.maxY).toBe(60 + 200); // n2 height from map
   });
 
+  it("fitToScreen uses selected notes bounds when selection exists", () => {
+    mockNoteHeights(new Map());
+    const canvasRef = ref(makeCanvasRef());
+    const rootNoteList = ref([
+      {
+        id: "n1",
+        model: {
+          pos: { value: { x: 0, y: 0 } },
+          width: { value: { expanded: "100px", collapsed: "80px" } },
+        },
+      },
+      {
+        id: "n2",
+        model: {
+          pos: { value: { x: 500, y: 500 } },
+          width: { value: { expanded: "Auto", collapsed: "80px" } },
+        },
+      },
+      {
+        id: "n3",
+        model: {
+          pos: { value: { x: 1000, y: 1000 } },
+          width: { value: { expanded: "Auto", collapsed: "80px" } },
+        },
+      },
+    ] as any);
+
+    const selectedNoteIds = ref(new Set(["n2"]));
+
+    const { fitToScreen } = useCanvasActions({
+      canvasRef,
+      rootNoteList,
+      selectedNoteIds,
+      createNoteAt: vi.fn(),
+    });
+
+    fitToScreen();
+    const fitToScreenMock = canvasRef.value.fitToScreen as ReturnType<typeof vi.fn>;
+    const [bounds] = fitToScreenMock.mock.calls[0]!;
+    // Should fit to n2 only, not the full spread of n1..n3
+    expect(bounds.minX).toBe(500);
+    expect(bounds.minY).toBe(500);
+    expect(bounds.maxX).toBe(500 + 160); // Auto width
+    expect(bounds.maxY).toBe(500 + 80);  // Default height
+  });
+
   it("onCanvasDoubleClick at zoom=2 scales world coordinates correctly", () => {
     mockNoteHeights(new Map());
     const canvasRef = ref(

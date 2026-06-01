@@ -182,6 +182,7 @@ const {
 const { onCanvasDoubleClick, fitToScreen } = useCanvasActions({
   canvasRef,
   rootNoteList,
+  selectedNoteIds: selection.selectedIds,
   createNoteAt,
   defaultNoteTemplate: props.defaultNoteTemplate,
 });

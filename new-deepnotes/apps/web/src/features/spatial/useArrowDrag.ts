@@ -2,6 +2,7 @@ import { computed, ref } from "vue";
 import type { Ref } from "vue";
 import type { NoteModel } from "./note-model";
 import { worldToScreen } from "./spatial-viewport-math";
+import { useNoteHeights } from "./useNoteHeights";
 import type { ClipboardArrow } from "./clipboard";
 
 export interface UseArrowDragInput {
@@ -17,6 +18,7 @@ export interface UseArrowDragInput {
 }
 
 export function useArrowDrag(input: UseArrowDragInput) {
+  const { heights: noteHeights } = useNoteHeights();
   const arrowDrag = ref<{
     sourceId: string;
     endX: number;
@@ -39,9 +41,10 @@ export function useArrowDrag(input: UseArrowDragInput) {
 
     const wStr = sourceNote.model.width.value.expanded;
     const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+    const h = noteHeights.value.get(sourceNote.id) ?? 80;
     const sourceScreen = worldToScreen(
       sourceNote.model.pos.value.x + w / 2,
-      sourceNote.model.pos.value.y + 40,
+      sourceNote.model.pos.value.y + h / 2,
       cx,
       cy,
       camX,

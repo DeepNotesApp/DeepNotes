@@ -46,6 +46,7 @@ export function getNoteRect(
   noteId: string,
   noteList: { id: string; model: NoteModel }[],
   parentOf: Map<string, string>,
+  heights?: Map<string, number>,
 ): NoteRect | null {
   const entry = noteList.find((n) => n.id === noteId);
   if (!entry) return null;
@@ -53,6 +54,6 @@ export function getNoteRect(
   if (!pos) return null;
   const wStr = entry.model.width.value.expanded;
   const w = wStr === "Auto" ? 160 : parseFloat(wStr);
-  const h = 80;
+  const h = heights?.get(noteId) ?? 80;
   return { x: pos.x, y: pos.y, width: w, height: h };
 }

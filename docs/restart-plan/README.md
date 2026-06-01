@@ -77,10 +77,13 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (**Complete**)
 
-All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows are Done. Independent evaluation (see `phase-6-spatial-polish.md`) confirmed genuine parity with a cleaner architecture, but identified these gaps ordered by severity:
+All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows are Done. Independent evaluation (see `phase-6-spatial-polish.md`) confirmed genuine parity with a cleaner architecture. Two critical gaps were **fixed on 2026-06-01**; remaining gaps are non-blocking:
 
-1. **`note-geometry.ts` hardcodes note height as `80px`** (`getNoteRect`). Affects box selection accuracy and container overlap detection. `DisplayNote.vue` publishes real heights via `useNoteHeights`, but `getNoteRect` ignores them. `useArrowDrag.ts` also hardcodes `sourceNote.pos.y + 40` for arrow drag origin. **Functional bug — should be fixed before cutover.**
-2. **`fitToScreen` only uses `rootNoteList` bounds.** Legacy `PageCamera.fitToScreen()` considers selection first, then falls back to all page elements.
+**Fixed (2026-06-01):**
+1. ~~**`note-geometry.ts` hardcodes note height as `80px`**~~ `getNoteRect` now accepts `heights` from `useNoteHeights`. All callers (`useBoxSelection`, `useNoteDrag`, `useArrowReconnect`) pass actual rendered heights. `useArrowDrag.ts` no longer hardcodes `sourceNote.pos.y + 40`.
+2. ~~**`fitToScreen` only uses `rootNoteList` bounds**~~ `useCanvasActions` now accepts `selectedNoteIds`; `fitToScreen` prioritizes selected notes, falling back to all root notes.
+
+**Remaining (non-blocking):**
 3. **Interregional arrows are schema-only.** `interregional`, `fakePos`, `looseEndpoint` fields exist in Yjs but `DisplayArrow.vue` does not render cross-region arrows with fake endpoints.
 4. **Selection formatting integration is missing.** Legacy `PageSelection.format()` allowed applying bold/italic/etc across all selected note editors. No equivalent in new code.
 5. **Color system is simplified.** Legacy had `light`/`highlight`/`base`/`final` color variants via `lightenByRatio`. New code uses flat 10-color map with `/18` opacity tint only.
@@ -104,7 +107,7 @@ Pending infrastructure/deployment:
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
-- **Spatial: hardcoded note heights in geometry** — `note-geometry.ts:getNoteRect` hardcodes `const h = 80;` and `useArrowDrag.ts` hardcodes `sourceNote.pos.y + 40`. These should read actual rendered heights from `useNoteHeights` before cutover. See `phase-6-spatial-polish.md` Evaluation findings.
+- ~~**Spatial: hardcoded note heights in geometry**~~ **FIXED (2026-06-01).** `note-geometry.ts:getNoteRect` now reads actual rendered heights via optional `heights` parameter. `useArrowDrag.ts` uses `noteHeights` for source origin. See `phase-6-spatial-polish.md` Evaluation findings.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 
 ---

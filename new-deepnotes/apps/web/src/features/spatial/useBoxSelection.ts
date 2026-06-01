@@ -4,6 +4,7 @@ import type { SpatialEditing } from "./useSpatialEditing";
 import type { NoteModel } from "./note-model";
 import { screenToWorld } from "./spatial-viewport-math";
 import { getNoteRect, rectsIntersect } from "./note-geometry";
+import { useNoteHeights } from "./useNoteHeights";
 
 const DRAG_THRESHOLD = 4;
 
@@ -29,6 +30,7 @@ export interface UseBoxSelectionInput {
 }
 
 export function useBoxSelection(input: UseBoxSelectionInput) {
+  const { heights: noteHeights } = useNoteHeights();
   let boxState: BoxSelectionState | null = null;
 
   function onCanvasPointerDown(e: PointerEvent) {
@@ -96,7 +98,7 @@ export function useBoxSelection(input: UseBoxSelectionInput) {
     const boxH = Math.max(w1.y, w2.y) - boxY;
 
     for (const note of input.rootNoteList.value) {
-      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value);
+      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value);
       if (!noteRect) continue;
 
       if (

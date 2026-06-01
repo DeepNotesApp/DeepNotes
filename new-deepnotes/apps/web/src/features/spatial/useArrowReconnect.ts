@@ -4,6 +4,7 @@ import type { NoteModel } from "./note-model";
 import type { ArrowModel } from "./arrow-model";
 import { screenToWorld } from "./spatial-viewport-math";
 import { getNoteRect } from "./note-geometry";
+import { useNoteHeights } from "./useNoteHeights";
 
 export interface UseArrowReconnectInput {
   canvasRef: Ref<{
@@ -18,6 +19,7 @@ export interface UseArrowReconnectInput {
 }
 
 export function useArrowReconnect(input: UseArrowReconnectInput) {
+  const { heights: noteHeights } = useNoteHeights();
   const reconnectingArrowId = ref<string | null>(null);
   const reconnectingFrom = ref<'source' | 'target' | null>(null);
   const hoveredNoteId = ref<string | null>(null);
@@ -55,7 +57,7 @@ export function useArrowReconnect(input: UseArrowReconnectInput) {
     let bestNoteId: string | null = null;
 
     for (const note of input.noteList.value) {
-      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value);
+      const noteRect = getNoteRect(note.id, input.noteList.value, input.parentOf.value, noteHeights.value);
       if (!noteRect) continue;
 
       if (
