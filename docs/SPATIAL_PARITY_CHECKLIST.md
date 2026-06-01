@@ -69,7 +69,7 @@
 | 3.1 | Create arrow (drag from note handle to target) | `DisplayArrow/CreateArrow.ts` | `SpatialPageView.vue:onArrowDragStart/End` | **Done** | — |
 | 3.2 | Delete arrow (Delete key) | `DisplayArrow/DeleteArrow.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
 | 3.3 | Curve body (quadratic bezier) | `DisplayArrow/CurveArrow.vue` | `DisplayArrow.vue:pathD` | **Done** | — |
-| 3.4 | Line body (straight line) | `DisplayArrow/LineArrow.vue` | `DisplayArrow.vue:pathD` | **Done** | — |
+| 3.4 | Line body (straight line) | `DisplayArrow/LineArrow.vue` | `DisplayArrow.vue:pathD` + `arrow-geometry.ts` | **Done** | `arrow-geometry.test.ts` |
 | 3.5 | Arrow heads (open chevron SVG markers) | `DisplayArrow/OpenHead.vue` | `DisplayArrow.vue:marker` | **Done** | — |
 | 3.6 | Source/target head toggles | `arrow.ts` `sourceHead/targetHead` | `arrow-model.ts:sourceHead, targetHead` | **Done** | `arrow-model.test.ts` |
 | 3.7 | Body type toggle (`curve`/`line`) | `arrow.ts` `bodyType` | `arrow-model.ts:bodyType` | **Done** | `arrow-model.test.ts` |
@@ -111,6 +111,7 @@
 | 5.5 | Active element tracking | `selection/active.ts` | `useSpatialSelection.ts:activeId` | **Partial** | `selection.test.ts` |
 | 5.6 | Active region tracking | `selection/activeRegion.ts` | `useSpatialSelection.ts:activeRegionId` | **Partial** | — |
 | 5.7 | Selection count badge | `selection/select.ts` | `SpatialPageView.vue:selection count` | **Done** | — |
+| 5.8 | `bringToTop` on selection | `selection/bringToTop.ts` | `useSpatialSelection.ts:bringToTop` | **Partial** | `selection.test.ts` (core selection only; no explicit zIndex bump test) |
 
 ## 6. Clipboard
 
@@ -127,7 +128,7 @@
 | 7.1 | Align left / center / right | `alignment/align.ts` | `alignment.ts` | **Done** | `alignment.test.ts` |
 | 7.2 | Align top / middle / bottom | `alignment/align.ts` | `alignment.ts` | **Done** | `alignment.test.ts` |
 | 7.3 | Distribute horizontally / vertically | `alignment/distribute.ts` | `alignment.ts` | **Done** | `alignment.test.ts` |
-| 7.4 | Keyboard shortcuts (Ctrl+Shift+...) | `alignment/shortcuts.ts` | `SpatialPageView.vue:onKeyDown` | **Done** | — |
+| 7.4 | Keyboard shortcuts (Ctrl+Shift+...) | `alignment/shortcuts.ts` | `useSpatialKeyboard.ts` + `SpatialPageView.vue` | **Done** | `spatial-keyboard.test.ts` (Space-pan guard only) |
 
 ## 8. Undo / Redo
 
@@ -144,6 +145,7 @@
 | 9.1 | Find/replace dialog | `editing/findReplace.ts` | `FindReplaceDialog.vue` | **Done** | `find-replace.test.ts` |
 | 9.2 | Search across note head/body | `editing/findReplace.ts` | `find-replace.ts` | **Partial** | `find-replace.test.ts` |
 | 9.3 | Replace current / replace all | `editing/findReplace.ts` | `find-replace.ts` | **Done** | `find-replace.test.ts` |
+| 9.4 | Editing state management (which element is being edited) | `PageElem/editing.ts` | `useSpatialEditing.ts` | **Done** | `useSpatialEditing.test.ts` |
 
 ## 10. Collab (Page-level Yjs)
 
@@ -274,7 +276,7 @@ Every field from legacy `INoteCollab` and `IArrowCollab` is present in the new Y
 
 - [x] Checklist contains ≥ 60 rows. (Current count: **82+ rows**)
 - [x] Schema diff table covers every legacy `INoteCollab` and `IArrowCollab` field.
-- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~40+ UI/interaction rows marked "Done" have "—" in the Test file column. These must be downgraded to "Partial" or tests must be added.
+- [ ] Every "Done" item has a passing automated test. **VIOLATED.** ~35+ UI/interaction rows marked "Done" still have "—" in the Test file column. Progress since last evaluation: `arrow-geometry.test.ts` (5 tests), `useSpatialEditing.test.ts` (4 tests) added. Remaining gaps: `DisplayNote.vue` (basic render tests only), `DisplayArrow.vue` (no component tests), `SpatialPageView.vue` (no component/integration tests), drag/resize interaction, box selection, arrow creation/reconnection, sidebar/toolbar integration.
 - [ ] Phase 6 is not declared done until ≥ 80% of rows are **Done**. **NOT MET.** Strict enforcement of the test rule would drop the true "Done" count well below 80%.
 
 ---
