@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** Screenshot floating UI implemented: `ScreenshotDialog.vue` with html2canvas (margin/scale options, `Alt+Shift+S` shortcut), `ScreenshotDialog.test.ts` (4 tests), and `SpatialPageView.test.ts` updated. Also includes prior session: Collab update squashing implemented in `useCollabPush.ts` (adaptive 1500ms debounce) with `useCollabPush.test.ts` (5 tests). Collab pagination limit capped at 100 rows. `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 **independent evaluation completed.** See `phase-6-spatial-polish.md` "Evaluation findings" section. 205 tests passing across 28 test files. Key findings: `note-geometry.ts` still hardcodes `80px` note height (affects box selection and container overlap); interregional arrows are schema-only; selection formatting integration missing. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -77,7 +77,14 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (**Complete**)
 
-All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows are Done. Minor remaining gaps (non-blocking): active region tracking (5.6), loading overlay polish (12.20), interregional arrow coordinate transforms, `fakePos`/`looseEndpoint` rendering.
+All major deliverables implemented and tested. 88% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows are Done. Independent evaluation (see `phase-6-spatial-polish.md`) confirmed genuine parity with a cleaner architecture, but identified these gaps ordered by severity:
+
+1. **`note-geometry.ts` hardcodes note height as `80px`** (`getNoteRect`). Affects box selection accuracy and container overlap detection. `DisplayNote.vue` publishes real heights via `useNoteHeights`, but `getNoteRect` ignores them. `useArrowDrag.ts` also hardcodes `sourceNote.pos.y + 40` for arrow drag origin. **Functional bug — should be fixed before cutover.**
+2. **`fitToScreen` only uses `rootNoteList` bounds.** Legacy `PageCamera.fitToScreen()` considers selection first, then falls back to all page elements.
+3. **Interregional arrows are schema-only.** `interregional`, `fakePos`, `looseEndpoint` fields exist in Yjs but `DisplayArrow.vue` does not render cross-region arrows with fake endpoints.
+4. **Selection formatting integration is missing.** Legacy `PageSelection.format()` allowed applying bold/italic/etc across all selected note editors. No equivalent in new code.
+5. **Color system is simplified.** Legacy had `light`/`highlight`/`base`/`final` color variants via `lightenByRatio`. New code uses flat 10-color map with `/18` opacity tint only.
+6. **Active region tracking (5.6) and loading overlay polish (12.20)** remain partial/non-blocking.
 
 ### Phase 9 — Production Readiness (in progress)
 
@@ -97,6 +104,7 @@ Pending infrastructure/deployment:
 
 - **Realtime notification toast** — only `/notifications` page exists, no badge/toast.
 - **Auth: `rememberDevice` UI missing in login** — `LoginView.vue` has no "Remember this device" checkbox for 2FA login; users are re-prompted every time. API schema already supports it.
+- **Spatial: hardcoded note heights in geometry** — `note-geometry.ts:getNoteRect` hardcodes `const h = 80;` and `useArrowDrag.ts` hardcodes `sourceNote.pos.y + 40`. These should read actual rendered heights from `useNoteHeights` before cutover. See `phase-6-spatial-polish.md` Evaluation findings.
 - **Auth: no distributed locking** — Legacy used Redlock (`user-lock:${userId}`) around password change, email change, and 2FA mutations. New code relies on DB transactions only.
 
 ---
