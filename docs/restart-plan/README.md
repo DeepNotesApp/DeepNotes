@@ -1,6 +1,6 @@
 # DeepNotes Restart Plan — Index
 
-> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
+> **Last updated:** 2026-06-01 (Phase 6 in progress. **New this session:** Collab update squashing implemented in `useCollabPush.ts` (adaptive 1500ms debounce) with `useCollabPush.test.ts` (5 tests). Collab pagination limit capped at 100 rows. `PageCollabRoom` broadcast backpressure implemented (batches ≤ 10 sockets). Auth revocation implemented: DO `alarm()` re-verifies all sockets every 30 s via new `collab-ws-verify` internal endpoint; `webSocketMessage` closes socket with code `1008` on 403 from `collab-ws-append`. `page-collab-room.test.ts` expanded to 6 tests. See `phase-6-spatial-polish.md` and `SPATIAL_PARITY_CHECKLIST.md` for details. Phase 9 in progress.)  
 > **This document replaces `docs/RESTART_PLAN.md`.** If a prior statement conflicts with this one, this version wins.
 
 ---
@@ -48,8 +48,8 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Drizzle:** `drizzle-kit migrate` applies cleanly from empty DB to current schema.
 - [ ] **Backend parity:** Every row in `docs/TRPC_REST_MAP.md` marked "implemented" has a passing automated test.
 - [ ] **Collab:** `PageCollabRoom` integration test: two clients sync note creation via WS within 2 seconds.
-- [ ] **Collab pagination:** `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and returns ≤ 100 rows.
-- [ ] **Collab update squashing:** 50 rapid edits from a single client produce ≤ 2 `page_updates` rows.
+- [x] **Collab pagination:** `GET /api/pages/:pageId/collab-updates` supports `?sinceIndex=` and returns ≤ 100 rows.
+- [x] **Collab update squashing:** 50 rapid edits from a single client produce ≤ 2 `page_updates` rows.
 - [x] **Collab auth revocation:** `PageCollabRoom` closes socket (code `1008`) when a user's session is invalidated mid-session.
 - [x] **Collab broadcast backpressure:** `PageCollabRoom` chunks broadcast into batches of ≤ 10 sockets.
 - [ ] **Collab data migration:** `docs/COLLAB_DATA_MIGRATION.md` exists and explains legacy compatibility.
@@ -77,7 +77,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 
 ### Phase 6 — Spatial canvas polish (in progress)
 
-- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows. Schema diff table complete. **Test coverage improved this session:** `NotePropertiesCard.test.ts` (5), `ArrowPropertiesCard.test.ts` (6), `SpatialPageView.test.ts` (13), `PageToolbarActions.test.ts` (7), `MainToolbar.test.ts` (8), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (26), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12). Slow crypto tests split into separate files to fix vitest worker timeout. Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, screenshot floating UI, user avatars on canvas.
+- **`docs/SPATIAL_PARITY_CHECKLIST.md` created.** 82+ rows. Schema diff table complete. **Test coverage improved this session:** `NotePropertiesCard.test.ts` (5), `ArrowPropertiesCard.test.ts` (6), `SpatialPageView.test.ts` (13), `PageToolbarActions.test.ts` (7), `MainToolbar.test.ts` (8), `PageLayout.test.ts` (10), `RecentPagesCard.test.ts` (5), `FavoritePagesCard.test.ts` (5), `SelectedPagesCard.test.ts` (5), `useNoteContextMenu.test.ts` (5), `useCanvasActions.test.ts` (5), `DisplayNote.test.ts` (26), `DisplayArrow.test.ts` (12), `useCanvasContextMenu.test.ts` (6), `note-geometry.test.ts` (10), `useBoxSelection.test.ts` (6), `arrow-geometry.test.ts` (5), `useSpatialEditing.test.ts` (4), `selection.test.ts` (12), `useCollabPush.test.ts` (5). Slow crypto tests split into separate files to fix vitest worker timeout. Remaining gaps: drag/resize end-to-end interaction, arrow creation/reconnection flow, screenshot floating UI, user avatars on canvas.
 - **Left sidebar panels now load real data.** `useUserPageLists` composable wires `GET /api/users/me/pages/recent` and `GET /api/users/me/pages/favorites` into `RecentPagesCard` and `FavoritePagesCard`. Clear handlers call API-backed `clearRecent`/`clearFavorites`.
 - **Right sidebar properties panels significantly improved.** `NotePropertiesCard.vue` now exposes all major container properties (spatial, wrapChildren, stretchChildren, forceColorInheritance) plus head/body wrap toggles. `ArrowPropertiesCard.vue` now exposes bodyStyle (solid/dashed/dotted) and readOnly toggle. `PagePropertiesCard.vue` remains basic. All wired through `PageEditorView.vue`.
 - **`MainToolbar.vue` extracted as standalone component.** `PageLayout.vue` now delegates to `MainToolbar.vue` for the header shell. `PageToolbarActions.vue` provides insert note, insert arrow, zoom in/out, and fit-to-screen buttons. Still missing: alignment/formatting buttons, screenshot.

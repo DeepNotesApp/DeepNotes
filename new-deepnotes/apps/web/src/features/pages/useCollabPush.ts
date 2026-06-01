@@ -37,6 +37,10 @@ export function useCollabPush(opts: {
   const unackedUpdates = opts.unackedUpdates ?? new Map<number, Uint8Array>();
   let collabClientUpdateId = 0;
   let pushTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastPushTime = 0;
+
+  /** Squash window: after a push, rapid edits within this window are batched. */
+  const SQUASH_WINDOW_MS = 1500;
 
   function syncServerDocToYdoc() {
     const diff = Y.encodeStateAsUpdateV2(ydoc, Y.encodeStateVector(serverDoc));
@@ -52,20 +56,28 @@ export function useCollabPush(opts: {
     if (pushTimer != null) {
       clearTimeout(pushTimer);
     }
-    const ws = getCollabWs();
-    if (
-      collabWsLive.value &&
-      ws != null &&
-      ws.readyState === WebSocket.OPEN
-    ) {
-      pushTimer = setTimeout(() => {
-        void flushPushWs();
-      }, 200);
-      return;
-    }
+    const sinceLastPush = Date.now() - lastPushTime;
+    const inSquashWindow = sinceLastPush < SQUASH_WINDOW_MS;
+    const baseDelay = (() => {
+      const ws = getCollabWs();
+      return collabWsLive.value && ws != null && ws.readyState === 1 /* OPEN */
+        ? 200
+        : 700;
+    })();
+    const delay = inSquashWindow ? SQUASH_WINDOW_MS : baseDelay;
+
     pushTimer = setTimeout(() => {
-      void flushPush();
-    }, 700);
+      const ws = getCollabWs();
+      if (
+        collabWsLive.value &&
+        ws != null &&
+        ws.readyState === 1 /* OPEN */
+      ) {
+        void flushPushWs();
+      } else {
+        void flushPush();
+      }
+    }, delay);
   }
 
   function flushPushWs() {
@@ -81,7 +93,7 @@ export function useCollabPush(opts: {
     if (
       !collabWsLive.value ||
       ws == null ||
-      ws.readyState !== WebSocket.OPEN
+      ws.readyState !== 1 /* OPEN */
     ) {
       return;
     }
@@ -104,6 +116,7 @@ export function useCollabPush(opts: {
           encryptedUpdate: enc,
         }),
       );
+      lastPushTime = Date.now();
     } catch (e) {
       pushError.value =
         e instanceof Error ? e.message : "Could not send collab update.";
@@ -116,7 +129,7 @@ export function useCollabPush(opts: {
     if (
       collabWsLive.value &&
       ws != null &&
-      ws.readyState === WebSocket.OPEN
+      ws.readyState === 1 /* OPEN */
     ) {
       return;
     }
@@ -159,6 +172,7 @@ export function useCollabPush(opts: {
       if (response.status === 204) {
         Y.applyUpdateV2(serverDoc, diff);
         collabLastIndex.value = nextIndex;
+        lastPushTime = Date.now();
         return;
       }
       if (error && typeof error === "object" && "message" in error) {

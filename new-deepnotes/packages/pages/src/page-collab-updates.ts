@@ -99,7 +99,7 @@ export async function performGetPageCollabUpdates(input: {
     )
     .limit(1);
 
-  const effectiveLimit = Math.min(input.limit ?? 100, 500);
+  const effectiveLimit = Math.min(input.limit ?? 100, 100);
 
   const rows = await input.db
     .select({
