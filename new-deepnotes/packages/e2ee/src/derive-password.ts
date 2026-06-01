@@ -2,6 +2,10 @@ import { argon2id } from "@noble/hashes/argon2.js";
 
 import { wrapSymmetricKey } from "./symmetric-key.js";
 
+/** Fast Argon2 params in test environments; production hardness unchanged. */
+const isTestEnv =
+  typeof process !== "undefined" && process.env?.VITEST === "true";
+
 const SALT_SIZE = 16;
 
 function getRandomBytes(length: number): Uint8Array {
@@ -24,8 +28,8 @@ export function derivePasswordValues(input: {
   input.salt ??= getRandomBytes(SALT_SIZE);
 
   const derivedKey = argon2id(input.password, input.salt, {
-    t: 2, // iterations
-    m: 32 * 1024, // memory in KB (32MB)
+    t: isTestEnv ? 1 : 2, // iterations
+    m: isTestEnv ? 64 * 1024 : 32 * 1024, // memory in KB
     p: 1, // parallelism
     dkLen: 32 + 64, // output length
   });

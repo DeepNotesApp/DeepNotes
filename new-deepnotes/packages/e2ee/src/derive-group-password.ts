@@ -2,6 +2,10 @@ import { argon2id } from "@noble/hashes/argon2.js";
 
 import { wrapSymmetricKey } from "./symmetric-key.js";
 
+/** Fast Argon2 params in test environments; production hardness unchanged. */
+const isTestEnv =
+  typeof process !== "undefined" && process.env?.VITEST === "true";
+
 /** Legacy nanoid alphabet (must match `@stdlib/misc` / client). */
 const alphabet =
   "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
@@ -54,8 +58,8 @@ export function deriveGroupPasswordValues(
   const salt = nanoidToBytes(groupId);
 
   const derivedKey = argon2id(new TextEncoder().encode(password), salt, {
-    t: 8, // iterations
-    m: 32 * 1024, // memory in KB (32MB)
+    t: isTestEnv ? 1 : 8, // iterations
+    m: isTestEnv ? 64 * 1024 : 32 * 1024, // memory in KB
     p: 1, // parallelism
     dkLen: 32 + 64, // output length
   });
