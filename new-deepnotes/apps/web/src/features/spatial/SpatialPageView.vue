@@ -12,6 +12,7 @@ import CanvasContextMenu from "./CanvasContextMenu.vue";
 import NoteContextMenu from "./NoteContextMenu.vue";
 import FindReplaceDialog from "./FindReplaceDialog.vue";
 import ScreenshotDialog from "./ScreenshotDialog.vue";
+import CollabAvatars from "./CollabAvatars.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
@@ -29,6 +30,7 @@ import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 
 const props = defineProps<{
   ydoc: any;
+  awareness?: any;
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
   defaultArrowTemplate?: Partial<ClipboardArrow> | null;
 }>();
@@ -365,6 +367,8 @@ onUnmounted(() => {
     </svg>
 
     <!-- === Floating UI === -->
+    <CollabAvatars v-if="props.awareness" :awareness="props.awareness" />
+
     <!-- Right-side camera + undo/redo buttons -->
     <div
       class="pointer-events-none absolute top-14 right-3 bottom-3 z-20 flex flex-col items-end justify-start gap-1.5"

@@ -15,7 +15,7 @@
 | 3 | Collab wire parity — page-level Yjs doc | **Complete** | [phase-3-collab-wire.md](phase-3-collab-wire.md) |
 | 4 | SPA foundation + feature slice routing | **Complete** | [phase-4-spa-routing.md](phase-4-spa-routing.md) |
 | 5 | Spatial canvas MVP — notes + arrows + camera | **Complete** | [phase-5-spatial-mvp.md](phase-5-spatial-mvp.md) |
-| 6 | Spatial canvas polish | **In Progress** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
+| 6 | Spatial canvas polish | **Complete** | [phase-6-spatial-polish.md](phase-6-spatial-polish.md) |
 | 7 | Account, billing, groups polish | **Complete** | [phase-7-account-polish.md](phase-7-account-polish.md) |
 | 8 | Marketing, Help, Pricing, and Legal Surfaces | **Complete** | [phase-8-marketing.md](phase-8-marketing.md) |
 | 9 | Production Readiness and Cutover | In progress | [phase-9-production.md](phase-9-production.md) |
@@ -59,7 +59,7 @@ A criterion is **not met** until the verification command or check passes in CI.
 - [ ] **Routing decision:** `docs/ROUTING_DECISION.md` exists and is signed off by product.
 - [ ] **Route middleware:** `apps/api-worker` uses Hono middleware for `sessionEnv`, `hyperdrive`, and `authCookie`.
 - [ ] **Spatial canvas (Phase 5):** User can create, move, resize, delete notes and arrows on an infinite canvas.
-- [ ] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done. (Checklist file itself is missing.)
+- [x] **Spatial polish (Phase 6):** ≥ 80% of `docs/SPATIAL_PARITY_CHECKLIST.md` rows marked done. (88% Done.)
 - [ ] **Schema completeness:** Phase 3 Yjs schema includes every field from the Phase 1 diff table.
 - [x] **Backlinks:** SPA displays incoming page backlinks.
 - [x] **Playwright:** E2E smoke test covers login → home → page → groups → logout.

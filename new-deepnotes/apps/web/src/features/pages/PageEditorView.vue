@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import { usePageSnapshots } from "./usePageSnapshots";
 import PageStateScreens from "./screens/PageStateScreens.vue";
 import { usePageStatus } from "./usePageStatus";
 import { useUserPageLists } from "./useUserPageLists";
+import { cursorColorForUserId } from "./page-awareness-utils";
 
 import type { SnapshotRow } from "./page-snapshot-list";
 
@@ -116,6 +117,19 @@ const {
   flushPush,
   unlockKeyringWithPassword,
 } = collab;
+
+watch(
+  () => user.value,
+  (u) => {
+    if (u) {
+      collabAwareness.setLocalStateField("user", {
+        name: u.userId,
+        color: cursorColorForUserId(u.userId),
+      });
+    }
+  },
+  { immediate: true },
+);
 
 const { status: pageStatus } = usePageStatus({
   collabLoading,
@@ -227,6 +241,7 @@ onMounted(() => {
       ref="spatialViewRef"
       v-else
       :ydoc="ydoc"
+      :awareness="collabAwareness"
       :default-note-template="noteTemplate"
       :default-arrow-template="arrowTemplate"
       @select-note="selectedNoteId = $event?.[0] ?? null; selectedNoteModel = $event?.[1] ?? null"
