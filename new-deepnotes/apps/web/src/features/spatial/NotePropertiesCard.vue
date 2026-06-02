@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/select'
 import { ExternalLink, Copy, ArrowUpDown, FilePlus, Save, Download } from '@lucide/vue'
 import ColorPalette from '@/components/ColorPalette.vue'
+import { getNoteEditor } from './note-editor-registry'
+import TurndownService from 'turndown'
 
 const props = defineProps<{
   noteId: string | null
@@ -34,7 +36,7 @@ const emit = defineEmits<{
   'update:anchor-y': [value: number]
   'update:width': [value: string]
   'update:height': [value: string]
-  'update:color': [value: number]
+  'update:color': [value: string]
   'update:color-inherit': [value: boolean]
   'update:collapsible': [value: boolean]
   'update:collapsed': [value: boolean]
@@ -127,19 +129,78 @@ function handleHeightModeChange(mode: string) {
   }
 }
 
+function htmlToMarkdown(html: string): string {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+
+  // Flatten divs inside list items (Tiptap task lists produce these)
+  const divs = doc.querySelectorAll('li > div')
+  for (let i = divs.length - 1; i >= 0; i--) {
+    const el = divs.item(i)
+    el.outerHTML = el.innerHTML
+  }
+  const paragraphs = doc.querySelectorAll('li > p')
+  for (let i = paragraphs.length - 1; i >= 0; i--) {
+    const el = paragraphs.item(i)
+    el.outerHTML = el.innerHTML
+  }
+
+  const td = new TurndownService({
+    codeBlockStyle: 'fenced',
+    emDelimiter: '*',
+    headingStyle: 'atx',
+    hr: '---',
+  })
+
+  td.addRule('strikethrough', {
+    filter: ['s' as keyof HTMLElementTagNameMap],
+    replacement: (content) => `~~${content}~~`,
+  })
+  td.addRule('math-block', {
+    filter: ['math-block' as keyof HTMLElementTagNameMap],
+    replacement: (content) => `\n\n$$\n${content}\n$$\n\n`,
+  })
+  td.addRule('inline-math', {
+    filter: ['inline-math' as keyof HTMLElementTagNameMap],
+    replacement: (content) => `$${content}$`,
+  })
+  td.keep(['u', 'sub', 'sup', 'table', 'iframe'])
+
+  return td.turndown(doc.body.innerHTML)
+}
+
 function exportAsMarkdown(download: boolean) {
-  // Stub: Note export requires extracting text from Yjs fragments.
-  // Full implementation needs head/body editor HTML -> markdown conversion.
-  const stub = '# Note export stub'
+  if (!props.noteId) return
+
+  let markdown = ''
+  let hasPrevSection = false
+
+  for (const section of ['head', 'body'] as const) {
+    const editor = getNoteEditor(props.noteId, section)
+    if (!editor) continue
+    const html = editor.getHTML()
+    if (!html || html === '<p></p>') continue
+
+    if (hasPrevSection) {
+      markdown += '\n\n---\n\n'
+    }
+    markdown += htmlToMarkdown(html)
+    hasPrevSection = true
+  }
+
+  if (!markdown) {
+    markdown = '# Empty note\n'
+  }
+
   if (download) {
-    const blob = new Blob([stub], { type: 'text/plain;charset=utf-8' })
+    const blob = new Blob([markdown], { type: 'text/plain;charset=utf-8' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
     a.download = 'note.md'
     a.click()
     URL.revokeObjectURL(a.href)
   } else {
-    navigator.clipboard.writeText(stub)
+    navigator.clipboard.writeText(markdown)
   }
 }
 </script>

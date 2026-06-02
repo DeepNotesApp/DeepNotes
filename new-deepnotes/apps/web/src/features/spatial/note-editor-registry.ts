@@ -42,6 +42,15 @@ export function getNoteEditors(noteId: string): Editor[] {
   return Array.from(map.values()).map((e) => e.editor);
 }
 
+export function getNoteEditor(
+  noteId: string,
+  section: EditorSection,
+): Editor | undefined {
+  const map = registry.get(noteId);
+  if (!map) return undefined;
+  return map.get(section)?.editor;
+}
+
 export function clearNoteEditors(noteId: string): void {
   registry.delete(noteId);
 }

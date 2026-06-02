@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import { useHead } from "@unhead/vue";
-import { marked } from "marked";
+import DocumentIndexLayout from "@/components/DocumentIndexLayout.vue";
 
 useHead({
   title: "Whitepaper — DeepNotes",
@@ -180,71 +179,8 @@ We then send the encrypted keys to the server, which stores them in the database
 We remove a group member by deleting their encrypted keys from the database.
 Then we rotate the group keys and set the page keys for rotation in the next page activity.
 `;
-
-const html = computed(() => marked.parse(markdownSource));
-
-const headings = computed(() => {
-  const result: { level: number; text: string; id: string }[] = [];
-  const tokens = marked.lexer(markdownSource);
-  for (const token of tokens) {
-    if (token.type === "heading") {
-      const id = token.text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-");
-      result.push({ level: token.depth, text: token.text, id });
-    }
-  }
-  return result;
-});
-
-const activeHeading = ref("");
-
-function scrollToHeading(id: string) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-    activeHeading.value = id;
-  }
-}
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-16 md:flex-row md:px-6 md:py-24">
-    <!-- Sticky sidebar -->
-    <aside class="hidden md:block md:w-64 md:shrink-0">
-      <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
-        <nav class="flex flex-col gap-1">
-          <button
-            v-for="heading in headings"
-            :key="heading.id"
-            :class="[
-              'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
-              heading.level === 1 ? 'font-semibold text-foreground' : '',
-              heading.level === 2 ? 'pl-5 text-muted-foreground' : '',
-              heading.level === 3 ? 'pl-7 text-sm text-muted-foreground' : '',
-              activeHeading === heading.id
-                ? 'bg-muted text-foreground'
-                : 'hover:bg-muted hover:text-foreground',
-            ]"
-            @click="scrollToHeading(heading.id)"
-          >
-            {{ heading.text }}
-          </button>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Content -->
-    <article class="min-w-0 flex-1">
-      <h1 class="mb-10 text-center text-4xl font-bold tracking-tight md:text-5xl">
-        Whitepaper
-      </h1>
-      <div
-        class="prose prose-neutral dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-        v-html="html"
-      />
-    </article>
-  </div>
+  <DocumentIndexLayout title="Whitepaper" :markdown-source="markdownSource" />
 </template>

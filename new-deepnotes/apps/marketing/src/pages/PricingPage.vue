@@ -91,36 +91,38 @@ function periodLabel() {
     </div>
 
     <!-- Billing toggle -->
-    <div class="mt-10 flex items-center justify-center gap-3">
-      <span
-        :class="[
-          'text-sm font-medium',
-          billingFrequency === 'monthly'
-            ? 'text-foreground'
-            : 'text-muted-foreground',
-        ]"
-        >Monthly</span
-      >
-      <Switch
-        :model-value="billingFrequency === 'yearly'"
-        @update:model-value="
-          (v) => (billingFrequency = v ? 'yearly' : 'monthly')
-        "
-      />
-      <span
-        :class="[
-          'text-sm font-medium',
-          billingFrequency === 'yearly'
-            ? 'text-foreground'
-            : 'text-muted-foreground',
-        ]"
-        >Yearly</span
-      >
+    <div class="mt-10 flex flex-col items-center gap-2">
       <span
         v-if="billingFrequency === 'yearly'"
         class="rounded-full bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground"
         >Save 20%</span
       >
+      <div class="flex items-center gap-3">
+        <span
+          :class="[
+            'text-sm font-medium',
+            billingFrequency === 'monthly'
+              ? 'text-foreground'
+              : 'text-muted-foreground',
+          ]"
+          >Monthly</span
+        >
+        <Switch
+          :model-value="billingFrequency === 'yearly'"
+          @update:model-value="
+            (v) => (billingFrequency = v ? 'yearly' : 'monthly')
+          "
+        />
+        <span
+          :class="[
+            'text-sm font-medium',
+            billingFrequency === 'yearly'
+              ? 'text-foreground'
+              : 'text-muted-foreground',
+          ]"
+          >Yearly</span
+        >
+      </div>
     </div>
 
     <!-- Plan cards -->
@@ -133,11 +135,11 @@ function periodLabel() {
           plan.highlight ? 'border-primary ring-1 ring-primary' : '',
         ]"
       >
-        <CardHeader class="space-y-2">
-          <CardTitle class="text-2xl">{{ plan.name }}</CardTitle>
+        <CardHeader class="space-y-1.5 pb-4">
+          <CardTitle class="text-xl">{{ plan.name }}</CardTitle>
           <CardDescription>{{ plan.description }}</CardDescription>
-          <div class="mt-2 flex items-baseline gap-1">
-            <span class="text-4xl font-bold">{{ priceLabel(plan) }}</span>
+          <div class="mt-1 flex items-baseline gap-1">
+            <span class="text-3xl font-bold">{{ priceLabel(plan) }}</span>
             <span
               v-if="priceLabel(plan) !== 'Free'"
               class="text-sm text-muted-foreground"
@@ -146,7 +148,7 @@ function periodLabel() {
           </div>
         </CardHeader>
         <CardContent class="flex-1">
-          <ul class="space-y-3">
+          <ul class="space-y-1.5">
             <li
               v-for="feature in plan.features"
               :key="feature"

@@ -36,11 +36,14 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 | **4.1e** | Canvas toolbar: floating position + remove zoom buttons | **DONE** | `CanvasToolbar.vue`, `SpatialPageView.vue`, new `FloatingCameraButtons.vue` | Toolbar is `absolute top-2 left-14 right-14`; View group removed. Right-side floating buttons replicate legacy `DisplayRightBtns`. |
 | **5.1c** | Right sidebar: fix properties header to stay fixed above scrollable content | **DONE** | `PageLayout.vue`, `PageEditorView.vue` | `<aside>` restructured to `flex-col` with `shrink-0` header strip + `flex-1 overflow-y-auto` content pane. |
 | **Floating UI** | "N items selected" should be absolute positioned | **DONE** | `SpatialPageView.vue` | Changed to `absolute bottom-3 right-3 pointer-events-none`; no longer affects layout. |
+| **1.1** | Marketing: pricing layout fix | **DONE** | `PricingPage.vue` | Badge moved above toggle; feature list tightened to `space-y-1.5`; card titles reduced to `text-xl`. |
+| **1.2** | Marketing: scroll-driven index | **DONE** | `DocumentIndexLayout.vue`, `WhitepaperPage.vue`, `PrivacyPolicyPage.vue`, `TermsOfServicePage.vue` | New reusable `DocumentIndexLayout` with `IntersectionObserver` scroll-spy and `marked` heading extraction. Ported to all three legal pages. |
+| **1.3** | Marketing: scroll reset on route change | **DONE** | `marketing/src/main.ts` | Added `scrollBehavior` to `ViteSSG` config. |
+| **6.1** | Account page restructure with sidebar navigation | **DONE** | `AccountLayout.vue`, `AccountGeneral.vue`, `AccountSecurity.vue`, `AccountBilling.vue`, `account-routes.ts` | Split monolithic `AccountView.vue` into nested routes (`/account/general`, `/account/security`, `/account/billing`) with left sidebar layout matching legacy. Removed dev-facing hints (`emailChangeDevHint`, `code` subtitles). |
+| **5.2b** | Set as default note/arrow style serialization + encryption | **DONE** | `PageEditorView.vue`, `note-editor-registry.ts` | Full crypto flow: unwraps session symmetric keyring, serializes selected note/arrow to msgpack, encrypts with `UserDefaultNote`/`UserDefaultArrow` AAD, calls `PATCH /api/users/me/defaults/{note,arrow}`. |
+| **5.1f** | Note export: head/body HTML -> markdown via Turndown | **DONE** | `NotePropertiesCard.vue`, `note-editor-registry.ts` | New `getNoteEditor(noteId, section)` helper. Export uses editor registry to get head/body Tiptap instances, converts HTML to markdown with legacy-aligned Turndown rules (math, strikethrough, tables). |
 
 ## Next Recommended Actions
 
-1. Marketing app fixes (§1): pricing layout (`#pricing`), scroll-driven index (`gsap.ScrollTrigger` lazy init), scroll reset on route change.
-2. Account page restructure (§6.1): sidebar navigation (`AccountLayout.vue`) with tabs for Profile / Preferences / Notifications / Security.
-3. Implement full "Set as default note/arrow style" serialization + encryption (currently stubbed).
-4. Complete note export: extract Yjs fragment text -> markdown (currently stubbed).
-5. Add container reverse/import children actions if required by spatial parity checklist.
+1. Add container reverse/import children actions if required by spatial parity checklist.
+2. Run spatial parity checklist (Phase 1 of RESTART_PLAN) to identify remaining canvas-level gaps.

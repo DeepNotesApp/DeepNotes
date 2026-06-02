@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
 import { useHead } from "@unhead/vue";
-import { marked } from "marked";
+import DocumentIndexLayout from "@/components/DocumentIndexLayout.vue";
 
 useHead({
   title: "Privacy Policy — DeepNotes",
@@ -61,53 +60,8 @@ You also have the option to delete your DeepNotes account at any time. When you 
 If you have any questions or concerns about your privacy while using DeepNotes, please feel free to reach out to us at contact@deepnotes.app.
 We are always here to help and will get back to you as soon as we can.
 `;
-
-const html = computed(() => marked.parse(markdownSource));
-
-const headings = computed(() => {
-  const result: { text: string; id: string }[] = [];
-  const tokens = marked.lexer(markdownSource);
-  for (const token of tokens) {
-    if (token.type === "heading") {
-      const id = token.text
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-");
-      result.push({ text: token.text, id });
-    }
-  }
-  return result;
-});
 </script>
 
 <template>
-  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-16 md:flex-row md:px-6 md:py-24">
-    <!-- Sticky sidebar -->
-    <aside class="hidden md:block md:w-64 md:shrink-0">
-      <div class="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
-        <nav class="flex flex-col gap-1">
-          <a
-            v-for="heading in headings"
-            :key="heading.id"
-            :href="'#' + heading.id"
-            class="rounded-md px-3 py-1.5 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {{ heading.text }}
-          </a>
-        </nav>
-      </div>
-    </aside>
-
-    <!-- Content -->
-    <article class="min-w-0 flex-1">
-      <h1 class="mb-10 text-center text-4xl font-bold tracking-tight md:text-5xl">
-        Privacy Policy
-      </h1>
-      <div
-        class="prose prose-neutral dark:prose-invert max-w-none prose-headings:scroll-mt-24 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-        v-html="html"
-      />
-    </article>
-  </div>
+  <DocumentIndexLayout title="Privacy Policy" :markdown-source="markdownSource" />
 </template>

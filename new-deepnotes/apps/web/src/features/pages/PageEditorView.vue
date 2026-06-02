@@ -21,11 +21,13 @@ import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
 import { nanoid } from "nanoid";
+import { pack } from "msgpackr";
 import {
   base64ToBytes,
   bytesToBase64,
   createSymmetricKeyring,
   ensureSodiumReady,
+  wrapSymmetricKey,
 } from "@deepnotes/e2ee";
 import {
   decryptPageRelativeTitle,
@@ -51,6 +53,16 @@ function pagePathLabel(
   const label = labels[pid];
   if (label != null && label.length > 0) return label;
   return `[Page ${pid}]`;
+}
+
+function messageFromMaybeError(e: unknown): string | undefined {
+  if (e && typeof e === "object" && "message" in e) {
+    const m = (e as { message?: unknown }).message;
+    if (typeof m === "string") {
+      return m;
+    }
+  }
+  return undefined;
 }
 
 const route = useRoute();
@@ -348,7 +360,84 @@ function handleSwapHeadBody() {
 }
 
 async function handleSetNoteAsDefault() {
-  pageOpsMessage.value = 'Set as default note style is not yet implemented in the new UI (requires serialization + encryption).';
+  pageOpsMessage.value = null;
+  if (!selectedNoteModel.value) return;
+
+  const stored = readSessionCrypto();
+  if (!stored) {
+    pageOpsMessage.value = 'Unlock session crypto (password login) to save default styles.';
+    return;
+  }
+
+  try {
+    await ensureSodiumReady();
+    const sessionKey = wrapSymmetricKey(base64ToBytes(stored.sessionKeyB64));
+    const symmetricKeyring = createSymmetricKeyring(
+      base64ToBytes(stored.encryptedSymmetricKeyringB64),
+    ).unwrapSymmetric(sessionKey, {
+      associatedData: {
+        context: 'SessionUserSymmetricKeyring',
+        userId: stored.userId,
+      },
+    });
+
+    const model = selectedNoteModel.value;
+    const serialNote: Record<string, unknown> = {};
+
+    const anchor = model.anchor?.value;
+    if (anchor) serialNote.anchor = anchor;
+
+    serialNote.color = model.color?.value;
+    serialNote.width = model.width?.value;
+    serialNote.height = model.height?.value;
+    serialNote.head = {
+      enabled: model.head?.enabled?.value ?? true,
+      wrap: model.head?.wrap?.value ?? true,
+      height: model.head?.height?.value ?? { expanded: 'Auto', collapsed: 'Auto' },
+    };
+    serialNote.body = {
+      enabled: model.body?.enabled?.value ?? false,
+      wrap: model.body?.wrap?.value ?? true,
+      height: model.body?.height?.value ?? { expanded: 'Auto', collapsed: 'Auto' },
+    };
+    serialNote.container = {
+      enabled: model.container?.enabled?.value ?? false,
+      spatial: model.container?.spatial?.value ?? false,
+      horizontal: model.container?.horizontal?.value ?? false,
+      wrapChildren: model.container?.wrapChildren?.value ?? false,
+      stretchChildren: model.container?.stretchChildren?.value ?? true,
+      forceColorInheritance: model.container?.forceColorInheritance?.value ?? false,
+    };
+    serialNote.collapsing = {
+      enabled: model.collapsing?.enabled?.value ?? false,
+      collapsed: model.collapsing?.collapsed?.value ?? false,
+      localCollapsing: model.collapsing?.localCollapsing?.value ?? false,
+    };
+    serialNote.movable = model.movable?.value ?? true;
+    serialNote.resizable = model.resizable?.value ?? true;
+    serialNote.readOnly = model.readOnly?.value ?? false;
+    serialNote.zIndex = model.zIndex?.value ?? -1;
+    serialNote.link = model.link?.value ?? '';
+
+    const payload = pack({ notes: [serialNote] });
+    const encrypted = symmetricKeyring.encrypt(payload, {
+      associatedData: {
+        context: 'UserDefaultNote',
+        userId: stored.userId,
+      },
+    });
+
+    const res = await client.PATCH('/api/users/me/defaults/note', {
+      body: { userEncryptedDefaultNote: bytesToBase64(encrypted) },
+    });
+    if (res.response.status !== 204) {
+      pageOpsMessage.value = messageFromMaybeError(res.error) ?? 'Could not save default note style.';
+      return;
+    }
+    pageOpsMessage.value = 'Default note style saved.';
+  } catch (e) {
+    pageOpsMessage.value = e instanceof Error ? e.message : 'Could not save default note style.';
+  }
 }
 
 async function handleCreateNewPage() {
@@ -455,7 +544,57 @@ function handleCopyArrowLink() {
 }
 
 async function handleSetArrowAsDefault() {
-  pageOpsMessage.value = 'Set as default arrow style is not yet implemented in the new UI (requires serialization + encryption).';
+  pageOpsMessage.value = null;
+  if (!selectedArrowModel.value) return;
+
+  const stored = readSessionCrypto();
+  if (!stored) {
+    pageOpsMessage.value = 'Unlock session crypto (password login) to save default styles.';
+    return;
+  }
+
+  try {
+    await ensureSodiumReady();
+    const sessionKey = wrapSymmetricKey(base64ToBytes(stored.sessionKeyB64));
+    const symmetricKeyring = createSymmetricKeyring(
+      base64ToBytes(stored.encryptedSymmetricKeyringB64),
+    ).unwrapSymmetric(sessionKey, {
+      associatedData: {
+        context: 'SessionUserSymmetricKeyring',
+        userId: stored.userId,
+      },
+    });
+
+    const model = selectedArrowModel.value;
+    const serialArrow: Record<string, unknown> = {};
+
+    serialArrow.color = model.color?.value ?? 'grey';
+    serialArrow.sourceHead = model.sourceHead?.value ?? 'none';
+    serialArrow.targetHead = model.targetHead?.value ?? 'open';
+    serialArrow.bodyType = model.bodyType?.value ?? 'curve';
+    serialArrow.bodyStyle = model.bodyStyle?.value ?? 'solid';
+    serialArrow.readOnly = model.readOnly?.value ?? false;
+    serialArrow.interregional = model.interregional?.value ?? false;
+
+    const payload = pack(serialArrow);
+    const encrypted = symmetricKeyring.encrypt(payload, {
+      associatedData: {
+        context: 'UserDefaultArrow',
+        userId: stored.userId,
+      },
+    });
+
+    const res = await client.PATCH('/api/users/me/defaults/arrow', {
+      body: { userEncryptedDefaultArrow: bytesToBase64(encrypted) },
+    });
+    if (res.response.status !== 204) {
+      pageOpsMessage.value = messageFromMaybeError(res.error) ?? 'Could not save default arrow style.';
+      return;
+    }
+    pageOpsMessage.value = 'Default arrow style saved.';
+  } catch (e) {
+    pageOpsMessage.value = e instanceof Error ? e.message : 'Could not save default arrow style.';
+  }
 }
 
 onMounted(() => {
