@@ -41,11 +41,11 @@ describe("theme preference", () => {
     expect(localStorage.getItem(NEW_KEY)).toBe("dark");
   });
 
-  it("toggle removes dark and clears storage", () => {
+  it("toggle removes dark and persists light", () => {
     document.documentElement.classList.add("dark");
     localStorage.setItem(NEW_KEY, "dark");
     toggleTheme();
     expect(document.documentElement.classList.contains("dark")).toBe(false);
-    expect(localStorage.getItem(NEW_KEY)).toBeNull();
+    expect(localStorage.getItem(NEW_KEY)).toBe("light");
   });
 });
