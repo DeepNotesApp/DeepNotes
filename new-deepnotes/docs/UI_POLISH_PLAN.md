@@ -1,15 +1,19 @@
 # UI Polish Plan — Legacy vs New Comparison & Roadmap
 
 > **Source:** `docs/CURRENT_SITUATION.md` product feedback translated into a concrete engineering plan.  
-> **Status:** v5 — updated after editor-chrome evaluation (left sidebar tabs orientation, mini-mode removal, property cards audit).  
+> **Status:** v6 — updated after thorough editor-chrome evaluation (notification popup, fixed properties header, floating toolbar, selection count layout, left sidebar card panels).  
 > **Key audit findings:**
 > 1. **Tiptap extensions already exist** in both `note-editor-tiptap-extensions.ts` and `page-editor-tiptap-extensions.ts`. The missing piece is a **command dispatcher** that routes toolbar/shortcut actions to the correct note editor instance(s).
 > 2. ✅ **Note vertical resize Yjs schema migration** — `height` field added to `page-doc-schema.ts`, `note-model.ts`, with runtime backfill for persisted docs.
-> 3. **~20 high-impact keyboard shortcuts are missing** compared to legacy `use-keyboard-shortcuts.ts`. A toolbar without shortcut parity is a degraded experience.
+> 3. ✅ **Keyboard shortcut parity achieved** — ~20 missing shortcuts now implemented in `useSpatialKeyboard.ts` and `tiptap-keyboard-shortcuts.ts`.
 > 4. ❌ **Mini-mode removed** — The 48px collapsed strip was implemented but is disliked by the user. Sidebar should be **expanded or hidden only** (2-state).
-> 5. **Left sidebar tabs are vertical; should be horizontal** — `PageEditorLeftSidebar.vue` renders a 40px vertical strip on the left. User wants icon tabs **above** the content.
-> 6. **Raw `<select>` elements still present** — `NotePropertiesCard.vue` and `ArrowPropertiesCard.vue` use native `<select>` instead of Shadcn `Select` because the component is not installed in the project.
-> 7. **Mini-mode is severely stripped down vs legacy** — New mini-mode has only 3 actions (create-page stub, swap, copy-link) vs legacy's 10+ quick-toggles (head/body, collapsible, container, color, etc.). Removing mini-mode avoids this regression entirely.
+> 5. ✅ **Left sidebar tabs are now horizontal** — `PageEditorLeftSidebar.vue` flipped to `flex-col` with icon tabs above content.
+> 6. ✅ **Raw `<select>` elements replaced** — Shadcn `Select` installed; all native `<select>` in property cards replaced.
+> 7. ❌ **Notification button navigates to `/notifications` page** — Severe UX regression. Legacy opened an inline `q-menu` popup. No `NotificationPopup` component exists in new app.
+> 8. ❌ **Right sidebar "Page/Note/Arrow Properties" header scrolls away** — Rendered inside scrollable content area instead of as fixed sibling. Direct regression from legacy `q-toolbar`.
+> 9. ❌ **"N items selected" indicator is in normal document flow** — Shrinks canvas when visible. Legacy used `position: absolute`. Layout bug.
+> 10. ❌ **Canvas toolbar stuck to top as `border-b` flex item** — User feedback: should be floating with margins from left/top/right. Zoom buttons should be removed and replaced with legacy-style right-side floating buttons.
+> 11. ❌ **Left sidebar tab contents wrapped in Card panels with borders** — User feedback: should be plain content without panel borders, closer to legacy sections.
 
 ---
 
@@ -65,6 +69,7 @@
   1. **Remove** `PageToolbarActions` from the header entirely (they belong in the main canvas toolbar, see §4.1). This requires deleting the `toolbar-actions` slot usage in `PageEditorView.vue` (`@/apps/web/.../PageEditorView.vue:364-372`) that currently injects them into `MainToolbar.vue` via the `PageLayout` slot.
   2. **Remove** text links for Pages, Groups, Account.
   3. Keep **Notifications** as an **icon button** (bell icon) with the unread badge.
+     > **Critical regression found:** The new notification button uses `<RouterLink to="/notifications">` which navigates away from the editor to a full page. Legacy opened an inline `q-menu` popup (`NotificationsPopup.vue`) so the user could read and dismiss notifications without leaving the canvas. **Fix:** Replace the `RouterLink` with a `Popover` or `DropdownMenu` that renders `NotificationsView.vue`'s list inline. The `/notifications` route can remain for direct linking.
   4. Keep **theme toggle**.
   5. Replace Sign out text button with a **profile icon button** that opens a dropdown menu containing:
      - Settings → `/account`
@@ -72,7 +77,7 @@
   6. Resulting header layout:
      - Left: sidebar toggle + DeepNotes logo
      - Center: breadcrumb path (unchanged)
-     - Right: Notifications (icon) | ThemeSwitcher | Profile (icon dropdown) | sidebar toggle
+     - Right: Notifications (icon, inline popup) | ThemeSwitcher | Profile (icon dropdown) | sidebar toggle
 
 ---
 
@@ -88,8 +93,11 @@
   2. Implement a **horizontal icon tab bar** at the top of the sidebar content area:
      - Tabs (icon only): Path, Recent, Favorites, Selected
      - Clicking a tab shows only that section in the sidebar body below.
-     - Keep the section contents as Shadcn `Card` components but show one at a time.
-  3. **Structural note:** `PageLayout.vue` (`@/apps/web/.../PageLayout.vue:70-87`) renders the left sidebar as a single scrollable `<aside>` with no tab infrastructure. `PageEditorLeftSidebar.vue` (`@/apps/web/.../PageEditorLeftSidebar.vue:18-44`) currently uses a two-part `flex-row` layout (40px vertical strip + content pane). Flip this to `flex-col` with the tab strip as a horizontal row at the top (`flex-row` tabs, full width of sidebar, icon-only buttons with active state). The content pane remains scrollable below.
+  3. **Remove Card panel borders from tab contents.** User feedback: "The contents shouldn't be inside a panel with borders, they should just be in the tab. Make closer to legacy." Legacy sections (`CurrentPath`, `RecentPages`, `FavoritePages`, `SelectedPages`) were plain content with a header bar + list, separated by `q-separator`, not wrapped in bordered cards. Fix:
+     - In `PageEditorView.vue` Path tab: remove `<Card>`, `<CardHeader>`, `<CardContent>` wrappers; keep content as plain divs.
+     - In `RecentPagesCard.vue`, `FavoritePagesCard.vue`, `SelectedPagesCard.vue`: remove `<Card>` wrapper, `<CardHeader>`, `<CardContent>`; render title as plain text and list as plain nav/ul.
+     - Remove excessive `space-y-3` and card border styling from the left sidebar content pane.
+  4. **Structural note:** `PageLayout.vue` (`@/apps/web/.../PageLayout.vue:70-87`) renders the left sidebar as a single scrollable `<aside>` with no tab infrastructure. `PageEditorLeftSidebar.vue` (`@/apps/web/.../PageEditorLeftSidebar.vue:18-44`) currently uses a two-part `flex-row` layout (40px vertical strip + content pane). Flip this to `flex-col` with the tab strip as a horizontal row at the top (`flex-row` tabs, full width of sidebar, icon-only buttons with active state). The content pane remains scrollable below.
 
 ---
 
@@ -108,7 +116,9 @@
 - **Critical finding:** `note-editor-tiptap-extensions.ts` (`@/apps/web/.../note-editor-tiptap-extensions.ts:1-100`) and `page-editor-tiptap-extensions.ts` (`@/apps/web/.../page-editor-tiptap-extensions.ts:1-109`) **already import** `StarterKit`, `Underline`, `TextAlign`, `Subscript`, `Superscript`, `Link`, `Highlight`, `Image`, `TaskList`, `TaskItem`, `Table` (+ `TableRow`, `TableHeader`, `TableCell`), `CodeBlockLowlight`, `InlineMathTipTapExtension`, `MathBlockTipTapExtension`, `YoutubeVideoTipTapExtension`, `HorizontalRule`, `Placeholder`, and `Collaboration`. **The extensions are present; the missing piece is the command dispatcher.**
 - **Problem:** The rich text editing experience is completely broken without formatting tools. The floating right-side buttons are too many and crowd the canvas. A toolbar built without keyboard shortcuts will be a mouse-only degraded experience.
 - **Fix:**
-  1. **Build a new `CanvasToolbar.vue`** positioned directly above the canvas area (inside `PageLayout` main slot, top edge) or fixed at the top of the canvas.
+  1. **Build a new `CanvasToolbar.vue`** as a **floating toolbar** positioned with margins from the canvas edges, not stuck to the top as a `border-b` flex item.
+     > **User feedback:** "I don't like that the canvas toolbar is stuck to the top. It should be floating at a certain margin from the left, top and right."
+     > Position: `absolute top-2 left-14 right-14 z-20` inside `SpatialPageView.vue`, above the `SpatialWorldCanvas` but not in the flex column. This leaves room for sidebar toggle buttons on the left and the legacy-style right-side floating buttons on the right.
   2. Replicate legacy toolbar groups but with **Shadcn/Tailwind** styling and **Lucide icons** instead of MDI.
   3. **Command dispatcher (mandatory prerequisite):** Before wiring buttons, build a dispatcher that, given a command name (e.g. `toggleBold`), finds the active Tiptap editor(s) for the currently selected note(s) and calls `editor.chain().toggleBold().run()`. Legacy uses `page.selection.toggleMark('bold')` and `page.selection.format((chain) => chain.toggleBulletList())` which abstracts over single/multi-note selection. The new app needs an equivalent abstraction because `useSpatialKeyboard.ts` (`@/apps/web/.../useSpatialKeyboard.ts:1-263`) already iterates over selected notes and applies commands to each editor.
   4. Implement responsive overflow: if the toolbar doesn't fit, collapse overflow groups into a `…` dropdown menu.
@@ -116,14 +126,14 @@
      > - **4.1a** Command dispatcher + toolbar shell + overflow logic
      > - **4.1b** Basic & Formatting groups + shortcut wiring
      > - **4.1c** Objects, Tables, and Alignment groups + shortcut wiring
-  5. **Remove** the floating right-side buttons currently in `SpatialPageView.vue` and move them into the toolbar or eliminate:
-     - Zoom % label → keep, but make it smaller or move to bottom-left.
-     - Reset zoom / Fit to screen → move into a "View" group in the toolbar.
+  5. **Remove zoom buttons from the toolbar.** User feedback: "I don't like that it has the zoom buttons." Move Reset zoom, Fit to screen, and the Zoom % display to a **separate floating right-side button panel** that replicates legacy `DisplayRightBtns.vue`:
+     - **New component:** `FloatingCameraButtons.vue` — `position: absolute; right: 12px; top: 55px;` (matching legacy) with vertical stack of: Reset zoom, Fit to screen, Zoom % label, Undo, Redo.
+     - Remove the current "View" group (ZoomIn, ZoomOut, FitToScreen) from `CanvasToolbar.vue`.
+  6. **Remove** the other floating buttons currently in `SpatialPageView.vue`:
      - Back/Forward → remove from canvas (browser nav is sufficient).
      - Find/Replace → keep as `Ctrl+F` shortcut, optionally add a toolbar button.
      - Screenshot → keep as `Alt+Shift+S` shortcut, optionally add a toolbar button.
-     - Undo/Redo → move into Basic group in the toolbar.
-  6. Keep the **Note / Arrow insert** buttons in the toolbar (they are currently in `PageToolbarActions` which should be removed from header).
+  7. Keep the **Note / Arrow insert** buttons in the toolbar (they are currently in `PageToolbarActions` which should be removed from header).
 
 ### 4.2 Fix note interaction bugs
 
@@ -161,6 +171,23 @@
   - Expand `NoteContextMenu` to include: paste, duplicate, select all, cut, copy, delete, bring to front, send to back.
   - Add a `TableContextMenu` for table operations (insert/remove rows/columns, merge/split cells) to match legacy.
 
+### 4.4 Floating overlay elements
+
+- **Legacy:** `DisplayBottomRight.vue` (`@/apps/client/.../DisplayBottomRight.vue:1-30`) renders the "N items selected" indicator and read-only status with `position: absolute; bottom: 12px; right: 14px; pointer-events: none;`. The text floats over the canvas without affecting layout.
+- **New:** `SpatialPageView.vue:458-464` renders the selection count as a **block element in normal document flow** inside the flex column:
+  ```vue
+  <div v-if="selection.selected.value.length > 0"
+       class="bg-card border-border pointer-events-auto rounded-md border px-2 py-1 text-xs shadow-sm">
+    {{ selection.selected.value.length }} item{{ ... }} selected
+  </div>
+  ```
+  This div sits between `SpatialWorldCanvas` and the context menus. When it appears, it **shrinks the canvas height** by its own height, shifting the entire main section upward.
+- **Problem:** Layout-breaking bug. User explicitly said: "The 'N items selected' thing is horrible. It shouldn't shift the main section up."
+- **Fix:**
+  1. Move the selection count into the `floating-overlay` slot of `PageLayout.vue` (`@/apps/web/.../PageLayout.vue:93-99`), which is already designed for this purpose (`pointer-events-none absolute inset-0`).
+  2. Or, make it `absolute bottom-3 right-3 pointer-events-none` inside `SpatialPageView.vue`.
+  3. Also ensure `CollabAvatars` uses the overlay slot instead of being rendered in normal flow.
+
 ---
 
 ## 5. Web App — Right Sidebar
@@ -179,7 +206,12 @@
 - **Problem:** User says it's "very ugly" and missing "Create new page" which is central. The sidebar was both visually inconsistent (raw `<select>`) and functionally incomplete. Most controls are now present; remaining gaps are anchor numeric inputs, explicit width/height comboboxes, ColorPalette component, note export, and full page-creation / set-as-default crypto integration.
 - **Fix:**
   1. **Remove mini-mode entirely.** The right sidebar should be a clean 2-state toggle: **expanded (`300px`) ↔ hidden** (same as the left sidebar). Delete the `right-sidebar-mini` slot from `PageEditorView.vue`, the `rightMiniMode` ref and conditional rendering from `PageLayout.vue`, and any mini-mode-only logic in the property cards.
-  2. **Add a header bar** to the right sidebar showing the active element type ("Note Properties", "Arrow Properties", or "Page Properties"). Legacy had a `q-toolbar` at the top of `RightSidebar.vue` that served this purpose. The new sidebar currently shows anonymous cards.
+  2. **Add a fixed header bar** to the right sidebar showing the active element type ("Note Properties", "Arrow Properties", or "Page Properties"). Legacy had a `q-toolbar` at the top of `RightSidebar.vue` that served this purpose. The new sidebar currently shows anonymous cards.
+     > **Critical regression found:** The header in `PageEditorView.vue:529-533` is rendered as a plain `<div>` **inside** the scrollable content area (`PageLayout.vue:102-111` `<aside class="... overflow-y-auto">`). When the user scrolls through long properties, the header scrolls away. Legacy `RightSidebar.vue:19-53` had the `q-toolbar` as a **sibling** of the scrollable content div (`<div style="overflow-y: auto; height: 0; flex: 1">`), ensuring it stayed fixed while content scrolled.
+     > **Fix:** Restructure `PageLayout.vue` `<aside>` to use `flex-col` with:
+     >   - A fixed-height header strip containing the `border-b pb-2 ...` div.
+     >   - A `flex-1 overflow-y-auto` content pane below.
+     > Move the header from `PageEditorView.vue:529-533` into `PageLayout.vue`'s `<aside>` structure.
   3. **Visual density:** Reduce excessive `space-y-3` gaps between cards. Use tighter spacing (`space-y-2` or `gap-3` on a single wrapper). Remove card borders inside the sidebar or use `variant="ghost"` cards.
   4. **Add missing controls to `NotePropertiesCard`:**
      - ✅ Link URL input — exists.
@@ -306,7 +338,12 @@ The following are already implemented in `useSpatialKeyboard.ts` and should be p
 | **P0** | 7. Keyboard shortcut parity | `useSpatialKeyboard.ts`, command dispatcher | **Large** | ~22 missing shortcuts. Must be wired before or alongside the toolbar. |
 | **P0** | 4.1 Restore main toolbar | New `CanvasToolbar.vue`, command dispatcher, `PageLayout.vue`, `SpatialPageView.vue` (remove floating buttons) | **Extra-Large** | Split into 4.1a (dispatcher), 4.1b (basic/formatting), 4.1c (objects/tables/alignment). Tiptap extensions already exist. |
 | **P1** | 2.1 Simplify header | `MainToolbar.vue`, `PageEditorView.vue` (remove slot usage) | **Small** | Delete slot usage in `PageEditorView.vue:364-372`. |
+| **P1** | 2.1b Notification inline popup | `MainToolbar.vue`, new `NotificationsPopover.vue` | **Small** | Replace `RouterLink` with Radix `Popover`/`DropdownMenu`. No popup component exists. |
 | **P1** | 3.1 Left sidebar tabs (horizontal) | `PageEditorLeftSidebar.vue` | **Small** | Flip `flex-row` → `flex-col`; tab strip becomes horizontal row at top. Content pane scrolls below. |
+| **P1** | 3.1b Left sidebar: remove Card panels | `PageEditorView.vue`, `RecentPagesCard.vue`, `FavoritePagesCard.vue`, `SelectedPagesCard.vue` | **Small** | Remove `<Card>` wrappers; render plain content like legacy sections. |
+| **P1** | 4.1e Canvas toolbar: floating + legacy camera buttons | `CanvasToolbar.vue`, `SpatialPageView.vue`, new `FloatingCameraButtons.vue` | **Small–Medium** | Make toolbar `absolute` with margins; remove View group; create right-side floating buttons (Reset zoom, Fit, Zoom%, Undo, Redo). |
+| **P1** | 4.4 Floating overlay: selection count | `SpatialPageView.vue`, `PageLayout.vue` | **Tiny** | Move indicator to `absolute bottom-3 right-3 pointer-events-none` or into `floating-overlay` slot. |
+| **P1** | 5.1c Right sidebar: fixed properties header | `PageLayout.vue`, `PageEditorView.vue` | **Small** | Restructure `<aside>` so header is fixed-height sibling above scrollable content pane. |
 | **P1** | 5.1 & 5.2 Right sidebar parity + create page | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue`, `PageLayout.vue`, `PageEditorView.vue` | **Medium** | Remove mini-mode (2-state only), add header bar, styled selects, anchor numeric inputs, width/height combos, ColorPalette, note export, full page-creation crypto. | |
 | **P1** | 4.3 Context menu expansion | `CanvasContextMenu.vue`, `NoteContextMenu.vue`, `SpatialPageView.vue` | **Small** | Add duplicate, select all, table context menu. |
 | **P2** | 6.1 Account page restructure | `AccountView.vue`, new sub-components/routes, router config | **Medium** | Verify/add `/account/general`, `/account/billing`, `/account/security` routes. |
@@ -315,7 +352,7 @@ The following are already implemented in `useSpatialKeyboard.ts` and should be p
 | **P2** | 1.3 Marketing scroll reset | `marketing/src/main.ts` | **Tiny** | Single `scrollBehavior` option. |
 
 ### Re-prioritization suggestion
-Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre-P0 "quick wins" batch. They are Tiny/Small, fix immediate user-facing polish issues, and carry zero risk.
+Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre-P0 "quick wins" batch. They are Tiny/Small, fix immediate user-facing polish issues, and carry zero risk. The new P1 items (§2.1b notification popup, §3.1b left sidebar cards, §4.1e floating toolbar, §4.4 selection count, §5.1c fixed header) are all Small–Medium effort and should be batched together as a "chrome polish" sprint before tackling remaining right sidebar controls.
 
 ---
 
@@ -345,7 +382,8 @@ Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre
 | `PageEditorView.vue` | `MainContent/DisplayPage/DisplayPage.vue` + sidebar sections | Fragments page properties into multiple cards. |
 | `DisplayNote.vue` | `DisplayWorld/DisplayNote/DisplayNote.vue` | Missing vertical resize, edit-on-frame, handle visibility. |
 | `DisplayArrow.vue` | `DisplayWorld/DisplayArrow/DisplayArrow.vue` | — |
-| `SpatialPageView.vue` | `MainContent/MainContent.vue` + `DisplayUI/DisplayUI.vue` | Floating buttons grew from 5 to 9 because toolbar vanished. |
+| `SpatialPageView.vue` | `MainContent/MainContent.vue` + `DisplayUI/DisplayUI.vue` | Toolbar is stuck to top as `border-b` flex item; should be floating. Right-side floating buttons need to be split into legacy-style `FloatingCameraButtons.vue`. Selection count is in normal flow instead of absolute positioned. |
+| `FloatingCameraButtons.vue` | `DisplayUI/DisplayRightBtns.vue` | Not yet created. Should replicate legacy: Reset zoom, Fit to screen, Zoom %, Undo, Redo as vertical stack at `right: 12px; top: 55px`. |
 | `NotePropertiesCard.vue` | `RightSidebar/NoteProperties/NoteProperties.vue` | Most features added (swap, timestamps, copy link, local collapsing, container props, movable/resizable). Remaining: anchor numeric inputs, explicit width/height combos, ColorPalette component, note export. |
 | `ArrowPropertiesCard.vue` | `RightSidebar/ArrowProperties.vue` | Anchor selects, head selects, swap, timestamps, copy link added. Remaining: ColorPalette, body type/style Shadcn Select. |
 | `PagePropertiesCard.vue` | `RightSidebar/PageProperties/PageProperties.vue` | Missing group settings, move page, delete, version history. Snapshots/management/backlinks now consolidated (conditionally rendered when no note/arrow selected). |
@@ -358,4 +396,4 @@ Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre
 
 ---
 
-*End of plan — v5*
+*End of plan — v6*
