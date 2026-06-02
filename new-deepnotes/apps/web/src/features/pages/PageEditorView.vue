@@ -321,6 +321,56 @@ async function updatePageTitle(type: "relative" | "absolute", value: string) {
   }
 }
 
+function handleCopyNoteLink() {
+  if (!selectedNoteId.value) return;
+  const url = `${window.location.origin}/pages/${pageId.value}?elem=${selectedNoteId.value}`;
+  navigator.clipboard.writeText(url);
+}
+
+function handleSwapHeadBody() {
+  if (!selectedNoteModel.value) return;
+  const headFrag = selectedNoteModel.value.head?.value;
+  const bodyFrag = selectedNoteModel.value.body?.value;
+  if (!headFrag || !bodyFrag) return;
+  // Swap Yjs XmlFragments by exchanging their internal content
+  // This is a shallow swap: exchange the `value` references in the parent map
+  const noteMap = selectedNoteModel.value.rawMap;
+  if (!noteMap) return;
+  const headMap = noteMap.get('head') as any;
+  const bodyMap = noteMap.get('body') as any;
+  if (!headMap || !bodyMap) return;
+  const hVal = headMap.get('value');
+  const bVal = bodyMap.get('value');
+  headMap.set('value', bVal);
+  bodyMap.set('value', hVal);
+}
+
+async function handleSetNoteAsDefault() {
+  pageOpsMessage.value = 'Set as default note style is not yet implemented in the new UI (requires serialization + encryption).';
+}
+
+async function handleCreateNewPage() {
+  pageOpsMessage.value = 'Create new page is not yet implemented in the new UI (requires page-creation crypto: encrypted titles + keyring).';
+}
+
+function handleSwapArrowheads() {
+  if (!selectedArrowModel.value) return;
+  const s = selectedArrowModel.value.sourceHead.value;
+  const t = selectedArrowModel.value.targetHead.value;
+  selectedArrowModel.value.sourceHead.value = t;
+  selectedArrowModel.value.targetHead.value = s;
+}
+
+function handleCopyArrowLink() {
+  if (!selectedArrowId.value) return;
+  const url = `${window.location.origin}/pages/${pageId.value}?elem=${selectedArrowId.value}`;
+  navigator.clipboard.writeText(url);
+}
+
+async function handleSetArrowAsDefault() {
+  pageOpsMessage.value = 'Set as default arrow style is not yet implemented in the new UI (requires serialization + encryption).';
+}
+
 onMounted(() => {
   if (!isAuthenticated.value) {
     void router.replace({
@@ -517,6 +567,12 @@ onMounted(() => {
           @update:container-wrap-children="selectedNoteModel.container.wrapChildren.value = $event"
           @update:container-stretch-children="selectedNoteModel.container.stretchChildren.value = $event"
           @update:container-force-color-inheritance="selectedNoteModel.container.forceColorInheritance.value = $event"
+          @update:local-collapsing="selectedNoteModel.collapsing.localCollapsing.value = $event"
+          @update:locally-collapsed="selectedNoteModel.collapsing.locallyCollapsed.value = $event"
+          @create-new-page="handleCreateNewPage"
+          @swap-head-body="handleSwapHeadBody"
+          @copy-link="handleCopyNoteLink"
+          @set-as-default="handleSetNoteAsDefault"
         />
 
         <ArrowPropertiesCard
@@ -531,32 +587,39 @@ onMounted(() => {
           @update:color="selectedArrowModel.color.value = $event"
           @update:color-inherit="selectedArrowModel.color.inherit.value = $event"
           @update:read-only="selectedArrowModel.readOnly.value = $event"
+          @update:source-anchor="selectedArrowModel.sourceAnchor.value = $event === 'null' ? null : JSON.parse($event)"
+          @update:target-anchor="selectedArrowModel.targetAnchor.value = $event === 'null' ? null : JSON.parse($event)"
+          @swap-arrowheads="handleSwapArrowheads"
+          @copy-link="handleCopyArrowLink"
+          @set-as-default="handleSetArrowAsDefault"
         />
 
-        <PageEditorSnapshotsCard
-          :snapshot-loading="snapshotsLoading"
-          :snapshots="snapshotList"
-          :collab-loading="collabLoading"
-          :load-error="loadError"
-          :crypto-error="cryptoError"
-          @restore="restoreFromSnapshot($event)"
-          @remove="deleteSnapshot($event)"
-          @save-manual="saveSnapshotManual()"
-        />
+        <template v-if="!selectedNoteId && !selectedArrowId">
+          <PageEditorSnapshotsCard
+            :snapshot-loading="snapshotsLoading"
+            :snapshots="snapshotList"
+            :collab-loading="collabLoading"
+            :load-error="loadError"
+            :crypto-error="cryptoError"
+            @restore="restoreFromSnapshot($event)"
+            @remove="deleteSnapshot($event)"
+            @save-manual="saveSnapshotManual()"
+          />
 
-        <PageEditorManagementCard
-          v-model:move-dest-group-id="moveDestGroupId"
-          :collab-loading="collabLoading"
-          :load-error="loadError"
-          :crypto-error="cryptoError"
-          :collab-group-id="collabGroupId"
-          @move-to-group="management.movePageToOtherGroup()"
-          @set-as-main-page="management.setAsGroupMainPage()"
-          @soft-delete="management.softDeleteThisPage()"
-          @purge="management.purgeThisPagePermanently()"
-        />
+          <PageEditorManagementCard
+            v-model:move-dest-group-id="moveDestGroupId"
+            :collab-loading="collabLoading"
+            :load-error="loadError"
+            :crypto-error="cryptoError"
+            :collab-group-id="collabGroupId"
+            @move-to-group="management.movePageToOtherGroup()"
+            @set-as-main-page="management.setAsGroupMainPage()"
+            @soft-delete="management.softDeleteThisPage()"
+            @purge="management.purgeThisPagePermanently()"
+          />
 
-        <PageEditorBacklinksCard :page-id="pageId" />
+          <PageEditorBacklinksCard :page-id="pageId" />
+        </template>
       </div>
     </template>
 

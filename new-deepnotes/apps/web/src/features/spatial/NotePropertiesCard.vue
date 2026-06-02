@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ExternalLink, Copy, Palette } from 'lucide-vue-next'
+import { ExternalLink, Copy, Palette, ArrowUpDown, FilePlus, Save } from 'lucide-vue-next'
 
 const props = defineProps<{
   noteId: string | null
@@ -39,6 +39,12 @@ const emit = defineEmits<{
   'update:container-wrap-children': [value: boolean]
   'update:container-stretch-children': [value: boolean]
   'update:container-force-color-inheritance': [value: boolean]
+  'update:local-collapsing': [value: boolean]
+  'update:locally-collapsed': [value: boolean]
+  'create-new-page': []
+  'swap-head-body': []
+  'copy-link': []
+  'set-as-default': []
 }>()
 
 const link = computed(() => props.noteModel?.link?.value ?? '')
@@ -65,6 +71,16 @@ const containerStretchChildren = computed(() => props.noteModel?.container?.stre
 const containerForceColorInheritance = computed(() => props.noteModel?.container?.forceColorInheritance?.value ?? false)
 const headWrap = computed(() => props.noteModel?.head?.wrap?.value ?? true)
 const bodyWrap = computed(() => props.noteModel?.body?.wrap?.value ?? true)
+const localCollapsing = computed(() => props.noteModel?.collapsing?.localCollapsing?.value ?? false)
+const locallyCollapsed = computed(() => props.noteModel?.collapsing?.locallyCollapsed?.value ?? false)
+const createdAt = computed(() => props.noteModel?.createdAt?.value ?? null)
+const editedAt = computed(() => props.noteModel?.editedAt?.value ?? null)
+const movedAt = computed(() => props.noteModel?.movedAt?.value ?? null)
+
+function formatTimestamp(ts: number | null): string {
+  if (ts == null) return ''
+  return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(ts)
+}
 
 const colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
@@ -109,6 +125,18 @@ function handleColorSelect(colorIndex: number) {
         </div>
       </div>
 
+      <!-- Create new page -->
+      <Button
+        variant="default"
+        size="sm"
+        class="w-full"
+        :disabled="readOnly"
+        @click="emit('create-new-page')"
+      >
+        <FilePlus class="h-3 w-3 mr-2" />
+        Create new page
+      </Button>
+
       <!-- Head/Body -->
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
@@ -128,6 +156,18 @@ function handleColorSelect(colorIndex: number) {
           <Label>Body</Label>
         </div>
       </div>
+
+      <!-- Swap head and body -->
+      <Button
+        variant="outline"
+        size="sm"
+        class="w-full"
+        :disabled="readOnly"
+        @click="emit('swap-head-body')"
+      >
+        <ArrowUpDown class="h-3 w-3 mr-2" />
+        Swap head and body
+      </Button>
 
       <!-- Wrap -->
       <div class="flex items-center gap-4">
@@ -262,6 +302,42 @@ function handleColorSelect(colorIndex: number) {
         </div>
       </div>
 
+      <!-- Copy link / Set as default -->
+      <div class="space-y-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="w-full"
+          @click="emit('copy-link')"
+        >
+          <Copy class="h-3 w-3 mr-2" />
+          Copy link to this note
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          class="w-full"
+          :disabled="readOnly"
+          @click="emit('set-as-default')"
+        >
+          <Save class="h-3 w-3 mr-2" />
+          Set as default note style
+        </Button>
+      </div>
+
+      <!-- Timestamps -->
+      <div v-if="createdAt || editedAt || movedAt" class="space-y-1 text-[11px] text-muted-foreground">
+        <div v-if="createdAt">
+          <span class="font-medium text-foreground">Created:</span> {{ formatTimestamp(createdAt) }}
+        </div>
+        <div v-if="editedAt">
+          <span class="font-medium text-foreground">Edited:</span> {{ formatTimestamp(editedAt) }}
+        </div>
+        <div v-if="movedAt">
+          <span class="font-medium text-foreground">Moved:</span> {{ formatTimestamp(movedAt) }}
+        </div>
+      </div>
+
       <!-- Collapsing -->
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -279,6 +355,22 @@ function handleColorSelect(colorIndex: number) {
             @update:model-value="emit('update:collapsed', $event as boolean)"
           />
           <Label>Collapsed</Label>
+        </div>
+        <div class="flex items-center gap-2 pl-6">
+          <Switch
+            :model-value="localCollapsing"
+            :disabled="readOnly || !collapsible"
+            @update:model-value="emit('update:local-collapsing', $event as boolean)"
+          />
+          <Label>Local collapsing</Label>
+        </div>
+        <div class="flex items-center gap-2 pl-6">
+          <Switch
+            :model-value="locallyCollapsed"
+            :disabled="readOnly || !collapsible || !localCollapsing"
+            @update:model-value="emit('update:locally-collapsed', $event as boolean)"
+          />
+          <Label>Locally collapsed</Label>
         </div>
       </div>
 
