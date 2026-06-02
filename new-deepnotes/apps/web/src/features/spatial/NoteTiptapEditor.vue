@@ -41,11 +41,15 @@ const { editor } = useNoteEditor({
 }
 
 :deep(.note-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before) {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(0, 0, 0, 0.4);
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.dark :deep(.note-tiptap-editor .ProseMirror p.is-editor-empty:first-child::before) {
+  color: rgba(255, 255, 255, 0.45);
 }
 
 :deep(.note-tiptap-editor .ProseMirror table) {
@@ -59,16 +63,25 @@ const { editor } = useNoteEditor({
 :deep(.note-tiptap-editor .ProseMirror td),
 :deep(.note-tiptap-editor .ProseMirror th) {
   min-width: 1em;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   padding: 0.2rem 0.4rem;
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
 }
 
+.dark :deep(.note-tiptap-editor .ProseMirror td),
+.dark :deep(.note-tiptap-editor .ProseMirror th) {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 :deep(.note-tiptap-editor .ProseMirror th) {
   font-weight: 600;
   text-align: left;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.dark :deep(.note-tiptap-editor .ProseMirror th) {
   background: rgba(255, 255, 255, 0.12);
 }
 
@@ -94,6 +107,10 @@ const { editor } = useNoteEditor({
   font-family: ui-monospace, monospace;
   font-size: 0.75rem;
   overflow-x: auto;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.dark :deep(.note-tiptap-editor .ProseMirror pre) {
   background: rgba(0, 0, 0, 0.35);
 }
 

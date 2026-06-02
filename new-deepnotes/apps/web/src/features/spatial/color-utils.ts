@@ -1,6 +1,9 @@
 /**
  * DeepNotes legacy color palette.
  * Matches exactly the colors from apps/client/src/code/pages/colors.ts
+ *
+ * Light-mode variants are generated so notes remain readable on light
+ * canvas backgrounds while preserving the same design language.
  */
 
 export type ColorName =
@@ -17,6 +20,7 @@ export type ColorName =
   | 'purple'
   | 'pink'
 
+/** Legacy dark-mode note background colors. */
 export const noteColorMap: Record<ColorName, string> = {
   grey: '#2F2F2F',
   red: '#6C1313',
@@ -32,6 +36,23 @@ export const noteColorMap: Record<ColorName, string> = {
   pink: '#61116B',
 }
 
+/** Light-mode note background colors (pastel variants). */
+export const lightNoteColorMap: Record<ColorName, string> = {
+  grey: '#F0F0F0',
+  red: '#FFE0E0',
+  brown: '#F5E6D6',
+  orange: '#FFE8D0',
+  yellow: '#FFF8D0',
+  green: '#D8F5DE',
+  teal: '#D0F5F0',
+  sky: '#D0F0FF',
+  blue: '#D8E0FF',
+  violet: '#E8D8FF',
+  purple: '#EDD8FF',
+  pink: '#FFD8FF',
+}
+
+/** Legacy arrow colors (work well on both light and dark canvas). */
 export const arrowColorMap: Record<ColorName, string> = {
   grey: '#858585',
   red: '#B80909',
@@ -91,12 +112,32 @@ export function lightenColor(hex: string, ratio: number): string {
   return rgbToHex(lightened.r, lightened.g, lightened.b);
 }
 
-export function resolveNoteColor(colorValue: string | undefined): string {
-  return noteColorMap[colorValue as ColorName] ?? colorValue ?? noteColorMap.grey
+export function resolveNoteColor(
+  colorValue: string | undefined,
+  isDark = true,
+): string {
+  const map = isDark ? noteColorMap : lightNoteColorMap
+  return map[colorValue as ColorName] ?? colorValue ?? map.grey
 }
 
 export function resolveArrowColor(colorValue: string | undefined): string {
   return arrowColorMap[colorValue as ColorName] ?? colorValue ?? arrowColorMap.grey
+}
+
+/** Note text color: white in dark mode, near-black in light mode. */
+export function noteTextColor(isDark = true): string {
+  return isDark ? '#ffffff' : '#1a1a1a'
+}
+
+/** Note border color for the given theme. */
+export function noteBorderColor(isDark = true, selected = false): string {
+  if (selected) return '#2196f3'
+  return isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)'
+}
+
+/** Divider color for the given theme. */
+export function noteDividerColor(isDark = true): string {
+  return isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.15)'
 }
 
 export function resolveNoteColorVariants(colorValue: string | undefined): ColorVariants {

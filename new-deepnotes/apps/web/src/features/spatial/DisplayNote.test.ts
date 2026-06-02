@@ -137,7 +137,7 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, parentColor: "#6C1313" },
     });
 
-    const el = wrapper.find('[data-testid="display-note"]');
+    const el = wrapper.find('[data-testid="display-note"] > div');
     const style = el.attributes("style");
     expect(style).toContain("background-color: #6C1313");
   });
@@ -150,9 +150,10 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
     });
 
-    const el = wrapper.find('[data-testid="display-note"]');
+    const el = wrapper.find('[data-testid="display-note"] > div');
     const style = el.attributes("style");
-    expect(style).toContain("background-color: #102C7A");
+    // Light mode blue note color
+    expect(style).toContain("background-color: #D8E0FF");
   });
 
   function mockPointerCapture(el: { element: Element }) {
@@ -254,8 +255,11 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
-    expect(handles.length).toBe(8);
+    // 4 resize bars + 4 corner resize handles (filter by cursor style)
+    const resizeZones = wrapper.findAll('[data-testid="display-note"] > div').filter((d) =>
+      d.attributes('style')?.includes('cursor'),
+    );
+    expect(resizeZones.length).toBe(8);
   });
 
   it("hides resize handles when not selected", () => {
@@ -266,8 +270,10 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: false },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
-    expect(handles.length).toBe(0);
+    const resizeZones = wrapper.findAll('[data-testid="display-note"] > div').filter((d) =>
+      d.attributes('style')?.includes('cursor'),
+    );
+    expect(resizeZones.length).toBe(0);
   });
 
   it("hides resize handles when not resizable", () => {
@@ -278,8 +284,10 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
-    expect(handles.length).toBe(0);
+    const resizeZones = wrapper.findAll('[data-testid="display-note"] > div').filter((d) =>
+      d.attributes('style')?.includes('cursor'),
+    );
+    expect(resizeZones.length).toBe(0);
   });
 
   it("hides resize handles when readOnly", () => {
@@ -290,8 +298,10 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
-    expect(handles.length).toBe(0);
+    const resizeZones = wrapper.findAll('[data-testid="display-note"] > div').filter((d) =>
+      d.attributes('style')?.includes('cursor'),
+    );
+    expect(resizeZones.length).toBe(0);
   });
 
   it("renders 4 arrow handles when selected and not readOnly", () => {
@@ -302,7 +312,7 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    const handles = wrapper.findAll('[data-testid="display-note"] > svg.note-arrow-handle');
     expect(handles.length).toBe(4);
   });
 
@@ -314,7 +324,7 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: false },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    const handles = wrapper.findAll('[data-testid="display-note"] > svg.note-arrow-handle');
     expect(handles.length).toBe(0);
   });
 
@@ -326,7 +336,7 @@ describe("DisplayNote", () => {
       props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
-    const handles = wrapper.findAll('[data-testid="display-note"] > div.cursor-crosshair');
+    const handles = wrapper.findAll('[data-testid="display-note"] > svg.note-arrow-handle');
     expect(handles.length).toBe(0);
   });
 

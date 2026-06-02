@@ -5,7 +5,13 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { CONTAINER_CONTENT_OFFSET_Y } from "./spatial-constants";
-import { resolveNoteColor } from "./color-utils";
+import {
+  resolveNoteColor,
+  noteTextColor,
+  noteBorderColor,
+  noteDividerColor,
+} from "./color-utils";
+import { isDark } from "@/features/theme/useThemePreference";
 
 const props = defineProps<{
   id: string;
@@ -63,10 +69,14 @@ const noteColor = computed(() => {
   const c = props.model.color.value;
   const baseColor = c.inherit ? props.parentColor : null;
   if (baseColor) {
-    return resolveNoteColor(baseColor);
+    return resolveNoteColor(baseColor, isDark.value);
   }
-  return resolveNoteColor(c.value ?? "grey");
+  return resolveNoteColor(c.value ?? "grey", isDark.value);
 });
+
+const textColor = computed(() => noteTextColor(isDark.value));
+const borderColor = computed(() => noteBorderColor(isDark.value, props.selected));
+const dividerColor = computed(() => noteDividerColor(isDark.value));
 
 const headFrag = computed(() => props.model.head.value.value);
 const bodyFrag = computed(() => props.model.body.value.value);
@@ -86,9 +96,14 @@ const transform = computed(() => {
   if (h !== "Auto" && h !== "Minimum") {
     style.height = `${h}px`;
   }
-  style.backgroundColor = noteColor.value;
   return style;
 });
+
+const contentStyle = computed(() => ({
+  backgroundColor: noteColor.value,
+  borderColor: borderColor.value,
+  color: textColor.value,
+}));
 
 const containerSpatial = computed(() => props.model.container.spatial.value);
 const containerHorizontal = computed(() => props.model.container.horizontal.value);
@@ -97,18 +112,38 @@ const containerStretchChildren = computed(() => props.model.container.stretchChi
 
 const isDragging = ref(false);
 
+const topSection = computed<"head" | "body" | "container">(() => {
+  if (props.model.head.enabled.value) return "head";
+  if (props.model.body.enabled.value) return "body";
+  return "container";
+});
+
+const bottomSection = computed<"head" | "body" | "container">(() => {
+  if (props.model.collapsing.collapsed.value) return topSection.value;
+  if (props.model.container.enabled.value) return "container";
+  if (props.model.body.enabled.value) return "body";
+  return "head";
+});
+
+const numEnabledSections = computed(() => {
+  let n = 0;
+  if (props.model.head.enabled.value) n++;
+  if (props.model.body.enabled.value) n++;
+  if (props.model.container.enabled.value) n++;
+  return n;
+});
+
 const frameClasses = computed(() => {
   const ro = props.model.readOnly.value;
   const movable = props.model.movable.value && !ro;
   return [
-    "pointer-events-auto select-none transition-opacity text-white",
+    "pointer-events-auto select-none transition-opacity",
     props.isFlexChild ? "relative flex-none" : "absolute top-0 left-0",
     ro ? "cursor-not-allowed" : "",
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
-    props.selected ? "ring-2 ring-[#2196f3]" : "",
     props.isDropTarget ? "ring-2 ring-accent ring-offset-2" : "",
-    ro ? "ring-1 ring-destructive/30" : "",
+    ro && !props.selected ? "ring-1 ring-destructive/30" : "",
   ];
 });
 
@@ -282,8 +317,7 @@ function onContextMenu(e: MouseEvent) {
     data-testid="display-note"
     :data-note-id="id"
     :class="frameClasses"
-    :style="[transform, { borderRadius: '7px' }]"
-    class="overflow-hidden border border-black/15 dark:border-white/30"
+    :style="transform"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
@@ -291,82 +325,140 @@ function onContextMenu(e: MouseEvent) {
     @dblclick="emit('edit-start')"
     @contextmenu="onContextMenu"
   >
-    <div class="flex items-center gap-1 border-b border-white/10 dark:border-white/10 px-2 py-1 text-xs font-medium">
-      <button
-        v-if="model.collapsing.enabled.value && !model.readOnly.value"
-        class="text-white/70 hover:text-white focus:outline-none"
-        @pointerdown.stop="toggleCollapsed"
+    <!-- Note content wrapper: background, border, radius -->
+    <div
+      class="relative overflow-hidden"
+      :style="[contentStyle, { borderRadius: '7px', borderWidth: '1px', borderStyle: 'solid' }]"
+    >
+      <!-- head section -->
+      <div
+        v-if="model.head.enabled.value && !model.collapsing.collapsed.value"
+        class="flex"
+        style="min-height: 36.45px"
       >
-        <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-3 w-3" />
-        <ChevronRight v-else class="h-3 w-3" />
-      </button>
-      <span v-if="!model.head.enabled.value" class="text-white/50 flex-1 truncate">
-        Note
-      </span>
-      <span v-else class="flex-1" />
+        <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
+          <NoteTiptapEditor
+            :fragment="headFrag!"
+            :editable="!model.readOnly.value"
+            placeholder="Head…"
+            :note-id="id"
+            section="head"
+          />
+        </div>
+        <button
+          v-if="model.collapsing.enabled.value && topSection === 'head' && !model.readOnly.value"
+          class="flex items-center justify-center focus:outline-none"
+          style="width: 32px; min-height: 36.45px"
+          :style="{ color: textColor }"
+          @pointerdown.stop="toggleCollapsed"
+        >
+          <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-4 w-4" />
+          <ChevronRight v-else class="h-4 w-4" />
+        </button>
+      </div>
 
-      <!-- Link icon -->
+      <!-- divider head -> body -->
+      <div
+        v-if="
+          !model.collapsing.collapsed.value &&
+          model.head.enabled.value &&
+          (model.body.enabled.value || model.container.enabled.value)
+        "
+        :style="{ height: '1px', backgroundColor: dividerColor }"
+      />
+
+      <!-- body section -->
+      <div
+        v-if="model.body.enabled.value && !model.collapsing.collapsed.value"
+        class="flex"
+        style="min-height: 36.45px"
+      >
+        <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
+          <NoteTiptapEditor
+            :fragment="bodyFrag!"
+            :editable="!model.readOnly.value"
+            placeholder="Body…"
+            :note-id="id"
+            section="body"
+          />
+        </div>
+        <button
+          v-if="model.collapsing.enabled.value && topSection === 'body' && !model.readOnly.value"
+          class="flex items-center justify-center focus:outline-none"
+          style="width: 32px; min-height: 36.45px"
+          :style="{ color: textColor }"
+          @pointerdown.stop="toggleCollapsed"
+        >
+          <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-4 w-4" />
+          <ChevronRight v-else class="h-4 w-4" />
+        </button>
+      </div>
+
+      <!-- divider body -> container -->
+      <div
+        v-if="
+          !model.collapsing.collapsed.value &&
+          model.body.enabled.value &&
+          model.container.enabled.value
+        "
+        :style="{ height: '1px', backgroundColor: dividerColor }"
+      />
+
+      <!-- container section -->
+      <div
+        v-if="model.container.enabled.value && !model.collapsing.collapsed.value"
+        style="min-height: 52.5px"
+      />
+    </div>
+
+    <!-- Link icon (absolute, top center) -->
+    <div
+      v-if="model.link.value"
+      class="pointer-events-none absolute left-1/2"
+      style="top: 2px; transform: translate(-50%, -50%)"
+    >
       <a
-        v-if="model.link.value"
         :href="model.link.value"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-white/70 hover:text-white pointer-events-auto ml-auto"
-        title="Open link"
+        class="pointer-events-auto"
         @pointerdown.stop
       >
-        <ExternalLink class="h-3 w-3" />
+        <ExternalLink class="h-3.5 w-3.5" :style="{ color: textColor }" />
       </a>
     </div>
 
-    <!-- head editor -->
-    <div
-      v-if="model.head.enabled.value && !model.collapsing.collapsed.value"
-      class="px-2 pt-1"
-      @pointerdown.stop
-      @focusin="emit('edit-start')"
-    >
-      <NoteTiptapEditor
-        :fragment="headFrag!"
-        :editable="!model.readOnly.value"
-        placeholder="Head…"
-        :note-id="id"
-        section="head"
+    <!-- Resize bars -->
+    <template v-if="model.resizable.value && !model.readOnly.value && props.selected">
+      <div
+        v-for="bar in ([
+          { side: 'n', top: '-3px', left: '0', right: '0', height: '7px', cursor: 'ns-resize' },
+          { side: 's', bottom: '-3px', left: '0', right: '0', height: '7px', cursor: 'ns-resize' },
+          { side: 'e', right: '-3px', top: '0', bottom: '0', width: '7px', cursor: 'ew-resize' },
+          { side: 'w', left: '-3px', top: '0', bottom: '0', width: '7px', cursor: 'ew-resize' },
+        ] as const)"
+        :key="bar.side"
+        class="absolute z-[2147483646]"
+        :style="bar"
+        @pointerdown="(e: PointerEvent) => onResizePointerDown(e, bar.side)"
+        @pointermove="onResizePointerMove"
+        @pointerup="onResizePointerUp"
+        @pointercancel="onResizePointerUp"
       />
-    </div>
+    </template>
 
-    <!-- body editor -->
-    <div
-      v-if="model.body.enabled.value && !model.collapsing.collapsed.value"
-      class="px-2 pb-1"
-      @pointerdown.stop
-      @focusin="emit('edit-start')"
-    >
-      <NoteTiptapEditor
-        :fragment="bodyFrag!"
-        :editable="!model.readOnly.value"
-        placeholder="Body…"
-        :note-id="id"
-        section="body"
-      />
-    </div>
-
-    <!-- 8 resize handles -->
+    <!-- Corner resize handles -->
     <template v-if="model.resizable.value && !model.readOnly.value && props.selected">
       <div
         v-for="h in ([
-          { key: 'nw', cls: '-top-1.5 -left-1.5 cursor-nwse-resize' },
-          { key: 'n', cls: '-top-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize' },
-          { key: 'ne', cls: '-top-1.5 -right-1.5 cursor-nesw-resize' },
-          { key: 'e', cls: '-right-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' },
-          { key: 'se', cls: '-bottom-1.5 -right-1.5 cursor-nwse-resize' },
-          { key: 's', cls: '-bottom-1.5 left-1/2 -translate-x-1/2 cursor-ns-resize' },
-          { key: 'sw', cls: '-bottom-1.5 -left-1.5 cursor-nesw-resize' },
-          { key: 'w', cls: '-left-1.5 top-1/2 -translate-y-1/2 cursor-ew-resize' },
+          { key: 'nw', top: '0', left: '0', cursor: 'nwse-resize' },
+          { key: 'ne', top: '0', right: '0', cursor: 'nesw-resize' },
+          { key: 'sw', bottom: '0', left: '0', cursor: 'nesw-resize' },
+          { key: 'se', bottom: '0', right: '0', cursor: 'nwse-resize' },
         ] as const)"
         :key="h.key"
-        class="bg-primary absolute h-3 w-3 rounded-full"
-        :class="h.cls"
+        class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"
+        :style="[h, { backgroundColor: '#2196f3', transform: 'translate(-50%, -50%)' }]"
         @pointerdown="(e: PointerEvent) => onResizePointerDown(e, h.key)"
         @pointermove="onResizePointerMove"
         @pointerup="onResizePointerUp"
@@ -374,22 +466,23 @@ function onContextMenu(e: MouseEvent) {
       />
     </template>
 
-    <!-- arrow handles -->
+    <!-- Arrow handles -->
     <template v-if="selected && !model.readOnly.value">
-      <div
+      <svg
         v-for="h in ([
-          { cls: '-top-3 left-1/2 -translate-x-1/2' },
-          { cls: '-right-3 top-1/2 -translate-y-1/2' },
-          { cls: '-bottom-3 left-1/2 -translate-x-1/2' },
-          { cls: '-left-3 top-1/2 -translate-y-1/2' },
+          { anchor: { x: -1, y: 0 }, style: { top: '50%', left: '-20px', transform: 'translate(-50%, -50%) rotateZ(-90deg)' } },
+          { anchor: { x: 1, y: 0 }, style: { top: '50%', right: '-20px', transform: 'translate(50%, -50%) rotateZ(90deg)' } },
+          { anchor: { x: 0, y: -1 }, style: { top: '-20px', left: '50%', transform: 'translate(-50%, -50%) rotateZ(0deg)' } },
+          { anchor: { x: 0, y: 1 }, style: { bottom: '-20px', left: '50%', transform: 'translate(-50%, 50%) rotateZ(180deg)' } },
         ] as const)"
-        :key="h.cls"
-        class="bg-primary/80 hover:bg-primary absolute h-2.5 w-2.5 cursor-crosshair rounded-full"
-        :class="h.cls"
-        @pointerdown.stop="(e: PointerEvent) => {
-          emit('arrowDragStart', { noteId: props.id });
-        }"
-      />
+        :key="`${h.anchor.x}-${h.anchor.y}`"
+        class="note-arrow-handle absolute cursor-copy"
+        style="width: 20px; height: 27px; z-index: 2147483647;"
+        :style="h.style"
+        @pointerdown.stop="(e: PointerEvent) => { emit('arrowDragStart', { noteId: props.id }); }"
+      >
+        <path d="M 6 27 L 14 27 L 14 14 L 20 14 L 10 0 L 0 14 L 6 14 Z" stroke="none" fill="#2196f3" />
+      </svg>
     </template>
 
     <!-- container children -->
@@ -423,3 +516,13 @@ function onContextMenu(e: MouseEvent) {
     </template>
   </div>
 </template>
+
+<style scoped>
+.note-arrow-handle {
+  opacity: 0.15;
+  pointer-events: auto;
+}
+.note-arrow-handle:hover {
+  opacity: 0.8;
+}
+</style>

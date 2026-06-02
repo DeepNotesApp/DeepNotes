@@ -150,9 +150,9 @@ describe("DisplayArrow", () => {
     });
 
     const path = wrapper.findAll('path').find((p) =>
-      p.attributes('stroke-linecap') === 'round',
+      p.attributes('stroke-width') === '4',
     );
-    expect(path?.attributes('d')).toContain('Q');
+    expect(path?.attributes('d')).toContain('C');
   });
 
   it("renders line body path when bodyType is line", () => {
@@ -162,7 +162,7 @@ describe("DisplayArrow", () => {
     });
 
     const path = wrapper.findAll('path').find((p) =>
-      p.attributes('stroke-linecap') === 'round',
+      p.attributes('stroke-width') === '4',
     );
     expect(path?.attributes('d')).toContain('L');
   });
@@ -174,9 +174,10 @@ describe("DisplayArrow", () => {
     });
 
     const visiblePath = wrapper.findAll('path').find((p) =>
-      p.attributes('stroke-linecap') === 'round',
+      p.attributes('stroke-width') === '4',
     );
-    expect(visiblePath?.attributes('stroke')).toBe('#2196f3');
+    // Grey (#858585) lightened by 30%
+    expect(visiblePath?.attributes('stroke')).toBe('#aaaaaa');
   });
 
   it("uses arrow color stroke when not selected", () => {
@@ -186,7 +187,7 @@ describe("DisplayArrow", () => {
     });
 
     const visiblePath = wrapper.findAll('path').find((p) =>
-      p.attributes('stroke-linecap') === 'round',
+      p.attributes('stroke-width') === '4',
     );
     expect(visiblePath?.attributes('stroke')).toBe('#B80909');
   });
@@ -197,8 +198,8 @@ describe("DisplayArrow", () => {
       props: { id: "arrow-1", model: arrowModel, sourceModel, targetModel },
     });
 
-    const defs = wrapper.find('defs');
-    expect(defs.find('marker').exists()).toBe(true);
+    const polylines = wrapper.findAll('polyline');
+    expect(polylines.length).toBeGreaterThanOrEqual(1);
   });
 
   it("emits select on pointer down", async () => {

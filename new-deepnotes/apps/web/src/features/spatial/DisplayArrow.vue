@@ -5,7 +5,8 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { computeArrowEndpoints } from "./arrow-geometry";
-import { resolveArrowColor } from "./color-utils";
+import { resolveArrowColor, lightenColor } from "./color-utils";
+import { isDark } from "@/features/theme/useThemePreference";
 
 const props = defineProps<{
   id: string;
@@ -24,8 +25,14 @@ const emit = defineEmits<{
 
 const labelFragment = computed(() => props.model.label.value);
 
-const arrowColor = computed(() => {
-  return resolveArrowColor(props.model.color.value);
+const arrowColors = computed(() => {
+  const base = resolveArrowColor(props.model.color.value);
+  return {
+    base,
+    light: lightenColor(base, 0.3),
+    highlight: lightenColor(base, 0.6),
+    final: props.selected ? lightenColor(base, 0.3) : base,
+  };
 });
 
 const { heights: noteHeights } = useNoteHeights();
@@ -39,10 +46,11 @@ const isLooseTarget = computed(() =>
 
 const strokeDasharray = computed(() => {
   const style = props.model.bodyStyle.value;
-  if (style === "dashed") return "8 6";
-  if (style === "dotted") return "2 4";
-  return "none";
+  if (style === "dashed") return "6,6";
+  return undefined;
 });
+
+const ARROW_SIZE = 10;
 
 const geometry = computed(() => {
   const s = props.sourceModel;
@@ -80,7 +88,6 @@ const geometry = computed(() => {
     x1 = fake.x;
     y1 = fake.y;
   } else {
-    // No source and no fakePos — can't render this end
     return null;
   }
 
@@ -95,12 +102,11 @@ const geometry = computed(() => {
     x2 = fake.x;
     y2 = fake.y;
   } else {
-    // No target and no fakePos — can't render this end
     return null;
   }
 
-  // Apply rectangle-edge intersection for line body when both notes are present
-  if (s && t && props.model.bodyType.value === "line" && !sourceAnchor && !targetAnchor) {
+  // Apply rectangle-edge intersection when both notes are present
+  if (s && t && !sourceAnchor && !targetAnchor) {
     const endpoints = computeArrowEndpoints(
       s.pos.value,
       t.pos.value,
@@ -124,31 +130,42 @@ const geometry = computed(() => {
   const localX2 = x2 - minX;
   const localY2 = y2 - minY;
 
-  // Curve control point
-  const mx = (localX1 + localX2) / 2;
-  const my = (localY1 + localY2) / 2;
   const dx = localX2 - localX1;
   const dy = localY2 - localY1;
   const dist = Math.hypot(dx, dy);
-  const curveOffset = props.model.bodyType.value === "curve" ? dist * 0.25 : 0;
-  // Perpendicular offset
-  const perpX = dy / (dist || 1);
-  const perpY = -dx / (dist || 1);
-  const cx = mx + perpX * curveOffset;
-  const cy = my + perpY * curveOffset;
 
-  const pathD =
-    props.model.bodyType.value === "curve"
-      ? `M ${localX1} ${localY1} Q ${cx} ${cy} ${localX2} ${localY2}`
-      : `M ${localX1} ${localY1} L ${localX2} ${localY2}`;
+  let pathD: string;
+  let sourceAngle: number;
+  let targetAngle: number;
+  let centerX: number;
+  let centerY: number;
 
-  // Arrowhead angle at target
-  let angle = 0;
   if (props.model.bodyType.value === "curve") {
-    // Approximate tangent at endpoint for quadratic bezier
-    angle = Math.atan2(localY2 - cy, localX2 - cx);
+    const perpX = dy / (dist || 1);
+    const perpY = -dx / (dist || 1);
+    const offset = dist * 0.25;
+
+    const c1x = localX1 + dx * 0.5 + perpX * offset;
+    const c1y = localY1 + dy * 0.5 + perpY * offset;
+    const c2x = localX2 - dx * 0.5 + perpX * offset;
+    const c2y = localY2 - dy * 0.5 + perpY * offset;
+
+    pathD = `M ${localX1} ${localY1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${localX2} ${localY2}`;
+
+    sourceAngle = Math.atan2(c1y - localY1, c1x - localX1);
+    targetAngle = Math.atan2(localY2 - c2y, localX2 - c2x);
+
+    // Cubic bezier midpoint at t=0.5
+    centerX = 0.125 * localX1 + 0.375 * c1x + 0.375 * c2x + 0.125 * localX2;
+    centerY = 0.125 * localY1 + 0.375 * c1y + 0.375 * c2y + 0.125 * localY2;
   } else {
-    angle = Math.atan2(localY2 - localY1, localX2 - localX1);
+    pathD = `M ${localX1} ${localY1} L ${localX2} ${localY2}`;
+
+    sourceAngle = Math.atan2(dy, dx);
+    targetAngle = Math.atan2(dy, dx);
+
+    centerX = (localX1 + localX2) / 2;
+    centerY = (localY1 + localY2) / 2;
   }
 
   return {
@@ -159,7 +176,10 @@ const geometry = computed(() => {
     localX2,
     localY2,
     pathD,
-    angle,
+    sourceAngle,
+    targetAngle,
+    centerX,
+    centerY,
     dist,
     sourceX: x1,
     sourceY: y1,
@@ -190,37 +210,13 @@ function onPointerDown(e: PointerEvent) {
       transform: `translate(${geometry.minX}px, ${geometry.minY}px)`,
     }"
   >
-    <!-- Arrow head markers (unique per arrow to avoid color bleeding) -->
-    <defs>
-      <marker
-        :id="`arrowhead-target-${model.source.value}-${model.target.value}`"
-        markerWidth="10"
-        markerHeight="10"
-        refX="9"
-        refY="5"
-        orient="auto-start-reverse"
-      >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
-      </marker>
-      <marker
-        :id="`arrowhead-source-${model.source.value}-${model.target.value}`"
-        markerWidth="10"
-        markerHeight="10"
-        refX="9"
-        refY="5"
-        orient="auto-start-reverse"
-      >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
-      </marker>
-    </defs>
-
     <!-- Hitbox: thick invisible stroke for easy grabbing -->
     <path
       :d="geometry.pathD"
       fill="none"
       stroke="transparent"
       stroke-width="20"
-      class="pointer-events-auto cursor-pointer"
+      class="pointer-events-auto cursor-grab"
       @pointerdown="onPointerDown"
     />
 
@@ -228,12 +224,29 @@ function onPointerDown(e: PointerEvent) {
     <path
       :d="geometry.pathD"
       fill="none"
-      :stroke="selected ? '#2196f3' : arrowColor"
-      :stroke-width="selected ? 4 : 4"
+      :stroke="arrowColors.final"
+      stroke-width="4"
       :stroke-dasharray="strokeDasharray"
-      stroke-linecap="round"
-      :marker-end="model.targetHead.value ? `url(#arrowhead-target-${model.source.value}-${model.target.value})` : ''"
-      :marker-start="model.sourceHead.value ? `url(#arrowhead-source-${model.source.value}-${model.target.value})` : ''"
+    />
+
+    <!-- Source open head -->
+    <polyline
+      v-if="model.sourceHead.value === 'open'"
+      :stroke="arrowColors.final"
+      :points="`${geometry.localX1 - ARROW_SIZE},${geometry.localY1 - ARROW_SIZE} ${geometry.localX1},${geometry.localY1} ${geometry.localX1 - ARROW_SIZE},${geometry.localY1 + ARROW_SIZE}`"
+      :transform="`rotate(${(geometry.sourceAngle / Math.PI) * 180 + 180},${geometry.localX1},${geometry.localY1})`"
+      fill="none"
+      stroke-width="4"
+    />
+
+    <!-- Target open head -->
+    <polyline
+      v-if="model.targetHead.value === 'open'"
+      :stroke="arrowColors.final"
+      :points="`${geometry.localX2 - ARROW_SIZE},${geometry.localY2 - ARROW_SIZE} ${geometry.localX2},${geometry.localY2} ${geometry.localX2 - ARROW_SIZE},${geometry.localY2 + ARROW_SIZE}`"
+      :transform="`rotate(${(geometry.targetAngle / Math.PI) * 180},${geometry.localX2},${geometry.localY2})`"
+      fill="none"
+      stroke-width="4"
     />
 
     <!-- Source connection zone -->
@@ -266,8 +279,8 @@ function onPointerDown(e: PointerEvent) {
       :cx="geometry.localX1"
       :cy="geometry.localY1"
       r="4"
-      :fill="arrowColor"
-      stroke="white"
+      :fill="arrowColors.final"
+      :stroke="isDark ? 'white' : '#1a1a1a'"
       stroke-width="1.5"
     />
     <circle
@@ -275,21 +288,25 @@ function onPointerDown(e: PointerEvent) {
       :cx="geometry.localX2"
       :cy="geometry.localY2"
       r="4"
-      :fill="arrowColor"
-      stroke="white"
+      :fill="arrowColors.final"
+      :stroke="isDark ? 'white' : '#1a1a1a'"
       stroke-width="1.5"
     />
 
     <!-- Arrow label at midpoint -->
     <foreignObject
       v-if="labelFragment"
-      :x="(geometry.localX1 + geometry.localX2) / 2 - 60"
-      :y="(geometry.localY1 + geometry.localY2) / 2 - 16"
+      :x="geometry.centerX - 60"
+      :y="geometry.centerY - 16"
       width="120"
       height="32"
       class="pointer-events-auto"
     >
-      <div class="bg-background/90 dark:bg-background/90 h-full w-full rounded px-1 shadow-sm" @focusin="emit('edit-start')">
+      <div
+        class="h-full w-full rounded px-1"
+        :style="{ backgroundColor: isDark ? 'rgba(24,24,24,0.9)' : 'rgba(255,255,255,0.9)' }"
+        @focusin="emit('edit-start')"
+      >
         <NoteTiptapEditor
           :fragment="labelFragment"
           :editable="!props.model.readOnly.value"
