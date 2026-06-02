@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ExternalLink, Copy, ArrowUpDown, FilePlus, Save, Download } from '@lucide/vue'
+import { ExternalLink, Copy, ArrowUpDown, FilePlus, Save, Download, ArrowDownUp, Import } from '@lucide/vue'
 import ColorPalette from '@/components/ColorPalette.vue'
 import { getNoteEditor } from './note-editor-registry'
 import TurndownService from 'turndown'
@@ -55,6 +55,8 @@ const emit = defineEmits<{
   'swap-head-body': []
   'copy-link': []
   'set-as-default': []
+  'reverse-children': []
+  'import-children': [files: FileList]
 }>()
 
 const link = computed(() => props.noteModel?.link?.value ?? '')
@@ -96,6 +98,24 @@ function handleCopyLink() {
   if (!props.noteId) return
   const url = `${window.location.origin}/pages/${props.noteId}?elem=${props.noteId}`
   navigator.clipboard.writeText(url)
+}
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+function handleReverseChildren() {
+  emit('reverse-children')
+}
+
+function handleImportClick() {
+  fileInput.value?.click()
+}
+
+function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    emit('import-children', target.files)
+    target.value = ''
+  }
 }
 
 function handleColorSelect(colorName: string) {
@@ -587,6 +607,34 @@ function exportAsMarkdown(download: boolean) {
             @update:model-value="emit('update:container-force-color-inheritance', $event as boolean)"
           />
           <Label>Force color inheritance</Label>
+        </div>
+        <div class="flex items-center gap-2 pl-6 pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="readOnly || !containerEnabled || (props.noteModel?.container?.children?.value?.length ?? 0) < 2"
+            @click="handleReverseChildren"
+          >
+            <ArrowDownUp class="mr-1 h-3 w-3" />
+            Reverse children
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            :disabled="readOnly || (containerEnabled && containerSpatial)"
+            @click="handleImportClick"
+          >
+            <Import class="mr-1 h-3 w-3" />
+            Import children
+          </Button>
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".txt,.md"
+            multiple
+            class="hidden"
+            @change="handleFileChange"
+          />
         </div>
       </div>
 

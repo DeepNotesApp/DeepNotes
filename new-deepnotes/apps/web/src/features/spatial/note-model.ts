@@ -134,7 +134,10 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
   const movable = useYMapBoolean(noteMap, YPAGE_NOTE_KEY.movable, true);
   const resizable = useYMapBoolean(noteMap, YPAGE_NOTE_KEY.resizable, true);
   const readOnly = useYMapBoolean(noteMap, YPAGE_NOTE_KEY.readOnly, false);
-  const anchor = useYMapValue<{ x: number; y: number }>(noteMap, YPAGE_NOTE_KEY.anchor);
+  const anchorMap = noteMap.get(YPAGE_NOTE_KEY.anchor) as Y.Map<number>;
+  const anchorX = useYMapNumber(anchorMap, "x", 0.5);
+  const anchorY = useYMapNumber(anchorMap, "y", 0.5);
+  const anchor = computed(() => ({ x: anchorX.value, y: anchorY.value }));
   const regionId = useYMapValue<string | null>(noteMap, YPAGE_NOTE_KEY.regionId);
   const createdAt = useYMapValue<number | null>(noteMap, YPAGE_NOTE_KEY.createdAt);
   const editedAt = useYMapValue<number | null>(noteMap, YPAGE_NOTE_KEY.editedAt);

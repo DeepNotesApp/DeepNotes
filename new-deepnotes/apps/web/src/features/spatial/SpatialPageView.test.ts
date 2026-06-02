@@ -137,17 +137,15 @@ describe("SpatialPageView", () => {
     expect(titles).toContain("Redo");
   });
 
-  it("renders toolbar with zoom and fit-to-screen buttons", () => {
+  it("renders floating camera buttons with zoom and fit-to-screen", () => {
     const { ydoc } = setupDocWithNotes();
     wrapper = mount(SpatialPageView, {
       props: { ydoc },
       global: { stubs: { Teleport: true } },
     });
 
-    const buttons = wrapper.findAll("button");
-    const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Zoom in");
-    expect(titles).toContain("Zoom out");
-    expect(titles).toContain("Fit to screen");
+    // Zoom/reset/fit buttons moved from toolbar to FloatingCameraButtons
+    const cameraButtons = wrapper.findComponent({ name: "FloatingCameraButtons" });
+    expect(cameraButtons.exists()).toBe(true);
   });
 });

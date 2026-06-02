@@ -440,6 +440,19 @@ async function handleSetNoteAsDefault() {
   }
 }
 
+function handleReverseChildren() {
+  if (!selectedNoteId.value) return;
+  spatialViewRef.value?.reverseChildren?.(selectedNoteId.value);
+}
+
+async function handleImportChildren(files: FileList) {
+  if (!selectedNoteId.value) return;
+  await spatialViewRef.value?.importChildrenFromFiles?.(
+    selectedNoteId.value,
+    Array.from(files),
+  );
+}
+
 async function handleCreateNewPage() {
   pageOpsMessage.value = null;
   const id = pageId.value;
@@ -799,6 +812,8 @@ onMounted(() => {
           @swap-head-body="handleSwapHeadBody"
           @copy-link="handleCopyNoteLink"
           @set-as-default="handleSetNoteAsDefault"
+          @reverse-children="handleReverseChildren"
+          @import-children="handleImportChildren"
         />
 
         <ArrowPropertiesCard

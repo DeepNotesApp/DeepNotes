@@ -125,11 +125,29 @@ export function useContainerOps(
     removeChildFromContainer(currentParentId, noteId);
   }
 
+  function reverseChildren(containerId: string): void {
+    const containerNote = notesMap.get(containerId);
+    if (!containerNote) return;
+    const containerMap = containerNote.get(
+      YPAGE_NOTE_KEY.container,
+    ) as Y.Map<unknown>;
+    const childrenArr = containerMap.get("children") as Y.Array<string>;
+    const length = childrenArr.length;
+    if (length < 2) return;
+
+    const children = childrenArr.toArray();
+    ydoc.transact(() => {
+      childrenArr.delete(0, length);
+      childrenArr.push(children.reverse());
+    });
+  }
+
   return {
     parentOf,
     addChildToContainer,
     removeChildFromContainer,
     moveNoteIntoContainer,
     moveNoteOutOfContainer,
+    reverseChildren,
   };
 }

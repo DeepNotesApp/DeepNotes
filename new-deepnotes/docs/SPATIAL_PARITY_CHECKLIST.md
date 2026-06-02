@@ -13,21 +13,21 @@
 | 1.2 | Delete note (`Delete` key) | `code/pages/page/elems/deleting.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
 | 1.3 | Move note (drag) | `code/pages/page/notes/dragging.ts` | `features/spatial/note-model.ts` | `note-model.test.ts`, `DisplayNote.vue` comp. test | ✅ 2026-05-30 |
 | 1.4 | Resize note (8 handles) | `code/pages/page/notes/resizing.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 (8 handles on edges/corners; width resize with position shift for west-side handles) |
-| 1.5 | Clone note | `code/pages/page/notes/cloning.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.5 | Clone note | `code/pages/page/notes/cloning.ts` | `features/spatial/useSpatialPage.ts` | `useSpatialPage.test.ts` | ✅ 2026-06-02 |
 | 1.6 | Align notes (left/center/right/top/middle/bottom) | `code/pages/page/notes/aligning.ts` | `features/spatial/alignment.ts` | `alignment.test.ts` | ✅ 2026-05-30 |
 | 1.7 | Distribute notes (horizontal/vertical) | `code/pages/page/notes/aligning.ts` | `features/spatial/alignment.ts` | `alignment.test.ts` | ✅ 2026-05-30 |
-| 1.8 | Note head section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
-| 1.9 | Note body section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
-| 1.10 | Container section (enabled, spatial, horizontal) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ⬜ |
-| 1.11 | Container wrap/stretch children | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.12 | Container force color inheritance | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.8 | Note head section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.9 | Note body section (Tiptap, enabled, height, wrap) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.10 | Container section (enabled, spatial, horizontal) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.11 | Container wrap/stretch children | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.12 | Container force color inheritance | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
 | 1.13 | Note collapsing (enabled, collapsed, localCollapsing) | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | ✅ 2026-05-30 |
 | 1.14 | Note color (inherit, value) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
-| 1.15 | Note link | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.15 | Note link | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
 | 1.16 | Note z-index | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-05-30 |
-| 1.17 | Note anchor (x,y) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.18 | Note width (expanded, collapsed) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
-| 1.19 | Note createdAt / editedAt / movedAt | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ⬜ |
+| 1.17 | Note anchor (x,y) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.18 | Note width (expanded, collapsed) | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
+| 1.19 | Note createdAt / editedAt / movedAt | `code/pages/page/notes/note-collab.ts` | `features/spatial/note-model.ts` | `note-model.test.ts` | ✅ 2026-06-02 |
 | 1.20 | Note movable / resizable / readOnly | `code/pages/page/notes/note-collab.ts` | `features/spatial/DisplayNote.vue` | `DisplayNote.test.ts` | 🟡 2026-05-30 (readOnly UI guards done; movable/resizable already functional) |
 
 ---

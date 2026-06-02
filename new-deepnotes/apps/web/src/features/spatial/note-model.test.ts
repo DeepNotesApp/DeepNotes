@@ -111,4 +111,136 @@ describe("note-model reactivity", () => {
     expect(model.editedAt.value).toBeNull();
     expect(model.movedAt.value).toBeNull();
   });
+
+  it("reacts to createdAt / editedAt / movedAt mutations", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    note.set(YPAGE_NOTE_KEY.createdAt, 1700000000000);
+    note.set(YPAGE_NOTE_KEY.editedAt, 1700000001000);
+    note.set(YPAGE_NOTE_KEY.movedAt, 1700000002000);
+
+    expect(model.createdAt.value).toBe(1700000000000);
+    expect(model.editedAt.value).toBe(1700000001000);
+    expect(model.movedAt.value).toBe(1700000002000);
+  });
+
+  it("reads head wrap and height", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.head.wrap.value).toBe(true);
+    expect(model.head.height.value).toEqual({
+      expanded: "Auto",
+      collapsed: "Auto",
+    });
+  });
+
+  it("reacts to head.wrap and head.height mutations", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    const headMap = note.get(YPAGE_NOTE_KEY.head) as Y.Map<unknown>;
+    headMap.set("wrap", false);
+
+    const headHeightMap = headMap.get("height") as Y.Map<string>;
+    headHeightMap.set("expanded", "120px");
+
+    expect(model.head.wrap.value).toBe(false);
+    expect(model.head.height.value.expanded).toBe("120px");
+  });
+
+  it("reads body enabled, wrap, and height", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.body.enabled.value).toBe(false);
+    expect(model.body.wrap.value).toBe(true);
+    expect(model.body.height.value).toEqual({
+      expanded: "Auto",
+      collapsed: "Auto",
+    });
+  });
+
+  it("reacts to body mutations", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    const bodyMap = note.get(YPAGE_NOTE_KEY.body) as Y.Map<unknown>;
+    bodyMap.set("enabled", true);
+    bodyMap.set("wrap", false);
+
+    const bodyHeightMap = bodyMap.get("height") as Y.Map<string>;
+    bodyHeightMap.set("expanded", "80px");
+
+    expect(model.body.enabled.value).toBe(true);
+    expect(model.body.wrap.value).toBe(false);
+    expect(model.body.height.value.expanded).toBe("80px");
+  });
+
+  it("reacts to container.spatial, .horizontal, .stretchChildren, .forceColorInheritance", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.container.spatial.value).toBe(false);
+    expect(model.container.horizontal.value).toBe(false);
+    expect(model.container.stretchChildren.value).toBe(true);
+    expect(model.container.forceColorInheritance.value).toBe(false);
+
+    const containerMap = note.get(YPAGE_NOTE_KEY.container) as Y.Map<unknown>;
+    containerMap.set("spatial", true);
+    containerMap.set("horizontal", true);
+    containerMap.set("stretchChildren", false);
+    containerMap.set("forceColorInheritance", true);
+
+    expect(model.container.spatial.value).toBe(true);
+    expect(model.container.horizontal.value).toBe(true);
+    expect(model.container.stretchChildren.value).toBe(false);
+    expect(model.container.forceColorInheritance.value).toBe(true);
+  });
+
+  it("reacts to anchor mutations", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.anchor.value).toEqual({ x: 0.5, y: 0.5 });
+
+    const anchorMap = note.get(YPAGE_NOTE_KEY.anchor) as Y.Map<number>;
+    anchorMap.set("x", 0.25);
+    anchorMap.set("y", 0.75);
+
+    expect(model.anchor.value).toEqual({ x: 0.25, y: 0.75 });
+  });
+
+  it("reacts to link mutations", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.link.value).toBe("");
+
+    note.set(YPAGE_NOTE_KEY.link, "/pages/some-page-id");
+
+    expect(model.link.value).toBe("/pages/some-page-id");
+  });
+
+  it("reads and reacts to width.collapsed", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.width.value.collapsed).toBe("Auto");
+
+    const widthMap = note.get(YPAGE_NOTE_KEY.width) as Y.Map<string>;
+    widthMap.set("collapsed", "Minimum");
+
+    expect(model.width.value.collapsed).toBe("Minimum");
+  });
 });

@@ -168,4 +168,108 @@ describe("useSpatialPage", () => {
 
     expect(page.parentOf.value.has(grandparentId)).toBe(false);
   });
+
+  it("reverses container children", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(0, 0);
+    const a = page.createNoteAt(10, 10);
+    const b = page.createNoteAt(20, 20);
+    const c = page.createNoteAt(30, 30);
+
+    page.moveNoteIntoContainer(a, containerId);
+    page.moveNoteIntoContainer(b, containerId);
+    page.moveNoteIntoContainer(c, containerId);
+
+    const containerModel = page.noteList.value.find(
+      (n) => n.id === containerId,
+    )!.model;
+    expect(containerModel.container.children.value).toEqual([a, b, c]);
+
+    page.reverseChildren(containerId);
+    expect(containerModel.container.children.value).toEqual([c, b, a]);
+  });
+
+  it("imports children from text files into a container", async () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(100, 100);
+    const file = new File(["Hello world\nLine two"], "test.txt", {
+      type: "text/plain",
+    });
+
+    await page.importChildrenFromFiles(containerId, [file]);
+
+    expect(page.noteList.value.length).toBe(2); // container + child
+
+    const containerModel = page.noteList.value.find(
+      (n) => n.id === containerId,
+    )!.model;
+    expect(containerModel.container.children.value.length).toBe(1);
+
+    const childId = containerModel.container.children.value[0]!;
+    const childModel = page.noteList.value.find(
+      (n) => n.id === childId,
+    )!.model;
+    expect(childModel.head.enabled.value).toBe(true);
+    expect(childModel.body.enabled.value).toBe(false);
+    expect(childModel.container.enabled.value).toBe(false);
+  });
+
+  it("imports children from markdown files into a container", async () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const containerId = page.createNoteAt(100, 100);
+    const file = new File(["# Title\n\nParagraph"], "test.md", {
+      type: "text/markdown",
+    });
+
+    await page.importChildrenFromFiles(containerId, [file]);
+
+    const containerModel = page.noteList.value.find(
+      (n) => n.id === containerId,
+    )!.model;
+    expect(containerModel.container.children.value.length).toBe(1);
+
+    const childId = containerModel.container.children.value[0]!;
+    const childModel = page.noteList.value.find(
+      (n) => n.id === childId,
+    )!.model;
+    expect(childModel.head.enabled.value).toBe(true);
+  });
+
+  it("clones selected notes and arrows", () => {
+    const ydoc = createPageYDoc();
+    const page = useSpatialPage(ydoc);
+
+    const n1 = page.createNoteAt(0, 0);
+    const n2 = page.createNoteAt(100, 0);
+    const a1 = page.createArrow(n1, n2);
+
+    const noteEntries = page.noteList.value.filter(
+      (n) => n.id === n1 || n.id === n2,
+    );
+    const arrowEntries = page.arrowList.value.filter((a) => a.id === a1);
+
+    const result = page.cloneNotes(noteEntries, arrowEntries, 20, 20);
+
+    expect(result.noteIds.length).toBe(2);
+    expect(result.arrowIds.length).toBe(1);
+
+    // Cloned notes should be offset
+    const clonedNote = page.noteList.value.find(
+      (n) => n.id === result.noteIds[0],
+    );
+    expect(clonedNote!.model.pos.value).toEqual({ x: 20, y: 20 });
+
+    // Cloned arrow should point to cloned notes
+    const clonedArrow = page.arrowList.value.find(
+      (a) => a.id === result.arrowIds[0],
+    );
+    expect(clonedArrow!.model.source.value).toBe(result.noteIds[0]);
+    expect(clonedArrow!.model.target.value).toBe(result.noteIds[1]);
+  });
 });

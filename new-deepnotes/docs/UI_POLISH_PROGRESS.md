@@ -43,7 +43,12 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 | **5.2b** | Set as default note/arrow style serialization + encryption | **DONE** | `PageEditorView.vue`, `note-editor-registry.ts` | Full crypto flow: unwraps session symmetric keyring, serializes selected note/arrow to msgpack, encrypts with `UserDefaultNote`/`UserDefaultArrow` AAD, calls `PATCH /api/users/me/defaults/{note,arrow}`. |
 | **5.1f** | Note export: head/body HTML -> markdown via Turndown | **DONE** | `NotePropertiesCard.vue`, `note-editor-registry.ts` | New `getNoteEditor(noteId, section)` helper. Export uses editor registry to get head/body Tiptap instances, converts HTML to markdown with legacy-aligned Turndown rules (math, strikethrough, tables). |
 
+| **Container** | Reverse children + import children from files | **DONE** | `container-ops.ts`, `useSpatialPage.ts`, `NotePropertiesCard.vue`, `PageEditorView.vue`, `note-content-utils.ts` | `reverseChildren()` reverses the container's `children` Y.Array in a single transaction. `importChildrenFromFiles()` creates child notes, populates head Y.XmlFragment with HTML via temporary Tiptap `Editor`, and moves them into the container. Markdown parsed with `marked` (added to web app deps). Plain text escaped and wrapped in `<p>`. |
+| **Spatial parity** | Note model reactivity tests (head, body, container, anchor, link, width, timestamps) | **DONE** | `note-model.test.ts`, `note-model.ts` | Added 11 new tests covering head wrap/height, body enabled/wrap/height, container spatial/horizontal/stretchChildren/forceColorInheritance, anchor x/y, link mutations, width collapsed, and createdAt/editedAt/movedAt mutations. Fixed `anchor` reactivity bug: now reads nested `x`/`y` from Y.Map via `useYMapNumber` instead of returning raw Y.Map. |
+| **Spatial parity** | Clone note (dedicated function + test) | **DONE** | `clipboard.ts`, `useSpatialPage.ts`, `useSpatialPage.test.ts` | Exported `serializeNote`/`serializeArrow` from `clipboard.ts`. Added `cloneSelection()` that bypasses clipboard indirection. Added `cloneNotes()` to `useSpatialPage` return object. Test verifies cloned notes are offset and arrows remapped to new note IDs. |
+
 ## Next Recommended Actions
 
-1. Add container reverse/import children actions if required by spatial parity checklist.
-2. Run spatial parity checklist (Phase 1 of RESTART_PLAN) to identify remaining canvas-level gaps.
+1. Implement remaining arrow model parity (source/target anchors, heads, body type/style, label, color, interregional, fakePos/looseEndpoint).
+2. Implement camera/viewport parity (fit-to-screen, coordinate transforms, rect math, canvas background).
+3. Implement collab parity (page-level Yjs doc structure, remote cursor awareness, WS bootstrap, retry buffer).

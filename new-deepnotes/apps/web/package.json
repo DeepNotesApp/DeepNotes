@@ -51,6 +51,7 @@
     "html2canvas": "^1.4.1",
     "katex": "0.16.22",
     "lowlight": "3.3.0",
+    "marked": "^18.0.4",
     "msgpackr": "^1.11.2",
     "nanoid": "^5.1.5",
     "openapi-fetch": "^0.17.0",

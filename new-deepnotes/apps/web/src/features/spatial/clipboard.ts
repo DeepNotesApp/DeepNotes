@@ -130,7 +130,7 @@ async function readFromClipboard(): Promise<ClipboardPayload | null> {
   return null;
 }
 
-function serializeNote(model: NoteModel, id: string): ClipboardNote {
+export function serializeNote(model: NoteModel, id: string): ClipboardNote {
   return {
     id,
     pos: model.pos.value,
@@ -174,7 +174,7 @@ function serializeNote(model: NoteModel, id: string): ClipboardNote {
   };
 }
 
-function serializeArrow(model: ArrowModel, id: string): ClipboardArrow {
+export function serializeArrow(model: ArrowModel, id: string): ClipboardArrow {
   return {
     id,
     source: model.source.value,
@@ -298,4 +298,25 @@ export function pastePayload(
   }
 
   return { noteIds, arrowIds };
+}
+
+export function cloneSelection(
+  noteEntries: { id: string; model: NoteModel }[],
+  arrowEntries: { id: string; model: ArrowModel }[],
+  options: {
+    createNote: (worldX: number, worldY: number, template?: Partial<ClipboardNote>) => string;
+    createArrow: (sourceId: string, targetId: string, template?: Partial<ClipboardArrow>) => string;
+    offsetX?: number;
+    offsetY?: number;
+  },
+): { noteIds: string[]; arrowIds: string[] } {
+  const noteIds = new Set(noteEntries.map((n) => n.id));
+  const arrows = arrowEntries
+    .filter(
+      (a) => noteIds.has(a.model.source.value) && noteIds.has(a.model.target.value),
+    )
+    .map((a) => serializeArrow(a.model, a.id));
+  const notes = noteEntries.map((n) => serializeNote(n.model, n.id));
+
+  return pastePayload({ notes, arrows }, options);
 }

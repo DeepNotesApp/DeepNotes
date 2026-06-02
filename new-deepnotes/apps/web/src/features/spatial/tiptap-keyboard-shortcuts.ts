@@ -81,8 +81,6 @@ export const DeepNotesKeyboardShortcuts = Extension.create({
         this.editor.chain().focus().toggleSuperscript().run(),
 
       "Mod-k": () => {
-        const { from, to } = this.editor.state.selection;
-        const hasSelection = from !== to;
         const existing = this.editor.getAttributes("link").href as
           | string
           | undefined;

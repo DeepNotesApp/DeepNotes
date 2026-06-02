@@ -97,7 +97,7 @@ describe("MainToolbar", () => {
     expect(wrapper.emitted("toggle-right")).toHaveLength(1);
   });
 
-  it("shows notification icon link when authenticated and bootstrapped", () => {
+  it("shows notification icon button (inline popup) when authenticated and bootstrapped", () => {
     mockSession({ isAuthenticated: true, bootstrapped: true });
     wrapper = mount(MainToolbar, {
       props: { leftExpanded: true, rightExpanded: true },
@@ -105,9 +105,14 @@ describe("MainToolbar", () => {
 
     const links = wrapper.findAll('[data-testid="router-link"]');
     const toValues = links.map((l) => l.attributes("data-to"));
-    expect(toValues).toContain("/notifications");
+    // Notifications now open an inline popup, not a router link
+    expect(toValues).not.toContain("/notifications");
     expect(toValues).not.toContain("/pages");
     expect(toValues).not.toContain("/groups");
+
+    // Verify the notification popover component is rendered
+    const popover = wrapper.findComponent({ name: "NotificationsPopover" });
+    expect(popover.exists()).toBe(true);
   });
 
   it("shows sign in link when not authenticated", () => {

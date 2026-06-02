@@ -275,6 +275,9 @@ importers:
       lowlight:
         specifier: 3.3.0
         version: 3.3.0
+      marked:
+        specifier: ^18.0.4
+        version: 18.0.4
       msgpackr:
         specifier: ^1.11.2
         version: 1.11.12

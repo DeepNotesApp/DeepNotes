@@ -12,12 +12,16 @@ import {
   YPAGE_NOTE_KEY,
 } from "@deepnotes/collab-wire";
 
+import { marked } from "marked";
+
 import { useContainerOps } from "./container-ops";
 import { useNoteModel, type NoteModel } from "./note-model";
 import { useArrowModel, type ArrowModel } from "./arrow-model";
 import type { SpatialUndoRedo } from "./undo-redo";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 import { applyNoteTemplate, applyArrowTemplate } from "./useSpatialPage-templates";
+import { setNoteFragmentContent } from "./note-content-utils";
+import { pastePayload, cloneSelection } from "./clipboard";
 
 export type SpatialPage = ReturnType<typeof useSpatialPage>;
 
@@ -119,6 +123,7 @@ export function useSpatialPage(ydoc: Y.Doc, undoRedo?: SpatialUndoRedo) {
     removeChildFromContainer,
     moveNoteIntoContainer,
     moveNoteOutOfContainer,
+    reverseChildren,
   } = useContainerOps(ydoc, noteList, noteModels);
 
   const rootNoteList = computed(() =>
@@ -176,6 +181,81 @@ export function useSpatialPage(ydoc: Y.Doc, undoRedo?: SpatialUndoRedo) {
     return id;
   }
 
+  function cloneNotes(
+    noteEntries: { id: string; model: NoteModel }[],
+    arrowEntries: { id: string; model: ArrowModel }[],
+    offsetX = 20,
+    offsetY = 20,
+  ): { noteIds: string[]; arrowIds: string[] } {
+    return cloneSelection(noteEntries, arrowEntries, {
+      createNote: createNoteAt,
+      createArrow,
+      offsetX,
+      offsetY,
+    });
+  }
+
+  async function importChildrenFromFiles(
+    containerId: string,
+    files: File[],
+  ): Promise<void> {
+    const containerEntry = noteList.value.find((n) => n.id === containerId);
+    if (!containerEntry) return;
+
+    const containerPos = containerEntry.model.pos.value;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]!;
+      const content = await file.text();
+
+      // Create note at container position with small vertical offset so
+      // imported notes don't all stack exactly on top of each other.
+      const noteId = createNoteAt(
+        containerPos.x,
+        containerPos.y + i * 10,
+      );
+
+      // Enable container on the note so it can hold children
+      const noteMap = notesMap.get(noteId);
+      if (!noteMap) continue;
+
+      ydoc.transact(() => {
+        const headMap = noteMap.get(YPAGE_NOTE_KEY.head) as Y.Map<unknown>;
+        headMap.set("enabled", true);
+
+        const bodyMap = noteMap.get(YPAGE_NOTE_KEY.body) as Y.Map<unknown>;
+        bodyMap.set("enabled", false);
+
+        const containerMap = noteMap.get(
+          YPAGE_NOTE_KEY.container,
+        ) as Y.Map<unknown>;
+        containerMap.set("enabled", false);
+      });
+
+      // Prepare HTML to insert
+      let html: string;
+      if (file.name.endsWith(".md")) {
+        html = await marked.parse(content);
+      } else {
+        // Plain text: escape HTML and wrap in paragraph with <br> for newlines
+        const escaped = content
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\n/g, "<br>");
+        html = `<p>${escaped}</p>`;
+      }
+
+      // Populate the head fragment
+      const headMap = noteMap.get(YPAGE_NOTE_KEY.head) as Y.Map<unknown>;
+      const fragment = headMap.get("value") as Y.XmlFragment;
+      setNoteFragmentContent(fragment, html);
+
+      // Move into target container
+      moveNoteIntoContainer(noteId, containerId);
+    }
+  }
+
   return {
     noteIds,
     noteList,
@@ -190,5 +270,8 @@ export function useSpatialPage(ydoc: Y.Doc, undoRedo?: SpatialUndoRedo) {
     removeChildFromContainer,
     moveNoteIntoContainer,
     moveNoteOutOfContainer,
+    reverseChildren,
+    importChildrenFromFiles,
+    cloneNotes,
   };
 }

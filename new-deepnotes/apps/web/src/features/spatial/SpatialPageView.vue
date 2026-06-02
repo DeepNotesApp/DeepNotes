@@ -66,6 +66,8 @@ const {
   createArrow,
   moveNoteIntoContainer,
   moveNoteOutOfContainer,
+  reverseChildren,
+  importChildrenFromFiles,
 } = useSpatialPage(props.ydoc, undoRedo);
 
 function getNoteZIndex(id: string): number {
@@ -214,6 +216,8 @@ defineExpose({
   zoomIn,
   zoomOut,
   fitToScreen,
+  reverseChildren,
+  importChildrenFromFiles,
 });
 
 const {
