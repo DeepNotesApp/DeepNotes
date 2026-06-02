@@ -246,16 +246,28 @@ describe("DisplayNote", () => {
     expect(wrapper.emitted('dragstart')).toBeUndefined();
   });
 
-  it("renders 8 resize handles when resizable and not readOnly", () => {
+  it("renders 8 resize handles when selected, resizable and not readOnly", () => {
     const ydoc = createPageYDoc();
     const model = createNoteModel(ydoc, "note-1", { resizable: true, readOnly: false });
 
     wrapper = mount(DisplayNote, {
-      props: { id: "note-1", model, zoom: 1 },
+      props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
     const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
     expect(handles.length).toBe(8);
+  });
+
+  it("hides resize handles when not selected", () => {
+    const ydoc = createPageYDoc();
+    const model = createNoteModel(ydoc, "note-1", { resizable: true, readOnly: false });
+
+    wrapper = mount(DisplayNote, {
+      props: { id: "note-1", model, zoom: 1, selected: false },
+    });
+
+    const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
+    expect(handles.length).toBe(0);
   });
 
   it("hides resize handles when not resizable", () => {
@@ -263,7 +275,7 @@ describe("DisplayNote", () => {
     const model = createNoteModel(ydoc, "note-1", { resizable: false });
 
     wrapper = mount(DisplayNote, {
-      props: { id: "note-1", model, zoom: 1 },
+      props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
     const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');
@@ -275,7 +287,7 @@ describe("DisplayNote", () => {
     const model = createNoteModel(ydoc, "note-1", { resizable: true, readOnly: true });
 
     wrapper = mount(DisplayNote, {
-      props: { id: "note-1", model, zoom: 1 },
+      props: { id: "note-1", model, zoom: 1, selected: true },
     });
 
     const handles = wrapper.findAll('[data-testid="display-note"] > div.bg-primary');

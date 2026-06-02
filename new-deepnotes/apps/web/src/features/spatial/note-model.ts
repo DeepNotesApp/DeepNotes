@@ -33,6 +33,21 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
     collapsed: widthCollapsed.value,
   }));
 
+  // --- height (with backfill for docs created before the field existed) ---
+  if (!noteMap.has(YPAGE_NOTE_KEY.height)) {
+    const heightMap = new Y.Map<string>();
+    heightMap.set("expanded", "Auto");
+    heightMap.set("collapsed", "Auto");
+    noteMap.set(YPAGE_NOTE_KEY.height, heightMap);
+  }
+  const heightMap = noteMap.get(YPAGE_NOTE_KEY.height) as Y.Map<string>;
+  const heightExpanded = useYMapString(heightMap, "expanded", "Auto");
+  const heightCollapsed = useYMapString(heightMap, "collapsed", "Auto");
+  const height = computed(() => ({
+    expanded: heightExpanded.value,
+    collapsed: heightCollapsed.value,
+  }));
+
   // --- head ---
   const headMap = noteMap.get(YPAGE_NOTE_KEY.head) as Y.Map<unknown>;
   const headEnabled = useYMapBoolean(headMap, "enabled", true);
@@ -128,6 +143,7 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
   return {
     pos,
     width,
+    height,
     head: {
       enabled: headEnabled,
       wrap: headWrap,

@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Trash2, Copy, Scissors, ArrowUp, ArrowDown } from 'lucide-vue-next'
+import { Trash2, Copy, Scissors, ArrowUp, ArrowDown, ClipboardPaste, Files, ListChecks } from 'lucide-vue-next'
 
 const props = defineProps<{
   x: number
@@ -19,6 +19,9 @@ const emit = defineEmits<{
   delete: []
   copy: []
   cut: []
+  paste: []
+  duplicate: []
+  'select-all': []
   'bring-to-front': []
   'send-to-back': []
 }>()
@@ -54,6 +57,21 @@ function handleSendToBack() {
   emit('send-to-back')
   emit('close')
 }
+
+function handlePaste() {
+  emit('paste')
+  emit('close')
+}
+
+function handleDuplicate() {
+  emit('duplicate')
+  emit('close')
+}
+
+function handleSelectAll() {
+  emit('select-all')
+  emit('close')
+}
 </script>
 
 <template>
@@ -78,6 +96,11 @@ function handleSendToBack() {
 
       <DropdownMenuSeparator />
 
+      <DropdownMenuItem @click="handlePaste">
+        <ClipboardPaste class="h-4 w-4" />
+        <span>Paste</span>
+      </DropdownMenuItem>
+
       <DropdownMenuItem @click="handleCopy">
         <Copy class="h-4 w-4" />
         <span>Copy</span>
@@ -86,6 +109,16 @@ function handleSendToBack() {
       <DropdownMenuItem @click="handleCut">
         <Scissors class="h-4 w-4" />
         <span>Cut</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem @click="handleDuplicate">
+        <Files class="h-4 w-4" />
+        <span>Duplicate</span>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem @click="handleSelectAll">
+        <ListChecks class="h-4 w-4" />
+        <span>Select all</span>
       </DropdownMenuItem>
 
       <DropdownMenuSeparator />

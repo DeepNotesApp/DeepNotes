@@ -31,6 +31,7 @@ export const YPAGE_NOTE_KEY = {
   anchor: "anchor",
   pos: "pos",
   width: "width",
+  height: "height",
   head: "head",
   body: "body",
   container: "container",
@@ -152,6 +153,7 @@ export function createNoteMap(): Y.Map<unknown> {
   note.set(YPAGE_NOTE_KEY.anchor, createDefaultAnchor());
   note.set(YPAGE_NOTE_KEY.pos, createDefaultVec2());
   note.set(YPAGE_NOTE_KEY.width, createDefaultSize());
+  note.set(YPAGE_NOTE_KEY.height, createDefaultSize());
   note.set(YPAGE_NOTE_KEY.head, createDefaultTextSection(true));
   note.set(YPAGE_NOTE_KEY.body, createDefaultTextSection(false));
   note.set(YPAGE_NOTE_KEY.container, createDefaultContainer());

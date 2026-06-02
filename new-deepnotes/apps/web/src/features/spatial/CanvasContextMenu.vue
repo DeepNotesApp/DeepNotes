@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Plus, Clipboard, Trash2, Copy, Scissors } from 'lucide-vue-next'
+import { Plus, Clipboard, Trash2, Copy, Scissors, Files, ListChecks } from 'lucide-vue-next'
 import type { ClipboardNote, ClipboardArrow } from './clipboard'
 import { readClipboardPayload } from './clipboard'
 
@@ -19,6 +19,8 @@ const props = defineProps<{
   onDeleteSelected: () => void
   onCopySelected: () => void
   onCutSelected: () => void
+  onDuplicateSelected: () => void
+  onSelectAll: () => void
   hasSelection: boolean
 }>()
 
@@ -60,6 +62,16 @@ function handleCutSelected() {
   props.onCutSelected()
   emit('close')
 }
+
+function handleDuplicateSelected() {
+  props.onDuplicateSelected()
+  emit('close')
+}
+
+function handleSelectAll() {
+  props.onSelectAll()
+  emit('close')
+}
 </script>
 
 <template>
@@ -85,6 +97,11 @@ function handleCutSelected() {
       </DropdownMenuItem>
 
       <DropdownMenuSeparator v-if="hasSelection" />
+
+      <DropdownMenuItem v-if="hasSelection" @click="handleDuplicateSelected">
+        <Files class="h-4 w-4" />
+        <span>Duplicate</span>
+      </DropdownMenuItem>
 
       <DropdownMenuItem v-if="hasSelection" @click="handleCopySelected">
         <Copy class="h-4 w-4" />

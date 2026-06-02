@@ -124,7 +124,7 @@ describe("SpatialPageView", () => {
     expect(typeof (wrapper.vm as any).insertArrowBetweenSelected).toBe("function");
   });
 
-  it("renders back and forward nav buttons", () => {
+  it("renders toolbar with undo and redo buttons", () => {
     const { ydoc } = setupDocWithNotes();
     wrapper = mount(SpatialPageView, {
       props: { ydoc },
@@ -133,21 +133,11 @@ describe("SpatialPageView", () => {
 
     const buttons = wrapper.findAll("button");
     const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Back");
-    expect(titles).toContain("Forward");
+    expect(titles).toContain("Undo");
+    expect(titles).toContain("Redo");
   });
 
-  it("shows zoom percentage indicator", () => {
-    const { ydoc } = setupDocWithNotes();
-    wrapper = mount(SpatialPageView, {
-      props: { ydoc },
-      global: { stubs: { Teleport: true } },
-    });
-
-    expect(wrapper.text()).toContain("100%");
-  });
-
-  it("renders undo and redo buttons", () => {
+  it("renders toolbar with zoom and fit-to-screen buttons", () => {
     const { ydoc } = setupDocWithNotes();
     wrapper = mount(SpatialPageView, {
       props: { ydoc },
@@ -156,44 +146,8 @@ describe("SpatialPageView", () => {
 
     const buttons = wrapper.findAll("button");
     const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Undo (Ctrl+Z)");
-    expect(titles).toContain("Redo (Ctrl+Shift+Z)");
-  });
-
-  it("renders find/replace toggle button", () => {
-    const { ydoc } = setupDocWithNotes();
-    wrapper = mount(SpatialPageView, {
-      props: { ydoc },
-      global: { stubs: { Teleport: true } },
-    });
-
-    const buttons = wrapper.findAll("button");
-    const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Find and Replace (Ctrl+F)");
-  });
-
-  it("renders screenshot toggle button", () => {
-    const { ydoc } = setupDocWithNotes();
-    wrapper = mount(SpatialPageView, {
-      props: { ydoc },
-      global: { stubs: { Teleport: true } },
-    });
-
-    const buttons = wrapper.findAll("button");
-    const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Take Screenshot (Alt+Shift+S)");
-  });
-
-  it("renders reset zoom and fit-to-screen buttons", () => {
-    const { ydoc } = setupDocWithNotes();
-    wrapper = mount(SpatialPageView, {
-      props: { ydoc },
-      global: { stubs: { Teleport: true } },
-    });
-
-    const buttons = wrapper.findAll("button");
-    const titles = buttons.map((b) => b.attributes("title"));
-    expect(titles).toContain("Reset zoom");
+    expect(titles).toContain("Zoom in");
+    expect(titles).toContain("Zoom out");
     expect(titles).toContain("Fit to screen");
   });
 });

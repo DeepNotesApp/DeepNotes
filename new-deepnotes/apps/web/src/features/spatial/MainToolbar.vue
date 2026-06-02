@@ -2,15 +2,26 @@
 import { RouterLink, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useSession } from "@/features/auth/useSession";
 import { unreadNotificationCount } from "@/features/notifications/useNotificationBadge";
 import ThemeSwitcher from "@/features/theme/ThemeSwitcher.vue";
 import { isDark } from "@/features/theme/useThemePreference";
 import {
+  Bell,
   ChevronLeft,
   ChevronRight,
+  LogOut,
   PanelLeft,
   PanelRight,
+  Settings,
+  User,
 } from "lucide-vue-next";
 
 const props = defineProps<{
@@ -70,41 +81,30 @@ async function onLogout() {
       <slot />
     </div>
 
-    <!-- Page actions -->
-    <div class="hidden flex-none items-center gap-1 pr-1 md:flex">
-      <slot name="actions" />
-    </div>
-
-    <!-- Right: global nav + theme + sidebar toggle -->
+    <!-- Right: notifications + theme + profile + sidebar toggle -->
     <div class="flex flex-none items-center gap-1 pr-1">
-      <nav
+      <!-- Notifications (icon only) -->
+      <Button
         v-if="bootstrapped && isAuthenticated"
-        class="hidden items-center gap-1 md:flex"
+        as-child
+        variant="ghost"
+        size="icon"
+        class="relative h-8 w-8"
       >
-        <Button as-child size="sm" variant="ghost">
-          <RouterLink to="/pages">Pages</RouterLink>
-        </Button>
-        <Button as-child size="sm" variant="ghost">
-          <RouterLink to="/groups">Groups</RouterLink>
-        </Button>
-        <Button as-child size="sm" variant="ghost" class="relative">
-          <RouterLink to="/notifications">
-            Notifications
-            <span
-              v-if="unreadNotificationCount > 0"
-              class="bg-primary text-primary-foreground absolute -right-1 -top-1 flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-bold"
-            >
-              {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
-            </span>
-          </RouterLink>
-        </Button>
-        <Button as-child size="sm" variant="ghost">
-          <RouterLink to="/account">Account</RouterLink>
-        </Button>
-      </nav>
+        <RouterLink to="/notifications">
+          <Bell class="h-4 w-4" />
+          <span
+            v-if="unreadNotificationCount > 0"
+            class="bg-primary text-primary-foreground absolute -right-0.5 -top-0.5 flex h-3.5 min-w-[0.875rem] items-center justify-center rounded-full px-0.5 text-[9px] font-bold"
+          >
+            {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
+          </span>
+        </RouterLink>
+      </Button>
 
       <ThemeSwitcher />
 
+      <!-- Auth -->
       <template v-if="bootstrapped">
         <template v-if="!isAuthenticated">
           <Button as-child variant="ghost" size="sm">
@@ -112,14 +112,35 @@ async function onLogout() {
           </Button>
         </template>
         <template v-else>
-          <Button
-            :disabled="loading"
-            size="sm"
-            variant="ghost"
-            @click="onLogout"
-          >
-            Sign out
-          </Button>
+          <!-- Profile dropdown -->
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button
+                variant="ghost"
+                size="icon"
+                class="h-8 w-8"
+              >
+                <User class="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem as-child>
+                <RouterLink to="/account" class="flex items-center gap-2">
+                  <Settings class="h-4 w-4" />
+                  <span>Settings</span>
+                </RouterLink>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                :disabled="loading"
+                class="text-destructive focus:text-destructive flex items-center gap-2"
+                @click="onLogout"
+              >
+                <LogOut class="h-4 w-4" />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </template>
       </template>
 

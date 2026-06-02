@@ -185,6 +185,31 @@ describe("useCanvasActions", () => {
     expect(bounds.maxY).toBe(500 + 80);  // Default height
   });
 
+  it("onCanvasDoubleClick bails out when target is a note", () => {
+    mockNoteHeights(new Map());
+    const canvasRef = ref(makeCanvasRef());
+    const createNoteAt = vi.fn();
+
+    const { onCanvasDoubleClick } = useCanvasActions({
+      canvasRef,
+      rootNoteList: ref([]),
+      createNoteAt,
+    });
+
+    const noteEl = document.createElement("div");
+    noteEl.dataset.noteId = "note-1";
+    canvasRef.value.rootEl!.appendChild(noteEl);
+
+    const event = new MouseEvent("dblclick", { clientX: 100, clientY: 200, bubbles: true });
+    // Simulate the event path containing the note element
+    Object.defineProperty(event, "composedPath", {
+      value: () => [noteEl, canvasRef.value.rootEl!, document.body],
+    });
+
+    onCanvasDoubleClick(event);
+    expect(createNoteAt).not.toHaveBeenCalled();
+  });
+
   it("onCanvasDoubleClick at zoom=2 scales world coordinates correctly", () => {
     mockNoteHeights(new Map());
     const canvasRef = ref(

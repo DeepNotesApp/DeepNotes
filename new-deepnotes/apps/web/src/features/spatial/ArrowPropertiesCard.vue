@@ -15,8 +15,8 @@ const props = defineProps<{
 const emit = defineEmits({
   'update:body-type': (value: 'curve' | 'line') => true,
   'update:body-style': (value: string) => true,
-  'update:source-head': (value: boolean) => true,
-  'update:target-head': (value: boolean) => true,
+  'update:source-head': (value: string) => true,
+  'update:target-head': (value: string) => true,
   'update:color': (value: number) => true,
   'update:color-inherit': (value: boolean) => true,
   'update:read-only': (value: boolean) => true,
@@ -24,8 +24,8 @@ const emit = defineEmits({
 
 const bodyType = computed(() => props.arrowModel?.bodyType?.value ?? 'curve')
 const bodyStyle = computed(() => props.arrowModel?.bodyStyle?.value ?? 'solid')
-const sourceHead = computed(() => props.arrowModel?.sourceHead?.value !== 'none')
-const targetHead = computed(() => props.arrowModel?.targetHead?.value !== 'none')
+const sourceHead = computed(() => props.arrowModel?.sourceHead?.value ?? 'none')
+const targetHead = computed(() => props.arrowModel?.targetHead?.value ?? 'open')
 const color = computed(() => props.arrowModel?.color?.value ?? 0)
 const colorInherit = computed(() => props.arrowModel?.color?.inherit?.value ?? false)
 const readOnlyArrow = computed(() => props.arrowModel?.readOnly?.value ?? false)
@@ -74,22 +74,28 @@ function handleColorSelect(colorIndex: number) {
       <!-- Arrow Heads -->
       <div class="space-y-2">
         <Label>Arrow Heads</Label>
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <Switch
-              :model-value="sourceHead"
+        <div class="flex gap-2">
+          <div class="flex-1">
+            <select
+              :value="sourceHead"
+              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               :disabled="readOnly"
-              @update:model-value="emit('update:source-head', Boolean($event))"
-            />
-            <Label>Source</Label>
+              @change="emit('update:source-head', ($event.target as HTMLSelectElement).value)"
+            >
+              <option value="none">None</option>
+              <option value="open">Open</option>
+            </select>
           </div>
-          <div class="flex items-center gap-2">
-            <Switch
-              :model-value="targetHead"
+          <div class="flex-1">
+            <select
+              :value="targetHead"
+              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               :disabled="readOnly"
-              @update:model-value="emit('update:target-head', Boolean($event))"
-            />
-            <Label>Target</Label>
+              @change="emit('update:target-head', ($event.target as HTMLSelectElement).value)"
+            >
+              <option value="none">None</option>
+              <option value="open">Open</option>
+            </select>
           </div>
         </div>
       </div>

@@ -50,6 +50,10 @@ describe("page-doc-schema", () => {
     expect(width.get("expanded")).toBe("Auto");
     expect(width.get("collapsed")).toBe("Auto");
 
+    const height = note.get(YPAGE_NOTE_KEY.height) as Y.Map<string>;
+    expect(height.get("expanded")).toBe("Auto");
+    expect(height.get("collapsed")).toBe("Auto");
+
     const head = note.get(YPAGE_NOTE_KEY.head) as Y.Map<unknown>;
     expect(head.get("enabled")).toBe(true);
     expect(head.get("wrap")).toBe(true);

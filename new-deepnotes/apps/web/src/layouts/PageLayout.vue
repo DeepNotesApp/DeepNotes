@@ -72,7 +72,7 @@ function onResizePointerUp(e: PointerEvent) {
         class="border-border/40 bg-muted/30 relative flex flex-col overflow-hidden border-r"
         :style="{ width: `${leftWidth}px`, minWidth: `${leftWidth}px` }"
       >
-        <div class="flex-1 overflow-y-auto p-2">
+        <div class="flex-1 overflow-hidden">
           <slot name="left-sidebar" />
         </div>
 

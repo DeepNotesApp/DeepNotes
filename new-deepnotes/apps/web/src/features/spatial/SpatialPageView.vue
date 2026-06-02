@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
-import { Button } from "@/components/ui/button";
-import { Undo, Redo, RotateCcw, Search, Maximize, ArrowLeft, ArrowRight, Camera } from "lucide-vue-next";
-import { useRouter } from "vue-router";
-
 import SpatialWorldCanvas from "./SpatialWorldCanvas.vue";
 import DisplayNote from "./DisplayNote.vue";
 import DisplayArrow from "./DisplayArrow.vue";
@@ -13,6 +9,7 @@ import NoteContextMenu from "./NoteContextMenu.vue";
 import FindReplaceDialog from "./FindReplaceDialog.vue";
 import ScreenshotDialog from "./ScreenshotDialog.vue";
 import CollabAvatars from "./CollabAvatars.vue";
+import CanvasToolbar from "./CanvasToolbar.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
@@ -27,6 +24,7 @@ import { useCanvasActions } from "./useCanvasActions";
 import { useCanvasContextMenu } from "./useCanvasContextMenu";
 import { useNoteContextMenu } from "./useNoteContextMenu";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
+import { copySelection, readClipboardPayload } from "./clipboard";
 
 const props = defineProps<{
   ydoc: any;
@@ -34,8 +32,6 @@ const props = defineProps<{
   defaultNoteTemplate?: Partial<ClipboardNote> | null;
   defaultArrowTemplate?: Partial<ClipboardArrow> | null;
 }>();
-
-const router = useRouter();
 
 const emit = defineEmits<{
   'select-note': [id: string | null, model: any]
@@ -251,6 +247,68 @@ const {
   deleteNote,
 });
 
+async function handleContextMenuDuplicateSelected() {
+  await handleContextMenuCopySelected();
+  const payload = await readClipboardPayload();
+  if (payload) {
+    await handleContextMenuPaste(payload);
+  }
+}
+
+function handleContextMenuSelectAll() {
+  for (const note of noteList.value) {
+    selection.select(note.id, "note", true);
+  }
+  for (const arrow of arrowList.value) {
+    selection.select(arrow.id, "arrow", true);
+  }
+}
+
+async function handleNoteContextMenuCopy() {
+  const noteId = noteContextMenu.value.noteId;
+  if (noteId) {
+    selection.select(noteId, "note");
+    await handleContextMenuCopySelected();
+  }
+}
+
+async function handleNoteContextMenuCut() {
+  const noteId = noteContextMenu.value.noteId;
+  if (noteId) {
+    selection.select(noteId, "note");
+    await handleContextMenuCopySelected();
+    handleContextMenuDeleteSelected();
+  }
+}
+
+async function handleNoteContextMenuPaste() {
+  const payload = await readClipboardPayload();
+  if (payload) {
+    await handleContextMenuPaste(payload);
+  }
+}
+
+async function handleNoteContextMenuDuplicate() {
+  const noteId = noteContextMenu.value.noteId;
+  if (noteId) {
+    selection.select(noteId, "note");
+    await handleContextMenuCopySelected();
+    const payload = await readClipboardPayload();
+    if (payload) {
+      await handleContextMenuPaste(payload);
+    }
+  }
+}
+
+function handleNoteContextMenuSelectAll() {
+  for (const note of noteList.value) {
+    selection.select(note.id, "note", true);
+  }
+  for (const arrow of arrowList.value) {
+    selection.select(arrow.id, "arrow", true);
+  }
+}
+
 // --- keyboard shortcuts ---
 const { onKeyDown } = useSpatialKeyboard({
   selection,
@@ -285,6 +343,18 @@ onUnmounted(() => {
 
 <template>
   <div class="relative flex h-full w-full flex-col">
+    <CanvasToolbar
+      :selected-note-ids="selection.selectedOfKind('note')"
+      :can-undo="undoRedo.canUndo()"
+      :can-redo="undoRedo.canRedo()"
+      @undo="undoRedo.undo()"
+      @redo="undoRedo.redo()"
+      @insert-note="insertNoteAtCenter()"
+      @insert-arrow="insertArrowBetweenSelected()"
+      @zoom-in="zoomIn()"
+      @zoom-out="zoomOut()"
+      @fit-to-screen="fitToScreen()"
+    />
     <SpatialWorldCanvas
       ref="canvasRef"
       class="flex-1"
@@ -370,118 +440,13 @@ onUnmounted(() => {
     <!-- === Floating UI === -->
     <CollabAvatars v-if="props.awareness" :awareness="props.awareness" />
 
-    <!-- Right-side camera + undo/redo buttons -->
-    <div
-      class="pointer-events-none absolute top-14 right-3 bottom-3 z-20 flex flex-col items-end justify-start gap-1.5"
-    >
-      <div class="pointer-events-auto flex flex-col items-end gap-1.5">
-        <!-- Zoom % -->
-        <div
-          class="bg-card border-border flex h-8 items-center justify-center rounded-md border px-2 text-xs font-medium shadow-sm"
-        >
-          {{ Math.round((canvasRef?.zoom ?? 1) * 100) }}%
-        </div>
-
-        <!-- Reset zoom -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Reset zoom"
-          @click="canvasRef?.resetView()"
-        >
-          <RotateCcw class="h-4 w-4" />
-        </Button>
-
-        <!-- Fit to screen -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Fit to screen"
-          @click="fitToScreen"
-        >
-          <Maximize class="h-4 w-4" />
-        </Button>
-
-        <!-- Back/Forward nav -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Back"
-          @click="router.back()"
-        >
-          <ArrowLeft class="h-4 w-4" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Forward"
-          @click="router.forward()"
-        >
-          <ArrowRight class="h-4 w-4" />
-        </Button>
-
-        <!-- Find/Replace -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Find and Replace (Ctrl+F)"
-          @click="findReplaceOpen = true"
-        >
-          <Search class="h-4 w-4" />
-        </Button>
-
-        <!-- Screenshot -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Take Screenshot (Alt+Shift+S)"
-          @click="screenshotOpen = true"
-        >
-          <Camera class="h-4 w-4" />
-        </Button>
-
-        <!-- Undo -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Undo (Ctrl+Z)"
-          :disabled="!undoRedo.canUndo()"
-          @click="undoRedo.undo()"
-        >
-          <Undo class="h-4 w-4" />
-        </Button>
-
-        <!-- Redo -->
-        <Button
-          variant="secondary"
-          size="icon"
-          class="h-8 w-8 shadow-sm"
-          title="Redo (Ctrl+Shift+Z)"
-          :disabled="!undoRedo.canRedo()"
-          @click="undoRedo.redo()"
-        >
-          <Redo class="h-4 w-4" />
-        </Button>
-      </div>
-
-      <!-- Spacer pushes bottom items down -->
-      <div class="flex-1" />
-
-      <!-- Bottom-right: selection count -->
+    <!-- Bottom-right: selection count -->
       <div
         v-if="selection.selected.value.length > 0"
         class="bg-card border-border pointer-events-auto rounded-md border px-2 py-1 text-xs shadow-sm"
       >
         {{ selection.selected.value.length }} item{{ selection.selected.value.length === 1 ? "" : "s" }} selected
       </div>
-    </div>
 
     <!-- Canvas context menu -->
     <CanvasContextMenu
@@ -494,6 +459,8 @@ onUnmounted(() => {
       @delete-selected="handleContextMenuDeleteSelected"
       @copy-selected="handleContextMenuCopySelected"
       @cut-selected="handleContextMenuCutSelected"
+      @duplicate-selected="handleContextMenuDuplicateSelected"
+      @select-all="handleContextMenuSelectAll"
       @close="contextMenu.open = false"
     />
 
@@ -504,6 +471,11 @@ onUnmounted(() => {
       :open="noteContextMenu.open"
       @close="noteContextMenu.open = false"
       @delete="handleNoteContextMenuDelete"
+      @copy="handleNoteContextMenuCopy"
+      @cut="handleNoteContextMenuCut"
+      @paste="handleNoteContextMenuPaste"
+      @duplicate="handleNoteContextMenuDuplicate"
+      @select-all="handleNoteContextMenuSelectAll"
       @bring-to-front="handleNoteContextMenuBringToFront"
       @send-to-back="handleNoteContextMenuSendToBack"
     />

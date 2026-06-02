@@ -81,6 +81,10 @@ const transform = computed(() => {
   }
   const widthVal = (props.model.width as any)?.value ?? props.model.width;
   style.width = widthVal?.expanded === "Auto" ? "auto" : `${widthVal?.expanded}px`;
+  const heightVal = (props.model.height as any)?.value ?? props.model.height;
+  if (heightVal?.expanded !== "Auto") {
+    style.height = `${heightVal?.expanded}px`;
+  }
   const cv = colorVariants.value;
   if (cv) {
     style.borderColor = cv.base;
@@ -189,7 +193,9 @@ let resizeHandle: ResizeHandle | null = null;
 let resizeStartX = 0;
 let resizeStartY = 0;
 let resizeStartWidth = 0;
+let resizeStartHeight = 0;
 let resizeStartPosX = 0;
+let resizeStartPosY = 0;
 
 function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   if (e.button !== 0) return;
@@ -202,7 +208,11 @@ function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   const widthVal = (props.model.width as any)?.value ?? props.model.width;
   const w = widthVal?.expanded;
   resizeStartWidth = w === "Auto" ? 160 : parseFloat(w ?? "160");
+  const heightVal = (props.model.height as any)?.value ?? props.model.height;
+  const h = heightVal?.expanded;
+  resizeStartHeight = h === "Auto" ? 80 : parseFloat(h ?? "80");
   resizeStartPosX = props.model.pos.value.x;
+  resizeStartPosY = props.model.pos.value.y;
   isDragging.value = true;
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
@@ -212,6 +222,7 @@ function onResizePointerMove(e: PointerEvent) {
   if (resizePointerId !== e.pointerId || !resizeHandle) return;
   const z = props.zoom || 1;
   const dx = (e.clientX - resizeStartX) / z;
+  const dy = (e.clientY - resizeStartY) / z;
 
   const isWest = resizeHandle.includes("w");
   const nextWidth = Math.max(
@@ -219,12 +230,25 @@ function onResizePointerMove(e: PointerEvent) {
     Math.round(isWest ? resizeStartWidth - dx : resizeStartWidth + dx),
   );
 
+  const isNorth = resizeHandle.includes("n");
+  const nextHeight = Math.max(
+    40,
+    Math.round(isNorth ? resizeStartHeight - dy : resizeStartHeight + dy),
+  );
+
   const widthMap = props.model.rawMap.get("width") as import("yjs").Map<string>;
   widthMap.set("expanded", String(nextWidth));
+
+  const heightMap = props.model.rawMap.get("height") as import("yjs").Map<string>;
+  heightMap.set("expanded", String(nextHeight));
 
   if (isWest) {
     const posMap = props.model.rawMap.get("pos") as import("yjs").Map<number>;
     posMap.set("x", Math.round(resizeStartPosX + dx));
+  }
+  if (isNorth) {
+    const posMap = props.model.rawMap.get("pos") as import("yjs").Map<number>;
+    posMap.set("y", Math.round(resizeStartPosY + dy));
   }
 }
 
@@ -266,6 +290,7 @@ function onContextMenu(e: MouseEvent) {
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
     @pointercancel="onPointerUp"
+    @dblclick="emit('edit-start')"
     @contextmenu="onContextMenu"
   >
     <div class="border-border flex items-center gap-1 border-b px-2 py-1 text-xs font-medium">
@@ -329,7 +354,7 @@ function onContextMenu(e: MouseEvent) {
     </div>
 
     <!-- 8 resize handles -->
-    <template v-if="model.resizable.value && !model.readOnly.value">
+    <template v-if="model.resizable.value && !model.readOnly.value && props.selected">
       <div
         v-for="h in ([
           { key: 'nw', cls: '-top-1.5 -left-1.5 cursor-nwse-resize' },

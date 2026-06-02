@@ -10,11 +10,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useSession } from "../auth/useSession";
-import PageToolbarActions from "../spatial/PageToolbarActions.vue";
 import SpatialPageView from "../spatial/SpatialPageView.vue";
 import { useUserTemplates } from "../spatial/useUserTemplates";
 import PageEditorBacklinksCard from "./PageEditorBacklinksCard.vue";
-import PageEditorCollabStatusCard from "./PageEditorCollabStatusCard.vue";
+import PageEditorLeftSidebar from "./PageEditorLeftSidebar.vue";
 import PageEditorManagementCard from "./PageEditorManagementCard.vue";
 import PageEditorSnapshotsCard from "./PageEditorSnapshotsCard.vue";
 import NotePropertiesCard from "../spatial/NotePropertiesCard.vue";
@@ -360,17 +359,6 @@ onMounted(() => {
       @select-arrow="selectedArrowId = $event?.[0] ?? null; selectedArrowModel = $event?.[1] ?? null"
     />
 
-    <!-- === Toolbar actions === -->
-    <template #toolbar-actions>
-      <PageToolbarActions
-        @insert-note="spatialViewRef?.insertNoteAtCenter()"
-        @insert-arrow="spatialViewRef?.insertArrowBetweenSelected()"
-        @zoom-in="spatialViewRef?.zoomIn()"
-        @zoom-out="spatialViewRef?.zoomOut()"
-        @fit-to-screen="spatialViewRef?.fitToScreen()"
-      />
-    </template>
-
     <!-- === Toolbar center: breadcrumb path === -->
     <template #toolbar-center>
       <nav
@@ -401,61 +389,64 @@ onMounted(() => {
 
     <!-- === Left sidebar === -->
     <template #left-sidebar>
-      <div class="space-y-3">
+      <PageEditorLeftSidebar v-slot="{ activeTab }">
         <!-- Current path -->
-        <Card>
-          <CardHeader class="pb-2">
-            <CardTitle class="text-sm">Path</CardTitle>
-          </CardHeader>
-          <CardContent class="space-y-2 text-xs">
-            <p v-if="pathLoading" class="text-muted-foreground">Loading…</p>
-            <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
-            <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1">
-              <template v-for="(pid, i) in pathPageIds" :key="pid">
-                <span v-if="i > 0">/</span>
-                <RouterLink
-                  v-if="i < pathPageIds.length - 1"
-                  class="text-primary hover:underline"
-                  :to="`/pages/${pid}`"
+        <div v-if="activeTab === 'path'" class="space-y-3">
+          <Card>
+            <CardHeader class="pb-2">
+              <CardTitle class="text-sm">Path</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-2 text-xs">
+              <p v-if="pathLoading" class="text-muted-foreground">Loading…</p>
+              <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
+              <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1">
+                <template v-for="(pid, i) in pathPageIds" :key="pid">
+                  <span v-if="i > 0">/</span>
+                  <RouterLink
+                    v-if="i < pathPageIds.length - 1"
+                    class="text-primary hover:underline"
+                    :to="`/pages/${pid}`"
+                  >
+                    {{ pagePathLabel(pid, pageLabels) }}
+                  </RouterLink>
+                  <span v-else class="text-foreground font-medium">
+                    {{ pagePathLabel(pid, pageLabels) }}
+                  </span>
+                </template>
+              </nav>
+              <div class="flex flex-wrap gap-1">
+                <Button
+                  size="xs"
+                  variant="secondary"
+                  class="h-6 text-[10px]"
+                  :disabled="pagePrefsLoading"
+                  @click="bumpAsStarting()"
                 >
-                  {{ pagePathLabel(pid, pageLabels) }}
-                </RouterLink>
-                <span v-else class="text-foreground font-medium">
-                  {{ pagePathLabel(pid, pageLabels) }}
-                </span>
-              </template>
-            </nav>
-            <div class="flex flex-wrap gap-1">
-              <Button
-                size="xs"
-                variant="secondary"
-                class="h-6 text-[10px]"
-                :disabled="pagePrefsLoading"
-                @click="bumpAsStarting()"
-              >
-                Make starting
-              </Button>
-              <Button
-                size="xs"
-                variant="outline"
-                class="h-6 text-[10px]"
-                :disabled="pagePrefsLoading"
-                @click="toggleFavorite()"
-              >
-                {{ isFavorite ? "Unfavorite" : "Favorite" }}
-              </Button>
-            </div>
-            <p v-if="bumpMessage" class="text-muted-foreground text-[10px]">
-              {{ bumpMessage }}
-            </p>
-            <p v-if="favoriteMessage" class="text-amber-700 dark:text-amber-300 text-[10px]">
-              {{ favoriteMessage }}
-            </p>
-          </CardContent>
-        </Card>
+                  Make starting
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  class="h-6 text-[10px]"
+                  :disabled="pagePrefsLoading"
+                  @click="toggleFavorite()"
+                >
+                  {{ isFavorite ? "Unfavorite" : "Favorite" }}
+                </Button>
+              </div>
+              <p v-if="bumpMessage" class="text-muted-foreground text-[10px]">
+                {{ bumpMessage }}
+              </p>
+              <p v-if="favoriteMessage" class="text-amber-700 dark:text-amber-300 text-[10px]">
+                {{ favoriteMessage }}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <!-- Recent pages -->
         <RecentPagesCard
+          v-if="activeTab === 'recent'"
           :recent-page-ids="recentPageIds"
           :current-page-id="pageId"
           :page-labels="pageLabels"
@@ -464,6 +455,7 @@ onMounted(() => {
 
         <!-- Favorite pages -->
         <FavoritePagesCard
+          v-if="activeTab === 'favorites'"
           :favorite-page-ids="favoritePageIds"
           :current-page-id="pageId"
           :page-labels="pageLabels"
@@ -472,25 +464,13 @@ onMounted(() => {
 
         <!-- Selected pages -->
         <SelectedPagesCard
+          v-if="activeTab === 'selected'"
           :selected-page-ids="selectedPageIds"
           :current-page-id="pageId"
           :page-labels="pageLabels"
           @clear="selectedPageIds = []"
         />
-
-        <!-- Collab status mini -->
-        <PageEditorCollabStatusCard
-          :collab-loading="collabLoading"
-          :load-error="loadError"
-          :crypto-error="cryptoError"
-          :collab-ws-live="collabWsLive"
-          :collab-ws-error="collabWsError"
-          :update-count="updateCount"
-          :collab-last-index="collabLastIndex"
-          :push-error="pushError"
-          @unlock-with-password="onUnlockWithPassword($event)"
-        />
-      </div>
+      </PageEditorLeftSidebar>
     </template>
 
     <!-- === Right sidebar === -->
@@ -523,6 +503,7 @@ onMounted(() => {
           @update:anchor-x="selectedNoteModel.anchor.value.x = $event"
           @update:anchor-y="selectedNoteModel.anchor.value.y = $event"
           @update:width="selectedNoteModel.width.value.expanded = $event"
+          @update:height="selectedNoteModel.height.value.expanded = $event"
           @update:color="selectedNoteModel.color.value = $event"
           @update:color-inherit="selectedNoteModel.color.inherit.value = $event"
           @update:collapsible="selectedNoteModel.collapsing.enabled.value = $event"

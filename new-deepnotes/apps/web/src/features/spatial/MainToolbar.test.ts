@@ -97,7 +97,7 @@ describe("MainToolbar", () => {
     expect(wrapper.emitted("toggle-right")).toHaveLength(1);
   });
 
-  it("shows global nav links when authenticated and bootstrapped", () => {
+  it("shows notification icon link when authenticated and bootstrapped", () => {
     mockSession({ isAuthenticated: true, bootstrapped: true });
     wrapper = mount(MainToolbar, {
       props: { leftExpanded: true, rightExpanded: true },
@@ -105,10 +105,9 @@ describe("MainToolbar", () => {
 
     const links = wrapper.findAll('[data-testid="router-link"]');
     const toValues = links.map((l) => l.attributes("data-to"));
-    expect(toValues).toContain("/pages");
-    expect(toValues).toContain("/groups");
     expect(toValues).toContain("/notifications");
-    expect(toValues).toContain("/account");
+    expect(toValues).not.toContain("/pages");
+    expect(toValues).not.toContain("/groups");
   });
 
   it("shows sign in link when not authenticated", () => {
@@ -144,15 +143,13 @@ describe("MainToolbar", () => {
     expect(wrapper.find('[data-testid="center-slot"]').exists()).toBe(true);
   });
 
-  it("renders actions slot content", () => {
-    mockSession();
+  it("shows profile dropdown trigger when authenticated", () => {
+    mockSession({ isAuthenticated: true, bootstrapped: true });
     wrapper = mount(MainToolbar, {
       props: { leftExpanded: true, rightExpanded: true },
-      slots: {
-        actions: h("button", { "data-testid": "action-btn" }, "Action"),
-      },
     });
 
-    expect(wrapper.find('[data-testid="action-btn"]').exists()).toBe(true);
+    // The User icon button acts as the dropdown trigger
+    expect(wrapper.find('svg').exists()).toBe(true);
   });
 });

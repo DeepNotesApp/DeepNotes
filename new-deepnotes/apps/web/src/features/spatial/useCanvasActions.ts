@@ -25,6 +25,12 @@ export function useCanvasActions(input: UseCanvasActionsInput) {
   const { heights: noteHeights } = useNoteHeights();
 
   function onCanvasDoubleClick(e: MouseEvent) {
+    // Bail if the double-click originated on a note (or inside one)
+    const path = e.composedPath() as HTMLElement[];
+    for (const el of path) {
+      if (el?.dataset?.noteId) return;
+    }
+
     const canvas = input.canvasRef.value;
     if (!canvas || !canvas.rootEl) return;
 

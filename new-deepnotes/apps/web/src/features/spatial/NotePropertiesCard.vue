@@ -25,6 +25,7 @@ const emit = defineEmits<{
   'update:anchor-x': [value: number]
   'update:anchor-y': [value: number]
   'update:width': [value: string]
+  'update:height': [value: string]
   'update:color': [value: number]
   'update:color-inherit': [value: boolean]
   'update:collapsible': [value: boolean]
@@ -48,6 +49,7 @@ const posY = computed(() => props.noteModel?.pos?.value?.y ?? 0)
 const anchorX = computed(() => props.noteModel?.anchor?.value?.x ?? 0.5)
 const anchorY = computed(() => props.noteModel?.anchor?.value?.y ?? 0.5)
 const width = computed(() => props.noteModel?.width?.value?.expanded ?? 'Auto')
+const height = computed(() => props.noteModel?.height?.value?.expanded ?? 'Auto')
 const color = computed(() => props.noteModel?.color?.value ?? 0)
 const colorInherit = computed(() => props.noteModel?.color?.inherit?.value ?? false)
 const collapsible = computed(() => props.noteModel?.collapsing?.enabled?.value ?? false)
@@ -179,7 +181,7 @@ function handleColorSelect(colorIndex: number) {
           <div class="flex-1">
             <select
               :value="anchorX"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               :disabled="readOnly"
               @change="emit('update:anchor-x', Number(($event.target as HTMLSelectElement).value))"
             >
@@ -191,7 +193,7 @@ function handleColorSelect(colorIndex: number) {
           <div class="flex-1">
             <select
               :value="anchorY"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               :disabled="readOnly"
               @change="emit('update:anchor-y', Number(($event.target as HTMLSelectElement).value))"
             >
@@ -203,14 +205,27 @@ function handleColorSelect(colorIndex: number) {
         </div>
       </div>
 
-      <!-- Width -->
+      <!-- Width / Height -->
       <div class="space-y-2">
         <Label>Width</Label>
         <select
           :value="width"
-          class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+          class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           :disabled="readOnly"
           @change="emit('update:width', ($event.target as HTMLSelectElement).value as string)"
+        >
+          <option value="Auto">Auto</option>
+          <option value="Minimum">Minimum</option>
+        </select>
+      </div>
+
+      <div class="space-y-2">
+        <Label>Height</Label>
+        <select
+          :value="height"
+          class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          :disabled="readOnly"
+          @change="emit('update:height', ($event.target as HTMLSelectElement).value as string)"
         >
           <option value="Auto">Auto</option>
           <option value="Minimum">Minimum</option>
