@@ -39,7 +39,6 @@ import PageStateScreens from "./screens/PageStateScreens.vue";
 import { usePageStatus } from "./usePageStatus";
 import { useUserPageLists } from "./useUserPageLists";
 import { cursorColorForUserId } from "./page-awareness-utils";
-import { FilePlus, ArrowUpDown, Copy } from "lucide-vue-next";
 
 import type { SnapshotRow } from "./page-snapshot-list";
 
@@ -621,61 +620,6 @@ onMounted(() => {
 
           <PageEditorBacklinksCard :page-id="pageId" />
         </template>
-      </div>
-    </template>
-
-    <!-- === Right sidebar mini mode === -->
-    <template #right-sidebar-mini>
-      <div class="flex flex-col items-center gap-2">
-        <!-- Note mini actions -->
-        <template v-if="selectedNoteId">
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-8 w-8"
-            title="Create new page"
-            :disabled="cryptoError !== null"
-            @click="handleCreateNewPage"
-          >
-            <FilePlus class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-8 w-8"
-            title="Swap head and body"
-            :disabled="cryptoError !== null"
-            @click="handleSwapHeadBody"
-          >
-            <ArrowUpDown class="h-4 w-4" />
-          </Button>
-        </template>
-
-        <!-- Arrow mini actions -->
-        <template v-if="selectedArrowId">
-          <Button
-            variant="ghost"
-            size="icon"
-            class="h-8 w-8"
-            title="Swap arrowheads"
-            :disabled="cryptoError !== null"
-            @click="handleSwapArrowheads"
-          >
-            <ArrowUpDown class="h-4 w-4" />
-          </Button>
-        </template>
-
-        <!-- Common: copy link -->
-        <Button
-          v-if="selectedNoteId || selectedArrowId"
-          variant="ghost"
-          size="icon"
-          class="h-8 w-8"
-          title="Copy link"
-          @click="selectedNoteId ? handleCopyNoteLink() : handleCopyArrowLink()"
-        >
-          <Copy class="h-4 w-4" />
-        </Button>
       </div>
     </template>
 

@@ -16,11 +16,10 @@ const tabs = [
 </script>
 
 <template>
-  <div class="flex h-full w-full overflow-hidden">
-    <!-- Vertical tab strip -->
+  <div class="flex flex-col h-full w-full overflow-hidden">
+    <!-- Horizontal tab strip -->
     <div
-      class="border-border/40 bg-muted/30 flex flex-col items-center gap-1 border-r py-2"
-      style="width: 40px; min-width: 40px"
+      class="border-border/40 bg-muted/30 flex flex-row items-center gap-1 border-b px-2 py-1"
     >
       <button
         v-for="tab in tabs"
