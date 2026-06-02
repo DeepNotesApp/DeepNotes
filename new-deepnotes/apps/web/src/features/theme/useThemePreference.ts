@@ -39,7 +39,7 @@ export function toggleTheme(): void {
     localStorage.setItem(STORAGE_KEY, "dark");
   } else {
     html.classList.remove("dark");
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.setItem(STORAGE_KEY, "light");
   }
   _isDark.value = next;
 }
