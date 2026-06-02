@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Search, X, ArrowUp, ArrowDown, Replace } from 'lucide-vue-next'
+import { Search, X, ArrowUp, ArrowDown, Replace } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

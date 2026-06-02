@@ -22,7 +22,7 @@ import {
   PanelRight,
   Settings,
   User,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const props = defineProps<{
   leftExpanded?: boolean;

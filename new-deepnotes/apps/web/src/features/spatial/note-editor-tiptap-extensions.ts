@@ -24,6 +24,7 @@ import {
   MathBlockTipTapExtension,
 } from "../pages/tiptap-math-extensions";
 import { YoutubeVideoTipTapExtension } from "../pages/tiptap-youtube-extension";
+import { DeepNotesKeyboardShortcuts } from "./tiptap-keyboard-shortcuts";
 
 const noteEditorLowlight = createLowlight(common);
 
@@ -88,6 +89,7 @@ export function createNoteEditorTipTapExtensions(opts: {
       height: 360,
       controls: true,
     }),
+    DeepNotesKeyboardShortcuts,
     Placeholder.configure({ placeholder }),
     Collaboration.configure({
       fragment,

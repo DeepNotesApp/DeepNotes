@@ -6,7 +6,7 @@ import {
   Lock,
   Mail,
   User,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

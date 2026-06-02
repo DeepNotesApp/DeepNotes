@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Plus, Clipboard, Trash2, Copy, Scissors, Files, ListChecks } from 'lucide-vue-next'
+import { Plus, Clipboard, Trash2, Copy, Scissors, Files, ListChecks } from '@lucide/vue'
 import type { ClipboardNote, ClipboardArrow } from './clipboard'
 import { readClipboardPayload } from './clipboard'
 

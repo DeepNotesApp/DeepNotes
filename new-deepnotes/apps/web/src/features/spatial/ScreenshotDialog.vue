@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { Camera, X } from "lucide-vue-next";
+import { Camera, X } from "@lucide/vue";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {

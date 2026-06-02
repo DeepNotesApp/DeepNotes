@@ -526,6 +526,12 @@ onMounted(() => {
     <!-- === Right sidebar === -->
     <template #right-sidebar>
       <div class="space-y-3">
+        <div class="border-border/40 border-b pb-2 text-xs font-semibold tracking-wide uppercase">
+          <span v-if="selectedNoteId">Note Properties</span>
+          <span v-else-if="selectedArrowId">Arrow Properties</span>
+          <span v-else>Page Properties</span>
+        </div>
+
         <PagePropertiesCard
           v-if="!selectedNoteId && !selectedArrowId"
           :page-id="pageId"

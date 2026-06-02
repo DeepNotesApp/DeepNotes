@@ -23,6 +23,7 @@ import { useNoteDrag } from "./useNoteDrag";
 import { useCanvasActions } from "./useCanvasActions";
 import { useCanvasContextMenu } from "./useCanvasContextMenu";
 import { useNoteContextMenu } from "./useNoteContextMenu";
+import { YPAGE_NOTE_KEY } from "@deepnotes/collab-wire";
 import type { ClipboardNote, ClipboardArrow } from "./clipboard";
 import { copySelection, readClipboardPayload } from "./clipboard";
 
@@ -309,6 +310,18 @@ function handleNoteContextMenuSelectAll() {
   }
 }
 
+function nudgeNotes(dx: number, dy: number) {
+  for (const note of noteList.value) {
+    if (selection.isSelected(note.id)) {
+      const posMap = note.model.rawMap.get(YPAGE_NOTE_KEY.pos) as any;
+      if (posMap) {
+        posMap.set("x", (posMap.get("x") ?? 0) + dx);
+        posMap.set("y", (posMap.get("y") ?? 0) + dy);
+      }
+    }
+  }
+}
+
 // --- keyboard shortcuts ---
 const { onKeyDown } = useSpatialKeyboard({
   selection,
@@ -330,6 +343,8 @@ const { onKeyDown } = useSpatialKeyboard({
     x: canvasRef.value?.camX ?? 0,
     y: canvasRef.value?.camY ?? 0,
   }),
+  getZoom: () => canvasRef.value?.zoom ?? 1,
+  nudgeNotes,
 });
 
 onMounted(() => {

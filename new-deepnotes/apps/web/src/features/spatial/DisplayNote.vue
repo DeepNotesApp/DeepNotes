@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUpdated, ref } from "vue";
-import { ChevronDown, ChevronRight, ExternalLink } from "lucide-vue-next";
+import { ChevronDown, ChevronRight, ExternalLink } from "@lucide/vue";
 import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";

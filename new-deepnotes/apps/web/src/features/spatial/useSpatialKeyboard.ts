@@ -33,6 +33,8 @@ export interface UseSpatialKeyboardInput {
   screenshotOpen: Ref<boolean>;
   pasteCount: Ref<number>;
   getCamPos: () => { x: number; y: number };
+  getZoom?: () => number;
+  nudgeNotes?: (dx: number, dy: number) => void;
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -67,6 +69,11 @@ export function useSpatialKeyboard(input: UseSpatialKeyboardInput) {
           input.deleteArrow(id);
         }
         input.selection.clear();
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        input.undoRedo.undo();
       }
       return;
     }
@@ -151,9 +158,80 @@ export function useSpatialKeyboard(input: UseSpatialKeyboardInput) {
       return;
     }
 
+    if (e.key === "h" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      input.findReplaceOpen.value = true;
+      return;
+    }
+
     if (e.altKey && e.shiftKey && e.key === "S") {
       e.preventDefault();
       input.screenshotOpen.value = true;
+      return;
+    }
+
+    if (e.key === "F2") {
+      e.preventDefault();
+      const active = input.selection.active.value;
+      if (active) {
+        input.editing.startEditing(active.id, active.kind);
+      }
+      return;
+    }
+
+    // Duplicate selection (Ctrl+D)
+    if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      const selectedNotes = input.noteList.value.filter((n) =>
+        input.selection.isSelected(n.id),
+      );
+      const selectedArrows = input.arrowList.value.filter((a) =>
+        input.selection.isSelected(a.id),
+      );
+      if (selectedNotes.length > 0) {
+        await copySelection(selectedNotes, selectedArrows);
+        const payload = await readClipboardPayload();
+        if (payload) {
+          const result = pastePayload(payload, {
+            createNote: input.createNoteAt,
+            createArrow: input.createArrow,
+            offsetX: 20,
+            offsetY: 20,
+          });
+          input.selection.clear();
+          for (const id of result.noteIds) {
+            input.selection.select(id, "note", true);
+          }
+        }
+      }
+      return;
+    }
+
+    // Nudge selected notes with arrow keys
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      const selectedNoteIds = Array.from(input.selection.selectedOfKind("note"));
+      if (selectedNoteIds.length > 0 && input.nudgeNotes) {
+        e.preventDefault();
+        const zoom = input.getZoom?.() ?? 1;
+        const step = 1 / zoom;
+        let dx = 0;
+        let dy = 0;
+        switch (e.key) {
+          case "ArrowUp":
+            dy = -step;
+            break;
+          case "ArrowDown":
+            dy = step;
+            break;
+          case "ArrowLeft":
+            dx = -step;
+            break;
+          case "ArrowRight":
+            dx = step;
+            break;
+        }
+        input.nudgeNotes(dx, dy);
+      }
       return;
     }
 

@@ -34,7 +34,7 @@ import {
   AlignCenter,
   AlignRight,
   AlignJustify,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 import { useEditorCommandDispatcher } from "./useEditorCommandDispatcher";
 
 const props = defineProps<{

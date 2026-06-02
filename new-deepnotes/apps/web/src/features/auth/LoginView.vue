@@ -7,7 +7,7 @@ import {
   KeyRound,
   LogIn,
   Mail,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";

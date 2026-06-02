@@ -6,7 +6,7 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize,
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 const emit = defineEmits<{
   "insert-note": [];

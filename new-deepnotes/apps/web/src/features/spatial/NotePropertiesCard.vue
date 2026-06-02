@@ -6,7 +6,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ExternalLink, Copy, Palette, ArrowUpDown, FilePlus, Save } from 'lucide-vue-next'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { ExternalLink, Copy, Palette, ArrowUpDown, FilePlus, Save } from '@lucide/vue'
 
 const props = defineProps<{
   noteId: string | null
@@ -219,28 +226,36 @@ function handleColorSelect(colorIndex: number) {
         <Label>Anchor</Label>
         <div class="flex gap-2">
           <div class="flex-1">
-            <select
-              :value="anchorX"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="String(anchorX)"
               :disabled="readOnly"
-              @change="emit('update:anchor-x', Number(($event.target as HTMLSelectElement).value))"
+              @update:model-value="emit('update:anchor-x', Number($event))"
             >
-              <option value="0">Left</option>
-              <option value="0.5">Center</option>
-              <option value="1">Right</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="X" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Left</SelectItem>
+                <SelectItem value="0.5">Center</SelectItem>
+                <SelectItem value="1">Right</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div class="flex-1">
-            <select
-              :value="anchorY"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="String(anchorY)"
               :disabled="readOnly"
-              @change="emit('update:anchor-y', Number(($event.target as HTMLSelectElement).value))"
+              @update:model-value="emit('update:anchor-y', Number($event))"
             >
-              <option value="0">Top</option>
-              <option value="0.5">Center</option>
-              <option value="1">Bottom</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="Y" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">Top</SelectItem>
+                <SelectItem value="0.5">Center</SelectItem>
+                <SelectItem value="1">Bottom</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -248,28 +263,36 @@ function handleColorSelect(colorIndex: number) {
       <!-- Width / Height -->
       <div class="space-y-2">
         <Label>Width</Label>
-        <select
-          :value="width"
-          class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        <Select
+          :model-value="width"
           :disabled="readOnly"
-          @change="emit('update:width', ($event.target as HTMLSelectElement).value as string)"
+          @update:model-value="emit('update:width', $event as string)"
         >
-          <option value="Auto">Auto</option>
-          <option value="Minimum">Minimum</option>
-        </select>
+          <SelectTrigger class="h-8 w-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Auto">Auto</SelectItem>
+            <SelectItem value="Minimum">Minimum</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div class="space-y-2">
         <Label>Height</Label>
-        <select
-          :value="height"
-          class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        <Select
+          :model-value="height"
           :disabled="readOnly"
-          @change="emit('update:height', ($event.target as HTMLSelectElement).value as string)"
+          @update:model-value="emit('update:height', $event as string)"
         >
-          <option value="Auto">Auto</option>
-          <option value="Minimum">Minimum</option>
-        </select>
+          <SelectTrigger class="h-8 w-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Auto">Auto</SelectItem>
+            <SelectItem value="Minimum">Minimum</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <!-- Color -->

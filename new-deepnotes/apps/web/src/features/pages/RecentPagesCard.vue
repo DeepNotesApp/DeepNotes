@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { History, X } from 'lucide-vue-next'
+import { History, X } from '@lucide/vue'
 import { RouterLink } from 'vue-router'
 
 const props = defineProps<{

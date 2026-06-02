@@ -4,7 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Palette, Copy, Save, ArrowUpDown } from 'lucide-vue-next'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Palette, Copy, Save, ArrowUpDown } from '@lucide/vue'
 
 const props = defineProps<{
   arrowId: string | null
@@ -106,26 +113,34 @@ function handleColorSelect(colorIndex: number) {
         <Label>Arrow Heads</Label>
         <div class="flex gap-2">
           <div class="flex-1">
-            <select
-              :value="sourceHead"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="sourceHead"
               :disabled="readOnly"
-              @change="emit('update:source-head', ($event.target as HTMLSelectElement).value)"
+              @update:model-value="emit('update:source-head', $event as string)"
             >
-              <option value="none">None</option>
-              <option value="open">Open</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div class="flex-1">
-            <select
-              :value="targetHead"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="targetHead"
               :disabled="readOnly"
-              @change="emit('update:target-head', ($event.target as HTMLSelectElement).value)"
+              @update:model-value="emit('update:target-head', $event as string)"
             >
-              <option value="none">None</option>
-              <option value="open">Open</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="Target" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -147,24 +162,36 @@ function handleColorSelect(colorIndex: number) {
         <Label>Anchors</Label>
         <div class="flex gap-2">
           <div class="flex-1">
-            <select
-              :value="sourceAnchor"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="sourceAnchor"
               :disabled="readOnly"
-              @change="emit('update:source-anchor', ($event.target as HTMLSelectElement).value)"
+              @update:model-value="emit('update:source-anchor', $event as string)"
             >
-              <option v-for="opt in anchorOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="opt in anchorOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div class="flex-1">
-            <select
-              :value="targetAnchor"
-              class="h-8 w-full rounded-md border border-input bg-background px-2 text-xs ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            <Select
+              :model-value="targetAnchor"
               :disabled="readOnly"
-              @change="emit('update:target-anchor', ($event.target as HTMLSelectElement).value)"
+              @update:model-value="emit('update:target-anchor', $event as string)"
             >
-              <option v-for="opt in anchorOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
+              <SelectTrigger class="h-8 w-full text-xs">
+                <SelectValue placeholder="Target" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem v-for="opt in anchorOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.label }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { Trash2, Copy, Scissors, ArrowUp, ArrowDown, ClipboardPaste, Files, ListChecks } from 'lucide-vue-next'
+import { Trash2, Copy, Scissors, ArrowUp, ArrowDown, ClipboardPaste, Files, ListChecks } from '@lucide/vue'
 
 const props = defineProps<{
   x: number

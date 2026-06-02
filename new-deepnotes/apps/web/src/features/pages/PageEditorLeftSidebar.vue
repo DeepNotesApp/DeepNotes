@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Route, History, Star, ListChecks } from "lucide-vue-next";
+import { Route, History, Star, ListChecks } from "@lucide/vue";
 import type { Button } from "@/components/ui/button";
 
 export type LeftTab = "path" | "recent" | "favorites" | "selected";
