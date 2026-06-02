@@ -1,4 +1,4 @@
-/** Session-scoped crypto material for E2EE (mirrors legacy `sessionStorage` key names). */
+/** Tab-shared crypto material for E2EE (stored in `localStorage` so auth survives new tabs). */
 
 const P = "dn.";
 
@@ -23,36 +23,36 @@ export type StoredSessionCrypto = {
 };
 
 export function writeSessionCrypto(data: StoredSessionCrypto): void {
-  sessionStorage.setItem(CRYPTO_KEYS.sessionKey, data.sessionKeyB64);
-  sessionStorage.setItem(
+  localStorage.setItem(CRYPTO_KEYS.sessionKey, data.sessionKeyB64);
+  localStorage.setItem(
     CRYPTO_KEYS.encryptedPrivateKeyring,
     data.encryptedPrivateKeyringB64,
   );
-  sessionStorage.setItem(
+  localStorage.setItem(
     CRYPTO_KEYS.encryptedSymmetricKeyring,
     data.encryptedSymmetricKeyringB64,
   );
-  sessionStorage.setItem(CRYPTO_KEYS.sessionId, data.sessionId);
-  sessionStorage.setItem(CRYPTO_KEYS.userId, data.userId);
-  sessionStorage.setItem(CRYPTO_KEYS.publicKeyring, data.publicKeyringB64);
-  sessionStorage.setItem(
+  localStorage.setItem(CRYPTO_KEYS.sessionId, data.sessionId);
+  localStorage.setItem(CRYPTO_KEYS.userId, data.userId);
+  localStorage.setItem(CRYPTO_KEYS.publicKeyring, data.publicKeyringB64);
+  localStorage.setItem(
     CRYPTO_KEYS.personalGroupId,
     data.personalGroupId,
   );
 }
 
 export function readSessionCrypto(): StoredSessionCrypto | null {
-  const sessionKeyB64 = sessionStorage.getItem(CRYPTO_KEYS.sessionKey);
-  const encryptedPrivateKeyringB64 = sessionStorage.getItem(
+  const sessionKeyB64 = localStorage.getItem(CRYPTO_KEYS.sessionKey);
+  const encryptedPrivateKeyringB64 = localStorage.getItem(
     CRYPTO_KEYS.encryptedPrivateKeyring,
   );
-  const encryptedSymmetricKeyringB64 = sessionStorage.getItem(
+  const encryptedSymmetricKeyringB64 = localStorage.getItem(
     CRYPTO_KEYS.encryptedSymmetricKeyring,
   );
-  const sessionId = sessionStorage.getItem(CRYPTO_KEYS.sessionId);
-  const userId = sessionStorage.getItem(CRYPTO_KEYS.userId);
-  const publicKeyringB64 = sessionStorage.getItem(CRYPTO_KEYS.publicKeyring);
-  const personalGroupId = sessionStorage.getItem(CRYPTO_KEYS.personalGroupId);
+  const sessionId = localStorage.getItem(CRYPTO_KEYS.sessionId);
+  const userId = localStorage.getItem(CRYPTO_KEYS.userId);
+  const publicKeyringB64 = localStorage.getItem(CRYPTO_KEYS.publicKeyring);
+  const personalGroupId = localStorage.getItem(CRYPTO_KEYS.personalGroupId);
   if (
     sessionKeyB64 == null ||
     encryptedPrivateKeyringB64 == null ||
@@ -77,6 +77,6 @@ export function readSessionCrypto(): StoredSessionCrypto | null {
 
 export function clearSessionCrypto(): void {
   for (const k of Object.values(CRYPTO_KEYS)) {
-    sessionStorage.removeItem(k);
+    localStorage.removeItem(k);
   }
 }
