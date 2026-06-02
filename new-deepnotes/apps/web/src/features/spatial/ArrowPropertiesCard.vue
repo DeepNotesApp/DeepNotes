@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -75,14 +74,10 @@ function handleColorSelect(colorName: string) {
 </script>
 
 <template>
-  <Card v-if="arrowId" data-testid="arrow-properties-card">
-    <CardHeader class="pb-2">
-      <CardTitle class="text-sm">Arrow Properties</CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-4 text-xs">
+  <div v-if="arrowId" data-testid="arrow-properties-card" class="space-y-3 text-xs">
       <!-- Body Type -->
-      <div class="space-y-2">
-        <Label>Body Type</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Body Type</Label>
         <Select
           :model-value="bodyType"
           :disabled="readOnly"
@@ -98,9 +93,11 @@ function handleColorSelect(colorName: string) {
         </Select>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Arrow Heads -->
-      <div class="space-y-2">
-        <Label>Arrow Heads</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Arrow Heads</Label>
         <div class="flex gap-2">
           <div class="flex-1">
             <Select
@@ -147,9 +144,11 @@ function handleColorSelect(colorName: string) {
         Swap arrowheads
       </Button>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Anchors -->
-      <div class="space-y-2">
-        <Label>Anchors</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Anchors</Label>
         <div class="flex gap-2">
           <div class="flex-1">
             <Select
@@ -186,9 +185,11 @@ function handleColorSelect(colorName: string) {
         </div>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Body Style -->
-      <div class="space-y-2">
-        <Label>Body Style</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Body Style</Label>
         <Select
           :model-value="bodyStyle"
           :disabled="readOnly"
@@ -205,10 +206,12 @@ function handleColorSelect(colorName: string) {
         </Select>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Color -->
       <div class="space-y-2">
         <div class="flex items-center justify-between">
-          <Label>Color</Label>
+          <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Color</Label>
           <div class="flex items-center gap-2">
             <Switch
               :model-value="colorInherit"
@@ -229,6 +232,8 @@ function handleColorSelect(colorName: string) {
           />
         </div>
       </div>
+
+      <div class="bg-border/40 h-px" />
 
       <!-- Copy link / Set as default -->
       <div class="space-y-2">
@@ -254,7 +259,7 @@ function handleColorSelect(colorName: string) {
       </div>
 
       <!-- Timestamps -->
-      <div v-if="createdAt || editedAt" class="space-y-1 text-[11px] text-muted-foreground">
+      <div v-if="createdAt || editedAt" class="space-y-1 rounded-md bg-muted/40 px-2 py-1.5 text-[11px] text-muted-foreground">
         <div v-if="createdAt">
           <span class="font-medium text-foreground">Created:</span> {{ formatTimestamp(createdAt) }}
         </div>
@@ -263,6 +268,8 @@ function handleColorSelect(colorName: string) {
         </div>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Read-only -->
       <div class="flex items-center gap-2">
         <Switch
@@ -270,8 +277,7 @@ function handleColorSelect(colorName: string) {
           :disabled="readOnly"
           @update:model-value="emit('update:read-only', Boolean($event))"
         />
-        <Label>Read-only</Label>
+        <Label class="text-xs">Read-only</Label>
       </div>
-    </CardContent>
-  </Card>
+    </div>
 </template>

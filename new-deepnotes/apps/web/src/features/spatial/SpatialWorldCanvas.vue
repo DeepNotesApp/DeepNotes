@@ -57,7 +57,7 @@ function onAuxClick(e: MouseEvent) {
   <div
     ref="rootRef"
     data-testid="spatial-world-canvas"
-    class="border-border bg-muted/15 touch-none relative isolate h-full overflow-hidden rounded-md border select-none"
+    class="bg-[#e8e8e8] dark:bg-[#1a1a1a] touch-none relative isolate h-full overflow-hidden select-none"
     :class="rootCursorClass"
     @wheel.prevent="onWheel"
     @pointerdown="onPointerDown"
@@ -67,7 +67,7 @@ function onAuxClick(e: MouseEvent) {
     @auxclick="onAuxClick"
   >
     <div
-      class="bg-size-[24px_24px] pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.35)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.35)_1px,transparent_1px)] opacity-80"
+      class="bg-size-[24px_24px] pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.06)_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.07)_1px,transparent_1px)]"
       aria-hidden="true"
     />
     <div class="absolute top-1/2 left-1/2 h-0 w-0">

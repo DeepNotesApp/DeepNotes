@@ -40,12 +40,8 @@ defineEmits<{
 
 <template>
   <Card>
-    <CardHeader>
-      <CardTitle class="text-base">Path and prefs</CardTitle>
-      <CardDescription>
-        Breadcrumb toward your personal main page, plus starting-page bump and favorites (legacy
-        <code class="font-mono text-xs">users.pages</code> / <code class="font-mono text-xs">pages.bump</code>).
-      </CardDescription>
+    <CardHeader class="pb-2">
+      <CardTitle class="text-sm">Path</CardTitle>
     </CardHeader>
     <CardContent class="space-y-3 text-sm">
       <p v-if="pathLoading" class="text-muted-foreground">Loading path…</p>

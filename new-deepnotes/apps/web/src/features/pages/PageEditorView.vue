@@ -813,8 +813,7 @@ onMounted(() => {
 
     <!-- === Right sidebar === -->
     <template #right-sidebar>
-      <div class="space-y-3">
-        <PagePropertiesCard
+      <PagePropertiesCard
           v-if="!selectedNoteId && !selectedArrowId"
           :page-id="pageId"
           :relative-title="currentPageRelativeTitle"
@@ -910,7 +909,6 @@ onMounted(() => {
 
           <PageEditorBacklinksCard :page-id="pageId" />
         </template>
-      </div>
     </template>
 
     <!-- === Floating overlay === -->

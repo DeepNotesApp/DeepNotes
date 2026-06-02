@@ -35,7 +35,7 @@ describe("color-utils", () => {
   describe("resolveNoteColorVariants", () => {
     it("resolves known color names to variants", () => {
       const variants = resolveNoteColorVariants("red");
-      expect(variants.base).toBe("#ef4444");
+      expect(variants.base).toBe("#6C1313");
       expect(variants.light).toMatch(/^#/);
       expect(variants.highlight).toMatch(/^#/);
     });

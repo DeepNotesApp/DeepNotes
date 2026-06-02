@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -226,11 +225,7 @@ function exportAsMarkdown(download: boolean) {
 </script>
 
 <template>
-  <Card v-if="noteId" data-testid="note-properties-card">
-    <CardHeader class="pb-2">
-      <CardTitle class="text-sm">Note Properties</CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-4 text-xs">
+  <div v-if="noteId" data-testid="note-properties-card" class="space-y-3 text-xs">
       <!-- Link -->
       <div class="space-y-2">
         <Label>Link</Label>
@@ -464,6 +459,8 @@ function exportAsMarkdown(download: boolean) {
         </div>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Copy link / Set as default / Export -->
       <div class="space-y-2">
         <Button
@@ -510,7 +507,7 @@ function exportAsMarkdown(download: boolean) {
       </div>
 
       <!-- Timestamps -->
-      <div v-if="createdAt || editedAt || movedAt" class="space-y-1 text-[11px] text-muted-foreground">
+      <div v-if="createdAt || editedAt || movedAt" class="space-y-1 rounded-md bg-muted/40 px-2 py-1.5 text-[11px] text-muted-foreground">
         <div v-if="createdAt">
           <span class="font-medium text-foreground">Created:</span> {{ formatTimestamp(createdAt) }}
         </div>
@@ -522,6 +519,8 @@ function exportAsMarkdown(download: boolean) {
         </div>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Collapsing -->
       <div class="space-y-2">
         <div class="flex items-center gap-2">
@@ -530,33 +529,35 @@ function exportAsMarkdown(download: boolean) {
             :disabled="readOnly"
             @update:model-value="emit('update:collapsible', $event as boolean)"
           />
-          <Label>Collapsible</Label>
+          <Label class="text-xs">Collapsible</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="collapsed"
             :disabled="readOnly || !collapsible"
             @update:model-value="emit('update:collapsed', $event as boolean)"
           />
-          <Label>Collapsed</Label>
+          <Label class="text-xs">Collapsed</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="localCollapsing"
             :disabled="readOnly || !collapsible"
             @update:model-value="emit('update:local-collapsing', $event as boolean)"
           />
-          <Label>Local collapsing</Label>
+          <Label class="text-xs">Local collapsing</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="locallyCollapsed"
             :disabled="readOnly || !collapsible || !localCollapsing"
             @update:model-value="emit('update:locally-collapsed', $event as boolean)"
           />
-          <Label>Locally collapsed</Label>
+          <Label class="text-xs">Locally collapsed</Label>
         </div>
       </div>
+
+      <div class="bg-border/40 h-px" />
 
       <!-- Container -->
       <div class="space-y-2">
@@ -566,49 +567,49 @@ function exportAsMarkdown(download: boolean) {
             :disabled="readOnly"
             @update:model-value="emit('update:container-enabled', $event as boolean)"
           />
-          <Label>Container</Label>
+          <Label class="text-xs">Container</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="containerSpatial"
             :disabled="readOnly || !containerEnabled"
             @update:model-value="emit('update:container-spatial', $event as boolean)"
           />
-          <Label>Spatial</Label>
+          <Label class="text-xs">Spatial</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="containerHorizontal"
             :disabled="readOnly || !containerEnabled"
             @update:model-value="emit('update:container-horizontal', $event as boolean)"
           />
-          <Label>Horizontal layout</Label>
+          <Label class="text-xs">Horizontal layout</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="containerWrapChildren"
             :disabled="readOnly || !containerEnabled"
             @update:model-value="emit('update:container-wrap-children', $event as boolean)"
           />
-          <Label>Wrap children</Label>
+          <Label class="text-xs">Wrap children</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="containerStretchChildren"
             :disabled="readOnly || !containerEnabled"
             @update:model-value="emit('update:container-stretch-children', $event as boolean)"
           />
-          <Label>Stretch children</Label>
+          <Label class="text-xs">Stretch children</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6">
+        <div class="flex items-center gap-2 pl-5">
           <Switch
             :model-value="containerForceColorInheritance"
             :disabled="readOnly || !containerEnabled"
             @update:model-value="emit('update:container-force-color-inheritance', $event as boolean)"
           />
-          <Label>Force color inheritance</Label>
+          <Label class="text-xs">Force color inheritance</Label>
         </div>
-        <div class="flex items-center gap-2 pl-6 pt-1">
+        <div class="flex items-center gap-2 pl-5 pt-1">
           <Button
             variant="outline"
             size="sm"
@@ -638,6 +639,8 @@ function exportAsMarkdown(download: boolean) {
         </div>
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Movable/Resizable -->
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
@@ -646,7 +649,7 @@ function exportAsMarkdown(download: boolean) {
             :disabled="readOnly"
             @update:model-value="emit('update:movable', $event as boolean)"
           />
-          <Label>Movable</Label>
+          <Label class="text-xs">Movable</Label>
         </div>
         <div class="flex items-center gap-2">
           <Switch
@@ -654,7 +657,7 @@ function exportAsMarkdown(download: boolean) {
             :disabled="readOnly"
             @update:model-value="emit('update:resizable', $event as boolean)"
           />
-          <Label>Resizable</Label>
+          <Label class="text-xs">Resizable</Label>
         </div>
       </div>
 
@@ -665,8 +668,7 @@ function exportAsMarkdown(download: boolean) {
           :disabled="readOnly"
           @update:model-value="emit('update:read-only', $event as boolean)"
         />
-        <Label>Read-only</Label>
+        <Label class="text-xs">Read-only</Label>
       </div>
-    </CardContent>
-  </Card>
+    </div>
 </template>

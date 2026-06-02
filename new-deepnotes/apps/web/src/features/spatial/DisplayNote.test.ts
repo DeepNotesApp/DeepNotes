@@ -134,12 +134,12 @@ describe("DisplayNote", () => {
     const model = createNoteModel(ydoc, "note-1", { colorInherit: true });
 
     wrapper = mount(DisplayNote, {
-      props: { id: "note-1", model, zoom: 1, parentColor: "#ef4444" },
+      props: { id: "note-1", model, zoom: 1, parentColor: "#6C1313" },
     });
 
     const el = wrapper.find('[data-testid="display-note"]');
     const style = el.attributes("style");
-    expect(style).toContain("border-color: #ef4444");
+    expect(style).toContain("background-color: #6C1313");
   });
 
   it("uses own color when color.inherit is false", () => {
@@ -152,7 +152,7 @@ describe("DisplayNote", () => {
 
     const el = wrapper.find('[data-testid="display-note"]');
     const style = el.attributes("style");
-    expect(style).toContain("border-color: #3b82f6");
+    expect(style).toContain("background-color: #102C7A");
   });
 
   function mockPointerCapture(el: { element: Element }) {

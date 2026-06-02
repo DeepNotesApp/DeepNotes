@@ -5,7 +5,7 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { computeArrowEndpoints } from "./arrow-geometry";
-import { resolveNoteColorVariants } from "./color-utils";
+import { resolveArrowColor } from "./color-utils";
 
 const props = defineProps<{
   id: string;
@@ -24,9 +24,8 @@ const emit = defineEmits<{
 
 const labelFragment = computed(() => props.model.label.value);
 
-const colorVariants = computed(() => {
-  const c = props.model.color.value;
-  return resolveNoteColorVariants(c ?? "currentColor");
+const arrowColor = computed(() => {
+  return resolveArrowColor(props.model.color.value);
 });
 
 const { heights: noteHeights } = useNoteHeights();
@@ -37,6 +36,13 @@ const isLooseSource = computed(() =>
 const isLooseTarget = computed(() =>
   props.model.looseEndpoint.value === "target" || !props.targetModel,
 );
+
+const strokeDasharray = computed(() => {
+  const style = props.model.bodyStyle.value;
+  if (style === "dashed") return "8 6";
+  if (style === "dotted") return "2 4";
+  return "none";
+});
 
 const geometry = computed(() => {
   const s = props.sourceModel;
@@ -194,7 +200,7 @@ function onPointerDown(e: PointerEvent) {
         refY="5"
         orient="auto-start-reverse"
       >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="colorVariants.base" stroke-width="1.5" />
+        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
       </marker>
       <marker
         :id="`arrowhead-source-${model.source.value}-${model.target.value}`"
@@ -204,7 +210,7 @@ function onPointerDown(e: PointerEvent) {
         refY="5"
         orient="auto-start-reverse"
       >
-        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="colorVariants.base" stroke-width="1.5" />
+        <path d="M 0 1 L 9 5 L 0 9" fill="none" :stroke="arrowColor" stroke-width="1.5" />
       </marker>
     </defs>
 
@@ -222,8 +228,9 @@ function onPointerDown(e: PointerEvent) {
     <path
       :d="geometry.pathD"
       fill="none"
-      :stroke="selected ? 'var(--primary)' : colorVariants.base"
-      :stroke-width="selected ? 3 : 2"
+      :stroke="selected ? '#2196f3' : arrowColor"
+      :stroke-width="selected ? 4 : 4"
+      :stroke-dasharray="strokeDasharray"
       stroke-linecap="round"
       :marker-end="model.targetHead.value ? `url(#arrowhead-target-${model.source.value}-${model.target.value})` : ''"
       :marker-start="model.sourceHead.value ? `url(#arrowhead-source-${model.source.value}-${model.target.value})` : ''"
@@ -259,7 +266,7 @@ function onPointerDown(e: PointerEvent) {
       :cx="geometry.localX1"
       :cy="geometry.localY1"
       r="4"
-      :fill="colorVariants.base"
+      :fill="arrowColor"
       stroke="white"
       stroke-width="1.5"
     />
@@ -268,7 +275,7 @@ function onPointerDown(e: PointerEvent) {
       :cx="geometry.localX2"
       :cy="geometry.localY2"
       r="4"
-      :fill="colorVariants.base"
+      :fill="arrowColor"
       stroke="white"
       stroke-width="1.5"
     />
@@ -282,7 +289,7 @@ function onPointerDown(e: PointerEvent) {
       height="32"
       class="pointer-events-auto"
     >
-      <div class="h-full w-full" @focusin="emit('edit-start')">
+      <div class="bg-background/90 dark:bg-background/90 h-full w-full rounded px-1 shadow-sm" @focusin="emit('edit-start')">
         <NoteTiptapEditor
           :fragment="labelFragment"
           :editable="!props.model.readOnly.value"

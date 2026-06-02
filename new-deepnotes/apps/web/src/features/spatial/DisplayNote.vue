@@ -5,7 +5,7 @@ import type { NoteModel } from "./note-model";
 import NoteTiptapEditor from "./NoteTiptapEditor.vue";
 import { useNoteHeights } from "./useNoteHeights";
 import { CONTAINER_CONTENT_OFFSET_Y } from "./spatial-constants";
-import { resolveNoteColorVariants } from "./color-utils";
+import { resolveNoteColor } from "./color-utils";
 
 const props = defineProps<{
   id: string;
@@ -59,14 +59,13 @@ onUpdated(() => {
   publishOriginOffset();
 });
 
-const colorVariants = computed(() => {
+const noteColor = computed(() => {
   const c = props.model.color.value;
   const baseColor = c.inherit ? props.parentColor : null;
   if (baseColor) {
-    // When inheriting, resolve variants from the parent color directly
-    return resolveNoteColorVariants(baseColor);
+    return resolveNoteColor(baseColor);
   }
-  return resolveNoteColorVariants(c.value ?? "grey");
+  return resolveNoteColor(c.value ?? "grey");
 });
 
 const headFrag = computed(() => props.model.head.value.value);
@@ -80,16 +79,14 @@ const transform = computed(() => {
     style.zIndex = props.model.zIndex.value;
   }
   const widthVal = (props.model.width as any)?.value ?? props.model.width;
-  style.width = widthVal?.expanded === "Auto" ? "auto" : `${widthVal?.expanded}px`;
+  const w = widthVal?.expanded;
+  style.width = w === "Auto" || w === "Minimum" ? "auto" : `${w}px`;
   const heightVal = (props.model.height as any)?.value ?? props.model.height;
-  if (heightVal?.expanded !== "Auto") {
-    style.height = `${heightVal?.expanded}px`;
+  const h = heightVal?.expanded;
+  if (h !== "Auto" && h !== "Minimum") {
+    style.height = `${h}px`;
   }
-  const cv = colorVariants.value;
-  if (cv) {
-    style.borderColor = cv.base;
-    style.backgroundColor = `${cv.light}40`; // ~25% opacity light variant
-  }
+  style.backgroundColor = noteColor.value;
   return style;
 });
 
@@ -104,9 +101,9 @@ const frameClasses = computed(() => {
   const ro = props.model.readOnly.value;
   const movable = props.model.movable.value && !ro;
   return [
-    "border-border bg-card text-card-foreground pointer-events-auto rounded-md border shadow-sm select-none transition-opacity",
+    "pointer-events-auto select-none transition-opacity text-white",
     props.isFlexChild ? "relative flex-none" : "absolute top-0 left-0",
-    ro ? "opacity-60 cursor-not-allowed" : "",
+    ro ? "cursor-not-allowed" : "",
     isDragging.value ? "opacity-70" : "",
     movable ? "cursor-grab active:cursor-grabbing" : "cursor-default",
     props.selected ? "ring-2 ring-[#2196f3]" : "",
@@ -285,7 +282,8 @@ function onContextMenu(e: MouseEvent) {
     data-testid="display-note"
     :data-note-id="id"
     :class="frameClasses"
-    :style="transform"
+    :style="[transform, { borderRadius: '7px' }]"
+    class="overflow-hidden border border-black/15 dark:border-white/30"
     @pointerdown="onPointerDown"
     @pointermove="onPointerMove"
     @pointerup="onPointerUp"
@@ -293,16 +291,16 @@ function onContextMenu(e: MouseEvent) {
     @dblclick="emit('edit-start')"
     @contextmenu="onContextMenu"
   >
-    <div class="border-border flex items-center gap-1 border-b px-2 py-1 text-xs font-medium">
+    <div class="flex items-center gap-1 border-b border-white/10 dark:border-white/10 px-2 py-1 text-xs font-medium">
       <button
         v-if="model.collapsing.enabled.value && !model.readOnly.value"
-        class="text-muted-foreground hover:text-foreground focus:outline-none"
+        class="text-white/70 hover:text-white focus:outline-none"
         @pointerdown.stop="toggleCollapsed"
       >
         <ChevronDown v-if="!model.collapsing.collapsed.value" class="h-3 w-3" />
         <ChevronRight v-else class="h-3 w-3" />
       </button>
-      <span v-if="!model.head.enabled.value" class="text-muted-foreground flex-1 truncate">
+      <span v-if="!model.head.enabled.value" class="text-white/50 flex-1 truncate">
         Note
       </span>
       <span v-else class="flex-1" />
@@ -313,7 +311,7 @@ function onContextMenu(e: MouseEvent) {
         :href="model.link.value"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-muted-foreground hover:text-primary pointer-events-auto ml-auto"
+        class="text-white/70 hover:text-white pointer-events-auto ml-auto"
         title="Open link"
         @pointerdown.stop
       >
@@ -417,7 +415,7 @@ function onContextMenu(e: MouseEvent) {
           :id="child.id"
           :model="child.model"
           :zoom="zoom"
-          :parent-color="colorVariants.base"
+          :parent-color="noteColor"
           :is-flex-child="!containerSpatial"
           @dragend="$emit('dragend', $event)"
         />

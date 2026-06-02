@@ -1,7 +1,51 @@
 /**
- * Hex color manipulation utilities to match legacy color variants.
- * Legacy used `lightenByRatio` from `@stdlib/color`.
+ * DeepNotes legacy color palette.
+ * Matches exactly the colors from apps/client/src/code/pages/colors.ts
  */
+
+export type ColorName =
+  | 'grey'
+  | 'red'
+  | 'brown'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'teal'
+  | 'sky'
+  | 'blue'
+  | 'violet'
+  | 'purple'
+  | 'pink'
+
+export const noteColorMap: Record<ColorName, string> = {
+  grey: '#2F2F2F',
+  red: '#6C1313',
+  brown: '#542D11',
+  orange: '#7B2F07',
+  yellow: '#776109',
+  green: '#0E5428',
+  teal: '#08564E',
+  sky: '#065072',
+  blue: '#102C7A',
+  violet: '#3E177A',
+  purple: '#4B1972',
+  pink: '#61116B',
+}
+
+export const arrowColorMap: Record<ColorName, string> = {
+  grey: '#858585',
+  red: '#B80909',
+  brown: '#81370E',
+  orange: '#CC6200',
+  yellow: '#C19700',
+  green: '#13A906',
+  teal: '#14B8A6',
+  sky: '#0EA5E9',
+  blue: '#1D4ED8',
+  violet: '#7F2DFF',
+  purple: '#9C29FF',
+  pink: '#C91CDA',
+}
 
 export interface ColorVariants {
   base: string;
@@ -33,7 +77,6 @@ function lightenRgb(
   rgb: { r: number; g: number; b: number },
   ratio: number,
 ): { r: number; g: number; b: number } {
-  // Blend toward white by ratio (0 = no change, 1 = white)
   return {
     r: rgb.r + (255 - rgb.r) * ratio,
     g: rgb.g + (255 - rgb.g) * ratio,
@@ -48,21 +91,16 @@ export function lightenColor(hex: string, ratio: number): string {
   return rgbToHex(lightened.r, lightened.g, lightened.b);
 }
 
+export function resolveNoteColor(colorValue: string | undefined): string {
+  return noteColorMap[colorValue as ColorName] ?? colorValue ?? noteColorMap.grey
+}
+
+export function resolveArrowColor(colorValue: string | undefined): string {
+  return arrowColorMap[colorValue as ColorName] ?? colorValue ?? arrowColorMap.grey
+}
+
 export function resolveNoteColorVariants(colorValue: string | undefined): ColorVariants {
-  const colorMap: Record<string, string> = {
-    grey: "#9ca3af",
-    red: "#ef4444",
-    green: "#22c55e",
-    blue: "#3b82f6",
-    yellow: "#eab308",
-    purple: "#a855f7",
-    orange: "#f97316",
-    pink: "#ec4899",
-    cyan: "#06b6d4",
-    black: "#171717",
-    white: "#f5f5f5",
-  };
-  const base = (colorValue ? colorMap[colorValue] : undefined) ?? colorValue ?? "#9ca3af";
+  const base = resolveNoteColor(colorValue)
   return {
     base,
     light: lightenColor(base, 0.35),

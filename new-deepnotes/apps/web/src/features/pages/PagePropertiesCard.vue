@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,14 +30,10 @@ function handleCopyId() {
 </script>
 
 <template>
-  <Card>
-    <CardHeader class="pb-2">
-      <CardTitle class="text-sm">Page Properties</CardTitle>
-    </CardHeader>
-    <CardContent class="space-y-4 text-xs">
+  <div class="space-y-3 text-xs">
       <!-- Relative Title -->
-      <div class="space-y-2">
-        <Label>Relative Title</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Relative Title</Label>
         <Input
           :model-value="relativeTitle"
           placeholder="Page title"
@@ -48,9 +43,11 @@ function handleCopyId() {
         />
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Absolute Title -->
-      <div class="space-y-2">
-        <Label>Absolute Title</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Absolute Title</Label>
         <Input
           :model-value="absoluteTitle"
           placeholder="Full page title"
@@ -60,9 +57,11 @@ function handleCopyId() {
         />
       </div>
 
+      <div class="bg-border/40 h-px" />
+
       <!-- Page ID -->
-      <div class="space-y-2">
-        <Label>Page ID</Label>
+      <div class="space-y-1">
+        <Label class="text-[10px] uppercase tracking-wider text-muted-foreground">Page ID</Label>
         <div class="flex gap-2">
           <Input
             :model-value="pageId"
@@ -79,6 +78,8 @@ function handleCopyId() {
           </Button>
         </div>
       </div>
+
+      <div class="bg-border/40 h-px" />
 
       <!-- Copy Link -->
       <Button
@@ -103,6 +104,5 @@ function handleCopyId() {
         <Star v-else class="h-3 w-3 mr-2" />
         {{ isFavorite ? 'Remove from favorites' : 'Add to favorites' }}
       </Button>
-    </CardContent>
-  </Card>
+    </div>
 </template>

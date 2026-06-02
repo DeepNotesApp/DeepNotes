@@ -176,7 +176,7 @@ describe("DisplayArrow", () => {
     const visiblePath = wrapper.findAll('path').find((p) =>
       p.attributes('stroke-linecap') === 'round',
     );
-    expect(visiblePath?.attributes('stroke')).toBe('var(--primary)');
+    expect(visiblePath?.attributes('stroke')).toBe('#2196f3');
   });
 
   it("uses arrow color stroke when not selected", () => {
@@ -188,7 +188,7 @@ describe("DisplayArrow", () => {
     const visiblePath = wrapper.findAll('path').find((p) =>
       p.attributes('stroke-linecap') === 'round',
     );
-    expect(visiblePath?.attributes('stroke')).toBe('#ef4444');
+    expect(visiblePath?.attributes('stroke')).toBe('#B80909');
   });
 
   it("renders target head marker when targetHead is open", () => {
