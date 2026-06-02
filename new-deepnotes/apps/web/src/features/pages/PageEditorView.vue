@@ -27,6 +27,8 @@ import { createPageCollabDoc } from "./page-yjs-doc";
 import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
+import { base64ToBytes } from "@deepnotes/e2ee";
+import { decryptPageRelativeTitle } from "./page-collab-crypto";
 import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { usePageSnapshots } from "./usePageSnapshots";
 import PageLayout from "@/layouts/PageLayout.vue";
@@ -166,6 +168,31 @@ const { pathPageLabels } = usePagePathRealtimeTitles({
   collabLoading,
   cryptoError,
 });
+
+// Fallback: decrypt current page title from bootstrap data when realtime
+// WS hasn't provided it yet.
+watch(
+  [pageId, pageKeyring, pageEncRelTitleB64],
+  () => {
+    const id = pageId.value;
+    const pk = pageKeyring.value;
+    const b64 = pageEncRelTitleB64.value;
+    if (!id || !pk || !b64) return;
+    try {
+      const title = decryptPageRelativeTitle({
+        pageKeyring: pk,
+        pageId: id,
+        ciphertext: base64ToBytes(b64),
+      });
+      if (title && title.length > 0) {
+        pathPageLabels.value = { ...pathPageLabels.value, [id]: title };
+      }
+    } catch {
+      // ignore decrypt failures
+    }
+  },
+  { immediate: true },
+);
 
 const snapshotsApi = usePageSnapshots({
   pageId,

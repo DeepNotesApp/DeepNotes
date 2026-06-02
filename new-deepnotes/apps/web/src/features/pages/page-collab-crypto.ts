@@ -196,6 +196,22 @@ export function decryptPageDocUpdate(input: {
   });
 }
 
+/** Legacy `PageRelativeTitle` AAD. */
+export function decryptPageRelativeTitle(input: {
+  pageKeyring: SymmetricKeyring;
+  pageId: string;
+  ciphertext: Uint8Array;
+}): string {
+  const plain = input.pageKeyring.decrypt(input.ciphertext, {
+    padding: true,
+    associatedData: {
+      context: "PageRelativeTitle",
+      pageId: input.pageId,
+    },
+  });
+  return new TextDecoder().decode(plain);
+}
+
 /** Legacy `PageAbsoluteTitle` AAD (realtime hash `encrypted-absolute-title`). */
 export function decryptPageAbsoluteTitle(input: {
   pageKeyring: SymmetricKeyring;

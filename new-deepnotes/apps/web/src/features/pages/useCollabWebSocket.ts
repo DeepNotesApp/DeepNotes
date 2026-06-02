@@ -28,6 +28,9 @@ export function useCollabWebSocket(opts: {
   const collabWsError = opts.collabWsError ?? ref<string | null>(null);
   let collabWs: WebSocket | null = null;
   let awarenessPushTimer: ReturnType<typeof setTimeout> | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let reconnectAttempts = 0;
+  const MAX_RECONNECT_DELAY = 30000;
 
   const hydrating = opts.hydrating ?? ref(false);
 
@@ -119,9 +122,14 @@ export function useCollabWebSocket(opts: {
   function teardownCollabWebSocket() {
     collabWsLive.value = false;
     collabWsError.value = null;
+    reconnectAttempts = 0;
     if (awarenessPushTimer != null) {
       clearTimeout(awarenessPushTimer);
       awarenessPushTimer = null;
+    }
+    if (reconnectTimer != null) {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
     }
     try {
       removeAwarenessStates(
@@ -133,9 +141,20 @@ export function useCollabWebSocket(opts: {
       // ignore
     }
     if (collabWs != null) {
-      collabWs.close();
+      const oldWs = collabWs;
       collabWs = null;
+      oldWs.close();
     }
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimer != null) return;
+    const delay = Math.min(1000 * 2 ** reconnectAttempts, MAX_RECONNECT_DELAY);
+    reconnectTimer = setTimeout(() => {
+      reconnectTimer = null;
+      reconnectAttempts++;
+      connectCollabWebSocket();
+    }, delay);
   }
 
   function connectCollabWebSocket() {
@@ -163,8 +182,10 @@ export function useCollabWebSocket(opts: {
       collabWsError.value = "Live collab WebSocket error.";
     };
     ws.onclose = () => {
+      if (collabWs !== ws) return; // stale close from old socket
       collabWsLive.value = false;
       collabWs = null;
+      scheduleReconnect();
     };
     ws.onmessage = (ev: MessageEvent) => {
       if (!(ev.data instanceof ArrayBuffer)) {
