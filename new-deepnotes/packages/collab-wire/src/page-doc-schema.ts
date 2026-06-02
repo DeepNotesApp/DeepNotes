@@ -116,6 +116,7 @@ function createDefaultContainer(): Y.Map<unknown> {
   m.set("stretchChildren", true);
   m.set("forceColorInheritance", false);
   m.set("children", new Y.Array<string>());
+  m.set("height", createDefaultSize());
   return m;
 }
 

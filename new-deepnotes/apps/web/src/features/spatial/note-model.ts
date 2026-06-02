@@ -97,6 +97,21 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
   const containerChildrenArr = containerMap.get("children") as Y.Array<string>;
   const containerChildren = useYArrayValues<string>(containerChildrenArr);
 
+  // backfill container height for docs created before the field existed
+  if (!containerMap.has("height")) {
+    const chMap = new Y.Map<string>();
+    chMap.set("expanded", "Auto");
+    chMap.set("collapsed", "Auto");
+    containerMap.set("height", chMap);
+  }
+  const containerHeightMap = containerMap.get("height") as Y.Map<string>;
+  const containerHeightExpanded = useYMapString(containerHeightMap, "expanded", "Auto");
+  const containerHeightCollapsed = useYMapString(containerHeightMap, "collapsed", "Auto");
+  const containerHeight = computed(() => ({
+    expanded: containerHeightExpanded.value,
+    collapsed: containerHeightCollapsed.value,
+  }));
+
   // Runtime-only properties (not in Yjs schema, computed locally)
   const containerOverflow = computed(() => {
     // overflow is true when children exceed container bounds
@@ -174,6 +189,7 @@ export function useNoteModel(noteMap: Y.Map<unknown>) {
       forceColorInheritance: containerForceColorInheritance,
       overflow: containerOverflow,
       children: containerChildren,
+      height: containerHeight,
     },
     collapsing: {
       enabled: collapsingEnabled,
