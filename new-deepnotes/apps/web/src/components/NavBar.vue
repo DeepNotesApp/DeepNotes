@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/features/auth/useSession";
@@ -8,11 +8,13 @@ import ThemeSwitcher from "@/features/theme/ThemeSwitcher.vue";
 import { isDark } from "@/features/theme/useThemePreference";
 
 const { isAuthenticated, bootstrapped, loading, logout } = useSession();
+const router = useRouter();
 
 const marketingUrl = import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/$/, "") || "https://deepnotes.app";
 
 async function onLogout() {
   await logout();
+  await router.push("/login");
 }
 </script>
 

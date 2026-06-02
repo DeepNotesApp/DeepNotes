@@ -2,12 +2,17 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { defineComponent, h, ref } from "vue";
 
+const mockPush = vi.fn();
+
 vi.mock("vue-router", () => ({
   RouterLink: defineComponent({
     props: ["to"],
     setup(props, { slots }) {
       return () => h("a", { "data-testid": "router-link", "data-to": props.to }, slots);
     },
+  }),
+  useRouter: () => ({
+    push: mockPush,
   }),
 }));
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
 import { useSession } from "@/features/auth/useSession";
@@ -24,6 +24,7 @@ const emit = defineEmits<{
 }>();
 
 const { isAuthenticated, bootstrapped, loading, logout } = useSession();
+const router = useRouter();
 
 const marketingUrl =
   import.meta.env.VITE_MARKETING_APP_URL?.trim().replace(/\/+$/, "") ||
@@ -31,6 +32,7 @@ const marketingUrl =
 
 async function onLogout() {
   await logout();
+  await router.push("/login");
 }
 </script>
 
