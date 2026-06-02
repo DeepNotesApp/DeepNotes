@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import { getNotesMap, getArrowsMap, getPageMap } from "@deepnotes/collab-wire";
+import { getNotesMap, getArrowsMap, getPageMap, getNoteIds, getArrowIds, getNextZIndex } from "@deepnotes/collab-wire";
 
 export type SpatialUndoRedo = ReturnType<typeof useSpatialUndoRedo>;
 
@@ -21,6 +21,12 @@ function addTypeToScope(um: Y.UndoManager, type: Y.AbstractType<any>): void {
 }
 
 export function useSpatialUndoRedo(ydoc: Y.Doc) {
+  // Eagerly create lazy structures so they don't appear as undoable
+  // mutations when useSpatialPage first accesses them.
+  getNoteIds(ydoc);
+  getArrowIds(ydoc);
+  getNextZIndex(ydoc);
+
   const notesMap = getNotesMap(ydoc);
   const arrowsMap = getArrowsMap(ydoc);
   const pageMap = getPageMap(ydoc);

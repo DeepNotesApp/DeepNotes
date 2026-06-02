@@ -22,14 +22,10 @@ import {
 } from "./page-doc-schema.js";
 
 describe("page-doc-schema", () => {
-  it("creates a doc with empty page, notes, and arrows maps", () => {
+  it("creates a blank doc", () => {
     const ydoc = createPageYDoc();
 
-    const page = ydoc.getMap(YPAGE_KEY.page);
-    expect(page.get(YPAGE_PAGE_KEY.noteIds)).toBeInstanceOf(Y.Array);
-    expect(page.get(YPAGE_PAGE_KEY.arrowIds)).toBeInstanceOf(Y.Array);
-    expect(page.get(YPAGE_PAGE_KEY.nextZIndex)).toBe(0);
-
+    expect(ydoc.getMap(YPAGE_KEY.page).size).toBe(0);
     expect(ydoc.getMap(YPAGE_KEY.notes).size).toBe(0);
     expect(ydoc.getMap(YPAGE_KEY.arrows).size).toBe(0);
   });

@@ -177,8 +177,7 @@ export function getNoteMap(ydoc: Y.Doc, noteId: string): Y.Map<unknown> | undefi
 
 export function addNoteToPage(ydoc: Y.Doc, noteId: string): Y.Map<unknown> {
   const note = createNoteMap();
-  const page = getPageMap(ydoc);
-  const noteIds = page.get(YPAGE_PAGE_KEY.noteIds) as Y.Array<string>;
+  const noteIds = getNoteIds(ydoc);
   const notes = getNotesMap(ydoc);
 
   ydoc.transact(() => {
@@ -190,8 +189,7 @@ export function addNoteToPage(ydoc: Y.Doc, noteId: string): Y.Map<unknown> {
 }
 
 export function removeNoteFromPage(ydoc: Y.Doc, noteId: string): void {
-  const page = getPageMap(ydoc);
-  const noteIds = page.get(YPAGE_PAGE_KEY.noteIds) as Y.Array<string>;
+  const noteIds = getNoteIds(ydoc);
   const notes = getNotesMap(ydoc);
 
   ydoc.transact(() => {
@@ -239,8 +237,7 @@ export function getArrowMap(ydoc: Y.Doc, arrowId: string): Y.Map<unknown> | unde
 
 export function addArrowToPage(ydoc: Y.Doc, arrowId: string): Y.Map<unknown> {
   const arrow = createArrowMap();
-  const page = getPageMap(ydoc);
-  const arrowIds = page.get(YPAGE_PAGE_KEY.arrowIds) as Y.Array<string>;
+  const arrowIds = getArrowIds(ydoc);
   const arrows = getArrowsMap(ydoc);
 
   ydoc.transact(() => {
@@ -252,8 +249,7 @@ export function addArrowToPage(ydoc: Y.Doc, arrowId: string): Y.Map<unknown> {
 }
 
 export function removeArrowFromPage(ydoc: Y.Doc, arrowId: string): void {
-  const page = getPageMap(ydoc);
-  const arrowIds = page.get(YPAGE_PAGE_KEY.arrowIds) as Y.Array<string>;
+  const arrowIds = getArrowIds(ydoc);
   const arrows = getArrowsMap(ydoc);
 
   ydoc.transact(() => {
@@ -274,15 +270,33 @@ export function getPageMap(ydoc: Y.Doc): Y.Map<unknown> {
 }
 
 export function getNoteIds(ydoc: Y.Doc): Y.Array<string> {
-  return getPageMap(ydoc).get(YPAGE_PAGE_KEY.noteIds) as Y.Array<string>;
+  const page = getPageMap(ydoc);
+  let arr = page.get(YPAGE_PAGE_KEY.noteIds) as Y.Array<string> | undefined;
+  if (arr == null) {
+    arr = new Y.Array<string>();
+    page.set(YPAGE_PAGE_KEY.noteIds, arr);
+  }
+  return arr;
 }
 
 export function getArrowIds(ydoc: Y.Doc): Y.Array<string> {
-  return getPageMap(ydoc).get(YPAGE_PAGE_KEY.arrowIds) as Y.Array<string>;
+  const page = getPageMap(ydoc);
+  let arr = page.get(YPAGE_PAGE_KEY.arrowIds) as Y.Array<string> | undefined;
+  if (arr == null) {
+    arr = new Y.Array<string>();
+    page.set(YPAGE_PAGE_KEY.arrowIds, arr);
+  }
+  return arr;
 }
 
 export function getNextZIndex(ydoc: Y.Doc): number {
-  return (getPageMap(ydoc).get(YPAGE_PAGE_KEY.nextZIndex) as number) ?? 0;
+  const page = getPageMap(ydoc);
+  const val = page.get(YPAGE_PAGE_KEY.nextZIndex);
+  if (val === undefined) {
+    page.set(YPAGE_PAGE_KEY.nextZIndex, 0);
+    return 0;
+  }
+  return (val as number) ?? 0;
 }
 
 export function setNextZIndex(ydoc: Y.Doc, value: number): void {
@@ -294,18 +308,9 @@ export function setNextZIndex(ydoc: Y.Doc, value: number): void {
 // ------------------------------------------------------------------
 
 export function createPageYDoc(): Y.Doc {
-  const ydoc = new Y.Doc();
-
-  const page = ydoc.getMap(YPAGE_KEY.page);
-  page.set(YPAGE_PAGE_KEY.noteIds, new Y.Array<string>());
-  page.set(YPAGE_PAGE_KEY.arrowIds, new Y.Array<string>());
-  page.set(YPAGE_PAGE_KEY.nextZIndex, 0);
-
-  // Ensure top-level maps exist so observers can subscribe immediately.
-  ydoc.getMap(YPAGE_KEY.notes);
-  ydoc.getMap(YPAGE_KEY.arrows);
-
-  return ydoc;
+  // Return a completely blank doc so server bootstrap updates recreate
+  // the exact shared types (same Yjs IDs) that the original session used.
+  return new Y.Doc();
 }
 
 // ------------------------------------------------------------------
