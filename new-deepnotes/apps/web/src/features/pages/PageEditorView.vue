@@ -27,9 +27,13 @@ import { createPageCollabDoc } from "./page-yjs-doc";
 import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
-import { base64ToBytes } from "@deepnotes/e2ee";
-import { decryptPageRelativeTitle } from "./page-collab-crypto";
+import { base64ToBytes, bytesToBase64 } from "@deepnotes/e2ee";
+import {
+  decryptPageRelativeTitle,
+  decryptPageAbsoluteTitle,
+} from "./page-collab-crypto";
 import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
+import { buildRealtimeHset, sendRealtimeRequestBatch } from "../realtime/realtime-user-ws";
 import { usePageSnapshots } from "./usePageSnapshots";
 import PageLayout from "@/layouts/PageLayout.vue";
 import PageStateScreens from "./screens/PageStateScreens.vue";
@@ -169,31 +173,71 @@ const { pathPageLabels } = usePagePathRealtimeTitles({
   cryptoError,
 });
 
-// Merge realtime labels with the current page's bootstrap-encrypted title.
-// usePagePathRealtimeTitles clears and refills pathPageLabels asynchronously,
-// so a simple watcher would be overwritten.  A computed always re-evaluates.
-const pageLabels = computed<Record<string, string>>(() => {
-  const labels = { ...pathPageLabels.value };
+// Separate reactive overrides so local edits reflect immediately without
+// waiting for the async realtime round-trip.
+const editedRelativeTitle = ref<string | null>(null);
+const editedAbsoluteTitle = ref<string | null>(null);
+
+watch(pageId, () => {
+  editedRelativeTitle.value = null;
+  editedAbsoluteTitle.value = null;
+});
+
+const currentPageRelativeTitle = computed(() => {
+  if (editedRelativeTitle.value != null) return editedRelativeTitle.value;
   const id = pageId.value;
-  if (labels[id] && labels[id].length > 0) {
-    return labels;
-  }
   const pk = pageKeyring.value;
   const b64 = pageEncRelTitleB64.value;
-  if (!id || !pk || !b64) {
-    return labels;
-  }
+  if (!id || !pk || !b64) return `[Page ${id}]`;
   try {
-    const title = decryptPageRelativeTitle({
+    const t = decryptPageRelativeTitle({
       pageKeyring: pk,
       pageId: id,
       ciphertext: base64ToBytes(b64),
     });
-    if (title && title.length > 0) {
-      labels[id] = title;
-    }
+    return t && t.length > 0 ? t : `[Page ${id}]`;
   } catch {
-    // ignore decrypt failures
+    return `[Page ${id}]`;
+  }
+});
+
+const currentPageAbsoluteTitle = computed(() => {
+  if (editedAbsoluteTitle.value != null) return editedAbsoluteTitle.value;
+  const id = pageId.value;
+  const fromRealtime = pathPageLabels.value[id];
+  if (fromRealtime && fromRealtime.length > 0) return fromRealtime;
+  const pk = pageKeyring.value;
+  const b64 = pageEncAbsTitleB64.value;
+  if (!id || !pk || !b64) return `[Page ${id}]`;
+  try {
+    const t = decryptPageAbsoluteTitle({
+      pageKeyring: pk,
+      pageId: id,
+      ciphertext: base64ToBytes(b64),
+    });
+    return t && t.length > 0 ? t : `[Page ${id}]`;
+  } catch {
+    return `[Page ${id}]`;
+  }
+});
+
+// Breadcrumb labels: absolute title from realtime, fallback to decrypted bootstrap.
+const pageLabels = computed<Record<string, string>>(() => {
+  const labels = { ...pathPageLabels.value };
+  const id = pageId.value;
+  if (labels[id] && labels[id].length > 0) return labels;
+  const pk = pageKeyring.value;
+  const b64 = pageEncAbsTitleB64.value;
+  if (!id || !pk || !b64) return labels;
+  try {
+    const t = decryptPageAbsoluteTitle({
+      pageKeyring: pk,
+      pageId: id,
+      ciphertext: base64ToBytes(b64),
+    });
+    if (t && t.length > 0) labels[id] = t;
+  } catch {
+    // ignore
   }
   return labels;
 });
@@ -240,6 +284,42 @@ async function onUnlockWithPassword(password: string): Promise<boolean> {
     collabReloadNonce.value++;
   }
   return ok;
+}
+
+async function updatePageTitle(type: "relative" | "absolute", value: string) {
+  const id = pageId.value;
+  const pk = pageKeyring.value;
+  if (!id || !pk) return;
+  try {
+    const ciphertext = pk.encrypt(new TextEncoder().encode(value), {
+      padding: true,
+      associatedData: {
+        context:
+          type === "relative" ? "PageRelativeTitle" : "PageAbsoluteTitle",
+        pageId: id,
+      },
+    });
+    void sendRealtimeRequestBatch([
+      buildRealtimeHset(
+        "page",
+        id,
+        type === "relative"
+          ? "encrypted-relative-title"
+          : "encrypted-absolute-title",
+        bytesToBase64(ciphertext),
+      ),
+    ]);
+    // Optimistic update so the input stays in sync immediately.
+    if (type === "relative") {
+      editedRelativeTitle.value = value;
+    } else {
+      editedAbsoluteTitle.value = value;
+      // Also update the shared labels map used by breadcrumb/cards.
+      pathPageLabels.value = { ...pathPageLabels.value, [id]: value };
+    }
+  } catch {
+    // ignore encrypt failures
+  }
 }
 
 onMounted(() => {
@@ -419,12 +499,12 @@ onMounted(() => {
         <PagePropertiesCard
           v-if="!selectedNoteId && !selectedArrowId"
           :page-id="pageId"
-          :relative-title="pageLabels[pageId]"
-          :absolute-title="pageLabels[pageId]"
+          :relative-title="currentPageRelativeTitle"
+          :absolute-title="currentPageAbsoluteTitle"
           :is-favorite="isFavorite"
           :read-only="cryptoError !== null"
-          @update:relative-title="() => {}"
-          @update:absolute-title="() => {}"
+          @update:relative-title="updatePageTitle('relative', $event)"
+          @update:absolute-title="updatePageTitle('absolute', $event)"
           @toggle-favorite="toggleFavorite()"
         />
 

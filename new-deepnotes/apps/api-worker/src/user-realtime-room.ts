@@ -1,4 +1,6 @@
 import { Redis } from "@upstash/redis";
+import { eq } from "drizzle-orm";
+import { pages } from "@deepnotes/db/schema";
 import {
   decodeRealtimeClientBinaryMessage,
   encodeRealtimeServerDataNotification,
@@ -415,6 +417,33 @@ export class UserRealtimeRoom {
       }
       if (out.subscribeNotifyBytes != null) {
         ws.send(out.subscribeNotifyBytes);
+      }
+
+      // Persist page title changes to Postgres so they survive refresh.
+      if (hyper != null) {
+        const db = getDbForConnectionString(hyper.connectionString);
+        for (const item of out.hsetBroadcastItems) {
+          if (item.prefix !== "page") continue;
+          const pageId = item.suffix;
+          const b64 = typeof item.value === "string" ? item.value : "";
+          if (b64 === "") continue;
+          const bytes = Buffer.from(b64, "base64");
+          try {
+            if (item.field === "encrypted-relative-title") {
+              await db
+                .update(pages)
+                .set({ encryptedRelativeTitle: bytes })
+                .where(eq(pages.id, pageId));
+            } else if (item.field === "encrypted-absolute-title") {
+              await db
+                .update(pages)
+                .set({ encryptedAbsoluteTitle: bytes })
+                .where(eq(pages.id, pageId));
+            }
+          } catch {
+            // Best-effort DB persistence.
+          }
+        }
       }
 
       for (const item of out.hsetBroadcastItems) {

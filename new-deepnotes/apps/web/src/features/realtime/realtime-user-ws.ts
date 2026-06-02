@@ -294,3 +294,15 @@ export function buildRealtimeUnsubscribe(
     args: [prefix, suffix, field],
   };
 }
+
+export function buildRealtimeHset(
+  prefix: string,
+  suffix: string,
+  field: string,
+  value: unknown,
+): RealtimeClientCommand {
+  return {
+    type: RealtimeCommandType.HSET,
+    args: [prefix, suffix, field, value],
+  };
+}

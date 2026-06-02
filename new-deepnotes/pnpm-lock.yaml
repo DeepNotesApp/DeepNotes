@@ -75,6 +75,9 @@ importers:
       '@upstash/redis':
         specifier: ^1.34.8
         version: 1.38.0
+      drizzle-orm:
+        specifier: ^0.41.0
+        version: 0.41.0(@cloudflare/workers-types@4.20260531.1)(postgres@3.4.9)
       hono:
         specifier: ^4.7.7
         version: 4.12.23
