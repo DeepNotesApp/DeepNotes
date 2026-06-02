@@ -68,9 +68,21 @@ describe("PageLayout", () => {
     expect(style).not.toContain("display: none");
   });
 
-  it("hides right sidebar when toggled off", async () => {
+  it("switches right sidebar to mini mode on first toggle", async () => {
     wrapper = mount(PageLayout);
     const toolbar = wrapper.findComponent({ name: "MainToolbarMock" });
+    await toolbar.vm.$emit("toggle-right");
+    await wrapper.vm.$nextTick();
+    const aside = wrapper.findAll("aside");
+    const style = aside[1]!.attributes("style") ?? "";
+    expect(style).not.toContain("display: none");
+    expect(style).toContain("48px");
+  });
+
+  it("hides right sidebar on second toggle", async () => {
+    wrapper = mount(PageLayout);
+    const toolbar = wrapper.findComponent({ name: "MainToolbarMock" });
+    await toolbar.vm.$emit("toggle-right");
     await toolbar.vm.$emit("toggle-right");
     await wrapper.vm.$nextTick();
     const aside = wrapper.findAll("aside");

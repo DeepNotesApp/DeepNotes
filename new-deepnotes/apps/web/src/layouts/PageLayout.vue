@@ -6,13 +6,25 @@ import MainToolbar from "@/features/spatial/MainToolbar.vue";
 // --- sidebar state ---
 const leftExpanded = ref(true);
 const rightExpanded = ref(true);
+const rightMiniMode = ref(false);
 const leftWidth = ref(240);
 
 function toggleLeft() {
   leftExpanded.value = !leftExpanded.value;
 }
 function toggleRight() {
-  rightExpanded.value = !rightExpanded.value;
+  if (rightExpanded.value && !rightMiniMode.value) {
+    // expanded -> mini
+    rightMiniMode.value = true;
+  } else if (rightExpanded.value && rightMiniMode.value) {
+    // mini -> hidden
+    rightExpanded.value = false;
+    rightMiniMode.value = false;
+  } else {
+    // hidden -> expanded
+    rightExpanded.value = true;
+    rightMiniMode.value = false;
+  }
 }
 function resetLeftWidth() {
   leftWidth.value = 240;
@@ -22,6 +34,7 @@ function resetLeftWidth() {
 provide("pageLayout", {
   leftExpanded,
   rightExpanded,
+  rightMiniMode,
   leftWidth,
   toggleLeft,
   toggleRight,
@@ -103,9 +116,13 @@ function onResizePointerUp(e: PointerEvent) {
       <aside
         v-show="rightExpanded"
         class="border-border/40 bg-muted/30 flex flex-col overflow-y-auto border-l"
-        :style="{ width: '300px', minWidth: '300px' }"
+        :class="rightMiniMode ? 'items-center' : ''"
+        :style="{ width: rightMiniMode ? '48px' : '300px', minWidth: rightMiniMode ? '48px' : '300px' }"
       >
-        <div class="p-2">
+        <div v-if="rightMiniMode" class="flex flex-col items-center gap-1 py-2">
+          <slot name="right-sidebar-mini" />
+        </div>
+        <div v-else class="p-2">
           <slot name="right-sidebar" />
         </div>
       </aside>
