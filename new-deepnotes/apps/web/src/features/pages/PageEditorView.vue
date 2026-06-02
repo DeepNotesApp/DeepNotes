@@ -20,11 +20,19 @@ import { createPageCollabDoc } from "./page-yjs-doc";
 import { usePageCollabEditor } from "./usePageCollabEditor";
 import { usePageManagement } from "./usePageManagement";
 import { usePagePathAndPrefs } from "./usePagePathAndPrefs";
-import { base64ToBytes, bytesToBase64 } from "@deepnotes/e2ee";
+import { nanoid } from "nanoid";
+import {
+  base64ToBytes,
+  bytesToBase64,
+  createSymmetricKeyring,
+  ensureSodiumReady,
+} from "@deepnotes/e2ee";
 import {
   decryptPageRelativeTitle,
   decryptPageAbsoluteTitle,
+  unwrapGroupContentSymmetricKeyring,
 } from "./page-collab-crypto";
+import { readSessionCrypto } from "../auth/crypto-storage";
 import { usePagePathRealtimeTitles } from "./usePagePathRealtimeTitles";
 import { buildRealtimeHset, sendRealtimeRequestBatch } from "../realtime/realtime-user-ws";
 import { usePageSnapshots } from "./usePageSnapshots";
@@ -344,7 +352,92 @@ async function handleSetNoteAsDefault() {
 }
 
 async function handleCreateNewPage() {
-  pageOpsMessage.value = 'Create new page is not yet implemented in the new UI (requires page-creation crypto: encrypted titles + keyring).';
+  pageOpsMessage.value = null;
+  const id = pageId.value;
+  const gid = collabGroupId.value;
+  const gCrypto = collabGroupCrypto.value;
+  if (!id || !gid || !gCrypto) {
+    pageOpsMessage.value = 'Page crypto not loaded yet.';
+    return;
+  }
+  const stored = readSessionCrypto();
+  if (!stored) {
+    pageOpsMessage.value = 'Unlock session crypto (password login) to create pages.';
+    return;
+  }
+  try {
+    await ensureSodiumReady();
+    const groupContentKeyring = await unwrapGroupContentSymmetricKeyring({
+      groupId: gid,
+      groupEncryptedContentKeyring: gCrypto.groupEncryptedContentKeyring,
+      memberEncryptedAccessKeyring: gCrypto.memberEncryptedAccessKeyring,
+      groupAccessKeyring: gCrypto.groupAccessKeyring,
+      stored,
+    });
+
+    const newPageId = nanoid();
+    const newPageKeyring = createSymmetricKeyring();
+
+    const encryptedPageKeyring = newPageKeyring.wrapSymmetric(groupContentKeyring, {
+      associatedData: {
+        context: 'PageKeyring',
+        pageId: newPageId,
+      },
+    });
+
+    const relativeTitle = 'New page';
+    const absoluteTitle = 'New page';
+
+    const encryptedRelativeTitle = newPageKeyring.encrypt(
+      new TextEncoder().encode(relativeTitle),
+      {
+        padding: true,
+        associatedData: {
+          context: 'PageRelativeTitle',
+          pageId: newPageId,
+        },
+      },
+    );
+
+    const encryptedAbsoluteTitle = newPageKeyring.encrypt(
+      new TextEncoder().encode(absoluteTitle),
+      {
+        padding: true,
+        associatedData: {
+          context: 'PageAbsoluteTitle',
+          pageId: newPageId,
+        },
+      },
+    );
+
+    const res = await client.POST('/api/groups/{groupId}/pages', {
+      params: { path: { groupId: gid } },
+      body: {
+        parentPageId: id,
+        pageId: newPageId,
+        pageEncryptedSymmetricKeyring: bytesToBase64(encryptedPageKeyring.wrappedValue),
+        pageEncryptedRelativeTitle: bytesToBase64(encryptedRelativeTitle),
+        pageEncryptedAbsoluteTitle: bytesToBase64(encryptedAbsoluteTitle),
+      },
+    });
+
+    if (res.response.status !== 200 || !res.data) {
+      pageOpsMessage.value =
+        res.error && typeof res.error === 'object' && 'message' in res.error
+          ? String((res.error as { message?: string }).message)
+          : 'Could not create page.';
+      return;
+    }
+
+    // Set the note's link to the newly created page
+    if (selectedNoteModel.value?.link != null) {
+      selectedNoteModel.value.link.value = `/pages/${newPageId}`;
+    }
+
+    pageOpsMessage.value = `Created new page ${newPageId}.`;
+  } catch (e) {
+    pageOpsMessage.value = e instanceof Error ? e.message : 'Could not create page.';
+  }
 }
 
 function handleSwapArrowheads() {

@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ExternalLink, Copy, Palette, ArrowUpDown, FilePlus, Save } from '@lucide/vue'
+import { ExternalLink, Copy, ArrowUpDown, FilePlus, Save, Download } from '@lucide/vue'
+import ColorPalette from '@/components/ColorPalette.vue'
 
 const props = defineProps<{
   noteId: string | null
@@ -63,7 +64,7 @@ const anchorX = computed(() => props.noteModel?.anchor?.value?.x ?? 0.5)
 const anchorY = computed(() => props.noteModel?.anchor?.value?.y ?? 0.5)
 const width = computed(() => props.noteModel?.width?.value?.expanded ?? 'Auto')
 const height = computed(() => props.noteModel?.height?.value?.expanded ?? 'Auto')
-const color = computed(() => props.noteModel?.color?.value ?? 0)
+const color = computed(() => (props.noteModel?.color?.value as string) ?? 'grey')
 const colorInherit = computed(() => props.noteModel?.color?.inherit?.value ?? false)
 const collapsible = computed(() => props.noteModel?.collapsing?.enabled?.value ?? false)
 const collapsed = computed(() => props.noteModel?.collapsing?.collapsed?.value ?? false)
@@ -89,17 +90,57 @@ function formatTimestamp(ts: number | null): string {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(ts)
 }
 
-const colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-
 function handleCopyLink() {
   if (!props.noteId) return
   const url = `${window.location.origin}/pages/${props.noteId}?elem=${props.noteId}`
   navigator.clipboard.writeText(url)
 }
 
-function handleColorSelect(colorIndex: number) {
-  emit('update:color', colorIndex)
+function handleColorSelect(colorName: string) {
+  emit('update:color', colorName)
   emit('update:color-inherit', false)
+}
+
+const isWidthNumeric = computed(() => {
+  const w = width.value
+  return w !== 'Auto' && w !== 'Minimum'
+})
+
+const isHeightNumeric = computed(() => {
+  const h = height.value
+  return h !== 'Auto' && h !== 'Minimum'
+})
+
+function handleWidthModeChange(mode: string) {
+  if (mode === 'Custom') {
+    emit('update:width', '160')
+  } else {
+    emit('update:width', mode)
+  }
+}
+
+function handleHeightModeChange(mode: string) {
+  if (mode === 'Custom') {
+    emit('update:height', '80')
+  } else {
+    emit('update:height', mode)
+  }
+}
+
+function exportAsMarkdown(download: boolean) {
+  // Stub: Note export requires extracting text from Yjs fragments.
+  // Full implementation needs head/body editor HTML -> markdown conversion.
+  const stub = '# Note export stub'
+  if (download) {
+    const blob = new Blob([stub], { type: 'text/plain;charset=utf-8' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'note.md'
+    a.click()
+    URL.revokeObjectURL(a.href)
+  } else {
+    navigator.clipboard.writeText(stub)
+  }
 }
 </script>
 
@@ -263,36 +304,58 @@ function handleColorSelect(colorIndex: number) {
       <!-- Width / Height -->
       <div class="space-y-2">
         <Label>Width</Label>
-        <Select
-          :model-value="width"
-          :disabled="readOnly"
-          @update:model-value="emit('update:width', $event as string)"
-        >
-          <SelectTrigger class="h-8 w-full text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Auto">Auto</SelectItem>
-            <SelectItem value="Minimum">Minimum</SelectItem>
-          </SelectContent>
-        </Select>
+        <div class="flex gap-2">
+          <Select
+            :model-value="isWidthNumeric ? 'Custom' : width"
+            :disabled="readOnly"
+            @update:model-value="handleWidthModeChange($event as string)"
+          >
+            <SelectTrigger class="h-8 w-full text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Auto">Auto</SelectItem>
+              <SelectItem value="Minimum">Minimum</SelectItem>
+              <SelectItem value="Custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            v-if="isWidthNumeric"
+            type="number"
+            :model-value="Number(width) || 0"
+            class="h-8 w-20 text-xs"
+            :disabled="readOnly"
+            @update:model-value="emit('update:width', String($event))"
+          />
+        </div>
       </div>
 
       <div class="space-y-2">
         <Label>Height</Label>
-        <Select
-          :model-value="height"
-          :disabled="readOnly"
-          @update:model-value="emit('update:height', $event as string)"
-        >
-          <SelectTrigger class="h-8 w-full text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Auto">Auto</SelectItem>
-            <SelectItem value="Minimum">Minimum</SelectItem>
-          </SelectContent>
-        </Select>
+        <div class="flex gap-2">
+          <Select
+            :model-value="isHeightNumeric ? 'Custom' : height"
+            :disabled="readOnly"
+            @update:model-value="handleHeightModeChange($event as string)"
+          >
+            <SelectTrigger class="h-8 w-full text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Auto">Auto</SelectItem>
+              <SelectItem value="Minimum">Minimum</SelectItem>
+              <SelectItem value="Custom">Custom</SelectItem>
+            </SelectContent>
+          </Select>
+          <Input
+            v-if="isHeightNumeric"
+            type="number"
+            :model-value="Number(height) || 0"
+            class="h-8 w-20 text-xs"
+            :disabled="readOnly"
+            @update:model-value="emit('update:height', String($event))"
+          />
+        </div>
       </div>
 
       <!-- Color -->
@@ -308,24 +371,19 @@ function handleColorSelect(colorIndex: number) {
             <Label class="text-[10px]">Inherit</Label>
           </div>
         </div>
-        <div class="flex justify-center gap-1">
-          <button
-            v-for="c in colors"
-            :key="c"
-            class="h-6 w-6 rounded-full border-2 transition-all hover:scale-110"
-            :class="{
-              'border-primary': color === c && !colorInherit,
-              'border-transparent': color !== c || colorInherit,
-              'opacity-50': colorInherit,
-            }"
-            :style="{ backgroundColor: `hsl(${c * 36}, 70%, 50%)` }"
-            :disabled="readOnly"
-            @click="handleColorSelect(c)"
+        <div class="flex justify-center">
+          <ColorPalette
+            type="notes"
+            orientation="horizontal"
+            :split="2"
+            :model-value="color"
+            :disabled="readOnly || colorInherit"
+            @update:model-value="handleColorSelect($event as string)"
           />
         </div>
       </div>
 
-      <!-- Copy link / Set as default -->
+      <!-- Copy link / Set as default / Export -->
       <div class="space-y-2">
         <Button
           variant="outline"
@@ -346,6 +404,28 @@ function handleColorSelect(colorIndex: number) {
           <Save class="h-3 w-3 mr-2" />
           Set as default note style
         </Button>
+        <div class="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-1"
+            :disabled="readOnly"
+            @click="exportAsMarkdown(false)"
+          >
+            <Copy class="h-3 w-3 mr-1" />
+            Copy MD
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            class="flex-1"
+            :disabled="readOnly"
+            @click="exportAsMarkdown(true)"
+          >
+            <Download class="h-3 w-3 mr-1" />
+            Download MD
+          </Button>
+        </div>
       </div>
 
       <!-- Timestamps -->

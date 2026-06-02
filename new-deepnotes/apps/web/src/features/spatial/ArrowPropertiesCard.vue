@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Palette, Copy, Save, ArrowUpDown } from '@lucide/vue'
+import ColorPalette from '@/components/ColorPalette.vue'
 
 const props = defineProps<{
   arrowId: string | null
@@ -26,7 +27,7 @@ const emit = defineEmits({
   'update:target-head': (value: string) => true,
   'update:source-anchor': (value: string) => true,
   'update:target-anchor': (value: string) => true,
-  'update:color': (value: number) => true,
+  'update:color': (value: string) => true,
   'update:color-inherit': (value: boolean) => true,
   'update:read-only': (value: boolean) => true,
   'swap-arrowheads': () => true,
@@ -48,7 +49,7 @@ const targetAnchor = computed(() => {
   if (v == null) return 'null'
   return JSON.stringify(v)
 })
-const color = computed(() => props.arrowModel?.color?.value ?? 0)
+const color = computed(() => (props.arrowModel?.color?.value as string) ?? 'grey')
 const colorInherit = computed(() => props.arrowModel?.color?.inherit?.value ?? false)
 const readOnlyArrow = computed(() => props.arrowModel?.readOnly?.value ?? false)
 const createdAt = computed(() => props.arrowModel?.createdAt?.value ?? null)
@@ -67,10 +68,8 @@ const anchorOptions = [
   { label: 'Bottom', value: JSON.stringify({ x: 0, y: 1 }) },
 ]
 
-const colors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-function handleColorSelect(colorIndex: number) {
-  emit('update:color', colorIndex)
+function handleColorSelect(colorName: string) {
+  emit('update:color', colorName)
   emit('update:color-inherit', false)
 }
 </script>
@@ -84,28 +83,19 @@ function handleColorSelect(colorIndex: number) {
       <!-- Body Type -->
       <div class="space-y-2">
         <Label>Body Type</Label>
-        <div class="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1"
-            :class="{ 'bg-primary text-primary-foreground': bodyType === 'curve' }"
-            :disabled="readOnly"
-            @click="emit('update:body-type', 'curve')"
-          >
-            Curve
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1"
-            :class="{ 'bg-primary text-primary-foreground': bodyType === 'line' }"
-            :disabled="readOnly"
-            @click="emit('update:body-type', 'line')"
-          >
-            Line
-          </Button>
-        </div>
+        <Select
+          :model-value="bodyType"
+          :disabled="readOnly"
+          @update:model-value="emit('update:body-type', $event as 'curve' | 'line')"
+        >
+          <SelectTrigger class="h-8 w-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="curve">Curve</SelectItem>
+            <SelectItem value="line">Line</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <!-- Arrow Heads -->
@@ -199,38 +189,20 @@ function handleColorSelect(colorIndex: number) {
       <!-- Body Style -->
       <div class="space-y-2">
         <Label>Body Style</Label>
-        <div class="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1"
-            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'solid' }"
-            :disabled="readOnly"
-            @click="emit('update:body-style', 'solid')"
-          >
-            Solid
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1"
-            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'dashed' }"
-            :disabled="readOnly"
-            @click="emit('update:body-style', 'dashed')"
-          >
-            Dashed
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            class="flex-1"
-            :class="{ 'bg-primary text-primary-foreground': bodyStyle === 'dotted' }"
-            :disabled="readOnly"
-            @click="emit('update:body-style', 'dotted')"
-          >
-            Dotted
-          </Button>
-        </div>
+        <Select
+          :model-value="bodyStyle"
+          :disabled="readOnly"
+          @update:model-value="emit('update:body-style', $event as string)"
+        >
+          <SelectTrigger class="h-8 w-full text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="solid">Solid</SelectItem>
+            <SelectItem value="dashed">Dashed</SelectItem>
+            <SelectItem value="dotted">Dotted</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <!-- Color -->
@@ -246,19 +218,14 @@ function handleColorSelect(colorIndex: number) {
             <Label class="text-[10px]">Inherit</Label>
           </div>
         </div>
-        <div class="flex justify-center gap-1">
-          <button
-            v-for="c in colors"
-            :key="c"
-            class="h-6 w-6 rounded-full border-2 transition-all hover:scale-110"
-            :class="{
-              'border-primary': color === c && !colorInherit,
-              'border-transparent': color !== c || colorInherit,
-              'opacity-50': colorInherit,
-            }"
-            :style="{ backgroundColor: `hsl(${c * 36}, 70%, 50%)` }"
-            :disabled="readOnly"
-            @click="handleColorSelect(c)"
+        <div class="flex justify-center">
+          <ColorPalette
+            type="arrows"
+            orientation="horizontal"
+            :split="2"
+            :model-value="color"
+            :disabled="readOnly || colorInherit"
+            @update:model-value="handleColorSelect($event as string)"
           />
         </div>
       </div>

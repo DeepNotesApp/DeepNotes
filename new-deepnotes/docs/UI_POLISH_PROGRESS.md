@@ -26,7 +26,9 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 | **4.3** | Expand context menus | **DONE** | `CanvasContextMenu.vue`, `NoteContextMenu.vue`, `SpatialPageView.vue` | — |
 | **5.1** | Right sidebar: styled selects, height control, arrow head selects | **DONE** | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PageEditorView.vue`, `components/ui/select/*` | Shadcn `Select` installed; all raw `<select>` replaced. |
 | **5.1b** | Right sidebar: consolidate page-level cards, add missing controls (swap, timestamps, copy link, local collapsing, anchors) | **DONE** | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PageEditorView.vue` | — |
-| **5.2** | Right sidebar: "Create new page" functionality | `PARTIAL` | `NotePropertiesCard.vue` | UI added, crypto stubbed. |
+| **5.1d** | Right sidebar: width/height explicit px combos, ColorPalette, note export | **DONE** | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `ColorPalette.vue` | Width/height now support Custom (numeric) mode. ColorPalette extracted to reusable component using legacy 12-color palette. Note export UI added (copy/download MD stubs). |
+| **5.1e** | Right sidebar: arrow body type/style to Shadcn Select | **DONE** | `ArrowPropertiesCard.vue` | Button toggles replaced with `Select` components. |
+| **5.2** | Right sidebar: "Create new page" functionality | **DONE** | `NotePropertiesCard.vue`, `PageEditorView.vue` | Full crypto flow: unwraps group content keyring, creates page keyring, encrypts titles, calls `POST /api/groups/{groupId}/pages`, sets note link to new page. |
 | **5.3** | Right sidebar: mini-mode (48px collapsed strip) | **REMOVED** | `PageLayout.vue`, `PageEditorView.vue` | ✅ 2-state only (expanded ↔ hidden). |
 | **7** | Keyboard shortcut parity (high-impact missing shortcuts) | **DONE** | `useSpatialKeyboard.ts`, `tiptap-keyboard-shortcuts.ts`, `note-editor-tiptap-extensions.ts`, `SpatialPageView.vue` | Canvas: F2, arrows, Ctrl+D, Ctrl+H, Backspace undo. Editing: 20 Tiptap shortcuts (formatting, objects, tables, math). |
 | **2.1b** | Header: notification inline popup (not page nav) | **DONE** | `MainToolbar.vue`, new `NotificationsPopover.vue` | `DropdownMenu`-based popup with compact notification list, mark-all-read, and link to full page. |
@@ -37,5 +39,8 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 
 ## Next Recommended Actions
 
-1. Add remaining right sidebar controls: anchor numeric inputs, explicit width/height combos, ColorPalette, note export.
-2. Implement full "Create new page" crypto flow (§5.2).
+1. Marketing app fixes (§1): pricing layout (`#pricing`), scroll-driven index (`gsap.ScrollTrigger` lazy init), scroll reset on route change.
+2. Account page restructure (§6.1): sidebar navigation (`AccountLayout.vue`) with tabs for Profile / Preferences / Notifications / Security.
+3. Implement full "Set as default note/arrow style" serialization + encryption (currently stubbed).
+4. Complete note export: extract Yjs fragment text -> markdown (currently stubbed).
+5. Add container reverse/import children actions if required by spatial parity checklist.
