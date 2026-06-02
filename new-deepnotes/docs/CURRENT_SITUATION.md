@@ -1,3 +1,13 @@
+> **⚠️ Past Snapshot — Jun 2026**
+>
+> This document captures a moment-in-time snapshot of product feedback from the greenfield project's early stable state. It is **not actively maintained**; the engineering roadmap derived from it lives in [`UI_POLISH_PLAN.md`](./UI_POLISH_PLAN.md), which translates these observations into concrete tasks with file references, legacy comparisons, and implementation priorities.
+>
+> If you are looking for the current plan or progress tracker, see:
+> - [`UI_POLISH_PLAN.md`](./UI_POLISH_PLAN.md) — Legacy vs new comparison & roadmap
+> - [`UI_POLISH_PROGRESS.md`](./UI_POLISH_PROGRESS.md) — Execution tracker
+
+---
+
 We kind of reached a somewhat stable state in the greenfield project. But there are still lots of problems. Here I'll put everything I notice.
 
 In the marketing app. I kind of like the homepage.
