@@ -66,7 +66,7 @@ const colorVariants = computed(() => {
     // When inheriting, resolve variants from the parent color directly
     return resolveNoteColorVariants(baseColor);
   }
-  return resolveNoteColorVariants(c.value);
+  return resolveNoteColorVariants(c.value ?? "grey");
 });
 
 const headFrag = computed(() => props.model.head.value.value);

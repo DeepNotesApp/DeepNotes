@@ -48,7 +48,7 @@ export function lightenColor(hex: string, ratio: number): string {
   return rgbToHex(lightened.r, lightened.g, lightened.b);
 }
 
-export function resolveNoteColorVariants(colorValue: string): ColorVariants {
+export function resolveNoteColorVariants(colorValue: string | undefined): ColorVariants {
   const colorMap: Record<string, string> = {
     grey: "#9ca3af",
     red: "#ef4444",
@@ -62,7 +62,7 @@ export function resolveNoteColorVariants(colorValue: string): ColorVariants {
     black: "#171717",
     white: "#f5f5f5",
   };
-  const base = colorMap[colorValue] ?? colorValue;
+  const base = (colorValue ? colorMap[colorValue] : undefined) ?? colorValue ?? "#9ca3af";
   return {
     base,
     light: lightenColor(base, 0.35),
