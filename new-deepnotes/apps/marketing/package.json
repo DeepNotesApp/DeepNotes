@@ -12,10 +12,11 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
+    "@vueuse/core": "^14.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "marked": "^18.0.4",
-    "reka-ui": "^2.9.6",
+    "reka-ui": "^2.9.8",
     "shadcn-vue": "^2.6.2",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.4",
