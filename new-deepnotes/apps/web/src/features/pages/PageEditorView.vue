@@ -3,12 +3,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useSession } from "../auth/useSession";
 import SpatialPageView from "../spatial/SpatialPageView.vue";
 import { useUserTemplates } from "../spatial/useUserTemplates";
@@ -441,57 +435,50 @@ onMounted(() => {
     <template #left-sidebar>
       <PageEditorLeftSidebar v-slot="{ activeTab }">
         <!-- Current path -->
-        <div v-if="activeTab === 'path'" class="space-y-3">
-          <Card>
-            <CardHeader class="pb-2">
-              <CardTitle class="text-sm">Path</CardTitle>
-            </CardHeader>
-            <CardContent class="space-y-2 text-xs">
-              <p v-if="pathLoading" class="text-muted-foreground">Loading…</p>
-              <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
-              <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1">
-                <template v-for="(pid, i) in pathPageIds" :key="pid">
-                  <span v-if="i > 0">/</span>
-                  <RouterLink
-                    v-if="i < pathPageIds.length - 1"
-                    class="text-primary hover:underline"
-                    :to="`/pages/${pid}`"
-                  >
-                    {{ pagePathLabel(pid, pageLabels) }}
-                  </RouterLink>
-                  <span v-else class="text-foreground font-medium">
-                    {{ pagePathLabel(pid, pageLabels) }}
-                  </span>
-                </template>
-              </nav>
-              <div class="flex flex-wrap gap-1">
-                <Button
-                  size="xs"
-                  variant="secondary"
-                  class="h-6 text-[10px]"
-                  :disabled="pagePrefsLoading"
-                  @click="bumpAsStarting()"
-                >
-                  Make starting
-                </Button>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  class="h-6 text-[10px]"
-                  :disabled="pagePrefsLoading"
-                  @click="toggleFavorite()"
-                >
-                  {{ isFavorite ? "Unfavorite" : "Favorite" }}
-                </Button>
-              </div>
-              <p v-if="bumpMessage" class="text-muted-foreground text-[10px]">
-                {{ bumpMessage }}
-              </p>
-              <p v-if="favoriteMessage" class="text-amber-700 dark:text-amber-300 text-[10px]">
-                {{ favoriteMessage }}
-              </p>
-            </CardContent>
-          </Card>
+        <div v-if="activeTab === 'path'" class="space-y-2 text-xs">
+          <p v-if="pathLoading" class="text-muted-foreground">Loading…</p>
+          <p v-else-if="pathError" class="text-destructive">{{ pathError }}</p>
+          <nav v-else class="text-muted-foreground flex flex-wrap items-center gap-1">
+            <template v-for="(pid, i) in pathPageIds" :key="pid">
+              <span v-if="i > 0">/</span>
+              <RouterLink
+                v-if="i < pathPageIds.length - 1"
+                class="text-primary hover:underline"
+                :to="`/pages/${pid}`"
+              >
+                {{ pagePathLabel(pid, pageLabels) }}
+              </RouterLink>
+              <span v-else class="text-foreground font-medium">
+                {{ pagePathLabel(pid, pageLabels) }}
+              </span>
+            </template>
+          </nav>
+          <div class="flex flex-wrap gap-1">
+            <Button
+              size="xs"
+              variant="secondary"
+              class="h-6 text-[10px]"
+              :disabled="pagePrefsLoading"
+              @click="bumpAsStarting()"
+            >
+              Make starting
+            </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              class="h-6 text-[10px]"
+              :disabled="pagePrefsLoading"
+              @click="toggleFavorite()"
+            >
+              {{ isFavorite ? "Unfavorite" : "Favorite" }}
+            </Button>
+          </div>
+          <p v-if="bumpMessage" class="text-muted-foreground text-[10px]">
+            {{ bumpMessage }}
+          </p>
+          <p v-if="favoriteMessage" class="text-amber-700 dark:text-amber-300 text-[10px]">
+            {{ favoriteMessage }}
+          </p>
         </div>
 
         <!-- Recent pages -->
@@ -523,15 +510,16 @@ onMounted(() => {
       </PageEditorLeftSidebar>
     </template>
 
+    <!-- === Right sidebar header === -->
+    <template #right-sidebar-header>
+      <span v-if="selectedNoteId">Note Properties</span>
+      <span v-else-if="selectedArrowId">Arrow Properties</span>
+      <span v-else>Page Properties</span>
+    </template>
+
     <!-- === Right sidebar === -->
     <template #right-sidebar>
       <div class="space-y-3">
-        <div class="border-border/40 border-b pb-2 text-xs font-semibold tracking-wide uppercase">
-          <span v-if="selectedNoteId">Note Properties</span>
-          <span v-else-if="selectedArrowId">Arrow Properties</span>
-          <span v-else>Page Properties</span>
-        </div>
-
         <PagePropertiesCard
           v-if="!selectedNoteId && !selectedArrowId"
           :page-id="pageId"

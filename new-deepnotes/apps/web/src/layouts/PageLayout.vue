@@ -102,10 +102,15 @@ function onResizePointerUp(e: PointerEvent) {
       <!-- Right sidebar -->
       <aside
         v-show="rightExpanded"
-        class="border-border/40 bg-muted/30 flex flex-col overflow-y-auto border-l"
+        class="border-border/40 bg-muted/30 flex flex-col border-l"
         style="width: 300px; min-width: 300px"
       >
-        <div class="p-2">
+        <!-- Fixed header -->
+        <div class="border-border/40 shrink-0 border-b px-2 py-2 text-xs font-semibold tracking-wide uppercase">
+          <slot name="right-sidebar-header">Properties</slot>
+        </div>
+        <!-- Scrollable content -->
+        <div class="flex-1 overflow-y-auto p-2">
           <slot name="right-sidebar" />
         </div>
       </aside>

@@ -10,6 +10,7 @@ import FindReplaceDialog from "./FindReplaceDialog.vue";
 import ScreenshotDialog from "./ScreenshotDialog.vue";
 import CollabAvatars from "./CollabAvatars.vue";
 import CanvasToolbar from "./CanvasToolbar.vue";
+import FloatingCameraButtons from "./FloatingCameraButtons.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
@@ -359,6 +360,7 @@ onUnmounted(() => {
 <template>
   <div class="relative flex h-full w-full flex-col">
     <CanvasToolbar
+      class="absolute top-2 left-14 right-14 z-20"
       :selected-note-ids="selection.selectedOfKind('note')"
       :can-undo="undoRedo.canUndo()"
       :can-redo="undoRedo.canRedo()"
@@ -366,9 +368,6 @@ onUnmounted(() => {
       @redo="undoRedo.redo()"
       @insert-note="insertNoteAtCenter()"
       @insert-arrow="insertArrowBetweenSelected()"
-      @zoom-in="zoomIn()"
-      @zoom-out="zoomOut()"
-      @fit-to-screen="fitToScreen()"
     />
     <SpatialWorldCanvas
       ref="canvasRef"
@@ -423,6 +422,18 @@ onUnmounted(() => {
       />
     </SpatialWorldCanvas>
 
+    <!-- Right-side floating camera buttons -->
+    <FloatingCameraButtons
+      class="absolute top-14 right-3 z-20"
+      :zoom="canvasRef?.zoom ?? 1"
+      :can-undo="undoRedo.canUndo()"
+      :can-redo="undoRedo.canRedo()"
+      @reset-zoom="canvasRef?.resetView()"
+      @fit-to-screen="fitToScreen()"
+      @undo="undoRedo.undo()"
+      @redo="undoRedo.redo()"
+    />
+
     <!-- box selection overlay -->
     <div
       v-if="selection.boxSelecting.value && selection.boxRect.value"
@@ -456,12 +467,12 @@ onUnmounted(() => {
     <CollabAvatars v-if="props.awareness" :awareness="props.awareness" />
 
     <!-- Bottom-right: selection count -->
-      <div
-        v-if="selection.selected.value.length > 0"
-        class="bg-card border-border pointer-events-auto rounded-md border px-2 py-1 text-xs shadow-sm"
-      >
-        {{ selection.selected.value.length }} item{{ selection.selected.value.length === 1 ? "" : "s" }} selected
-      </div>
+    <div
+      v-if="selection.selected.value.length > 0"
+      class="bg-card border-border pointer-events-none absolute bottom-3 right-3 rounded-md border px-2 py-1 text-xs shadow-sm"
+    >
+      {{ selection.selected.value.length }} item{{ selection.selected.value.length === 1 ? "" : "s" }} selected
+    </div>
 
     <!-- Canvas context menu -->
     <CanvasContextMenu

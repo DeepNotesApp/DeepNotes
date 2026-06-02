@@ -23,9 +23,6 @@ import {
   Redo,
   Plus,
   ArrowRight,
-  ZoomIn,
-  ZoomOut,
-  Maximize,
   Highlighter,
   Subscript,
   Superscript,
@@ -48,9 +45,6 @@ const emit = defineEmits<{
   redo: [];
   "insert-note": [];
   "insert-arrow": [];
-  "zoom-in": [];
-  "zoom-out": [];
-  "fit-to-screen": [];
 }>();
 
 const dispatcher = useEditorCommandDispatcher(() => props.selectedNoteIds);
@@ -78,7 +72,7 @@ function promptVideo() {
 
 <template>
   <div
-    class="border-border/40 bg-background/95 pointer-events-auto flex flex-none items-center gap-1 border-b px-2 py-1 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+    class="border-border/40 bg-background/95 pointer-events-auto flex items-center gap-1 rounded-md border px-2 py-1 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/60"
   >
     <!-- Undo / Redo -->
     <div class="flex items-center gap-0.5">
@@ -368,37 +362,5 @@ function promptVideo() {
       </Button>
     </div>
 
-    <div class="bg-border mx-1 h-4 w-px" />
-
-    <!-- View -->
-    <div class="flex items-center gap-0.5">
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-7 w-7"
-        title="Zoom in"
-        @click="emit('zoom-in')"
-      >
-        <ZoomIn class="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-7 w-7"
-        title="Zoom out"
-        @click="emit('zoom-out')"
-      >
-        <ZoomOut class="h-3.5 w-3.5" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon"
-        class="h-7 w-7"
-        title="Fit to screen"
-        @click="emit('fit-to-screen')"
-      >
-        <Maximize class="h-3.5 w-3.5" />
-      </Button>
-    </div>
   </div>
 </template>

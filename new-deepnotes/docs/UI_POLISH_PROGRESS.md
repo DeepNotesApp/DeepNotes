@@ -8,11 +8,11 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 > - ✅ Mini-mode has been removed entirely; right sidebar is 2-state only.
 > - ✅ Shadcn `Select` installed; raw `<select>` replaced in property cards.
 > - ✅ Keyboard shortcut parity: canvas-mode (F2, arrows, Ctrl+D, Ctrl+H, Backspace undo) + editing-mode (Tiptap extension with 20 shortcuts).
-> - ❌ **Notification button navigates to `/notifications` page instead of opening inline popup.** No `NotificationPopup` component exists. Severe UX regression from legacy.
-> - ❌ **Right sidebar "Page/Note/Arrow Properties" header scrolls away with content.** It is rendered inside the scrollable content area instead of as a fixed sibling. Direct regression from legacy `q-toolbar` behavior.
-> - ❌ **"N items selected" indicator is in normal document flow.** It shrinks the canvas when it appears. Legacy used `position: absolute`. Layout bug, not tracked.
-> - ❌ **Canvas toolbar is stuck to top as `border-b` flex item.** User feedback: should be floating with margins from left/top/right. Zoom buttons should be removed and replaced with legacy-style right-side floating buttons.
-> - ❌ **Left sidebar tab contents are wrapped in Card panels with borders.** User feedback: should be plain content without panel borders, closer to legacy.
+> - ✅ **Notification button now opens inline popup via `NotificationsPopover.vue`.** Replaced `RouterLink` in `MainToolbar.vue` with a `DropdownMenu`-based popup.
+> - ✅ **Right sidebar "Page/Note/Arrow Properties" header is now fixed.** Restructured `PageLayout.vue` `<aside>` with a `shrink-0` header strip above `flex-1 overflow-y-auto` content pane.
+> - ✅ **"N items selected" is now `absolute bottom-3 right-3 pointer-events-none`.** No longer shifts canvas layout.
+> - ✅ **Canvas toolbar is now floating (`absolute top-2 left-14 right-14`).** Zoom buttons removed from toolbar; `FloatingCameraButtons.vue` replicates legacy right-side stack (Reset zoom, Fit, Zoom%, Undo, Redo).
+> - ✅ **Left sidebar tab contents are now plain (no Card borders).** Removed `<Card>` wrappers from Path, Recent, Favorites, Selected tabs.
 > - `CURRENT_SITUATION.md` is a snapshot; it should not be edited.
 
 ## Status
@@ -29,18 +29,13 @@ Tracks execution of `UI_POLISH_PLAN.md` (areas around the main section in the pa
 | **5.2** | Right sidebar: "Create new page" functionality | `PARTIAL` | `NotePropertiesCard.vue` | UI added, crypto stubbed. |
 | **5.3** | Right sidebar: mini-mode (48px collapsed strip) | **REMOVED** | `PageLayout.vue`, `PageEditorView.vue` | ✅ 2-state only (expanded ↔ hidden). |
 | **7** | Keyboard shortcut parity (high-impact missing shortcuts) | **DONE** | `useSpatialKeyboard.ts`, `tiptap-keyboard-shortcuts.ts`, `note-editor-tiptap-extensions.ts`, `SpatialPageView.vue` | Canvas: F2, arrows, Ctrl+D, Ctrl+H, Backspace undo. Editing: 20 Tiptap shortcuts (formatting, objects, tables, math). |
-| **2.1b** | Header: notification inline popup (not page nav) | **NOT STARTED** | `MainToolbar.vue`, new `NotificationsPopover.vue` | No `NotificationPopup` component exists in new app. |
-| **3.1b** | Left sidebar: remove Card panel borders from tab contents | **NOT STARTED** | `PageEditorView.vue`, `RecentPagesCard.vue`, `FavoritePagesCard.vue`, `SelectedPagesCard.vue` | User feedback: contents should be plain, not inside panel borders. |
-| **4.1e** | Canvas toolbar: floating position + remove zoom buttons | **NOT STARTED** | `CanvasToolbar.vue`, `SpatialPageView.vue`, new `FloatingCameraButtons.vue` | User feedback: toolbar should float with margins; zoom buttons should be legacy-style right-side floating buttons. |
-| **5.1c** | Right sidebar: fix properties header to stay fixed above scrollable content | **NOT STARTED** | `PageLayout.vue`, `PageEditorView.vue` | Header scrolls away with content; legacy had fixed `q-toolbar`. |
-| **Floating UI** | "N items selected" should be absolute positioned | **NOT STARTED** | `SpatialPageView.vue` | Layout bug: indicator shrinks canvas when visible. |
+| **2.1b** | Header: notification inline popup (not page nav) | **DONE** | `MainToolbar.vue`, new `NotificationsPopover.vue` | `DropdownMenu`-based popup with compact notification list, mark-all-read, and link to full page. |
+| **3.1b** | Left sidebar: remove Card panel borders from tab contents | **DONE** | `PageEditorView.vue`, `RecentPagesCard.vue`, `FavoritePagesCard.vue`, `SelectedPagesCard.vue` | Removed `<Card>` wrappers; content is now plain with simple header + list. |
+| **4.1e** | Canvas toolbar: floating position + remove zoom buttons | **DONE** | `CanvasToolbar.vue`, `SpatialPageView.vue`, new `FloatingCameraButtons.vue` | Toolbar is `absolute top-2 left-14 right-14`; View group removed. Right-side floating buttons replicate legacy `DisplayRightBtns`. |
+| **5.1c** | Right sidebar: fix properties header to stay fixed above scrollable content | **DONE** | `PageLayout.vue`, `PageEditorView.vue` | `<aside>` restructured to `flex-col` with `shrink-0` header strip + `flex-1 overflow-y-auto` content pane. |
+| **Floating UI** | "N items selected" should be absolute positioned | **DONE** | `SpatialPageView.vue` | Changed to `absolute bottom-3 right-3 pointer-events-none`; no longer affects layout. |
 
 ## Next Recommended Actions
 
-1. **Fix notification popup regression** — Build `NotificationsPopover.vue` using Radix `Popover` or `DropdownMenu`; replace `RouterLink` in `MainToolbar.vue`.
-2. **Fix left sidebar Card panels** — Remove `<Card>` wrappers from Path, Recent, Favorites, Selected tab contents; make plain like legacy sections.
-3. **Fix canvas toolbar positioning** — Make `CanvasToolbar` floating (absolute with margins); remove View group (ZoomIn/ZoomOut/Fit); create `FloatingCameraButtons.vue` with Reset zoom, Fit to screen, Zoom %, Undo, Redo on the right side.
-4. **Fix right sidebar fixed header** — Restructure `PageLayout.vue` `<aside>` so the properties header is a fixed-height sibling above a scrollable content pane.
-5. **Fix "N items selected" layout** — Move the indicator into the `floating-overlay` slot or make it `absolute bottom-3 right-3 pointer-events-none`.
-6. Add remaining right sidebar controls: anchor numeric inputs, explicit width/height combos, ColorPalette, note export.
-7. Implement full "Create new page" crypto flow (§5.2).
+1. Add remaining right sidebar controls: anchor numeric inputs, explicit width/height combos, ColorPalette, note export.
+2. Implement full "Create new page" crypto flow (§5.2).

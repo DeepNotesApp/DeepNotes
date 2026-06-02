@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckSquare, X } from '@lucide/vue'
 import { RouterLink } from 'vue-router'
@@ -23,12 +22,12 @@ function pageLabel(pid: string): string {
 </script>
 
 <template>
-  <Card>
-    <CardHeader class="pb-2 flex flex-row items-center justify-between space-y-0">
-      <CardTitle class="text-sm flex items-center gap-2">
+  <div>
+    <div class="mb-2 flex items-center justify-between">
+      <div class="text-sm flex items-center gap-2 font-medium">
         <CheckSquare class="h-4 w-4" />
         Selected Pages
-      </CardTitle>
+      </div>
       <Button
         variant="ghost"
         size="icon"
@@ -38,22 +37,20 @@ function pageLabel(pid: string): string {
       >
         <X class="h-3 w-3" />
       </Button>
-    </CardHeader>
-    <CardContent class="text-xs">
-      <p v-if="selectedPageIds.length === 0" class="text-muted-foreground">
-        No pages selected.
-      </p>
-      <nav v-else class="space-y-1">
-        <RouterLink
-          v-for="pageId in selectedPageIds"
-          :key="pageId"
-          :to="`/pages/${pageId}`"
-          class="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
-          :class="{ 'bg-accent': pageId === currentPageId }"
-        >
-          {{ pageLabel(pageId) }}
-        </RouterLink>
-      </nav>
-    </CardContent>
-  </Card>
+    </div>
+    <p v-if="selectedPageIds.length === 0" class="text-muted-foreground text-xs">
+      No pages selected.
+    </p>
+    <nav v-else class="space-y-1 text-xs">
+      <RouterLink
+        v-for="pageId in selectedPageIds"
+        :key="pageId"
+        :to="`/pages/${pageId}`"
+        class="block rounded-md px-2 py-1.5 transition-colors hover:bg-accent"
+        :class="{ 'bg-accent': pageId === currentPageId }"
+      >
+        {{ pageLabel(pageId) }}
+      </RouterLink>
+    </nav>
+  </div>
 </template>

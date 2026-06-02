@@ -10,11 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "@/features/auth/useSession";
-import { unreadNotificationCount } from "@/features/notifications/useNotificationBadge";
+import NotificationsPopover from "@/features/notifications/NotificationsPopover.vue";
 import ThemeSwitcher from "@/features/theme/ThemeSwitcher.vue";
 import { isDark } from "@/features/theme/useThemePreference";
 import {
-  Bell,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -83,24 +82,8 @@ async function onLogout() {
 
     <!-- Right: notifications + theme + profile + sidebar toggle -->
     <div class="flex flex-none items-center gap-1 pr-1">
-      <!-- Notifications (icon only) -->
-      <Button
-        v-if="bootstrapped && isAuthenticated"
-        as-child
-        variant="ghost"
-        size="icon"
-        class="relative h-8 w-8"
-      >
-        <RouterLink to="/notifications">
-          <Bell class="h-4 w-4" />
-          <span
-            v-if="unreadNotificationCount > 0"
-            class="bg-primary text-primary-foreground absolute -right-0.5 -top-0.5 flex h-3.5 min-w-[0.875rem] items-center justify-center rounded-full px-0.5 text-[9px] font-bold"
-          >
-            {{ unreadNotificationCount > 99 ? "99+" : unreadNotificationCount }}
-          </span>
-        </RouterLink>
-      </Button>
+      <!-- Notifications popover -->
+      <NotificationsPopover v-if="bootstrapped && isAuthenticated" />
 
       <ThemeSwitcher />
 
