@@ -11,6 +11,7 @@ import ScreenshotDialog from "./ScreenshotDialog.vue";
 import CollabAvatars from "./CollabAvatars.vue";
 import CanvasToolbar from "./CanvasToolbar.vue";
 import FloatingCameraButtons from "./FloatingCameraButtons.vue";
+import FloatingLeftButtons from "./FloatingLeftButtons.vue";
 import { useSpatialPage } from "./useSpatialPage";
 import { useSpatialSelection } from "./selection";
 import { useSpatialEditing } from "./useSpatialEditing";
@@ -136,6 +137,18 @@ const notesByZIndex = computed(() => {
   return [...rootNoteList.value].sort(
     (a, b) => a.model.zIndex.value - b.model.zIndex.value,
   );
+});
+
+const boxOverlayStyle = computed(() => {
+  const br = selection.boxRect.value;
+  if (!selection.boxSelecting.value || !br || !canvasRef.value?.rootEl) return null;
+  const rect = canvasRef.value.rootEl.getBoundingClientRect();
+  return {
+    left: `${br.x - rect.left}px`,
+    top: `${br.y - rect.top}px`,
+    width: `${br.width}px`,
+    height: `${br.height}px`,
+  };
 });
 
 // --- extracted composables ---
@@ -390,6 +403,7 @@ onUnmounted(() => {
         :source-model="noteById.get(arrow.model.source.value)"
         :target-model="noteById.get(arrow.model.target.value)"
         :selected="selection.isSelected(arrow.id)"
+        :editing-id="editing.editingId.value"
         @select="selection.select(arrow.id, 'arrow')"
         @toggle="selection.toggle(arrow.id, 'arrow')"
         @reconnect-start="onArrowReconnectStart"
@@ -402,6 +416,7 @@ onUnmounted(() => {
         :model="note.model"
         :zoom="canvasRef?.zoom ?? 1"
         :selected="selection.isSelected(note.id)"
+        :editing-id="editing.editingId.value"
         :is-drop-target="hoveredContainerId === note.id"
         :child-models="
           note.model.container.children.value
@@ -426,6 +441,13 @@ onUnmounted(() => {
       />
     </SpatialWorldCanvas>
 
+    <!-- Left-side floating buttons -->
+    <FloatingLeftButtons
+      class="absolute top-14 left-3 z-20"
+      @screenshot="screenshotOpen = true"
+      @find-replace="findReplaceOpen = true"
+    />
+
     <!-- Right-side floating camera buttons -->
     <FloatingCameraButtons
       class="absolute top-14 right-3 z-20"
@@ -440,14 +462,9 @@ onUnmounted(() => {
 
     <!-- box selection overlay -->
     <div
-      v-if="selection.boxSelecting.value && selection.boxRect.value"
+      v-if="boxOverlayStyle"
       class="pointer-events-none absolute z-50 border border-primary bg-primary/10"
-      :style="{
-        left: `${selection.boxRect.value.x}px`,
-        top: `${selection.boxRect.value.y}px`,
-        width: `${selection.boxRect.value.width}px`,
-        height: `${selection.boxRect.value.height}px`,
-      }"
+      :style="boxOverlayStyle"
     />
 
     <!-- arrow drag preview line -->

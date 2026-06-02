@@ -23,7 +23,10 @@ const props = defineProps<{
   parentColor?: string | null;
   posOverride?: { x: number; y: number };
   isFlexChild?: boolean;
+  editingId?: string | null;
 }>();
+
+const isEditing = computed(() => props.editingId === props.id);
 
 const emit = defineEmits<{
   select: [];
@@ -339,7 +342,7 @@ function onContextMenu(e: MouseEvent) {
         <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
           <NoteTiptapEditor
             :fragment="headFrag!"
-            :editable="!model.readOnly.value"
+            :editable="isEditing && !model.readOnly.value"
             placeholder="Head…"
             :note-id="id"
             section="head"
@@ -364,8 +367,19 @@ function onContextMenu(e: MouseEvent) {
           model.head.enabled.value &&
           (model.body.enabled.value || model.container.enabled.value)
         "
+        class="relative"
         :style="{ height: '1px', backgroundColor: dividerColor }"
-      />
+      >
+        <div
+          v-if="model.resizable.value && !model.readOnly.value && props.selected"
+          class="absolute z-[2147483646] cursor-ns-resize"
+          style="top: -3px; left: 0; right: 0; height: 7px;"
+          @pointerdown="(e: PointerEvent) => onResizePointerDown(e, 's')"
+          @pointermove="onResizePointerMove"
+          @pointerup="onResizePointerUp"
+          @pointercancel="onResizePointerUp"
+        />
+      </div>
 
       <!-- body section -->
       <div
@@ -376,7 +390,7 @@ function onContextMenu(e: MouseEvent) {
         <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
           <NoteTiptapEditor
             :fragment="bodyFrag!"
-            :editable="!model.readOnly.value"
+            :editable="isEditing && !model.readOnly.value"
             placeholder="Body…"
             :note-id="id"
             section="body"
@@ -401,8 +415,19 @@ function onContextMenu(e: MouseEvent) {
           model.body.enabled.value &&
           model.container.enabled.value
         "
+        class="relative"
         :style="{ height: '1px', backgroundColor: dividerColor }"
-      />
+      >
+        <div
+          v-if="model.resizable.value && !model.readOnly.value && props.selected"
+          class="absolute z-[2147483646] cursor-ns-resize"
+          style="top: -3px; left: 0; right: 0; height: 7px;"
+          @pointerdown="(e: PointerEvent) => onResizePointerDown(e, 's')"
+          @pointermove="onResizePointerMove"
+          @pointerup="onResizePointerUp"
+          @pointercancel="onResizePointerUp"
+        />
+      </div>
 
       <!-- container section -->
       <div
@@ -451,10 +476,10 @@ function onContextMenu(e: MouseEvent) {
     <template v-if="model.resizable.value && !model.readOnly.value && props.selected">
       <div
         v-for="h in ([
-          { key: 'nw', top: '0', left: '0', cursor: 'nwse-resize' },
-          { key: 'ne', top: '0', right: '0', cursor: 'nesw-resize' },
-          { key: 'sw', bottom: '0', left: '0', cursor: 'nesw-resize' },
-          { key: 'se', bottom: '0', right: '0', cursor: 'nwse-resize' },
+          { key: 'nw', top: '0%', left: '0%', cursor: 'nwse-resize' },
+          { key: 'ne', top: '0%', left: '100%', cursor: 'nesw-resize' },
+          { key: 'sw', top: '100%', left: '0%', cursor: 'nesw-resize' },
+          { key: 'se', top: '100%', left: '100%', cursor: 'nwse-resize' },
         ] as const)"
         :key="h.key"
         class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"

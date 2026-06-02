@@ -40,6 +40,15 @@ export function useNoteEditor(opts: {
     { immediate: true },
   );
 
+  watch(
+    () => opts.editable,
+    (isEditable) => {
+      if (editor.value && !editor.value.isDestroyed) {
+        editor.value.setEditable(isEditable ?? true);
+      }
+    },
+  );
+
   onBeforeUnmount(() => {
     unregister?.();
     const ed = editor.value;

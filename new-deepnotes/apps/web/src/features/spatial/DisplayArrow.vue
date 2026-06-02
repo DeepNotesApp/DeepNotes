@@ -14,7 +14,10 @@ const props = defineProps<{
   sourceModel?: NoteModel;
   targetModel?: NoteModel;
   selected?: boolean;
+  editingId?: string | null;
 }>();
+
+const isEditing = computed(() => props.editingId === props.id);
 
 const emit = defineEmits<{
   select: [];
@@ -122,6 +125,32 @@ const geometry = computed(() => {
     y2 = endpoints.y2;
   }
 
+  // Compute normals (direction from note center to edge point)
+  let sourceNx = 0;
+  let sourceNy = 0;
+  let targetNx = 0;
+  let targetNy = 0;
+
+  if (s) {
+    const scx = s.pos.value.x + nw1 / 2;
+    const scy = s.pos.value.y + h1 / 2;
+    sourceNx = x1 - scx;
+    sourceNy = y1 - scy;
+    const sourceNlen = Math.hypot(sourceNx, sourceNy) || 1;
+    sourceNx /= sourceNlen;
+    sourceNy /= sourceNlen;
+  }
+
+  if (t) {
+    const tcx = t.pos.value.x + nw2 / 2;
+    const tcy = t.pos.value.y + h2 / 2;
+    targetNx = x2 - tcx;
+    targetNy = y2 - tcy;
+    const targetNlen = Math.hypot(targetNx, targetNy) || 1;
+    targetNx /= targetNlen;
+    targetNy /= targetNlen;
+  }
+
   const minX = Math.min(x1, x2);
   const minY = Math.min(y1, y2);
 
@@ -141,19 +170,18 @@ const geometry = computed(() => {
   let centerY: number;
 
   if (props.model.bodyType.value === "curve") {
-    const perpX = dy / (dist || 1);
-    const perpY = -dx / (dist || 1);
-    const offset = dist * 0.25;
+    // Control points along normals, similar to legacy
+    const offset = Math.min(dist * 0.4, 150);
 
-    const c1x = localX1 + dx * 0.5 + perpX * offset;
-    const c1y = localY1 + dy * 0.5 + perpY * offset;
-    const c2x = localX2 - dx * 0.5 + perpX * offset;
-    const c2y = localY2 - dy * 0.5 + perpY * offset;
+    const c1x = localX1 + sourceNx * offset;
+    const c1y = localY1 + sourceNy * offset;
+    const c2x = localX2 + targetNx * offset;
+    const c2y = localY2 + targetNy * offset;
 
     pathD = `M ${localX1} ${localY1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${localX2} ${localY2}`;
 
-    sourceAngle = Math.atan2(c1y - localY1, c1x - localX1);
-    targetAngle = Math.atan2(localY2 - c2y, localX2 - c2x);
+    sourceAngle = Math.atan2(sourceNy, sourceNx);
+    targetAngle = Math.atan2(targetNy, targetNx);
 
     // Cubic bezier midpoint at t=0.5
     centerX = 0.125 * localX1 + 0.375 * c1x + 0.375 * c2x + 0.125 * localX2;
@@ -309,7 +337,7 @@ function onPointerDown(e: PointerEvent) {
       >
         <NoteTiptapEditor
           :fragment="labelFragment"
-          :editable="!props.model.readOnly.value"
+          :editable="isEditing && !props.model.readOnly.value"
           placeholder="Label…"
           :note-id="id"
           section="label"
