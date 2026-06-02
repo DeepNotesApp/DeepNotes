@@ -24,8 +24,6 @@ async function resolveAndGo() {
     });
     return;
   }
-
-  await router.replace({ name: "home" });
 }
 
 watch(
