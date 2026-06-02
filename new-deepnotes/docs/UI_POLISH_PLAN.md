@@ -1,12 +1,12 @@
 # UI Polish Plan — Legacy vs New Comparison & Roadmap
 
 > **Source:** `docs/CURRENT_SITUATION.md` product feedback translated into a concrete engineering plan.  
-> **Status:** v3 — updated after deep codebase audit (33 files read across both codebases).  
+> **Status:** v4 — updated after right sidebar parity pass (NotePropertiesCard, ArrowPropertiesCard, PageLayout mini-mode).  
 > **Key audit findings:**
 > 1. **Tiptap extensions already exist** in both `note-editor-tiptap-extensions.ts` and `page-editor-tiptap-extensions.ts`. The missing piece is a **command dispatcher** that routes toolbar/shortcut actions to the correct note editor instance(s).
-> 2. **Note vertical resize requires a mandatory Yjs schema migration** — add a `height` field to `page-doc-schema.ts`, `note-model.ts`, and provide a runtime fallback for persisted docs that lack it.
+> 2. ✅ **Note vertical resize Yjs schema migration** — `height` field added to `page-doc-schema.ts`, `note-model.ts`, with runtime backfill for persisted docs.
 > 3. **~20 high-impact keyboard shortcuts are missing** compared to legacy `use-keyboard-shortcuts.ts`. A toolbar without shortcut parity is a degraded experience.
-> 4. **Right-sidebar mini-mode is a parallel UI surface** requiring `PageLayout.vue` structural changes and ~321+ lines of mini-mode logic (legacy `NoteMiniProperties.vue` alone), not a cosmetic afterthought.
+> 4. ✅ **Right-sidebar mini-mode** — `PageLayout.vue` now supports 3-state right sidebar (expanded → mini 48px → hidden). `PageEditorView.vue` provides `right-sidebar-mini` slot.
 
 ---
 
@@ -168,54 +168,52 @@
   - `NoteProperties.vue` (`@/apps/client/.../NoteProperties.vue:1-766`) is ~766 lines with rich controls: LinkURL input, **Create new page** split button (`DeepBtnDropdown`), Head/Body enabled toggles, **swap head/body** button, timestamps (createdAt, editedAt, movedAt), copy link to note, set as default note style, anchor X/Y numeric inputs, width/head-height/body-height/container-height combos (Auto / Minimum / explicit px), `ColorPalette` component, Collapsible/Collapsed/Local collapsing/Locally collapsed toggles, `NoteContainerProperties` sub-component (enabled, spatial, horizontal, wrap children, stretch children, force color inheritance), Movable/Resizable/Wrap head/Wrap body/Read-only toggles, `NoteExport` sub-component.
   - `ArrowProperties.vue` (`@/apps/client/.../ArrowProperties.vue:1-385`) is ~385 lines with: mini-mode (`MiniSidebarBtn` icons for backward, swap, forward, dashed, color palette), Source/Target anchor selects (Auto/Left/Top/Right/Bottom), Source/Target head selects (`none`/`open`), **swap arrowheads** button, Body type/style selects, `ColorPalette`, copy link, set as default, timestamps.
   - `PageProperties.vue` (`@/apps/client/.../PageProperties.vue:1-229`) is ~229 lines with: relative/absolute title inputs, page ID + copy link, **group settings** button, **move page** button, favorite/unfavorite, **delete page**, `PageSelection` sub-component, `VersionHistory` sub-component, `PageBacklinks` sub-component.
-- **New:** `NotePropertiesCard.vue` (`@/apps/web/.../NotePropertiesCard.vue:1-354`) is 354 lines, `ArrowPropertiesCard.vue` (`@/apps/web/.../ArrowPropertiesCard.vue:1-176`) is 176 lines, `PagePropertiesCard.vue` (`@/apps/web/.../PagePropertiesCard.vue:1-109`) is 109 lines. These use Shadcn `Card` but are much simpler.
-  - **Missing from `NotePropertiesCard`:** Create new page, swap head/body, timestamps, copy link, set as default, anchor numeric inputs, width/height combos beyond Auto/Minimum, `ColorPalette` (has a simple HSL row but not the legacy palette), collapsible/local collapsing, container properties, note export.
-  - **Missing from `ArrowPropertiesCard`:** mini-mode, source/target anchor selects, source/target head *selects* (new uses boolean Switch which discards the `"none"`/`"open"` distinction in the schema), swap arrowheads, timestamps, copy link, set as default.
-  - **Missing from `PagePropertiesCard`:** group settings, move page, delete page, page selection, version history, backlinks. However, the new `PageEditorView.vue` (`@/apps/web/.../PageEditorView.vue:497-599`) renders `PageEditorSnapshotsCard`, `PageEditorManagementCard`, and `PageEditorBacklinksCard` as **separate cards** in the right sidebar, which partially covers snapshots, management, and backlinks but fragments the UI.
-- **Problem:** User says it's "very ugly" and missing "Create new page" which is central. The sidebar is both visually inconsistent (raw `<select>`) and functionally incomplete.
+- **New:** `NotePropertiesCard.vue` (`@/apps/web/.../NotePropertiesCard.vue:1-445`) is 445 lines, `ArrowPropertiesCard.vue` (`@/apps/web/.../ArrowPropertiesCard.vue:1-281`) is 281 lines, `PagePropertiesCard.vue` (`@/apps/web/.../PagePropertiesCard.vue:1-109`) is 109 lines. These use Shadcn `Card`.
+  - **Missing from `NotePropertiesCard` (still):** Anchor numeric inputs, width/height combos beyond simple `select` (Auto / Minimum / explicit px), `ColorPalette` (has a simple HSL row but not the legacy palette component), note export UI.
+  - **Added to `NotePropertiesCard` (now present):** Link URL input, Create new page button (stubbed — see §5.2), Head/Body enabled toggles, swap head and body button, timestamps (createdAt, editedAt, movedAt), copy link to note, set as default note style (stubbed), Collapsible / Collapsed / Local collapsing / Locally collapsed toggles, Container properties (enabled, spatial, horizontal, wrap children, stretch children, force color inheritance), Movable / Resizable / Wrap head / Wrap body / Read-only toggles.
+  - **Added to `ArrowPropertiesCard` (now present):** Source/target anchor selects (Auto / Left / Top / Right / Bottom), source/target head selects (`none`/`open` via `<select>`), swap arrowheads button, timestamps (createdAt, editedAt), copy link, set as default (stubbed).
+  - **Missing from `PagePropertiesCard`:** group settings, move page, delete page, page selection, version history. Backlinks, snapshots, and management are now conditionally rendered below `PagePropertiesCard` when no note/arrow is selected (consolidated behavior).
+- **Problem:** User says it's "very ugly" and missing "Create new page" which is central. The sidebar was both visually inconsistent (raw `<select>`) and functionally incomplete. Most controls are now present; remaining gaps are anchor numeric inputs, explicit width/height comboboxes, ColorPalette component, note export, and full page-creation / set-as-default crypto integration.
 - **Fix:**
   1. **Visual density:** Reduce excessive `space-y-3` gaps between cards. Use tighter spacing (`space-y-2` or `gap-3` on a single wrapper). Remove card borders inside the sidebar or use `variant="ghost"` cards.
   2. **Add missing controls to `NotePropertiesCard`:**
-     - Link URL input (verify if it exists; if not, add it).
-     - **Create new page button** (the critical missing feature)
-     - Head/Body enabled toggles
-     - Swap head and body button
-     - Timestamps (createdAt, editedAt, movedAt)
-     - Copy link to note
-     - Set as default note style
-     - Anchor X/Y numeric inputs
-     - Width/Height combos (Auto / Minimum / explicit px)
-     - Color palette (horizontal, compact, matching legacy `ColorPalette` behavior)
-     - Collapsible / Collapsed / Local collapsing toggles
-     - Container properties (enabled, spatial, horizontal, wrap children, stretch children, force color inheritance)
-     - Movable / Resizable / Wrap head / Wrap body / Read-only toggles
-     - Note export UI
+     - ✅ Link URL input — exists.
+     - ✅ **Create new page button** — UI added (stubbed; see §5.2).
+     - ✅ Head/Body enabled toggles — exist.
+     - ✅ Swap head and body button — added.
+     - ✅ Timestamps (createdAt, editedAt, movedAt) — added.
+     - ✅ Copy link to note — added.
+     - ✅ Set as default note style — UI added (stubbed; requires serialization + encryption).
+     - 🔄 Anchor X/Y numeric inputs — still todo.
+     - 🔄 Width/Height combos (Auto / Minimum / explicit px) — still todo.
+     - 🔄 Color palette (horizontal, compact, matching legacy `ColorPalette` behavior) — still todo.
+     - ✅ Collapsible / Collapsed / Local collapsing / Locally collapsed toggles — added.
+     - ✅ Container properties (enabled, spatial, horizontal, wrap children, stretch children, force color inheritance) — added.
+     - ✅ Movable / Resizable / Wrap head / Wrap body / Read-only toggles — added.
+     - 🔄 Note export UI — still todo.
   3. **Add missing controls to `ArrowPropertiesCard`:**
-     - Source/target anchor select (Auto / Left / Top / Right / Bottom), matching legacy `q-select` behavior.
-     - Source/target head toggles (currently only boolean on/off; legacy uses `none`/`open`). The schema (`page-doc-schema.ts`) supports `none`/`open` — the UI must expose both states, not just a boolean Switch.
-     - Swap arrowheads button.
-     - Body type/style select (migrate from raw `<select>`/button toggles to Shadcn `Select`).
-     - Color palette (horizontal, compact).
-     - Timestamps (createdAt, editedAt).
-     - Copy link to arrow.
-     - Set as default arrow style.
-  4. **Consolidate page properties:** Move `PageEditorSnapshotsCard`, `PageEditorManagementCard`, and `PageEditorBacklinksCard` content **into** `PagePropertiesCard` so the right sidebar shows a single cohesive card when no note/arrow is selected, matching legacy `PageProperties.vue`.
-  5. **Add mini-mode (structural requirement):** When the right sidebar is collapsed, show a thin vertical strip of icon buttons (like legacy `NoteMiniProperties.vue` / `ArrowProperties.vue` mini lists). 
-     - Legacy `NoteMiniProperties.vue` (`@/apps/client/.../NoteMiniProperties.vue:1-321`) alone is **321 lines** of dense icon-button logic including Create new page, head/body toggles, collapsible, container, and color palette.
-     - This requires `PageLayout.vue` (`@/apps/web/.../PageLayout.vue:102-111`) to support a mini-width (e.g., `48px`) for the right aside. Currently it hardcodes the right sidebar to `300px` with `v-show`. There is no collapsed width or mini-mode infrastructure.
-     - **Task:** Add `rightMiniWidth` state to `PageLayout.vue`, build mini-property components for notes, arrows, and pages.
+     - ✅ Source/target anchor select (Auto / Left / Top / Right / Bottom) — added via `<select>`.
+     - ✅ Source/target head toggles (`none`/`open`) — migrated from boolean Switch to `<select>`.
+     - ✅ Swap arrowheads button — added.
+     - 🔄 Body type/style select (migrate from raw `<select>`/button toggles to Shadcn `Select`) — still todo.
+     - 🔄 Color palette (horizontal, compact) — still todo.
+     - ✅ Timestamps (createdAt, editedAt) — added.
+     - ✅ Copy link to arrow — added.
+     - ✅ Set as default arrow style — UI added (stubbed).
+  4. **Consolidate page properties:** ✅ Done — `PageEditorSnapshotsCard`, `PageEditorManagementCard`, and `PageEditorBacklinksCard` are now rendered conditionally below `PagePropertiesCard` when no note/arrow is selected (`PageEditorView.vue:597-622`).
+  5. **Add mini-mode (structural requirement):** ✅ Done — `PageLayout.vue` now supports a 3-state right sidebar: expanded (`300px`) → mini (`48px`) → hidden. `PageEditorView.vue` provides a `right-sidebar-mini` slot with icon buttons for create-page, swap, and copy-link.
 
 ### 5.2 Add "Create new page" functionality
 
 - **Legacy:** `NoteProperties.vue` (`@/apps/client/.../NoteProperties.vue:1-766`) has a prominent "Create new page" split button. It extracts the note's text as the initial page title, creates the page via API, sets the note's `link` to the new page, and navigates to it.
-- **New:** No equivalent exists in `NotePropertiesCard.vue`.
+- **New:** UI button added in `NotePropertiesCard.vue` and mini-mode slot, but the full crypto integration is **stubbed**. The handler shows a `pageOpsMessage` explaining the missing page-creation crypto layer.
 - **Fix:**
-  1. Add the "Create new page" button to `NotePropertiesCard`.
-  2. Implement `getInitialPageTitle` logic (extract first line from selected note's head/body text).
-  3. Call `POST /api/pages` with the title and current group/page as parent.
-  4. Set the note's `link` to `/pages/${newPageId}`.
-  5. Optionally navigate to the new page.
-  6. **Mini-mode duplication:** Legacy `NoteMiniProperties.vue` also has a "Create new page" icon button in mini-mode. If mini-mode is implemented (§5.1 step 5), this feature must be duplicated there too.
+  1. ✅ Add the "Create new page" button to `NotePropertiesCard`.
+  2. ✅ Add "Create new page" icon button to mini-mode slot.
+  3. Implement `getInitialPageTitle` logic (extract first line from selected note's head/body text).
+  4. Implement page-creation crypto: generate page keyring, encrypt relative/absolute titles with group content keyring, call `POST /api/groups/{groupId}/pages`.
+  5. Set the note's `link` to `/pages/${newPageId}`.
+  6. Optionally navigate to the new page.
 
 ---
 
@@ -306,7 +304,7 @@ The following are already implemented in `useSpatialKeyboard.ts` and should be p
 | **P0** | 4.1 Restore main toolbar | New `CanvasToolbar.vue`, command dispatcher, `PageLayout.vue`, `SpatialPageView.vue` (remove floating buttons) | **Extra-Large** | Split into 4.1a (dispatcher), 4.1b (basic/formatting), 4.1c (objects/tables/alignment). Tiptap extensions already exist. |
 | **P1** | 2.1 Simplify header | `MainToolbar.vue`, `PageEditorView.vue` (remove slot usage) | **Small** | Delete slot usage in `PageEditorView.vue:364-372`. |
 | **P1** | 3.1 Left sidebar tabs | `PageEditorView.vue`, new sidebar tab component, `PageLayout.vue` | **Medium** | Requires structural decision: tab strip inside slot vs. `PageLayout.vue` two-part sidebar. |
-| **P1** | 5.1 & 5.2 Right sidebar parity + create page | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue`, `PageLayout.vue` (mini-mode) | **Extra-Large** | Includes mini-mode infrastructure (`rightMiniWidth` in `PageLayout.vue`) and ~321 lines of mini-mode logic for notes alone. |
+| **P1** | 5.1 & 5.2 Right sidebar parity + create page | `NotePropertiesCard.vue`, `ArrowPropertiesCard.vue`, `PagePropertiesCard.vue`, `PageLayout.vue` (mini-mode) | **Done (v1)** | Mini-mode, swap, timestamps, anchors, copy link, local collapsing, container props added. Remaining: anchor numeric inputs, explicit width/height combos, ColorPalette component, note export, full page-creation crypto. | |
 | **P1** | 4.3 Context menu expansion | `CanvasContextMenu.vue`, `NoteContextMenu.vue`, `SpatialPageView.vue` | **Small** | Add duplicate, select all, table context menu. |
 | **P2** | 6.1 Account page restructure | `AccountView.vue`, new sub-components/routes, router config | **Medium** | Verify/add `/account/general`, `/account/billing`, `/account/security` routes. |
 | **P2** | 1.2 Scroll-driven index | `WhitepaperPage.vue`, `PrivacyPolicyPage.vue`, `TermsOfServicePage.vue`, new `DocumentIndexLayout` | **Small** | Port `marked.lexer` heading extraction to PrivacyPolicy and TermsOfService. |
@@ -322,7 +320,7 @@ Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre
 
 ### Note `height` field
 
-**Current state:** `page-doc-schema.ts` (`@/packages/collab-wire/.../page-doc-schema.ts:148-168`) defines `createNoteMap()` with `width: createDefaultSize()` but no `height`. `note-model.ts` (`@/apps/web/.../note-model.ts:1-172`) exposes `width` reactivity but not `height`.
+**Current state:** ✅ `height` was added to `YPAGE_NOTE_KEY` and `createNoteMap()`. `note-model.ts` now exposes reactive `height` proxies with runtime backfill for docs that lack the key (`height.expanded = "Auto"`).
 
 **Required changes:**
 1. Add `height: "height"` to `YPAGE_NOTE_KEY`.
@@ -340,21 +338,21 @@ Consider moving **§1.3 (scroll reset)** and **§1.1 (pricing layout)** to a pre
 | New File | Legacy Equivalent | Notes |
 |----------|-------------------|-------|
 | `MainToolbar.vue` | `PagesLayout/MainToolbar/MainToolbar.vue` + `ToolbarContent.vue` | Legacy toolbar lives *inside* the header. New app must separate them. |
-| `PageLayout.vue` | `PagesLayout/PagesLayout.vue` + `LeftSidebar.vue` + `RightSidebar.vue` | New layout lacks mini-mode and tab infrastructure. |
+| `PageLayout.vue` | `PagesLayout/PagesLayout.vue` + `LeftSidebar.vue` + `RightSidebar.vue` | Mini-mode added (3-state right sidebar: expanded → mini 48px → hidden). Tab infrastructure still missing. |
 | `PageEditorView.vue` | `MainContent/DisplayPage/DisplayPage.vue` + sidebar sections | Fragments page properties into multiple cards. |
 | `DisplayNote.vue` | `DisplayWorld/DisplayNote/DisplayNote.vue` | Missing vertical resize, edit-on-frame, handle visibility. |
 | `DisplayArrow.vue` | `DisplayWorld/DisplayArrow/DisplayArrow.vue` | — |
 | `SpatialPageView.vue` | `MainContent/MainContent.vue` + `DisplayUI/DisplayUI.vue` | Floating buttons grew from 5 to 9 because toolbar vanished. |
-| `NotePropertiesCard.vue` | `RightSidebar/NoteProperties/NoteProperties.vue` | Missing ~50% of legacy features. |
-| `ArrowPropertiesCard.vue` | `RightSidebar/ArrowProperties.vue` | Missing mini-mode, anchor selects, timestamps. |
-| `PagePropertiesCard.vue` | `RightSidebar/PageProperties/PageProperties.vue` | Missing group settings, move page, delete, version history. |
+| `NotePropertiesCard.vue` | `RightSidebar/NoteProperties/NoteProperties.vue` | Most features added (swap, timestamps, copy link, local collapsing, container props, movable/resizable). Remaining: anchor numeric inputs, explicit width/height combos, ColorPalette component, note export. |
+| `ArrowPropertiesCard.vue` | `RightSidebar/ArrowProperties.vue` | Mini-mode, anchor selects, head selects, swap, timestamps, copy link added. Remaining: ColorPalette, body type/style Shadcn Select. |
+| `PagePropertiesCard.vue` | `RightSidebar/PageProperties/PageProperties.vue` | Missing group settings, move page, delete, version history. Snapshots/management/backlinks now consolidated (conditionally rendered when no note/arrow selected). |
 | `AccountView.vue` | `pages/home/Account/Account.vue` + `General.vue` + `Security.vue` | Monolithic 830 lines vs. sidebar + router-view. |
 | `PricingPage.vue` | `pages/home/Pricing/Pricing.vue` | Layout shift bug introduced by badge inline with toggle. |
 | `WhitepaperPage.vue` | `pages/home/Whitepaper/Whitepaper.vue` | Missing scroll-spy; heading extraction not ported to Privacy/Terms. |
 | `useCanvasActions.ts` | Distributed across `page.cloning`, `page.clipboard`, `page.deleting`, `page.selection` | New composable architecture is cleaner but lacks some guards (e.g. `e.target` check). |
 | `useSpatialKeyboard.ts` | `code/pages/composables/use-keyboard-shortcuts.ts` | ~20 shortcuts vs. ~40 in legacy. |
-| `page-doc-schema.ts` | `SyncedStore` shape (legacy) | Replicates shape but missing `height` field. |
+| `page-doc-schema.ts` | `SyncedStore` shape (legacy) | `height` field added with runtime backfill for legacy docs. |
 
 ---
 
-*End of plan — v3*
+*End of plan — v4*
