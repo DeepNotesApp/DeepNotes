@@ -169,30 +169,34 @@ const { pathPageLabels } = usePagePathRealtimeTitles({
   cryptoError,
 });
 
-// Fallback: decrypt current page title from bootstrap data when realtime
-// WS hasn't provided it yet.
-watch(
-  [pageId, pageKeyring, pageEncRelTitleB64],
-  () => {
-    const id = pageId.value;
-    const pk = pageKeyring.value;
-    const b64 = pageEncRelTitleB64.value;
-    if (!id || !pk || !b64) return;
-    try {
-      const title = decryptPageRelativeTitle({
-        pageKeyring: pk,
-        pageId: id,
-        ciphertext: base64ToBytes(b64),
-      });
-      if (title && title.length > 0) {
-        pathPageLabels.value = { ...pathPageLabels.value, [id]: title };
-      }
-    } catch {
-      // ignore decrypt failures
+// Merge realtime labels with the current page's bootstrap-encrypted title.
+// usePagePathRealtimeTitles clears and refills pathPageLabels asynchronously,
+// so a simple watcher would be overwritten.  A computed always re-evaluates.
+const pageLabels = computed<Record<string, string>>(() => {
+  const labels = { ...pathPageLabels.value };
+  const id = pageId.value;
+  if (labels[id] && labels[id].length > 0) {
+    return labels;
+  }
+  const pk = pageKeyring.value;
+  const b64 = pageEncRelTitleB64.value;
+  if (!id || !pk || !b64) {
+    return labels;
+  }
+  try {
+    const title = decryptPageRelativeTitle({
+      pageKeyring: pk,
+      pageId: id,
+      ciphertext: base64ToBytes(b64),
+    });
+    if (title && title.length > 0) {
+      labels[id] = title;
     }
-  },
-  { immediate: true },
-);
+  } catch {
+    // ignore decrypt failures
+  }
+  return labels;
+});
 
 const snapshotsApi = usePageSnapshots({
   pageId,
@@ -300,10 +304,10 @@ onMounted(() => {
             class="text-primary hover:underline"
             :to="`/pages/${pid}`"
           >
-            {{ pagePathLabel(pid, pathPageLabels) }}
+            {{ pagePathLabel(pid, pageLabels) }}
           </RouterLink>
           <span v-else class="text-foreground font-medium">
-            {{ pagePathLabel(pid, pathPageLabels) }}
+            {{ pagePathLabel(pid, pageLabels) }}
           </span>
         </template>
       </nav>
@@ -334,10 +338,10 @@ onMounted(() => {
                   class="text-primary hover:underline"
                   :to="`/pages/${pid}`"
                 >
-                  {{ pagePathLabel(pid, pathPageLabels) }}
+                  {{ pagePathLabel(pid, pageLabels) }}
                 </RouterLink>
                 <span v-else class="text-foreground font-medium">
-                  {{ pagePathLabel(pid, pathPageLabels) }}
+                  {{ pagePathLabel(pid, pageLabels) }}
                 </span>
               </template>
             </nav>
@@ -374,7 +378,7 @@ onMounted(() => {
         <RecentPagesCard
           :recent-page-ids="recentPageIds"
           :current-page-id="pageId"
-          :page-labels="pathPageLabels"
+          :page-labels="pageLabels"
           @clear="void clearRecent()"
         />
 
@@ -382,7 +386,7 @@ onMounted(() => {
         <FavoritePagesCard
           :favorite-page-ids="favoritePageIds"
           :current-page-id="pageId"
-          :page-labels="pathPageLabels"
+          :page-labels="pageLabels"
           @clear="void clearFavorites()"
         />
 
@@ -390,7 +394,7 @@ onMounted(() => {
         <SelectedPagesCard
           :selected-page-ids="selectedPageIds"
           :current-page-id="pageId"
-          :page-labels="pathPageLabels"
+          :page-labels="pageLabels"
           @clear="selectedPageIds = []"
         />
 
@@ -415,8 +419,8 @@ onMounted(() => {
         <PagePropertiesCard
           v-if="!selectedNoteId && !selectedArrowId"
           :page-id="pageId"
-          :relative-title="pathPageLabels[pageId]"
-          :absolute-title="pathPageLabels[pageId]"
+          :relative-title="pageLabels[pageId]"
+          :absolute-title="pageLabels[pageId]"
           :is-favorite="isFavorite"
           :read-only="cryptoError !== null"
           @update:relative-title="() => {}"
