@@ -54,6 +54,7 @@ const strokeDasharray = computed(() => {
 });
 
 const ARROW_SIZE = 10;
+const ARROW_OFFSET = 4;
 
 const geometry = computed(() => {
   const s = props.sourceModel;
@@ -81,11 +82,13 @@ const geometry = computed(() => {
   let y2: number;
 
   if (s) {
-    x1 = s.pos.value.x + nw1 / 2;
-    y1 = s.pos.value.y + h1 / 2;
+    const scx = s.pos.value.x + nw1 / 2;
+    const scy = s.pos.value.y + h1 / 2;
+    x1 = scx;
+    y1 = scy;
     if (sourceAnchor) {
-      x1 = s.pos.value.x + sourceAnchor.x;
-      y1 = s.pos.value.y + sourceAnchor.y;
+      x1 = scx + sourceAnchor.x * (nw1 / 2 + ARROW_OFFSET);
+      y1 = scy + sourceAnchor.y * (h1 / 2 + ARROW_OFFSET);
     }
   } else if (fake) {
     x1 = fake.x;
@@ -95,11 +98,13 @@ const geometry = computed(() => {
   }
 
   if (t) {
-    x2 = t.pos.value.x + nw2 / 2;
-    y2 = t.pos.value.y + h2 / 2;
+    const tcx = t.pos.value.x + nw2 / 2;
+    const tcy = t.pos.value.y + h2 / 2;
+    x2 = tcx;
+    y2 = tcy;
     if (targetAnchor) {
-      x2 = t.pos.value.x + targetAnchor.x;
-      y2 = t.pos.value.y + targetAnchor.y;
+      x2 = tcx + targetAnchor.x * (nw2 / 2 + ARROW_OFFSET);
+      y2 = tcy + targetAnchor.y * (h2 / 2 + ARROW_OFFSET);
     }
   } else if (fake) {
     x2 = fake.x;
@@ -123,6 +128,23 @@ const geometry = computed(() => {
     y1 = endpoints.y1;
     x2 = endpoints.x2;
     y2 = endpoints.y2;
+
+    // Push endpoints outward by ARROW_OFFSET so heads don't sit on the edge
+    const scx = s.pos.value.x + nw1 / 2;
+    const scy = s.pos.value.y + h1 / 2;
+    const dx1 = x1 - scx;
+    const dy1 = y1 - scy;
+    const d1 = Math.hypot(dx1, dy1) || 1;
+    x1 += (dx1 / d1) * ARROW_OFFSET;
+    y1 += (dy1 / d1) * ARROW_OFFSET;
+
+    const tcx = t.pos.value.x + nw2 / 2;
+    const tcy = t.pos.value.y + h2 / 2;
+    const dx2 = x2 - tcx;
+    const dy2 = y2 - tcy;
+    const d2 = Math.hypot(dx2, dy2) || 1;
+    x2 += (dx2 / d2) * ARROW_OFFSET;
+    y2 += (dy2 / d2) * ARROW_OFFSET;
   }
 
   // Compute normals (direction from note center to edge point)
@@ -181,7 +203,7 @@ const geometry = computed(() => {
     pathD = `M ${localX1} ${localY1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${localX2} ${localY2}`;
 
     sourceAngle = Math.atan2(sourceNy, sourceNx);
-    targetAngle = Math.atan2(targetNy, targetNx);
+    targetAngle = Math.atan2(targetNy, targetNx) + Math.PI;
 
     // Cubic bezier midpoint at t=0.5
     centerX = 0.125 * localX1 + 0.375 * c1x + 0.375 * c2x + 0.125 * localX2;

@@ -81,6 +81,43 @@ const textColor = computed(() => noteTextColor(isDark.value));
 const borderColor = computed(() => noteBorderColor(isDark.value, props.selected));
 const dividerColor = computed(() => noteDividerColor(isDark.value));
 
+function sizeToCSS(size: string): string {
+  if (/^-?\d+(\.\d+)?$/.test(size.trim())) {
+    return `${size}px`;
+  }
+  return size;
+}
+
+const headHeightCSS = computed(() => {
+  const h = props.model.head.height.value;
+  const collapsed = props.model.collapsing.collapsed.value;
+  if (!props.model.head.enabled.value) return undefined;
+  if (collapsed) {
+    const c = h.collapsed;
+    if (c === "Auto" || c === "Minimum") {
+      if (numEnabledSections.value === 1) return "0px";
+      return sizeToCSS(h.expanded);
+    }
+    return sizeToCSS(c);
+  }
+  return sizeToCSS(h.expanded);
+});
+
+const bodyHeightCSS = computed(() => {
+  const h = props.model.body.height.value;
+  const collapsed = props.model.collapsing.collapsed.value;
+  if (!props.model.body.enabled.value) return undefined;
+  if (collapsed) {
+    const c = h.collapsed;
+    if (c === "Auto" || c === "Minimum") {
+      if (numEnabledSections.value === 1) return "0px";
+      return sizeToCSS(h.expanded);
+    }
+    return sizeToCSS(c);
+  }
+  return sizeToCSS(h.expanded);
+});
+
 const headFrag = computed(() => props.model.head.value.value);
 const bodyFrag = computed(() => props.model.body.value.value);
 
@@ -159,6 +196,7 @@ let hasDragged = false;
 
 function onPointerDown(e: PointerEvent) {
   if (e.button !== 0) return;
+  if (isEditing.value) return;
   e.stopPropagation();
 
   if (e.shiftKey) {
@@ -231,6 +269,7 @@ let resizeStartWidth = 0;
 let resizeStartHeight = 0;
 let resizeStartPosX = 0;
 let resizeStartPosY = 0;
+let resizingSection: "head" | "body" | null = null;
 
 function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   if (e.button !== 0) return;
@@ -238,6 +277,7 @@ function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   e.stopPropagation();
   resizePointerId = e.pointerId;
   resizeHandle = handle;
+  resizingSection = null;
   resizeStartX = e.clientX;
   resizeStartY = e.clientY;
   const widthVal = (props.model.width as any)?.value ?? props.model.width;
@@ -253,11 +293,77 @@ function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   el.setPointerCapture(e.pointerId);
 }
 
+function onSectionResizePointerDown(e: PointerEvent, section: "head" | "body") {
+  if (e.button !== 0) return;
+  if (props.model.readOnly.value) return;
+  e.stopPropagation();
+  resizePointerId = e.pointerId;
+  resizeHandle = "s";
+  resizingSection = section;
+  resizeStartX = e.clientX;
+  resizeStartY = e.clientY;
+  const sectionMap = props.model.rawMap.get(section) as import("yjs").Map<unknown>;
+  const hMap = sectionMap.get("height") as import("yjs").Map<string>;
+  const hVal = hMap.get("expanded") ?? "Auto";
+  resizeStartHeight = hVal === "Auto" || hVal === "Minimum" ? 80 : parseFloat(hVal);
+  isDragging.value = true;
+  const el = e.currentTarget as HTMLElement;
+  el.setPointerCapture(e.pointerId);
+}
+
+function onSectionCornerResizePointerDown(e: PointerEvent, handle: ResizeHandle, section: "head" | "body") {
+  if (e.button !== 0) return;
+  if (props.model.readOnly.value) return;
+  e.stopPropagation();
+  resizePointerId = e.pointerId;
+  resizeHandle = handle;
+  resizingSection = section;
+  resizeStartX = e.clientX;
+  resizeStartY = e.clientY;
+  const widthVal = (props.model.width as any)?.value ?? props.model.width;
+  const w = widthVal?.expanded;
+  resizeStartWidth = w === "Auto" ? 160 : parseFloat(w ?? "160");
+  const sectionMap = props.model.rawMap.get(section) as import("yjs").Map<unknown>;
+  const hMap = sectionMap.get("height") as import("yjs").Map<string>;
+  const hVal = hMap.get("expanded") ?? "Auto";
+  resizeStartHeight = hVal === "Auto" || hVal === "Minimum" ? 80 : parseFloat(hVal);
+  resizeStartPosX = props.model.pos.value.x;
+  resizeStartPosY = props.model.pos.value.y;
+  isDragging.value = true;
+  const el = e.currentTarget as HTMLElement;
+  el.setPointerCapture(e.pointerId);
+}
+
 function onResizePointerMove(e: PointerEvent) {
   if (resizePointerId !== e.pointerId || !resizeHandle) return;
   const z = props.zoom || 1;
   const dx = (e.clientX - resizeStartX) / z;
   const dy = (e.clientY - resizeStartY) / z;
+
+  if (resizingSection) {
+    const nextHeight = Math.max(
+      40,
+      Math.round(resizeStartHeight + dy),
+    );
+    const sectionMap = props.model.rawMap.get(resizingSection) as import("yjs").Map<unknown>;
+    const hMap = sectionMap.get("height") as import("yjs").Map<string>;
+    hMap.set("expanded", String(nextHeight));
+
+    const isWest = resizeHandle.includes("w");
+    if (isWest || resizeHandle.includes("e")) {
+      const nextWidth = Math.max(
+        80,
+        Math.round(isWest ? resizeStartWidth - dx : resizeStartWidth + dx),
+      );
+      const widthMap = props.model.rawMap.get("width") as import("yjs").Map<string>;
+      widthMap.set("expanded", String(nextWidth));
+      if (isWest) {
+        const posMap = props.model.rawMap.get("pos") as import("yjs").Map<number>;
+        posMap.set("x", Math.round(resizeStartPosX + dx));
+      }
+    }
+    return;
+  }
 
   const isWest = resizeHandle.includes("w");
   const nextWidth = Math.max(
@@ -291,6 +397,7 @@ function onResizePointerUp(e: PointerEvent) {
   if (resizePointerId !== e.pointerId) return;
   resizePointerId = null;
   resizeHandle = null;
+  resizingSection = null;
   isDragging.value = false;
   const el = e.currentTarget as HTMLElement;
   if (el.releasePointerCapture) {
@@ -337,9 +444,9 @@ function onContextMenu(e: MouseEvent) {
       <div
         v-if="model.head.enabled.value && !model.collapsing.collapsed.value"
         class="flex"
-        style="min-height: 36.45px"
+        :style="{ height: headHeightCSS, minHeight: '36.45px' }"
       >
-        <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
+        <div class="flex-1" @dblclick.stop="emit('edit-start')" @focusin="emit('edit-start')">
           <NoteTiptapEditor
             :fragment="headFrag!"
             :editable="isEditing && !model.readOnly.value"
@@ -374,20 +481,38 @@ function onContextMenu(e: MouseEvent) {
           v-if="model.resizable.value && !model.readOnly.value && props.selected"
           class="absolute z-[2147483646] cursor-ns-resize"
           style="top: -3px; left: 0; right: 0; height: 7px;"
-          @pointerdown="(e: PointerEvent) => onResizePointerDown(e, 's')"
+          @pointerdown="(e: PointerEvent) => onSectionResizePointerDown(e, 'head')"
           @pointermove="onResizePointerMove"
           @pointerup="onResizePointerUp"
           @pointercancel="onResizePointerUp"
         />
+        <template v-if="model.resizable.value && !model.readOnly.value && props.selected && !isFlexChild">
+          <div
+            class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"
+            style="left: 0%; top: 0%; background-color: #2196f3; transform: translate(-50%, -50%);"
+            @pointerdown="(e: PointerEvent) => onSectionCornerResizePointerDown(e, 'sw', 'head')"
+            @pointermove="onResizePointerMove"
+            @pointerup="onResizePointerUp"
+            @pointercancel="onResizePointerUp"
+          />
+          <div
+            class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"
+            style="left: 100%; top: 0%; background-color: #2196f3; transform: translate(-50%, -50%);"
+            @pointerdown="(e: PointerEvent) => onSectionCornerResizePointerDown(e, 'se', 'head')"
+            @pointermove="onResizePointerMove"
+            @pointerup="onResizePointerUp"
+            @pointercancel="onResizePointerUp"
+          />
+        </template>
       </div>
 
       <!-- body section -->
       <div
         v-if="model.body.enabled.value && !model.collapsing.collapsed.value"
         class="flex"
-        style="min-height: 36.45px"
+        :style="{ height: bodyHeightCSS, minHeight: '36.45px' }"
       >
-        <div class="flex-1" @pointerdown.stop @focusin="emit('edit-start')">
+        <div class="flex-1" @dblclick.stop="emit('edit-start')" @focusin="emit('edit-start')">
           <NoteTiptapEditor
             :fragment="bodyFrag!"
             :editable="isEditing && !model.readOnly.value"
@@ -422,11 +547,29 @@ function onContextMenu(e: MouseEvent) {
           v-if="model.resizable.value && !model.readOnly.value && props.selected"
           class="absolute z-[2147483646] cursor-ns-resize"
           style="top: -3px; left: 0; right: 0; height: 7px;"
-          @pointerdown="(e: PointerEvent) => onResizePointerDown(e, 's')"
+          @pointerdown="(e: PointerEvent) => onSectionResizePointerDown(e, 'body')"
           @pointermove="onResizePointerMove"
           @pointerup="onResizePointerUp"
           @pointercancel="onResizePointerUp"
         />
+        <template v-if="model.resizable.value && !model.readOnly.value && props.selected && !isFlexChild">
+          <div
+            class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"
+            style="left: 0%; top: 0%; background-color: #2196f3; transform: translate(-50%, -50%);"
+            @pointerdown="(e: PointerEvent) => onSectionCornerResizePointerDown(e, 'sw', 'body')"
+            @pointermove="onResizePointerMove"
+            @pointerup="onResizePointerUp"
+            @pointercancel="onResizePointerUp"
+          />
+          <div
+            class="absolute z-[2147483647] h-2.5 w-2.5 rounded-full"
+            style="left: 100%; top: 0%; background-color: #2196f3; transform: translate(-50%, -50%);"
+            @pointerdown="(e: PointerEvent) => onSectionCornerResizePointerDown(e, 'se', 'body')"
+            @pointermove="onResizePointerMove"
+            @pointerup="onResizePointerUp"
+            @pointercancel="onResizePointerUp"
+          />
+        </template>
       </div>
 
       <!-- container section -->

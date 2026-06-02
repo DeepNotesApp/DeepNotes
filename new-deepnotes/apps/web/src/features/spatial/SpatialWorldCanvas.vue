@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 
 import { useSpatialViewport } from "./useSpatialViewport";
 import { isDark } from "@/features/theme/useThemePreference";
 
 const rootRef = ref<HTMLElement | null>(null);
+const canvasRef = ref<HTMLCanvasElement | null>(null);
 const {
   camX,
   camY,
@@ -39,8 +40,6 @@ const worldTransform = computed(() => {
   };
 });
 
-const gridStroke = computed(() => (isDark.value ? "#5a5a5a" : "#484848"));
-
 const rootCursorClass = computed(() =>
   spaceDown.value ? "cursor-grab active:cursor-grabbing" : "",
 );
@@ -54,6 +53,59 @@ function onAuxClick(e: MouseEvent) {
     e.preventDefault();
   }
 }
+
+// --- Canvas grid: draws 100-unit grid lines that track the camera ---
+watchEffect(() => {
+  const canvas = canvasRef.value;
+  const root = rootRef.value;
+  if (!canvas || !root) return;
+
+  const rect = root.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const w = rect.width;
+  const h = rect.height;
+
+  if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+  }
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  const z = zoom.value;
+  if (z <= 0) return;
+
+  const gridSize = 100;
+  const startWorldX = camX.value - (w / 2) / z;
+  const startWorldY = camY.value - (h / 2) / z;
+  const endWorldX = camX.value + (w / 2) / z;
+  const endWorldY = camY.value + (h / 2) / z;
+
+  const firstGridX = Math.floor(startWorldX / gridSize) * gridSize;
+  const firstGridY = Math.floor(startWorldY / gridSize) * gridSize;
+
+  ctx.strokeStyle = isDark.value ? "#5a5a5a" : "#484848";
+  ctx.lineWidth = Math.max(0.5, 1 * z);
+
+  ctx.beginPath();
+  for (let x = firstGridX; x <= endWorldX; x += gridSize) {
+    const screenX = (x - camX.value) * z + w / 2;
+    ctx.moveTo(screenX, 0);
+    ctx.lineTo(screenX, h);
+  }
+  for (let y = firstGridY; y <= endWorldY; y += gridSize) {
+    const screenY = (y - camY.value) * z + h / 2;
+    ctx.moveTo(0, screenY);
+    ctx.lineTo(w, screenY);
+  }
+  ctx.stroke();
+});
 </script>
 
 <template>
@@ -69,36 +121,13 @@ function onAuxClick(e: MouseEvent) {
     @pointercancel="onPointerCancel"
     @auxclick="onAuxClick"
   >
+    <canvas
+      ref="canvasRef"
+      class="pointer-events-none absolute inset-0"
+      aria-hidden="true"
+    />
     <div class="absolute top-1/2 left-1/2 h-0 w-0">
       <div class="will-change-transform" :style="worldTransform">
-        <svg
-          class="pointer-events-none absolute"
-          style="top: -5000000px; left: -5000000px; width: 10000000px; height: 10000000px"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern
-              id="spatial-grid"
-              width="100"
-              height="100"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 100 0 L 0 0 0 100"
-                fill="none"
-                :stroke="gridStroke"
-                stroke-width="1"
-              />
-            </pattern>
-          </defs>
-          <rect
-            x="0"
-            y="0"
-            width="10000000"
-            height="10000000"
-            fill="url(#spatial-grid)"
-          />
-        </svg>
         <slot />
       </div>
     </div>
