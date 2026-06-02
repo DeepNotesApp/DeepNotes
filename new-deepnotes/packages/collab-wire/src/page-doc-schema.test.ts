@@ -3,7 +3,6 @@ import * as Y from "yjs";
 
 import {
   YPAGE_KEY,
-  YPAGE_PAGE_KEY,
   YPAGE_NOTE_KEY,
   YPAGE_ARROW_KEY,
   createPageYDoc,
