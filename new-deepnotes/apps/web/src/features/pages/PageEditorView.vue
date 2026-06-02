@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import { Button } from "@/components/ui/button";
@@ -79,11 +79,60 @@ const spatialViewRef = ref<any>(null);
 
 // Track selected note for properties panel
 const selectedNoteId = ref<string | null>(null);
-const selectedNoteModel = ref<any>(null);
+const selectedNoteModel = shallowRef<any>(null);
 
 // Track selected arrow for properties panel
 const selectedArrowId = ref<string | null>(null);
-const selectedArrowModel = ref<any>(null);
+const selectedArrowModel = shallowRef<any>(null);
+
+function handleSelectNote(id: string | null, model: any) {
+  selectedNoteId.value = id ?? null;
+  selectedNoteModel.value = model ?? null;
+}
+
+function handleSelectArrow(id: string | null, model: any) {
+  selectedArrowId.value = id ?? null;
+  selectedArrowModel.value = model ?? null;
+}
+
+// Note property update handlers
+function onUpdateNoteLink(v: string) { if (selectedNoteModel.value) selectedNoteModel.value.link.value = v; }
+function onUpdateNoteHeadEnabled(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.head.enabled.value = v; }
+function onUpdateNoteBodyEnabled(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.body.enabled.value = v; }
+function onUpdateNoteHeadWrap(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.head.wrap.value = v; }
+function onUpdateNoteBodyWrap(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.body.wrap.value = v; }
+function onUpdateNotePosX(v: number) { if (selectedNoteModel.value) selectedNoteModel.value.posX.value = v; }
+function onUpdateNotePosY(v: number) { if (selectedNoteModel.value) selectedNoteModel.value.posY.value = v; }
+function onUpdateNoteAnchorX(v: number) { if (selectedNoteModel.value) selectedNoteModel.value.anchorX.value = v; }
+function onUpdateNoteAnchorY(v: number) { if (selectedNoteModel.value) selectedNoteModel.value.anchorY.value = v; }
+function onUpdateNoteWidth(v: string) { if (selectedNoteModel.value) selectedNoteModel.value.widthExpanded.value = v; }
+function onUpdateNoteHeight(v: string) { if (selectedNoteModel.value) selectedNoteModel.value.heightExpanded.value = v; }
+function onUpdateNoteColor(v: string) { if (selectedNoteModel.value) selectedNoteModel.value.colorValue.value = v; }
+function onUpdateNoteColorInherit(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.colorInherit.value = v; }
+function onUpdateNoteCollapsible(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.collapsing.enabled.value = v; }
+function onUpdateNoteCollapsed(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.collapsing.collapsed.value = v; }
+function onUpdateNoteMovable(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.movable.value = v; }
+function onUpdateNoteResizable(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.resizable.value = v; }
+function onUpdateNoteReadOnly(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.readOnly.value = v; }
+function onUpdateNoteContainerEnabled(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.enabled.value = v; }
+function onUpdateNoteContainerHorizontal(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.horizontal.value = v; }
+function onUpdateNoteContainerSpatial(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.spatial.value = v; }
+function onUpdateNoteContainerWrapChildren(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.wrapChildren.value = v; }
+function onUpdateNoteContainerStretchChildren(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.stretchChildren.value = v; }
+function onUpdateNoteContainerForceColorInheritance(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.container.forceColorInheritance.value = v; }
+function onUpdateNoteLocalCollapsing(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.collapsing.localCollapsing.value = v; }
+function onUpdateNoteLocallyCollapsed(v: boolean) { if (selectedNoteModel.value) selectedNoteModel.value.collapsing.locallyCollapsed.value = v; }
+
+// Arrow property update handlers
+function onUpdateArrowBodyType(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.bodyType.value = v; }
+function onUpdateArrowBodyStyle(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.bodyStyle.value = v; }
+function onUpdateArrowSourceHead(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.sourceHead.value = v; }
+function onUpdateArrowTargetHead(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.targetHead.value = v; }
+function onUpdateArrowColor(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.color.value = v; }
+function onUpdateArrowColorInherit(_v: boolean) { /* arrow model has no color.inherit */ }
+function onUpdateArrowReadOnly(v: boolean) { if (selectedArrowModel.value) selectedArrowModel.value.readOnly.value = v; }
+function onUpdateArrowSourceAnchor(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.sourceAnchor.value = v === 'null' ? null : JSON.parse(v); }
+function onUpdateArrowTargetAnchor(v: string) { if (selectedArrowModel.value) selectedArrowModel.value.targetAnchor.value = v === 'null' ? null : JSON.parse(v); }
 
 // Track recent/favorite/selected pages for left sidebar
 const {
@@ -644,8 +693,8 @@ onMounted(() => {
       :awareness="collabAwareness"
       :default-note-template="noteTemplate"
       :default-arrow-template="arrowTemplate"
-      @select-note="selectedNoteId = $event?.[0] ?? null; selectedNoteModel = $event?.[1] ?? null"
-      @select-arrow="selectedArrowId = $event?.[0] ?? null; selectedArrowModel = $event?.[1] ?? null"
+      @select-note="(id, model) => handleSelectNote(id, model)"
+      @select-arrow="(id, model) => handleSelectArrow(id, model)"
     />
 
     <!-- === Toolbar center: breadcrumb path === -->
@@ -782,32 +831,32 @@ onMounted(() => {
           :note-id="selectedNoteId"
           :note-model="selectedNoteModel"
           :read-only="cryptoError !== null"
-          @update:link="selectedNoteModel.link.value = $event"
-          @update:head-enabled="selectedNoteModel.head.enabled.value = $event"
-          @update:body-enabled="selectedNoteModel.body.enabled.value = $event"
-          @update:head-wrap="selectedNoteModel.head.wrap.value = $event"
-          @update:body-wrap="selectedNoteModel.body.wrap.value = $event"
-          @update:pos-x="selectedNoteModel.pos.value.x = $event"
-          @update:pos-y="selectedNoteModel.pos.value.y = $event"
-          @update:anchor-x="selectedNoteModel.anchor.value.x = $event"
-          @update:anchor-y="selectedNoteModel.anchor.value.y = $event"
-          @update:width="selectedNoteModel.width.value.expanded = $event"
-          @update:height="selectedNoteModel.height.value.expanded = $event"
-          @update:color="selectedNoteModel.color.value = $event"
-          @update:color-inherit="selectedNoteModel.color.inherit.value = $event"
-          @update:collapsible="selectedNoteModel.collapsing.enabled.value = $event"
-          @update:collapsed="selectedNoteModel.collapsing.collapsed.value = $event"
-          @update:movable="selectedNoteModel.movable.value = $event"
-          @update:resizable="selectedNoteModel.resizable.value = $event"
-          @update:read-only="selectedNoteModel.readOnly.value = $event"
-          @update:container-enabled="selectedNoteModel.container.enabled.value = $event"
-          @update:container-horizontal="selectedNoteModel.container.horizontal.value = $event"
-          @update:container-spatial="selectedNoteModel.container.spatial.value = $event"
-          @update:container-wrap-children="selectedNoteModel.container.wrapChildren.value = $event"
-          @update:container-stretch-children="selectedNoteModel.container.stretchChildren.value = $event"
-          @update:container-force-color-inheritance="selectedNoteModel.container.forceColorInheritance.value = $event"
-          @update:local-collapsing="selectedNoteModel.collapsing.localCollapsing.value = $event"
-          @update:locally-collapsed="selectedNoteModel.collapsing.locallyCollapsed.value = $event"
+          @update:link="onUpdateNoteLink($event)"
+          @update:head-enabled="onUpdateNoteHeadEnabled($event)"
+          @update:body-enabled="onUpdateNoteBodyEnabled($event)"
+          @update:head-wrap="onUpdateNoteHeadWrap($event)"
+          @update:body-wrap="onUpdateNoteBodyWrap($event)"
+          @update:pos-x="onUpdateNotePosX($event)"
+          @update:pos-y="onUpdateNotePosY($event)"
+          @update:anchor-x="onUpdateNoteAnchorX($event)"
+          @update:anchor-y="onUpdateNoteAnchorY($event)"
+          @update:width="onUpdateNoteWidth($event)"
+          @update:height="onUpdateNoteHeight($event)"
+          @update:color="onUpdateNoteColor($event)"
+          @update:color-inherit="onUpdateNoteColorInherit($event)"
+          @update:collapsible="onUpdateNoteCollapsible($event)"
+          @update:collapsed="onUpdateNoteCollapsed($event)"
+          @update:movable="onUpdateNoteMovable($event)"
+          @update:resizable="onUpdateNoteResizable($event)"
+          @update:read-only="onUpdateNoteReadOnly($event)"
+          @update:container-enabled="onUpdateNoteContainerEnabled($event)"
+          @update:container-horizontal="onUpdateNoteContainerHorizontal($event)"
+          @update:container-spatial="onUpdateNoteContainerSpatial($event)"
+          @update:container-wrap-children="onUpdateNoteContainerWrapChildren($event)"
+          @update:container-stretch-children="onUpdateNoteContainerStretchChildren($event)"
+          @update:container-force-color-inheritance="onUpdateNoteContainerForceColorInheritance($event)"
+          @update:local-collapsing="onUpdateNoteLocalCollapsing($event)"
+          @update:locally-collapsed="onUpdateNoteLocallyCollapsed($event)"
           @create-new-page="handleCreateNewPage"
           @swap-head-body="handleSwapHeadBody"
           @copy-link="handleCopyNoteLink"
@@ -821,15 +870,15 @@ onMounted(() => {
           :arrow-id="selectedArrowId"
           :arrow-model="selectedArrowModel"
           :read-only="cryptoError !== null"
-          @update:body-type="selectedArrowModel.bodyType.value = $event"
-          @update:body-style="selectedArrowModel.bodyStyle.value = $event"
-          @update:source-head="selectedArrowModel.sourceHead.value = $event"
-          @update:target-head="selectedArrowModel.targetHead.value = $event"
-          @update:color="selectedArrowModel.color.value = $event"
-          @update:color-inherit="selectedArrowModel.color.inherit.value = $event"
-          @update:read-only="selectedArrowModel.readOnly.value = $event"
-          @update:source-anchor="selectedArrowModel.sourceAnchor.value = $event === 'null' ? null : JSON.parse($event)"
-          @update:target-anchor="selectedArrowModel.targetAnchor.value = $event === 'null' ? null : JSON.parse($event)"
+          @update:body-type="onUpdateArrowBodyType($event)"
+          @update:body-style="onUpdateArrowBodyStyle($event)"
+          @update:source-head="onUpdateArrowSourceHead($event)"
+          @update:target-head="onUpdateArrowTargetHead($event)"
+          @update:color="onUpdateArrowColor($event)"
+          @update:color-inherit="onUpdateArrowColorInherit($event)"
+          @update:read-only="onUpdateArrowReadOnly($event)"
+          @update:source-anchor="onUpdateArrowSourceAnchor($event)"
+          @update:target-anchor="onUpdateArrowTargetAnchor($event)"
           @swap-arrowheads="handleSwapArrowheads"
           @copy-link="handleCopyArrowLink"
           @set-as-default="handleSetArrowAsDefault"

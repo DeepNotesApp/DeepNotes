@@ -243,4 +243,81 @@ describe("note-model reactivity", () => {
 
     expect(model.width.value.collapsed).toBe("Minimum");
   });
+
+  it("allows direct write to colorValue and colorInherit refs", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    expect(model.color.value).toEqual({ inherit: false, value: "grey" });
+
+    model.colorValue.value = "blue";
+    model.colorInherit.value = true;
+
+    expect(model.color.value).toEqual({ inherit: true, value: "blue" });
+
+    const colorMap = note.get(YPAGE_NOTE_KEY.color) as Y.Map<unknown>;
+    expect(colorMap.get("value")).toBe("blue");
+    expect(colorMap.get("inherit")).toBe(true);
+  });
+
+  it("allows direct write to widthExpanded and widthCollapsed refs", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    model.widthExpanded.value = "200px";
+    model.widthCollapsed.value = "Minimum";
+
+    expect(model.width.value).toEqual({ expanded: "200px", collapsed: "Minimum" });
+
+    const widthMap = note.get(YPAGE_NOTE_KEY.width) as Y.Map<string>;
+    expect(widthMap.get("expanded")).toBe("200px");
+    expect(widthMap.get("collapsed")).toBe("Minimum");
+  });
+
+  it("allows direct write to heightExpanded and heightCollapsed refs", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    model.heightExpanded.value = "120px";
+    model.heightCollapsed.value = "Auto";
+
+    expect(model.height.value).toEqual({ expanded: "120px", collapsed: "Auto" });
+
+    const heightMap = note.get(YPAGE_NOTE_KEY.height) as Y.Map<string>;
+    expect(heightMap.get("expanded")).toBe("120px");
+    expect(heightMap.get("collapsed")).toBe("Auto");
+  });
+
+  it("allows direct write to posX and posY refs", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    model.posX.value = 150;
+    model.posY.value = 250;
+
+    expect(model.pos.value).toEqual({ x: 150, y: 250 });
+
+    const posMap = note.get(YPAGE_NOTE_KEY.pos) as Y.Map<number>;
+    expect(posMap.get("x")).toBe(150);
+    expect(posMap.get("y")).toBe(250);
+  });
+
+  it("allows direct write to anchorX and anchorY refs", () => {
+    const ydoc = createPageYDoc();
+    const note = addNoteToPage(ydoc, "n1");
+    const model = useNoteModel(note);
+
+    model.anchorX.value = 0.25;
+    model.anchorY.value = 0.75;
+
+    expect(model.anchor.value).toEqual({ x: 0.25, y: 0.75 });
+
+    const anchorMap = note.get(YPAGE_NOTE_KEY.anchor) as Y.Map<number>;
+    expect(anchorMap.get("x")).toBe(0.25);
+    expect(anchorMap.get("y")).toBe(0.75);
+  });
 });

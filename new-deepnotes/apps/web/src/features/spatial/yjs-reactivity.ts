@@ -1,4 +1,4 @@
-import { ref, type Ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 import type * as Y from "yjs";
 
 /**
@@ -24,8 +24,20 @@ export function useYMapNumber(
 ): Ref<number> {
   const value = ref<number>((ymap.get(key) as number) ?? defaultValue);
   ymap.observe(() => {
-    value.value = (ymap.get(key) as number) ?? defaultValue;
+    const next = (ymap.get(key) as number) ?? defaultValue;
+    if (value.value !== next) {
+      value.value = next;
+    }
   });
+  watch(
+    value,
+    (next) => {
+      if (ymap.get(key) !== next) {
+        ymap.set(key, next);
+      }
+    },
+    { flush: "sync" },
+  );
   return value;
 }
 
@@ -36,8 +48,20 @@ export function useYMapBoolean(
 ): Ref<boolean> {
   const value = ref<boolean>((ymap.get(key) as boolean) ?? defaultValue);
   ymap.observe(() => {
-    value.value = (ymap.get(key) as boolean) ?? defaultValue;
+    const next = (ymap.get(key) as boolean) ?? defaultValue;
+    if (value.value !== next) {
+      value.value = next;
+    }
   });
+  watch(
+    value,
+    (next) => {
+      if (ymap.get(key) !== next) {
+        ymap.set(key, next);
+      }
+    },
+    { flush: "sync" },
+  );
   return value;
 }
 
@@ -48,8 +72,20 @@ export function useYMapString(
 ): Ref<string> {
   const value = ref<string>((ymap.get(key) as string) ?? defaultValue);
   ymap.observe(() => {
-    value.value = (ymap.get(key) as string) ?? defaultValue;
+    const next = (ymap.get(key) as string) ?? defaultValue;
+    if (value.value !== next) {
+      value.value = next;
+    }
   });
+  watch(
+    value,
+    (next) => {
+      if (ymap.get(key) !== next) {
+        ymap.set(key, next);
+      }
+    },
+    { flush: "sync" },
+  );
   return value;
 }
 
