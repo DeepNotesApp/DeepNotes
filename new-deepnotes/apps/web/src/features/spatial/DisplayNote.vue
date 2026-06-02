@@ -233,20 +233,28 @@ function onPointerDown(e: PointerEvent) {
   noteStartX = props.model.pos.value.x;
   noteStartY = props.model.pos.value.y;
   hasDragged = false;
-  isDragging.value = true;
-  emit("dragstart", props.id);
+  // Don't start dragging yet; wait for 5px threshold (like legacy listenPointerEvents)
   const el = e.currentTarget as HTMLElement;
   el.setPointerCapture(e.pointerId);
-  el.style.cursor = "grabbing";
 }
 
 function onPointerMove(e: PointerEvent) {
   if (dragPointerId !== e.pointerId) return;
+
   const dxScreen = e.clientX - startX;
   const dyScreen = e.clientY - startY;
-  if (dxScreen !== 0 || dyScreen !== 0) {
+
+  if (!isDragging.value) {
+    if (Math.sqrt(dxScreen * dxScreen + dyScreen * dyScreen) <= 5) {
+      return;
+    }
+    isDragging.value = true;
     hasDragged = true;
+    emit("dragstart", props.id);
+    const el = e.currentTarget as HTMLElement;
+    el.style.cursor = "grabbing";
   }
+
   const z = props.zoom || 1;
   const noteMap = props.model.rawMap;
   const posMap = noteMap.get("pos") as import("yjs").Map<number>;
@@ -265,10 +273,9 @@ function onPointerUp(e: PointerEvent) {
       /* ignore */
     }
   }
-  el.style.cursor = props.model.movable.value ? "grab" : "";
-  isDragging.value = false;
-  if (hasDragged) {
-    hasDragged = false;
+  if (isDragging.value) {
+    el.style.cursor = props.model.movable.value ? "grab" : "";
+    isDragging.value = false;
     emit("dragend", props.id);
   }
 }

@@ -215,7 +215,9 @@ describe("DisplayNote", () => {
 
     const el = wrapper.find('[data-testid="display-note"]');
     mockPointerCapture(el);
-    await el.trigger('pointerdown', { button: 0 });
+    await el.trigger('pointerdown', { button: 0, clientX: 0, clientY: 0 });
+    // Dragging only starts after 5px threshold (like legacy listenPointerEvents)
+    await el.trigger('pointermove', { clientX: 10, clientY: 0 });
     expect(wrapper.emitted('dragstart')).toHaveLength(1);
   });
 
