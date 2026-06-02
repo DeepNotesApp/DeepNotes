@@ -52,8 +52,9 @@ export function getNoteRect(
   if (!entry) return null;
   const pos = getNoteEffectiveWorldPos(noteId, noteList, parentOf, originOffsets);
   if (!pos) return null;
-  const wStr = entry.model.width.value.expanded;
-  const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+  const widthVal = (entry.model.width as any)?.value ?? entry.model.width;
+  const wStr = widthVal?.expanded;
+  const w = wStr === "Auto" ? 160 : parseFloat(wStr ?? "160");
   const h = heights?.get(noteId) ?? 80;
   return { x: pos.x, y: pos.y, width: w, height: h };
 }

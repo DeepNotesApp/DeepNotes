@@ -134,7 +134,7 @@ function serializeNote(model: NoteModel, id: string): ClipboardNote {
   return {
     id,
     pos: model.pos.value,
-    width: model.width.value,
+    width: ((model.width as any)?.value ?? model.width) ?? { expanded: "Auto", collapsed: "Auto" },
     head: {
       enabled: model.head.enabled.value,
       wrap: model.head.wrap.value,

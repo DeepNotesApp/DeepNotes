@@ -67,8 +67,9 @@ export function useCanvasActions(input: UseCanvasActionsInput) {
     let maxY = -Infinity;
 
     for (const note of notesToFit) {
-      const wStr = note.model.width.value.expanded;
-      const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+      const widthVal = (note.model.width as any)?.value ?? note.model.width;
+      const wStr = widthVal?.expanded;
+      const w = wStr === "Auto" ? 160 : parseFloat(wStr ?? "160");
       const h = noteHeights.value.get(note.id) ?? 80;
       const x = note.model.pos.value.x;
       const y = note.model.pos.value.y;

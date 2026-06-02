@@ -39,8 +39,9 @@ export function useArrowDrag(input: UseArrowDragInput) {
     const camX = input.canvasRef.value.camX;
     const camY = input.canvasRef.value.camY;
 
-    const wStr = sourceNote.model.width.value.expanded;
-    const w = wStr === "Auto" ? 160 : parseFloat(wStr);
+    const widthVal = (sourceNote.model.width as any)?.value ?? sourceNote.model.width;
+    const wStr = widthVal?.expanded;
+    const w = wStr === "Auto" ? 160 : parseFloat(wStr ?? "160");
     const h = noteHeights.value.get(sourceNote.id) ?? 80;
     const sourceScreen = worldToScreen(
       sourceNote.model.pos.value.x + w / 2,

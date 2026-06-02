@@ -46,11 +46,11 @@ const geometry = computed(() => {
   // Need at least one real endpoint or a fakePos to render
   if (!s && !t && !fake) return null;
 
-  const w1 = s?.width.value.expanded;
+  const w1 = s ? ((s.width as any)?.value ?? s.width)?.expanded : undefined;
   const nw1 = w1 === "Auto" ? 160 : w1 ? parseFloat(w1) : 0;
   const h1 = s ? (noteHeights.value.get(props.model.source.value) ?? 80) : 0;
 
-  const w2 = t?.width.value.expanded;
+  const w2 = t ? ((t.width as any)?.value ?? t.width)?.expanded : undefined;
   const nw2 = w2 === "Auto" ? 160 : w2 ? parseFloat(w2) : 0;
   const h2 = t ? (noteHeights.value.get(props.model.target.value) ?? 80) : 0;
 

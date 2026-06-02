@@ -79,7 +79,8 @@ const transform = computed(() => {
     style.transform = `translate(${pos.x}px, ${pos.y}px)`;
     style.zIndex = props.model.zIndex.value;
   }
-  style.width = props.model.width.value.expanded === "Auto" ? "auto" : `${props.model.width.value.expanded}px`;
+  const widthVal = (props.model.width as any)?.value ?? props.model.width;
+  style.width = widthVal?.expanded === "Auto" ? "auto" : `${widthVal?.expanded}px`;
   const cv = colorVariants.value;
   if (cv) {
     style.borderColor = cv.base;
@@ -198,8 +199,9 @@ function onResizePointerDown(e: PointerEvent, handle: ResizeHandle) {
   resizeHandle = handle;
   resizeStartX = e.clientX;
   resizeStartY = e.clientY;
-  const w = props.model.width.value.expanded;
-  resizeStartWidth = w === "Auto" ? 160 : parseFloat(w);
+  const widthVal = (props.model.width as any)?.value ?? props.model.width;
+  const w = widthVal?.expanded;
+  resizeStartWidth = w === "Auto" ? 160 : parseFloat(w ?? "160");
   resizeStartPosX = props.model.pos.value.x;
   isDragging.value = true;
   const el = e.currentTarget as HTMLElement;
